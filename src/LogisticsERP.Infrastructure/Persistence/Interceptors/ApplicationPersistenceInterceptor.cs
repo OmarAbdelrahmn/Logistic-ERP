@@ -106,6 +106,41 @@ internal sealed class ApplicationPersistenceInterceptor(
             return;
         }
 
+        if (entry.Entity is TemporalPeriodEntity temporal)
+        {
+            if (entry.State == EntityState.Deleted)
+            {
+                throw new InvalidOperationException("Temporal period records cannot be deleted.");
+            }
+
+            if (entry.State == EntityState.Added)
+            {
+                temporal.CreatedAtUtc = now;
+                temporal.CreatedByUserId ??= currentUser.UserId;
+                return;
+            }
+
+            var effectiveToProperty = entry.Property(nameof(TemporalPeriodEntity.EffectiveTo));
+            var modifiedProperties = entry.Properties
+                .Where(property => property.IsModified && property.Metadata.Name is not nameof(TemporalPeriodEntity.RowVersion))
+                .Select(property => property.Metadata.Name)
+                .ToArray();
+
+            if (!effectiveToProperty.IsModified
+                || modifiedProperties.Any(property => property is not nameof(TemporalPeriodEntity.EffectiveTo))
+                || effectiveToProperty.OriginalValue is not null
+                || temporal.EffectiveTo is null
+                || temporal.EffectiveTo < temporal.EffectiveFrom)
+            {
+                throw new InvalidOperationException(
+                    "Temporal period records are immutable except for closing an open period once.");
+            }
+
+            temporal.ClosedAtUtc = now;
+            temporal.ClosedByUserId = currentUser.UserId;
+            return;
+        }
+
         if (entry.Entity is HistoryEntity history)
         {
             if (entry.State == EntityState.Deleted)
@@ -139,7 +174,7 @@ internal sealed class ApplicationPersistenceInterceptor(
             var before = new Dictionary<string, object?>(StringComparer.Ordinal);
             var after = new Dictionary<string, object?>(StringComparer.Ordinal);
 
-            foreach (var property in entry.Properties.Where(property => !ExcludedAuditProperties.Contains(property.Metadata.Name)))
+            foreach (var property in entry.Properties.Where(property => !IsSensitiveAuditProperty(property.Metadata.Name)))
             {
                 if (entry.State != EntityState.Added && (entry.State == EntityState.Deleted || property.IsModified))
                 {
@@ -187,6 +222,17 @@ internal sealed class ApplicationPersistenceInterceptor(
             return "SoftDeleted";
         }
 
+        if (entry.Entity is TemporalPeriodEntity { EffectiveTo: not null })
+        {
+            return "Closed";
+        }
+
         return "Updated";
     }
+
+    private static bool IsSensitiveAuditProperty(string propertyName) =>
+        ExcludedAuditProperties.Contains(propertyName)
+        || propertyName.EndsWith("Ciphertext", StringComparison.OrdinalIgnoreCase)
+        || propertyName.EndsWith("LookupHash", StringComparison.OrdinalIgnoreCase)
+        || propertyName.EndsWith("LastFour", StringComparison.OrdinalIgnoreCase);
 }

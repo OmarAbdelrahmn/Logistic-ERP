@@ -9,7 +9,7 @@ internal sealed class HttpCurrentUser(IHttpContextAccessor httpContextAccessor) 
     {
         get
         {
-            var subject = httpContextAccessor.HttpContext?.User.FindFirstValue("sub")
+            var subject = httpContextAccessor.HttpContext?.User.FindFirstValue(AuthenticationClaimNames.Subject)
                 ?? httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             return Guid.TryParse(subject, out var userId) ? userId : null;
@@ -20,7 +20,7 @@ internal sealed class HttpCurrentUser(IHttpContextAccessor httpContextAccessor) 
     {
         get
         {
-            var sessionId = httpContextAccessor.HttpContext?.User.FindFirstValue("sid");
+            var sessionId = httpContextAccessor.HttpContext?.User.FindFirstValue(AuthenticationClaimNames.SessionId);
             return Guid.TryParse(sessionId, out var id) ? id : null;
         }
     }

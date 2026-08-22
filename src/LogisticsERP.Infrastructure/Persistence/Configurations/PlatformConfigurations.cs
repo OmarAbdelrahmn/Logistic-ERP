@@ -1,5 +1,6 @@
 using LogisticsERP.Domain.Entities.Documents;
 using LogisticsERP.Domain.Entities.Platform;
+using LogisticsERP.Infrastructure.Persistence.SeedData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -63,22 +64,40 @@ internal sealed class GlobalCityConfiguration : IEntityTypeConfiguration<GlobalC
         builder.Property(entity => entity.Longitude).HasPrecision(9, 6);
         builder.HasIndex(entity => entity.Code).IsUnique();
         builder.HasIndex(entity => new { entity.NameAr, entity.NameEn });
-        builder.HasData(new
-        {
-            Id = GlobalCity.JeddahId,
-            Code = "JEDDAH",
-            NameAr = "جدة",
-            NameEn = "Jeddah",
-            RegionAr = "منطقة مكة المكرمة",
-            RegionEn = "Makkah Region",
-            CountryCode = "SA",
-            Latitude = (decimal?)21.4858m,
-            Longitude = (decimal?)39.1925m,
-            DisplayOrder = 1,
-            Status = LogisticsERP.Domain.Enums.CatalogStatus.Active,
-            CreatedAtUtc = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero),
-            IsDeleted = false
-        });
+        var seededAt = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
+        builder.HasData(
+            new
+            {
+                Id = GlobalCity.JeddahId,
+                Code = "JEDDAH",
+                NameAr = "جدة",
+                NameEn = "Jeddah",
+                RegionAr = "منطقة مكة المكرمة",
+                RegionEn = "Makkah Region",
+                CountryCode = "SA",
+                Latitude = (decimal?)21.4858m,
+                Longitude = (decimal?)39.1925m,
+                DisplayOrder = 1,
+                Status = LogisticsERP.Domain.Enums.CatalogStatus.Active,
+                CreatedAtUtc = seededAt,
+                IsDeleted = false
+            },
+            new
+            {
+                Id = GlobalCity.RiyadhId,
+                Code = "RIYADH",
+                NameAr = "الرياض",
+                NameEn = "Riyadh",
+                RegionAr = "منطقة الرياض",
+                RegionEn = "Riyadh Region",
+                CountryCode = "SA",
+                Latitude = (decimal?)24.7136m,
+                Longitude = (decimal?)46.6753m,
+                DisplayOrder = 2,
+                Status = LogisticsERP.Domain.Enums.CatalogStatus.Active,
+                CreatedAtUtc = seededAt,
+                IsDeleted = false
+            });
     }
 }
 
@@ -92,15 +111,26 @@ internal sealed class OperatingCityConfiguration : IEntityTypeConfiguration<Oper
         builder.ToTable(table => table.HasCheckConstraint(
             "CK_OperatingCities_DateRange",
             "[DisabledAt] IS NULL OR [DisabledAt] >= [EnabledFrom]"));
-        builder.HasData(new
-        {
-            Id = OperatingCity.JeddahId,
-            GlobalCityId = GlobalCity.JeddahId,
-            EnabledFrom = new DateOnly(2026, 1, 1),
-            Status = LogisticsERP.Domain.Enums.CatalogStatus.Active,
-            CreatedAtUtc = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero),
-            IsDeleted = false
-        });
+        var seededAt = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
+        builder.HasData(
+            new
+            {
+                Id = OperatingCity.JeddahId,
+                GlobalCityId = GlobalCity.JeddahId,
+                EnabledFrom = new DateOnly(2026, 1, 1),
+                Status = LogisticsERP.Domain.Enums.CatalogStatus.Active,
+                CreatedAtUtc = seededAt,
+                IsDeleted = false
+            },
+            new
+            {
+                Id = OperatingCity.RiyadhId,
+                GlobalCityId = GlobalCity.RiyadhId,
+                EnabledFrom = new DateOnly(2026, 1, 1),
+                Status = LogisticsERP.Domain.Enums.CatalogStatus.Active,
+                CreatedAtUtc = seededAt,
+                IsDeleted = false
+            });
     }
 }
 
@@ -135,6 +165,28 @@ internal sealed class PermissionDefinitionConfiguration : IEntityTypeConfigurati
         builder.Property(entity => entity.ReplacementKey).HasMaxLength(150);
         builder.HasIndex(entity => entity.Key).IsUnique();
         builder.HasIndex(entity => new { entity.Category, entity.DisplayOrder });
+
+        var seededAt = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
+        builder.HasData(PermissionSeedCatalog.All.Select(permission => new PermissionDefinition
+        {
+            Id = permission.Id,
+            Key = permission.Key,
+            Category = permission.Category,
+            NameAr = permission.NameAr,
+            NameEn = permission.NameEn,
+            DescriptionAr = permission.DescriptionAr,
+            DescriptionEn = permission.DescriptionEn,
+            RequiresHousingScope = permission.RequiresHousingScope,
+            RequiresClientScope = permission.RequiresClientScope,
+            IsSensitive = permission.IsSensitive,
+            IsHighTrust = permission.IsHighTrust,
+            GrantabilityRule = permission.GrantabilityRule,
+            Version = 1,
+            IsDeprecated = false,
+            DisplayOrder = permission.DisplayOrder,
+            CreatedAtUtc = seededAt,
+            IsDeleted = false
+        }));
     }
 }
 
@@ -149,6 +201,53 @@ internal sealed class DocumentTypeConfiguration : IEntityTypeConfiguration<Docum
         builder.Property(entity => entity.DescriptionAr).HasMaxLength(500);
         builder.Property(entity => entity.DescriptionEn).HasMaxLength(500);
         builder.Property(entity => entity.AllowedMimeTypes).HasMaxLength(500).IsRequired();
+        builder.Property(entity => entity.MaxFileSizeBytes).HasDefaultValue(10 * 1024 * 1024);
+        builder.ToTable(table => table.HasCheckConstraint("CK_DocumentTypes_MaxFileSize", "[MaxFileSizeBytes] > 0"));
         builder.HasIndex(entity => entity.Code).IsUnique();
+
+        var seededAt = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
+        const string allowedMimeTypes = "application/pdf,image/jpeg,image/png";
+        const long maxFileSizeBytes = 10 * 1024 * 1024;
+        builder.HasData(
+            CreateDocumentTypeSeed(DocumentType.ResidencyPermitId, "RESIDENCY_PERMIT", "الإقامة", "Residency Permit", true, false, false, true, true, true, true, allowedMimeTypes, maxFileSizeBytes, seededAt),
+            CreateDocumentTypeSeed(DocumentType.DriverLicenseId, "DRIVER_LICENSE", "رخصة القيادة", "Driver License", true, true, true, true, true, true, true, allowedMimeTypes, maxFileSizeBytes, seededAt),
+            CreateDocumentTypeSeed(DocumentType.RiderCardId, "RIDER_CARD", "بطاقة السائق", "Rider Card", true, true, true, true, true, true, true, allowedMimeTypes, maxFileSizeBytes, seededAt),
+            CreateDocumentTypeSeed(DocumentType.HealthCardId, "HEALTH_CARD", "البطاقة الصحية", "Health Card", true, true, true, true, true, true, true, allowedMimeTypes, maxFileSizeBytes, seededAt),
+            CreateDocumentTypeSeed(DocumentType.PromissoryNoteId, "PROMISSORY_NOTE", "سند الأمر", "Promissory Note", true, true, false, true, true, false, true, allowedMimeTypes, maxFileSizeBytes, seededAt),
+            CreateDocumentTypeSeed(DocumentType.MedicalInsuranceId, "MEDICAL_INSURANCE", "التأمين الطبي", "Medical Insurance", true, true, true, true, true, true, true, allowedMimeTypes, maxFileSizeBytes, seededAt));
     }
+
+    private static object CreateDocumentTypeSeed(
+        Guid id,
+        string code,
+        string nameAr,
+        string nameEn,
+        bool appliesToSponsoredInternal,
+        bool appliesToOutsideRider,
+        bool appliesToRiderProfile,
+        bool requiresNumber,
+        bool requiresIssueDate,
+        bool requiresExpiryDate,
+        bool requiresFile,
+        string allowedMimeTypes,
+        long maxFileSizeBytes,
+        DateTimeOffset createdAtUtc) => new
+        {
+            Id = id,
+            Code = code,
+            NameAr = nameAr,
+            NameEn = nameEn,
+            AppliesToSponsoredInternal = appliesToSponsoredInternal,
+            AppliesToOutsideRider = appliesToOutsideRider,
+            AppliesToRiderProfile = appliesToRiderProfile,
+            RequiresNumber = requiresNumber,
+            RequiresIssueDate = requiresIssueDate,
+            RequiresExpiryDate = requiresExpiryDate,
+            RequiresFile = requiresFile,
+            AllowedMimeTypes = allowedMimeTypes,
+            MaxFileSizeBytes = maxFileSizeBytes,
+            Status = LogisticsERP.Domain.Enums.CatalogStatus.Active,
+            CreatedAtUtc = createdAtUtc,
+            IsDeleted = false
+        };
 }

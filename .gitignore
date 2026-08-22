@@ -15,3 +15,5 @@ artifacts/
 !*.example
 src/LogisticsERP.Api/App_Data/
 src/LogisticsERP.Worker/App_Data/
+src/LogisticsERP.Api/wwwroot/private/**
+!src/LogisticsERP.Api/wwwroot/private/.gitkeep

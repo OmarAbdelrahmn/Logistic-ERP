@@ -182,6 +182,111 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.ToTable("PlatformAccountCredentialVersions", "app");
                 });
 
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Clients.PlatformAccountRegistration", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("ActivatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("ClientContractId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ClientPlatformId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<Guid>("OperatingCityId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("PlatformRiderAccountId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("RegisteredEmployeeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("RegistrationType")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("RequestedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("RiderProfileId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<Guid?>("SponsorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("StatusReason")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClientPlatformId");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("PlatformRiderAccountId")
+                        .IsUnique()
+                        .HasFilter("[PlatformRiderAccountId] IS NOT NULL AND [IsDeleted] = 0");
+
+                    b.HasIndex("SponsorId");
+
+                    b.HasIndex("ClientContractId", "ClientPlatformId");
+
+                    b.HasIndex("RiderProfileId", "RegisteredEmployeeId");
+
+                    b.HasIndex("RegisteredEmployeeId", "ClientPlatformId", "Status");
+
+                    b.HasIndex("OperatingCityId", "SponsorId", "RegistrationType", "Status");
+
+                    b.ToTable("PlatformAccountRegistrations", "app", t =>
+                        {
+                            t.HasCheckConstraint("CK_PlatformAccountRegistrations_ActivationRange", "[ActivatedAtUtc] IS NULL OR [RequestedAtUtc] IS NULL OR [ActivatedAtUtc] >= [RequestedAtUtc]");
+
+                            t.HasCheckConstraint("CK_PlatformAccountRegistrations_Registration", "([RegistrationType] = 1 AND [SponsorId] IS NOT NULL) OR ([RegistrationType] = 2 AND [SponsorId] IS NULL)");
+                        });
+                });
+
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Clients.PlatformRiderAccount", b =>
                 {
                     b.Property<Guid>("Id")
@@ -189,6 +294,9 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.Property<DateOnly?>("AcquisitionDate")
                         .HasColumnType("date");
+
+                    b.Property<int>("BillingMode")
+                        .HasColumnType("int");
 
                     b.Property<Guid>("ClientContractId")
                         .HasColumnType("uniqueidentifier");
@@ -241,6 +349,9 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
 
+                    b.Property<Guid>("OperatingCityId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("OperationalNotes")
                         .HasMaxLength(4000)
                         .HasColumnType("nvarchar(4000)");
@@ -249,11 +360,20 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .HasMaxLength(4000)
                         .HasColumnType("nvarchar(4000)");
 
+                    b.Property<Guid?>("RegisteredEmployeeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("RegistrationType")
+                        .HasColumnType("int");
+
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .IsRequired()
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("rowversion");
+
+                    b.Property<Guid?>("SponsorId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateOnly?>("StartDate")
                         .HasColumnType("date");
@@ -282,14 +402,24 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.HasIndex("IsDeleted");
 
+                    b.HasIndex("SponsorId");
+
+                    b.HasIndex("ClientContractId", "ClientPlatformId");
+
                     b.HasIndex("ClientContractId", "Status");
 
                     b.HasIndex("ClientPlatformId", "NormalizedExternalAccountId")
                         .IsUnique();
 
+                    b.HasIndex("OperatingCityId", "SponsorId", "RegistrationType");
+
+                    b.HasIndex("RegisteredEmployeeId", "ClientPlatformId", "Status");
+
                     b.ToTable("PlatformRiderAccounts", "app", t =>
                         {
                             t.HasCheckConstraint("CK_PlatformRiderAccounts_DateRange", "[EndDate] IS NULL OR [StartDate] IS NULL OR [EndDate] >= [StartDate]");
+
+                            t.HasCheckConstraint("CK_PlatformRiderAccounts_Registration", "([RegistrationType] = 1 AND [SponsorId] IS NOT NULL) OR ([RegistrationType] = 2 AND [SponsorId] IS NULL)");
                         });
                 });
 
@@ -339,6 +469,9 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("ActualEmployeeId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("AssignedByUserId")
                         .HasColumnType("uniqueidentifier");
 
@@ -370,9 +503,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.Property<DateOnly?>("EffectiveTo")
                         .HasColumnType("date");
-
-                    b.Property<Guid>("EmployeeId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("EndReason")
                         .HasMaxLength(1000)
@@ -422,7 +552,7 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EmployeeId")
+                    b.HasIndex("ActualEmployeeId")
                         .IsUnique()
                         .HasFilter("[EffectiveTo] IS NULL AND [IsDeleted] = 0");
 
@@ -432,11 +562,13 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .IsUnique()
                         .HasFilter("[EffectiveTo] IS NULL AND [IsDeleted] = 0");
 
-                    b.HasIndex("RiderProfileId");
+                    b.HasIndex("ActualEmployeeId", "EffectiveFrom");
 
                     b.HasIndex("ClientContractId", "Status");
 
-                    b.HasIndex("EmployeeId", "EffectiveFrom");
+                    b.HasIndex("PlatformRiderAccountId", "ClientContractId");
+
+                    b.HasIndex("RiderProfileId", "ActualEmployeeId");
 
                     b.ToTable("RiderClientAssignments", "app", t =>
                         {
@@ -575,6 +707,11 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<long>("MaxFileSizeBytes")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasDefaultValue(10485760L);
+
                     b.Property<string>("NameAr")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -619,7 +756,126 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.HasIndex("IsDeleted");
 
-                    b.ToTable("DocumentTypes", "platform");
+                    b.ToTable("DocumentTypes", "platform", t =>
+                        {
+                            t.HasCheckConstraint("CK_DocumentTypes_MaxFileSize", "[MaxFileSizeBytes] > 0");
+                        });
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-8000-000000000030"),
+                            AllowedMimeTypes = "application/pdf,image/jpeg,image/png",
+                            AppliesToOutsideRider = false,
+                            AppliesToRiderProfile = false,
+                            AppliesToSponsoredInternal = true,
+                            Code = "RESIDENCY_PERMIT",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            MaxFileSizeBytes = 10485760L,
+                            NameAr = "الإقامة",
+                            NameEn = "Residency Permit",
+                            RequiresExpiryDate = true,
+                            RequiresFile = true,
+                            RequiresIssueDate = true,
+                            RequiresNumber = true,
+                            Status = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-8000-000000000031"),
+                            AllowedMimeTypes = "application/pdf,image/jpeg,image/png",
+                            AppliesToOutsideRider = true,
+                            AppliesToRiderProfile = true,
+                            AppliesToSponsoredInternal = true,
+                            Code = "DRIVER_LICENSE",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            MaxFileSizeBytes = 10485760L,
+                            NameAr = "رخصة القيادة",
+                            NameEn = "Driver License",
+                            RequiresExpiryDate = true,
+                            RequiresFile = true,
+                            RequiresIssueDate = true,
+                            RequiresNumber = true,
+                            Status = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-8000-000000000032"),
+                            AllowedMimeTypes = "application/pdf,image/jpeg,image/png",
+                            AppliesToOutsideRider = true,
+                            AppliesToRiderProfile = true,
+                            AppliesToSponsoredInternal = true,
+                            Code = "RIDER_CARD",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            MaxFileSizeBytes = 10485760L,
+                            NameAr = "بطاقة السائق",
+                            NameEn = "Rider Card",
+                            RequiresExpiryDate = true,
+                            RequiresFile = true,
+                            RequiresIssueDate = true,
+                            RequiresNumber = true,
+                            Status = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-8000-000000000033"),
+                            AllowedMimeTypes = "application/pdf,image/jpeg,image/png",
+                            AppliesToOutsideRider = true,
+                            AppliesToRiderProfile = true,
+                            AppliesToSponsoredInternal = true,
+                            Code = "HEALTH_CARD",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            MaxFileSizeBytes = 10485760L,
+                            NameAr = "البطاقة الصحية",
+                            NameEn = "Health Card",
+                            RequiresExpiryDate = true,
+                            RequiresFile = true,
+                            RequiresIssueDate = true,
+                            RequiresNumber = true,
+                            Status = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-8000-000000000034"),
+                            AllowedMimeTypes = "application/pdf,image/jpeg,image/png",
+                            AppliesToOutsideRider = true,
+                            AppliesToRiderProfile = false,
+                            AppliesToSponsoredInternal = true,
+                            Code = "PROMISSORY_NOTE",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            MaxFileSizeBytes = 10485760L,
+                            NameAr = "سند الأمر",
+                            NameEn = "Promissory Note",
+                            RequiresExpiryDate = false,
+                            RequiresFile = true,
+                            RequiresIssueDate = true,
+                            RequiresNumber = true,
+                            Status = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-8000-000000000035"),
+                            AllowedMimeTypes = "application/pdf,image/jpeg,image/png",
+                            AppliesToOutsideRider = true,
+                            AppliesToRiderProfile = true,
+                            AppliesToSponsoredInternal = true,
+                            Code = "MEDICAL_INSURANCE",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            MaxFileSizeBytes = 10485760L,
+                            NameAr = "التأمين الطبي",
+                            NameEn = "Medical Insurance",
+                            RequiresExpiryDate = true,
+                            RequiresFile = true,
+                            RequiresIssueDate = true,
+                            RequiresNumber = true,
+                            Status = 1
+                        });
                 });
 
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Documents.EmployeeDocument", b =>
@@ -915,6 +1171,12 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<bool>("CapacityOverrideUsed")
                         .HasColumnType("bit");
 
+                    b.Property<DateTimeOffset?>("ClosedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("ClosedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .HasColumnType("datetimeoffset");
 
@@ -934,9 +1196,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<Guid>("EmployeeId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("EndedByUserId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid>("HousingId")
                         .HasColumnType("uniqueidentifier");
 
@@ -947,6 +1206,12 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<string>("MoveOutReason")
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
 
                     b.Property<string>("SourceReference")
                         .HasMaxLength(200)
@@ -982,6 +1247,12 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
+                    b.Property<DateTimeOffset?>("ClosedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("ClosedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .HasColumnType("datetimeoffset");
 
@@ -998,11 +1269,14 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
-                    b.Property<Guid?>("EndedByUserId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid>("HousingId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
 
                     b.Property<Guid>("SupervisorEmployeeId")
                         .HasColumnType("uniqueidentifier");
@@ -1354,6 +1628,22 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                             RegionAr = "منطقة مكة المكرمة",
                             RegionEn = "Makkah Region",
                             Status = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-8000-000000000004"),
+                            Code = "RIYADH",
+                            CountryCode = "SA",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DisplayOrder = 2,
+                            IsDeleted = false,
+                            Latitude = 24.7136m,
+                            Longitude = 46.6753m,
+                            NameAr = "الرياض",
+                            NameEn = "Riyadh",
+                            RegionAr = "منطقة الرياض",
+                            RegionEn = "Riyadh Region",
+                            Status = 1
                         });
                 });
 
@@ -1424,6 +1714,15 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                             CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             EnabledFrom = new DateOnly(2026, 1, 1),
                             GlobalCityId = new Guid("019c18d5-62e1-7000-8000-000000000002"),
+                            IsDeleted = false,
+                            Status = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-8000-000000000005"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            EnabledFrom = new DateOnly(2026, 1, 1),
+                            GlobalCityId = new Guid("019c18d5-62e1-7000-8000-000000000004"),
                             IsDeleted = false,
                             Status = 1
                         });
@@ -1534,6 +1833,1145 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.HasIndex("Category", "DisplayOrder");
 
                     b.ToTable("PermissionDefinitions", "platform");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000001"),
+                            Category = "Security",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "عرض حسابات المستخدمين وحالتها.",
+                            DescriptionEn = "View user accounts and their status.",
+                            DisplayOrder = 1,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "users.read",
+                            NameAr = "عرض المستخدمين",
+                            NameEn = "Read users",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000002"),
+                            Category = "Security",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "إنشاء حسابات مستخدمين جديدة.",
+                            DescriptionEn = "Create new user accounts.",
+                            DisplayOrder = 2,
+                            GrantabilityRule = "HIGH_TRUST_ONLY",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = true,
+                            IsSensitive = true,
+                            Key = "users.create",
+                            NameAr = "إنشاء المستخدمين",
+                            NameEn = "Create users",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000003"),
+                            Category = "Security",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "تعديل حالة وبيانات حسابات المستخدمين.",
+                            DescriptionEn = "Update user account details and status.",
+                            DisplayOrder = 3,
+                            GrantabilityRule = "HIGH_TRUST_ONLY",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = true,
+                            IsSensitive = true,
+                            Key = "users.update",
+                            NameAr = "تعديل المستخدمين",
+                            NameEn = "Update users",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000004"),
+                            Category = "Security",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "أرشفة حساب مستخدم وإبطال جلساته دون حذف بياناته.",
+                            DescriptionEn = "Archive a user and revoke sessions without deleting records.",
+                            DisplayOrder = 4,
+                            GrantabilityRule = "HIGH_TRUST_ONLY",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = true,
+                            IsSensitive = true,
+                            Key = "users.archive",
+                            NameAr = "أرشفة المستخدمين",
+                            NameEn = "Archive users",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000005"),
+                            Category = "Security",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "عرض الأدوار وقوالب الصلاحيات.",
+                            DescriptionEn = "View roles and permission templates.",
+                            DisplayOrder = 5,
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = false,
+                            Key = "roles.read",
+                            NameAr = "عرض الأدوار",
+                            NameEn = "Read roles",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000006"),
+                            Category = "Security",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "إدارة الأدوار غير المحمية وتعيينها للمستخدمين.",
+                            DescriptionEn = "Manage non-protected roles and user role assignments.",
+                            DisplayOrder = 6,
+                            GrantabilityRule = "HIGH_TRUST_ONLY",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = true,
+                            IsSensitive = false,
+                            Key = "roles.manage",
+                            NameAr = "إدارة الأدوار",
+                            NameEn = "Manage roles",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000007"),
+                            Category = "Security",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "عرض كتالوج الصلاحيات والمنح والمنع.",
+                            DescriptionEn = "View the permission catalog, grants, and denies.",
+                            DisplayOrder = 7,
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = false,
+                            Key = "permissions.read",
+                            NameAr = "عرض الصلاحيات",
+                            NameEn = "Read permissions",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000008"),
+                            Category = "Security",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "إدارة منح ومنع الصلاحيات ونطاقاتها.",
+                            DescriptionEn = "Manage permission grants, denies, and scopes.",
+                            DisplayOrder = 8,
+                            GrantabilityRule = "HIGH_TRUST_ONLY",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = true,
+                            IsSensitive = false,
+                            Key = "permissions.manage",
+                            NameAr = "إدارة الصلاحيات",
+                            NameEn = "Manage permissions",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000009"),
+                            Category = "Security",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "عرض سجل التدقيق الأمني والتشغيلي.",
+                            DescriptionEn = "View security and operational audit records.",
+                            DisplayOrder = 9,
+                            GrantabilityRule = "HIGH_TRUST_ONLY",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = true,
+                            IsSensitive = true,
+                            Key = "audit.read",
+                            NameAr = "عرض سجل التدقيق",
+                            NameEn = "Read audit log",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000010"),
+                            Category = "Security",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "إدارة وصول الدعم المؤقت وحالات الطوارئ.",
+                            DescriptionEn = "Manage temporary and break-glass support access.",
+                            DisplayOrder = 10,
+                            GrantabilityRule = "HIGH_TRUST_ONLY",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = true,
+                            IsSensitive = true,
+                            Key = "support_access.manage",
+                            NameAr = "إدارة وصول الدعم",
+                            NameEn = "Manage support access",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000011"),
+                            Category = "Catalog",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "عرض المدن والفروع التشغيلية.",
+                            DescriptionEn = "View operating cities and branches.",
+                            DisplayOrder = 11,
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = false,
+                            Key = "operating_cities.read",
+                            NameAr = "عرض المدن التشغيلية",
+                            NameEn = "Read operating cities",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000012"),
+                            Category = "Catalog",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "إضافة وتعديل وتعطيل المدن التشغيلية.",
+                            DescriptionEn = "Add, update, and disable operating cities.",
+                            DisplayOrder = 12,
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = false,
+                            Key = "operating_cities.manage",
+                            NameAr = "إدارة المدن التشغيلية",
+                            NameEn = "Manage operating cities",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000013"),
+                            Category = "Workforce",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "عرض بيانات الموظفين غير الحساسة.",
+                            DescriptionEn = "View non-sensitive employee data.",
+                            DisplayOrder = 13,
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = false,
+                            Key = "employees.read",
+                            NameAr = "عرض الموظفين",
+                            NameEn = "Read employees",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000014"),
+                            Category = "Workforce",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "إنشاء سجلات موظفين جديدة.",
+                            DescriptionEn = "Create new employee records.",
+                            DisplayOrder = 14,
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = false,
+                            Key = "employees.create",
+                            NameAr = "إنشاء الموظفين",
+                            NameEn = "Create employees",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000015"),
+                            Category = "Workforce",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "تعديل بيانات الموظفين التشغيلية.",
+                            DescriptionEn = "Update operational employee data.",
+                            DisplayOrder = 15,
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = false,
+                            Key = "employees.update",
+                            NameAr = "تعديل الموظفين",
+                            NameEn = "Update employees",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000016"),
+                            Category = "Workforce",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "أرشفة الموظفين دون حذف تاريخهم.",
+                            DescriptionEn = "Archive employees without deleting their history.",
+                            DisplayOrder = 16,
+                            GrantabilityRule = "HIGH_TRUST_ONLY",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = true,
+                            IsSensitive = false,
+                            Key = "employees.archive",
+                            NameAr = "أرشفة الموظفين",
+                            NameEn = "Archive employees",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000017"),
+                            Category = "Workforce",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "عرض الهوية والإقامة والبيانات الشخصية المقيدة.",
+                            DescriptionEn = "View restricted identity, residency, and personal data.",
+                            DisplayOrder = 17,
+                            GrantabilityRule = "HIGH_TRUST_ONLY",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = true,
+                            IsSensitive = true,
+                            Key = "employees.sensitive.read",
+                            NameAr = "عرض بيانات الموظفين الحساسة",
+                            NameEn = "Read sensitive employee data",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000018"),
+                            Category = "Workforce",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "عرض ملفات المناديب وبياناتهم التشغيلية.",
+                            DescriptionEn = "View rider profiles and operational data.",
+                            DisplayOrder = 18,
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = false,
+                            Key = "riders.read",
+                            NameAr = "عرض المناديب",
+                            NameEn = "Read riders",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000019"),
+                            Category = "Workforce",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "إنشاء وتعديل حالات وملفات المناديب.",
+                            DescriptionEn = "Create and update rider profiles and status.",
+                            DisplayOrder = 19,
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = false,
+                            Key = "riders.manage",
+                            NameAr = "إدارة المناديب",
+                            NameEn = "Manage riders",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000020"),
+                            Category = "Workforce",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "عرض جهات الكفالة وبيانات السجل.",
+                            DescriptionEn = "View sponsors and registry information.",
+                            DisplayOrder = 20,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "sponsors.read",
+                            NameAr = "عرض الكفلاء",
+                            NameEn = "Read sponsors",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000021"),
+                            Category = "Workforce",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "إدارة جهات الكفالة وفترات كفالة الموظفين.",
+                            DescriptionEn = "Manage sponsors and employee sponsorship periods.",
+                            DisplayOrder = 21,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "sponsors.manage",
+                            NameAr = "إدارة الكفلاء",
+                            NameEn = "Manage sponsors",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000022"),
+                            Category = "Compliance",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "عرض بيانات الإقامة المقيدة.",
+                            DescriptionEn = "View restricted residency permit data.",
+                            DisplayOrder = 22,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "residency.read",
+                            NameAr = "عرض الإقامات",
+                            NameEn = "Read residency permits",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000023"),
+                            Category = "Compliance",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "إضافة وتجديد وتحديث حالات الإقامة.",
+                            DescriptionEn = "Add, renew, and update residency permit status.",
+                            DisplayOrder = 23,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "residency.manage",
+                            NameAr = "إدارة الإقامات",
+                            NameEn = "Manage residency permits",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000024"),
+                            Category = "Compliance",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "عرض رخص القيادة وإصداراتها.",
+                            DescriptionEn = "View driver licenses and their versions.",
+                            DisplayOrder = 24,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "licenses.read",
+                            NameAr = "عرض الرخص",
+                            NameEn = "Read driver licenses",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000025"),
+                            Category = "Compliance",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "إدارة إصدار وتجديد وحالة رخص القيادة.",
+                            DescriptionEn = "Manage driver-license issuance, renewal, and status.",
+                            DisplayOrder = 25,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "licenses.manage",
+                            NameAr = "إدارة الرخص",
+                            NameEn = "Manage driver licenses",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000026"),
+                            Category = "Compliance",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "عرض بطاقات السائق وتجديداتها.",
+                            DescriptionEn = "View rider cards and renewals.",
+                            DisplayOrder = 26,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "rider_cards.read",
+                            NameAr = "عرض بطاقات السائق",
+                            NameEn = "Read rider cards",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000027"),
+                            Category = "Compliance",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "إدارة إصدار وتجديد بطاقات السائق.",
+                            DescriptionEn = "Manage rider-card issuance and renewal.",
+                            DisplayOrder = 27,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "rider_cards.manage",
+                            NameAr = "إدارة بطاقات السائق",
+                            NameEn = "Manage rider cards",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000028"),
+                            Category = "Compliance",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "عرض البطاقات الصحية وتجديداتها.",
+                            DescriptionEn = "View health cards and renewals.",
+                            DisplayOrder = 28,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "health_cards.read",
+                            NameAr = "عرض البطاقات الصحية",
+                            NameEn = "Read health cards",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000029"),
+                            Category = "Compliance",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "إدارة إصدار وتجديد البطاقات الصحية.",
+                            DescriptionEn = "Manage health-card issuance and renewal.",
+                            DisplayOrder = 29,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "health_cards.manage",
+                            NameAr = "إدارة البطاقات الصحية",
+                            NameEn = "Manage health cards",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000030"),
+                            Category = "Compliance",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "عرض وثائق ومستويات التأمين الطبي.",
+                            DescriptionEn = "View medical-insurance policies and plan levels.",
+                            DisplayOrder = 30,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "insurance.read",
+                            NameAr = "عرض التأمين الطبي",
+                            NameEn = "Read medical insurance",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000031"),
+                            Category = "Compliance",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "إدارة وثائق وتجديدات ومستويات التأمين الطبي.",
+                            DescriptionEn = "Manage medical-insurance policies, renewals, and levels.",
+                            DisplayOrder = 31,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "insurance.manage",
+                            NameAr = "إدارة التأمين الطبي",
+                            NameEn = "Manage medical insurance",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000032"),
+                            Category = "Compliance",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "عرض بيانات سندات الأمر المالية.",
+                            DescriptionEn = "View financial promissory-note data.",
+                            DisplayOrder = 32,
+                            GrantabilityRule = "HIGH_TRUST_ONLY",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = true,
+                            IsSensitive = true,
+                            Key = "promissory_notes.read",
+                            NameAr = "عرض سندات الأمر",
+                            NameEn = "Read promissory notes",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000033"),
+                            Category = "Compliance",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "إدارة حالات ونسخ سندات الأمر دون حذف.",
+                            DescriptionEn = "Manage promissory-note status and versions without deletion.",
+                            DisplayOrder = 33,
+                            GrantabilityRule = "HIGH_TRUST_ONLY",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = true,
+                            IsSensitive = true,
+                            Key = "promissory_notes.manage",
+                            NameAr = "إدارة سندات الأمر",
+                            NameEn = "Manage promissory notes",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000034"),
+                            Category = "Documents",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "عرض بيانات الوثائق ونسخها دون تنزيل المحتوى.",
+                            DescriptionEn = "View document metadata and versions without downloading content.",
+                            DisplayOrder = 34,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "documents.read",
+                            NameAr = "عرض بيانات الوثائق",
+                            NameEn = "Read document metadata",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000035"),
+                            Category = "Documents",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "رفع نسخة وثيقة جديدة وفق سياسة الملفات.",
+                            DescriptionEn = "Upload a new document version under the file policy.",
+                            DisplayOrder = 35,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "documents.upload",
+                            NameAr = "رفع الوثائق",
+                            NameEn = "Upload documents",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000036"),
+                            Category = "Documents",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "تنزيل محتوى الوثائق غير المصنفة عالية الحساسية.",
+                            DescriptionEn = "Download document content not classified as highly sensitive.",
+                            DisplayOrder = 36,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "documents.download",
+                            NameAr = "تنزيل الوثائق",
+                            NameEn = "Download documents",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000037"),
+                            Category = "Documents",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "تنزيل محتوى وثائق الهوية والمالية عالية الحساسية.",
+                            DescriptionEn = "Download highly sensitive identity and financial documents.",
+                            DisplayOrder = 37,
+                            GrantabilityRule = "HIGH_TRUST_ONLY",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = true,
+                            IsSensitive = true,
+                            Key = "documents.download_sensitive",
+                            NameAr = "تنزيل الوثائق الحساسة",
+                            NameEn = "Download sensitive documents",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000038"),
+                            Category = "Operations",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "عرض حسابات منصات العملاء ضمن النطاق المسموح.",
+                            DescriptionEn = "View client-platform accounts within the allowed scope.",
+                            DisplayOrder = 38,
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = false,
+                            Key = "platform_accounts.read",
+                            NameAr = "عرض حسابات المنصات",
+                            NameEn = "Read platform accounts",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000039"),
+                            Category = "Operations",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "إدارة التسجيل والحالة والملكية الرسمية لحسابات المنصات ضمن النطاق.",
+                            DescriptionEn = "Manage registration, status, and official ownership of platform accounts within scope.",
+                            DisplayOrder = 39,
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = false,
+                            Key = "platform_accounts.manage",
+                            NameAr = "إدارة حسابات المنصات",
+                            NameEn = "Manage platform accounts",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000040"),
+                            Category = "Operations",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "عرض تاريخ الاستخدام الفعلي لحسابات المنصات ضمن النطاق.",
+                            DescriptionEn = "View actual platform-account usage history within scope.",
+                            DisplayOrder = 40,
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = false,
+                            Key = "platform_assignments.read",
+                            NameAr = "عرض تكليفات المنصات",
+                            NameEn = "Read platform assignments",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000041"),
+                            Category = "Operations",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "إدارة تكليفات الاستخدام الفعلي مع حفظ التاريخ ضمن النطاق.",
+                            DescriptionEn = "Manage actual-use assignments while preserving history within scope.",
+                            DisplayOrder = 41,
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = false,
+                            Key = "platform_assignments.manage",
+                            NameAr = "إدارة تكليفات المنصات",
+                            NameEn = "Manage platform assignments",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000042"),
+                            Category = "Operations",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "عرض السكن وفترات الإقامة ضمن النطاق المسموح.",
+                            DescriptionEn = "View housing and residence periods within the allowed scope.",
+                            DisplayOrder = 42,
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = false,
+                            Key = "housing.read",
+                            NameAr = "عرض السكن",
+                            NameEn = "Read housing",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = true,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000043"),
+                            Category = "Operations",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "إدارة السكن والمشرفين وفترات الإقامة ضمن النطاق.",
+                            DescriptionEn = "Manage housing, supervisors, and residence periods within scope.",
+                            DisplayOrder = 43,
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = false,
+                            Key = "housing.manage",
+                            NameAr = "إدارة السكن",
+                            NameEn = "Manage housing",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = true,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000044"),
+                            Category = "Reporting",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "عرض التقارير التشغيلية المصرح بها.",
+                            DescriptionEn = "View authorized operational reports.",
+                            DisplayOrder = 44,
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = false,
+                            Key = "reports.read",
+                            NameAr = "عرض التقارير",
+                            NameEn = "Read reports",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000045"),
+                            Category = "Reporting",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "إنشاء ملفات تصدير من البيانات المصرح بها فقط.",
+                            DescriptionEn = "Create export files from authorized data only.",
+                            DisplayOrder = 45,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "exports.create",
+                            NameAr = "إنشاء التصديرات",
+                            NameEn = "Create exports",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000046"),
+                            Category = "Reporting",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "عرض الإشعارات التشغيلية.",
+                            DescriptionEn = "View operational notifications.",
+                            DisplayOrder = 46,
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = false,
+                            Key = "notifications.read",
+                            NameAr = "عرض الإشعارات",
+                            NameEn = "Read notifications",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000047"),
+                            Category = "Reporting",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "إدارة حالة ومحتوى الإشعارات التشغيلية.",
+                            DescriptionEn = "Manage operational notification status and content.",
+                            DisplayOrder = 47,
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = false,
+                            Key = "notifications.manage",
+                            NameAr = "إدارة الإشعارات",
+                            NameEn = "Manage notifications",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000048"),
+                            Category = "Workflows",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "عرض طلبات الإجازة وتاريخها.",
+                            DescriptionEn = "View leave requests and history.",
+                            DisplayOrder = 48,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "leave_requests.read",
+                            NameAr = "عرض طلبات الإجازة",
+                            NameEn = "Read leave requests",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000049"),
+                            Category = "Workflows",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "إنشاء وتعديل طلبات الإجازة وفق حالتها.",
+                            DescriptionEn = "Create and update leave requests according to their state.",
+                            DisplayOrder = 49,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "leave_requests.manage",
+                            NameAr = "إدارة طلبات الإجازة",
+                            NameEn = "Manage leave requests",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000050"),
+                            Category = "Workflows",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "الموافقة أو الرفض الموثق لطلبات الإجازة.",
+                            DescriptionEn = "Record approval or rejection decisions for leave requests.",
+                            DisplayOrder = 50,
+                            GrantabilityRule = "HIGH_TRUST_ONLY",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = true,
+                            IsSensitive = true,
+                            Key = "leave_requests.approve",
+                            NameAr = "اعتماد طلبات الإجازة",
+                            NameEn = "Approve leave requests",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000051"),
+                            Category = "Workflows",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "عرض حالات الغياب والهروب وسجل أحداثها.",
+                            DescriptionEn = "View absence and escaped-employee cases and their events.",
+                            DisplayOrder = 51,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "absence_cases.read",
+                            NameAr = "عرض حالات الغياب",
+                            NameEn = "Read absence cases",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000052"),
+                            Category = "Workflows",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "إدارة حالات الغياب والهروب مع حفظ سجل الأحداث.",
+                            DescriptionEn = "Manage absence and escaped-employee cases while preserving event history.",
+                            DisplayOrder = 52,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "absence_cases.manage",
+                            NameAr = "إدارة حالات الغياب",
+                            NameEn = "Manage absence cases",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000053"),
+                            Category = "Workflows",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "عرض طلبات تغيير حالة الموظف.",
+                            DescriptionEn = "View employee status-change requests.",
+                            DisplayOrder = 53,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "employee_status_changes.read",
+                            NameAr = "عرض طلبات تغيير الحالة",
+                            NameEn = "Read employee status changes",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000054"),
+                            Category = "Workflows",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "إنشاء وتحديث طلبات تغيير حالة الموظف.",
+                            DescriptionEn = "Create and update employee status-change requests.",
+                            DisplayOrder = 54,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "employee_status_changes.manage",
+                            NameAr = "إدارة طلبات تغيير الحالة",
+                            NameEn = "Manage employee status changes",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000055"),
+                            Category = "Workflows",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "اعتماد تغيير حالة الموظف مع حفظ الأثر التاريخي.",
+                            DescriptionEn = "Approve employee status changes while preserving history.",
+                            DisplayOrder = 55,
+                            GrantabilityRule = "HIGH_TRUST_ONLY",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = true,
+                            IsSensitive = true,
+                            Key = "employee_status_changes.approve",
+                            NameAr = "اعتماد تغيير حالة الموظف",
+                            NameEn = "Approve employee status changes",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        });
                 });
 
             modelBuilder.Entity("LogisticsERP.Domain.Entities.System.AuditEntry", b =>
@@ -2330,6 +3768,92 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.ToTable("Tags", "app");
                 });
 
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Workforce.DriverLicenseCategory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("NameAr")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("NameEn")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.HasIndex("IsDeleted");
+
+                    b.ToTable("DriverLicenseCategories", "app");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-8000-000000000020"),
+                            Code = "LIGHT_TRANSPORT",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            NameAr = "نقل خفيف",
+                            NameEn = "Light Transport",
+                            Status = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-8000-000000000021"),
+                            Code = "MOTORCYCLE",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            NameAr = "دراجة نارية",
+                            NameEn = "Motorcycle",
+                            Status = 1
+                        });
+                });
+
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Workforce.Employee", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2368,12 +3892,19 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("FullNameEn")
-                        .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<DateOnly?>("HireDate")
+                        .HasColumnType("date");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
+
+                    b.Property<string>("NationalityCountryCode")
+                        .HasMaxLength(2)
+                        .HasColumnType("nchar(2)")
+                        .IsFixedLength();
 
                     b.Property<string>("NormalizedNameAr")
                         .IsRequired()
@@ -2381,7 +3912,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("NormalizedNameEn")
-                        .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
@@ -2390,7 +3920,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .HasColumnType("nvarchar(4000)");
 
                     b.Property<string>("PrimaryPhone")
-                        .IsRequired()
                         .HasMaxLength(32)
                         .HasColumnType("nvarchar(32)");
 
@@ -2586,12 +4115,126 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.ToTable("EmployeeAbsenceComplianceCaseEvents", "app");
                 });
 
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Workforce.EmployeeDriverLicense", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("BookingStatus")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid>("DriverLicenseCategoryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("EmployeeDocumentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("EmployeeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly?>("ExpiryDate")
+                        .HasColumnType("date");
+
+                    b.Property<bool>("IsCurrent")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("IssuanceStatus")
+                        .HasColumnType("int");
+
+                    b.Property<DateOnly?>("IssueDate")
+                        .HasColumnType("date");
+
+                    b.Property<byte[]>("LicenseNumberCiphertext")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("LicenseNumberLastFour")
+                        .HasMaxLength(4)
+                        .HasColumnType("nchar(4)")
+                        .IsFixedLength();
+
+                    b.Property<string>("LicenseNumberLookupHash")
+                        .HasMaxLength(64)
+                        .HasColumnType("nchar(64)")
+                        .IsFixedLength();
+
+                    b.Property<int>("LicenseStatus")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<Guid?>("PreviousLicenseId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DriverLicenseCategoryId");
+
+                    b.HasIndex("EmployeeDocumentId");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("LicenseNumberLookupHash")
+                        .HasFilter("[LicenseNumberLookupHash] IS NOT NULL");
+
+                    b.HasIndex("PreviousLicenseId");
+
+                    b.HasIndex("EmployeeId", "DriverLicenseCategoryId")
+                        .IsUnique()
+                        .HasFilter("[IsCurrent] = 1 AND [IsDeleted] = 0");
+
+                    b.HasIndex("EmployeeId", "DriverLicenseCategoryId", "LicenseStatus");
+
+                    b.ToTable("EmployeeDriverLicenses", "app", t =>
+                        {
+                            t.HasCheckConstraint("CK_EmployeeDriverLicenses_DateRange", "[ExpiryDate] IS NULL OR [IssueDate] IS NULL OR [ExpiryDate] >= [IssueDate]");
+                        });
+                });
+
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Workforce.EmployeeJobTitlePeriod", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("ChangedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("ClosedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("ClosedByUserId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTimeOffset>("CreatedAtUtc")
@@ -2612,9 +4255,21 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<Guid>("JobTitleId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("OperatingCityId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("OperationalWorkTypeId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Reason")
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
 
                     b.HasKey("Id");
 
@@ -2624,11 +4279,242 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.HasIndex("JobTitleId");
 
+                    b.HasIndex("OperationalWorkTypeId");
+
                     b.HasIndex("EmployeeId", "EffectiveFrom");
+
+                    b.HasIndex("OperatingCityId", "OperationalWorkTypeId", "JobTitleId", "EffectiveTo");
 
                     b.ToTable("EmployeeJobTitlePeriods", "app", t =>
                         {
                             t.HasCheckConstraint("CK_EmployeeJobTitlePeriods_EffectiveRange", "[EffectiveTo] IS NULL OR [EffectiveTo] >= [EffectiveFrom]");
+                        });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Workforce.EmployeeMedicalInsurancePolicy", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid?>("EmployeeDocumentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("EmployeeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly>("EndDate")
+                        .HasColumnType("date");
+
+                    b.Property<Guid>("InsuranceCompanyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("InsurancePlanLevelId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsCurrent")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<byte[]>("MemberNumberCiphertext")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("MemberNumberLastFour")
+                        .HasMaxLength(4)
+                        .HasColumnType("nchar(4)")
+                        .IsFixedLength();
+
+                    b.Property<string>("MemberNumberLookupHash")
+                        .HasMaxLength(64)
+                        .HasColumnType("nchar(64)")
+                        .IsFixedLength();
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<byte[]>("PolicyNumberCiphertext")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("PolicyNumberLastFour")
+                        .HasMaxLength(4)
+                        .HasColumnType("nchar(4)")
+                        .IsFixedLength();
+
+                    b.Property<string>("PolicyNumberLookupHash")
+                        .HasMaxLength(64)
+                        .HasColumnType("nchar(64)")
+                        .IsFixedLength();
+
+                    b.Property<Guid?>("PreviousPolicyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmployeeDocumentId");
+
+                    b.HasIndex("EmployeeId")
+                        .IsUnique()
+                        .HasFilter("[IsCurrent] = 1 AND [IsDeleted] = 0");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("MemberNumberLookupHash")
+                        .HasFilter("[MemberNumberLookupHash] IS NOT NULL");
+
+                    b.HasIndex("PolicyNumberLookupHash")
+                        .HasFilter("[PolicyNumberLookupHash] IS NOT NULL");
+
+                    b.HasIndex("PreviousPolicyId");
+
+                    b.HasIndex("InsurancePlanLevelId", "InsuranceCompanyId");
+
+                    b.HasIndex("InsuranceCompanyId", "Status", "EndDate");
+
+                    b.ToTable("EmployeeMedicalInsurancePolicies", "app", t =>
+                        {
+                            t.HasCheckConstraint("CK_EmployeeMedicalInsurancePolicies_DateRange", "[EndDate] >= [StartDate]");
+                        });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Workforce.EmployeePromissoryNote", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("BeneficiaryCompanyProfileId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CurrencyCode")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("nchar(3)")
+                        .IsFixedLength();
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateOnly?>("DueDate")
+                        .HasColumnType("date");
+
+                    b.Property<Guid?>("EmployeeDocumentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("EmployeeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateOnly>("IssueDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("NormalizedNoteNumber")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("NoteNumber")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<DateTimeOffset?>("SignedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("SponsorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmployeeDocumentId");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("SponsorId");
+
+                    b.HasIndex("BeneficiaryCompanyProfileId", "NormalizedNoteNumber")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.HasIndex("EmployeeId", "Status");
+
+                    b.ToTable("EmployeePromissoryNotes", "app", t =>
+                        {
+                            t.HasCheckConstraint("CK_EmployeePromissoryNotes_Amount", "[Amount] > 0");
+
+                            t.HasCheckConstraint("CK_EmployeePromissoryNotes_DateRange", "[DueDate] IS NULL OR [DueDate] >= [IssueDate]");
                         });
                 });
 
@@ -2638,6 +4524,12 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("ChangedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("ClosedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("ClosedByUserId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTimeOffset>("CreatedAtUtc")
@@ -2666,6 +4558,12 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<int>("RelationshipType")
                         .HasColumnType("int");
 
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
                     b.Property<string>("SourceReference")
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
@@ -2681,6 +4579,180 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.ToTable("EmployeeRelationshipPeriods", "app", t =>
                         {
                             t.HasCheckConstraint("CK_EmployeeRelationshipPeriods_EffectiveRange", "[EffectiveTo] IS NULL OR [EffectiveTo] >= [EffectiveFrom]");
+                        });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Workforce.EmployeeResidencyPermit", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid?>("EmployeeDocumentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("EmployeeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly>("ExpiryDate")
+                        .HasColumnType("date");
+
+                    b.Property<bool>("IsCurrent")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateOnly?>("IssueDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<byte[]>("PermitNumberCiphertext")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("PermitNumberLastFour")
+                        .IsRequired()
+                        .HasMaxLength(4)
+                        .HasColumnType("nchar(4)")
+                        .IsFixedLength();
+
+                    b.Property<string>("PermitNumberLookupHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nchar(64)")
+                        .IsFixedLength();
+
+                    b.Property<Guid?>("PreviousPermitId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ResidencyProfessionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<Guid>("SponsorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmployeeDocumentId");
+
+                    b.HasIndex("EmployeeId")
+                        .IsUnique()
+                        .HasFilter("[IsCurrent] = 1 AND [IsDeleted] = 0");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("PermitNumberLookupHash")
+                        .IsUnique()
+                        .HasFilter("[IsCurrent] = 1 AND [IsDeleted] = 0");
+
+                    b.HasIndex("PreviousPermitId");
+
+                    b.HasIndex("ResidencyProfessionId");
+
+                    b.HasIndex("SponsorId", "Status", "ExpiryDate");
+
+                    b.ToTable("EmployeeResidencyPermits", "app", t =>
+                        {
+                            t.HasCheckConstraint("CK_EmployeeResidencyPermits_DateRange", "[IssueDate] IS NULL OR [ExpiryDate] >= [IssueDate]");
+                        });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Workforce.EmployeeSponsorshipPeriod", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ChangedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("ClosedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("ClosedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly>("EffectiveFrom")
+                        .HasColumnType("date");
+
+                    b.Property<DateOnly?>("EffectiveTo")
+                        .HasColumnType("date");
+
+                    b.Property<Guid>("EmployeeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Reason")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<string>("SourceReference")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<Guid>("SponsorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmployeeId")
+                        .IsUnique()
+                        .HasFilter("[EffectiveTo] IS NULL");
+
+                    b.HasIndex("EmployeeId", "EffectiveFrom");
+
+                    b.HasIndex("SponsorId", "Status", "EffectiveTo");
+
+                    b.ToTable("EmployeeSponsorshipPeriods", "app", t =>
+                        {
+                            t.HasCheckConstraint("CK_EmployeeSponsorshipPeriods_EffectiveRange", "[EffectiveTo] IS NULL OR [EffectiveTo] >= [EffectiveFrom]");
                         });
                 });
 
@@ -2793,6 +4865,12 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<Guid>("ChangedByUserId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTimeOffset?>("ClosedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("ClosedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .HasColumnType("datetimeoffset");
 
@@ -2816,6 +4894,12 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
@@ -2830,6 +4914,198 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.ToTable("EmployeeStatusPeriods", "app", t =>
                         {
                             t.HasCheckConstraint("CK_EmployeeStatusPeriods_EffectiveRange", "[EffectiveTo] IS NULL OR [EffectiveTo] >= [EffectiveFrom]");
+                        });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Workforce.InsuranceCompany", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<string>("ContactEmail")
+                        .HasMaxLength(320)
+                        .HasColumnType("nvarchar(320)");
+
+                    b.Property<string>("ContactName")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("ContactPhone")
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("NameAr")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("NameEn")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<string>("ProviderRegistrationNumber")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("ProviderRegistrationNumber")
+                        .IsUnique()
+                        .HasFilter("[ProviderRegistrationNumber] IS NOT NULL AND [IsDeleted] = 0");
+
+                    b.HasIndex("Status", "NameAr");
+
+                    b.ToTable("InsuranceCompanies", "app");
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Workforce.InsurancePlanLevel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal?>("AnnualCoverageLimit")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<string>("CoverageClass")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal?>("DeductiblePercentage")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateOnly?>("EffectiveFrom")
+                        .HasColumnType("date");
+
+                    b.Property<DateOnly?>("EffectiveTo")
+                        .HasColumnType("date");
+
+                    b.Property<Guid>("InsuranceCompanyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("NameAr")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("NameEn")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("NetworkName")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("Rank")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("InsuranceCompanyId", "Code")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.HasIndex("InsuranceCompanyId", "Status", "Rank");
+
+                    b.ToTable("InsurancePlanLevels", "app", t =>
+                        {
+                            t.HasCheckConstraint("CK_InsurancePlanLevels_AnnualLimit", "[AnnualCoverageLimit] IS NULL OR [AnnualCoverageLimit] >= 0");
+
+                            t.HasCheckConstraint("CK_InsurancePlanLevels_DateRange", "[EffectiveTo] IS NULL OR [EffectiveFrom] IS NULL OR [EffectiveTo] >= [EffectiveFrom]");
+
+                            t.HasCheckConstraint("CK_InsurancePlanLevels_Deductible", "[DeductiblePercentage] IS NULL OR ([DeductiblePercentage] >= 0 AND [DeductiblePercentage] <= 100)");
+
+                            t.HasCheckConstraint("CK_InsurancePlanLevels_Rank", "[Rank] >= 0");
                         });
                 });
 
@@ -2903,6 +5179,61 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.HasIndex("IsDeleted");
 
                     b.ToTable("JobTitles", "app");
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Workforce.JobTitleOperationalWorkType", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("JobTitleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("OperationalWorkTypeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("OperationalWorkTypeId");
+
+                    b.HasIndex("JobTitleId", "OperationalWorkTypeId")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.ToTable("JobTitleOperationalWorkTypes", "app");
                 });
 
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Workforce.LeaveApprovalDecision", b =>
@@ -3738,6 +6069,102 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         });
                 });
 
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Workforce.OperationalWorkType", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("NameAr")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("NameEn")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.HasIndex("IsDeleted");
+
+                    b.ToTable("OperationalWorkTypes", "app");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-8000-000000000010"),
+                            Code = "ADMIN",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            NameAr = "إداري",
+                            NameEn = "Administrative",
+                            Status = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-8000-000000000011"),
+                            Code = "CAR",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            NameAr = "سيارة",
+                            NameEn = "Car",
+                            Status = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-8000-000000000012"),
+                            Code = "MOTORCYCLE",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            NameAr = "دراجة نارية",
+                            NameEn = "Motorcycle",
+                            Status = 1
+                        });
+                });
+
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Workforce.OutsideRiderDetails", b =>
                 {
                     b.Property<Guid>("Id")
@@ -3781,11 +6208,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<string>("NationalityCountryCode")
-                        .HasMaxLength(2)
-                        .HasColumnType("nchar(2)")
-                        .IsFixedLength();
-
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .IsRequired()
@@ -3806,6 +6228,281 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.HasIndex("IsDeleted");
 
                     b.ToTable("OutsideRiderDetails", "app");
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Workforce.ResidencyProfession", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("NameAr")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("NameEn")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("NameAr");
+
+                    b.ToTable("ResidencyProfessions", "app");
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Workforce.RiderCard", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CardNumber")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<int>("CardType")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid?>("EmployeeDocumentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly?>("ExpiryDate")
+                        .HasColumnType("date");
+
+                    b.Property<bool>("IsCurrent")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateOnly?>("IssueDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("NormalizedCardNumber")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<Guid?>("PreviousCardId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("RiderProfileId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("ValidityCycle")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmployeeDocumentId");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("NormalizedCardNumber")
+                        .IsUnique()
+                        .HasFilter("[IsCurrent] = 1 AND [IsDeleted] = 0");
+
+                    b.HasIndex("PreviousCardId");
+
+                    b.HasIndex("RiderProfileId", "CardType")
+                        .IsUnique()
+                        .HasFilter("[IsCurrent] = 1 AND [IsDeleted] = 0");
+
+                    b.HasIndex("RiderProfileId", "CardType", "Status");
+
+                    b.ToTable("RiderCards", "app", t =>
+                        {
+                            t.HasCheckConstraint("CK_RiderCards_DateRange", "[ExpiryDate] IS NULL OR [IssueDate] IS NULL OR [ExpiryDate] >= [IssueDate]");
+                        });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Workforce.RiderHealthCard", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("CardNumberCiphertext")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("CardNumberLastFour")
+                        .IsRequired()
+                        .HasMaxLength(4)
+                        .HasColumnType("nchar(4)")
+                        .IsFixedLength();
+
+                    b.Property<string>("CardNumberLookupHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nchar(64)")
+                        .IsFixedLength();
+
+                    b.Property<string>("CardType")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid?>("EmployeeDocumentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly?>("ExpiryDate")
+                        .HasColumnType("date");
+
+                    b.Property<bool>("IsCurrent")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateOnly?>("IssueDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("IssuingAuthority")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<Guid?>("PreviousCardId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("RiderProfileId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CardNumberLookupHash")
+                        .IsUnique()
+                        .HasFilter("[IsCurrent] = 1 AND [IsDeleted] = 0");
+
+                    b.HasIndex("EmployeeDocumentId");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("PreviousCardId");
+
+                    b.HasIndex("RiderProfileId", "CardType")
+                        .IsUnique()
+                        .HasFilter("[IsCurrent] = 1 AND [IsDeleted] = 0");
+
+                    b.HasIndex("RiderProfileId", "CardType", "Status");
+
+                    b.ToTable("RiderHealthCards", "app", t =>
+                        {
+                            t.HasCheckConstraint("CK_RiderHealthCards_DateRange", "[ExpiryDate] IS NULL OR [IssueDate] IS NULL OR [ExpiryDate] >= [IssueDate]");
+                        });
                 });
 
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Workforce.RiderProfile", b =>
@@ -3834,9 +6531,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
-
-                    b.Property<Guid?>("LicenseDocumentId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("OperationalNotes")
                         .HasMaxLength(4000)
@@ -3873,8 +6567,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.HasIndex("IsDeleted");
 
-                    b.HasIndex("LicenseDocumentId");
-
                     b.HasIndex("PreferredCityId");
 
                     b.HasIndex("Status");
@@ -3882,6 +6574,116 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.ToTable("RiderProfiles", "app", t =>
                         {
                             t.HasCheckConstraint("CK_RiderProfiles_DateRange", "[RiderEndDate] IS NULL OR [RiderStartDate] IS NULL OR [RiderEndDate] >= [RiderStartDate]");
+                        });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Workforce.Sponsor", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly?>("ActiveFrom")
+                        .HasColumnType("date");
+
+                    b.Property<DateOnly?>("ActiveTo")
+                        .HasColumnType("date");
+
+                    b.Property<string>("CommercialRegistrationNumber")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<Guid>("CompanyProfileId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ContactEmail")
+                        .HasMaxLength(320)
+                        .HasColumnType("nvarchar(320)");
+
+                    b.Property<string>("ContactName")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("ContactPhone")
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("EmployerIdentityNumber")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<string>("RegistryNameAr")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("RegistryNameEn")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int>("SponsorType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UnifiedNationalNumber")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CommercialRegistrationNumber")
+                        .IsUnique()
+                        .HasFilter("[CommercialRegistrationNumber] IS NOT NULL AND [IsDeleted] = 0");
+
+                    b.HasIndex("CompanyProfileId");
+
+                    b.HasIndex("EmployerIdentityNumber")
+                        .IsUnique();
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("Status", "RegistryNameAr");
+
+                    b.ToTable("Sponsors", "app", t =>
+                        {
+                            t.HasCheckConstraint("CK_Sponsors_ActiveRange", "[ActiveTo] IS NULL OR [ActiveFrom] IS NULL OR [ActiveTo] >= [ActiveFrom]");
                         });
                 });
 
@@ -3905,7 +6707,7 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<Guid?>("CreatedByUserId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("CurrentJobTitleId")
+                    b.Property<Guid?>("CurrentSponsorId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTimeOffset?>("DeletedAtUtc")
@@ -3951,9 +6753,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<int?>("Gender")
                         .HasColumnType("int");
 
-                    b.Property<DateOnly?>("HireDate")
-                        .HasColumnType("date");
-
                     b.Property<string>("InternalNotes")
                         .HasMaxLength(4000)
                         .HasColumnType("nvarchar(4000)");
@@ -3961,16 +6760,15 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<string>("LegacySponsorReference")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
                     b.Property<Guid?>("ManagerEmployeeId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int?>("MaritalStatus")
                         .HasColumnType("int");
-
-                    b.Property<string>("NationalityCountryCode")
-                        .HasMaxLength(2)
-                        .HasColumnType("nchar(2)")
-                        .IsFixedLength();
 
                     b.Property<DateOnly?>("ProbationEndDate")
                         .HasColumnType("date");
@@ -3992,10 +6790,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .HasMaxLength(32)
                         .HasColumnType("nvarchar(32)");
 
-                    b.Property<string>("SponsorLegalReference")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
                     b.Property<DateOnly?>("TerminationDate")
                         .HasColumnType("date");
 
@@ -4007,7 +6801,7 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CurrentJobTitleId");
+                    b.HasIndex("CurrentSponsorId");
 
                     b.HasIndex("EmployeeId")
                         .IsUnique();
@@ -4049,17 +6843,79 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .OnDelete(DeleteBehavior.Restrict);
                 });
 
-            modelBuilder.Entity("LogisticsERP.Domain.Entities.Clients.PlatformRiderAccount", b =>
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Clients.PlatformAccountRegistration", b =>
                 {
-                    b.HasOne("LogisticsERP.Domain.Entities.Clients.ClientContract", null)
-                        .WithMany()
-                        .HasForeignKey("ClientContractId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("LogisticsERP.Domain.Entities.Platform.ClientPlatform", null)
                         .WithMany()
                         .HasForeignKey("ClientPlatformId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Platform.OperatingCity", null)
+                        .WithMany()
+                        .HasForeignKey("OperatingCityId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Clients.PlatformRiderAccount", null)
+                        .WithMany()
+                        .HasForeignKey("PlatformRiderAccountId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.Employee", null)
+                        .WithMany()
+                        .HasForeignKey("RegisteredEmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.Sponsor", null)
+                        .WithMany()
+                        .HasForeignKey("SponsorId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Clients.ClientContract", null)
+                        .WithMany()
+                        .HasForeignKey("ClientContractId", "ClientPlatformId")
+                        .HasPrincipalKey("Id", "ClientPlatformId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.RiderProfile", null)
+                        .WithMany()
+                        .HasForeignKey("RiderProfileId", "RegisteredEmployeeId")
+                        .HasPrincipalKey("Id", "EmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Clients.PlatformRiderAccount", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Platform.ClientPlatform", null)
+                        .WithMany()
+                        .HasForeignKey("ClientPlatformId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Platform.OperatingCity", null)
+                        .WithMany()
+                        .HasForeignKey("OperatingCityId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.Employee", null)
+                        .WithMany()
+                        .HasForeignKey("RegisteredEmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.Sponsor", null)
+                        .WithMany()
+                        .HasForeignKey("SponsorId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Clients.ClientContract", null)
+                        .WithMany()
+                        .HasForeignKey("ClientContractId", "ClientPlatformId")
+                        .HasPrincipalKey("Id", "ClientPlatformId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
@@ -4075,27 +6931,29 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Clients.RiderClientAssignment", b =>
                 {
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.Employee", null)
+                        .WithMany()
+                        .HasForeignKey("ActualEmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("LogisticsERP.Domain.Entities.Clients.ClientContract", null)
                         .WithMany()
                         .HasForeignKey("ClientContractId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.Employee", null)
-                        .WithMany()
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("LogisticsERP.Domain.Entities.Clients.PlatformRiderAccount", null)
                         .WithMany()
-                        .HasForeignKey("PlatformRiderAccountId")
+                        .HasForeignKey("PlatformRiderAccountId", "ClientContractId")
+                        .HasPrincipalKey("Id", "ClientContractId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("LogisticsERP.Domain.Entities.Workforce.RiderProfile", null)
                         .WithMany()
-                        .HasForeignKey("RiderProfileId")
+                        .HasForeignKey("RiderProfileId", "ActualEmployeeId")
+                        .HasPrincipalKey("Id", "EmployeeId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
@@ -4364,6 +7222,31 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Workforce.EmployeeDriverLicense", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.DriverLicenseCategory", null)
+                        .WithMany()
+                        .HasForeignKey("DriverLicenseCategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Documents.EmployeeDocument", null)
+                        .WithMany()
+                        .HasForeignKey("EmployeeDocumentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.Employee", null)
+                        .WithMany()
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.EmployeeDriverLicense", null)
+                        .WithMany()
+                        .HasForeignKey("PreviousLicenseId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Workforce.EmployeeJobTitlePeriod", b =>
                 {
                     b.HasOne("LogisticsERP.Domain.Entities.Workforce.Employee", null)
@@ -4377,6 +7260,75 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .HasForeignKey("JobTitleId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Platform.OperatingCity", null)
+                        .WithMany()
+                        .HasForeignKey("OperatingCityId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.OperationalWorkType", null)
+                        .WithMany()
+                        .HasForeignKey("OperationalWorkTypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Workforce.EmployeeMedicalInsurancePolicy", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Documents.EmployeeDocument", null)
+                        .WithMany()
+                        .HasForeignKey("EmployeeDocumentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.Employee", null)
+                        .WithMany()
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.InsuranceCompany", null)
+                        .WithMany()
+                        .HasForeignKey("InsuranceCompanyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.EmployeeMedicalInsurancePolicy", null)
+                        .WithMany()
+                        .HasForeignKey("PreviousPolicyId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.InsurancePlanLevel", null)
+                        .WithMany()
+                        .HasForeignKey("InsurancePlanLevelId", "InsuranceCompanyId")
+                        .HasPrincipalKey("Id", "InsuranceCompanyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Workforce.EmployeePromissoryNote", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Platform.CompanyProfile", null)
+                        .WithMany()
+                        .HasForeignKey("BeneficiaryCompanyProfileId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Documents.EmployeeDocument", null)
+                        .WithMany()
+                        .HasForeignKey("EmployeeDocumentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.Employee", null)
+                        .WithMany()
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.Sponsor", null)
+                        .WithMany()
+                        .HasForeignKey("SponsorId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Workforce.EmployeeRelationshipPeriod", b =>
@@ -4384,6 +7336,52 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.HasOne("LogisticsERP.Domain.Entities.Workforce.Employee", null)
                         .WithMany()
                         .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Workforce.EmployeeResidencyPermit", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Documents.EmployeeDocument", null)
+                        .WithMany()
+                        .HasForeignKey("EmployeeDocumentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.Employee", null)
+                        .WithMany()
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.EmployeeResidencyPermit", null)
+                        .WithMany()
+                        .HasForeignKey("PreviousPermitId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.ResidencyProfession", null)
+                        .WithMany()
+                        .HasForeignKey("ResidencyProfessionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.Sponsor", null)
+                        .WithMany()
+                        .HasForeignKey("SponsorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Workforce.EmployeeSponsorshipPeriod", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.Employee", null)
+                        .WithMany()
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.Sponsor", null)
+                        .WithMany()
+                        .HasForeignKey("SponsorId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
@@ -4407,6 +7405,30 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.HasOne("LogisticsERP.Domain.Entities.Workforce.Employee", null)
                         .WithMany()
                         .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Workforce.InsurancePlanLevel", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.InsuranceCompany", null)
+                        .WithMany()
+                        .HasForeignKey("InsuranceCompanyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Workforce.JobTitleOperationalWorkType", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.JobTitle", null)
+                        .WithMany()
+                        .HasForeignKey("JobTitleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.OperationalWorkType", null)
+                        .WithMany()
+                        .HasForeignKey("OperationalWorkTypeId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
@@ -4522,6 +7544,44 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Workforce.RiderCard", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Documents.EmployeeDocument", null)
+                        .WithMany()
+                        .HasForeignKey("EmployeeDocumentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.RiderCard", null)
+                        .WithMany()
+                        .HasForeignKey("PreviousCardId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.RiderProfile", null)
+                        .WithMany()
+                        .HasForeignKey("RiderProfileId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Workforce.RiderHealthCard", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Documents.EmployeeDocument", null)
+                        .WithMany()
+                        .HasForeignKey("EmployeeDocumentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.RiderHealthCard", null)
+                        .WithMany()
+                        .HasForeignKey("PreviousCardId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.RiderProfile", null)
+                        .WithMany()
+                        .HasForeignKey("RiderProfileId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Workforce.RiderProfile", b =>
                 {
                     b.HasOne("LogisticsERP.Domain.Entities.Workforce.Employee", null)
@@ -4530,22 +7590,72 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("LogisticsERP.Domain.Entities.Documents.EmployeeDocument", null)
-                        .WithMany()
-                        .HasForeignKey("LicenseDocumentId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("LogisticsERP.Domain.Entities.Platform.GlobalCity", null)
                         .WithMany()
                         .HasForeignKey("PreferredCityId")
                         .OnDelete(DeleteBehavior.Restrict);
                 });
 
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Workforce.Sponsor", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Platform.CompanyProfile", null)
+                        .WithMany()
+                        .HasForeignKey("CompanyProfileId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.OwnsOne("LogisticsERP.Domain.Common.Address", "Address", b1 =>
+                        {
+                            b1.Property<Guid>("SponsorId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("AdditionalNumber")
+                                .HasMaxLength(32)
+                                .HasColumnType("nvarchar(32)")
+                                .HasColumnName("AddressAdditionalNumber");
+
+                            b1.Property<string>("BuildingNumber")
+                                .HasMaxLength(32)
+                                .HasColumnType("nvarchar(32)")
+                                .HasColumnName("AddressBuildingNumber");
+
+                            b1.Property<string>("City")
+                                .HasMaxLength(200)
+                                .HasColumnType("nvarchar(200)")
+                                .HasColumnName("AddressCity");
+
+                            b1.Property<string>("District")
+                                .HasMaxLength(200)
+                                .HasColumnType("nvarchar(200)")
+                                .HasColumnName("AddressDistrict");
+
+                            b1.Property<string>("PostalCode")
+                                .HasMaxLength(32)
+                                .HasColumnType("nvarchar(32)")
+                                .HasColumnName("AddressPostalCode");
+
+                            b1.Property<string>("Street")
+                                .HasMaxLength(200)
+                                .HasColumnType("nvarchar(200)")
+                                .HasColumnName("AddressStreet");
+
+                            b1.HasKey("SponsorId");
+
+                            b1.ToTable("Sponsors", "app");
+
+                            b1.WithOwner()
+                                .HasForeignKey("SponsorId");
+                        });
+
+                    b.Navigation("Address")
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Workforce.SponsoredInternalDetails", b =>
                 {
-                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.JobTitle", null)
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.Sponsor", null)
                         .WithMany()
-                        .HasForeignKey("CurrentJobTitleId")
+                        .HasForeignKey("CurrentSponsorId")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("LogisticsERP.Domain.Entities.Workforce.Employee", null)

@@ -1,8 +1,11 @@
 using System.Security.Cryptography;
+using System.Globalization;
 using System.Text;
 using System.Threading.RateLimiting;
 using LogisticsERP.Api.Authentication;
+using LogisticsERP.Api.Authorization;
 using LogisticsERP.Api.ErrorHandling;
+using LogisticsERP.Api.Development;
 using LogisticsERP.Api.Middleware;
 using LogisticsERP.Api.OpenApi;
 using LogisticsERP.Application;
@@ -17,6 +20,45 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Logging.AddJsonConsole();
 
+var authenticationOptions = builder.Configuration
+    .GetSection(AuthenticationOptions.SectionName)
+    .Get<AuthenticationOptions>()
+    ?? throw new InvalidOperationException("Authentication configuration is required.");
+
+authenticationOptions.DevelopmentAccountsEnabled = builder.Environment.IsDevelopment();
+
+if (string.IsNullOrWhiteSpace(authenticationOptions.Issuer)
+    || string.IsNullOrWhiteSpace(authenticationOptions.Audience))
+{
+    throw new InvalidOperationException("Authentication issuer and audience are required.");
+}
+
+if (string.IsNullOrWhiteSpace(authenticationOptions.SigningKey))
+{
+    if (!builder.Environment.IsDevelopment())
+    {
+        throw new InvalidOperationException("Authentication:SigningKey must be supplied from a secret source.");
+    }
+
+    authenticationOptions.SigningKey = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+}
+
+if (Encoding.UTF8.GetByteCount(authenticationOptions.SigningKey) < 64)
+{
+    throw new InvalidOperationException("Authentication:SigningKey must contain at least 64 bytes.");
+}
+
+if (authenticationOptions.AccessTokenMinutes is < 1 or > 60
+    || authenticationOptions.RefreshTokenIdleDays is < 1 or > 30
+    || authenticationOptions.RefreshTokenAbsoluteDays < authenticationOptions.RefreshTokenIdleDays
+    || authenticationOptions.RefreshTokenAbsoluteDays > 90
+    || authenticationOptions.MaxActiveSessions is < 1 or > 50
+    || authenticationOptions.SessionValidationCacheSeconds is < 1 or > 60)
+{
+    throw new InvalidOperationException("Authentication lifetime configuration is outside the allowed security limits.");
+}
+
+builder.Services.AddSingleton(authenticationOptions);
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddHttpContextAccessor();
@@ -33,54 +75,72 @@ builder.Services.AddResponseCompression();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.ConfigureOptions<ConfigureSwaggerOptions>();
-
-var jwtOptions = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()
-    ?? throw new InvalidOperationException("Authentication configuration is required.");
-builder.Services
-    .AddOptions<JwtOptions>()
-    .BindConfiguration(JwtOptions.SectionName)
-    .Validate(options => !string.IsNullOrWhiteSpace(options.Issuer), "Authentication issuer is required.")
-    .Validate(options => !string.IsNullOrWhiteSpace(options.Audience), "Authentication audience is required.")
-    .ValidateOnStart();
-var signingKey = jwtOptions.SigningKey;
-
-if (string.IsNullOrWhiteSpace(signingKey))
-{
-    if (!builder.Environment.IsDevelopment())
-    {
-        throw new InvalidOperationException("Authentication:SigningKey must be supplied from a secret source.");
-    }
-
-    signingKey = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
-}
+builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
+builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
         options.MapInboundClaims = false;
+        options.SaveToken = false;
+        options.IncludeErrorDetails = builder.Environment.IsDevelopment();
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
-            ValidIssuer = jwtOptions.Issuer,
+            ValidIssuer = authenticationOptions.Issuer,
             ValidateAudience = true,
-            ValidAudience = jwtOptions.Audience,
+            ValidAudience = authenticationOptions.Audience,
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signingKey)),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(authenticationOptions.SigningKey)),
             ValidateLifetime = true,
             RequireExpirationTime = true,
             RequireSignedTokens = true,
             ClockSkew = TimeSpan.FromSeconds(30),
             NameClaimType = "name",
-            RoleClaimType = "role"
+            RoleClaimType = AuthenticationClaimNames.Role
+        };
+        options.Events = new JwtBearerEvents
+        {
+            OnTokenValidated = async context =>
+            {
+                var subject = context.Principal?.FindFirst(AuthenticationClaimNames.Subject)?.Value;
+                var session = context.Principal?.FindFirst(AuthenticationClaimNames.SessionId)?.Value;
+                var version = context.Principal?.FindFirst(AuthenticationClaimNames.AuthorizationVersion)?.Value;
+                if (!Guid.TryParse(subject, out var userId)
+                    || !Guid.TryParse(session, out var sessionId)
+                    || !long.TryParse(version, NumberStyles.None, CultureInfo.InvariantCulture, out var authorizationVersion))
+                {
+                    context.Fail("The access token is missing required session claims.");
+                    return;
+                }
+
+                var validator = context.HttpContext.RequestServices
+                    .GetRequiredService<IAuthenticationSessionValidator>();
+                if (!await validator.IsValidAsync(
+                    userId,
+                    sessionId,
+                    authorizationVersion,
+                    context.HttpContext.RequestAborted))
+                {
+                    context.Fail("The access token session is no longer valid.");
+                }
+            }
         };
     });
 
 builder.Services.AddAuthorization(options =>
 {
-    options.FallbackPolicy = new AuthorizationPolicyBuilder()
+    var standardPolicy = new AuthorizationPolicyBuilder(JwtBearerDefaults.AuthenticationScheme)
         .RequireAuthenticatedUser()
+        .RequireClaim(AuthenticationClaimNames.PasswordChangeRequired, "false")
         .Build();
+
+    options.DefaultPolicy = standardPolicy;
+    options.FallbackPolicy = standardPolicy;
+    options.AddPolicy(AuthenticationPolicies.AllowPasswordChangeRequired, policy =>
+        policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
+            .RequireAuthenticatedUser());
 });
 
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
@@ -97,7 +157,7 @@ builder.Services.AddRateLimiter(options =>
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
     options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
     {
-        var partitionKey = context.User.FindFirst("sub")?.Value
+        var partitionKey = context.User.FindFirst(AuthenticationClaimNames.Subject)?.Value
             ?? context.Connection.RemoteIpAddress?.ToString()
             ?? "anonymous";
         return RateLimitPartition.GetFixedWindowLimiter(partitionKey, _ => new FixedWindowRateLimiterOptions
@@ -111,6 +171,14 @@ builder.Services.AddRateLimiter(options =>
 });
 
 var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    await DevelopmentIdentitySeeder.SeedAsync(
+        app.Services,
+        app.Configuration,
+        app.Lifetime.ApplicationStopping);
+}
 
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {

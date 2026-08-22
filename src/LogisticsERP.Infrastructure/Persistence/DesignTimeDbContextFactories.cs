@@ -38,6 +38,11 @@ public sealed class IdentityDbContextFactory : IDesignTimeDbContextFactory<Ident
 
 internal static class DesignTimeDatabase
 {
-    public const string ConnectionString =
+    private const string DefaultConnectionString =
         "Server=(localdb)\\mssqllocaldb;Database=LogisticsERP_Design;Trusted_Connection=True;TrustServerCertificate=True";
+
+    public static string ConnectionString =>
+        Environment.GetEnvironmentVariable("ConnectionStrings__LogisticsDatabase") is { Length: > 0 } configured
+            ? configured
+            : DefaultConnectionString;
 }

@@ -32,6 +32,19 @@ internal static class ConfigurationExtensions
         builder.Property(entity => entity.CreatedAtUtc).IsRequired();
     }
 
+    public static void ConfigureTemporal<TEntity>(this EntityTypeBuilder<TEntity> builder, string table, string schema = "app")
+        where TEntity : TemporalPeriodEntity
+    {
+        builder.ToTable(table, schema);
+        builder.HasKey(entity => entity.Id);
+        builder.Property(entity => entity.Id).ValueGeneratedNever();
+        builder.Property(entity => entity.CreatedAtUtc).IsRequired();
+        builder.Property(entity => entity.RowVersion).IsRowVersion();
+        builder.ToTable(tableBuilder => tableBuilder.HasCheckConstraint(
+            $"CK_{table}_EffectiveRange",
+            "[EffectiveTo] IS NULL OR [EffectiveTo] >= [EffectiveFrom]"));
+    }
+
     public static void ConfigureAddress<TOwner>(this OwnedNavigationBuilder<TOwner, Address> builder, string prefix)
         where TOwner : class
     {

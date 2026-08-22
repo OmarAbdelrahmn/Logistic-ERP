@@ -1,3 +1,6 @@
+using LogisticsERP.Application.Authorization;
+using LogisticsERP.Domain.Enums;
+using LogisticsERP.Infrastructure.Identity.SeedData;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -33,6 +36,7 @@ internal sealed class ApplicationUserConfiguration : IEntityTypeConfiguration<Ap
             .IsUnique()
             .HasFilter("[EmployeeId] IS NOT NULL");
         builder.HasIndex(entity => entity.Status);
+        builder.HasIndex(entity => entity.IsDevelopmentOnly);
     }
 }
 
@@ -62,7 +66,59 @@ internal sealed class ApplicationRoleConfiguration : IEntityTypeConfiguration<Ap
             .IsUnique()
             .HasDatabaseName("UX_Roles_NormalizedName")
             .HasFilter("[NormalizedName] IS NOT NULL");
+
+        var seededAt = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
+        builder.HasData(
+            CreateRoleSeed(
+                SystemRoles.SystemAdminId,
+                SystemRoles.SystemAdmin,
+                "مسؤول النظام",
+                "System Administrator",
+                "إدارة المستخدمين والأدوار والصلاحيات والأمن دون منح تلقائي لكل البيانات التشغيلية الحساسة.",
+                "Manages users, roles, permissions, and security without automatic access to all sensitive operational data.",
+                seededAt),
+            CreateRoleSeed(
+                SystemRoles.ManagerId,
+                SystemRoles.Manager,
+                "مدير",
+                "Manager",
+                "قراءة تشغيلية أساسية، وتضاف صلاحيات الإدارة والنطاقات حسب مسؤوليات الشخص.",
+                "Minimal operational read access; management permissions and scopes are assigned per responsibility.",
+                seededAt),
+            CreateRoleSeed(
+                SystemRoles.UserId,
+                SystemRoles.User,
+                "مستخدم",
+                "User",
+                "الوصول إلى الملف الشخصي والجلسات فقط حتى تمنح صلاحيات إضافية.",
+                "Access to the user's own profile and sessions until additional permissions are granted.",
+                seededAt));
     }
+
+    private static ApplicationRole CreateRoleSeed(
+        Guid id,
+        string code,
+        string nameAr,
+        string nameEn,
+        string descriptionAr,
+        string descriptionEn,
+        DateTimeOffset createdAtUtc) => new()
+        {
+            Id = id,
+            Name = code,
+            NormalizedName = code,
+            Code = code,
+            NameAr = nameAr,
+            NameEn = nameEn,
+            DescriptionAr = descriptionAr,
+            DescriptionEn = descriptionEn,
+            Status = RoleStatus.Active,
+            IsProtected = true,
+            IsTemplate = true,
+            CreatedAtUtc = createdAtUtc,
+            IsDeleted = false,
+            ConcurrencyStamp = $"protected-{code.ToLowerInvariant()}-v1"
+        };
 }
 
 internal sealed class IdentityUserClaimConfiguration : IEntityTypeConfiguration<IdentityUserClaim<Guid>>
@@ -99,6 +155,16 @@ internal sealed class RolePermissionGrantConfiguration : IEntityTypeConfiguratio
         builder.HasOne<ApplicationRole>().WithMany().HasForeignKey(entity => entity.RoleId).OnDelete(DeleteBehavior.Restrict);
         builder.HasIndex(entity => new { entity.RoleId, entity.PermissionKey }).IsUnique();
         builder.HasIndex(entity => entity.PermissionKey);
+
+        var seededAt = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
+        builder.HasData(AuthorizationSeedCatalog.RolePermissions.Select(grant => new RolePermissionGrant
+        {
+            Id = grant.Id,
+            RoleId = grant.RoleId,
+            PermissionKey = grant.PermissionKey,
+            CreatedAtUtc = seededAt,
+            IsDeleted = false
+        }));
     }
 }
 

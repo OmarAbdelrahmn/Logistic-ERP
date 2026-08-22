@@ -21,6 +21,7 @@ internal sealed class ClientContractConfiguration : IEntityTypeConfiguration<Cli
         builder.Property(entity => entity.ContactEmail).HasMaxLength(320);
         builder.Property(entity => entity.Notes).HasMaxLength(4000);
         builder.HasOne<ClientPlatform>().WithMany().HasForeignKey(entity => entity.ClientPlatformId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasAlternateKey(entity => new { entity.Id, entity.ClientPlatformId });
         builder.HasIndex(entity => entity.Code).IsUnique();
         builder.HasIndex(entity => new { entity.ClientPlatformId, entity.Status });
         builder.HasIndex(entity => new { entity.ClientPlatformId, entity.ExternalBusinessAccountId })
@@ -46,14 +47,27 @@ internal sealed class PlatformRiderAccountConfiguration : IEntityTypeConfigurati
         builder.Property(entity => entity.StatusReason).HasMaxLength(500);
         builder.Property(entity => entity.OwnershipNotes).HasMaxLength(4000);
         builder.Property(entity => entity.OperationalNotes).HasMaxLength(4000);
-        builder.HasOne<ClientContract>().WithMany().HasForeignKey(entity => entity.ClientContractId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<ClientContract>().WithMany()
+            .HasForeignKey(entity => new { entity.ClientContractId, entity.ClientPlatformId })
+            .HasPrincipalKey(entity => new { entity.Id, entity.ClientPlatformId })
+            .OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<ClientPlatform>().WithMany().HasForeignKey(entity => entity.ClientPlatformId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<Employee>().WithMany().HasForeignKey(entity => entity.RegisteredEmployeeId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<Sponsor>().WithMany().HasForeignKey(entity => entity.SponsorId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<OperatingCity>().WithMany().HasForeignKey(entity => entity.OperatingCityId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasAlternateKey(entity => new { entity.Id, entity.ClientContractId });
         builder.HasIndex(entity => entity.Code).IsUnique();
         builder.HasIndex(entity => new { entity.ClientPlatformId, entity.NormalizedExternalAccountId }).IsUnique();
         builder.HasIndex(entity => new { entity.ClientContractId, entity.Status });
-        builder.ToTable(table => table.HasCheckConstraint(
-            "CK_PlatformRiderAccounts_DateRange",
-            "[EndDate] IS NULL OR [StartDate] IS NULL OR [EndDate] >= [StartDate]"));
+        builder.HasIndex(entity => new { entity.RegisteredEmployeeId, entity.ClientPlatformId, entity.Status });
+        builder.HasIndex(entity => new { entity.OperatingCityId, entity.SponsorId, entity.RegistrationType });
+        builder.ToTable(table =>
+        {
+            table.HasCheckConstraint("CK_PlatformRiderAccounts_DateRange", "[EndDate] IS NULL OR [StartDate] IS NULL OR [EndDate] >= [StartDate]");
+            table.HasCheckConstraint(
+                "CK_PlatformRiderAccounts_Registration",
+                "([RegistrationType] = 1 AND [SponsorId] IS NOT NULL) OR ([RegistrationType] = 2 AND [SponsorId] IS NULL)");
+        });
     }
 }
 
@@ -82,13 +96,19 @@ internal sealed class RiderClientAssignmentConfiguration : IEntityTypeConfigurat
         builder.Property(entity => entity.OperationalAgreementReference).HasMaxLength(200);
         builder.Property(entity => entity.OperationalAgreementNotes).HasMaxLength(4000);
         builder.Property(entity => entity.BackdatedReason).HasMaxLength(1000);
-        builder.HasOne<Employee>().WithMany().HasForeignKey(entity => entity.EmployeeId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasOne<RiderProfile>().WithMany().HasForeignKey(entity => entity.RiderProfileId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<Employee>().WithMany().HasForeignKey(entity => entity.ActualEmployeeId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<RiderProfile>().WithMany()
+            .HasForeignKey(entity => new { entity.RiderProfileId, entity.ActualEmployeeId })
+            .HasPrincipalKey(entity => new { entity.Id, entity.EmployeeId })
+            .OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<ClientContract>().WithMany().HasForeignKey(entity => entity.ClientContractId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasOne<PlatformRiderAccount>().WithMany().HasForeignKey(entity => entity.PlatformRiderAccountId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasIndex(entity => new { entity.EmployeeId, entity.EffectiveFrom });
+        builder.HasOne<PlatformRiderAccount>().WithMany()
+            .HasForeignKey(entity => new { entity.PlatformRiderAccountId, entity.ClientContractId })
+            .HasPrincipalKey(entity => new { entity.Id, entity.ClientContractId })
+            .OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(entity => new { entity.ActualEmployeeId, entity.EffectiveFrom });
         builder.HasIndex(entity => new { entity.ClientContractId, entity.Status });
-        builder.HasIndex(entity => entity.EmployeeId)
+        builder.HasIndex(entity => entity.ActualEmployeeId)
             .IsUnique()
             .HasFilter("[EffectiveTo] IS NULL AND [IsDeleted] = 0");
         builder.HasIndex(entity => entity.PlatformRiderAccountId)
@@ -98,6 +118,43 @@ internal sealed class RiderClientAssignmentConfiguration : IEntityTypeConfigurat
         {
             table.HasCheckConstraint("CK_RiderClientAssignments_EffectiveRange", "[EffectiveTo] IS NULL OR [EffectiveTo] >= [EffectiveFrom]");
             table.HasCheckConstraint("CK_RiderClientAssignments_BackdatedReason", "[WasBackdated] = 0 OR [BackdatedReason] IS NOT NULL");
+        });
+    }
+}
+
+internal sealed class PlatformAccountRegistrationConfiguration : IEntityTypeConfiguration<PlatformAccountRegistration>
+{
+    public void Configure(EntityTypeBuilder<PlatformAccountRegistration> builder)
+    {
+        builder.ConfigureOperational("PlatformAccountRegistrations");
+        builder.Property(entity => entity.StatusReason).HasMaxLength(1000);
+        builder.Property(entity => entity.Notes).HasMaxLength(4000);
+        builder.HasOne<Employee>().WithMany().HasForeignKey(entity => entity.RegisteredEmployeeId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<RiderProfile>().WithMany()
+            .HasForeignKey(entity => new { entity.RiderProfileId, entity.RegisteredEmployeeId })
+            .HasPrincipalKey(entity => new { entity.Id, entity.EmployeeId })
+            .OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<ClientPlatform>().WithMany().HasForeignKey(entity => entity.ClientPlatformId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<ClientContract>().WithMany()
+            .HasForeignKey(entity => new { entity.ClientContractId, entity.ClientPlatformId })
+            .HasPrincipalKey(entity => new { entity.Id, entity.ClientPlatformId })
+            .OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<Sponsor>().WithMany().HasForeignKey(entity => entity.SponsorId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<OperatingCity>().WithMany().HasForeignKey(entity => entity.OperatingCityId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<PlatformRiderAccount>().WithMany().HasForeignKey(entity => entity.PlatformRiderAccountId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(entity => new { entity.RegisteredEmployeeId, entity.ClientPlatformId, entity.Status });
+        builder.HasIndex(entity => new { entity.OperatingCityId, entity.SponsorId, entity.RegistrationType, entity.Status });
+        builder.HasIndex(entity => entity.PlatformRiderAccountId)
+            .IsUnique()
+            .HasFilter("[PlatformRiderAccountId] IS NOT NULL AND [IsDeleted] = 0");
+        builder.ToTable(table =>
+        {
+            table.HasCheckConstraint(
+                "CK_PlatformAccountRegistrations_Registration",
+                "([RegistrationType] = 1 AND [SponsorId] IS NOT NULL) OR ([RegistrationType] = 2 AND [SponsorId] IS NULL)");
+            table.HasCheckConstraint(
+                "CK_PlatformAccountRegistrations_ActivationRange",
+                "[ActivatedAtUtc] IS NULL OR [RequestedAtUtc] IS NULL OR [ActivatedAtUtc] >= [RequestedAtUtc]");
         });
     }
 }

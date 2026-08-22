@@ -13,6 +13,7 @@ public sealed class ApplicationUser : IdentityUser<Guid>
     public string PreferredTheme { get; set; } = "light";
     public string PreferredDensity { get; set; } = "compact";
     public bool RequiresPasswordChange { get; set; } = true;
+    public bool IsDevelopmentOnly { get; set; }
     public long AuthorizationVersion { get; set; } = 1;
     public DateTimeOffset? LastLoginAtUtc { get; set; }
     public DateTimeOffset? LastActivityAtUtc { get; set; }

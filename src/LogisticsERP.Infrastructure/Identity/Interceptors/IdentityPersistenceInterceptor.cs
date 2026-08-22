@@ -1,4 +1,5 @@
 using LogisticsERP.Application.Abstractions.Authentication;
+using LogisticsERP.Application.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
@@ -61,6 +62,7 @@ internal sealed class IdentityPersistenceInterceptor(
 
         ApplyUserRules(context, now);
         ApplyRoleRules(context, now);
+        ApplyProtectedRolePermissionRules(context);
 
         var unsupportedDeletes = context.ChangeTracker.Entries()
             .Where(entry => entry.State == EntityState.Deleted)
@@ -106,6 +108,15 @@ internal sealed class IdentityPersistenceInterceptor(
     {
         foreach (var entry in context.ChangeTracker.Entries<ApplicationRole>())
         {
+            var wasProtected = entry.State != EntityState.Added
+                && entry.OriginalValues.GetValue<bool>(nameof(ApplicationRole.IsProtected));
+
+            if (wasProtected && entry.State is EntityState.Modified or EntityState.Deleted)
+            {
+                throw new InvalidOperationException(
+                    $"The protected role '{entry.OriginalValues.GetValue<string>(nameof(ApplicationRole.Code))}' cannot be modified or archived.");
+            }
+
             if (entry.State == EntityState.Added)
             {
                 entry.Entity.Id = entry.Entity.Id == Guid.Empty ? Guid.CreateVersion7() : entry.Entity.Id;
@@ -127,6 +138,22 @@ internal sealed class IdentityPersistenceInterceptor(
                 entry.Entity.UpdatedAtUtc = now;
                 entry.Entity.UpdatedByUserId = currentUser.UserId;
             }
+        }
+    }
+
+    private static void ApplyProtectedRolePermissionRules(DbContext context)
+    {
+        var protectedGrantChanges = context.ChangeTracker.Entries<RolePermissionGrant>()
+            .Where(entry => entry.State is EntityState.Added or EntityState.Modified or EntityState.Deleted)
+            .Where(entry => SystemRoles.IsProtected(entry.Entity.RoleId))
+            .Select(entry => entry.Entity.RoleId)
+            .Distinct()
+            .ToArray();
+
+        if (protectedGrantChanges.Length > 0)
+        {
+            throw new InvalidOperationException(
+                "The baseline permissions of protected system roles cannot be changed at runtime. Use direct user permissions and scopes instead.");
         }
     }
 }

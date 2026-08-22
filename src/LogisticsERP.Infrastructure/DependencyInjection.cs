@@ -1,5 +1,9 @@
 using LogisticsERP.Application.Abstractions.Authentication;
 using LogisticsERP.Application.Abstractions.Persistence;
+using LogisticsERP.Application.Features.Authentication;
+using LogisticsERP.Application.Features.UserProfiles;
+using LogisticsERP.Application.Authorization;
+using LogisticsERP.Infrastructure.Authentication;
 using LogisticsERP.Infrastructure.Identity;
 using LogisticsERP.Infrastructure.Identity.Interceptors;
 using LogisticsERP.Infrastructure.Persistence;
@@ -23,8 +27,14 @@ public static class DependencyInjection
 
         services.TryAddSingleton(TimeProvider.System);
         services.TryAddScoped<ICurrentUser, SystemCurrentUser>();
+        services.AddMemoryCache();
         services.AddScoped<ApplicationPersistenceInterceptor>();
         services.AddScoped<IdentityPersistenceInterceptor>();
+        services.AddSingleton<IAccessTokenFactory, AccessTokenFactory>();
+        services.AddScoped<IAuthenticationSessionValidator, AuthenticationSessionValidator>();
+        services.AddScoped<IAuthenticationService, AuthenticationService>();
+        services.AddScoped<IUserProfileService, UserProfileService>();
+        services.AddScoped<IPermissionChecker, PermissionChecker>();
 
         services.AddDbContext<ApplicationDbContext>((provider, options) =>
         {

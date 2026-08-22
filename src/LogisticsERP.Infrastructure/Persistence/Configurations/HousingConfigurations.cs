@@ -35,7 +35,7 @@ internal sealed class HousingSupervisorPeriodConfiguration : IEntityTypeConfigur
 {
     public void Configure(EntityTypeBuilder<HousingSupervisorPeriod> builder)
     {
-        builder.ConfigureHistory("HousingSupervisorPeriods");
+        builder.ConfigureTemporal("HousingSupervisorPeriods");
         builder.Property(entity => entity.AssignmentReason).HasMaxLength(1000);
         builder.Property(entity => entity.EndReason).HasMaxLength(1000);
         builder.HasOne<Housing>().WithMany().HasForeignKey(entity => entity.HousingId).OnDelete(DeleteBehavior.Restrict);
@@ -44,9 +44,6 @@ internal sealed class HousingSupervisorPeriodConfiguration : IEntityTypeConfigur
         builder.HasIndex(entity => entity.HousingId)
             .IsUnique()
             .HasFilter("[EffectiveTo] IS NULL");
-        builder.ToTable(table => table.HasCheckConstraint(
-            "CK_HousingSupervisorPeriods_EffectiveRange",
-            "[EffectiveTo] IS NULL OR [EffectiveTo] >= [EffectiveFrom]"));
     }
 }
 
@@ -54,7 +51,7 @@ internal sealed class HousingResidencePeriodConfiguration : IEntityTypeConfigura
 {
     public void Configure(EntityTypeBuilder<HousingResidencePeriod> builder)
     {
-        builder.ConfigureHistory("HousingResidencePeriods");
+        builder.ConfigureTemporal("HousingResidencePeriods");
         builder.Property(entity => entity.MoveInReason).HasMaxLength(1000);
         builder.Property(entity => entity.MoveOutReason).HasMaxLength(1000);
         builder.Property(entity => entity.SourceReference).HasMaxLength(200);
@@ -69,7 +66,6 @@ internal sealed class HousingResidencePeriodConfiguration : IEntityTypeConfigura
             .HasFilter("[EffectiveTo] IS NULL");
         builder.ToTable(table =>
         {
-            table.HasCheckConstraint("CK_HousingResidencePeriods_EffectiveRange", "[EffectiveTo] IS NULL OR [EffectiveTo] >= [EffectiveFrom]");
             table.HasCheckConstraint("CK_HousingResidencePeriods_CapacityOverrideReason", "[CapacityOverrideUsed] = 0 OR [CapacityOverrideReason] IS NOT NULL");
         });
     }

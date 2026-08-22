@@ -3,12 +3,10 @@ using LogisticsERP.Domain.Enums;
 
 namespace LogisticsERP.Domain.Entities.Workforce;
 
-public sealed class EmployeeRelationshipPeriod : HistoryEntity
+public sealed class EmployeeRelationshipPeriod : TemporalPeriodEntity
 {
     public Guid EmployeeId { get; set; }
     public EmployeeRelationshipType RelationshipType { get; set; }
-    public DateOnly EffectiveFrom { get; set; }
-    public DateOnly? EffectiveTo { get; set; }
     public string? ReasonCode { get; set; }
     public string? Reason { get; set; }
     public string? SourceReference { get; set; }

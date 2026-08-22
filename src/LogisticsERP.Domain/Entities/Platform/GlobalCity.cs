@@ -6,6 +6,7 @@ namespace LogisticsERP.Domain.Entities.Platform;
 public sealed class GlobalCity : AuditableEntity
 {
     public static readonly Guid JeddahId = Guid.Parse("019c18d5-62e1-7000-8000-000000000002");
+    public static readonly Guid RiyadhId = Guid.Parse("019c18d5-62e1-7000-8000-000000000004");
 
     public string Code { get; set; } = string.Empty;
     public string NameAr { get; set; } = string.Empty;

@@ -2803,3 +2803,1925 @@ END;
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    ALTER TABLE [app].[PlatformRiderAccounts] DROP CONSTRAINT [FK_PlatformRiderAccounts_ClientContracts_ClientContractId];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    ALTER TABLE [app].[RiderClientAssignments] DROP CONSTRAINT [FK_RiderClientAssignments_Employees_EmployeeId];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    ALTER TABLE [app].[RiderClientAssignments] DROP CONSTRAINT [FK_RiderClientAssignments_PlatformRiderAccounts_PlatformRiderAccountId];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    ALTER TABLE [app].[RiderClientAssignments] DROP CONSTRAINT [FK_RiderClientAssignments_RiderProfiles_RiderProfileId];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    ALTER TABLE [app].[RiderProfiles] DROP CONSTRAINT [FK_RiderProfiles_EmployeeDocuments_LicenseDocumentId];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    ALTER TABLE [app].[SponsoredInternalDetails] DROP CONSTRAINT [FK_SponsoredInternalDetails_JobTitles_CurrentJobTitleId];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    DROP INDEX [IX_RiderProfiles_LicenseDocumentId] ON [app].[RiderProfiles];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    DROP INDEX [IX_RiderClientAssignments_RiderProfileId] ON [app].[RiderClientAssignments];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    EXEC sp_rename N'[app].[SponsoredInternalDetails].[SponsorLegalReference]', N'LegacySponsorReference', 'COLUMN';
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    ALTER TABLE [app].[SponsoredInternalDetails] ADD [CurrentSponsorId] uniqueidentifier NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_SponsoredInternalDetails_CurrentSponsorId] ON [app].[SponsoredInternalDetails] ([CurrentSponsorId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    EXEC sp_rename N'[app].[RiderClientAssignments].[EmployeeId]', N'ActualEmployeeId', 'COLUMN';
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    EXEC sp_rename N'[app].[RiderClientAssignments].[IX_RiderClientAssignments_EmployeeId_EffectiveFrom]', N'IX_RiderClientAssignments_ActualEmployeeId_EffectiveFrom', 'INDEX';
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    EXEC sp_rename N'[app].[RiderClientAssignments].[IX_RiderClientAssignments_EmployeeId]', N'IX_RiderClientAssignments_ActualEmployeeId', 'INDEX';
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    EXEC sp_rename N'[app].[HousingSupervisorPeriods].[EndedByUserId]', N'ClosedByUserId', 'COLUMN';
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    EXEC sp_rename N'[app].[HousingResidencePeriods].[EndedByUserId]', N'ClosedByUserId', 'COLUMN';
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    ALTER TABLE [app].[PlatformRiderAccounts] ADD [BillingMode] int NOT NULL DEFAULT 0;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    ALTER TABLE [app].[PlatformRiderAccounts] ADD [OperatingCityId] uniqueidentifier NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000';
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    ALTER TABLE [app].[PlatformRiderAccounts] ADD [RegisteredEmployeeId] uniqueidentifier NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    ALTER TABLE [app].[PlatformRiderAccounts] ADD [RegistrationType] int NOT NULL DEFAULT 0;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    ALTER TABLE [app].[PlatformRiderAccounts] ADD [SponsorId] uniqueidentifier NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    ALTER TABLE [app].[HousingSupervisorPeriods] ADD [ClosedAtUtc] datetimeoffset NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    ALTER TABLE [app].[HousingSupervisorPeriods] ADD [RowVersion] rowversion NOT NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    ALTER TABLE [app].[HousingResidencePeriods] ADD [ClosedAtUtc] datetimeoffset NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    ALTER TABLE [app].[HousingResidencePeriods] ADD [RowVersion] rowversion NOT NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    ALTER TABLE [app].[EmployeeStatusPeriods] ADD [ClosedAtUtc] datetimeoffset NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    ALTER TABLE [app].[EmployeeStatusPeriods] ADD [ClosedByUserId] uniqueidentifier NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    ALTER TABLE [app].[EmployeeStatusPeriods] ADD [RowVersion] rowversion NOT NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    DECLARE @var nvarchar(max);
+    SELECT @var = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[app].[Employees]') AND [c].[name] = N'PrimaryPhone');
+    IF @var IS NOT NULL EXEC(N'ALTER TABLE [app].[Employees] DROP CONSTRAINT ' + @var + ';');
+    ALTER TABLE [app].[Employees] ALTER COLUMN [PrimaryPhone] nvarchar(32) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    DECLARE @var1 nvarchar(max);
+    SELECT @var1 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[app].[Employees]') AND [c].[name] = N'NormalizedNameEn');
+    IF @var1 IS NOT NULL EXEC(N'ALTER TABLE [app].[Employees] DROP CONSTRAINT ' + @var1 + ';');
+    ALTER TABLE [app].[Employees] ALTER COLUMN [NormalizedNameEn] nvarchar(200) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    DECLARE @var2 nvarchar(max);
+    SELECT @var2 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[app].[Employees]') AND [c].[name] = N'FullNameEn');
+    IF @var2 IS NOT NULL EXEC(N'ALTER TABLE [app].[Employees] DROP CONSTRAINT ' + @var2 + ';');
+    ALTER TABLE [app].[Employees] ALTER COLUMN [FullNameEn] nvarchar(200) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    ALTER TABLE [app].[Employees] ADD [HireDate] date NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    ALTER TABLE [app].[Employees] ADD [NationalityCountryCode] nchar(2) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    ALTER TABLE [app].[EmployeeRelationshipPeriods] ADD [ClosedAtUtc] datetimeoffset NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    ALTER TABLE [app].[EmployeeRelationshipPeriods] ADD [ClosedByUserId] uniqueidentifier NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    ALTER TABLE [app].[EmployeeRelationshipPeriods] ADD [RowVersion] rowversion NOT NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    ALTER TABLE [app].[EmployeeJobTitlePeriods] ADD [ClosedAtUtc] datetimeoffset NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    ALTER TABLE [app].[EmployeeJobTitlePeriods] ADD [ClosedByUserId] uniqueidentifier NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    ALTER TABLE [app].[EmployeeJobTitlePeriods] ADD [OperatingCityId] uniqueidentifier NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000';
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    ALTER TABLE [app].[EmployeeJobTitlePeriods] ADD [OperationalWorkTypeId] uniqueidentifier NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000';
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    ALTER TABLE [app].[EmployeeJobTitlePeriods] ADD [RowVersion] rowversion NOT NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    ALTER TABLE [platform].[DocumentTypes] ADD [MaxFileSizeBytes] bigint NOT NULL DEFAULT CAST(10485760 AS bigint);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    ALTER TABLE [app].[RiderProfiles] ADD CONSTRAINT [AK_RiderProfiles_Id_EmployeeId] UNIQUE ([Id], [EmployeeId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    ALTER TABLE [app].[PlatformRiderAccounts] ADD CONSTRAINT [AK_PlatformRiderAccounts_Id_ClientContractId] UNIQUE ([Id], [ClientContractId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    ALTER TABLE [app].[ClientContracts] ADD CONSTRAINT [AK_ClientContracts_Id_ClientPlatformId] UNIQUE ([Id], [ClientPlatformId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE TABLE [app].[DriverLicenseCategories] (
+        [Id] uniqueidentifier NOT NULL,
+        [Code] nvarchar(32) NOT NULL,
+        [NameAr] nvarchar(100) NOT NULL,
+        [NameEn] nvarchar(100) NOT NULL,
+        [Status] int NOT NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_DriverLicenseCategories] PRIMARY KEY ([Id])
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE TABLE [app].[InsuranceCompanies] (
+        [Id] uniqueidentifier NOT NULL,
+        [Code] nvarchar(32) NOT NULL,
+        [NameAr] nvarchar(200) NOT NULL,
+        [NameEn] nvarchar(200) NULL,
+        [ProviderRegistrationNumber] nvarchar(100) NULL,
+        [ContactName] nvarchar(200) NULL,
+        [ContactPhone] nvarchar(32) NULL,
+        [ContactEmail] nvarchar(320) NULL,
+        [Status] int NOT NULL,
+        [Notes] nvarchar(4000) NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_InsuranceCompanies] PRIMARY KEY ([Id])
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE TABLE [app].[OperationalWorkTypes] (
+        [Id] uniqueidentifier NOT NULL,
+        [Code] nvarchar(32) NOT NULL,
+        [NameAr] nvarchar(100) NOT NULL,
+        [NameEn] nvarchar(100) NOT NULL,
+        [Status] int NOT NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_OperationalWorkTypes] PRIMARY KEY ([Id])
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE TABLE [app].[ResidencyProfessions] (
+        [Id] uniqueidentifier NOT NULL,
+        [Code] nvarchar(32) NOT NULL,
+        [NameAr] nvarchar(200) NOT NULL,
+        [NameEn] nvarchar(200) NULL,
+        [Status] int NOT NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_ResidencyProfessions] PRIMARY KEY ([Id])
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE TABLE [app].[RiderCards] (
+        [Id] uniqueidentifier NOT NULL,
+        [RiderProfileId] uniqueidentifier NOT NULL,
+        [CardNumber] nvarchar(150) NOT NULL,
+        [NormalizedCardNumber] nvarchar(150) NOT NULL,
+        [CardType] int NOT NULL,
+        [ValidityCycle] int NOT NULL,
+        [IssueDate] date NULL,
+        [ExpiryDate] date NULL,
+        [Status] int NOT NULL,
+        [PreviousCardId] uniqueidentifier NULL,
+        [IsCurrent] bit NOT NULL,
+        [EmployeeDocumentId] uniqueidentifier NULL,
+        [Notes] nvarchar(4000) NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_RiderCards] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_RiderCards_DateRange] CHECK ([ExpiryDate] IS NULL OR [IssueDate] IS NULL OR [ExpiryDate] >= [IssueDate]),
+        CONSTRAINT [FK_RiderCards_EmployeeDocuments_EmployeeDocumentId] FOREIGN KEY ([EmployeeDocumentId]) REFERENCES [app].[EmployeeDocuments] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_RiderCards_RiderCards_PreviousCardId] FOREIGN KEY ([PreviousCardId]) REFERENCES [app].[RiderCards] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_RiderCards_RiderProfiles_RiderProfileId] FOREIGN KEY ([RiderProfileId]) REFERENCES [app].[RiderProfiles] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE TABLE [app].[RiderHealthCards] (
+        [Id] uniqueidentifier NOT NULL,
+        [RiderProfileId] uniqueidentifier NOT NULL,
+        [CardNumberCiphertext] varbinary(max) NOT NULL,
+        [CardNumberLookupHash] nchar(64) NOT NULL,
+        [CardNumberLastFour] nchar(4) NOT NULL,
+        [CardType] nvarchar(100) NULL,
+        [IssuingAuthority] nvarchar(200) NULL,
+        [IssueDate] date NULL,
+        [ExpiryDate] date NULL,
+        [Status] int NOT NULL,
+        [PreviousCardId] uniqueidentifier NULL,
+        [IsCurrent] bit NOT NULL,
+        [EmployeeDocumentId] uniqueidentifier NULL,
+        [Notes] nvarchar(4000) NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_RiderHealthCards] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_RiderHealthCards_DateRange] CHECK ([ExpiryDate] IS NULL OR [IssueDate] IS NULL OR [ExpiryDate] >= [IssueDate]),
+        CONSTRAINT [FK_RiderHealthCards_EmployeeDocuments_EmployeeDocumentId] FOREIGN KEY ([EmployeeDocumentId]) REFERENCES [app].[EmployeeDocuments] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_RiderHealthCards_RiderHealthCards_PreviousCardId] FOREIGN KEY ([PreviousCardId]) REFERENCES [app].[RiderHealthCards] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_RiderHealthCards_RiderProfiles_RiderProfileId] FOREIGN KEY ([RiderProfileId]) REFERENCES [app].[RiderProfiles] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE TABLE [app].[Sponsors] (
+        [Id] uniqueidentifier NOT NULL,
+        [CompanyProfileId] uniqueidentifier NOT NULL,
+        [EmployerIdentityNumber] nvarchar(100) NOT NULL,
+        [RegistryNameAr] nvarchar(200) NOT NULL,
+        [RegistryNameEn] nvarchar(200) NULL,
+        [CommercialRegistrationNumber] nvarchar(100) NULL,
+        [UnifiedNationalNumber] nvarchar(100) NULL,
+        [SponsorType] int NOT NULL,
+        [Status] int NOT NULL,
+        [ActiveFrom] date NULL,
+        [ActiveTo] date NULL,
+        [ContactName] nvarchar(200) NULL,
+        [ContactPhone] nvarchar(32) NULL,
+        [ContactEmail] nvarchar(320) NULL,
+        [AddressBuildingNumber] nvarchar(32) NULL,
+        [AddressStreet] nvarchar(200) NULL,
+        [AddressDistrict] nvarchar(200) NULL,
+        [AddressCity] nvarchar(200) NULL,
+        [AddressPostalCode] nvarchar(32) NULL,
+        [AddressAdditionalNumber] nvarchar(32) NULL,
+        [Notes] nvarchar(4000) NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_Sponsors] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_Sponsors_ActiveRange] CHECK ([ActiveTo] IS NULL OR [ActiveFrom] IS NULL OR [ActiveTo] >= [ActiveFrom]),
+        CONSTRAINT [FK_Sponsors_CompanyProfile_CompanyProfileId] FOREIGN KEY ([CompanyProfileId]) REFERENCES [platform].[CompanyProfile] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE TABLE [app].[EmployeeDriverLicenses] (
+        [Id] uniqueidentifier NOT NULL,
+        [EmployeeId] uniqueidentifier NOT NULL,
+        [DriverLicenseCategoryId] uniqueidentifier NOT NULL,
+        [LicenseNumberCiphertext] varbinary(max) NULL,
+        [LicenseNumberLookupHash] nchar(64) NULL,
+        [LicenseNumberLastFour] nchar(4) NULL,
+        [IssueDate] date NULL,
+        [ExpiryDate] date NULL,
+        [BookingStatus] int NOT NULL,
+        [IssuanceStatus] int NOT NULL,
+        [LicenseStatus] int NOT NULL,
+        [PreviousLicenseId] uniqueidentifier NULL,
+        [IsCurrent] bit NOT NULL,
+        [EmployeeDocumentId] uniqueidentifier NULL,
+        [Notes] nvarchar(4000) NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_EmployeeDriverLicenses] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_EmployeeDriverLicenses_DateRange] CHECK ([ExpiryDate] IS NULL OR [IssueDate] IS NULL OR [ExpiryDate] >= [IssueDate]),
+        CONSTRAINT [FK_EmployeeDriverLicenses_DriverLicenseCategories_DriverLicenseCategoryId] FOREIGN KEY ([DriverLicenseCategoryId]) REFERENCES [app].[DriverLicenseCategories] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_EmployeeDriverLicenses_EmployeeDocuments_EmployeeDocumentId] FOREIGN KEY ([EmployeeDocumentId]) REFERENCES [app].[EmployeeDocuments] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_EmployeeDriverLicenses_EmployeeDriverLicenses_PreviousLicenseId] FOREIGN KEY ([PreviousLicenseId]) REFERENCES [app].[EmployeeDriverLicenses] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_EmployeeDriverLicenses_Employees_EmployeeId] FOREIGN KEY ([EmployeeId]) REFERENCES [app].[Employees] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE TABLE [app].[InsurancePlanLevels] (
+        [Id] uniqueidentifier NOT NULL,
+        [InsuranceCompanyId] uniqueidentifier NOT NULL,
+        [Code] nvarchar(32) NOT NULL,
+        [NameAr] nvarchar(200) NOT NULL,
+        [NameEn] nvarchar(200) NULL,
+        [Rank] int NOT NULL,
+        [NetworkName] nvarchar(200) NULL,
+        [CoverageClass] nvarchar(100) NULL,
+        [AnnualCoverageLimit] decimal(18,2) NULL,
+        [DeductiblePercentage] decimal(5,2) NULL,
+        [EffectiveFrom] date NULL,
+        [EffectiveTo] date NULL,
+        [Status] int NOT NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_InsurancePlanLevels] PRIMARY KEY ([Id]),
+        CONSTRAINT [AK_InsurancePlanLevels_Id_InsuranceCompanyId] UNIQUE ([Id], [InsuranceCompanyId]),
+        CONSTRAINT [CK_InsurancePlanLevels_AnnualLimit] CHECK ([AnnualCoverageLimit] IS NULL OR [AnnualCoverageLimit] >= 0),
+        CONSTRAINT [CK_InsurancePlanLevels_DateRange] CHECK ([EffectiveTo] IS NULL OR [EffectiveFrom] IS NULL OR [EffectiveTo] >= [EffectiveFrom]),
+        CONSTRAINT [CK_InsurancePlanLevels_Deductible] CHECK ([DeductiblePercentage] IS NULL OR ([DeductiblePercentage] >= 0 AND [DeductiblePercentage] <= 100)),
+        CONSTRAINT [CK_InsurancePlanLevels_Rank] CHECK ([Rank] >= 0),
+        CONSTRAINT [FK_InsurancePlanLevels_InsuranceCompanies_InsuranceCompanyId] FOREIGN KEY ([InsuranceCompanyId]) REFERENCES [app].[InsuranceCompanies] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE TABLE [app].[JobTitleOperationalWorkTypes] (
+        [Id] uniqueidentifier NOT NULL,
+        [JobTitleId] uniqueidentifier NOT NULL,
+        [OperationalWorkTypeId] uniqueidentifier NOT NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_JobTitleOperationalWorkTypes] PRIMARY KEY ([Id]),
+        CONSTRAINT [FK_JobTitleOperationalWorkTypes_JobTitles_JobTitleId] FOREIGN KEY ([JobTitleId]) REFERENCES [app].[JobTitles] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_JobTitleOperationalWorkTypes_OperationalWorkTypes_OperationalWorkTypeId] FOREIGN KEY ([OperationalWorkTypeId]) REFERENCES [app].[OperationalWorkTypes] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE TABLE [app].[EmployeePromissoryNotes] (
+        [Id] uniqueidentifier NOT NULL,
+        [EmployeeId] uniqueidentifier NOT NULL,
+        [SponsorId] uniqueidentifier NULL,
+        [NoteNumber] nvarchar(150) NOT NULL,
+        [NormalizedNoteNumber] nvarchar(150) NOT NULL,
+        [Amount] decimal(18,2) NOT NULL,
+        [CurrencyCode] nchar(3) NOT NULL,
+        [IssueDate] date NOT NULL,
+        [DueDate] date NULL,
+        [SignedAtUtc] datetimeoffset NULL,
+        [Status] int NOT NULL,
+        [BeneficiaryCompanyProfileId] uniqueidentifier NOT NULL,
+        [EmployeeDocumentId] uniqueidentifier NULL,
+        [Notes] nvarchar(4000) NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_EmployeePromissoryNotes] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_EmployeePromissoryNotes_Amount] CHECK ([Amount] > 0),
+        CONSTRAINT [CK_EmployeePromissoryNotes_DateRange] CHECK ([DueDate] IS NULL OR [DueDate] >= [IssueDate]),
+        CONSTRAINT [FK_EmployeePromissoryNotes_CompanyProfile_BeneficiaryCompanyProfileId] FOREIGN KEY ([BeneficiaryCompanyProfileId]) REFERENCES [platform].[CompanyProfile] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_EmployeePromissoryNotes_EmployeeDocuments_EmployeeDocumentId] FOREIGN KEY ([EmployeeDocumentId]) REFERENCES [app].[EmployeeDocuments] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_EmployeePromissoryNotes_Employees_EmployeeId] FOREIGN KEY ([EmployeeId]) REFERENCES [app].[Employees] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_EmployeePromissoryNotes_Sponsors_SponsorId] FOREIGN KEY ([SponsorId]) REFERENCES [app].[Sponsors] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE TABLE [app].[EmployeeResidencyPermits] (
+        [Id] uniqueidentifier NOT NULL,
+        [EmployeeId] uniqueidentifier NOT NULL,
+        [SponsorId] uniqueidentifier NOT NULL,
+        [ResidencyProfessionId] uniqueidentifier NOT NULL,
+        [PermitNumberCiphertext] varbinary(max) NOT NULL,
+        [PermitNumberLookupHash] nchar(64) NOT NULL,
+        [PermitNumberLastFour] nchar(4) NOT NULL,
+        [IssueDate] date NULL,
+        [ExpiryDate] date NOT NULL,
+        [Status] int NOT NULL,
+        [PreviousPermitId] uniqueidentifier NULL,
+        [IsCurrent] bit NOT NULL,
+        [EmployeeDocumentId] uniqueidentifier NULL,
+        [Notes] nvarchar(4000) NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_EmployeeResidencyPermits] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_EmployeeResidencyPermits_DateRange] CHECK ([IssueDate] IS NULL OR [ExpiryDate] >= [IssueDate]),
+        CONSTRAINT [FK_EmployeeResidencyPermits_EmployeeDocuments_EmployeeDocumentId] FOREIGN KEY ([EmployeeDocumentId]) REFERENCES [app].[EmployeeDocuments] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_EmployeeResidencyPermits_EmployeeResidencyPermits_PreviousPermitId] FOREIGN KEY ([PreviousPermitId]) REFERENCES [app].[EmployeeResidencyPermits] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_EmployeeResidencyPermits_Employees_EmployeeId] FOREIGN KEY ([EmployeeId]) REFERENCES [app].[Employees] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_EmployeeResidencyPermits_ResidencyProfessions_ResidencyProfessionId] FOREIGN KEY ([ResidencyProfessionId]) REFERENCES [app].[ResidencyProfessions] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_EmployeeResidencyPermits_Sponsors_SponsorId] FOREIGN KEY ([SponsorId]) REFERENCES [app].[Sponsors] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE TABLE [app].[EmployeeSponsorshipPeriods] (
+        [Id] uniqueidentifier NOT NULL,
+        [EmployeeId] uniqueidentifier NOT NULL,
+        [SponsorId] uniqueidentifier NOT NULL,
+        [Status] int NOT NULL,
+        [Reason] nvarchar(1000) NULL,
+        [SourceReference] nvarchar(200) NULL,
+        [ChangedByUserId] uniqueidentifier NOT NULL,
+        [EffectiveFrom] date NOT NULL,
+        [EffectiveTo] date NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [ClosedAtUtc] datetimeoffset NULL,
+        [ClosedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        CONSTRAINT [PK_EmployeeSponsorshipPeriods] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_EmployeeSponsorshipPeriods_EffectiveRange] CHECK ([EffectiveTo] IS NULL OR [EffectiveTo] >= [EffectiveFrom]),
+        CONSTRAINT [FK_EmployeeSponsorshipPeriods_Employees_EmployeeId] FOREIGN KEY ([EmployeeId]) REFERENCES [app].[Employees] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_EmployeeSponsorshipPeriods_Sponsors_SponsorId] FOREIGN KEY ([SponsorId]) REFERENCES [app].[Sponsors] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE TABLE [app].[PlatformAccountRegistrations] (
+        [Id] uniqueidentifier NOT NULL,
+        [RegisteredEmployeeId] uniqueidentifier NOT NULL,
+        [RiderProfileId] uniqueidentifier NOT NULL,
+        [ClientPlatformId] uniqueidentifier NOT NULL,
+        [ClientContractId] uniqueidentifier NOT NULL,
+        [SponsorId] uniqueidentifier NULL,
+        [OperatingCityId] uniqueidentifier NOT NULL,
+        [RegistrationType] int NOT NULL,
+        [Status] int NOT NULL,
+        [StatusReason] nvarchar(1000) NULL,
+        [RequestedAtUtc] datetimeoffset NULL,
+        [ActivatedAtUtc] datetimeoffset NULL,
+        [PlatformRiderAccountId] uniqueidentifier NULL,
+        [Notes] nvarchar(4000) NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_PlatformAccountRegistrations] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_PlatformAccountRegistrations_ActivationRange] CHECK ([ActivatedAtUtc] IS NULL OR [RequestedAtUtc] IS NULL OR [ActivatedAtUtc] >= [RequestedAtUtc]),
+        CONSTRAINT [CK_PlatformAccountRegistrations_Registration] CHECK (([RegistrationType] = 1 AND [SponsorId] IS NOT NULL) OR ([RegistrationType] = 2 AND [SponsorId] IS NULL)),
+        CONSTRAINT [FK_PlatformAccountRegistrations_ClientContracts_ClientContractId_ClientPlatformId] FOREIGN KEY ([ClientContractId], [ClientPlatformId]) REFERENCES [app].[ClientContracts] ([Id], [ClientPlatformId]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_PlatformAccountRegistrations_ClientPlatforms_ClientPlatformId] FOREIGN KEY ([ClientPlatformId]) REFERENCES [platform].[ClientPlatforms] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_PlatformAccountRegistrations_Employees_RegisteredEmployeeId] FOREIGN KEY ([RegisteredEmployeeId]) REFERENCES [app].[Employees] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_PlatformAccountRegistrations_OperatingCities_OperatingCityId] FOREIGN KEY ([OperatingCityId]) REFERENCES [app].[OperatingCities] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_PlatformAccountRegistrations_PlatformRiderAccounts_PlatformRiderAccountId] FOREIGN KEY ([PlatformRiderAccountId]) REFERENCES [app].[PlatformRiderAccounts] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_PlatformAccountRegistrations_RiderProfiles_RiderProfileId_RegisteredEmployeeId] FOREIGN KEY ([RiderProfileId], [RegisteredEmployeeId]) REFERENCES [app].[RiderProfiles] ([Id], [EmployeeId]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_PlatformAccountRegistrations_Sponsors_SponsorId] FOREIGN KEY ([SponsorId]) REFERENCES [app].[Sponsors] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE TABLE [app].[EmployeeMedicalInsurancePolicies] (
+        [Id] uniqueidentifier NOT NULL,
+        [EmployeeId] uniqueidentifier NOT NULL,
+        [InsuranceCompanyId] uniqueidentifier NOT NULL,
+        [InsurancePlanLevelId] uniqueidentifier NOT NULL,
+        [PolicyNumberCiphertext] varbinary(max) NULL,
+        [PolicyNumberLookupHash] nchar(64) NULL,
+        [PolicyNumberLastFour] nchar(4) NULL,
+        [MemberNumberCiphertext] varbinary(max) NULL,
+        [MemberNumberLookupHash] nchar(64) NULL,
+        [MemberNumberLastFour] nchar(4) NULL,
+        [StartDate] date NOT NULL,
+        [EndDate] date NOT NULL,
+        [Status] int NOT NULL,
+        [PreviousPolicyId] uniqueidentifier NULL,
+        [IsCurrent] bit NOT NULL,
+        [EmployeeDocumentId] uniqueidentifier NULL,
+        [Notes] nvarchar(4000) NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_EmployeeMedicalInsurancePolicies] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_EmployeeMedicalInsurancePolicies_DateRange] CHECK ([EndDate] >= [StartDate]),
+        CONSTRAINT [FK_EmployeeMedicalInsurancePolicies_EmployeeDocuments_EmployeeDocumentId] FOREIGN KEY ([EmployeeDocumentId]) REFERENCES [app].[EmployeeDocuments] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_EmployeeMedicalInsurancePolicies_EmployeeMedicalInsurancePolicies_PreviousPolicyId] FOREIGN KEY ([PreviousPolicyId]) REFERENCES [app].[EmployeeMedicalInsurancePolicies] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_EmployeeMedicalInsurancePolicies_Employees_EmployeeId] FOREIGN KEY ([EmployeeId]) REFERENCES [app].[Employees] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_EmployeeMedicalInsurancePolicies_InsuranceCompanies_InsuranceCompanyId] FOREIGN KEY ([InsuranceCompanyId]) REFERENCES [app].[InsuranceCompanies] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_EmployeeMedicalInsurancePolicies_InsurancePlanLevels_InsurancePlanLevelId_InsuranceCompanyId] FOREIGN KEY ([InsurancePlanLevelId], [InsuranceCompanyId]) REFERENCES [app].[InsurancePlanLevels] ([Id], [InsuranceCompanyId]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'AllowedMimeTypes', N'AppliesToOutsideRider', N'AppliesToRiderProfile', N'AppliesToSponsoredInternal', N'Code', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'DescriptionAr', N'DescriptionEn', N'IsDeleted', N'MaxFileSizeBytes', N'NameAr', N'NameEn', N'RequiresExpiryDate', N'RequiresFile', N'RequiresIssueDate', N'RequiresNumber', N'Status', N'UpdatedAtUtc', N'UpdatedByUserId') AND [object_id] = OBJECT_ID(N'[platform].[DocumentTypes]'))
+        SET IDENTITY_INSERT [platform].[DocumentTypes] ON;
+    EXEC(N'INSERT INTO [platform].[DocumentTypes] ([Id], [AllowedMimeTypes], [AppliesToOutsideRider], [AppliesToRiderProfile], [AppliesToSponsoredInternal], [Code], [CreatedAtUtc], [CreatedByUserId], [DeletedAtUtc], [DeletedByUserId], [DeletionReason], [DescriptionAr], [DescriptionEn], [IsDeleted], [MaxFileSizeBytes], [NameAr], [NameEn], [RequiresExpiryDate], [RequiresFile], [RequiresIssueDate], [RequiresNumber], [Status], [UpdatedAtUtc], [UpdatedByUserId])
+    VALUES (''019c18d5-62e1-7000-8000-000000000030'', N''application/pdf,image/jpeg,image/png'', CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), N''RESIDENCY_PERMIT'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, NULL, NULL, CAST(0 AS bit), CAST(10485760 AS bigint), N''الإقامة'', N''Residency Permit'', CAST(1 AS bit), CAST(1 AS bit), CAST(1 AS bit), CAST(1 AS bit), 1, NULL, NULL),
+    (''019c18d5-62e1-7000-8000-000000000031'', N''application/pdf,image/jpeg,image/png'', CAST(1 AS bit), CAST(1 AS bit), CAST(1 AS bit), N''DRIVER_LICENSE'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, NULL, NULL, CAST(0 AS bit), CAST(10485760 AS bigint), N''رخصة القيادة'', N''Driver License'', CAST(1 AS bit), CAST(1 AS bit), CAST(1 AS bit), CAST(1 AS bit), 1, NULL, NULL),
+    (''019c18d5-62e1-7000-8000-000000000032'', N''application/pdf,image/jpeg,image/png'', CAST(1 AS bit), CAST(1 AS bit), CAST(1 AS bit), N''RIDER_CARD'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, NULL, NULL, CAST(0 AS bit), CAST(10485760 AS bigint), N''بطاقة السائق'', N''Rider Card'', CAST(1 AS bit), CAST(1 AS bit), CAST(1 AS bit), CAST(1 AS bit), 1, NULL, NULL),
+    (''019c18d5-62e1-7000-8000-000000000033'', N''application/pdf,image/jpeg,image/png'', CAST(1 AS bit), CAST(1 AS bit), CAST(1 AS bit), N''HEALTH_CARD'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, NULL, NULL, CAST(0 AS bit), CAST(10485760 AS bigint), N''البطاقة الصحية'', N''Health Card'', CAST(1 AS bit), CAST(1 AS bit), CAST(1 AS bit), CAST(1 AS bit), 1, NULL, NULL),
+    (''019c18d5-62e1-7000-8000-000000000034'', N''application/pdf,image/jpeg,image/png'', CAST(1 AS bit), CAST(0 AS bit), CAST(1 AS bit), N''PROMISSORY_NOTE'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, NULL, NULL, CAST(0 AS bit), CAST(10485760 AS bigint), N''سند الأمر'', N''Promissory Note'', CAST(0 AS bit), CAST(1 AS bit), CAST(1 AS bit), CAST(1 AS bit), 1, NULL, NULL),
+    (''019c18d5-62e1-7000-8000-000000000035'', N''application/pdf,image/jpeg,image/png'', CAST(1 AS bit), CAST(1 AS bit), CAST(1 AS bit), N''MEDICAL_INSURANCE'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, NULL, NULL, CAST(0 AS bit), CAST(10485760 AS bigint), N''التأمين الطبي'', N''Medical Insurance'', CAST(1 AS bit), CAST(1 AS bit), CAST(1 AS bit), CAST(1 AS bit), 1, NULL, NULL)');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'AllowedMimeTypes', N'AppliesToOutsideRider', N'AppliesToRiderProfile', N'AppliesToSponsoredInternal', N'Code', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'DescriptionAr', N'DescriptionEn', N'IsDeleted', N'MaxFileSizeBytes', N'NameAr', N'NameEn', N'RequiresExpiryDate', N'RequiresFile', N'RequiresIssueDate', N'RequiresNumber', N'Status', N'UpdatedAtUtc', N'UpdatedByUserId') AND [object_id] = OBJECT_ID(N'[platform].[DocumentTypes]'))
+        SET IDENTITY_INSERT [platform].[DocumentTypes] OFF;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Code', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'IsDeleted', N'NameAr', N'NameEn', N'Status', N'UpdatedAtUtc', N'UpdatedByUserId') AND [object_id] = OBJECT_ID(N'[app].[DriverLicenseCategories]'))
+        SET IDENTITY_INSERT [app].[DriverLicenseCategories] ON;
+    EXEC(N'INSERT INTO [app].[DriverLicenseCategories] ([Id], [Code], [CreatedAtUtc], [CreatedByUserId], [DeletedAtUtc], [DeletedByUserId], [DeletionReason], [IsDeleted], [NameAr], [NameEn], [Status], [UpdatedAtUtc], [UpdatedByUserId])
+    VALUES (''019c18d5-62e1-7000-8000-000000000020'', N''LIGHT_TRANSPORT'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''نقل خفيف'', N''Light Transport'', 1, NULL, NULL),
+    (''019c18d5-62e1-7000-8000-000000000021'', N''MOTORCYCLE'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''دراجة نارية'', N''Motorcycle'', 1, NULL, NULL)');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Code', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'IsDeleted', N'NameAr', N'NameEn', N'Status', N'UpdatedAtUtc', N'UpdatedByUserId') AND [object_id] = OBJECT_ID(N'[app].[DriverLicenseCategories]'))
+        SET IDENTITY_INSERT [app].[DriverLicenseCategories] OFF;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Code', N'CountryCode', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'DisplayOrder', N'IsDeleted', N'Latitude', N'Longitude', N'NameAr', N'NameEn', N'RegionAr', N'RegionEn', N'Status', N'UpdatedAtUtc', N'UpdatedByUserId') AND [object_id] = OBJECT_ID(N'[platform].[GlobalCities]'))
+        SET IDENTITY_INSERT [platform].[GlobalCities] ON;
+    EXEC(N'INSERT INTO [platform].[GlobalCities] ([Id], [Code], [CountryCode], [CreatedAtUtc], [CreatedByUserId], [DeletedAtUtc], [DeletedByUserId], [DeletionReason], [DisplayOrder], [IsDeleted], [Latitude], [Longitude], [NameAr], [NameEn], [RegionAr], [RegionEn], [Status], [UpdatedAtUtc], [UpdatedByUserId])
+    VALUES (''019c18d5-62e1-7000-8000-000000000004'', N''RIYADH'', N''SA'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, 2, CAST(0 AS bit), 24.7136, 46.6753, N''الرياض'', N''Riyadh'', N''منطقة الرياض'', N''Riyadh Region'', 1, NULL, NULL)');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Code', N'CountryCode', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'DisplayOrder', N'IsDeleted', N'Latitude', N'Longitude', N'NameAr', N'NameEn', N'RegionAr', N'RegionEn', N'Status', N'UpdatedAtUtc', N'UpdatedByUserId') AND [object_id] = OBJECT_ID(N'[platform].[GlobalCities]'))
+        SET IDENTITY_INSERT [platform].[GlobalCities] OFF;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Code', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'IsDeleted', N'NameAr', N'NameEn', N'Status', N'UpdatedAtUtc', N'UpdatedByUserId') AND [object_id] = OBJECT_ID(N'[app].[OperationalWorkTypes]'))
+        SET IDENTITY_INSERT [app].[OperationalWorkTypes] ON;
+    EXEC(N'INSERT INTO [app].[OperationalWorkTypes] ([Id], [Code], [CreatedAtUtc], [CreatedByUserId], [DeletedAtUtc], [DeletedByUserId], [DeletionReason], [IsDeleted], [NameAr], [NameEn], [Status], [UpdatedAtUtc], [UpdatedByUserId])
+    VALUES (''019c18d5-62e1-7000-8000-000000000010'', N''ADMIN'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''إداري'', N''Administrative'', 1, NULL, NULL),
+    (''019c18d5-62e1-7000-8000-000000000011'', N''CAR'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''سيارة'', N''Car'', 1, NULL, NULL),
+    (''019c18d5-62e1-7000-8000-000000000012'', N''MOTORCYCLE'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''دراجة نارية'', N''Motorcycle'', 1, NULL, NULL)');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Code', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'IsDeleted', N'NameAr', N'NameEn', N'Status', N'UpdatedAtUtc', N'UpdatedByUserId') AND [object_id] = OBJECT_ID(N'[app].[OperationalWorkTypes]'))
+        SET IDENTITY_INSERT [app].[OperationalWorkTypes] OFF;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'DisabledAt', N'EnabledFrom', N'GlobalCityId', N'IsDeleted', N'Status', N'UpdatedAtUtc', N'UpdatedByUserId') AND [object_id] = OBJECT_ID(N'[app].[OperatingCities]'))
+        SET IDENTITY_INSERT [app].[OperatingCities] ON;
+    EXEC(N'INSERT INTO [app].[OperatingCities] ([Id], [CreatedAtUtc], [CreatedByUserId], [DeletedAtUtc], [DeletedByUserId], [DeletionReason], [DisabledAt], [EnabledFrom], [GlobalCityId], [IsDeleted], [Status], [UpdatedAtUtc], [UpdatedByUserId])
+    VALUES (''019c18d5-62e1-7000-8000-000000000005'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, NULL, ''2026-01-01'', ''019c18d5-62e1-7000-8000-000000000004'', CAST(0 AS bit), 1, NULL, NULL)');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'DisabledAt', N'EnabledFrom', N'GlobalCityId', N'IsDeleted', N'Status', N'UpdatedAtUtc', N'UpdatedByUserId') AND [object_id] = OBJECT_ID(N'[app].[OperatingCities]'))
+        SET IDENTITY_INSERT [app].[OperatingCities] OFF;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    EXEC(N'
+    UPDATE employee
+    SET employee.HireDate = sponsored.HireDate,
+        employee.NationalityCountryCode = sponsored.NationalityCountryCode
+    FROM [app].[Employees] AS employee
+    INNER JOIN [app].[SponsoredInternalDetails] AS sponsored ON sponsored.EmployeeId = employee.Id;
+
+    UPDATE employee
+    SET employee.NationalityCountryCode = outsideRider.NationalityCountryCode
+    FROM [app].[Employees] AS employee
+    INNER JOIN [app].[OutsideRiderDetails] AS outsideRider ON outsideRider.EmployeeId = employee.Id
+    WHERE employee.NationalityCountryCode IS NULL;
+
+    UPDATE [app].[EmployeeJobTitlePeriods]
+    SET OperatingCityId = ''019c18d5-62e1-7000-8000-000000000003'',
+        OperationalWorkTypeId = ''019c18d5-62e1-7000-8000-000000000010'';
+
+    INSERT INTO [app].[EmployeeJobTitlePeriods]
+        (Id, EmployeeId, JobTitleId, OperationalWorkTypeId, OperatingCityId, EffectiveFrom,
+         EffectiveTo, Reason, ChangedByUserId, CreatedAtUtc, CreatedByUserId, ClosedAtUtc, ClosedByUserId)
+    SELECT NEWID(), sponsored.EmployeeId, sponsored.CurrentJobTitleId,
+           ''019c18d5-62e1-7000-8000-000000000010'',
+           ''019c18d5-62e1-7000-8000-000000000003'',
+           COALESCE(sponsored.HireDate, CAST(sponsored.CreatedAtUtc AS date), CAST(SYSUTCDATETIME() AS date)),
+           NULL, N''Migrated from the previous current job-title reference.'',
+           ''00000000-0000-0000-0000-000000000000'', SYSUTCDATETIME(), NULL, NULL, NULL
+    FROM [app].[SponsoredInternalDetails] AS sponsored
+    WHERE sponsored.CurrentJobTitleId IS NOT NULL
+      AND NOT EXISTS
+      (
+          SELECT 1
+          FROM [app].[EmployeeJobTitlePeriods] AS period
+          WHERE period.EmployeeId = sponsored.EmployeeId AND period.EffectiveTo IS NULL
+      );
+
+    INSERT INTO [app].[EmployeeDriverLicenses]
+        (Id, EmployeeId, DriverLicenseCategoryId, BookingStatus, IssuanceStatus, LicenseStatus,
+         PreviousLicenseId, IsCurrent, EmployeeDocumentId, Notes, CreatedAtUtc, IsDeleted)
+    SELECT NEWID(), rider.EmployeeId, ''019c18d5-62e1-7000-8000-000000000020'',
+           6, 3, 2, NULL, 1, rider.LicenseDocumentId,
+           N''Migrated from RiderProfile.LicenseDocumentId.'', SYSUTCDATETIME(), 0
+    FROM [app].[RiderProfiles] AS rider
+    WHERE rider.LicenseDocumentId IS NOT NULL;
+
+    UPDATE [app].[PlatformRiderAccounts]
+    SET BillingMode = 1,
+        OperatingCityId = ''019c18d5-62e1-7000-8000-000000000003'',
+        RegistrationType = 2,
+        SponsorId = NULL;
+    ');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    DROP INDEX [IX_SponsoredInternalDetails_CurrentJobTitleId] ON [app].[SponsoredInternalDetails];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    DECLARE @var3 nvarchar(max);
+    SELECT @var3 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[app].[SponsoredInternalDetails]') AND [c].[name] = N'CurrentJobTitleId');
+    IF @var3 IS NOT NULL EXEC(N'ALTER TABLE [app].[SponsoredInternalDetails] DROP CONSTRAINT ' + @var3 + ';');
+    ALTER TABLE [app].[SponsoredInternalDetails] DROP COLUMN [CurrentJobTitleId];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    DECLARE @var4 nvarchar(max);
+    SELECT @var4 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[app].[SponsoredInternalDetails]') AND [c].[name] = N'HireDate');
+    IF @var4 IS NOT NULL EXEC(N'ALTER TABLE [app].[SponsoredInternalDetails] DROP CONSTRAINT ' + @var4 + ';');
+    ALTER TABLE [app].[SponsoredInternalDetails] DROP COLUMN [HireDate];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    DECLARE @var5 nvarchar(max);
+    SELECT @var5 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[app].[SponsoredInternalDetails]') AND [c].[name] = N'NationalityCountryCode');
+    IF @var5 IS NOT NULL EXEC(N'ALTER TABLE [app].[SponsoredInternalDetails] DROP CONSTRAINT ' + @var5 + ';');
+    ALTER TABLE [app].[SponsoredInternalDetails] DROP COLUMN [NationalityCountryCode];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    DECLARE @var6 nvarchar(max);
+    SELECT @var6 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[app].[RiderProfiles]') AND [c].[name] = N'LicenseDocumentId');
+    IF @var6 IS NOT NULL EXEC(N'ALTER TABLE [app].[RiderProfiles] DROP CONSTRAINT ' + @var6 + ';');
+    ALTER TABLE [app].[RiderProfiles] DROP COLUMN [LicenseDocumentId];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    DECLARE @var7 nvarchar(max);
+    SELECT @var7 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[app].[OutsideRiderDetails]') AND [c].[name] = N'NationalityCountryCode');
+    IF @var7 IS NOT NULL EXEC(N'ALTER TABLE [app].[OutsideRiderDetails] DROP CONSTRAINT ' + @var7 + ';');
+    ALTER TABLE [app].[OutsideRiderDetails] DROP COLUMN [NationalityCountryCode];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_RiderClientAssignments_PlatformRiderAccountId_ClientContractId] ON [app].[RiderClientAssignments] ([PlatformRiderAccountId], [ClientContractId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_RiderClientAssignments_RiderProfileId_ActualEmployeeId] ON [app].[RiderClientAssignments] ([RiderProfileId], [ActualEmployeeId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_PlatformRiderAccounts_ClientContractId_ClientPlatformId] ON [app].[PlatformRiderAccounts] ([ClientContractId], [ClientPlatformId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_PlatformRiderAccounts_OperatingCityId_SponsorId_RegistrationType] ON [app].[PlatformRiderAccounts] ([OperatingCityId], [SponsorId], [RegistrationType]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_PlatformRiderAccounts_RegisteredEmployeeId_ClientPlatformId_Status] ON [app].[PlatformRiderAccounts] ([RegisteredEmployeeId], [ClientPlatformId], [Status]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_PlatformRiderAccounts_SponsorId] ON [app].[PlatformRiderAccounts] ([SponsorId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    EXEC(N'ALTER TABLE [app].[PlatformRiderAccounts] ADD CONSTRAINT [CK_PlatformRiderAccounts_Registration] CHECK (([RegistrationType] = 1 AND [SponsorId] IS NOT NULL) OR ([RegistrationType] = 2 AND [SponsorId] IS NULL))');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_EmployeeJobTitlePeriods_OperatingCityId_OperationalWorkTypeId_JobTitleId_EffectiveTo] ON [app].[EmployeeJobTitlePeriods] ([OperatingCityId], [OperationalWorkTypeId], [JobTitleId], [EffectiveTo]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_EmployeeJobTitlePeriods_OperationalWorkTypeId] ON [app].[EmployeeJobTitlePeriods] ([OperationalWorkTypeId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    EXEC(N'ALTER TABLE [platform].[DocumentTypes] ADD CONSTRAINT [CK_DocumentTypes_MaxFileSize] CHECK ([MaxFileSizeBytes] > 0)');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE UNIQUE INDEX [IX_DriverLicenseCategories_Code] ON [app].[DriverLicenseCategories] ([Code]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_DriverLicenseCategories_IsDeleted] ON [app].[DriverLicenseCategories] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_EmployeeDriverLicenses_DriverLicenseCategoryId] ON [app].[EmployeeDriverLicenses] ([DriverLicenseCategoryId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_EmployeeDriverLicenses_EmployeeDocumentId] ON [app].[EmployeeDriverLicenses] ([EmployeeDocumentId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_EmployeeDriverLicenses_EmployeeId_DriverLicenseCategoryId] ON [app].[EmployeeDriverLicenses] ([EmployeeId], [DriverLicenseCategoryId]) WHERE [IsCurrent] = 1 AND [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_EmployeeDriverLicenses_EmployeeId_DriverLicenseCategoryId_LicenseStatus] ON [app].[EmployeeDriverLicenses] ([EmployeeId], [DriverLicenseCategoryId], [LicenseStatus]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_EmployeeDriverLicenses_IsDeleted] ON [app].[EmployeeDriverLicenses] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    EXEC(N'CREATE INDEX [IX_EmployeeDriverLicenses_LicenseNumberLookupHash] ON [app].[EmployeeDriverLicenses] ([LicenseNumberLookupHash]) WHERE [LicenseNumberLookupHash] IS NOT NULL');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_EmployeeDriverLicenses_PreviousLicenseId] ON [app].[EmployeeDriverLicenses] ([PreviousLicenseId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_EmployeeMedicalInsurancePolicies_EmployeeDocumentId] ON [app].[EmployeeMedicalInsurancePolicies] ([EmployeeDocumentId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_EmployeeMedicalInsurancePolicies_EmployeeId] ON [app].[EmployeeMedicalInsurancePolicies] ([EmployeeId]) WHERE [IsCurrent] = 1 AND [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_EmployeeMedicalInsurancePolicies_InsuranceCompanyId_Status_EndDate] ON [app].[EmployeeMedicalInsurancePolicies] ([InsuranceCompanyId], [Status], [EndDate]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_EmployeeMedicalInsurancePolicies_InsurancePlanLevelId_InsuranceCompanyId] ON [app].[EmployeeMedicalInsurancePolicies] ([InsurancePlanLevelId], [InsuranceCompanyId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_EmployeeMedicalInsurancePolicies_IsDeleted] ON [app].[EmployeeMedicalInsurancePolicies] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    EXEC(N'CREATE INDEX [IX_EmployeeMedicalInsurancePolicies_MemberNumberLookupHash] ON [app].[EmployeeMedicalInsurancePolicies] ([MemberNumberLookupHash]) WHERE [MemberNumberLookupHash] IS NOT NULL');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    EXEC(N'CREATE INDEX [IX_EmployeeMedicalInsurancePolicies_PolicyNumberLookupHash] ON [app].[EmployeeMedicalInsurancePolicies] ([PolicyNumberLookupHash]) WHERE [PolicyNumberLookupHash] IS NOT NULL');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_EmployeeMedicalInsurancePolicies_PreviousPolicyId] ON [app].[EmployeeMedicalInsurancePolicies] ([PreviousPolicyId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_EmployeePromissoryNotes_BeneficiaryCompanyProfileId_NormalizedNoteNumber] ON [app].[EmployeePromissoryNotes] ([BeneficiaryCompanyProfileId], [NormalizedNoteNumber]) WHERE [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_EmployeePromissoryNotes_EmployeeDocumentId] ON [app].[EmployeePromissoryNotes] ([EmployeeDocumentId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_EmployeePromissoryNotes_EmployeeId_Status] ON [app].[EmployeePromissoryNotes] ([EmployeeId], [Status]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_EmployeePromissoryNotes_IsDeleted] ON [app].[EmployeePromissoryNotes] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_EmployeePromissoryNotes_SponsorId] ON [app].[EmployeePromissoryNotes] ([SponsorId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_EmployeeResidencyPermits_EmployeeDocumentId] ON [app].[EmployeeResidencyPermits] ([EmployeeDocumentId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_EmployeeResidencyPermits_EmployeeId] ON [app].[EmployeeResidencyPermits] ([EmployeeId]) WHERE [IsCurrent] = 1 AND [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_EmployeeResidencyPermits_IsDeleted] ON [app].[EmployeeResidencyPermits] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_EmployeeResidencyPermits_PermitNumberLookupHash] ON [app].[EmployeeResidencyPermits] ([PermitNumberLookupHash]) WHERE [IsCurrent] = 1 AND [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_EmployeeResidencyPermits_PreviousPermitId] ON [app].[EmployeeResidencyPermits] ([PreviousPermitId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_EmployeeResidencyPermits_ResidencyProfessionId] ON [app].[EmployeeResidencyPermits] ([ResidencyProfessionId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_EmployeeResidencyPermits_SponsorId_Status_ExpiryDate] ON [app].[EmployeeResidencyPermits] ([SponsorId], [Status], [ExpiryDate]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_EmployeeSponsorshipPeriods_EmployeeId] ON [app].[EmployeeSponsorshipPeriods] ([EmployeeId]) WHERE [EffectiveTo] IS NULL');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_EmployeeSponsorshipPeriods_EmployeeId_EffectiveFrom] ON [app].[EmployeeSponsorshipPeriods] ([EmployeeId], [EffectiveFrom]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_EmployeeSponsorshipPeriods_SponsorId_Status_EffectiveTo] ON [app].[EmployeeSponsorshipPeriods] ([SponsorId], [Status], [EffectiveTo]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE UNIQUE INDEX [IX_InsuranceCompanies_Code] ON [app].[InsuranceCompanies] ([Code]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_InsuranceCompanies_IsDeleted] ON [app].[InsuranceCompanies] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_InsuranceCompanies_ProviderRegistrationNumber] ON [app].[InsuranceCompanies] ([ProviderRegistrationNumber]) WHERE [ProviderRegistrationNumber] IS NOT NULL AND [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_InsuranceCompanies_Status_NameAr] ON [app].[InsuranceCompanies] ([Status], [NameAr]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_InsurancePlanLevels_InsuranceCompanyId_Code] ON [app].[InsurancePlanLevels] ([InsuranceCompanyId], [Code]) WHERE [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_InsurancePlanLevels_InsuranceCompanyId_Status_Rank] ON [app].[InsurancePlanLevels] ([InsuranceCompanyId], [Status], [Rank]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_InsurancePlanLevels_IsDeleted] ON [app].[InsurancePlanLevels] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_JobTitleOperationalWorkTypes_IsDeleted] ON [app].[JobTitleOperationalWorkTypes] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_JobTitleOperationalWorkTypes_JobTitleId_OperationalWorkTypeId] ON [app].[JobTitleOperationalWorkTypes] ([JobTitleId], [OperationalWorkTypeId]) WHERE [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_JobTitleOperationalWorkTypes_OperationalWorkTypeId] ON [app].[JobTitleOperationalWorkTypes] ([OperationalWorkTypeId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE UNIQUE INDEX [IX_OperationalWorkTypes_Code] ON [app].[OperationalWorkTypes] ([Code]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_OperationalWorkTypes_IsDeleted] ON [app].[OperationalWorkTypes] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_PlatformAccountRegistrations_ClientContractId_ClientPlatformId] ON [app].[PlatformAccountRegistrations] ([ClientContractId], [ClientPlatformId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_PlatformAccountRegistrations_ClientPlatformId] ON [app].[PlatformAccountRegistrations] ([ClientPlatformId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_PlatformAccountRegistrations_IsDeleted] ON [app].[PlatformAccountRegistrations] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_PlatformAccountRegistrations_OperatingCityId_SponsorId_RegistrationType_Status] ON [app].[PlatformAccountRegistrations] ([OperatingCityId], [SponsorId], [RegistrationType], [Status]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_PlatformAccountRegistrations_PlatformRiderAccountId] ON [app].[PlatformAccountRegistrations] ([PlatformRiderAccountId]) WHERE [PlatformRiderAccountId] IS NOT NULL AND [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_PlatformAccountRegistrations_RegisteredEmployeeId_ClientPlatformId_Status] ON [app].[PlatformAccountRegistrations] ([RegisteredEmployeeId], [ClientPlatformId], [Status]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_PlatformAccountRegistrations_RiderProfileId_RegisteredEmployeeId] ON [app].[PlatformAccountRegistrations] ([RiderProfileId], [RegisteredEmployeeId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_PlatformAccountRegistrations_SponsorId] ON [app].[PlatformAccountRegistrations] ([SponsorId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE UNIQUE INDEX [IX_ResidencyProfessions_Code] ON [app].[ResidencyProfessions] ([Code]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_ResidencyProfessions_IsDeleted] ON [app].[ResidencyProfessions] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_ResidencyProfessions_NameAr] ON [app].[ResidencyProfessions] ([NameAr]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_RiderCards_EmployeeDocumentId] ON [app].[RiderCards] ([EmployeeDocumentId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_RiderCards_IsDeleted] ON [app].[RiderCards] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_RiderCards_NormalizedCardNumber] ON [app].[RiderCards] ([NormalizedCardNumber]) WHERE [IsCurrent] = 1 AND [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_RiderCards_PreviousCardId] ON [app].[RiderCards] ([PreviousCardId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_RiderCards_RiderProfileId_CardType] ON [app].[RiderCards] ([RiderProfileId], [CardType]) WHERE [IsCurrent] = 1 AND [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_RiderCards_RiderProfileId_CardType_Status] ON [app].[RiderCards] ([RiderProfileId], [CardType], [Status]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_RiderHealthCards_CardNumberLookupHash] ON [app].[RiderHealthCards] ([CardNumberLookupHash]) WHERE [IsCurrent] = 1 AND [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_RiderHealthCards_EmployeeDocumentId] ON [app].[RiderHealthCards] ([EmployeeDocumentId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_RiderHealthCards_IsDeleted] ON [app].[RiderHealthCards] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_RiderHealthCards_PreviousCardId] ON [app].[RiderHealthCards] ([PreviousCardId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_RiderHealthCards_RiderProfileId_CardType] ON [app].[RiderHealthCards] ([RiderProfileId], [CardType]) WHERE [IsCurrent] = 1 AND [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_RiderHealthCards_RiderProfileId_CardType_Status] ON [app].[RiderHealthCards] ([RiderProfileId], [CardType], [Status]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_Sponsors_CommercialRegistrationNumber] ON [app].[Sponsors] ([CommercialRegistrationNumber]) WHERE [CommercialRegistrationNumber] IS NOT NULL AND [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_Sponsors_CompanyProfileId] ON [app].[Sponsors] ([CompanyProfileId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE UNIQUE INDEX [IX_Sponsors_EmployerIdentityNumber] ON [app].[Sponsors] ([EmployerIdentityNumber]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_Sponsors_IsDeleted] ON [app].[Sponsors] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    CREATE INDEX [IX_Sponsors_Status_RegistryNameAr] ON [app].[Sponsors] ([Status], [RegistryNameAr]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    ALTER TABLE [app].[EmployeeJobTitlePeriods] ADD CONSTRAINT [FK_EmployeeJobTitlePeriods_OperatingCities_OperatingCityId] FOREIGN KEY ([OperatingCityId]) REFERENCES [app].[OperatingCities] ([Id]) ON DELETE NO ACTION;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    ALTER TABLE [app].[EmployeeJobTitlePeriods] ADD CONSTRAINT [FK_EmployeeJobTitlePeriods_OperationalWorkTypes_OperationalWorkTypeId] FOREIGN KEY ([OperationalWorkTypeId]) REFERENCES [app].[OperationalWorkTypes] ([Id]) ON DELETE NO ACTION;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    ALTER TABLE [app].[PlatformRiderAccounts] ADD CONSTRAINT [FK_PlatformRiderAccounts_ClientContracts_ClientContractId_ClientPlatformId] FOREIGN KEY ([ClientContractId], [ClientPlatformId]) REFERENCES [app].[ClientContracts] ([Id], [ClientPlatformId]) ON DELETE NO ACTION;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    ALTER TABLE [app].[PlatformRiderAccounts] ADD CONSTRAINT [FK_PlatformRiderAccounts_Employees_RegisteredEmployeeId] FOREIGN KEY ([RegisteredEmployeeId]) REFERENCES [app].[Employees] ([Id]) ON DELETE NO ACTION;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    ALTER TABLE [app].[PlatformRiderAccounts] ADD CONSTRAINT [FK_PlatformRiderAccounts_OperatingCities_OperatingCityId] FOREIGN KEY ([OperatingCityId]) REFERENCES [app].[OperatingCities] ([Id]) ON DELETE NO ACTION;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    ALTER TABLE [app].[PlatformRiderAccounts] ADD CONSTRAINT [FK_PlatformRiderAccounts_Sponsors_SponsorId] FOREIGN KEY ([SponsorId]) REFERENCES [app].[Sponsors] ([Id]) ON DELETE NO ACTION;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    ALTER TABLE [app].[RiderClientAssignments] ADD CONSTRAINT [FK_RiderClientAssignments_Employees_ActualEmployeeId] FOREIGN KEY ([ActualEmployeeId]) REFERENCES [app].[Employees] ([Id]) ON DELETE NO ACTION;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    ALTER TABLE [app].[RiderClientAssignments] ADD CONSTRAINT [FK_RiderClientAssignments_PlatformRiderAccounts_PlatformRiderAccountId_ClientContractId] FOREIGN KEY ([PlatformRiderAccountId], [ClientContractId]) REFERENCES [app].[PlatformRiderAccounts] ([Id], [ClientContractId]) ON DELETE NO ACTION;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    ALTER TABLE [app].[RiderClientAssignments] ADD CONSTRAINT [FK_RiderClientAssignments_RiderProfiles_RiderProfileId_ActualEmployeeId] FOREIGN KEY ([RiderProfileId], [ActualEmployeeId]) REFERENCES [app].[RiderProfiles] ([Id], [EmployeeId]) ON DELETE NO ACTION;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    ALTER TABLE [app].[SponsoredInternalDetails] ADD CONSTRAINT [FK_SponsoredInternalDetails_Sponsors_CurrentSponsorId] FOREIGN KEY ([CurrentSponsorId]) REFERENCES [app].[Sponsors] ([Id]) ON DELETE NO ACTION;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822113817_AddEmployeeRiderComplianceModels'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260822113817_AddEmployeeRiderComplianceModels', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822123741_SeedPermissionCatalog'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Category', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'DescriptionAr', N'DescriptionEn', N'DisplayOrder', N'GrantabilityRule', N'IsDeleted', N'IsDeprecated', N'IsHighTrust', N'IsSensitive', N'Key', N'NameAr', N'NameEn', N'ReplacementKey', N'RequiresClientScope', N'RequiresHousingScope', N'UpdatedAtUtc', N'UpdatedByUserId', N'Version') AND [object_id] = OBJECT_ID(N'[platform].[PermissionDefinitions]'))
+        SET IDENTITY_INSERT [platform].[PermissionDefinitions] ON;
+    EXEC(N'INSERT INTO [platform].[PermissionDefinitions] ([Id], [Category], [CreatedAtUtc], [CreatedByUserId], [DeletedAtUtc], [DeletedByUserId], [DeletionReason], [DescriptionAr], [DescriptionEn], [DisplayOrder], [GrantabilityRule], [IsDeleted], [IsDeprecated], [IsHighTrust], [IsSensitive], [Key], [NameAr], [NameEn], [ReplacementKey], [RequiresClientScope], [RequiresHousingScope], [UpdatedAtUtc], [UpdatedByUserId], [Version])
+    VALUES (''019c18d5-62e1-7000-a000-000000000001'', N''Security'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''عرض حسابات المستخدمين وحالتها.'', N''View user accounts and their status.'', 1, N''SENSITIVE_DATA'', CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), N''users.read'', N''عرض المستخدمين'', N''Read users'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000002'', N''Security'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''إنشاء حسابات مستخدمين جديدة.'', N''Create new user accounts.'', 2, N''HIGH_TRUST_ONLY'', CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), CAST(1 AS bit), N''users.create'', N''إنشاء المستخدمين'', N''Create users'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000003'', N''Security'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''تعديل حالة وبيانات حسابات المستخدمين.'', N''Update user account details and status.'', 3, N''HIGH_TRUST_ONLY'', CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), CAST(1 AS bit), N''users.update'', N''تعديل المستخدمين'', N''Update users'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000004'', N''Security'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''أرشفة حساب مستخدم وإبطال جلساته دون حذف بياناته.'', N''Archive a user and revoke sessions without deleting records.'', 4, N''HIGH_TRUST_ONLY'', CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), CAST(1 AS bit), N''users.archive'', N''أرشفة المستخدمين'', N''Archive users'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000005'', N''Security'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''عرض الأدوار وقوالب الصلاحيات.'', N''View roles and permission templates.'', 5, NULL, CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), N''roles.read'', N''عرض الأدوار'', N''Read roles'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000006'', N''Security'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''إدارة الأدوار غير المحمية وتعيينها للمستخدمين.'', N''Manage non-protected roles and user role assignments.'', 6, N''HIGH_TRUST_ONLY'', CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), CAST(0 AS bit), N''roles.manage'', N''إدارة الأدوار'', N''Manage roles'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000007'', N''Security'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''عرض كتالوج الصلاحيات والمنح والمنع.'', N''View the permission catalog, grants, and denies.'', 7, NULL, CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), N''permissions.read'', N''عرض الصلاحيات'', N''Read permissions'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000008'', N''Security'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''إدارة منح ومنع الصلاحيات ونطاقاتها.'', N''Manage permission grants, denies, and scopes.'', 8, N''HIGH_TRUST_ONLY'', CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), CAST(0 AS bit), N''permissions.manage'', N''إدارة الصلاحيات'', N''Manage permissions'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000009'', N''Security'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''عرض سجل التدقيق الأمني والتشغيلي.'', N''View security and operational audit records.'', 9, N''HIGH_TRUST_ONLY'', CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), CAST(1 AS bit), N''audit.read'', N''عرض سجل التدقيق'', N''Read audit log'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000010'', N''Security'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''إدارة وصول الدعم المؤقت وحالات الطوارئ.'', N''Manage temporary and break-glass support access.'', 10, N''HIGH_TRUST_ONLY'', CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), CAST(1 AS bit), N''support_access.manage'', N''إدارة وصول الدعم'', N''Manage support access'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000011'', N''Catalog'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''عرض المدن والفروع التشغيلية.'', N''View operating cities and branches.'', 11, NULL, CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), N''operating_cities.read'', N''عرض المدن التشغيلية'', N''Read operating cities'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000012'', N''Catalog'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''إضافة وتعديل وتعطيل المدن التشغيلية.'', N''Add, update, and disable operating cities.'', 12, NULL, CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), N''operating_cities.manage'', N''إدارة المدن التشغيلية'', N''Manage operating cities'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000013'', N''Workforce'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''عرض بيانات الموظفين غير الحساسة.'', N''View non-sensitive employee data.'', 13, NULL, CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), N''employees.read'', N''عرض الموظفين'', N''Read employees'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000014'', N''Workforce'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''إنشاء سجلات موظفين جديدة.'', N''Create new employee records.'', 14, NULL, CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), N''employees.create'', N''إنشاء الموظفين'', N''Create employees'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000015'', N''Workforce'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''تعديل بيانات الموظفين التشغيلية.'', N''Update operational employee data.'', 15, NULL, CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), N''employees.update'', N''تعديل الموظفين'', N''Update employees'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000016'', N''Workforce'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''أرشفة الموظفين دون حذف تاريخهم.'', N''Archive employees without deleting their history.'', 16, N''HIGH_TRUST_ONLY'', CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), CAST(0 AS bit), N''employees.archive'', N''أرشفة الموظفين'', N''Archive employees'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000017'', N''Workforce'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''عرض الهوية والإقامة والبيانات الشخصية المقيدة.'', N''View restricted identity, residency, and personal data.'', 17, N''HIGH_TRUST_ONLY'', CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), CAST(1 AS bit), N''employees.sensitive.read'', N''عرض بيانات الموظفين الحساسة'', N''Read sensitive employee data'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000018'', N''Workforce'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''عرض ملفات المناديب وبياناتهم التشغيلية.'', N''View rider profiles and operational data.'', 18, NULL, CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), N''riders.read'', N''عرض المناديب'', N''Read riders'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000019'', N''Workforce'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''إنشاء وتعديل حالات وملفات المناديب.'', N''Create and update rider profiles and status.'', 19, NULL, CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), N''riders.manage'', N''إدارة المناديب'', N''Manage riders'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000020'', N''Workforce'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''عرض جهات الكفالة وبيانات السجل.'', N''View sponsors and registry information.'', 20, N''SENSITIVE_DATA'', CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), N''sponsors.read'', N''عرض الكفلاء'', N''Read sponsors'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000021'', N''Workforce'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''إدارة جهات الكفالة وفترات كفالة الموظفين.'', N''Manage sponsors and employee sponsorship periods.'', 21, N''SENSITIVE_DATA'', CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), N''sponsors.manage'', N''إدارة الكفلاء'', N''Manage sponsors'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000022'', N''Compliance'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''عرض بيانات الإقامة المقيدة.'', N''View restricted residency permit data.'', 22, N''SENSITIVE_DATA'', CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), N''residency.read'', N''عرض الإقامات'', N''Read residency permits'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000023'', N''Compliance'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''إضافة وتجديد وتحديث حالات الإقامة.'', N''Add, renew, and update residency permit status.'', 23, N''SENSITIVE_DATA'', CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), N''residency.manage'', N''إدارة الإقامات'', N''Manage residency permits'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000024'', N''Compliance'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''عرض رخص القيادة وإصداراتها.'', N''View driver licenses and their versions.'', 24, N''SENSITIVE_DATA'', CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), N''licenses.read'', N''عرض الرخص'', N''Read driver licenses'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000025'', N''Compliance'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''إدارة إصدار وتجديد وحالة رخص القيادة.'', N''Manage driver-license issuance, renewal, and status.'', 25, N''SENSITIVE_DATA'', CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), N''licenses.manage'', N''إدارة الرخص'', N''Manage driver licenses'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000026'', N''Compliance'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''عرض بطاقات السائق وتجديداتها.'', N''View rider cards and renewals.'', 26, N''SENSITIVE_DATA'', CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), N''rider_cards.read'', N''عرض بطاقات السائق'', N''Read rider cards'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000027'', N''Compliance'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''إدارة إصدار وتجديد بطاقات السائق.'', N''Manage rider-card issuance and renewal.'', 27, N''SENSITIVE_DATA'', CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), N''rider_cards.manage'', N''إدارة بطاقات السائق'', N''Manage rider cards'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000028'', N''Compliance'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''عرض البطاقات الصحية وتجديداتها.'', N''View health cards and renewals.'', 28, N''SENSITIVE_DATA'', CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), N''health_cards.read'', N''عرض البطاقات الصحية'', N''Read health cards'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000029'', N''Compliance'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''إدارة إصدار وتجديد البطاقات الصحية.'', N''Manage health-card issuance and renewal.'', 29, N''SENSITIVE_DATA'', CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), N''health_cards.manage'', N''إدارة البطاقات الصحية'', N''Manage health cards'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000030'', N''Compliance'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''عرض وثائق ومستويات التأمين الطبي.'', N''View medical-insurance policies and plan levels.'', 30, N''SENSITIVE_DATA'', CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), N''insurance.read'', N''عرض التأمين الطبي'', N''Read medical insurance'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000031'', N''Compliance'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''إدارة وثائق وتجديدات ومستويات التأمين الطبي.'', N''Manage medical-insurance policies, renewals, and levels.'', 31, N''SENSITIVE_DATA'', CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), N''insurance.manage'', N''إدارة التأمين الطبي'', N''Manage medical insurance'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000032'', N''Compliance'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''عرض بيانات سندات الأمر المالية.'', N''View financial promissory-note data.'', 32, N''HIGH_TRUST_ONLY'', CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), CAST(1 AS bit), N''promissory_notes.read'', N''عرض سندات الأمر'', N''Read promissory notes'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000033'', N''Compliance'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''إدارة حالات ونسخ سندات الأمر دون حذف.'', N''Manage promissory-note status and versions without deletion.'', 33, N''HIGH_TRUST_ONLY'', CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), CAST(1 AS bit), N''promissory_notes.manage'', N''إدارة سندات الأمر'', N''Manage promissory notes'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000034'', N''Documents'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''عرض بيانات الوثائق ونسخها دون تنزيل المحتوى.'', N''View document metadata and versions without downloading content.'', 34, N''SENSITIVE_DATA'', CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), N''documents.read'', N''عرض بيانات الوثائق'', N''Read document metadata'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000035'', N''Documents'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''رفع نسخة وثيقة جديدة وفق سياسة الملفات.'', N''Upload a new document version under the file policy.'', 35, N''SENSITIVE_DATA'', CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), N''documents.upload'', N''رفع الوثائق'', N''Upload documents'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000036'', N''Documents'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''تنزيل محتوى الوثائق غير المصنفة عالية الحساسية.'', N''Download document content not classified as highly sensitive.'', 36, N''SENSITIVE_DATA'', CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), N''documents.download'', N''تنزيل الوثائق'', N''Download documents'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000037'', N''Documents'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''تنزيل محتوى وثائق الهوية والمالية عالية الحساسية.'', N''Download highly sensitive identity and financial documents.'', 37, N''HIGH_TRUST_ONLY'', CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), CAST(1 AS bit), N''documents.download_sensitive'', N''تنزيل الوثائق الحساسة'', N''Download sensitive documents'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000038'', N''Operations'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''عرض حسابات منصات العملاء ضمن النطاق المسموح.'', N''View client-platform accounts within the allowed scope.'', 38, NULL, CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), N''platform_accounts.read'', N''عرض حسابات المنصات'', N''Read platform accounts'', NULL, CAST(1 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000039'', N''Operations'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''إدارة التسجيل والحالة والملكية الرسمية لحسابات المنصات ضمن النطاق.'', N''Manage registration, status, and official ownership of platform accounts within scope.'', 39, NULL, CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), N''platform_accounts.manage'', N''إدارة حسابات المنصات'', N''Manage platform accounts'', NULL, CAST(1 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000040'', N''Operations'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''عرض تاريخ الاستخدام الفعلي لحسابات المنصات ضمن النطاق.'', N''View actual platform-account usage history within scope.'', 40, NULL, CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), N''platform_assignments.read'', N''عرض تكليفات المنصات'', N''Read platform assignments'', NULL, CAST(1 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000041'', N''Operations'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''إدارة تكليفات الاستخدام الفعلي مع حفظ التاريخ ضمن النطاق.'', N''Manage actual-use assignments while preserving history within scope.'', 41, NULL, CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), N''platform_assignments.manage'', N''إدارة تكليفات المنصات'', N''Manage platform assignments'', NULL, CAST(1 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000042'', N''Operations'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''عرض السكن وفترات الإقامة ضمن النطاق المسموح.'', N''View housing and residence periods within the allowed scope.'', 42, NULL, CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), N''housing.read'', N''عرض السكن'', N''Read housing'', NULL, CAST(0 AS bit), CAST(1 AS bit), NULL, NULL, 1);
+    INSERT INTO [platform].[PermissionDefinitions] ([Id], [Category], [CreatedAtUtc], [CreatedByUserId], [DeletedAtUtc], [DeletedByUserId], [DeletionReason], [DescriptionAr], [DescriptionEn], [DisplayOrder], [GrantabilityRule], [IsDeleted], [IsDeprecated], [IsHighTrust], [IsSensitive], [Key], [NameAr], [NameEn], [ReplacementKey], [RequiresClientScope], [RequiresHousingScope], [UpdatedAtUtc], [UpdatedByUserId], [Version])
+    VALUES (''019c18d5-62e1-7000-a000-000000000043'', N''Operations'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''إدارة السكن والمشرفين وفترات الإقامة ضمن النطاق.'', N''Manage housing, supervisors, and residence periods within scope.'', 43, NULL, CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), N''housing.manage'', N''إدارة السكن'', N''Manage housing'', NULL, CAST(0 AS bit), CAST(1 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000044'', N''Reporting'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''عرض التقارير التشغيلية المصرح بها.'', N''View authorized operational reports.'', 44, NULL, CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), N''reports.read'', N''عرض التقارير'', N''Read reports'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000045'', N''Reporting'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''إنشاء ملفات تصدير من البيانات المصرح بها فقط.'', N''Create export files from authorized data only.'', 45, N''SENSITIVE_DATA'', CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), N''exports.create'', N''إنشاء التصديرات'', N''Create exports'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000046'', N''Reporting'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''عرض الإشعارات التشغيلية.'', N''View operational notifications.'', 46, NULL, CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), N''notifications.read'', N''عرض الإشعارات'', N''Read notifications'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000047'', N''Reporting'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''إدارة حالة ومحتوى الإشعارات التشغيلية.'', N''Manage operational notification status and content.'', 47, NULL, CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), N''notifications.manage'', N''إدارة الإشعارات'', N''Manage notifications'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000048'', N''Workflows'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''عرض طلبات الإجازة وتاريخها.'', N''View leave requests and history.'', 48, N''SENSITIVE_DATA'', CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), N''leave_requests.read'', N''عرض طلبات الإجازة'', N''Read leave requests'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000049'', N''Workflows'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''إنشاء وتعديل طلبات الإجازة وفق حالتها.'', N''Create and update leave requests according to their state.'', 49, N''SENSITIVE_DATA'', CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), N''leave_requests.manage'', N''إدارة طلبات الإجازة'', N''Manage leave requests'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000050'', N''Workflows'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''الموافقة أو الرفض الموثق لطلبات الإجازة.'', N''Record approval or rejection decisions for leave requests.'', 50, N''HIGH_TRUST_ONLY'', CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), CAST(1 AS bit), N''leave_requests.approve'', N''اعتماد طلبات الإجازة'', N''Approve leave requests'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000051'', N''Workflows'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''عرض حالات الغياب والهروب وسجل أحداثها.'', N''View absence and escaped-employee cases and their events.'', 51, N''SENSITIVE_DATA'', CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), N''absence_cases.read'', N''عرض حالات الغياب'', N''Read absence cases'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000052'', N''Workflows'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''إدارة حالات الغياب والهروب مع حفظ سجل الأحداث.'', N''Manage absence and escaped-employee cases while preserving event history.'', 52, N''SENSITIVE_DATA'', CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), N''absence_cases.manage'', N''إدارة حالات الغياب'', N''Manage absence cases'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000053'', N''Workflows'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''عرض طلبات تغيير حالة الموظف.'', N''View employee status-change requests.'', 53, N''SENSITIVE_DATA'', CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), N''employee_status_changes.read'', N''عرض طلبات تغيير الحالة'', N''Read employee status changes'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000054'', N''Workflows'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''إنشاء وتحديث طلبات تغيير حالة الموظف.'', N''Create and update employee status-change requests.'', 54, N''SENSITIVE_DATA'', CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), N''employee_status_changes.manage'', N''إدارة طلبات تغيير الحالة'', N''Manage employee status changes'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000055'', N''Workflows'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''اعتماد تغيير حالة الموظف مع حفظ الأثر التاريخي.'', N''Approve employee status changes while preserving history.'', 55, N''HIGH_TRUST_ONLY'', CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), CAST(1 AS bit), N''employee_status_changes.approve'', N''اعتماد تغيير حالة الموظف'', N''Approve employee status changes'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1)');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Category', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'DescriptionAr', N'DescriptionEn', N'DisplayOrder', N'GrantabilityRule', N'IsDeleted', N'IsDeprecated', N'IsHighTrust', N'IsSensitive', N'Key', N'NameAr', N'NameEn', N'ReplacementKey', N'RequiresClientScope', N'RequiresHousingScope', N'UpdatedAtUtc', N'UpdatedByUserId', N'Version') AND [object_id] = OBJECT_ID(N'[platform].[PermissionDefinitions]'))
+        SET IDENTITY_INSERT [platform].[PermissionDefinitions] OFF;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260822123741_SeedPermissionCatalog'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260822123741_SeedPermissionCatalog', N'10.0.11');
+END;
+
+COMMIT;
+GO
+

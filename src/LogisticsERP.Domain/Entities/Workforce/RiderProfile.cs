@@ -10,6 +10,5 @@ public sealed class RiderProfile : AuditableEntity
     public DateOnly? RiderStartDate { get; set; }
     public DateOnly? RiderEndDate { get; set; }
     public Guid? PreferredCityId { get; set; }
-    public Guid? LicenseDocumentId { get; set; }
     public string? OperationalNotes { get; set; }
 }

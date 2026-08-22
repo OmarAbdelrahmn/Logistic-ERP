@@ -699,3 +699,93 @@ END;
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__IdentityMigrationsHistory]
+    WHERE [MigrationId] = N'20260822123746_SeedProtectedAuthorizationRoles'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Code', N'ConcurrencyStamp', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'DescriptionAr', N'DescriptionEn', N'IsDeleted', N'IsProtected', N'IsTemplate', N'Name', N'NameAr', N'NameEn', N'NormalizedName', N'SourceTemplateId', N'Status', N'UpdatedAtUtc', N'UpdatedByUserId') AND [object_id] = OBJECT_ID(N'[identity].[Roles]'))
+        SET IDENTITY_INSERT [identity].[Roles] ON;
+    EXEC(N'INSERT INTO [identity].[Roles] ([Id], [Code], [ConcurrencyStamp], [CreatedAtUtc], [CreatedByUserId], [DeletedAtUtc], [DeletedByUserId], [DeletionReason], [DescriptionAr], [DescriptionEn], [IsDeleted], [IsProtected], [IsTemplate], [Name], [NameAr], [NameEn], [NormalizedName], [SourceTemplateId], [Status], [UpdatedAtUtc], [UpdatedByUserId])
+    VALUES (''019c18d5-62e1-7000-9000-000000000001'', N''SYSTEM_ADMIN'', N''protected-system_admin-v1'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''إدارة المستخدمين والأدوار والصلاحيات والأمن دون منح تلقائي لكل البيانات التشغيلية الحساسة.'', N''Manages users, roles, permissions, and security without automatic access to all sensitive operational data.'', CAST(0 AS bit), CAST(1 AS bit), CAST(1 AS bit), N''SYSTEM_ADMIN'', N''مسؤول النظام'', N''System Administrator'', N''SYSTEM_ADMIN'', NULL, 2, NULL, NULL),
+    (''019c18d5-62e1-7000-9000-000000000002'', N''MANAGER'', N''protected-manager-v1'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''قراءة تشغيلية أساسية، وتضاف صلاحيات الإدارة والنطاقات حسب مسؤوليات الشخص.'', N''Minimal operational read access; management permissions and scopes are assigned per responsibility.'', CAST(0 AS bit), CAST(1 AS bit), CAST(1 AS bit), N''MANAGER'', N''مدير'', N''Manager'', N''MANAGER'', NULL, 2, NULL, NULL),
+    (''019c18d5-62e1-7000-9000-000000000003'', N''USER'', N''protected-user-v1'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''الوصول إلى الملف الشخصي والجلسات فقط حتى تمنح صلاحيات إضافية.'', N''Access to the user''''s own profile and sessions until additional permissions are granted.'', CAST(0 AS bit), CAST(1 AS bit), CAST(1 AS bit), N''USER'', N''مستخدم'', N''User'', N''USER'', NULL, 2, NULL, NULL)');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Code', N'ConcurrencyStamp', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'DescriptionAr', N'DescriptionEn', N'IsDeleted', N'IsProtected', N'IsTemplate', N'Name', N'NameAr', N'NameEn', N'NormalizedName', N'SourceTemplateId', N'Status', N'UpdatedAtUtc', N'UpdatedByUserId') AND [object_id] = OBJECT_ID(N'[identity].[Roles]'))
+        SET IDENTITY_INSERT [identity].[Roles] OFF;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__IdentityMigrationsHistory]
+    WHERE [MigrationId] = N'20260822123746_SeedProtectedAuthorizationRoles'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'IsDeleted', N'PermissionKey', N'RoleId', N'UpdatedAtUtc', N'UpdatedByUserId') AND [object_id] = OBJECT_ID(N'[identity].[RolePermissions]'))
+        SET IDENTITY_INSERT [identity].[RolePermissions] ON;
+    EXEC(N'INSERT INTO [identity].[RolePermissions] ([Id], [CreatedAtUtc], [CreatedByUserId], [DeletedAtUtc], [DeletedByUserId], [DeletionReason], [IsDeleted], [PermissionKey], [RoleId], [UpdatedAtUtc], [UpdatedByUserId])
+    VALUES (''019c18d5-62e1-7000-b000-000000000001'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''users.read'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000002'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''users.create'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000003'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''users.update'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000004'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''users.archive'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000005'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''roles.read'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000006'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''roles.manage'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000007'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''permissions.read'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000008'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''permissions.manage'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000009'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''audit.read'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000010'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''support_access.manage'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000011'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''operating_cities.read'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000012'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''operating_cities.manage'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000013'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''reports.read'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000014'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''operating_cities.read'', ''019c18d5-62e1-7000-9000-000000000002'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000015'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''employees.read'', ''019c18d5-62e1-7000-9000-000000000002'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000016'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''riders.read'', ''019c18d5-62e1-7000-9000-000000000002'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000017'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''platform_accounts.read'', ''019c18d5-62e1-7000-9000-000000000002'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000018'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''platform_assignments.read'', ''019c18d5-62e1-7000-9000-000000000002'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000019'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''housing.read'', ''019c18d5-62e1-7000-9000-000000000002'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000020'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''reports.read'', ''019c18d5-62e1-7000-9000-000000000002'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000021'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''notifications.read'', ''019c18d5-62e1-7000-9000-000000000002'', NULL, NULL)');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'IsDeleted', N'PermissionKey', N'RoleId', N'UpdatedAtUtc', N'UpdatedByUserId') AND [object_id] = OBJECT_ID(N'[identity].[RolePermissions]'))
+        SET IDENTITY_INSERT [identity].[RolePermissions] OFF;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__IdentityMigrationsHistory]
+    WHERE [MigrationId] = N'20260822123746_SeedProtectedAuthorizationRoles'
+)
+BEGIN
+    INSERT INTO [migration].[__IdentityMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260822123746_SeedProtectedAuthorizationRoles', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__IdentityMigrationsHistory]
+    WHERE [MigrationId] = N'20260822124255_ProtectDevelopmentAccounts'
+)
+BEGIN
+    ALTER TABLE [identity].[Users] ADD [IsDevelopmentOnly] bit NOT NULL DEFAULT CAST(0 AS bit);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__IdentityMigrationsHistory]
+    WHERE [MigrationId] = N'20260822124255_ProtectDevelopmentAccounts'
+)
+BEGIN
+    CREATE INDEX [IX_Users_IsDevelopmentOnly] ON [identity].[Users] ([IsDevelopmentOnly]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__IdentityMigrationsHistory]
+    WHERE [MigrationId] = N'20260822124255_ProtectDevelopmentAccounts'
+)
+BEGIN
+    INSERT INTO [migration].[__IdentityMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260822124255_ProtectDevelopmentAccounts', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
