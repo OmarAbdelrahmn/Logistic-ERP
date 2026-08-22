@@ -642,6 +642,375 @@ namespace LogisticsERP.Infrastructure.Identity.Migrations
                             PermissionKey = "notifications.read",
                             RoleId = new Guid("019c18d5-62e1-7000-9000-000000000002"),
                             RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000022"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "company_profile.read",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000023"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "company_profile.manage",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000024"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "tags.read",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000025"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "tags.manage",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000026"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "documents.catalog.manage",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000027"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "platform_credentials.read",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000028"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "platform_credentials.rotate",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000029"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "tags.read",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000002"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000030"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "fleet.vehicles.read",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000031"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "fleet.vehicles.manage",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000032"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "fleet.vehicles.archive",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000033"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "fleet.vehicles.decommission",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000034"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "fleet.assignments.read",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000035"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "fleet.assignments.manage",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000036"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "fleet.assignments.correct",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000037"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "fleet.issues.read",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000038"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "fleet.issues.manage",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000039"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "fleet.compliance.read",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000040"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "fleet.compliance.manage",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000041"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "fleet.files.read",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000042"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "fleet.files.upload",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000043"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "fleet.files.download",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000044"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "fleet.accidents.read",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000045"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "fleet.accidents.report",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000046"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "fleet.accidents.finalize",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000047"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "fleet.accidents.download",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000048"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "fleet.corrections.manage",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000049"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "fleet.vehicles.read",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000002"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000050"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "fleet.vehicles.manage",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000002"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000051"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "fleet.assignments.read",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000002"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000052"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "fleet.assignments.manage",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000002"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000053"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "fleet.issues.read",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000002"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000054"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "fleet.issues.manage",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000002"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000055"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "fleet.compliance.read",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000002"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000056"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "fleet.compliance.manage",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000002"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000057"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "fleet.files.read",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000002"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000058"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "fleet.files.upload",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000002"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000059"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "fleet.files.download",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000002"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000060"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "fleet.accidents.read",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000002"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000061"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "fleet.accidents.report",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000002"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000062"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "fleet.accidents.download",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000002"),
+                            RowVersion = new byte[0]
                         });
                 });
 

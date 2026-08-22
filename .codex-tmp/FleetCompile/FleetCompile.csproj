@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\LogisticsERP.Application\LogisticsERP.Application.csproj" />
+    <ProjectReference Include="..\..\src\LogisticsERP.Domain\LogisticsERP.Domain.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
+    <PackageReference Include="QuestPDF" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\src\LogisticsERP.Infrastructure\Fleet\*.cs" Link="Fleet\%(Filename)%(Extension)" />
+    <Compile Include="..\..\src\LogisticsERP.Infrastructure\Files\PrivateFileStorage.cs" Link="Files\PrivateFileStorage.cs" />
+    <Compile Include="..\..\src\LogisticsERP.Infrastructure\Identity\*.cs" Link="Identity\%(Filename)%(Extension)" />
+    <Compile Include="..\..\src\LogisticsERP.Infrastructure\Identity\Configurations\*.cs" Link="Identity\Configurations\%(Filename)%(Extension)" />
+    <Compile Include="..\..\src\LogisticsERP.Infrastructure\Identity\SeedData\*.cs" Link="Identity\SeedData\%(Filename)%(Extension)" />
+    <Compile Include="..\..\src\LogisticsERP.Infrastructure\Identity\Migrations\*.cs" Link="Identity\Migrations\%(Filename)%(Extension)" />
+    <Compile Include="..\..\src\LogisticsERP.Infrastructure\Persistence\ApplicationDbContext.cs" Link="Persistence\ApplicationDbContext.cs" />
+    <Compile Include="..\..\src\LogisticsERP.Infrastructure\Persistence\DesignTimeDbContextFactories.cs" Link="Persistence\DesignTimeDbContextFactories.cs" />
+    <Compile Include="..\..\src\LogisticsERP.Infrastructure\Persistence\Configurations\*.cs" Link="Persistence\Configurations\%(Filename)%(Extension)" />
+    <Compile Include="..\..\src\LogisticsERP.Infrastructure\Persistence\SeedData\*.cs" Link="Persistence\SeedData\%(Filename)%(Extension)" />
+    <Compile Include="..\..\src\LogisticsERP.Infrastructure\Persistence\Migrations\Application\*.cs" Link="Persistence\Migrations\Application\%(Filename)%(Extension)" />
+    <Compile Include="Program.cs" />
+  </ItemGroup>
+</Project>

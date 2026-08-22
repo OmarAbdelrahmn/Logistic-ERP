@@ -30,6 +30,46 @@ internal sealed class SponsorConfiguration : IEntityTypeConfiguration<Sponsor>
         builder.ToTable(table => table.HasCheckConstraint(
             "CK_Sponsors_ActiveRange",
             "[ActiveTo] IS NULL OR [ActiveFrom] IS NULL OR [ActiveTo] >= [ActiveFrom]"));
+
+        var seededAt = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
+        var activeFrom = new DateOnly(2026, 1, 1);
+        builder.HasData(
+            new
+            {
+                Id = Sponsor.AlBawabaCommercialEstablishmentId,
+                CompanyProfileId = CompanyProfile.FixedId,
+                EmployerIdentityNumber = "7038745530",
+                RegistryNameAr = "مؤسسة البوابة التجارية",
+                SponsorType = LogisticsERP.Domain.Enums.SponsorType.Establishment,
+                Status = LogisticsERP.Domain.Enums.CatalogStatus.Active,
+                ActiveFrom = (DateOnly?)activeFrom,
+                CreatedAtUtc = seededAt,
+                IsDeleted = false
+            },
+            new
+            {
+                Id = Sponsor.AlBawabaNextCompanyId,
+                CompanyProfileId = CompanyProfile.FixedId,
+                EmployerIdentityNumber = "7015658094",
+                RegistryNameAr = "شركة البوابة المقبلة",
+                SponsorType = LogisticsERP.Domain.Enums.SponsorType.Company,
+                Status = LogisticsERP.Domain.Enums.CatalogStatus.Active,
+                ActiveFrom = (DateOnly?)activeFrom,
+                CreatedAtUtc = seededAt,
+                IsDeleted = false
+            },
+            new
+            {
+                Id = Sponsor.ExpressGateId,
+                CompanyProfileId = CompanyProfile.FixedId,
+                EmployerIdentityNumber = "7034861059",
+                RegistryNameAr = "اكسبرس جايت",
+                SponsorType = LogisticsERP.Domain.Enums.SponsorType.Company,
+                Status = LogisticsERP.Domain.Enums.CatalogStatus.Active,
+                ActiveFrom = (DateOnly?)activeFrom,
+                CreatedAtUtc = seededAt,
+                IsDeleted = false
+            });
     }
 }
 

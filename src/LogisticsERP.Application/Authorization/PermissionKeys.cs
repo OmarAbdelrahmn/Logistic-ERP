@@ -20,8 +20,12 @@ public static class PermissionKeys
 
     public static class Catalog
     {
+        public const string CompanyProfileRead = "company_profile.read";
+        public const string CompanyProfileManage = "company_profile.manage";
         public const string OperatingCitiesRead = "operating_cities.read";
         public const string OperatingCitiesManage = "operating_cities.manage";
+        public const string TagsRead = "tags.read";
+        public const string TagsManage = "tags.manage";
     }
 
     public static class Workforce
@@ -59,12 +63,15 @@ public static class PermissionKeys
         public const string Upload = "documents.upload";
         public const string Download = "documents.download";
         public const string DownloadSensitive = "documents.download_sensitive";
+        public const string CatalogManage = "documents.catalog.manage";
     }
 
     public static class Operations
     {
         public const string PlatformAccountsRead = "platform_accounts.read";
         public const string PlatformAccountsManage = "platform_accounts.manage";
+        public const string PlatformCredentialsRead = "platform_credentials.read";
+        public const string PlatformCredentialsRotate = "platform_credentials.rotate";
         public const string PlatformAssignmentsRead = "platform_assignments.read";
         public const string PlatformAssignmentsManage = "platform_assignments.manage";
         public const string HousingRead = "housing.read";
@@ -77,6 +84,29 @@ public static class PermissionKeys
         public const string ExportsCreate = "exports.create";
         public const string NotificationsRead = "notifications.read";
         public const string NotificationsManage = "notifications.manage";
+    }
+
+    public static class Fleet
+    {
+        public const string VehiclesRead = "fleet.vehicles.read";
+        public const string VehiclesManage = "fleet.vehicles.manage";
+        public const string VehiclesArchive = "fleet.vehicles.archive";
+        public const string VehiclesDecommission = "fleet.vehicles.decommission";
+        public const string AssignmentsRead = "fleet.assignments.read";
+        public const string AssignmentsManage = "fleet.assignments.manage";
+        public const string AssignmentsCorrect = "fleet.assignments.correct";
+        public const string IssuesRead = "fleet.issues.read";
+        public const string IssuesManage = "fleet.issues.manage";
+        public const string ComplianceRead = "fleet.compliance.read";
+        public const string ComplianceManage = "fleet.compliance.manage";
+        public const string FilesRead = "fleet.files.read";
+        public const string FilesUpload = "fleet.files.upload";
+        public const string FilesDownload = "fleet.files.download";
+        public const string AccidentsRead = "fleet.accidents.read";
+        public const string AccidentsReport = "fleet.accidents.report";
+        public const string AccidentsFinalize = "fleet.accidents.finalize";
+        public const string AccidentsDownload = "fleet.accidents.download";
+        public const string CorrectionsManage = "fleet.corrections.manage";
     }
 
     public static class Workflows
@@ -103,8 +133,12 @@ public static class PermissionKeys
         Security.PermissionsManage,
         Security.AuditRead,
         Security.SupportAccessManage,
+        Catalog.CompanyProfileRead,
+        Catalog.CompanyProfileManage,
         Catalog.OperatingCitiesRead,
         Catalog.OperatingCitiesManage,
+        Catalog.TagsRead,
+        Catalog.TagsManage,
         Workforce.EmployeesRead,
         Workforce.EmployeesCreate,
         Workforce.EmployeesUpdate,
@@ -130,8 +164,11 @@ public static class PermissionKeys
         Documents.Upload,
         Documents.Download,
         Documents.DownloadSensitive,
+        Documents.CatalogManage,
         Operations.PlatformAccountsRead,
         Operations.PlatformAccountsManage,
+        Operations.PlatformCredentialsRead,
+        Operations.PlatformCredentialsRotate,
         Operations.PlatformAssignmentsRead,
         Operations.PlatformAssignmentsManage,
         Operations.HousingRead,
@@ -140,6 +177,25 @@ public static class PermissionKeys
         Reporting.ExportsCreate,
         Reporting.NotificationsRead,
         Reporting.NotificationsManage,
+        Fleet.VehiclesRead,
+        Fleet.VehiclesManage,
+        Fleet.VehiclesArchive,
+        Fleet.VehiclesDecommission,
+        Fleet.AssignmentsRead,
+        Fleet.AssignmentsManage,
+        Fleet.AssignmentsCorrect,
+        Fleet.IssuesRead,
+        Fleet.IssuesManage,
+        Fleet.ComplianceRead,
+        Fleet.ComplianceManage,
+        Fleet.FilesRead,
+        Fleet.FilesUpload,
+        Fleet.FilesDownload,
+        Fleet.AccidentsRead,
+        Fleet.AccidentsReport,
+        Fleet.AccidentsFinalize,
+        Fleet.AccidentsDownload,
+        Fleet.CorrectionsManage,
         Workflows.LeaveRequestsRead,
         Workflows.LeaveRequestsManage,
         Workflows.LeaveRequestsApprove,

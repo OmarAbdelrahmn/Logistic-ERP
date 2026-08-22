@@ -11,5 +11,6 @@ public sealed class PlatformAccountCredentialVersion : HistoryEntity
     public int KeyVersion { get; set; }
     public DateTimeOffset RotatedAtUtc { get; set; }
     public Guid RotatedByUserId { get; set; }
+    public string RotationReason { get; set; } = string.Empty;
     public Guid? SupersededVersionId { get; set; }
 }

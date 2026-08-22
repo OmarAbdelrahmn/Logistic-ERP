@@ -3,10 +3,14 @@
     <RootNamespace>LogisticsERP.Infrastructure</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <InternalsVisibleTo Include="LogisticsERP.Fleet.UnitTests" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\LogisticsERP.Application\LogisticsERP.Application.csproj" />
     <ProjectReference Include="..\LogisticsERP.Domain\LogisticsERP.Domain.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="ClosedXML" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
@@ -18,6 +22,8 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
     <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" />
+    <PackageReference Include="QuestPDF" />
   </ItemGroup>
 </Project>

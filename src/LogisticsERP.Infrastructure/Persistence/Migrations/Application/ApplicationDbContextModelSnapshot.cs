@@ -167,6 +167,11 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<Guid>("RotatedByUserId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("RotationReason")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
                     b.Property<Guid?>("SupersededVersionId")
                         .HasColumnType("uniqueidentifier");
 
@@ -1048,6 +1053,1764 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                             t.HasCheckConstraint("CK_EmployeeDocumentVersions_FileSize", "[FileSizeBytes] > 0");
 
                             t.HasCheckConstraint("CK_EmployeeDocumentVersions_VersionNumber", "[VersionNumber] > 0");
+                        });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.FleetCommandReceipt", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CommandName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("IdempotencyKey")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("RequestHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nchar(64)")
+                        .IsFixedLength();
+
+                    b.Property<Guid>("ResultEntityId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CommandName", "IdempotencyKey")
+                        .IsUnique();
+
+                    b.ToTable("FleetCommandReceipts", "app");
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.FleetLocation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Address")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid?>("HousingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal?>("Latitude")
+                        .HasPrecision(9, 6)
+                        .HasColumnType("decimal(9,6)");
+
+                    b.Property<int>("LocationType")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("Longitude")
+                        .HasPrecision(9, 6)
+                        .HasColumnType("decimal(9,6)");
+
+                    b.Property<string>("NameAr")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("NameEn")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.HasIndex("HousingId");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("LocationType", "Status");
+
+                    b.ToTable("FleetLocations", "app", t =>
+                        {
+                            t.HasCheckConstraint("CK_FleetLocations_Housing", "([LocationType] = 2 AND [HousingId] IS NOT NULL) OR ([LocationType] <> 2 AND [HousingId] IS NULL)");
+                        });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.RiderVehicleAssignment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AssignedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AssignmentReason")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("BackdatedReason")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("CompletionReason")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<Guid?>("CorrectionOfAssignmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CorrectionReason")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid>("EmployeeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte?>("EndFuelLevelPercentage")
+                        .HasColumnType("tinyint");
+
+                    b.Property<Guid?>("EndLocationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<long?>("EndOdometer")
+                        .HasColumnType("bigint");
+
+                    b.Property<int?>("EndVehicleCondition")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("EndedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("EndedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<Guid>("OperationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly?>("PermissionEndsOn")
+                        .HasColumnType("date");
+
+                    b.Property<string>("PermissionReference")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateOnly?>("PermissionStartsOn")
+                        .HasColumnType("date");
+
+                    b.Property<Guid?>("PreviousAssignmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("RiderProfileId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<byte?>("StartFuelLevelPercentage")
+                        .HasColumnType("tinyint");
+
+                    b.Property<Guid?>("StartLocationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<long>("StartOdometer")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("StartVehicleCondition")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("StartedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("VehicleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("WasBackdated")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CorrectionOfAssignmentId");
+
+                    b.HasIndex("EmployeeId");
+
+                    b.HasIndex("EndLocationId");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("PreviousAssignmentId");
+
+                    b.HasIndex("RiderProfileId")
+                        .IsUnique()
+                        .HasFilter("[EndedAtUtc] IS NULL AND [IsDeleted] = 0");
+
+                    b.HasIndex("StartLocationId");
+
+                    b.HasIndex("VehicleId")
+                        .IsUnique()
+                        .HasFilter("[EndedAtUtc] IS NULL AND [IsDeleted] = 0");
+
+                    b.HasIndex("RiderProfileId", "EmployeeId");
+
+                    b.HasIndex("RiderProfileId", "StartedAtUtc");
+
+                    b.HasIndex("VehicleId", "StartedAtUtc");
+
+                    b.ToTable("RiderVehicleAssignments", "app", t =>
+                        {
+                            t.HasCheckConstraint("CK_RiderVehicleAssignments_Backdated", "[WasBackdated] = 0 OR [BackdatedReason] IS NOT NULL");
+
+                            t.HasCheckConstraint("CK_RiderVehicleAssignments_EndFuel", "[EndFuelLevelPercentage] IS NULL OR [EndFuelLevelPercentage] BETWEEN 0 AND 100");
+
+                            t.HasCheckConstraint("CK_RiderVehicleAssignments_Odometer", "[StartOdometer] >= 0 AND ([EndOdometer] IS NULL OR [EndOdometer] >= [StartOdometer] OR [CorrectionReason] IS NOT NULL)");
+
+                            t.HasCheckConstraint("CK_RiderVehicleAssignments_Permission", "[PermissionEndsOn] IS NULL OR [PermissionStartsOn] IS NULL OR [PermissionEndsOn] >= [PermissionStartsOn]");
+
+                            t.HasCheckConstraint("CK_RiderVehicleAssignments_StartFuel", "[StartFuelLevelPercentage] IS NULL OR [StartFuelLevelPercentage] BETWEEN 0 AND 100");
+
+                            t.HasCheckConstraint("CK_RiderVehicleAssignments_TimeRange", "[EndedAtUtc] IS NULL OR [EndedAtUtc] >= [StartedAtUtc]");
+                        });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.RiderVehicleAssignmentEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ActorUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ChangeSnapshotJson")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CorrelationId")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("EventType")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("OccurredAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("OperationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<Guid>("RiderVehicleAssignmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OperationId");
+
+                    b.HasIndex("RiderVehicleAssignmentId", "OccurredAtUtc");
+
+                    b.ToTable("RiderVehicleAssignmentEvents", "app");
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.Vehicle", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly?>("AcquisitionDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("AssetNumber")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<string>("ChassisNumber")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("ColorAr")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("ColorEn")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CurrentAssignmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CurrentLocationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<long>("CurrentOdometer")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("CurrentOperationalStatus")
+                        .HasColumnType("int");
+
+                    b.Property<string>("DecommissionReason")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTimeOffset?>("DecommissionedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("EngineNumber")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("FuelType")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("LastOdometerAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("LeaseReference")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int?>("ModelYear")
+                        .HasColumnType("int");
+
+                    b.Property<string>("NormalizedAssetNumber")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<string>("NormalizedPlateNumberAr")
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<string>("NormalizedPlateNumberEn")
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<string>("OwnerName")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("OwnershipType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PlateDigits")
+                        .HasMaxLength(8)
+                        .HasColumnType("nvarchar(8)");
+
+                    b.Property<string>("PlateLettersAr")
+                        .HasMaxLength(8)
+                        .HasColumnType("nvarchar(8)");
+
+                    b.Property<string>("PlateLettersEn")
+                        .HasMaxLength(8)
+                        .HasColumnType("nvarchar(8)");
+
+                    b.Property<string>("PlateNumberAr")
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<string>("PlateNumberEn")
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int>("TransmissionType")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("VehicleManufacturerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("VehicleModelId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("VehicleType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Vin")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CurrentLocationId");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("NormalizedAssetNumber")
+                        .IsUnique();
+
+                    b.HasIndex("NormalizedPlateNumberAr")
+                        .IsUnique()
+                        .HasFilter("[NormalizedPlateNumberAr] IS NOT NULL AND [IsDeleted] = 0");
+
+                    b.HasIndex("NormalizedPlateNumberEn")
+                        .IsUnique()
+                        .HasFilter("[NormalizedPlateNumberEn] IS NOT NULL AND [IsDeleted] = 0");
+
+                    b.HasIndex("VehicleManufacturerId");
+
+                    b.HasIndex("Vin")
+                        .IsUnique()
+                        .HasFilter("[Vin] IS NOT NULL AND [IsDeleted] = 0");
+
+                    b.HasIndex("CurrentOperationalStatus", "CurrentLocationId");
+
+                    b.HasIndex("VehicleModelId", "VehicleManufacturerId");
+
+                    b.ToTable("Vehicles", "app", t =>
+                        {
+                            t.HasCheckConstraint("CK_Vehicles_ModelYear", "[ModelYear] IS NULL OR ([ModelYear] >= 1950 AND [ModelYear] <= 2200)");
+
+                            t.HasCheckConstraint("CK_Vehicles_Odometer", "[CurrentOdometer] >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehicleAccident", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AccidentNumber")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<DateTimeOffset?>("ClosedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("ClosedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CurrentReportVersionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DamageDescription")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid>("EmployeeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("FaultAssessment")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<bool>("HasInjuries")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("InjuryDetails")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<string>("InsuranceClaimNumber")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDrivable")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal?>("Latitude")
+                        .HasPrecision(9, 6)
+                        .HasColumnType("decimal(9,6)");
+
+                    b.Property<string>("LocationDescription")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<Guid?>("LocationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal?>("Longitude")
+                        .HasPrecision(9, 6)
+                        .HasColumnType("decimal(9,6)");
+
+                    b.Property<string>("Narrative")
+                        .IsRequired()
+                        .HasMaxLength(8000)
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset>("OccurredAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("PoliceReportNumber")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<DateTimeOffset>("ReportedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("ReportedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ReviewedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("RiderProfileId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("RiderVehicleAssignmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int>("Severity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ThirdPartyDetails")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("VehicleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("VehicleInsurancePolicyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("VehicleIssueId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccidentNumber")
+                        .IsUnique();
+
+                    b.HasIndex("CurrentReportVersionId");
+
+                    b.HasIndex("EmployeeId");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("LocationId");
+
+                    b.HasIndex("RiderVehicleAssignmentId");
+
+                    b.HasIndex("VehicleInsurancePolicyId");
+
+                    b.HasIndex("VehicleIssueId");
+
+                    b.HasIndex("RiderProfileId", "EmployeeId");
+
+                    b.HasIndex("RiderProfileId", "OccurredAtUtc");
+
+                    b.HasIndex("VehicleId", "OccurredAtUtc");
+
+                    b.ToTable("VehicleAccidents", "app");
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehicleAccidentAttachment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("EvidenceType")
+                        .HasColumnType("int");
+
+                    b.Property<long>("FileSizeBytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("OriginalFileName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<string>("Sha256Checksum")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nchar(64)")
+                        .IsFixedLength();
+
+                    b.Property<string>("StoragePath")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("StoredFileName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("UploadedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("UploadedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("VehicleAccidentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("VehicleAccidentId", "IsDeleted");
+
+                    b.ToTable("VehicleAccidentAttachments", "app", t =>
+                        {
+                            t.HasCheckConstraint("CK_VehicleAccidentAttachments_Size", "[FileSizeBytes] > 0");
+                        });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehicleAccidentEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ActorUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("EventType")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("OccurredAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("SnapshotJson")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("VehicleAccidentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VehicleAccidentId", "OccurredAtUtc");
+
+                    b.ToTable("VehicleAccidentEvents", "app");
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehicleAccidentReportVersion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CorrectionReason")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<long>("FileSizeBytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset>("GeneratedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("GeneratedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ReportNumber")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Sha256Checksum")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nchar(64)")
+                        .IsFixedLength();
+
+                    b.Property<string>("SnapshotJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("StoragePath")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("StoredFileName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<Guid?>("SupersedesReportVersionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("VehicleAccidentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("VersionNumber")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReportNumber")
+                        .IsUnique();
+
+                    b.HasIndex("SupersedesReportVersionId");
+
+                    b.HasIndex("VehicleAccidentId", "VersionNumber")
+                        .IsUnique();
+
+                    b.ToTable("VehicleAccidentReportVersions", "app", t =>
+                        {
+                            t.HasCheckConstraint("CK_VehicleAccidentReportVersions_Size", "[FileSizeBytes] > 0");
+
+                            t.HasCheckConstraint("CK_VehicleAccidentReportVersions_Version", "[VersionNumber] > 0");
+                        });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehicleAttachment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Category")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CurrentVersionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("VehicleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CurrentVersionId");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("VehicleId", "IsDeleted");
+
+                    b.ToTable("VehicleAttachments", "app");
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehicleAttachmentVersion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<long>("FileSizeBytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("OriginalFileName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("Sha256Checksum")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nchar(64)")
+                        .IsFixedLength();
+
+                    b.Property<string>("StoragePath")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("StoredFileName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<Guid?>("SupersededVersionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("UploadedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("UploadedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("VehicleAttachmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("VersionNumber")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SupersededVersionId");
+
+                    b.HasIndex("VehicleAttachmentId", "VersionNumber")
+                        .IsUnique();
+
+                    b.ToTable("VehicleAttachmentVersions", "app", t =>
+                        {
+                            t.HasCheckConstraint("CK_VehicleAttachmentVersions_Size", "[FileSizeBytes] > 0");
+
+                            t.HasCheckConstraint("CK_VehicleAttachmentVersions_Version", "[VersionNumber] > 0");
+                        });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehicleInsurancePolicy", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ClaimContact")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("ClaimReference")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("CoverageType")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateOnly>("EffectiveFrom")
+                        .HasColumnType("date");
+
+                    b.Property<DateOnly>("ExpiryDate")
+                        .HasColumnType("date");
+
+                    b.Property<bool>("IsCurrent")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<string>("PolicyNumber")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<Guid?>("PreviousRecordId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ProofAttachmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ProviderName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("VehicleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("PreviousRecordId");
+
+                    b.HasIndex("VehicleId")
+                        .IsUnique()
+                        .HasFilter("[IsCurrent] = 1 AND [IsDeleted] = 0");
+
+                    b.HasIndex("ExpiryDate", "IsCurrent");
+
+                    b.HasIndex("VehicleId", "PolicyNumber")
+                        .IsUnique();
+
+                    b.ToTable("VehicleInsurancePolicies", "app", t =>
+                        {
+                            t.HasCheckConstraint("CK_VehicleInsurancePolicies_DateRange", "[ExpiryDate] >= [EffectiveFrom]");
+                        });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehicleIssue", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("BlocksOperation")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Category")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("ClosedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("ClosedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("IssueNumber")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<Guid?>("LocationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<long?>("OdometerAtReport")
+                        .HasColumnType("bigint");
+
+                    b.Property<Guid?>("RelatedAssignmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("ReportedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("ReportedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ResolutionSummary")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<DateTimeOffset?>("ResolvedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("ResolvedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ReviewedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int>("Severity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("VehicleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("IssueNumber")
+                        .IsUnique();
+
+                    b.HasIndex("LocationId");
+
+                    b.HasIndex("RelatedAssignmentId");
+
+                    b.HasIndex("VehicleId", "Status", "BlocksOperation");
+
+                    b.ToTable("VehicleIssues", "app");
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehicleIssueEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ActorUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("EventType")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("FromStatus")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("OccurredAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("SnapshotJson")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ToStatus")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("VehicleIssueId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VehicleIssueId", "OccurredAtUtc");
+
+                    b.ToTable("VehicleIssueEvents", "app");
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehicleManufacturer", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("NameAr")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("NameEn")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.HasIndex("IsDeleted");
+
+                    b.ToTable("VehicleManufacturers", "app");
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehicleModel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("DefaultFuelType")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("NameAr")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("NameEn")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("VehicleManufacturerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("VehicleType")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("VehicleManufacturerId", "Code")
+                        .IsUnique();
+
+                    b.ToTable("VehicleModels", "app");
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehicleOdometerReading", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CorrectionReason")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("EvidenceAttachmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsCorrection")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<long>("Reading")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset>("RecordedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("SourceEntityId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("SourceType")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("VehicleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VehicleId", "RecordedAtUtc");
+
+                    b.ToTable("VehicleOdometerReadings", "app", t =>
+                        {
+                            t.HasCheckConstraint("CK_VehicleOdometerReadings_Correction", "[IsCorrection] = 0 OR [CorrectionReason] IS NOT NULL");
+
+                            t.HasCheckConstraint("CK_VehicleOdometerReadings_Value", "[Reading] >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehicleOperationalStatusPeriod", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ChangedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTimeOffset>("EffectiveFromUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset?>("EffectiveToUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("ReasonCode")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<Guid?>("SourceEntityId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("SourceType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("VehicleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("VehicleId")
+                        .IsUnique()
+                        .HasFilter("[EffectiveToUtc] IS NULL AND [IsDeleted] = 0");
+
+                    b.HasIndex("VehicleId", "EffectiveFromUtc");
+
+                    b.ToTable("VehicleOperationalStatusPeriods", "app", t =>
+                        {
+                            t.HasCheckConstraint("CK_VehicleStatusPeriods_Range", "[EffectiveToUtc] IS NULL OR [EffectiveToUtc] >= [EffectiveFromUtc]");
+                        });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehiclePeriodicInspection", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateOnly>("ExpiryDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("FailureNotes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<DateOnly>("InspectionDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("InspectionNumber")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<bool>("IsCurrent")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<long?>("Odometer")
+                        .HasColumnType("bigint");
+
+                    b.Property<Guid?>("PreviousRecordId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ProofAttachmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Result")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<string>("StationName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("VehicleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("PreviousRecordId");
+
+                    b.HasIndex("VehicleId")
+                        .IsUnique()
+                        .HasFilter("[IsCurrent] = 1 AND [IsDeleted] = 0");
+
+                    b.HasIndex("ExpiryDate", "IsCurrent");
+
+                    b.HasIndex("VehicleId", "InspectionNumber")
+                        .IsUnique();
+
+                    b.ToTable("VehiclePeriodicInspections", "app", t =>
+                        {
+                            t.HasCheckConstraint("CK_VehiclePeriodicInspections_DateRange", "[ExpiryDate] >= [InspectionDate]");
+
+                            t.HasCheckConstraint("CK_VehiclePeriodicInspections_Odometer", "[Odometer] IS NULL OR [Odometer] >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehicleRegistration", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateOnly>("ExpiryDate")
+                        .HasColumnType("date");
+
+                    b.Property<bool>("IsCurrent")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateOnly>("IssueDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("IssuingAuthority")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<Guid?>("PreviousRecordId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ProofAttachmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("RegistrationNumber")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("VehicleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("PreviousRecordId");
+
+                    b.HasIndex("VehicleId")
+                        .IsUnique()
+                        .HasFilter("[IsCurrent] = 1 AND [IsDeleted] = 0");
+
+                    b.HasIndex("ExpiryDate", "IsCurrent");
+
+                    b.ToTable("VehicleRegistrations", "app", t =>
+                        {
+                            t.HasCheckConstraint("CK_VehicleRegistrations_DateRange", "[ExpiryDate] >= [IssueDate]");
                         });
                 });
 
@@ -2968,6 +4731,541 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                             NameAr = "اعتماد تغيير حالة الموظف",
                             NameEn = "Approve employee status changes",
                             RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000056"),
+                            Category = "Fleet",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "عرض المركبات ومواقعها وحالتها.",
+                            DescriptionEn = "View vehicles, locations, and operational status.",
+                            DisplayOrder = 56,
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = false,
+                            Key = "fleet.vehicles.read",
+                            NameAr = "عرض المركبات",
+                            NameEn = "Read vehicles",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = true,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000057"),
+                            Category = "Fleet",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "إنشاء وتعديل المركبات وحالتها التشغيلية.",
+                            DescriptionEn = "Create and update vehicles and their operational status.",
+                            DisplayOrder = 57,
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = false,
+                            Key = "fleet.vehicles.manage",
+                            NameAr = "إدارة المركبات",
+                            NameEn = "Manage vehicles",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = true,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000058"),
+                            Category = "Fleet",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "أرشفة واستعادة المركبات غير المستخدمة.",
+                            DescriptionEn = "Archive and restore unused vehicles.",
+                            DisplayOrder = 58,
+                            GrantabilityRule = "HIGH_TRUST_ONLY",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = true,
+                            IsSensitive = false,
+                            Key = "fleet.vehicles.archive",
+                            NameAr = "أرشفة المركبات",
+                            NameEn = "Archive vehicles",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000059"),
+                            Category = "Fleet",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "إنهاء خدمة مركبة بشكل تشغيلي نهائي.",
+                            DescriptionEn = "Operationally decommission a vehicle.",
+                            DisplayOrder = 59,
+                            GrantabilityRule = "HIGH_TRUST_ONLY",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = true,
+                            IsSensitive = false,
+                            Key = "fleet.vehicles.decommission",
+                            NameAr = "إنهاء خدمة المركبات",
+                            NameEn = "Decommission vehicles",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000060"),
+                            Category = "Fleet",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "عرض العهد الحالية والتاريخية بين الرايدرز والمركبات.",
+                            DescriptionEn = "View current and historical rider-vehicle assignments.",
+                            DisplayOrder = 60,
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = false,
+                            Key = "fleet.assignments.read",
+                            NameAr = "عرض عهد المركبات",
+                            NameEn = "Read vehicle assignments",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = true,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000061"),
+                            Category = "Fleet",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "تنفيذ الاستلام والإرجاع والتبديل وتجديد التصريح.",
+                            DescriptionEn = "Execute take, return, switch, and permission renewal.",
+                            DisplayOrder = 61,
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = false,
+                            Key = "fleet.assignments.manage",
+                            NameAr = "إدارة عهد المركبات",
+                            NameEn = "Manage vehicle assignments",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = true,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000062"),
+                            Category = "Fleet",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "تصحيح العهد التاريخية مع سبب إلزامي.",
+                            DescriptionEn = "Correct historical assignments with a mandatory reason.",
+                            DisplayOrder = 62,
+                            GrantabilityRule = "HIGH_TRUST_ONLY",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = true,
+                            IsSensitive = true,
+                            Key = "fleet.assignments.correct",
+                            NameAr = "تصحيح عهد المركبات",
+                            NameEn = "Correct vehicle assignments",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000063"),
+                            Category = "Fleet",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "عرض بلاغات وأعطال المركبات.",
+                            DescriptionEn = "View vehicle issues and faults.",
+                            DisplayOrder = 63,
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = false,
+                            Key = "fleet.issues.read",
+                            NameAr = "عرض بلاغات المركبات",
+                            NameEn = "Read vehicle issues",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = true,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000064"),
+                            Category = "Fleet",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "تسجيل ومراجعة وحل وإغلاق البلاغات.",
+                            DescriptionEn = "Report, review, resolve, and close vehicle issues.",
+                            DisplayOrder = 64,
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = false,
+                            Key = "fleet.issues.manage",
+                            NameAr = "إدارة بلاغات المركبات",
+                            NameEn = "Manage vehicle issues",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = true,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000065"),
+                            Category = "Fleet",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "عرض التسجيل والتأمين والفحص الدوري.",
+                            DescriptionEn = "View vehicle registration, insurance, and inspection.",
+                            DisplayOrder = 65,
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = false,
+                            Key = "fleet.compliance.read",
+                            NameAr = "عرض التزام المركبات",
+                            NameEn = "Read vehicle compliance",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = true,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000066"),
+                            Category = "Fleet",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "إضافة وتجديد وثائق التزام المركبات.",
+                            DescriptionEn = "Add and renew vehicle compliance records.",
+                            DisplayOrder = 66,
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = false,
+                            Key = "fleet.compliance.manage",
+                            NameAr = "إدارة التزام المركبات",
+                            NameEn = "Manage vehicle compliance",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = true,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000067"),
+                            Category = "Fleet",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "عرض بيانات ونسخ ملفات المركبات.",
+                            DescriptionEn = "View vehicle file metadata and versions.",
+                            DisplayOrder = 67,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "fleet.files.read",
+                            NameAr = "عرض ملفات المركبات",
+                            NameEn = "Read vehicle files",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = true,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000068"),
+                            Category = "Fleet",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "رفع وأرشفة نسخ ملفات المركبات.",
+                            DescriptionEn = "Upload and archive vehicle file versions.",
+                            DisplayOrder = 68,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "fleet.files.upload",
+                            NameAr = "رفع ملفات المركبات",
+                            NameEn = "Upload vehicle files",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = true,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000069"),
+                            Category = "Fleet",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "تنزيل محتوى ملفات المركبات الخاصة.",
+                            DescriptionEn = "Download private vehicle file content.",
+                            DisplayOrder = 69,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "fleet.files.download",
+                            NameAr = "تنزيل ملفات المركبات",
+                            NameEn = "Download vehicle files",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = true,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000070"),
+                            Category = "Fleet",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "عرض بيانات الحوادث والأدلة.",
+                            DescriptionEn = "View vehicle accidents and evidence.",
+                            DisplayOrder = 70,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "fleet.accidents.read",
+                            NameAr = "عرض حوادث المركبات",
+                            NameEn = "Read vehicle accidents",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = true,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000071"),
+                            Category = "Fleet",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "تسجيل حادث مرتبط برايدر وعهدة فعالة.",
+                            DescriptionEn = "Report an accident linked to a rider and active assignment.",
+                            DisplayOrder = 71,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "fleet.accidents.report",
+                            NameAr = "تسجيل حوادث المركبات",
+                            NameEn = "Report vehicle accidents",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = true,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000072"),
+                            Category = "Fleet",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "اعتماد وتصحيح وإغلاق تقارير الحوادث.",
+                            DescriptionEn = "Finalize, correct, and close accident reports.",
+                            DisplayOrder = 72,
+                            GrantabilityRule = "HIGH_TRUST_ONLY",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = true,
+                            IsSensitive = true,
+                            Key = "fleet.accidents.finalize",
+                            NameAr = "اعتماد تقارير الحوادث",
+                            NameEn = "Finalize accident reports",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000073"),
+                            Category = "Fleet",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "تنزيل الأدلة وتقارير الحوادث الخاصة.",
+                            DescriptionEn = "Download private accident evidence and reports.",
+                            DisplayOrder = 73,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "fleet.accidents.download",
+                            NameAr = "تنزيل تقارير الحوادث",
+                            NameEn = "Download accident reports",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = true,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000074"),
+                            Category = "Fleet",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "تنفيذ تصحيحات العداد والحالة عالية الثقة.",
+                            DescriptionEn = "Perform high-trust odometer and status corrections.",
+                            DisplayOrder = 74,
+                            GrantabilityRule = "HIGH_TRUST_ONLY",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = true,
+                            IsSensitive = true,
+                            Key = "fleet.corrections.manage",
+                            NameAr = "تصحيح بيانات الأسطول",
+                            NameEn = "Manage fleet corrections",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000075"),
+                            Category = "Catalog",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "عرض بيانات الشركة المالكة وإعداداتها العامة.",
+                            DescriptionEn = "View the owning company profile and general settings.",
+                            DisplayOrder = 75,
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = false,
+                            Key = "company_profile.read",
+                            NameAr = "عرض ملف الشركة",
+                            NameEn = "Read company profile",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000076"),
+                            Category = "Catalog",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "تعديل بيانات الشركة وإعداداتها دون تغيير التسلسل الداخلي.",
+                            DescriptionEn = "Update company settings without changing protected internal sequences.",
+                            DisplayOrder = 76,
+                            GrantabilityRule = "HIGH_TRUST_ONLY",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = true,
+                            IsSensitive = true,
+                            Key = "company_profile.manage",
+                            NameAr = "إدارة ملف الشركة",
+                            NameEn = "Manage company profile",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000077"),
+                            Category = "Catalog",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "عرض كتالوج الوسوم وروابطه التشغيلية.",
+                            DescriptionEn = "View the tag catalog and operational assignments.",
+                            DisplayOrder = 77,
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = false,
+                            Key = "tags.read",
+                            NameAr = "عرض الوسوم",
+                            NameEn = "Read tags",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000078"),
+                            Category = "Catalog",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "إدارة كتالوج الوسوم وتعيينها للكيانات المسموحة.",
+                            DescriptionEn = "Manage tags and assign them to supported entities.",
+                            DisplayOrder = 78,
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = false,
+                            Key = "tags.manage",
+                            NameAr = "إدارة الوسوم",
+                            NameEn = "Manage tags",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000079"),
+                            Category = "Documents",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "إدارة أنواع الوثائق ومتطلبات اكتمالها.",
+                            DescriptionEn = "Manage document types and completeness requirements.",
+                            DisplayOrder = 79,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "documents.catalog.manage",
+                            NameAr = "إدارة كتالوج الوثائق",
+                            NameEn = "Manage document catalog",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000080"),
+                            Category = "Operations",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "عرض بيانات وصفية فقط عن تدوير بيانات اعتماد حسابات المنصات.",
+                            DescriptionEn = "View metadata only for platform-account credential rotations.",
+                            DisplayOrder = 80,
+                            GrantabilityRule = "HIGH_TRUST_ONLY",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = true,
+                            IsSensitive = true,
+                            Key = "platform_credentials.read",
+                            NameAr = "عرض سجل بيانات اعتماد المنصات",
+                            NameEn = "Read platform credential history",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000081"),
+                            Category = "Operations",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "استبدال بيانات اعتماد حساب منصة مع حفظ سجل مشفر غير قابل للتعديل.",
+                            DescriptionEn = "Replace a platform account credential while preserving encrypted immutable history.",
+                            DisplayOrder = 81,
+                            GrantabilityRule = "HIGH_TRUST_ONLY",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = true,
+                            IsSensitive = true,
+                            Key = "platform_credentials.rotate",
+                            NameAr = "تدوير بيانات اعتماد المنصات",
+                            NameEn = "Rotate platform credentials",
+                            RequiresClientScope = true,
                             RequiresHousingScope = false,
                             RowVersion = new byte[0],
                             Version = 1
@@ -5526,6 +7824,9 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<Guid>("LeaveRequestId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int?>("PreviousLeaveStatus")
+                        .HasColumnType("int");
+
                     b.Property<string>("Reason")
                         .IsRequired()
                         .HasMaxLength(2000)
@@ -6685,6 +8986,44 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         {
                             t.HasCheckConstraint("CK_Sponsors_ActiveRange", "[ActiveTo] IS NULL OR [ActiveFrom] IS NULL OR [ActiveTo] >= [ActiveFrom]");
                         });
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-8000-000000000040"),
+                            ActiveFrom = new DateOnly(2026, 1, 1),
+                            CompanyProfileId = new Guid("019c18d5-62e1-7000-8000-000000000001"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            EmployerIdentityNumber = "7038745530",
+                            IsDeleted = false,
+                            RegistryNameAr = "مؤسسة البوابة التجارية",
+                            SponsorType = 1,
+                            Status = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-8000-000000000041"),
+                            ActiveFrom = new DateOnly(2026, 1, 1),
+                            CompanyProfileId = new Guid("019c18d5-62e1-7000-8000-000000000001"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            EmployerIdentityNumber = "7015658094",
+                            IsDeleted = false,
+                            RegistryNameAr = "شركة البوابة المقبلة",
+                            SponsorType = 2,
+                            Status = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-8000-000000000042"),
+                            ActiveFrom = new DateOnly(2026, 1, 1),
+                            CompanyProfileId = new Guid("019c18d5-62e1-7000-8000-000000000001"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            EmployerIdentityNumber = "7034861059",
+                            IsDeleted = false,
+                            RegistryNameAr = "اكسبرس جايت",
+                            SponsorType = 2,
+                            Status = 1
+                        });
                 });
 
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Workforce.SponsoredInternalDetails", b =>
@@ -6999,6 +9338,292 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .WithMany()
                         .HasForeignKey("SupersededVersionId")
                         .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.FleetLocation", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Housing.Housing", null)
+                        .WithMany()
+                        .HasForeignKey("HousingId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.RiderVehicleAssignment", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.RiderVehicleAssignment", null)
+                        .WithMany()
+                        .HasForeignKey("CorrectionOfAssignmentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.Employee", null)
+                        .WithMany()
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.FleetLocation", null)
+                        .WithMany()
+                        .HasForeignKey("EndLocationId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.RiderVehicleAssignment", null)
+                        .WithMany()
+                        .HasForeignKey("PreviousAssignmentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.FleetLocation", null)
+                        .WithMany()
+                        .HasForeignKey("StartLocationId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.Vehicle", null)
+                        .WithMany()
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.RiderProfile", null)
+                        .WithMany()
+                        .HasForeignKey("RiderProfileId", "EmployeeId")
+                        .HasPrincipalKey("Id", "EmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.RiderVehicleAssignmentEvent", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.RiderVehicleAssignment", null)
+                        .WithMany()
+                        .HasForeignKey("RiderVehicleAssignmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.Vehicle", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.FleetLocation", null)
+                        .WithMany()
+                        .HasForeignKey("CurrentLocationId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.VehicleManufacturer", null)
+                        .WithMany()
+                        .HasForeignKey("VehicleManufacturerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.VehicleModel", null)
+                        .WithMany()
+                        .HasForeignKey("VehicleModelId", "VehicleManufacturerId")
+                        .HasPrincipalKey("Id", "VehicleManufacturerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehicleAccident", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.VehicleAccidentReportVersion", null)
+                        .WithMany()
+                        .HasForeignKey("CurrentReportVersionId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.Employee", null)
+                        .WithMany()
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.FleetLocation", null)
+                        .WithMany()
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.RiderVehicleAssignment", null)
+                        .WithMany()
+                        .HasForeignKey("RiderVehicleAssignmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.Vehicle", null)
+                        .WithMany()
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.VehicleInsurancePolicy", null)
+                        .WithMany()
+                        .HasForeignKey("VehicleInsurancePolicyId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.VehicleIssue", null)
+                        .WithMany()
+                        .HasForeignKey("VehicleIssueId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.RiderProfile", null)
+                        .WithMany()
+                        .HasForeignKey("RiderProfileId", "EmployeeId")
+                        .HasPrincipalKey("Id", "EmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehicleAccidentAttachment", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.VehicleAccident", null)
+                        .WithMany()
+                        .HasForeignKey("VehicleAccidentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehicleAccidentEvent", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.VehicleAccident", null)
+                        .WithMany()
+                        .HasForeignKey("VehicleAccidentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehicleAccidentReportVersion", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.VehicleAccidentReportVersion", null)
+                        .WithMany()
+                        .HasForeignKey("SupersedesReportVersionId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.VehicleAccident", null)
+                        .WithMany()
+                        .HasForeignKey("VehicleAccidentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehicleAttachment", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.VehicleAttachmentVersion", null)
+                        .WithMany()
+                        .HasForeignKey("CurrentVersionId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.Vehicle", null)
+                        .WithMany()
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehicleAttachmentVersion", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.VehicleAttachmentVersion", null)
+                        .WithMany()
+                        .HasForeignKey("SupersededVersionId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.VehicleAttachment", null)
+                        .WithMany()
+                        .HasForeignKey("VehicleAttachmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehicleInsurancePolicy", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.VehicleInsurancePolicy", null)
+                        .WithMany()
+                        .HasForeignKey("PreviousRecordId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.Vehicle", null)
+                        .WithMany()
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehicleIssue", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.FleetLocation", null)
+                        .WithMany()
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.RiderVehicleAssignment", null)
+                        .WithMany()
+                        .HasForeignKey("RelatedAssignmentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.Vehicle", null)
+                        .WithMany()
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehicleIssueEvent", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.VehicleIssue", null)
+                        .WithMany()
+                        .HasForeignKey("VehicleIssueId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehicleModel", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.VehicleManufacturer", null)
+                        .WithMany()
+                        .HasForeignKey("VehicleManufacturerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehicleOdometerReading", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.Vehicle", null)
+                        .WithMany()
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehicleOperationalStatusPeriod", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.Vehicle", null)
+                        .WithMany()
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehiclePeriodicInspection", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.VehiclePeriodicInspection", null)
+                        .WithMany()
+                        .HasForeignKey("PreviousRecordId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.Vehicle", null)
+                        .WithMany()
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehicleRegistration", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.VehicleRegistration", null)
+                        .WithMany()
+                        .HasForeignKey("PreviousRecordId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.Vehicle", null)
+                        .WithMany()
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Housing.Housing", b =>

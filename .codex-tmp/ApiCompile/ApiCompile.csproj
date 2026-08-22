@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <OutputType>Library</OutputType>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\LogisticsERP.Application\LogisticsERP.Application.csproj" />
+    <ProjectReference Include="..\..\src\LogisticsERP.Domain\LogisticsERP.Domain.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\src\LogisticsERP.Api\Controllers\Vehicle*.cs" Link="Controllers\%(Filename)%(Extension)" />
+    <Compile Include="..\..\src\LogisticsERP.Api\ErrorHandling\ResultExtensions.cs" Link="ErrorHandling\ResultExtensions.cs" />
+  </ItemGroup>
+</Project>

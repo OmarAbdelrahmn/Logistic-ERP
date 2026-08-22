@@ -66,6 +66,27 @@ internal sealed class AuthenticationService(
             return Result.Failure<AuthenticationTokenResponse>(AuthenticationErrors.InvalidCredentials);
         }
 
+        if (user.RequiresPasswordChange)
+        {
+            var credentialHash = UserManagementService.HashTemporarySecret(request.Password);
+            var temporaryCredential = await dbContext.TemporaryCredentials
+                .IgnoreQueryFilters()
+                .Where(item => item.UserId == user.Id && item.CredentialHash == credentialHash)
+                .OrderByDescending(item => item.CreatedAtUtc)
+                .FirstOrDefaultAsync(cancellationToken);
+            if (temporaryCredential is not null)
+            {
+                if (temporaryCredential.IsDeleted
+                    || temporaryCredential.ConsumedAtUtc is not null
+                    || temporaryCredential.RevokedAtUtc is not null
+                    || temporaryCredential.ExpiresAtUtc <= now)
+                {
+                    return Result.Failure<AuthenticationTokenResponse>(AuthenticationErrors.InvalidCredentials);
+                }
+                temporaryCredential.ConsumedAtUtc = now;
+            }
+        }
+
         user.AccessFailedCount = 0;
         user.LockoutEnd = null;
         user.LastLoginAtUtc = now;

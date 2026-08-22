@@ -12,4 +12,6 @@ public interface IPermissionChecker
         string permissionKey,
         PermissionScope? scope = null,
         CancellationToken cancellationToken = default);
+
+    void InvalidateUser(Guid userId, long authorizationVersion);
 }

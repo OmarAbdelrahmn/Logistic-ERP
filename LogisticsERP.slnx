@@ -8,6 +8,7 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/LogisticsERP.Domain.UnitTests/LogisticsERP.Domain.UnitTests.csproj" />
+    <Project Path="tests/LogisticsERP.Fleet.UnitTests/LogisticsERP.Fleet.UnitTests.csproj" />
   </Folder>
   <Folder Name="/tools/">
     <Project Path="tools/LogisticsERP.Bootstrap/LogisticsERP.Bootstrap.csproj" />

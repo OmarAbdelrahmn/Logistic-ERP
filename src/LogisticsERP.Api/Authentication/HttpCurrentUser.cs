@@ -25,5 +25,14 @@ internal sealed class HttpCurrentUser(IHttpContextAccessor httpContextAccessor) 
         }
     }
 
+    public long? AuthorizationVersion
+    {
+        get
+        {
+            var value = httpContextAccessor.HttpContext?.User.FindFirstValue(AuthenticationClaimNames.AuthorizationVersion);
+            return long.TryParse(value, out var version) ? version : null;
+        }
+    }
+
     public string? CorrelationId => httpContextAccessor.HttpContext?.TraceIdentifier;
 }

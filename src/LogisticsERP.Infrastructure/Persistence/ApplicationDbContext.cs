@@ -3,6 +3,7 @@ using LogisticsERP.Application.Abstractions.Persistence;
 using LogisticsERP.Domain.Common;
 using LogisticsERP.Domain.Entities.Clients;
 using LogisticsERP.Domain.Entities.Documents;
+using LogisticsERP.Domain.Entities.Fleet;
 using LogisticsERP.Domain.Entities.Platform;
 using LogisticsERP.Domain.Entities.System;
 using LogisticsERP.Domain.Entities.Tags;
@@ -14,9 +15,13 @@ using HousingSupervisorPeriod = LogisticsERP.Domain.Entities.Housing.HousingSupe
 
 namespace LogisticsERP.Infrastructure.Persistence;
 
-public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+public sealed class ApplicationDbContext(
+    DbContextOptions<ApplicationDbContext> options,
+    TimeProvider? timeProvider = null)
     : DbContext(options), IApplicationDbContext
 {
+    private readonly TimeProvider _timeProvider = timeProvider ?? TimeProvider.System;
+
     public DbSet<CompanyProfile> CompanyProfiles => Set<CompanyProfile>();
     public DbSet<GlobalCity> GlobalCities => Set<GlobalCity>();
     public DbSet<OperatingCity> OperatingCities => Set<OperatingCity>();
@@ -79,10 +84,44 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     public DbSet<ExportJob> ExportJobs => Set<ExportJob>();
     public DbSet<SavedView> SavedViews => Set<SavedView>();
     public DbSet<DatasetVersion> DatasetVersions => Set<DatasetVersion>();
+    public DbSet<VehicleManufacturer> VehicleManufacturers => Set<VehicleManufacturer>();
+    public DbSet<VehicleModel> VehicleModels => Set<VehicleModel>();
+    public DbSet<FleetLocation> FleetLocations => Set<FleetLocation>();
+    public DbSet<Vehicle> Vehicles => Set<Vehicle>();
+    public DbSet<VehicleOperationalStatusPeriod> VehicleOperationalStatusPeriods => Set<VehicleOperationalStatusPeriod>();
+    public DbSet<VehicleOdometerReading> VehicleOdometerReadings => Set<VehicleOdometerReading>();
+    public DbSet<RiderVehicleAssignment> RiderVehicleAssignments => Set<RiderVehicleAssignment>();
+    public DbSet<RiderVehicleAssignmentEvent> RiderVehicleAssignmentEvents => Set<RiderVehicleAssignmentEvent>();
+    public DbSet<FleetCommandReceipt> FleetCommandReceipts => Set<FleetCommandReceipt>();
+    public DbSet<VehicleRegistration> VehicleRegistrations => Set<VehicleRegistration>();
+    public DbSet<VehicleInsurancePolicy> VehicleInsurancePolicies => Set<VehicleInsurancePolicy>();
+    public DbSet<VehiclePeriodicInspection> VehiclePeriodicInspections => Set<VehiclePeriodicInspection>();
+    public DbSet<VehicleAttachment> VehicleAttachments => Set<VehicleAttachment>();
+    public DbSet<VehicleAttachmentVersion> VehicleAttachmentVersions => Set<VehicleAttachmentVersion>();
+    public DbSet<VehicleIssue> VehicleIssues => Set<VehicleIssue>();
+    public DbSet<VehicleIssueEvent> VehicleIssueEvents => Set<VehicleIssueEvent>();
+    public DbSet<VehicleAccident> VehicleAccidents => Set<VehicleAccident>();
+    public DbSet<VehicleAccidentEvent> VehicleAccidentEvents => Set<VehicleAccidentEvent>();
+    public DbSet<VehicleAccidentAttachment> VehicleAccidentAttachments => Set<VehicleAccidentAttachment>();
+    public DbSet<VehicleAccidentReportVersion> VehicleAccidentReportVersions => Set<VehicleAccidentReportVersion>();
 
     public IQueryable<TEntity> Query<TEntity>() where TEntity : Entity => Set<TEntity>();
 
     public void AddEntity<TEntity>(TEntity entity) where TEntity : Entity => Set<TEntity>().Add(entity);
+
+    public override int SaveChanges(bool acceptAllChangesOnSuccess)
+    {
+        UpdateDatasetVersions();
+        return base.SaveChanges(acceptAllChangesOnSuccess);
+    }
+
+    public override async Task<int> SaveChangesAsync(
+        bool acceptAllChangesOnSuccess,
+        CancellationToken cancellationToken = default)
+    {
+        await UpdateDatasetVersionsAsync(cancellationToken);
+        return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -115,4 +154,75 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
 
     private static void ApplySoftDeleteFilter<TEntity>(ModelBuilder modelBuilder) where TEntity : AuditableEntity =>
         modelBuilder.Entity<TEntity>().HasQueryFilter(entity => !entity.IsDeleted);
+
+    private void UpdateDatasetVersions()
+    {
+        var moduleKeys = GetChangedModuleKeys();
+        var now = _timeProvider.GetUtcNow();
+        foreach (var moduleKey in moduleKeys)
+        {
+            var version = DatasetVersions.Local.FirstOrDefault(item => item.ModuleKey == moduleKey)
+                ?? DatasetVersions.IgnoreQueryFilters().SingleOrDefault(item => item.ModuleKey == moduleKey);
+            IncrementDatasetVersion(version, moduleKey, now);
+        }
+    }
+
+    private async Task UpdateDatasetVersionsAsync(CancellationToken cancellationToken)
+    {
+        var moduleKeys = GetChangedModuleKeys();
+        var now = _timeProvider.GetUtcNow();
+        foreach (var moduleKey in moduleKeys)
+        {
+            var version = DatasetVersions.Local.FirstOrDefault(item => item.ModuleKey == moduleKey)
+                ?? await DatasetVersions.IgnoreQueryFilters().SingleOrDefaultAsync(
+                    item => item.ModuleKey == moduleKey,
+                    cancellationToken);
+            IncrementDatasetVersion(version, moduleKey, now);
+        }
+    }
+
+    private string[] GetChangedModuleKeys() => ChangeTracker.Entries<Entity>()
+        .Where(entry => entry.Entity is not AuditEntry and not DatasetVersion
+            && entry.State is EntityState.Added or EntityState.Modified or EntityState.Deleted)
+        .Select(entry => GetModuleKey(entry.Metadata.ClrType))
+        .Distinct(StringComparer.Ordinal)
+        .ToArray();
+
+    private void IncrementDatasetVersion(DatasetVersion? version, string moduleKey, DateTimeOffset now)
+    {
+        if (version is null)
+        {
+            DatasetVersions.Add(new DatasetVersion
+            {
+                Id = Guid.CreateVersion7(),
+                ModuleKey = moduleKey,
+                Version = 1,
+                LastChangedAtUtc = now
+            });
+            return;
+        }
+
+        version.Version++;
+        version.LastChangedAtUtc = now;
+    }
+
+    private static string GetModuleKey(Type entityType)
+    {
+        var entityNamespace = entityType.Namespace ?? string.Empty;
+        if (entityNamespace.EndsWith(".Fleet", StringComparison.Ordinal)) return "fleet";
+        if (entityNamespace.EndsWith(".Tags", StringComparison.Ordinal)) return "tags";
+        if (entityNamespace.EndsWith(".Documents", StringComparison.Ordinal)) return "documents";
+        if (entityNamespace.EndsWith(".Housing", StringComparison.Ordinal)) return "housing";
+        if (entityNamespace.EndsWith(".Clients", StringComparison.Ordinal)) return "platform-operations";
+        if (entityNamespace.EndsWith(".Platform", StringComparison.Ordinal)) return "catalog";
+        if (entityNamespace.EndsWith(".Workforce", StringComparison.Ordinal)) return "workforce";
+
+        return entityType.Name switch
+        {
+            nameof(Notification) => "notifications",
+            nameof(ExportJob) => "exports",
+            nameof(SavedView) => "saved-views",
+            _ => "system"
+        };
+    }
 }

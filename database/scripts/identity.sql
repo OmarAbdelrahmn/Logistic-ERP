@@ -789,3 +789,94 @@ END;
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__IdentityMigrationsHistory]
+    WHERE [MigrationId] = N'20260822165334_AddFleetPermissions'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'IsDeleted', N'PermissionKey', N'RoleId', N'UpdatedAtUtc', N'UpdatedByUserId') AND [object_id] = OBJECT_ID(N'[identity].[RolePermissions]'))
+        SET IDENTITY_INSERT [identity].[RolePermissions] ON;
+    EXEC(N'INSERT INTO [identity].[RolePermissions] ([Id], [CreatedAtUtc], [CreatedByUserId], [DeletedAtUtc], [DeletedByUserId], [DeletionReason], [IsDeleted], [PermissionKey], [RoleId], [UpdatedAtUtc], [UpdatedByUserId])
+    VALUES (''019c18d5-62e1-7000-b000-000000000030'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''fleet.vehicles.read'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000031'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''fleet.vehicles.manage'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000032'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''fleet.vehicles.archive'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000033'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''fleet.vehicles.decommission'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000034'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''fleet.assignments.read'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000035'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''fleet.assignments.manage'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000036'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''fleet.assignments.correct'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000037'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''fleet.issues.read'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000038'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''fleet.issues.manage'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000039'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''fleet.compliance.read'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000040'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''fleet.compliance.manage'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000041'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''fleet.files.read'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000042'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''fleet.files.upload'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000043'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''fleet.files.download'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000044'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''fleet.accidents.read'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000045'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''fleet.accidents.report'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000046'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''fleet.accidents.finalize'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000047'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''fleet.accidents.download'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000048'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''fleet.corrections.manage'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000049'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''fleet.vehicles.read'', ''019c18d5-62e1-7000-9000-000000000002'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000050'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''fleet.vehicles.manage'', ''019c18d5-62e1-7000-9000-000000000002'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000051'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''fleet.assignments.read'', ''019c18d5-62e1-7000-9000-000000000002'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000052'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''fleet.assignments.manage'', ''019c18d5-62e1-7000-9000-000000000002'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000053'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''fleet.issues.read'', ''019c18d5-62e1-7000-9000-000000000002'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000054'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''fleet.issues.manage'', ''019c18d5-62e1-7000-9000-000000000002'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000055'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''fleet.compliance.read'', ''019c18d5-62e1-7000-9000-000000000002'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000056'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''fleet.compliance.manage'', ''019c18d5-62e1-7000-9000-000000000002'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000057'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''fleet.files.read'', ''019c18d5-62e1-7000-9000-000000000002'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000058'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''fleet.files.upload'', ''019c18d5-62e1-7000-9000-000000000002'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000059'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''fleet.files.download'', ''019c18d5-62e1-7000-9000-000000000002'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000060'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''fleet.accidents.read'', ''019c18d5-62e1-7000-9000-000000000002'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000061'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''fleet.accidents.report'', ''019c18d5-62e1-7000-9000-000000000002'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000062'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''fleet.accidents.download'', ''019c18d5-62e1-7000-9000-000000000002'', NULL, NULL)');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'IsDeleted', N'PermissionKey', N'RoleId', N'UpdatedAtUtc', N'UpdatedByUserId') AND [object_id] = OBJECT_ID(N'[identity].[RolePermissions]'))
+        SET IDENTITY_INSERT [identity].[RolePermissions] OFF;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__IdentityMigrationsHistory]
+    WHERE [MigrationId] = N'20260822165334_AddFleetPermissions'
+)
+BEGIN
+    INSERT INTO [migration].[__IdentityMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260822165334_AddFleetPermissions', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__IdentityMigrationsHistory]
+    WHERE [MigrationId] = N'20260822165718_AddMissingModelApiPermissions'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'IsDeleted', N'PermissionKey', N'RoleId', N'UpdatedAtUtc', N'UpdatedByUserId') AND [object_id] = OBJECT_ID(N'[identity].[RolePermissions]'))
+        SET IDENTITY_INSERT [identity].[RolePermissions] ON;
+    EXEC(N'INSERT INTO [identity].[RolePermissions] ([Id], [CreatedAtUtc], [CreatedByUserId], [DeletedAtUtc], [DeletedByUserId], [DeletionReason], [IsDeleted], [PermissionKey], [RoleId], [UpdatedAtUtc], [UpdatedByUserId])
+    VALUES (''019c18d5-62e1-7000-b000-000000000022'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''company_profile.read'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000023'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''company_profile.manage'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000024'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''tags.read'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000025'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''tags.manage'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000026'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''documents.catalog.manage'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000027'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''platform_credentials.read'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000028'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''platform_credentials.rotate'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000029'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''tags.read'', ''019c18d5-62e1-7000-9000-000000000002'', NULL, NULL)');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'IsDeleted', N'PermissionKey', N'RoleId', N'UpdatedAtUtc', N'UpdatedByUserId') AND [object_id] = OBJECT_ID(N'[identity].[RolePermissions]'))
+        SET IDENTITY_INSERT [identity].[RolePermissions] OFF;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__IdentityMigrationsHistory]
+    WHERE [MigrationId] = N'20260822165718_AddMissingModelApiPermissions'
+)
+BEGIN
+    INSERT INTO [migration].[__IdentityMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260822165718_AddMissingModelApiPermissions', N'10.0.11');
+END;
+
+COMMIT;
+GO
+

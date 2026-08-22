@@ -1,4 +1,6 @@
+using System.Text.Json;
 using LogisticsERP.Application.Authorization;
+using LogisticsERP.Application.Features.SupportAccess;
 using LogisticsERP.Domain.Enums;
 using LogisticsERP.Infrastructure.Identity;
 using LogisticsERP.Infrastructure.Persistence;
@@ -74,6 +76,9 @@ internal sealed class PermissionChecker(
             && IsApplicable(definition, assignment, scope, targetClientPlatformId, denyWithoutScopeIsGlobal: false));
     }
 
+    public void InvalidateUser(Guid userId, long authorizationVersion) =>
+        memoryCache.Remove($"permission-snapshot:{userId:N}:{authorizationVersion}");
+
     private async Task<AuthorizationSnapshot> GetSnapshotAsync(
         Guid userId,
         long authorizationVersion,
@@ -140,6 +145,36 @@ internal sealed class PermissionChecker(
                 assignment.ExpiresAtUtc))
             .ToArrayAsync(cancellationToken);
 
+        var supportRows = await identityDbContext.SupportAccessGrants
+            .AsNoTracking()
+            .Where(grant => grant.PlatformOperatorUserId == userId
+                && (grant.Status == SupportAccessStatus.Approved || grant.Status == SupportAccessStatus.Active)
+                && grant.RequestedStartAtUtc <= now
+                && grant.RequestedEndAtUtc > now)
+            .Select(grant => new
+            {
+                grant.Id,
+                grant.RequestedPermissionsJson,
+                grant.RequestedScopesJson,
+                grant.RequestedStartAtUtc,
+                grant.RequestedEndAtUtc
+            })
+            .ToArrayAsync(cancellationToken);
+
+        var supportAssignments = supportRows.SelectMany(row =>
+        {
+            var scopes = DeserializeSupportScopes(row.RequestedScopesJson);
+            return DeserializeSupportPermissions(row.RequestedPermissionsJson)
+                .Where(PermissionKeys.All.Contains)
+                .Select(permission => new PermissionAssignmentSnapshot(
+                    permission,
+                    PermissionEffect.Grant,
+                    false,
+                    false,
+                    false,
+                    scopes));
+        }).ToArray();
+
         var roleAssignmentIds = roleRows.Select(row => row.AssignmentId).Distinct().ToArray();
         var directAssignmentIds = directRows.Select(row => row.AssignmentId).Distinct().ToArray();
         var scopeRows = roleAssignmentIds.Length == 0 && directAssignmentIds.Length == 0
@@ -168,6 +203,7 @@ internal sealed class PermissionChecker(
         var authorizationBoundaries = roleRows
             .SelectMany(row => new DateTimeOffset?[] { row.StartsAtUtc, row.ExpiresAtUtc })
             .Concat(directRows.SelectMany(row => new DateTimeOffset?[] { row.StartsAtUtc, row.ExpiresAtUtc }))
+            .Concat(supportRows.SelectMany(row => new DateTimeOffset?[] { row.RequestedStartAtUtc, row.RequestedEndAtUtc }))
             .Where(boundary => boundary > now)
             .Select(boundary => boundary!.Value);
         var validUntilUtc = authorizationBoundaries
@@ -179,12 +215,35 @@ internal sealed class PermissionChecker(
             roleRows
                 .Where(row => row.StartsAtUtc <= now)
                 .Select(row => ToSnapshot(row, roleScopes[row.AssignmentId]))
+                .Concat(supportAssignments)
                 .ToArray(),
             directRows
                 .Where(row => row.StartsAtUtc <= now)
                 .Select(row => ToSnapshot(row, directScopes[row.AssignmentId]))
                 .ToArray(),
             validUntilUtc);
+    }
+
+    private static string[] DeserializeSupportPermissions(string json)
+    {
+        try { return JsonSerializer.Deserialize<string[]>(json) ?? []; }
+        catch (JsonException) { return []; }
+    }
+
+    private static PermissionScope[] DeserializeSupportScopes(string json)
+    {
+        try
+        {
+            return (JsonSerializer.Deserialize<SupportAccessScopeRequest[]>(json) ?? [])
+                .Where(scope => Enum.TryParse<AccessScopeType>(scope.Type, true, out _))
+                .Select(scope => new PermissionScope(Enum.Parse<AccessScopeType>(scope.Type, true), scope.TargetId))
+                .Distinct()
+                .ToArray();
+        }
+        catch (JsonException)
+        {
+            return [];
+        }
     }
 
     private static PermissionAssignmentSnapshot ToSnapshot(

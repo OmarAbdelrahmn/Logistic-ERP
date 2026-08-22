@@ -16,21 +16,62 @@ internal static class AuthorizationSeedCatalog
         PermissionKeys.Security.PermissionsManage,
         PermissionKeys.Security.AuditRead,
         PermissionKeys.Security.SupportAccessManage,
+        PermissionKeys.Catalog.CompanyProfileRead,
+        PermissionKeys.Catalog.CompanyProfileManage,
         PermissionKeys.Catalog.OperatingCitiesRead,
         PermissionKeys.Catalog.OperatingCitiesManage,
-        PermissionKeys.Reporting.ReportsRead
+        PermissionKeys.Catalog.TagsRead,
+        PermissionKeys.Catalog.TagsManage,
+        PermissionKeys.Documents.CatalogManage,
+        PermissionKeys.Operations.PlatformCredentialsRead,
+        PermissionKeys.Operations.PlatformCredentialsRotate,
+        PermissionKeys.Reporting.ReportsRead,
+        PermissionKeys.Fleet.VehiclesRead,
+        PermissionKeys.Fleet.VehiclesManage,
+        PermissionKeys.Fleet.VehiclesArchive,
+        PermissionKeys.Fleet.VehiclesDecommission,
+        PermissionKeys.Fleet.AssignmentsRead,
+        PermissionKeys.Fleet.AssignmentsManage,
+        PermissionKeys.Fleet.AssignmentsCorrect,
+        PermissionKeys.Fleet.IssuesRead,
+        PermissionKeys.Fleet.IssuesManage,
+        PermissionKeys.Fleet.ComplianceRead,
+        PermissionKeys.Fleet.ComplianceManage,
+        PermissionKeys.Fleet.FilesRead,
+        PermissionKeys.Fleet.FilesUpload,
+        PermissionKeys.Fleet.FilesDownload,
+        PermissionKeys.Fleet.AccidentsRead,
+        PermissionKeys.Fleet.AccidentsReport,
+        PermissionKeys.Fleet.AccidentsFinalize,
+        PermissionKeys.Fleet.AccidentsDownload,
+        PermissionKeys.Fleet.CorrectionsManage
     ];
 
     public static IReadOnlyList<string> ManagerPermissions { get; } =
     [
         PermissionKeys.Catalog.OperatingCitiesRead,
+        PermissionKeys.Catalog.TagsRead,
         PermissionKeys.Workforce.EmployeesRead,
         PermissionKeys.Workforce.RidersRead,
         PermissionKeys.Operations.PlatformAccountsRead,
         PermissionKeys.Operations.PlatformAssignmentsRead,
         PermissionKeys.Operations.HousingRead,
         PermissionKeys.Reporting.ReportsRead,
-        PermissionKeys.Reporting.NotificationsRead
+        PermissionKeys.Reporting.NotificationsRead,
+        PermissionKeys.Fleet.VehiclesRead,
+        PermissionKeys.Fleet.VehiclesManage,
+        PermissionKeys.Fleet.AssignmentsRead,
+        PermissionKeys.Fleet.AssignmentsManage,
+        PermissionKeys.Fleet.IssuesRead,
+        PermissionKeys.Fleet.IssuesManage,
+        PermissionKeys.Fleet.ComplianceRead,
+        PermissionKeys.Fleet.ComplianceManage,
+        PermissionKeys.Fleet.FilesRead,
+        PermissionKeys.Fleet.FilesUpload,
+        PermissionKeys.Fleet.FilesDownload,
+        PermissionKeys.Fleet.AccidentsRead,
+        PermissionKeys.Fleet.AccidentsReport,
+        PermissionKeys.Fleet.AccidentsDownload
     ];
 
     public static IReadOnlyList<RolePermissionSeed> RolePermissions { get; } =
@@ -41,8 +82,44 @@ internal static class AuthorizationSeedCatalog
         var seeds = new List<RolePermissionSeed>(SystemAdminPermissions.Count + ManagerPermissions.Count);
         var sequence = 1;
 
-        AddRolePermissions(seeds, SystemRoles.SystemAdminId, SystemAdminPermissions, ref sequence);
-        AddRolePermissions(seeds, SystemRoles.ManagerId, ManagerPermissions, ref sequence);
+        string[] legacySystemAdminPermissions =
+        [
+            PermissionKeys.Security.UsersRead,
+            PermissionKeys.Security.UsersCreate,
+            PermissionKeys.Security.UsersUpdate,
+            PermissionKeys.Security.UsersArchive,
+            PermissionKeys.Security.RolesRead,
+            PermissionKeys.Security.RolesManage,
+            PermissionKeys.Security.PermissionsRead,
+            PermissionKeys.Security.PermissionsManage,
+            PermissionKeys.Security.AuditRead,
+            PermissionKeys.Security.SupportAccessManage,
+            PermissionKeys.Catalog.OperatingCitiesRead,
+            PermissionKeys.Catalog.OperatingCitiesManage,
+            PermissionKeys.Reporting.ReportsRead
+        ];
+        string[] legacyManagerPermissions =
+        [
+            PermissionKeys.Catalog.OperatingCitiesRead,
+            PermissionKeys.Workforce.EmployeesRead,
+            PermissionKeys.Workforce.RidersRead,
+            PermissionKeys.Operations.PlatformAccountsRead,
+            PermissionKeys.Operations.PlatformAssignmentsRead,
+            PermissionKeys.Operations.HousingRead,
+            PermissionKeys.Reporting.ReportsRead,
+            PermissionKeys.Reporting.NotificationsRead
+        ];
+
+        AddRolePermissions(seeds, SystemRoles.SystemAdminId, legacySystemAdminPermissions, ref sequence);
+        AddRolePermissions(seeds, SystemRoles.ManagerId, legacyManagerPermissions, ref sequence);
+        AddRolePermissions(seeds, SystemRoles.SystemAdminId,
+            SystemAdminPermissions.Except(legacySystemAdminPermissions).Where(key => !key.StartsWith("fleet.", StringComparison.Ordinal)), ref sequence);
+        AddRolePermissions(seeds, SystemRoles.ManagerId,
+            ManagerPermissions.Except(legacyManagerPermissions).Where(key => !key.StartsWith("fleet.", StringComparison.Ordinal)), ref sequence);
+        AddRolePermissions(seeds, SystemRoles.SystemAdminId,
+            SystemAdminPermissions.Where(key => key.StartsWith("fleet.", StringComparison.Ordinal)), ref sequence);
+        AddRolePermissions(seeds, SystemRoles.ManagerId,
+            ManagerPermissions.Where(key => key.StartsWith("fleet.", StringComparison.Ordinal)), ref sequence);
 
         return seeds;
     }

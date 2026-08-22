@@ -12,6 +12,13 @@ internal sealed class ApplicationPersistenceInterceptor(
     ICurrentUser currentUser,
     TimeProvider timeProvider) : SaveChangesInterceptor
 {
+    private static readonly HashSet<string> TemporalClosureProperties = new(StringComparer.Ordinal)
+    {
+        nameof(TemporalPeriodEntity.EffectiveTo),
+        "MoveOutReason",
+        "DestinationReference",
+        "EndReason"
+    };
     private static readonly HashSet<string> ExcludedAuditProperties = new(StringComparer.OrdinalIgnoreCase)
     {
         nameof(AuditableEntity.RowVersion),
@@ -127,7 +134,7 @@ internal sealed class ApplicationPersistenceInterceptor(
                 .ToArray();
 
             if (!effectiveToProperty.IsModified
-                || modifiedProperties.Any(property => property is not nameof(TemporalPeriodEntity.EffectiveTo))
+                || modifiedProperties.Any(property => !TemporalClosureProperties.Contains(property))
                 || effectiveToProperty.OriginalValue is not null
                 || temporal.EffectiveTo is null
                 || temporal.EffectiveTo < temporal.EffectiveFrom)

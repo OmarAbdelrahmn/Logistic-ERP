@@ -79,6 +79,7 @@ internal sealed class PlatformAccountCredentialVersionConfiguration : IEntityTyp
         builder.Property(entity => entity.Ciphertext).IsRequired();
         builder.Property(entity => entity.Nonce).HasMaxLength(32).IsRequired();
         builder.Property(entity => entity.AuthenticationTag).HasMaxLength(32).IsRequired();
+        builder.Property(entity => entity.RotationReason).HasMaxLength(1000).IsRequired();
         builder.HasOne<PlatformRiderAccount>().WithMany().HasForeignKey(entity => entity.PlatformRiderAccountId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<PlatformAccountCredentialVersion>().WithMany().HasForeignKey(entity => entity.SupersededVersionId).OnDelete(DeleteBehavior.Restrict);
         builder.HasIndex(entity => new { entity.PlatformRiderAccountId, entity.KeyVersion }).IsUnique();
