@@ -1,0 +1,17 @@
+**/bin/
+**/obj/
+.vs/
+.idea/
+.vscode/
+TestResults/
+coverage/
+artifacts/
+*.user
+*.suo
+*.db
+*.log
+.env
+.env.*
+!*.example
+src/LogisticsERP.Api/App_Data/
+src/LogisticsERP.Worker/App_Data/

@@ -1,0 +1,29 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = crlf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.cs]
+indent_style = space
+indent_size = 4
+dotnet_sort_system_directives_first = true
+csharp_style_namespace_declarations = file_scoped:error
+csharp_style_prefer_primary_constructors = true:suggestion
+dotnet_diagnostic.CA1062.severity = none
+
+[**/Migrations/**/*.cs]
+# EF Core owns generated migration formatting and allocation syntax.
+dotnet_diagnostic.IDE0161.severity = none
+dotnet_diagnostic.CA1861.severity = none
+
+[**/Migrations/*.cs]
+# EF Core also places context-specific migrations directly in this folder.
+dotnet_diagnostic.IDE0161.severity = none
+dotnet_diagnostic.CA1861.severity = none
+
+[*.{json,yml,yaml,props,targets,csproj,slnx}]
+indent_style = space
+indent_size = 2
