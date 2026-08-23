@@ -6,7 +6,7 @@ namespace LogisticsERP.Domain.Entities.Workforce;
 public sealed class EmployeeResidencyPermit : AuditableEntity
 {
     public Guid EmployeeId { get; set; }
-    public Guid SponsorId { get; set; }
+    public Guid? SponsorId { get; set; }
     public Guid ResidencyProfessionId { get; set; }
     public byte[] PermitNumberCiphertext { get; set; } = [];
     public string PermitNumberLookupHash { get; set; } = string.Empty;

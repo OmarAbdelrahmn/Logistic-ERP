@@ -63,7 +63,8 @@ public sealed record ManagedRoleResponse(
     string NameEn,
     string Status,
     bool IsProtected,
-    IReadOnlyList<string> PermissionKeys);
+    IReadOnlyList<string> PermissionKeys,
+    string RowVersion);
 
 public sealed record ManagedRoleUpsertRequest(
     string Code,

@@ -15,11 +15,12 @@ internal sealed class ComplianceService(
     public async Task<Result<IReadOnlyList<ResidencyPermitResponse>>> GetResidencyPermitsAsync(Guid? employeeId, CancellationToken cancellationToken = default)
     {
         var query = from item in dbContext.EmployeeResidencyPermits.AsNoTracking()
-                    join sponsor in dbContext.Sponsors.AsNoTracking() on item.SponsorId equals sponsor.Id
+                    join sponsor in dbContext.Sponsors.AsNoTracking() on item.SponsorId equals sponsor.Id into sponsors
+                    from sponsor in sponsors.DefaultIfEmpty()
                     join profession in dbContext.ResidencyProfessions.AsNoTracking() on item.ResidencyProfessionId equals profession.Id
                     where employeeId == null || item.EmployeeId == employeeId
                     orderby item.IsCurrent descending, item.ExpiryDate descending
-                    select new ResidencyPermitProjection(item, sponsor.RegistryNameAr, profession.NameAr);
+                    select new ResidencyPermitProjection(item, sponsor == null ? null : sponsor.RegistryNameAr, profession.NameAr);
         var rows = await query.ToArrayAsync(cancellationToken);
         return Result.Success<IReadOnlyList<ResidencyPermitResponse>>(rows.Select(ToResidency).ToArray());
     }
@@ -33,7 +34,7 @@ internal sealed class ComplianceService(
             return Result.Failure<ResidencyPermitResponse>(HrErrors.InvalidRequest);
         }
         var refsValid = await dbContext.Employees.AnyAsync(item => item.Id == employeeId, cancellationToken)
-            && await dbContext.Sponsors.AnyAsync(item => item.Id == request.SponsorId, cancellationToken)
+            && (request.SponsorId is null || await dbContext.Sponsors.AnyAsync(item => item.Id == request.SponsorId, cancellationToken))
             && await dbContext.ResidencyProfessions.AnyAsync(item => item.Id == request.ResidencyProfessionId, cancellationToken)
             && await DocumentBelongsToEmployeeAsync(employeeId, request.EmployeeDocumentId, cancellationToken);
         if (!refsValid)
@@ -645,7 +646,7 @@ internal sealed class ComplianceService(
     private static bool TryParseEnum<TEnum>(string? value, out TEnum parsed) where TEnum : struct, Enum =>
         Enum.TryParse(value, true, out parsed) && Enum.IsDefined(parsed);
 
-    private sealed record ResidencyPermitProjection(EmployeeResidencyPermit Item, string SponsorNameAr, string ProfessionNameAr);
+    private sealed record ResidencyPermitProjection(EmployeeResidencyPermit Item, string? SponsorNameAr, string ProfessionNameAr);
     private sealed record DriverLicenseProjection(EmployeeDriverLicense Item, string CategoryNameAr);
     private sealed record PromissoryNoteProjection(EmployeePromissoryNote Item, string? SponsorNameAr);
     private sealed record MedicalPolicyProjection(EmployeeMedicalInsurancePolicy Item, string CompanyNameAr, string PlanNameAr);

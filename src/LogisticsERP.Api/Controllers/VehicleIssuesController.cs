@@ -22,10 +22,10 @@ public sealed class VehicleIssuesController(IFleetService service) : ControllerB
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 
-    [HttpPost("{id:guid}/{action:regex(^(review|close|reject)$)}")]
-    public async Task<IActionResult> Act(Guid id, string action, [FromBody] VehicleIssueActionRequest request, CancellationToken cancellationToken)
+    [HttpPost("{id:guid}/{operation:regex(^(review|close|reject)$)}")]
+    public async Task<IActionResult> Act(Guid id, string operation, [FromBody] VehicleIssueActionRequest request, CancellationToken cancellationToken)
     {
-        var result = await service.ActOnIssueAsync(id, action, request, cancellationToken);
+        var result = await service.ActOnIssueAsync(id, operation, request, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 

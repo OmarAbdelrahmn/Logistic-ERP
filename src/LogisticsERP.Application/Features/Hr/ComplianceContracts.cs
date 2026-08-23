@@ -1,7 +1,7 @@
 namespace LogisticsERP.Application.Features.Hr;
 
 public sealed record ResidencyPermitUpsertRequest(
-    Guid SponsorId,
+    Guid? SponsorId,
     Guid ResidencyProfessionId,
     string? PermitNumber,
     DateOnly? IssueDate,
@@ -16,8 +16,8 @@ public sealed record ResidencyPermitUpsertRequest(
 public sealed record ResidencyPermitResponse(
     Guid Id,
     Guid EmployeeId,
-    Guid SponsorId,
-    string SponsorNameAr,
+    Guid? SponsorId,
+    string? SponsorNameAr,
     Guid ResidencyProfessionId,
     string ResidencyProfessionAr,
     string PermitNumberMasked,
@@ -234,4 +234,3 @@ public sealed record MedicalInsurancePolicyResponse(
     Guid? EmployeeDocumentId,
     string? Notes,
     string RowVersion);
-

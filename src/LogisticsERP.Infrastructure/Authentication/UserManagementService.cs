@@ -391,14 +391,15 @@ internal sealed class UserManagementService(
     {
         var roles = await identityDbContext.Roles.AsNoTracking()
             .OrderBy(role => role.Code)
-            .Select(role => new { role.Id, role.Code, role.NameAr, role.NameEn, role.Status, role.IsProtected })
+            .Select(role => new { role.Id, role.Code, role.NameAr, role.NameEn, role.Status, role.IsProtected, role.RowVersion })
             .ToListAsync(cancellationToken);
         var grants = await identityDbContext.RolePermissionGrants.AsNoTracking()
             .Select(grant => new { grant.RoleId, grant.PermissionKey })
             .ToListAsync(cancellationToken);
         return Result.Success<IReadOnlyList<ManagedRoleResponse>>(roles.Select(role => new ManagedRoleResponse(
             role.Id, role.Code, role.NameAr, role.NameEn, role.Status.ToString(), role.IsProtected,
-            grants.Where(grant => grant.RoleId == role.Id).Select(grant => grant.PermissionKey).Order().ToArray())).ToArray());
+            grants.Where(grant => grant.RoleId == role.Id).Select(grant => grant.PermissionKey).Order().ToArray(),
+            Convert.ToBase64String(role.RowVersion))).ToArray());
     }
 
     public async Task<Result<ManagedRoleResponse>> UpsertRoleAsync(
@@ -838,7 +839,8 @@ internal sealed class UserManagementService(
             role.NameEn,
             role.Status.ToString(),
             role.IsProtected,
-            permissions);
+            permissions,
+            Convert.ToBase64String(role.RowVersion));
     }
 
     private async Task RevokeActiveTemporaryCredentialsAsync(Guid userId, DateTimeOffset now, CancellationToken cancellationToken)
