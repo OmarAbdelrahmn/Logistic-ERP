@@ -19,6 +19,7 @@ public sealed class MissingModelApiSurfaceTests
         { typeof(SupportAccessController), nameof(SupportAccessController.Resolve), typeof(HttpPostAttribute), PermissionKeys.Security.SupportAccessManage },
         { typeof(HrWorkflowsController), nameof(HrWorkflowsController.ResolveCancellation), typeof(HttpPostAttribute), PermissionKeys.Workflows.LeaveRequestsApprove },
         { typeof(LeaveDocumentsController), nameof(LeaveDocumentsController.Download), typeof(HttpGetAttribute), PermissionKeys.Documents.DownloadSensitive },
+        { typeof(RiderDocumentsController), nameof(RiderDocumentsController.AjeerContract), typeof(HttpPostAttribute), PermissionKeys.Documents.Upload },
         { typeof(ExportsController), nameof(ExportsController.Create), typeof(HttpPostAttribute), PermissionKeys.Reporting.ExportsCreate },
         { typeof(AuditEntriesController), nameof(AuditEntriesController.Query), typeof(HttpGetAttribute), PermissionKeys.Security.AuditRead },
         { typeof(DatasetVersionsController), nameof(DatasetVersionsController.Get), typeof(HttpGetAttribute), PermissionKeys.Reporting.ReportsRead }

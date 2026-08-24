@@ -11,6 +11,7 @@ public sealed class DocumentType : AuditableEntity
     public static readonly Guid HealthCardId = Guid.Parse("019c18d5-62e1-7000-8000-000000000033");
     public static readonly Guid PromissoryNoteId = Guid.Parse("019c18d5-62e1-7000-8000-000000000034");
     public static readonly Guid MedicalInsuranceId = Guid.Parse("019c18d5-62e1-7000-8000-000000000035");
+    public static readonly Guid AjeerContractId = Guid.Parse("019c18d5-62e1-7000-8000-000000000036");
 
     public string Code { get; set; } = string.Empty;
     public string NameAr { get; set; } = string.Empty;

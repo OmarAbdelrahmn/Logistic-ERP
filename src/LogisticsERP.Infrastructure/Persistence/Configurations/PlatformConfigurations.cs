@@ -214,7 +214,8 @@ internal sealed class DocumentTypeConfiguration : IEntityTypeConfiguration<Docum
             CreateDocumentTypeSeed(DocumentType.RiderCardId, "RIDER_CARD", "بطاقة السائق", "Rider Card", true, true, true, true, true, true, true, allowedMimeTypes, maxFileSizeBytes, seededAt),
             CreateDocumentTypeSeed(DocumentType.HealthCardId, "HEALTH_CARD", "البطاقة الصحية", "Health Card", true, true, true, true, true, true, true, allowedMimeTypes, maxFileSizeBytes, seededAt),
             CreateDocumentTypeSeed(DocumentType.PromissoryNoteId, "PROMISSORY_NOTE", "سند الأمر", "Promissory Note", true, true, false, true, true, false, true, allowedMimeTypes, maxFileSizeBytes, seededAt),
-            CreateDocumentTypeSeed(DocumentType.MedicalInsuranceId, "MEDICAL_INSURANCE", "التأمين الطبي", "Medical Insurance", true, true, true, true, true, true, true, allowedMimeTypes, maxFileSizeBytes, seededAt));
+            CreateDocumentTypeSeed(DocumentType.MedicalInsuranceId, "MEDICAL_INSURANCE", "التأمين الطبي", "Medical Insurance", true, true, true, true, true, true, true, allowedMimeTypes, maxFileSizeBytes, seededAt),
+            CreateDocumentTypeSeed(DocumentType.AjeerContractId, "AJEER_CONTRACT", "عقود اجير", "Ajeer Contracts", true, true, true, true, true, true, true, allowedMimeTypes, maxFileSizeBytes, seededAt));
     }
 
     private static object CreateDocumentTypeSeed(

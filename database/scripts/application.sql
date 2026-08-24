@@ -6148,3 +6148,1280 @@ END;
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823071345_MakeResidencyPermitSponsorOptional'
+)
+BEGIN
+    DECLARE @var8 nvarchar(max);
+    SELECT @var8 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[app].[EmployeeResidencyPermits]') AND [c].[name] = N'SponsorId');
+    IF @var8 IS NOT NULL EXEC(N'ALTER TABLE [app].[EmployeeResidencyPermits] DROP CONSTRAINT ' + @var8 + ';');
+    ALTER TABLE [app].[EmployeeResidencyPermits] ALTER COLUMN [SponsorId] uniqueidentifier NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823071345_MakeResidencyPermitSponsorOptional'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260823071345_MakeResidencyPermitSponsorOptional', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DECLARE @Targets TABLE
+    (
+        SchemaName sysname NOT NULL,
+        TableName sysname NOT NULL,
+        PRIMARY KEY (SchemaName, TableName)
+    );
+
+    INSERT INTO @Targets (SchemaName, TableName)
+    VALUES (N'app', N'Employees');
+
+    WHILE 1 = 1
+    BEGIN
+        INSERT INTO @Targets (SchemaName, TableName)
+        SELECT DISTINCT childSchema.name, childTable.name
+        FROM sys.foreign_keys AS foreignKey
+        INNER JOIN sys.tables AS childTable
+            ON childTable.object_id = foreignKey.parent_object_id
+        INNER JOIN sys.schemas AS childSchema
+            ON childSchema.schema_id = childTable.schema_id
+        INNER JOIN sys.tables AS parentTable
+            ON parentTable.object_id = foreignKey.referenced_object_id
+        INNER JOIN sys.schemas AS parentSchema
+            ON parentSchema.schema_id = parentTable.schema_id
+        INNER JOIN @Targets AS target
+            ON target.SchemaName = parentSchema.name
+            AND target.TableName = parentTable.name
+        WHERE NOT EXISTS
+        (
+            SELECT 1
+            FROM @Targets AS existing
+            WHERE existing.SchemaName = childSchema.name
+              AND existing.TableName = childTable.name
+        );
+
+        IF @@ROWCOUNT = 0 BREAK;
+    END;
+
+    DECLARE @DisableConstraints nvarchar(max);
+    SELECT @DisableConstraints = STRING_AGG(CAST(
+        N'ALTER TABLE ' + QUOTENAME(SchemaName) + N'.' + QUOTENAME(TableName)
+        + N' NOCHECK CONSTRAINT ALL;' AS nvarchar(max)), NCHAR(10))
+    FROM @Targets;
+    EXEC sys.sp_executesql @DisableConstraints;
+
+    DECLARE @DeleteRows nvarchar(max);
+    SELECT @DeleteRows = STRING_AGG(CAST(
+        N'DELETE FROM ' + QUOTENAME(SchemaName) + N'.' + QUOTENAME(TableName) + N';' AS nvarchar(max)),
+        NCHAR(10))
+    FROM @Targets;
+    EXEC sys.sp_executesql @DeleteRows;
+
+    DECLARE @EnableConstraints nvarchar(max);
+    SELECT @EnableConstraints = STRING_AGG(CAST(
+        N'ALTER TABLE ' + QUOTENAME(SchemaName) + N'.' + QUOTENAME(TableName)
+        + N' WITH CHECK CHECK CONSTRAINT ALL;' AS nvarchar(max)), NCHAR(10))
+    FROM @Targets;
+    EXEC sys.sp_executesql @EnableConstraints;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    ALTER TABLE [app].[EmployeeStatusChangeRequests] DROP CONSTRAINT [FK_EmployeeStatusChangeRequests_EmployeeStatusPeriods_ResultingStatusPeriodId];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    ALTER TABLE [app].[PlatformRiderAccounts] DROP CONSTRAINT [FK_PlatformRiderAccounts_ClientContracts_ClientContractId_ClientPlatformId];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    ALTER TABLE [app].[PlatformRiderAccounts] DROP CONSTRAINT [FK_PlatformRiderAccounts_Sponsors_SponsorId];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    ALTER TABLE [app].[RiderClientAssignments] DROP CONSTRAINT [FK_RiderClientAssignments_Employees_ActualEmployeeId];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    ALTER TABLE [app].[RiderClientAssignments] DROP CONSTRAINT [FK_RiderClientAssignments_PlatformRiderAccounts_PlatformRiderAccountId_ClientContractId];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    ALTER TABLE [app].[RiderClientAssignments] DROP CONSTRAINT [FK_RiderClientAssignments_RiderProfiles_RiderProfileId_ActualEmployeeId];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    ALTER TABLE [app].[RiderProfiles] DROP CONSTRAINT [FK_RiderProfiles_GlobalCities_PreferredCityId];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    ALTER TABLE [app].[RiderVehicleAssignments] DROP CONSTRAINT [FK_RiderVehicleAssignments_Employees_EmployeeId];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    ALTER TABLE [app].[RiderVehicleAssignments] DROP CONSTRAINT [FK_RiderVehicleAssignments_RiderProfiles_RiderProfileId_EmployeeId];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DROP TABLE [app].[EmployeeJobTitlePeriods];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DROP TABLE [app].[EmployeeRelationshipPeriods];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DROP TABLE [app].[EmployeeResidencyPermits];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DROP TABLE [app].[EmployeeSponsorshipPeriods];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DROP TABLE [app].[EmployeeStatusPeriods];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DROP TABLE [app].[OutsideRiderDetails];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DROP TABLE [app].[SponsoredInternalDetails];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DROP INDEX [IX_RiderVehicleAssignments_EmployeeId] ON [app].[RiderVehicleAssignments];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DROP INDEX [IX_RiderVehicleAssignments_RiderProfileId_EmployeeId] ON [app].[RiderVehicleAssignments];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DROP INDEX [IX_RiderProfiles_PreferredCityId] ON [app].[RiderProfiles];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DROP INDEX [IX_RiderProfiles_Status] ON [app].[RiderProfiles];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    ALTER TABLE [app].[RiderProfiles] DROP CONSTRAINT [CK_RiderProfiles_DateRange];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DROP INDEX [IX_RiderClientAssignments_ActualEmployeeId] ON [app].[RiderClientAssignments];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DROP INDEX [IX_RiderClientAssignments_ActualEmployeeId_EffectiveFrom] ON [app].[RiderClientAssignments];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DROP INDEX [IX_RiderClientAssignments_PlatformRiderAccountId_ClientContractId] ON [app].[RiderClientAssignments];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DROP INDEX [IX_RiderClientAssignments_RiderProfileId_ActualEmployeeId] ON [app].[RiderClientAssignments];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    ALTER TABLE [app].[PlatformRiderAccounts] DROP CONSTRAINT [AK_PlatformRiderAccounts_Id_ClientContractId];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DROP INDEX [IX_PlatformRiderAccounts_ClientContractId_ClientPlatformId] ON [app].[PlatformRiderAccounts];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DROP INDEX [IX_PlatformRiderAccounts_ClientContractId_Status] ON [app].[PlatformRiderAccounts];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DROP INDEX [IX_PlatformRiderAccounts_ClientPlatformId_NormalizedExternalAccountId] ON [app].[PlatformRiderAccounts];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DROP INDEX [IX_PlatformRiderAccounts_OperatingCityId_SponsorId_RegistrationType] ON [app].[PlatformRiderAccounts];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DROP INDEX [IX_PlatformRiderAccounts_RegisteredEmployeeId_ClientPlatformId_Status] ON [app].[PlatformRiderAccounts];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DROP INDEX [IX_PlatformRiderAccounts_SponsorId] ON [app].[PlatformRiderAccounts];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    ALTER TABLE [app].[PlatformRiderAccounts] DROP CONSTRAINT [CK_PlatformRiderAccounts_Registration];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DROP INDEX [IX_Employees_CurrentStatus] ON [app].[Employees];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DROP INDEX [IX_Employees_EmployeeNumber] ON [app].[Employees];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DROP INDEX [IX_Employees_NormalizedNameAr] ON [app].[Employees];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DROP INDEX [IX_Employees_NormalizedNameEn] ON [app].[Employees];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DROP INDEX [IX_EmployeeDocuments_DocumentTypeId_NormalizedDocumentNumber] ON [app].[EmployeeDocuments];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DECLARE @var9 nvarchar(max);
+    SELECT @var9 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[app].[RiderVehicleAssignments]') AND [c].[name] = N'EmployeeId');
+    IF @var9 IS NOT NULL EXEC(N'ALTER TABLE [app].[RiderVehicleAssignments] DROP CONSTRAINT ' + @var9 + ';');
+    ALTER TABLE [app].[RiderVehicleAssignments] DROP COLUMN [EmployeeId];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DECLARE @var10 nvarchar(max);
+    SELECT @var10 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[app].[RiderProfiles]') AND [c].[name] = N'PreferredCityId');
+    IF @var10 IS NOT NULL EXEC(N'ALTER TABLE [app].[RiderProfiles] DROP CONSTRAINT ' + @var10 + ';');
+    ALTER TABLE [app].[RiderProfiles] DROP COLUMN [PreferredCityId];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DECLARE @var11 nvarchar(max);
+    SELECT @var11 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[app].[RiderProfiles]') AND [c].[name] = N'RiderEndDate');
+    IF @var11 IS NOT NULL EXEC(N'ALTER TABLE [app].[RiderProfiles] DROP CONSTRAINT ' + @var11 + ';');
+    ALTER TABLE [app].[RiderProfiles] DROP COLUMN [RiderEndDate];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DECLARE @var12 nvarchar(max);
+    SELECT @var12 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[app].[RiderProfiles]') AND [c].[name] = N'RiderStartDate');
+    IF @var12 IS NOT NULL EXEC(N'ALTER TABLE [app].[RiderProfiles] DROP CONSTRAINT ' + @var12 + ';');
+    ALTER TABLE [app].[RiderProfiles] DROP COLUMN [RiderStartDate];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DECLARE @var13 nvarchar(max);
+    SELECT @var13 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[app].[RiderProfiles]') AND [c].[name] = N'Status');
+    IF @var13 IS NOT NULL EXEC(N'ALTER TABLE [app].[RiderProfiles] DROP CONSTRAINT ' + @var13 + ';');
+    ALTER TABLE [app].[RiderProfiles] DROP COLUMN [Status];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DECLARE @var14 nvarchar(max);
+    SELECT @var14 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[app].[RiderClientAssignments]') AND [c].[name] = N'ActualEmployeeId');
+    IF @var14 IS NOT NULL EXEC(N'ALTER TABLE [app].[RiderClientAssignments] DROP CONSTRAINT ' + @var14 + ';');
+    ALTER TABLE [app].[RiderClientAssignments] DROP COLUMN [ActualEmployeeId];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DECLARE @var15 nvarchar(max);
+    SELECT @var15 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[app].[PlatformRiderAccounts]') AND [c].[name] = N'BillingMode');
+    IF @var15 IS NOT NULL EXEC(N'ALTER TABLE [app].[PlatformRiderAccounts] DROP CONSTRAINT ' + @var15 + ';');
+    ALTER TABLE [app].[PlatformRiderAccounts] DROP COLUMN [BillingMode];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DECLARE @var16 nvarchar(max);
+    SELECT @var16 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[app].[PlatformRiderAccounts]') AND [c].[name] = N'ClientContractId');
+    IF @var16 IS NOT NULL EXEC(N'ALTER TABLE [app].[PlatformRiderAccounts] DROP CONSTRAINT ' + @var16 + ';');
+    ALTER TABLE [app].[PlatformRiderAccounts] DROP COLUMN [ClientContractId];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DECLARE @var17 nvarchar(max);
+    SELECT @var17 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[app].[PlatformRiderAccounts]') AND [c].[name] = N'LabelAr');
+    IF @var17 IS NOT NULL EXEC(N'ALTER TABLE [app].[PlatformRiderAccounts] DROP CONSTRAINT ' + @var17 + ';');
+    ALTER TABLE [app].[PlatformRiderAccounts] DROP COLUMN [LabelAr];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DECLARE @var18 nvarchar(max);
+    SELECT @var18 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[app].[PlatformRiderAccounts]') AND [c].[name] = N'LabelEn');
+    IF @var18 IS NOT NULL EXEC(N'ALTER TABLE [app].[PlatformRiderAccounts] DROP CONSTRAINT ' + @var18 + ';');
+    ALTER TABLE [app].[PlatformRiderAccounts] DROP COLUMN [LabelEn];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DECLARE @var19 nvarchar(max);
+    SELECT @var19 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[app].[PlatformRiderAccounts]') AND [c].[name] = N'NormalizedExternalAccountId');
+    IF @var19 IS NOT NULL EXEC(N'ALTER TABLE [app].[PlatformRiderAccounts] DROP CONSTRAINT ' + @var19 + ';');
+    ALTER TABLE [app].[PlatformRiderAccounts] DROP COLUMN [NormalizedExternalAccountId];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DECLARE @var20 nvarchar(max);
+    SELECT @var20 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[app].[PlatformRiderAccounts]') AND [c].[name] = N'RegistrationType');
+    IF @var20 IS NOT NULL EXEC(N'ALTER TABLE [app].[PlatformRiderAccounts] DROP CONSTRAINT ' + @var20 + ';');
+    ALTER TABLE [app].[PlatformRiderAccounts] DROP COLUMN [RegistrationType];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DECLARE @var21 nvarchar(max);
+    SELECT @var21 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[app].[PlatformRiderAccounts]') AND [c].[name] = N'SponsorId');
+    IF @var21 IS NOT NULL EXEC(N'ALTER TABLE [app].[PlatformRiderAccounts] DROP CONSTRAINT ' + @var21 + ';');
+    ALTER TABLE [app].[PlatformRiderAccounts] DROP COLUMN [SponsorId];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DECLARE @var22 nvarchar(max);
+    SELECT @var22 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[app].[Employees]') AND [c].[name] = N'EmployeeNumber');
+    IF @var22 IS NOT NULL EXEC(N'ALTER TABLE [app].[Employees] DROP CONSTRAINT ' + @var22 + ';');
+    ALTER TABLE [app].[Employees] DROP COLUMN [EmployeeNumber];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DECLARE @var23 nvarchar(max);
+    SELECT @var23 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[app].[Employees]') AND [c].[name] = N'NationalityCountryCode');
+    IF @var23 IS NOT NULL EXEC(N'ALTER TABLE [app].[Employees] DROP CONSTRAINT ' + @var23 + ';');
+    ALTER TABLE [app].[Employees] DROP COLUMN [NationalityCountryCode];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DECLARE @var24 nvarchar(max);
+    SELECT @var24 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[app].[Employees]') AND [c].[name] = N'NormalizedNameAr');
+    IF @var24 IS NOT NULL EXEC(N'ALTER TABLE [app].[Employees] DROP CONSTRAINT ' + @var24 + ';');
+    ALTER TABLE [app].[Employees] DROP COLUMN [NormalizedNameAr];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DECLARE @var25 nvarchar(max);
+    SELECT @var25 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[app].[EmployeeDocuments]') AND [c].[name] = N'IssuingAuthority');
+    IF @var25 IS NOT NULL EXEC(N'ALTER TABLE [app].[EmployeeDocuments] DROP CONSTRAINT ' + @var25 + ';');
+    ALTER TABLE [app].[EmployeeDocuments] DROP COLUMN [IssuingAuthority];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DECLARE @var26 nvarchar(max);
+    SELECT @var26 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[app].[EmployeeDocuments]') AND [c].[name] = N'IssuingCountryCode');
+    IF @var26 IS NOT NULL EXEC(N'ALTER TABLE [app].[EmployeeDocuments] DROP CONSTRAINT ' + @var26 + ';');
+    ALTER TABLE [app].[EmployeeDocuments] DROP COLUMN [IssuingCountryCode];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    DECLARE @var27 nvarchar(max);
+    SELECT @var27 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[app].[EmployeeDocuments]') AND [c].[name] = N'NormalizedDocumentNumber');
+    IF @var27 IS NOT NULL EXEC(N'ALTER TABLE [app].[EmployeeDocuments] DROP CONSTRAINT ' + @var27 + ';');
+    ALTER TABLE [app].[EmployeeDocuments] DROP COLUMN [NormalizedDocumentNumber];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    EXEC sp_rename N'[app].[EmployeeStatusChangeRequests].[ResultingStatusPeriodId]', N'ResultingWorkHistoryId', 'COLUMN';
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    EXEC sp_rename N'[app].[EmployeeStatusChangeRequests].[IX_EmployeeStatusChangeRequests_ResultingStatusPeriodId]', N'IX_EmployeeStatusChangeRequests_ResultingWorkHistoryId', 'INDEX';
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    EXEC sp_rename N'[app].[Employees].[NormalizedNameEn]', N'WorkingForMeAs', 'COLUMN';
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    EXEC sp_rename N'[app].[Employees].[CurrentStatus]', N'Status', 'COLUMN';
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    EXEC sp_rename N'[app].[Employees].[CurrentRelationshipType]', N'MaritalStatus', 'COLUMN';
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    ALTER TABLE [app].[RiderProfiles] ADD [TShirtSize] int NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    ALTER TABLE [app].[Employees] ADD [AlternateContactName] nvarchar(200) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    ALTER TABLE [app].[Employees] ADD [AlternateContactPhone] nvarchar(32) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    ALTER TABLE [app].[Employees] ADD [BirthDate] date NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    ALTER TABLE [app].[Employees] ADD [ContractEndDate] date NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    ALTER TABLE [app].[Employees] ADD [ContractStartDate] date NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    ALTER TABLE [app].[Employees] ADD [Email] nvarchar(320) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    ALTER TABLE [app].[Employees] ADD [EmergencyContactName] nvarchar(200) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    ALTER TABLE [app].[Employees] ADD [EmergencyContactPhone] nvarchar(32) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    ALTER TABLE [app].[Employees] ADD [EmergencyContactRelationship] nvarchar(100) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    ALTER TABLE [app].[Employees] ADD [EngagementType] int NOT NULL DEFAULT 0;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    ALTER TABLE [app].[Employees] ADD [Gender] int NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    ALTER TABLE [app].[Employees] ADD [IqamaNo] varchar(10) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    ALTER TABLE [app].[Employees] ADD [IsEmployee] bit NOT NULL DEFAULT CAST(0 AS bit);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    ALTER TABLE [app].[Employees] ADD [Nationality] nvarchar(100) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    ALTER TABLE [app].[Employees] ADD [OperatingCityId] uniqueidentifier NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    ALTER TABLE [app].[Employees] ADD [OperationalWorkTypeId] uniqueidentifier NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    ALTER TABLE [app].[Employees] ADD [ProbationEndDate] date NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    ALTER TABLE [app].[Employees] ADD [ProfilePhotoDocumentId] uniqueidentifier NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    ALTER TABLE [app].[Employees] ADD [ResidencyProfession] nvarchar(200) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    ALTER TABLE [app].[Employees] ADD [SecondaryPhone] nvarchar(32) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    ALTER TABLE [app].[Employees] ADD [SponsorId] uniqueidentifier NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    ALTER TABLE [app].[Employees] ADD [StatusReason] nvarchar(500) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    ALTER TABLE [app].[Employees] ADD [TerminationDate] date NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    CREATE TABLE [app].[EmployeeWorkHistory] (
+        [Id] uniqueidentifier NOT NULL,
+        [EmployeeId] uniqueidentifier NOT NULL,
+        [ChangeType] int NOT NULL,
+        [OldValue] nvarchar(1000) NULL,
+        [NewValue] nvarchar(1000) NULL,
+        [EffectiveDate] date NOT NULL,
+        [Reason] nvarchar(1000) NOT NULL,
+        [ChangedByUserId] uniqueidentifier NOT NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        CONSTRAINT [PK_EmployeeWorkHistory] PRIMARY KEY ([Id]),
+        CONSTRAINT [FK_EmployeeWorkHistory_Employees_EmployeeId] FOREIGN KEY ([EmployeeId]) REFERENCES [app].[Employees] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_RiderClientAssignments_RiderProfileId] ON [app].[RiderClientAssignments] ([RiderProfileId]) WHERE [EffectiveTo] IS NULL AND [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    CREATE INDEX [IX_RiderClientAssignments_RiderProfileId_EffectiveFrom] ON [app].[RiderClientAssignments] ([RiderProfileId], [EffectiveFrom]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    CREATE UNIQUE INDEX [IX_PlatformRiderAccounts_ClientPlatformId_ExternalAccountId] ON [app].[PlatformRiderAccounts] ([ClientPlatformId], [ExternalAccountId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    CREATE INDEX [IX_PlatformRiderAccounts_ClientPlatformId_Status] ON [app].[PlatformRiderAccounts] ([ClientPlatformId], [Status]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    CREATE INDEX [IX_PlatformRiderAccounts_OperatingCityId] ON [app].[PlatformRiderAccounts] ([OperatingCityId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_PlatformRiderAccounts_RegisteredEmployeeId_ClientPlatformId] ON [app].[PlatformRiderAccounts] ([RegisteredEmployeeId], [ClientPlatformId]) WHERE [RegisteredEmployeeId] IS NOT NULL AND [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    CREATE INDEX [IX_Employees_FullNameAr] ON [app].[Employees] ([FullNameAr]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    CREATE INDEX [IX_Employees_FullNameEn] ON [app].[Employees] ([FullNameEn]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_Employees_IqamaNo] ON [app].[Employees] ([IqamaNo]) WHERE [IqamaNo] IS NOT NULL AND [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    CREATE INDEX [IX_Employees_IsEmployee_EngagementType_Status] ON [app].[Employees] ([IsEmployee], [EngagementType], [Status]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    CREATE INDEX [IX_Employees_OperatingCityId] ON [app].[Employees] ([OperatingCityId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    CREATE INDEX [IX_Employees_OperationalWorkTypeId] ON [app].[Employees] ([OperationalWorkTypeId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    CREATE INDEX [IX_Employees_ProfilePhotoDocumentId] ON [app].[Employees] ([ProfilePhotoDocumentId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    CREATE INDEX [IX_Employees_SponsorId] ON [app].[Employees] ([SponsorId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    EXEC(N'ALTER TABLE [app].[Employees] ADD CONSTRAINT [CK_Employees_ActiveInternalSponsor] CHECK ([Status] <> 3 OR [EngagementType] <> 1 OR [SponsorId] IS NOT NULL)');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    EXEC(N'ALTER TABLE [app].[Employees] ADD CONSTRAINT [CK_Employees_ActiveIqama] CHECK ([Status] <> 3 OR [IqamaNo] IS NOT NULL)');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    EXEC(N'ALTER TABLE [app].[Employees] ADD CONSTRAINT [CK_Employees_ContractRange] CHECK ([ContractEndDate] IS NULL OR [ContractStartDate] IS NULL OR [ContractEndDate] >= [ContractStartDate])');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    EXEC(N'ALTER TABLE [app].[Employees] ADD CONSTRAINT [CK_Employees_IqamaNo] CHECK ([IqamaNo] IS NULL OR (LEN([IqamaNo]) = 10 AND [IqamaNo] NOT LIKE ''%[^0-9]%''))');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    EXEC(N'ALTER TABLE [app].[Employees] ADD CONSTRAINT [CK_Employees_OutsideIsRider] CHECK ([EngagementType] <> 2 OR [IsEmployee] = 0)');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_EmployeeDocuments_DocumentTypeId_DocumentNumber] ON [app].[EmployeeDocuments] ([DocumentTypeId], [DocumentNumber]) WHERE [DocumentNumber] IS NOT NULL AND [IsDeleted] = 0 AND [Status] <> 3');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    CREATE INDEX [IX_EmployeeWorkHistory_EmployeeId_EffectiveDate_ChangeType] ON [app].[EmployeeWorkHistory] ([EmployeeId], [EffectiveDate], [ChangeType]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    ALTER TABLE [app].[Employees] ADD CONSTRAINT [FK_Employees_EmployeeDocuments_ProfilePhotoDocumentId] FOREIGN KEY ([ProfilePhotoDocumentId]) REFERENCES [app].[EmployeeDocuments] ([Id]) ON DELETE NO ACTION;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    ALTER TABLE [app].[Employees] ADD CONSTRAINT [FK_Employees_OperatingCities_OperatingCityId] FOREIGN KEY ([OperatingCityId]) REFERENCES [app].[OperatingCities] ([Id]) ON DELETE NO ACTION;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    ALTER TABLE [app].[Employees] ADD CONSTRAINT [FK_Employees_OperationalWorkTypes_OperationalWorkTypeId] FOREIGN KEY ([OperationalWorkTypeId]) REFERENCES [app].[OperationalWorkTypes] ([Id]) ON DELETE NO ACTION;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    ALTER TABLE [app].[Employees] ADD CONSTRAINT [FK_Employees_Sponsors_SponsorId] FOREIGN KEY ([SponsorId]) REFERENCES [app].[Sponsors] ([Id]) ON DELETE NO ACTION;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    ALTER TABLE [app].[EmployeeStatusChangeRequests] ADD CONSTRAINT [FK_EmployeeStatusChangeRequests_EmployeeWorkHistory_ResultingWorkHistoryId] FOREIGN KEY ([ResultingWorkHistoryId]) REFERENCES [app].[EmployeeWorkHistory] ([Id]) ON DELETE NO ACTION;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    ALTER TABLE [app].[RiderClientAssignments] ADD CONSTRAINT [FK_RiderClientAssignments_PlatformRiderAccounts_PlatformRiderAccountId] FOREIGN KEY ([PlatformRiderAccountId]) REFERENCES [app].[PlatformRiderAccounts] ([Id]) ON DELETE NO ACTION;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    ALTER TABLE [app].[RiderClientAssignments] ADD CONSTRAINT [FK_RiderClientAssignments_RiderProfiles_RiderProfileId] FOREIGN KEY ([RiderProfileId]) REFERENCES [app].[RiderProfiles] ([Id]) ON DELETE NO ACTION;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    ALTER TABLE [app].[RiderVehicleAssignments] ADD CONSTRAINT [FK_RiderVehicleAssignments_RiderProfiles_RiderProfileId] FOREIGN KEY ([RiderProfileId]) REFERENCES [app].[RiderProfiles] ([Id]) ON DELETE NO ACTION;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823120810_SimplifyEmployeeRiderModel'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260823120810_SimplifyEmployeeRiderModel', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823122317_DetachUsersFromResetEmployees'
+)
+BEGIN
+    IF OBJECT_ID(N'[identity].[Users]', N'U') IS NOT NULL
+    BEGIN
+        UPDATE [identity].[Users]
+        SET [EmployeeId] = NULL
+        WHERE [EmployeeId] IS NOT NULL
+          AND NOT EXISTS
+          (
+              SELECT 1
+              FROM [app].[Employees]
+              WHERE [Employees].[Id] = [Users].[EmployeeId]
+          );
+    END;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260823122317_DetachUsersFromResetEmployees'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260823122317_DetachUsersFromResetEmployees', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260824120551_SeedAjeerContractDocumentType'
+)
+BEGIN
+    EXEC(N'UPDATE [platform].[DocumentTypes] SET [AllowedMimeTypes] = N''application/pdf,image/jpeg,image/png,image/webp,image/gif,image/bmp''
+    WHERE [Id] = ''019c18d5-62e1-7000-8000-000000000030'';
+    SELECT @@ROWCOUNT');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260824120551_SeedAjeerContractDocumentType'
+)
+BEGIN
+    EXEC(N'UPDATE [platform].[DocumentTypes] SET [AllowedMimeTypes] = N''application/pdf,image/jpeg,image/png,image/webp,image/gif,image/bmp''
+    WHERE [Id] = ''019c18d5-62e1-7000-8000-000000000031'';
+    SELECT @@ROWCOUNT');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260824120551_SeedAjeerContractDocumentType'
+)
+BEGIN
+    EXEC(N'UPDATE [platform].[DocumentTypes] SET [AllowedMimeTypes] = N''application/pdf,image/jpeg,image/png,image/webp,image/gif,image/bmp''
+    WHERE [Id] = ''019c18d5-62e1-7000-8000-000000000032'';
+    SELECT @@ROWCOUNT');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260824120551_SeedAjeerContractDocumentType'
+)
+BEGIN
+    EXEC(N'UPDATE [platform].[DocumentTypes] SET [AllowedMimeTypes] = N''application/pdf,image/jpeg,image/png,image/webp,image/gif,image/bmp''
+    WHERE [Id] = ''019c18d5-62e1-7000-8000-000000000033'';
+    SELECT @@ROWCOUNT');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260824120551_SeedAjeerContractDocumentType'
+)
+BEGIN
+    EXEC(N'UPDATE [platform].[DocumentTypes] SET [AllowedMimeTypes] = N''application/pdf,image/jpeg,image/png,image/webp,image/gif,image/bmp''
+    WHERE [Id] = ''019c18d5-62e1-7000-8000-000000000034'';
+    SELECT @@ROWCOUNT');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260824120551_SeedAjeerContractDocumentType'
+)
+BEGIN
+    EXEC(N'UPDATE [platform].[DocumentTypes] SET [AllowedMimeTypes] = N''application/pdf,image/jpeg,image/png,image/webp,image/gif,image/bmp''
+    WHERE [Id] = ''019c18d5-62e1-7000-8000-000000000035'';
+    SELECT @@ROWCOUNT');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260824120551_SeedAjeerContractDocumentType'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'AllowedMimeTypes', N'AppliesToOutsideRider', N'AppliesToRiderProfile', N'AppliesToSponsoredInternal', N'Code', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'DescriptionAr', N'DescriptionEn', N'IsDeleted', N'MaxFileSizeBytes', N'NameAr', N'NameEn', N'RequiresExpiryDate', N'RequiresFile', N'RequiresIssueDate', N'RequiresNumber', N'Status', N'UpdatedAtUtc', N'UpdatedByUserId') AND [object_id] = OBJECT_ID(N'[platform].[DocumentTypes]'))
+        SET IDENTITY_INSERT [platform].[DocumentTypes] ON;
+    EXEC(N'INSERT INTO [platform].[DocumentTypes] ([Id], [AllowedMimeTypes], [AppliesToOutsideRider], [AppliesToRiderProfile], [AppliesToSponsoredInternal], [Code], [CreatedAtUtc], [CreatedByUserId], [DeletedAtUtc], [DeletedByUserId], [DeletionReason], [DescriptionAr], [DescriptionEn], [IsDeleted], [MaxFileSizeBytes], [NameAr], [NameEn], [RequiresExpiryDate], [RequiresFile], [RequiresIssueDate], [RequiresNumber], [Status], [UpdatedAtUtc], [UpdatedByUserId])
+    VALUES (''019c18d5-62e1-7000-8000-000000000036'', N''application/pdf,image/jpeg,image/png,image/webp,image/gif,image/bmp'', CAST(1 AS bit), CAST(1 AS bit), CAST(1 AS bit), N''AJEER_CONTRACT'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, NULL, NULL, CAST(0 AS bit), CAST(10485760 AS bigint), N''عقود اجير'', N''Ajeer Contracts'', CAST(1 AS bit), CAST(1 AS bit), CAST(1 AS bit), CAST(1 AS bit), 1, NULL, NULL)');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'AllowedMimeTypes', N'AppliesToOutsideRider', N'AppliesToRiderProfile', N'AppliesToSponsoredInternal', N'Code', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'DescriptionAr', N'DescriptionEn', N'IsDeleted', N'MaxFileSizeBytes', N'NameAr', N'NameEn', N'RequiresExpiryDate', N'RequiresFile', N'RequiresIssueDate', N'RequiresNumber', N'Status', N'UpdatedAtUtc', N'UpdatedByUserId') AND [object_id] = OBJECT_ID(N'[platform].[DocumentTypes]'))
+        SET IDENTITY_INSERT [platform].[DocumentTypes] OFF;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260824120551_SeedAjeerContractDocumentType'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260824120551_SeedAjeerContractDocumentType', N'10.0.11');
+END;
+
+COMMIT;
+GO
+

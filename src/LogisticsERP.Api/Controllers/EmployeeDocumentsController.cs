@@ -119,6 +119,10 @@ public sealed class RiderDocumentsController(IEmployeeDocumentService service) :
     [RequirePermission(PermissionKeys.Documents.Upload)]
     public Task<IActionResult> MedicalInsurance(Guid riderProfileId, [FromForm] EmployeeDocumentUploadForm request, CancellationToken cancellationToken) => Upload(riderProfileId, DocumentType.MedicalInsuranceId, request, cancellationToken);
 
+    [HttpPost("ajeer-contract")]
+    [RequirePermission(PermissionKeys.Documents.Upload)]
+    public Task<IActionResult> AjeerContract(Guid riderProfileId, [FromForm] EmployeeDocumentUploadForm request, CancellationToken cancellationToken) => Upload(riderProfileId, DocumentType.AjeerContractId, request, cancellationToken);
+
     private async Task<IActionResult> Upload(Guid riderProfileId, Guid documentTypeId, EmployeeDocumentUploadForm request, CancellationToken cancellationToken)
     {
         var file = EmployeeDocumentsController.CreateFile(request.File);

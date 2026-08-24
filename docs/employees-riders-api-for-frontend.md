@@ -410,3 +410,25 @@ Response `200 OK`: `RiderDetailsResponse`.
 ## Related APIs
 
 Iqama scans, licenses, rider cards, health cards, and other documents are managed by separate controllers. The employee/rider core endpoints above store the links and identity; they do not upload binary files.
+
+### Upload an Ajeer contract
+
+`POST /api/riders/{riderProfileId}/documents/ajeer-contract`
+
+Permission: `documents.upload`
+
+Content type: `multipart/form-data`
+
+Form fields:
+
+| Field | Type | Required |
+|---|---|---|
+| `documentNumber` | string | Yes |
+| `issueDate` | `YYYY-MM-DD` | Yes |
+| `expiryDate` | `YYYY-MM-DD` | Yes |
+| `notes` | string | No |
+| `file` | PDF or image | Yes |
+
+The frontend does not send `documentTypeId` to this dedicated rider endpoint. The API assigns the seeded `AJEER_CONTRACT` type (`019c18d5-62e1-7000-8000-000000000036`) automatically.
+
+Response `200 OK`: `EmployeeDocumentResponse`, including `documentTypeCode: "AJEER_CONTRACT"` and `documentTypeNameAr: "عقود اجير"`.
