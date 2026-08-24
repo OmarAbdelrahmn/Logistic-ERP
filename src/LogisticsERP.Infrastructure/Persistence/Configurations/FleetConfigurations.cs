@@ -136,11 +136,7 @@ internal sealed class RiderVehicleAssignmentConfiguration : IEntityTypeConfigura
         builder.Property(x => x.BackdatedReason).HasMaxLength(1000);
         builder.Property(x => x.CorrectionReason).HasMaxLength(1000);
         builder.Property(x => x.Notes).HasMaxLength(4000);
-        builder.HasOne<Employee>().WithMany().HasForeignKey(x => x.EmployeeId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasOne<RiderProfile>().WithMany()
-            .HasForeignKey(x => new { x.RiderProfileId, x.EmployeeId })
-            .HasPrincipalKey(x => new { x.Id, x.EmployeeId })
-            .OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<RiderProfile>().WithMany().HasForeignKey(x => x.RiderProfileId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<Vehicle>().WithMany().HasForeignKey(x => x.VehicleId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<FleetLocation>().WithMany().HasForeignKey(x => x.StartLocationId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<FleetLocation>().WithMany().HasForeignKey(x => x.EndLocationId).OnDelete(DeleteBehavior.Restrict);

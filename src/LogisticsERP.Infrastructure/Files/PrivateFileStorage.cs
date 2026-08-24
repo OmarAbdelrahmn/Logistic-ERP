@@ -12,7 +12,10 @@ internal sealed class PrivateFileStorage(IHostEnvironment hostEnvironment) : IPr
         {
             ["application/pdf"] = ".pdf",
             ["image/jpeg"] = ".jpg",
-            ["image/png"] = ".png"
+            ["image/png"] = ".png",
+            ["image/webp"] = ".webp",
+            ["image/gif"] = ".gif",
+            ["image/bmp"] = ".bmp"
         };
 
     private static readonly Dictionary<string, HashSet<string>> AllowedOriginalExtensions =
@@ -20,7 +23,10 @@ internal sealed class PrivateFileStorage(IHostEnvironment hostEnvironment) : IPr
         {
             ["application/pdf"] = new(StringComparer.OrdinalIgnoreCase) { ".pdf" },
             ["image/jpeg"] = new(StringComparer.OrdinalIgnoreCase) { ".jpg", ".jpeg" },
-            ["image/png"] = new(StringComparer.OrdinalIgnoreCase) { ".png" }
+            ["image/png"] = new(StringComparer.OrdinalIgnoreCase) { ".png" },
+            ["image/webp"] = new(StringComparer.OrdinalIgnoreCase) { ".webp" },
+            ["image/gif"] = new(StringComparer.OrdinalIgnoreCase) { ".gif" },
+            ["image/bmp"] = new(StringComparer.OrdinalIgnoreCase) { ".bmp", ".dib" }
         };
 
     private readonly string storageRoot = Path.GetFullPath(Path.Combine(hostEnvironment.ContentRootPath, "wwwroot", "private"));
@@ -146,6 +152,9 @@ internal sealed class PrivateFileStorage(IHostEnvironment hostEnvironment) : IPr
         "application/pdf" => header.Length >= 4 && header[..4].SequenceEqual("%PDF"u8),
         "image/jpeg" => header.Length >= 3 && header[0] == 0xFF && header[1] == 0xD8 && header[2] == 0xFF,
         "image/png" => header.Length >= 8 && header[..8].SequenceEqual(new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A }),
+        "image/webp" => header.Length >= 12 && header[..4].SequenceEqual("RIFF"u8) && header[8..12].SequenceEqual("WEBP"u8),
+        "image/gif" => header.Length >= 6 && (header[..6].SequenceEqual("GIF87a"u8) || header[..6].SequenceEqual("GIF89a"u8)),
+        "image/bmp" => header.Length >= 2 && header[0] == 0x42 && header[1] == 0x4D,
         _ => false
     };
 

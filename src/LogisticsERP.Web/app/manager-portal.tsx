@@ -275,7 +275,7 @@ function Dashboard({ session, onUpdateProfile, onSignOut }: { session: Session; 
         </section>
         <section className="dashboard-grid dashboard-grid-secondary">
           <article className="content-card roster-card" id="riders"><div className="card-heading"><div><p className="eyebrow">{t.riders}</p><h2>{t.roster}</h2></div><span className="data-total">{activeRiders === null ? t.unavailable : `${formatMetric(activeRiders, locale)} ${t.active}`}</span></div>
-            {dashboard?.riders?.length ? <div className="table-wrap"><table><thead><tr><th>{t.employee}</th><th>{t.city}</th><th>{t.status}</th></tr></thead><tbody>{dashboard.riders.slice(0, 6).map((rider) => <tr key={rider.id}><td><strong>{locale === "ar" ? rider.fullNameAr : rider.fullNameEn || rider.fullNameAr}</strong><span>{rider.employeeNumber}</span></td><td>{rider.preferredCityAr ?? "—"}</td><td><span className={`status-chip ${isActiveStatus(rider.status) ? "is-good" : ""}`}>{rider.status}</span></td></tr>)}</tbody></table></div> : <EmptyData text={t.noRiders} icon="route" />}
+            {dashboard?.riders?.length ? <div className="table-wrap"><table><thead><tr><th>{t.employee}</th><th>{t.type}</th><th>{t.status}</th></tr></thead><tbody>{dashboard.riders.slice(0, 6).map((rider) => <tr key={rider.id}><td><strong>{locale === "ar" ? rider.fullNameAr : rider.fullNameEn || rider.fullNameAr}</strong><span>{rider.iqamaNo ?? "—"}</span></td><td>{rider.engagementType}</td><td><span className={`status-chip ${isActiveStatus(rider.status) ? "is-good" : ""}`}>{rider.status}</span></td></tr>)}</tbody></table></div> : <EmptyData text={t.noRiders} icon="route" />}
           </article>
           <article className="content-card assignments-card" id="client-platforms"><div className="card-heading"><div><p className="eyebrow">{t.clientPlatforms}</p><h2>{t.assignmentsStatus}</h2></div><span className="data-total">{dashboard?.assignments === null ? t.unavailable : formatMetric(dashboard?.assignments.length ?? null, locale)}</span></div>
             {dashboard?.assignments?.length ? <ul className="assignment-list">{dashboard.assignments.slice(0, 5).map((assignment) => <li key={assignment.id}><span className="assignment-avatar">{assignment.actualEmployeeNameAr.slice(0, 1)}</span><div><strong>{assignment.actualEmployeeNameAr}</strong><span>{assignment.contractNameAr} · {assignment.externalAccountId}</span></div><span className="status-chip is-good">{assignment.status}</span></li>)}</ul> : <EmptyData text={t.unavailable} icon="layers" />}
@@ -304,7 +304,7 @@ function buildAttention(snapshot: DashboardSnapshot | null, t: Translation, loca
   const threshold = new Date(today);
   threshold.setDate(today.getDate() + 30);
   const items: Array<{ id: string; title: string; detail: string; level: "warning" | "danger" }> = [];
-  for (const item of [...(snapshot.residencyPermits ?? []), ...(snapshot.driverLicenses ?? []), ...(snapshot.insurancePolicies ?? [])]) {
+  for (const item of [...(snapshot.driverLicenses ?? []), ...(snapshot.insurancePolicies ?? [])]) {
     const expiry = item.expiryDate ?? item.endDate;
     if (expiry && new Date(expiry) <= threshold) items.push({ id: item.id, title: t.upcomingExpiry, detail: new Intl.DateTimeFormat(locale === "ar" ? "ar-SA" : "en-GB", { dateStyle: "medium" }).format(new Date(expiry)), level: new Date(expiry) < today ? "danger" : "warning" });
   }
@@ -368,11 +368,11 @@ function ImportView({ accessToken, locale, t, onImported }: { accessToken: strin
 }
 
 function ImportResult({ result, locale, t }: { result: HrImportResponse; locale: Locale; t: Translation }) {
-  const summary = [[t.totalRows, result.totalRows], [t.validRows, result.validRows], [t.createdEmployees, result.createdEmployees], [t.updatedEmployees, result.updatedEmployees], [t.createdRiders, result.createdRiders], [t.createdResidencies, result.createdResidencyPermits], [t.createdLicenses, result.createdDriverLicenses], [t.createdAccounts, result.createdPlatformAccounts], [t.createdAssignments, result.createdPlatformAssignments]];
+  const summary = [[t.totalRows, result.totalRows], [t.validRows, result.validRows], [t.createdEmployees, result.createdEmployees], [t.updatedEmployees, result.updatedEmployees], [t.createdRiders, result.createdRiders], [t.createdLicenses, result.createdDriverLicenses], [t.createdAccounts, result.createdPlatformAccounts], [t.createdAssignments, result.createdPlatformAssignments]];
   return <article className="content-card import-result"><div className="card-heading"><div><p className="eyebrow">{result.validateOnly ? t.validationResults : t.importSuccessful}</p><h2>{result.worksheet}</h2></div><span className={`status-chip ${result.issues.some((issue) => issue.severity.toLowerCase() === "error") ? "" : "is-good"}`}>{result.issues.length} {t.issues}</span></div>
     <dl className="import-summary">{summary.map(([label, value]) => <div key={String(label)}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>
     <div className="import-columns"><div><strong>{t.supportedColumns}</strong><p>{result.importedColumns.join(" · ") || "—"}</p></div><div><strong>{t.ignoredColumns}</strong><p>{result.ignoredColumns.join(" · ") || "—"}</p></div></div>
-    {result.issues.length > 0 && <div className="table-wrap"><table className="resource-table import-issues"><thead><tr><th>#</th><th>{t.employee}</th><th>{t.status}</th><th>{t.issues}</th></tr></thead><tbody>{result.issues.map((issue) => <tr key={`${issue.rowNumber}-${issue.message}`}><td>{issue.rowNumber}</td><td>{issue.employeeNumber ?? "—"}</td><td><span className={`status-chip ${issue.severity.toLowerCase() === "error" ? "is-danger" : ""}`}>{issue.severity}</span></td><td>{issue.message}</td></tr>)}</tbody></table></div>}
+    {result.issues.length > 0 && <div className="table-wrap"><table className="resource-table import-issues"><thead><tr><th>#</th><th>{t.employee}</th><th>{t.status}</th><th>{t.issues}</th></tr></thead><tbody>{result.issues.map((issue) => <tr key={`${issue.rowNumber}-${issue.message}`}><td>{issue.rowNumber}</td><td>{issue.iqamaNo ?? "—"}</td><td><span className={`status-chip ${issue.severity.toLowerCase() === "error" ? "is-danger" : ""}`}>{issue.severity}</span></td><td>{issue.message}</td></tr>)}</tbody></table></div>}
   </article>;
 }
 
@@ -389,25 +389,25 @@ function ResourceView({ view, snapshot, locale, t, isLoading }: { view: string; 
 function resourceTable(view: string, snapshot: DashboardSnapshot | null, locale: Locale, t: Translation): ResourceTable {
   if (!snapshot) return { columns: [], rows: [], permitted: false };
   if (view === "workforce") return {
-    permitted: snapshot.employees !== null, columns: [t.city, t.type, t.status],
-    rows: (snapshot.employees ?? []).map((employee) => ({ id: employee.id, primary: locale === "ar" ? employee.fullNameAr : employee.fullNameEn || employee.fullNameAr, secondary: employee.employeeNumber, cells: [employee.operatingCityAr ?? "—", employee.jobTitleAr ?? employee.relationshipType ?? "—"], status: employee.status })),
+    permitted: snapshot.employees !== null, columns: [t.type, t.relationshipAndSponsor, t.status],
+    rows: (snapshot.employees ?? []).map((employee) => ({ id: employee.id, primary: locale === "ar" ? employee.fullNameAr : employee.fullNameEn || employee.fullNameAr, secondary: employee.iqamaNo ?? undefined, cells: [employee.isEmployee ? (locale === "ar" ? "إداري" : "Administrative") : (locale === "ar" ? "رايدر" : "Rider"), `${employee.engagementType} · ${employee.sponsorNameAr ?? "—"}`], status: employee.status })),
   };
   if (view === "riders") return {
-    permitted: snapshot.riders !== null, columns: [t.city, t.type, t.status],
-    rows: (snapshot.riders ?? []).map((rider) => ({ id: rider.id, primary: locale === "ar" ? rider.fullNameAr : rider.fullNameEn || rider.fullNameAr, secondary: rider.employeeNumber, cells: [rider.preferredCityAr ?? "—", rider.isOutsideRider ? t.outsideRider : t.rider], status: rider.status })),
+    permitted: snapshot.riders !== null, columns: [t.type, t.riderProfile, t.status],
+    rows: (snapshot.riders ?? []).map((rider) => ({ id: rider.id, primary: locale === "ar" ? rider.fullNameAr : rider.fullNameEn || rider.fullNameAr, secondary: rider.iqamaNo ?? undefined, cells: [rider.engagementType, rider.tShirtSize ?? "—"], status: rider.status })),
   };
   if (view === "housing") return {
     permitted: snapshot.housing !== null, columns: [t.city, t.capacity, t.status],
     rows: (snapshot.housing ?? []).map((housing) => ({ id: housing.id, primary: locale === "ar" ? housing.nameAr : housing.nameEn || housing.nameAr, secondary: housing.code, cells: [housing.cityAr, `${housing.currentResidents} / ${housing.totalCapacity}`], status: housing.status })),
   };
   if (view === "operations" || view === "client-platforms") return {
-    permitted: snapshot.accounts !== null, columns: [t.contract, t.city, t.status],
-    rows: (snapshot.accounts ?? []).map((account) => ({ id: account.id, primary: account.labelAr || account.externalAccountId, secondary: account.platformNameAr, cells: [account.contractNameAr, account.operatingCityAr], status: account.status })),
+    permitted: snapshot.accounts !== null, columns: [t.employee, t.city, t.status],
+    rows: (snapshot.accounts ?? []).map((account) => ({ id: account.id, primary: account.externalAccountId, secondary: account.platformNameAr, cells: [account.registeredEmployeeNameAr ?? "—", account.operatingCityAr], status: account.status })),
   };
   if (view === "compliance") {
-    const items = [...(snapshot.residencyPermits ?? []), ...(snapshot.driverLicenses ?? []), ...(snapshot.insurancePolicies ?? [])];
+    const items = [...(snapshot.driverLicenses ?? []), ...(snapshot.insurancePolicies ?? [])];
     return {
-      permitted: snapshot.residencyPermits !== null || snapshot.driverLicenses !== null || snapshot.insurancePolicies !== null, columns: [t.type, t.expiry, t.status],
+      permitted: snapshot.driverLicenses !== null || snapshot.insurancePolicies !== null, columns: [t.type, t.expiry, t.status],
       rows: items.map((item) => ({ id: item.id, primary: item.sponsorNameAr || t.compliance, secondary: item.categoryAr ?? undefined, cells: [item.categoryAr || "—", formatDate(item.expiryDate ?? item.endDate, locale)], status: item.status })),
     };
   }

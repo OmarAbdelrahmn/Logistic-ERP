@@ -73,21 +73,6 @@ internal sealed class SponsorConfiguration : IEntityTypeConfiguration<Sponsor>
     }
 }
 
-internal sealed class EmployeeSponsorshipPeriodConfiguration : IEntityTypeConfiguration<EmployeeSponsorshipPeriod>
-{
-    public void Configure(EntityTypeBuilder<EmployeeSponsorshipPeriod> builder)
-    {
-        builder.ConfigureTemporal("EmployeeSponsorshipPeriods");
-        builder.Property(entity => entity.Reason).HasMaxLength(1000);
-        builder.Property(entity => entity.SourceReference).HasMaxLength(200);
-        builder.HasOne<Employee>().WithMany().HasForeignKey(entity => entity.EmployeeId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasOne<Sponsor>().WithMany().HasForeignKey(entity => entity.SponsorId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasIndex(entity => new { entity.EmployeeId, entity.EffectiveFrom });
-        builder.HasIndex(entity => new { entity.SponsorId, entity.Status, entity.EffectiveTo });
-        builder.HasIndex(entity => entity.EmployeeId).IsUnique().HasFilter("[EffectiveTo] IS NULL");
-    }
-}
-
 internal sealed class ResidencyProfessionConfiguration : IEntityTypeConfiguration<ResidencyProfession>
 {
     public void Configure(EntityTypeBuilder<ResidencyProfession> builder)
@@ -98,32 +83,6 @@ internal sealed class ResidencyProfessionConfiguration : IEntityTypeConfiguratio
         builder.Property(entity => entity.NameEn).HasMaxLength(200);
         builder.HasIndex(entity => entity.Code).IsUnique();
         builder.HasIndex(entity => entity.NameAr);
-    }
-}
-
-internal sealed class EmployeeResidencyPermitConfiguration : IEntityTypeConfiguration<EmployeeResidencyPermit>
-{
-    public void Configure(EntityTypeBuilder<EmployeeResidencyPermit> builder)
-    {
-        builder.ConfigureOperational("EmployeeResidencyPermits");
-        builder.Property(entity => entity.PermitNumberCiphertext).IsRequired();
-        builder.Property(entity => entity.PermitNumberLookupHash).HasMaxLength(64).IsFixedLength().IsRequired();
-        builder.Property(entity => entity.PermitNumberLastFour).HasMaxLength(4).IsFixedLength().IsRequired();
-        builder.Property(entity => entity.Notes).HasMaxLength(4000);
-        builder.HasOne<Employee>().WithMany().HasForeignKey(entity => entity.EmployeeId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasOne<Sponsor>().WithMany().HasForeignKey(entity => entity.SponsorId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasOne<ResidencyProfession>().WithMany().HasForeignKey(entity => entity.ResidencyProfessionId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasOne<EmployeeResidencyPermit>().WithMany().HasForeignKey(entity => entity.PreviousPermitId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasOne<EmployeeDocument>().WithMany().HasForeignKey(entity => entity.EmployeeDocumentId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasIndex(entity => entity.PermitNumberLookupHash);
-        builder.HasIndex(entity => new { entity.SponsorId, entity.Status, entity.ExpiryDate });
-        builder.HasIndex(entity => entity.EmployeeId).IsUnique().HasFilter("[IsCurrent] = 1 AND [IsDeleted] = 0");
-        builder.HasIndex(entity => entity.PermitNumberLookupHash)
-            .IsUnique()
-            .HasFilter("[IsCurrent] = 1 AND [IsDeleted] = 0");
-        builder.ToTable(table => table.HasCheckConstraint(
-            "CK_EmployeeResidencyPermits_DateRange",
-            "[IssueDate] IS NULL OR [ExpiryDate] >= [IssueDate]"));
     }
 }
 

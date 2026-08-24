@@ -87,7 +87,7 @@ internal sealed class AccidentPdfGenerator : IAccidentPdfGenerator
             Cell(table, "رقم الحادث / Accident", snapshot.AccidentNumber);
             Cell(table, "التاريخ والوقت / Date & time", snapshot.OccurredAtUtc.ToString("yyyy-MM-dd HH:mm 'UTC'", CultureInfo.InvariantCulture));
             Cell(table, "الرايدر / Rider", $"{snapshot.RiderNameAr} / {snapshot.RiderNameEn}");
-            Cell(table, "الرقم الوظيفي / Employee", snapshot.EmployeeNumber);
+            Cell(table, "رقم الإقامة / Iqama", snapshot.IqamaNo ?? "-");
             Cell(table, "المركبة / Vehicle", snapshot.AssetNumber);
             Cell(table, "اللوحة / Plate", $"{snapshot.PlateNumberAr} / {snapshot.PlateNumberEn}");
             Cell(table, "الموقع / Location", snapshot.LocationDescription);

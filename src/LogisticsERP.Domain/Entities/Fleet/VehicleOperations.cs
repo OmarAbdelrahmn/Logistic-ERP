@@ -32,7 +32,6 @@ public sealed class VehicleOdometerReading : HistoryEntity
 public sealed class RiderVehicleAssignment : AuditableEntity
 {
     public Guid RiderProfileId { get; set; }
-    public Guid EmployeeId { get; set; }
     public Guid VehicleId { get; set; }
     public Guid OperationId { get; set; }
     public Guid? PreviousAssignmentId { get; set; }

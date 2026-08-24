@@ -2,192 +2,128 @@ namespace LogisticsERP.Application.Features.Hr;
 
 public sealed record EmployeeListItemResponse(
     Guid Id,
-    string EmployeeNumber,
+    string? IqamaNo,
     string FullNameAr,
     string? FullNameEn,
+    string? Nationality,
     string? PrimaryPhone,
-    string? NationalityCountryCode,
-    DateOnly? HireDate,
+    bool IsEmployee,
+    string EngagementType,
     string Status,
-    string? RelationshipType,
-    Guid? RiderProfileId,
-    string? RiderStatus,
-    string? JobTitleAr,
-    string? OperationalWorkTypeAr,
-    string? OperatingCityAr,
+    string? WorkingForMeAs,
+    string? ResidencyProfession,
+    Guid? SponsorId,
     string? SponsorNameAr,
-    string RowVersion);
+    Guid? RiderProfileId,
+    string RowVersion,
+    EmployeeResponse EmployeeDetails,
+    RiderDetailsResponse? RiderDetails,
+    CatalogResponse? OperationalWorkType,
+    OperatingCityResponse? OperatingCity,
+    string? HousingNameAr);
 
 public sealed record EmployeeDetailsResponse(
-    EmployeeListItemResponse Employee,
-    SponsoredInternalDetailsResponse? SponsoredDetails,
-    OutsideRiderDetailsResponse? OutsideRiderDetails,
+    EmployeeResponse Employee,
     RiderDetailsResponse? Rider,
-    IReadOnlyList<PeriodResponse> StatusHistory,
-    IReadOnlyList<PeriodResponse> RelationshipHistory,
-    IReadOnlyList<OperationalAssignmentResponse> OperationalAssignmentHistory,
-    IReadOnlyList<SponsorshipPeriodResponse> SponsorshipHistory);
+    IReadOnlyList<EmployeeWorkHistoryResponse> WorkHistory,
+    HousingResponse? Housing);
 
-public sealed record CreateEmployeeRequest(
-    string EmployeeNumber,
+public sealed record EmployeeResponse(
+    Guid Id,
+    string? IqamaNo,
+    string? ResidencyProfession,
+    string? WorkingForMeAs,
     string FullNameAr,
     string? FullNameEn,
-    string? PrimaryPhone,
-    string? NationalityCountryCode,
-    DateOnly? HireDate,
-    string Status,
-    string RelationshipType,
-    string? Notes,
-    SponsoredInternalDetailsRequest? SponsoredDetails,
-    OutsideRiderDetailsRequest? OutsideRiderDetails,
-    CreateRiderProfileRequest? Rider);
-
-public sealed record UpdateEmployeeRequest(
-    string FullNameAr,
-    string? FullNameEn,
-    string? PrimaryPhone,
-    string? NationalityCountryCode,
-    DateOnly? HireDate,
-    string? Notes,
-    string RowVersion);
-
-public sealed record ChangeEmployeeStatusRequest(
-    string Status,
-    DateOnly EffectiveFrom,
-    string? ReasonCode,
-    string Reason);
-
-public sealed record ChangeEmployeeRelationshipRequest(
-    string RelationshipType,
-    DateOnly EffectiveFrom,
-    string? ReasonCode,
-    string Reason,
-    string? SourceReference,
-    SponsoredInternalDetailsRequest? SponsoredDetails,
-    OutsideRiderDetailsRequest? OutsideRiderDetails);
-
-public sealed record SponsoredInternalDetailsRequest(
-    string? Gender,
+    string? Nationality,
     DateOnly? BirthDate,
+    string? Gender,
+    string? PrimaryPhone,
     string? SecondaryPhone,
     string? Email,
     Guid? ProfilePhotoDocumentId,
     string? MaritalStatus,
-    int? DependentsCount,
-    string? EducationLevel,
-    string? EducationDetails,
-    string? Profession,
-    AddressRequest? HomeAddress,
     string? EmergencyContactName,
     string? EmergencyContactRelationship,
     string? EmergencyContactPhone,
+    bool IsEmployee,
+    string EngagementType,
+    string Status,
+    string? StatusReason,
+    DateOnly? HireDate,
+    Guid? OperationalWorkTypeId,
+    Guid? OperatingCityId,
+    Guid? SponsorId,
     DateOnly? ContractStartDate,
     DateOnly? ContractEndDate,
     DateOnly? ProbationEndDate,
     DateOnly? TerminationDate,
-    Guid? ManagerEmployeeId,
-    Guid? CurrentSponsorId,
-    string? InternalNotes,
-    string? RowVersion = null);
+    string? AlternateContactName,
+    string? AlternateContactPhone,
+    string? Notes,
+    string RowVersion);
 
-public sealed record SponsoredInternalDetailsResponse(
-    Guid Id,
-    Guid EmployeeId,
-    string? Gender,
+public sealed record EmployeeUpsertRequest(
+    string? IqamaNo,
+    string? ResidencyProfession,
+    string? WorkingForMeAs,
+    string FullNameAr,
+    string? FullNameEn,
+    string? Nationality,
     DateOnly? BirthDate,
+    string? Gender,
+    string? PrimaryPhone,
     string? SecondaryPhone,
     string? Email,
     Guid? ProfilePhotoDocumentId,
     string? MaritalStatus,
-    int? DependentsCount,
-    string? EducationLevel,
-    string? EducationDetails,
-    string? Profession,
-    AddressResponse HomeAddress,
     string? EmergencyContactName,
     string? EmergencyContactRelationship,
     string? EmergencyContactPhone,
+    bool IsEmployee,
+    string EngagementType,
+    string Status,
+    string? StatusReason,
+    DateOnly? HireDate,
+    Guid? OperationalWorkTypeId,
+    Guid? OperatingCityId,
+    Guid? SponsorId,
     DateOnly? ContractStartDate,
     DateOnly? ContractEndDate,
     DateOnly? ProbationEndDate,
     DateOnly? TerminationDate,
-    Guid? ManagerEmployeeId,
-    Guid? CurrentSponsorId,
-    string? InternalNotes,
-    string RowVersion);
-
-public sealed record OutsideRiderDetailsRequest(
     string? AlternateContactName,
     string? AlternateContactPhone,
-    string? EngagementReference,
-    string? EngagementNotes,
-    string? RowVersion = null);
+    string? Notes,
+    RiderProfileUpsertRequest? Rider,
+    string? RowVersion);
 
-public sealed record OutsideRiderDetailsResponse(
-    Guid Id,
-    Guid EmployeeId,
-    string? AlternateContactName,
-    string? AlternateContactPhone,
-    string? EngagementReference,
-    string? EngagementNotes,
-    string RowVersion);
+public sealed record ChangeEmployeeStatusRequest(string Status, DateOnly EffectiveDate, string Reason);
+public sealed record ChangeEmployeeRoleRequest(bool IsEmployee, DateOnly EffectiveDate, string Reason, RiderProfileUpsertRequest? Rider);
 
-public sealed record CreateRiderProfileRequest(
-    string Status,
-    DateOnly? RiderStartDate,
-    DateOnly? RiderEndDate,
-    Guid? PreferredCityId,
-    string? OperationalNotes);
-
-public sealed record UpdateRiderProfileRequest(
-    string Status,
-    DateOnly? RiderStartDate,
-    DateOnly? RiderEndDate,
-    Guid? PreferredCityId,
-    string? OperationalNotes,
-    string RowVersion);
+public sealed record RiderProfileUpsertRequest(string? TShirtSize, string? OperationalNotes, string? RowVersion = null);
 
 public sealed record RiderDetailsResponse(
     Guid Id,
     Guid EmployeeId,
-    string EmployeeNumber,
+    string? IqamaNo,
     string FullNameAr,
     string? FullNameEn,
+    string EngagementType,
     string Status,
-    DateOnly? RiderStartDate,
-    DateOnly? RiderEndDate,
-    Guid? PreferredCityId,
-    string? PreferredCityAr,
+    string? TShirtSize,
     string? OperationalNotes,
-    bool IsOutsideRider,
     string RowVersion);
 
-public sealed record PeriodResponse(
+public sealed record EmployeeWorkHistoryResponse(
     Guid Id,
-    string Value,
-    DateOnly EffectiveFrom,
-    DateOnly? EffectiveTo,
-    string? Reason,
-    Guid ChangedByUserId);
-
-public sealed record AssignOperationalWorkRequest(
-    Guid JobTitleId,
-    Guid OperationalWorkTypeId,
-    Guid OperatingCityId,
-    DateOnly EffectiveFrom,
-    string Reason);
-
-public sealed record OperationalAssignmentResponse(
-    Guid Id,
-    Guid JobTitleId,
-    string JobTitleAr,
-    Guid OperationalWorkTypeId,
-    string OperationalWorkTypeAr,
-    Guid OperatingCityId,
-    string OperatingCityAr,
-    DateOnly EffectiveFrom,
-    DateOnly? EffectiveTo,
-    string? Reason);
+    string ChangeType,
+    string? OldValue,
+    string? NewValue,
+    DateOnly EffectiveDate,
+    string Reason,
+    Guid ChangedByUserId,
+    DateTimeOffset CreatedAtUtc);
 
 public sealed record SponsorUpsertRequest(
     string EmployerIdentityNumber,
@@ -224,21 +160,3 @@ public sealed record SponsorResponse(
     AddressResponse Address,
     string? Notes,
     string RowVersion);
-
-public sealed record ChangeSponsorshipRequest(
-    Guid SponsorId,
-    string Status,
-    DateOnly EffectiveFrom,
-    string Reason,
-    string? SourceReference);
-
-public sealed record SponsorshipPeriodResponse(
-    Guid Id,
-    Guid SponsorId,
-    string SponsorNameAr,
-    string EmployerIdentityNumber,
-    string Status,
-    DateOnly EffectiveFrom,
-    DateOnly? EffectiveTo,
-    string? Reason,
-    string? SourceReference);

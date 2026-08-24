@@ -7,32 +7,19 @@ public sealed record UpdateUserPreferencesRequest(
 
 public sealed record EmployeeUserProfileResponse(
     Guid Id,
-    string EmployeeNumber,
+    string? IqamaNo,
     string FullNameAr,
     string? FullNameEn,
     string? PrimaryPhone,
-    string? NationalityCountryCode,
+    string? Nationality,
     DateOnly? HireDate,
     string Status,
-    string? RelationshipType,
+    string EngagementType,
+    bool IsEmployee,
     Guid? RiderProfileId,
-    string? RiderStatus,
-    CurrentOperationalAssignmentResponse? CurrentAssignment);
-
-public sealed record CurrentOperationalAssignmentResponse(
-    Guid JobTitleId,
-    string JobTitleCode,
-    string JobTitleNameAr,
-    string JobTitleNameEn,
-    Guid OperationalWorkTypeId,
-    string OperationalWorkTypeCode,
-    string OperationalWorkTypeNameAr,
-    string OperationalWorkTypeNameEn,
-    Guid OperatingCityId,
-    string OperatingCityCode,
-    string OperatingCityNameAr,
-    string OperatingCityNameEn,
-    DateOnly EffectiveFrom);
+    string? WorkingForMeAs,
+    Guid? OperationalWorkTypeId,
+    Guid? OperatingCityId);
 
 public sealed record UserProfileResponse(
     Guid Id,

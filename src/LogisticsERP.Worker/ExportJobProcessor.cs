@@ -131,18 +131,18 @@ internal sealed partial class ExportJobProcessor(
         {
             case "employees":
             {
-                var rows = await dbContext.Employees.AsNoTracking().OrderBy(item => item.EmployeeNumber).ToArrayAsync(cancellationToken);
-                return Prepend(["EmployeeNumber", "NameAr", "NameEn", "Relationship", "Status", "HireDate"],
-                    rows.Select(item => new[] { item.EmployeeNumber, item.FullNameAr, item.FullNameEn ?? "", item.CurrentRelationshipType?.ToString() ?? "", item.CurrentStatus.ToString(), item.HireDate?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) ?? "" }));
+                var rows = await dbContext.Employees.AsNoTracking().OrderBy(item => item.IqamaNo).ToArrayAsync(cancellationToken);
+                return Prepend(["IqamaNo", "NameAr", "NameEn", "Role", "EngagementType", "Status", "HireDate"],
+                    rows.Select(item => new[] { item.IqamaNo ?? "", item.FullNameAr, item.FullNameEn ?? "", item.IsEmployee ? "Administrative" : "Rider", item.EngagementType.ToString(), item.Status.ToString(), item.HireDate?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) ?? "" }));
             }
             case "riders":
             {
                 var rows = await (from rider in dbContext.RiderProfiles.AsNoTracking()
                                   join employee in dbContext.Employees.AsNoTracking() on rider.EmployeeId equals employee.Id
-                                  orderby employee.EmployeeNumber
+                                  orderby employee.IqamaNo
                                   select new { rider, employee }).ToArrayAsync(cancellationToken);
-                return Prepend(["EmployeeNumber", "NameAr", "RiderStatus", "PreferredCityId"],
-                    rows.Select(row => new[] { row.employee.EmployeeNumber, row.employee.FullNameAr, row.rider.Status.ToString(), row.rider.PreferredCityId?.ToString("D") ?? "" }));
+                return Prepend(["IqamaNo", "NameAr", "Status", "TShirtSize"],
+                    rows.Select(row => new[] { row.employee.IqamaNo ?? "", row.employee.FullNameAr, row.employee.Status.ToString(), row.rider.TShirtSize?.ToString() ?? "" }));
             }
             case "housing":
             {
@@ -153,8 +153,8 @@ internal sealed partial class ExportJobProcessor(
             case "platform-accounts":
             {
                 var rows = await dbContext.PlatformRiderAccounts.AsNoTracking().OrderBy(item => item.Code).ToArrayAsync(cancellationToken);
-                return Prepend(["Code", "ExternalAccountId", "ClientPlatformId", "ClientContractId", "Status"],
-                    rows.Select(item => new[] { item.Code, item.ExternalAccountId, item.ClientPlatformId.ToString(), item.ClientContractId.ToString(), item.Status.ToString() }));
+                return Prepend(["Code", "ExternalAccountId", "ClientPlatformId", "RegisteredEmployeeId", "Status"],
+                    rows.Select(item => new[] { item.Code ?? "", item.ExternalAccountId ?? "", item.ClientPlatformId.ToString(), item.RegisteredEmployeeId?.ToString() ?? "", item.Status.ToString() }));
             }
             case "leave-requests":
             {

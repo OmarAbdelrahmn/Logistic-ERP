@@ -68,6 +68,7 @@ internal sealed class VehicleAccidentService(
         if (!actor.HasValue) return Result.Failure<VehicleAccidentDetailResponse>(FleetErrors.CurrentUserUnavailable);
         var vehicle = vehicleResult.Value!;
         var insurance = await dbContext.VehicleInsurancePolicies.AsNoTracking().Where(x => x.VehicleId == vehicle.Id && x.EffectiveFrom <= DateOnly.FromDateTime(request.OccurredAtUtc.UtcDateTime) && x.ExpiryDate >= DateOnly.FromDateTime(request.OccurredAtUtc.UtcDateTime)).OrderByDescending(x => x.EffectiveFrom).FirstOrDefaultAsync(cancellationToken);
+        var employeeId = await dbContext.RiderProfiles.AsNoTracking().Where(x => x.Id == assignment.RiderProfileId).Select(x => x.EmployeeId).SingleAsync(cancellationToken);
         await using var tx = await dbContext.Database.BeginTransactionAsync(cancellationToken);
         var issueId = Guid.CreateVersion7();
         var accidentId = Guid.CreateVersion7();
@@ -81,7 +82,7 @@ internal sealed class VehicleAccidentService(
         var accident = new VehicleAccident
         {
             Id = accidentId, AccidentNumber = FleetServiceSupport.NewNumber("ACC", support.UtcNow, accidentId), VehicleId = vehicle.Id,
-            RiderProfileId = assignment.RiderProfileId, EmployeeId = assignment.EmployeeId, RiderVehicleAssignmentId = assignment.Id, VehicleIssueId = issue.Id,
+            RiderProfileId = assignment.RiderProfileId, EmployeeId = employeeId, RiderVehicleAssignmentId = assignment.Id, VehicleIssueId = issue.Id,
             VehicleInsurancePolicyId = insurance?.Id, OccurredAtUtc = request.OccurredAtUtc, ReportedAtUtc = support.UtcNow, LocationId = request.LocationId ?? vehicle.CurrentLocationId,
             LocationDescription = request.LocationDescription.Trim(), Latitude = request.Latitude, Longitude = request.Longitude,
             PoliceReportNumber = FleetServiceSupport.TrimOrNull(request.PoliceReportNumber), InsuranceClaimNumber = FleetServiceSupport.TrimOrNull(request.InsuranceClaimNumber),
@@ -226,7 +227,7 @@ internal sealed class VehicleAccidentService(
         var identity = await (from employee in dbContext.Employees.AsNoTracking()
                               join vehicle in dbContext.Vehicles.AsNoTracking() on accident.VehicleId equals vehicle.Id
                               where employee.Id == accident.EmployeeId
-                              select new { employee.FullNameAr, employee.FullNameEn, employee.EmployeeNumber, vehicle.AssetNumber, vehicle.PlateNumberAr, vehicle.PlateNumberEn }).SingleAsync(cancellationToken);
+                              select new { employee.FullNameAr, employee.FullNameEn, employee.IqamaNo, vehicle.AssetNumber, vehicle.PlateNumberAr, vehicle.PlateNumberEn }).SingleAsync(cancellationToken);
         var insurance = accident.VehicleInsurancePolicyId.HasValue ? await dbContext.VehicleInsurancePolicies.AsNoTracking().SingleOrDefaultAsync(x => x.Id == accident.VehicleInsurancePolicyId, cancellationToken) : null;
         var files = await dbContext.VehicleAccidentAttachments.AsNoTracking().Where(x => x.VehicleAccidentId == accident.Id).OrderBy(x => x.UploadedAtUtc).ToArrayAsync(cancellationToken);
         var evidence = new List<AccidentPdfEvidence>();
@@ -246,7 +247,7 @@ internal sealed class VehicleAccidentService(
             }
             evidence.Add(new AccidentPdfEvidence(file.OriginalFileName, file.ContentType, file.Sha256Checksum, image));
         }
-        return new AccidentPdfSnapshot(reportNumber, accident.AccidentNumber, accident.OccurredAtUtc, identity.FullNameAr, identity.FullNameEn, identity.EmployeeNumber, identity.AssetNumber, identity.PlateNumberAr, identity.PlateNumberEn, accident.LocationDescription, accident.Severity, accident.IsDrivable, accident.HasInjuries, accident.InjuryDetails, accident.ThirdPartyDetails, accident.DamageDescription, accident.FaultAssessment, accident.Narrative, accident.PoliceReportNumber, accident.InsuranceClaimNumber, insurance?.ProviderName, insurance?.PolicyNumber, support.UtcNow, evidence);
+        return new AccidentPdfSnapshot(reportNumber, accident.AccidentNumber, accident.OccurredAtUtc, identity.FullNameAr, identity.FullNameEn, identity.IqamaNo, identity.AssetNumber, identity.PlateNumberAr, identity.PlateNumberEn, accident.LocationDescription, accident.Severity, accident.IsDrivable, accident.HasInjuries, accident.InjuryDetails, accident.ThirdPartyDetails, accident.DamageDescription, accident.FaultAssessment, accident.Narrative, accident.PoliceReportNumber, accident.InsuranceClaimNumber, insurance?.ProviderName, insurance?.PolicyNumber, support.UtcNow, evidence);
     }
 
     private async Task SetAccidentHoldAsync(Vehicle vehicle, VehicleAccident accident, Guid actor, CancellationToken cancellationToken)

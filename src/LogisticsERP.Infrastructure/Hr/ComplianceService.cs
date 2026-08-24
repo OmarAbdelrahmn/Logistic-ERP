@@ -12,79 +12,6 @@ internal sealed class ComplianceService(
     ApplicationDbContext dbContext,
     ISensitiveValueProtector protector) : IComplianceService
 {
-    public async Task<Result<IReadOnlyList<ResidencyPermitResponse>>> GetResidencyPermitsAsync(Guid? employeeId, CancellationToken cancellationToken = default)
-    {
-        var query = from item in dbContext.EmployeeResidencyPermits.AsNoTracking()
-                    join sponsor in dbContext.Sponsors.AsNoTracking() on item.SponsorId equals sponsor.Id into sponsors
-                    from sponsor in sponsors.DefaultIfEmpty()
-                    join profession in dbContext.ResidencyProfessions.AsNoTracking() on item.ResidencyProfessionId equals profession.Id
-                    where employeeId == null || item.EmployeeId == employeeId
-                    orderby item.IsCurrent descending, item.ExpiryDate descending
-                    select new ResidencyPermitProjection(item, sponsor == null ? null : sponsor.RegistryNameAr, profession.NameAr);
-        var rows = await query.ToArrayAsync(cancellationToken);
-        return Result.Success<IReadOnlyList<ResidencyPermitResponse>>(rows.Select(ToResidency).ToArray());
-    }
-
-    public async Task<Result<ResidencyPermitResponse>> UpsertResidencyPermitAsync(Guid employeeId, Guid? id, ResidencyPermitUpsertRequest request, CancellationToken cancellationToken = default)
-    {
-        if (!TryParseEnum<ResidencyPermitStatus>(request.Status, out var status)
-            || request.IssueDate is not null && request.ExpiryDate < request.IssueDate
-            || id is null && !HrServiceSupport.HasText(request.PermitNumber))
-        {
-            return Result.Failure<ResidencyPermitResponse>(HrErrors.InvalidRequest);
-        }
-        var refsValid = await dbContext.Employees.AnyAsync(item => item.Id == employeeId, cancellationToken)
-            && (request.SponsorId is null || await dbContext.Sponsors.AnyAsync(item => item.Id == request.SponsorId, cancellationToken))
-            && await dbContext.ResidencyProfessions.AnyAsync(item => item.Id == request.ResidencyProfessionId, cancellationToken)
-            && await DocumentBelongsToEmployeeAsync(employeeId, request.EmployeeDocumentId, cancellationToken);
-        if (!refsValid)
-        {
-            return Result.Failure<ResidencyPermitResponse>(HrErrors.NotFound);
-        }
-
-        EmployeeResidencyPermit entity;
-        if (id is null)
-        {
-            entity = new EmployeeResidencyPermit { EmployeeId = employeeId };
-            dbContext.EmployeeResidencyPermits.Add(entity);
-        }
-        else
-        {
-            entity = await dbContext.EmployeeResidencyPermits.SingleOrDefaultAsync(item => item.Id == id && item.EmployeeId == employeeId, cancellationToken) ?? null!;
-            if (entity is null)
-            {
-                return Result.Failure<ResidencyPermitResponse>(HrErrors.NotFound);
-            }
-            if (!HrServiceSupport.MatchesRowVersion(entity.RowVersion, request.RowVersion))
-            {
-                return Result.Failure<ResidencyPermitResponse>(HrErrors.ConcurrencyConflict);
-            }
-        }
-        if (HrServiceSupport.HasText(request.PermitNumber))
-        {
-            var hash = protector.CreateLookupHash(request.PermitNumber!);
-            if (await dbContext.EmployeeResidencyPermits.AnyAsync(item => item.Id != entity.Id && item.IsCurrent && item.PermitNumberLookupHash == hash, cancellationToken))
-            {
-                return Result.Failure<ResidencyPermitResponse>(HrErrors.Duplicate);
-            }
-            entity.PermitNumberCiphertext = protector.Protect(request.PermitNumber!);
-            entity.PermitNumberLookupHash = hash;
-            entity.PermitNumberLastFour = HrServiceSupport.LastFour(request.PermitNumber!);
-        }
-        await SupersedeCurrentResidencyAsync(employeeId, entity.Id, request.IsCurrent, cancellationToken);
-        entity.SponsorId = request.SponsorId;
-        entity.ResidencyProfessionId = request.ResidencyProfessionId;
-        entity.IssueDate = request.IssueDate;
-        entity.ExpiryDate = request.ExpiryDate;
-        entity.Status = status;
-        entity.IsCurrent = request.IsCurrent;
-        entity.PreviousPermitId = request.PreviousPermitId;
-        entity.EmployeeDocumentId = request.EmployeeDocumentId;
-        entity.Notes = HrServiceSupport.TrimOrNull(request.Notes);
-        await dbContext.SaveChangesAsync(cancellationToken);
-        return (await GetResidencyPermitsAsync(employeeId, cancellationToken)).MapSingle(item => item.Id == entity.Id);
-    }
-
     public async Task<Result<IReadOnlyList<DriverLicenseResponse>>> GetDriverLicensesAsync(Guid? employeeId, CancellationToken cancellationToken = default)
     {
         var rows = await (from item in dbContext.EmployeeDriverLicenses.AsNoTracking()
@@ -522,7 +449,6 @@ internal sealed class ComplianceService(
         }
         AuditableEntity? entity = resource.Trim().ToLowerInvariant() switch
         {
-            "residency" => await dbContext.EmployeeResidencyPermits.SingleOrDefaultAsync(item => item.Id == id, cancellationToken),
             "license" => await dbContext.EmployeeDriverLicenses.SingleOrDefaultAsync(item => item.Id == id, cancellationToken),
             "rider-card" => await dbContext.RiderCards.SingleOrDefaultAsync(item => item.Id == id, cancellationToken),
             "health-card" => await dbContext.RiderHealthCards.SingleOrDefaultAsync(item => item.Id == id, cancellationToken),
@@ -544,7 +470,6 @@ internal sealed class ComplianceService(
         entity.DeletionReason = request.Reason.Trim();
         switch (entity)
         {
-            case EmployeeResidencyPermit permit: permit.IsCurrent = false; break;
             case EmployeeDriverLicense license: license.IsCurrent = false; license.LicenseStatus = DriverLicenseStatus.Superseded; break;
             case RiderCard card: card.IsCurrent = false; card.Status = RiderCardStatus.Superseded; break;
             case RiderHealthCard healthCard: healthCard.IsCurrent = false; healthCard.Status = RiderHealthCardStatus.Superseded; break;
@@ -559,13 +484,6 @@ internal sealed class ComplianceService(
 
     private async Task<Guid?> GetRiderEmployeeIdAsync(Guid riderProfileId, CancellationToken cancellationToken) =>
         await dbContext.RiderProfiles.Where(item => item.Id == riderProfileId).Select(item => (Guid?)item.EmployeeId).SingleOrDefaultAsync(cancellationToken);
-
-    private async Task SupersedeCurrentResidencyAsync(Guid employeeId, Guid excludeId, bool makeCurrent, CancellationToken cancellationToken)
-    {
-        if (!makeCurrent) return;
-        var current = await dbContext.EmployeeResidencyPermits.SingleOrDefaultAsync(item => item.EmployeeId == employeeId && item.IsCurrent && item.Id != excludeId, cancellationToken);
-        if (current is not null) current.IsCurrent = false;
-    }
 
     private async Task SupersedeCurrentLicenseAsync(Guid employeeId, Guid categoryId, Guid excludeId, bool makeCurrent, CancellationToken cancellationToken)
     {
@@ -594,12 +512,6 @@ internal sealed class ComplianceService(
         var current = await dbContext.EmployeeMedicalInsurancePolicies.SingleOrDefaultAsync(item => item.EmployeeId == employeeId && item.IsCurrent && item.Id != excludeId, cancellationToken);
         if (current is not null) { current.IsCurrent = false; current.Status = MedicalInsurancePolicyStatus.Superseded; }
     }
-
-    private static ResidencyPermitResponse ToResidency(ResidencyPermitProjection row) => new(row.Item.Id, row.Item.EmployeeId,
-        row.Item.SponsorId, row.SponsorNameAr, row.Item.ResidencyProfessionId, row.ProfessionNameAr,
-        HrServiceSupport.MaskLastFour(row.Item.PermitNumberLastFour), row.Item.IssueDate, row.Item.ExpiryDate,
-        row.Item.Status.ToString(), row.Item.IsCurrent, row.Item.PreviousPermitId, row.Item.EmployeeDocumentId,
-        row.Item.Notes, HrServiceSupport.EncodeRowVersion(row.Item.RowVersion));
 
     private static DriverLicenseResponse ToLicense(DriverLicenseProjection row) => new(row.Item.Id, row.Item.EmployeeId,
         row.Item.DriverLicenseCategoryId, row.CategoryNameAr, row.Item.LicenseNumberLastFour is null ? null : HrServiceSupport.MaskLastFour(row.Item.LicenseNumberLastFour),
@@ -646,7 +558,6 @@ internal sealed class ComplianceService(
     private static bool TryParseEnum<TEnum>(string? value, out TEnum parsed) where TEnum : struct, Enum =>
         Enum.TryParse(value, true, out parsed) && Enum.IsDefined(parsed);
 
-    private sealed record ResidencyPermitProjection(EmployeeResidencyPermit Item, string? SponsorNameAr, string ProfessionNameAr);
     private sealed record DriverLicenseProjection(EmployeeDriverLicense Item, string CategoryNameAr);
     private sealed record PromissoryNoteProjection(EmployeePromissoryNote Item, string? SponsorNameAr);
     private sealed record MedicalPolicyProjection(EmployeeMedicalInsurancePolicy Item, string CompanyNameAr, string PlanNameAr);

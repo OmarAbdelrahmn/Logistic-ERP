@@ -182,7 +182,6 @@ export async function getManagerDashboard(
     loadDashboardResource<Housing>({ key: "housing", permission: "housing.read", path: "/api/housing" }, accessToken, permissions),
     loadDashboardResource<PlatformAccount>({ key: "accounts", permission: "platform_accounts.read", path: "/api/platform-operations/accounts" }, accessToken, permissions),
     loadDashboardResource<PlatformAssignment>({ key: "assignments", permission: "platform_assignments.read", path: "/api/platform-operations/assignments?currentOnly=true" }, accessToken, permissions),
-    loadDashboardResource<ComplianceItem>({ key: "residencyPermits", permission: "residency.read", path: "/api/compliance/residency-permits" }, accessToken, permissions),
     loadDashboardResource<ComplianceItem>({ key: "driverLicenses", permission: "licenses.read", path: "/api/compliance/driver-licenses" }, accessToken, permissions),
     loadDashboardResource<ComplianceItem>({ key: "insurancePolicies", permission: "insurance.read", path: "/api/insurance/policies" }, accessToken, permissions),
     loadDashboardResource<LeaveRequest>({ key: "leaveRequests", permission: "leave_requests.read", path: "/api/hr-workflows/leave-requests" }, accessToken, permissions),
@@ -192,7 +191,7 @@ export async function getManagerDashboard(
 
   const snapshot: DashboardSnapshot = {
     employees: null, riders: null, housing: null, accounts: null, assignments: null,
-    residencyPermits: null, driverLicenses: null, insurancePolicies: null,
+    driverLicenses: null, insurancePolicies: null,
     leaveRequests: null, absenceCases: null, statusChanges: null, unavailable: [],
   };
 

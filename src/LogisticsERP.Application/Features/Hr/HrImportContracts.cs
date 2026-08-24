@@ -19,7 +19,6 @@ public sealed record HrExcelImportResponse(
     int CreatedEmployees,
     int UpdatedEmployees,
     int CreatedRiders,
-    int CreatedResidencyPermits,
     int CreatedDriverLicenses,
     int CreatedPlatformAccounts,
     int CreatedPlatformAssignments,
@@ -27,7 +26,7 @@ public sealed record HrExcelImportResponse(
     IReadOnlyList<string> IgnoredColumns,
     IReadOnlyList<HrExcelImportIssue> Issues);
 
-public sealed record HrExcelImportIssue(int RowNumber, string? EmployeeNumber, string Severity, string Message);
+public sealed record HrExcelImportIssue(int RowNumber, string? IqamaNo, string Severity, string Message);
 
 public static class HrImportErrors
 {

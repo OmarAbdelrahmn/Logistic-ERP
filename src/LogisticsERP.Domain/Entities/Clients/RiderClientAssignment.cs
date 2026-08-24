@@ -5,7 +5,6 @@ namespace LogisticsERP.Domain.Entities.Clients;
 
 public sealed class RiderClientAssignment : AuditableEntity
 {
-    public Guid ActualEmployeeId { get; set; }
     public Guid RiderProfileId { get; set; }
     public Guid ClientContractId { get; set; }
     public Guid PlatformRiderAccountId { get; set; }

@@ -4,8 +4,6 @@ namespace LogisticsERP.Application.Features.Hr;
 
 public interface IComplianceService
 {
-    Task<Result<IReadOnlyList<ResidencyPermitResponse>>> GetResidencyPermitsAsync(Guid? employeeId, CancellationToken cancellationToken = default);
-    Task<Result<ResidencyPermitResponse>> UpsertResidencyPermitAsync(Guid employeeId, Guid? id, ResidencyPermitUpsertRequest request, CancellationToken cancellationToken = default);
     Task<Result<IReadOnlyList<DriverLicenseResponse>>> GetDriverLicensesAsync(Guid? employeeId, CancellationToken cancellationToken = default);
     Task<Result<DriverLicenseResponse>> UpsertDriverLicenseAsync(Guid employeeId, Guid? id, DriverLicenseUpsertRequest request, CancellationToken cancellationToken = default);
     Task<Result<IReadOnlyList<RiderCardResponse>>> GetRiderCardsAsync(Guid riderProfileId, CancellationToken cancellationToken = default);

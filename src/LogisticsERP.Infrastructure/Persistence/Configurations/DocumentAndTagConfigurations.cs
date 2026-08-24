@@ -35,17 +35,14 @@ internal sealed class EmployeeDocumentConfiguration : IEntityTypeConfiguration<E
     {
         builder.ConfigureOperational("EmployeeDocuments");
         builder.Property(entity => entity.DocumentNumber).HasMaxLength(150);
-        builder.Property(entity => entity.NormalizedDocumentNumber).HasMaxLength(150);
-        builder.Property(entity => entity.IssuingCountryCode).HasMaxLength(2).IsFixedLength();
-        builder.Property(entity => entity.IssuingAuthority).HasMaxLength(200);
         builder.Property(entity => entity.Notes).HasMaxLength(4000);
         builder.HasOne<Employee>().WithMany().HasForeignKey(entity => entity.EmployeeId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<DocumentType>().WithMany().HasForeignKey(entity => entity.DocumentTypeId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<EmployeeDocumentVersion>().WithMany().HasForeignKey(entity => entity.CurrentVersionId).OnDelete(DeleteBehavior.Restrict);
         builder.HasIndex(entity => new { entity.EmployeeId, entity.DocumentTypeId, entity.Status });
-        builder.HasIndex(entity => new { entity.DocumentTypeId, entity.NormalizedDocumentNumber })
+        builder.HasIndex(entity => new { entity.DocumentTypeId, entity.DocumentNumber })
             .IsUnique()
-            .HasFilter("[NormalizedDocumentNumber] IS NOT NULL AND [IsDeleted] = 0 AND [Status] <> 3");
+            .HasFilter("[DocumentNumber] IS NOT NULL AND [IsDeleted] = 0 AND [Status] <> 3");
         builder.ToTable(table => table.HasCheckConstraint(
             "CK_EmployeeDocuments_DateRange",
             "[ExpiryDate] IS NULL OR [IssueDate] IS NULL OR [ExpiryDate] >= [IssueDate]"));

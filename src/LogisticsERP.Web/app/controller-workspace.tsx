@@ -92,17 +92,17 @@ export function ControllerWorkspace({ accessToken, permissions, locale, t }: { a
 }
 
 type EmployeeRecord = {
-  id: string; employeeNumber: string; fullNameAr: string; fullNameEn: string | null; primaryPhone: string | null;
-  nationalityCountryCode: string | null; status: string; relationshipType: string | null; riderProfileId: string | null;
-  riderStatus: string | null; jobTitleAr: string | null; operationalWorkTypeAr: string | null; operatingCityAr: string | null; sponsorNameAr: string | null;
+  id: string; iqamaNo: string | null; fullNameAr: string; fullNameEn: string | null; primaryPhone: string | null;
+  nationality: string | null; isEmployee: boolean; engagementType: string; status: string; riderProfileId: string | null;
+  workingForMeAs: string | null; residencyProfession: string | null; sponsorNameAr: string | null;
 };
 
 function isEmployeeList(value: unknown): value is EmployeeRecord[] {
-  return Array.isArray(value) && value.every((item) => Boolean(item && typeof item === "object" && "employeeNumber" in item && "fullNameAr" in item));
+  return Array.isArray(value) && value.every((item) => Boolean(item && typeof item === "object" && "iqamaNo" in item && "fullNameAr" in item));
 }
 
 function EmployeesTable({ employees, locale, t }: { employees: EmployeeRecord[]; locale: Locale; t: Translation }) {
-  return <div className="table-wrap employee-response-table"><table className="resource-table"><thead><tr><th>{t.employee}</th><th>{t.jobAndWork}</th><th>{t.city}</th><th>{t.relationshipAndSponsor}</th><th>{t.riderProfile}</th><th>{t.contactAndNationality}</th><th>{t.status}</th></tr></thead><tbody>{employees.map((employee) => <tr key={employee.id}><td><strong>{locale === "ar" ? employee.fullNameAr : employee.fullNameEn || employee.fullNameAr}</strong><span>{t.employeeNumber}: {employee.employeeNumber}</span></td><td><strong>{employee.jobTitleAr ?? "—"}</strong><span>{employee.operationalWorkTypeAr ?? "—"}</span></td><td>{employee.operatingCityAr ?? "—"}</td><td><strong>{employee.relationshipType ?? "—"}</strong><span>{employee.sponsorNameAr ?? "—"}</span></td><td><strong>{employee.riderProfileId ? t.rider : "—"}</strong><span>{employee.riderStatus ?? "—"}</span></td><td><strong dir="ltr">{employee.primaryPhone ?? "—"}</strong><span>{employee.nationalityCountryCode ?? "—"}</span></td><td><span className={`status-chip ${isActive(employee.status) ? "is-good" : ""}`}>{employee.status}</span></td></tr>)}</tbody></table></div>;
+  return <div className="table-wrap employee-response-table"><table className="resource-table"><thead><tr><th>{t.employee}</th><th>{t.jobAndWork}</th><th>{t.relationshipAndSponsor}</th><th>{t.riderProfile}</th><th>{t.contactAndNationality}</th><th>{t.status}</th></tr></thead><tbody>{employees.map((employee) => <tr key={employee.id}><td><strong>{locale === "ar" ? employee.fullNameAr : employee.fullNameEn || employee.fullNameAr}</strong><span>{t.iqamaNo}: {employee.iqamaNo ?? "—"}</span></td><td><strong>{employee.workingForMeAs ?? "—"}</strong><span>{employee.residencyProfession ?? "—"}</span></td><td><strong>{employee.engagementType}</strong><span>{employee.sponsorNameAr ?? "—"}</span></td><td><strong>{employee.isEmployee ? (locale === "ar" ? "إداري" : "Administrative") : t.rider}</strong><span>{employee.riderProfileId ?? "—"}</span></td><td><strong dir="ltr">{employee.primaryPhone ?? "—"}</strong><span>{employee.nationality ?? "—"}</span></td><td><span className={`status-chip ${isActive(employee.status) ? "is-good" : ""}`}>{employee.status}</span></td></tr>)}</tbody></table></div>;
 }
 
 function isActive(status: string) {

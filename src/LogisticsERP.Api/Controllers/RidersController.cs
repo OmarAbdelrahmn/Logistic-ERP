@@ -26,20 +26,11 @@ public sealed class RidersController(IWorkforceService service) : ControllerBase
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 
-    [HttpPost("employee/{employeeId:guid}")]
-    [RequirePermission(PermissionKeys.Workforce.RidersManage)]
-    public async Task<IActionResult> Create(Guid employeeId, [FromBody] CreateRiderProfileRequest request, CancellationToken cancellationToken)
-    {
-        var result = await service.CreateRiderProfileAsync(employeeId, request, cancellationToken);
-        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
-    }
-
     [HttpPut("{riderProfileId:guid}")]
     [RequirePermission(PermissionKeys.Workforce.RidersManage)]
-    public async Task<IActionResult> Update(Guid riderProfileId, [FromBody] UpdateRiderProfileRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> Update(Guid riderProfileId, [FromBody] RiderProfileUpsertRequest request, CancellationToken cancellationToken)
     {
         var result = await service.UpdateRiderProfileAsync(riderProfileId, request, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 }
-

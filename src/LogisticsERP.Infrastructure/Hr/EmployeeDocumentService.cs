@@ -21,7 +21,7 @@ internal sealed class EmployeeDocumentService(
 
     private static readonly HashSet<string> AllowedContentTypes = new(StringComparer.OrdinalIgnoreCase)
     {
-        "application/pdf", "image/jpeg", "image/png"
+        "application/pdf", "image/jpeg", "image/png", "image/webp", "image/gif", "image/bmp"
     };
 
     public async Task<Result<IReadOnlyList<EmployeeDocumentResponse>>> GetEmployeeDocumentsAsync(Guid employeeId, CancellationToken cancellationToken = default)
@@ -47,15 +47,17 @@ internal sealed class EmployeeDocumentService(
         {
             return Result.Failure<EmployeeDocumentResponse>(HrErrors.NotFound);
         }
-        if (!ValidateMetadata(documentType, metadata) || !ValidateFileDeclaration(documentType, file))
+        if (!ValidateMetadata(documentType, metadata))
+        {
+            return Result.Failure<EmployeeDocumentResponse>(HrErrors.InvalidDocumentMetadata);
+        }
+        if (!ValidateFileDeclaration(documentType, file))
         {
             return Result.Failure<EmployeeDocumentResponse>(HrErrors.InvalidFile);
         }
-        var normalizedDocumentNumber = HrServiceSupport.HasText(metadata.DocumentNumber)
-            ? HrServiceSupport.NormalizeIdentifier(metadata.DocumentNumber!)
-            : null;
-        if (normalizedDocumentNumber is not null && await dbContext.EmployeeDocuments.AnyAsync(
-                item => item.DocumentTypeId == documentTypeId && item.NormalizedDocumentNumber == normalizedDocumentNumber && item.Status != DocumentStatus.Superseded,
+        var documentNumber = HrServiceSupport.TrimOrNull(metadata.DocumentNumber);
+        if (documentNumber is not null && await dbContext.EmployeeDocuments.AnyAsync(
+                item => item.DocumentTypeId == documentTypeId && item.DocumentNumber == documentNumber && item.Status != DocumentStatus.Superseded,
                 cancellationToken))
         {
             return Result.Failure<EmployeeDocumentResponse>(HrErrors.Duplicate);
@@ -65,10 +67,7 @@ internal sealed class EmployeeDocumentService(
         {
             EmployeeId = employeeId,
             DocumentTypeId = documentTypeId,
-            DocumentNumber = HrServiceSupport.TrimOrNull(metadata.DocumentNumber),
-            NormalizedDocumentNumber = normalizedDocumentNumber,
-            IssuingCountryCode = HrServiceSupport.TrimOrNull(metadata.IssuingCountryCode)?.ToUpperInvariant(),
-            IssuingAuthority = HrServiceSupport.TrimOrNull(metadata.IssuingAuthority),
+            DocumentNumber = documentNumber,
             IssueDate = metadata.IssueDate,
             ExpiryDate = metadata.ExpiryDate,
             Status = DocumentStatus.Active,
@@ -182,15 +181,12 @@ internal sealed class EmployeeDocumentService(
         {
             return Result.Failure<EmployeeDocumentResponse>(HrErrors.InvalidRequest);
         }
-        var normalized = HrServiceSupport.HasText(request.DocumentNumber) ? HrServiceSupport.NormalizeIdentifier(request.DocumentNumber!) : null;
-        if (normalized is not null && await dbContext.EmployeeDocuments.AnyAsync(item => item.Id != documentId && item.DocumentTypeId == document.DocumentTypeId && item.NormalizedDocumentNumber == normalized && item.Status != DocumentStatus.Superseded, cancellationToken))
+        var documentNumber = HrServiceSupport.TrimOrNull(request.DocumentNumber);
+        if (documentNumber is not null && await dbContext.EmployeeDocuments.AnyAsync(item => item.Id != documentId && item.DocumentTypeId == document.DocumentTypeId && item.DocumentNumber == documentNumber && item.Status != DocumentStatus.Superseded, cancellationToken))
         {
             return Result.Failure<EmployeeDocumentResponse>(HrErrors.Duplicate);
         }
-        document.DocumentNumber = HrServiceSupport.TrimOrNull(request.DocumentNumber);
-        document.NormalizedDocumentNumber = normalized;
-        document.IssuingCountryCode = HrServiceSupport.TrimOrNull(request.IssuingCountryCode)?.ToUpperInvariant();
-        document.IssuingAuthority = HrServiceSupport.TrimOrNull(request.IssuingAuthority);
+        document.DocumentNumber = documentNumber;
         document.IssueDate = request.IssueDate;
         document.ExpiryDate = request.ExpiryDate;
         document.Notes = HrServiceSupport.TrimOrNull(request.Notes);
@@ -262,8 +258,7 @@ internal sealed class EmployeeDocumentService(
 
         return rows.Select(row => new EmployeeDocumentResponse(row.Document.Id, row.Document.EmployeeId,
             row.Type.Id, row.Type.Code, row.Type.NameAr, row.Document.DocumentNumber,
-            row.Document.IssuingCountryCode, row.Document.IssuingAuthority, row.Document.IssueDate,
-            row.Document.ExpiryDate, row.Document.Status.ToString(), row.Document.Notes,
+            row.Document.IssueDate, row.Document.ExpiryDate, row.Document.Status.ToString(), row.Document.Notes,
             row.Document.CurrentVersionId, row.Version?.VersionNumber, row.Version?.OriginalFileName,
             row.Version?.ContentType, row.Version?.FileSizeBytes,
             Convert.ToBase64String(row.Document.RowVersion))).ToArray();
@@ -302,8 +297,7 @@ internal sealed class EmployeeDocumentService(
         (!type.RequiresNumber || HrServiceSupport.HasText(metadata.DocumentNumber))
         && (!type.RequiresIssueDate || metadata.IssueDate is not null)
         && (!type.RequiresExpiryDate || metadata.ExpiryDate is not null)
-        && (metadata.ExpiryDate is null || metadata.IssueDate is null || metadata.ExpiryDate >= metadata.IssueDate)
-        && metadata.IssuingCountryCode?.Trim().Length is not > 2;
+        && (metadata.ExpiryDate is null || metadata.IssueDate is null || metadata.ExpiryDate >= metadata.IssueDate);
 
     private static bool ValidateFileDeclaration(DocumentType type, FileUploadContent file)
     {
@@ -311,7 +305,8 @@ internal sealed class EmployeeDocumentService(
         return file.Length is > 0
             && file.Length <= type.MaxFileSizeBytes
             && AllowedContentTypes.Contains(file.ContentType)
-            && allowedByType.Contains(file.ContentType, StringComparer.OrdinalIgnoreCase)
+            && (allowedByType.Contains(file.ContentType, StringComparer.OrdinalIgnoreCase)
+                || file.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase) && AllowedContentTypes.Contains(file.ContentType))
             && HrServiceSupport.HasText(file.OriginalFileName);
     }
 

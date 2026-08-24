@@ -59,6 +59,16 @@ public sealed class EmployeeDocumentsController(IEmployeeDocumentService service
             : result.ToProblem(HttpContext);
     }
 
+    [HttpGet("{documentId:guid}/preview")]
+    public async Task<IActionResult> Preview(Guid employeeId, Guid documentId, [FromQuery] Guid? versionId, CancellationToken cancellationToken)
+    {
+        var result = await service.DownloadAsync(employeeId, documentId, versionId, cancellationToken);
+        if (result.IsFailure) return result.ToProblem(HttpContext);
+
+        Response.Headers.ContentDisposition = $"inline; filename=\"{Uri.EscapeDataString(result.Value!.DownloadFileName)}\"";
+        return File(result.Value.Content, result.Value.ContentType, enableRangeProcessing: true);
+    }
+
     [HttpPatch("{documentId:guid}/archive")]
     public async Task<IActionResult> Archive(Guid employeeId, Guid documentId, [FromBody] ArchiveRequest request, CancellationToken cancellationToken)
     {
@@ -123,14 +133,12 @@ public sealed class EmployeeDocumentUploadForm
 {
     public Guid DocumentTypeId { get; init; }
     public string? DocumentNumber { get; init; }
-    public string? IssuingCountryCode { get; init; }
-    public string? IssuingAuthority { get; init; }
     public DateOnly? IssueDate { get; init; }
     public DateOnly? ExpiryDate { get; init; }
     public string? Notes { get; init; }
     public IFormFile File { get; init; } = null!;
 
-    public EmployeeDocumentMetadataRequest ToMetadata() => new(DocumentNumber, IssuingCountryCode, IssuingAuthority, IssueDate, ExpiryDate, Notes);
+    public EmployeeDocumentMetadataRequest ToMetadata() => new(DocumentNumber, IssueDate, ExpiryDate, Notes);
 }
 
 public sealed class DocumentVersionUploadForm

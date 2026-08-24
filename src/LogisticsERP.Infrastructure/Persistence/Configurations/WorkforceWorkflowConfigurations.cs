@@ -248,7 +248,7 @@ internal sealed class EmployeeStatusChangeRequestConfiguration : IEntityTypeConf
         builder.Property(entity => entity.Reason).HasMaxLength(2000).IsRequired();
         builder.Property(entity => entity.ResolutionReason).HasMaxLength(1000);
         builder.HasOne<Employee>().WithMany().HasForeignKey(entity => entity.EmployeeId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasOne<EmployeeStatusPeriod>().WithMany().HasForeignKey(entity => entity.ResultingStatusPeriodId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<EmployeeWorkHistory>().WithMany().HasForeignKey(entity => entity.ResultingWorkHistoryId).OnDelete(DeleteBehavior.Restrict);
         builder.HasIndex(entity => entity.RequestNumber).IsUnique();
         builder.HasIndex(entity => new { entity.Status, entity.RequestedAtUtc });
         builder.HasIndex(entity => entity.EmployeeId)

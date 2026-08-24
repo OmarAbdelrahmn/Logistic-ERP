@@ -470,14 +470,15 @@ internal sealed class HrWorkflowService(
     public async Task<Result<EmployeeStatusChangeResponse>> CreateStatusChangeRequestAsync(EmployeeStatusChangeCreateRequest request, CancellationToken cancellationToken = default)
     {
         if (currentUser.UserId is not { } userId || !TryParseEnum<EmployeeStatus>(request.RequestedStatus, out var requestedStatus)
+            || requestedStatus == EmployeeStatus.Archived
             || !HrServiceSupport.HasText(request.Reason)) return Result.Failure<EmployeeStatusChangeResponse>(HrErrors.InvalidRequest);
         var employee = await dbContext.Employees.SingleOrDefaultAsync(item => item.Id == request.EmployeeId, cancellationToken);
         if (employee is null) return Result.Failure<EmployeeStatusChangeResponse>(HrErrors.NotFound);
-        if (employee.CurrentStatus == requestedStatus || await dbContext.EmployeeStatusChangeRequests.AnyAsync(item => item.EmployeeId == request.EmployeeId && item.Status == EmployeeStatusChangeRequestStatus.Pending, cancellationToken))
+        if (employee.Status == requestedStatus || await dbContext.EmployeeStatusChangeRequests.AnyAsync(item => item.EmployeeId == request.EmployeeId && item.Status == EmployeeStatusChangeRequestStatus.Pending, cancellationToken))
             return Result.Failure<EmployeeStatusChangeResponse>(HrErrors.Conflict);
         var entity = new EmployeeStatusChangeRequest
         {
-            RequestNumber = NewNumber("SC"), EmployeeId = request.EmployeeId, FromStatus = employee.CurrentStatus,
+            RequestNumber = NewNumber("SC"), EmployeeId = request.EmployeeId, FromStatus = employee.Status,
             RequestedStatus = requestedStatus, EffectiveFrom = request.EffectiveFrom, Reason = request.Reason.Trim(),
             Status = EmployeeStatusChangeRequestStatus.Pending, RequestedByUserId = userId,
             RequestedAtUtc = timeProvider.GetUtcNow()
@@ -502,17 +503,30 @@ internal sealed class HrWorkflowService(
         if (request.Approve)
         {
             var employee = await dbContext.Employees.SingleAsync(item => item.Id == entity.EmployeeId, cancellationToken);
-            var current = await dbContext.EmployeeStatusPeriods.SingleOrDefaultAsync(item => item.EmployeeId == entity.EmployeeId && item.EffectiveTo == null, cancellationToken);
-            if (current is not null)
+            if (entity.RequestedStatus == EmployeeStatus.Active
+                && (employee.IqamaNo is not { Length: 10 } iqamaNo || !iqamaNo.All(char.IsAsciiDigit)
+                    || employee.EngagementType == EmployeeRelationshipType.SponsoredInternal && employee.SponsorId is null
+                    || !employee.IsEmployee && !await dbContext.RiderProfiles.AnyAsync(item => item.EmployeeId == employee.Id, cancellationToken)))
+                return Result.Failure<EmployeeStatusChangeResponse>(HrErrors.InvalidRequest);
+            var history = new EmployeeWorkHistory
             {
-                if (entity.EffectiveFrom <= current.EffectiveFrom) return Result.Failure<EmployeeStatusChangeResponse>(HrErrors.Conflict);
-                current.EffectiveTo = entity.EffectiveFrom.AddDays(-1);
-            }
-            var period = new EmployeeStatusPeriod { EmployeeId = entity.EmployeeId, Status = entity.RequestedStatus,
-                EffectiveFrom = entity.EffectiveFrom, Reason = entity.Reason, ChangedByUserId = userId };
-            dbContext.EmployeeStatusPeriods.Add(period);
-            employee.CurrentStatus = entity.RequestedStatus;
-            entity.ResultingStatusPeriodId = period.Id;
+                EmployeeId = entity.EmployeeId,
+                ChangeType = EmployeeWorkChangeType.Status,
+                OldValue = employee.Status.ToString(),
+                NewValue = entity.RequestedStatus.ToString(),
+                EffectiveDate = entity.EffectiveFrom,
+                Reason = entity.Reason,
+                ChangedByUserId = userId,
+                CreatedAtUtc = timeProvider.GetUtcNow(),
+                CreatedByUserId = userId
+            };
+            dbContext.EmployeeWorkHistory.Add(history);
+            employee.Status = entity.RequestedStatus;
+            employee.StatusReason = entity.RequestedStatus is EmployeeStatus.Suspended or EmployeeStatus.Terminated
+                ? entity.Reason
+                : null;
+            if (entity.RequestedStatus == EmployeeStatus.Terminated) employee.TerminationDate = entity.EffectiveFrom;
+            entity.ResultingWorkHistoryId = history.Id;
         }
         await dbContext.SaveChangesAsync(cancellationToken);
         return (await GetStatusChangeRequestsAsync(null, cancellationToken)).MapSingle(item => item.Id == entity.Id);
@@ -521,7 +535,7 @@ internal sealed class HrWorkflowService(
     private async Task<Result> SubmitLeave(LeaveRequest entity, CancellationToken cancellationToken)
     {
         if (entity.Status is not (LeaveWorkflowStatus.Draft or LeaveWorkflowStatus.ReturnedForChanges)) return Result.Failure(HrErrors.Conflict);
-        var relationship = await dbContext.Employees.Where(item => item.Id == entity.EmployeeId).Select(item => item.CurrentRelationshipType).SingleAsync(cancellationToken);
+        var relationship = await dbContext.Employees.Where(item => item.Id == entity.EmployeeId).Select(item => (EmployeeRelationshipType?)item.EngagementType).SingleAsync(cancellationToken);
         var isRider = await dbContext.RiderProfiles.AnyAsync(item => item.EmployeeId == entity.EmployeeId, cancellationToken);
         var platformId = entity.RelatedClientContractId is null ? null : await dbContext.ClientContracts.Where(item => item.Id == entity.RelatedClientContractId).Select(item => (Guid?)item.ClientPlatformId).SingleOrDefaultAsync(cancellationToken);
         var today = DateOnly.FromDateTime(timeProvider.GetUtcNow().UtcDateTime);
@@ -610,8 +624,9 @@ internal sealed class HrWorkflowService(
             .Select(item => new PermissionScope(AccessScopeType.Housing, item.HousingId)).SingleOrDefaultAsync(cancellationToken),
         LeaveApprovalScopeSource.ActiveClientContract when request.RelatedClientContractId is not null => new PermissionScope(AccessScopeType.ClientContract, request.RelatedClientContractId.Value),
         LeaveApprovalScopeSource.ActiveClientPlatform => await (from assignment in dbContext.RiderClientAssignments
+            join rider in dbContext.RiderProfiles on assignment.RiderProfileId equals rider.Id
             join contract in dbContext.ClientContracts on assignment.ClientContractId equals contract.Id
-            where assignment.ActualEmployeeId == request.EmployeeId && assignment.EffectiveTo == null
+            where rider.EmployeeId == request.EmployeeId && assignment.EffectiveTo == null
             select new PermissionScope(AccessScopeType.ClientPlatform, contract.ClientPlatformId)).SingleOrDefaultAsync(cancellationToken),
         _ => null
     };
@@ -707,7 +722,7 @@ internal sealed class HrWorkflowService(
         row.Item.RequestNumber, row.Item.EmployeeId, row.EmployeeNameAr, row.Item.FromStatus.ToString(),
         row.Item.RequestedStatus.ToString(), row.Item.EffectiveFrom, row.Item.Reason, row.Item.Status.ToString(),
         row.Item.RequestedAtUtc, row.Item.ResolvedByUserId, row.Item.ResolvedAtUtc, row.Item.ResolutionReason,
-        row.Item.ResultingStatusPeriodId, HrServiceSupport.EncodeRowVersion(row.Item.RowVersion));
+        row.Item.ResultingWorkHistoryId, HrServiceSupport.EncodeRowVersion(row.Item.RowVersion));
 
     private sealed record WorkflowStepSnapshot(string StepKey, int Sequence, string RequiredPermissionKey,
         LeaveApprovalScopeSource ScopeSource, bool AllowsReturnForChanges, bool RequiresCommentOnApproval);

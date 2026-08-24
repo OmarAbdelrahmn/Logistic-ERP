@@ -206,7 +206,7 @@ internal sealed class DocumentTypeConfiguration : IEntityTypeConfiguration<Docum
         builder.HasIndex(entity => entity.Code).IsUnique();
 
         var seededAt = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
-        const string allowedMimeTypes = "application/pdf,image/jpeg,image/png";
+        const string allowedMimeTypes = "application/pdf,image/jpeg,image/png,image/webp,image/gif,image/bmp";
         const long maxFileSizeBytes = 10 * 1024 * 1024;
         builder.HasData(
             CreateDocumentTypeSeed(DocumentType.ResidencyPermitId, "RESIDENCY_PERMIT", "الإقامة", "Residency Permit", true, false, false, true, true, true, true, allowedMimeTypes, maxFileSizeBytes, seededAt),

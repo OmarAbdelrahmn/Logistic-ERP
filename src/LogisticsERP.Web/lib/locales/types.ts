@@ -18,10 +18,10 @@ export type Translation = {
   validationResults: string; commitImport: string; importing: string; importSuccessful: string; worksheet: string;
   totalRows: string; validRows: string; issues: string; supportedColumns: string; ignoredColumns: string;
   fileRequired: string; fileLimit: string; confirmImport: string; createdEmployees: string; updatedEmployees: string;
-  createdRiders: string; createdResidencies: string; createdLicenses: string; createdAccounts: string; createdAssignments: string;
+  createdRiders: string; createdLicenses: string; createdAccounts: string; createdAssignments: string;
   apiWorkspace: string; apiWorkspaceDescription: string; apiController: string; apiEndpoint: string; endpointAccess: string;
   routeParameters: string; requestBody: string; optionalQuery: string; selectFile: string; loadEndpoint: string;
   runAction: string; runningAction: string; response: string; actionComplete: string; invalidJson: string;
   parameterRequired: string; fileUploadHint: string; downloadComplete: string;
-  employeeNumber: string; jobAndWork: string; relationshipAndSponsor: string; riderProfile: string; contactAndNationality: string;
+  iqamaNo: string; jobAndWork: string; relationshipAndSponsor: string; riderProfile: string; contactAndNationality: string;
 };

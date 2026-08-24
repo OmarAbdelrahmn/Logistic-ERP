@@ -17,5 +17,5 @@ public sealed class EmployeeStatusChangeRequest : AuditableEntity
     public Guid? ResolvedByUserId { get; set; }
     public DateTimeOffset? ResolvedAtUtc { get; set; }
     public string? ResolutionReason { get; set; }
-    public Guid? ResultingStatusPeriodId { get; set; }
+    public Guid? ResultingWorkHistoryId { get; set; }
 }

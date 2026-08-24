@@ -98,6 +98,7 @@ internal static class HrServiceSupport
 internal interface ISensitiveValueProtector
 {
     byte[] Protect(string value);
+    string Unprotect(byte[] value);
     string CreateLookupHash(string value);
 }
 
@@ -166,5 +167,27 @@ internal sealed class SensitiveValueProtector : ISensitiveValueProtector
         var hash = HMACSHA256.HashData(lookupKey, normalized);
         CryptographicOperations.ZeroMemory(normalized);
         return Convert.ToHexString(hash);
+    }
+
+    public string Unprotect(byte[] value)
+    {
+        if (value.Length < 1 + AesGcm.NonceByteSizes.MaxSize + AesGcm.TagByteSizes.MaxSize || value[0] != FormatVersion)
+        {
+            throw new CryptographicException("Invalid protected value.");
+        }
+        var nonceLength = AesGcm.NonceByteSizes.MaxSize;
+        var tagLength = AesGcm.TagByteSizes.MaxSize;
+        var ciphertextLength = value.Length - 1 - nonceLength - tagLength;
+        var plaintext = new byte[ciphertextLength];
+        using var aes = new AesGcm(encryptionKey, tagLength);
+        aes.Decrypt(value.AsSpan(1, nonceLength), value.AsSpan(1 + nonceLength, tagLength), value.AsSpan(1 + nonceLength + tagLength), plaintext);
+        try
+        {
+            return Encoding.UTF8.GetString(plaintext);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(plaintext);
+        }
     }
 }

@@ -11,93 +11,44 @@ internal sealed class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
     public void Configure(EntityTypeBuilder<Employee> builder)
     {
         builder.ConfigureOperational("Employees");
-        builder.Property(entity => entity.EmployeeNumber).HasMaxLength(32).IsRequired();
+        builder.Property(entity => entity.IqamaNo).HasMaxLength(10).IsUnicode(false);
+        builder.Property(entity => entity.ResidencyProfession).HasMaxLength(200);
+        builder.Property(entity => entity.WorkingForMeAs).HasMaxLength(200);
         builder.Property(entity => entity.FullNameAr).HasMaxLength(200).IsRequired();
         builder.Property(entity => entity.FullNameEn).HasMaxLength(200);
-        builder.Property(entity => entity.NormalizedNameAr).HasMaxLength(200).IsRequired();
-        builder.Property(entity => entity.NormalizedNameEn).HasMaxLength(200);
+        builder.Property(entity => entity.Nationality).HasMaxLength(100);
         builder.Property(entity => entity.PrimaryPhone).HasMaxLength(32);
-        builder.Property(entity => entity.NationalityCountryCode).HasMaxLength(2).IsFixedLength();
-        builder.Property(entity => entity.Notes).HasMaxLength(4000);
-        builder.HasIndex(entity => entity.EmployeeNumber).IsUnique();
-        builder.HasIndex(entity => entity.NormalizedNameAr);
-        builder.HasIndex(entity => entity.NormalizedNameEn);
-        builder.HasIndex(entity => entity.PrimaryPhone);
-        builder.HasIndex(entity => entity.CurrentStatus);
-    }
-}
-
-internal sealed class EmployeeStatusPeriodConfiguration : IEntityTypeConfiguration<EmployeeStatusPeriod>
-{
-    public void Configure(EntityTypeBuilder<EmployeeStatusPeriod> builder)
-    {
-        builder.ConfigureTemporal("EmployeeStatusPeriods");
-        builder.Property(entity => entity.ReasonCode).HasMaxLength(100);
-        builder.Property(entity => entity.Reason).HasMaxLength(1000);
-        builder.HasOne<Employee>().WithMany().HasForeignKey(entity => entity.EmployeeId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasIndex(entity => new { entity.EmployeeId, entity.EffectiveFrom });
-        builder.HasIndex(entity => entity.EmployeeId)
-            .IsUnique()
-            .HasFilter("[EffectiveTo] IS NULL");
-    }
-}
-
-internal sealed class EmployeeRelationshipPeriodConfiguration : IEntityTypeConfiguration<EmployeeRelationshipPeriod>
-{
-    public void Configure(EntityTypeBuilder<EmployeeRelationshipPeriod> builder)
-    {
-        builder.ConfigureTemporal("EmployeeRelationshipPeriods");
-        builder.Property(entity => entity.ReasonCode).HasMaxLength(100);
-        builder.Property(entity => entity.Reason).HasMaxLength(1000);
-        builder.Property(entity => entity.SourceReference).HasMaxLength(200);
-        builder.HasOne<Employee>().WithMany().HasForeignKey(entity => entity.EmployeeId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasIndex(entity => new { entity.EmployeeId, entity.EffectiveFrom });
-        builder.HasIndex(entity => entity.EmployeeId)
-            .IsUnique()
-            .HasFilter("[EffectiveTo] IS NULL");
-    }
-}
-
-internal sealed class SponsoredInternalDetailsConfiguration : IEntityTypeConfiguration<SponsoredInternalDetails>
-{
-    public void Configure(EntityTypeBuilder<SponsoredInternalDetails> builder)
-    {
-        builder.ConfigureOperational("SponsoredInternalDetails");
         builder.Property(entity => entity.SecondaryPhone).HasMaxLength(32);
         builder.Property(entity => entity.Email).HasMaxLength(320);
-        builder.Property(entity => entity.EducationLevel).HasMaxLength(100);
-        builder.Property(entity => entity.EducationDetails).HasMaxLength(1000);
-        builder.Property(entity => entity.Profession).HasMaxLength(200);
         builder.Property(entity => entity.EmergencyContactName).HasMaxLength(200);
         builder.Property(entity => entity.EmergencyContactRelationship).HasMaxLength(100);
         builder.Property(entity => entity.EmergencyContactPhone).HasMaxLength(32);
-        builder.Property(entity => entity.LegacySponsorReference).HasMaxLength(200);
-        builder.Property(entity => entity.InternalNotes).HasMaxLength(4000);
-        builder.OwnsOne(entity => entity.HomeAddress, owned => owned.ConfigureAddress("HomeAddress"));
-        builder.HasOne<Employee>().WithOne().HasForeignKey<SponsoredInternalDetails>(entity => entity.EmployeeId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasOne<Employee>().WithMany().HasForeignKey(entity => entity.ManagerEmployeeId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasOne<Sponsor>().WithMany().HasForeignKey(entity => entity.CurrentSponsorId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasOne<EmployeeDocument>().WithMany().HasForeignKey(entity => entity.ProfilePhotoDocumentId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasIndex(entity => entity.EmployeeId).IsUnique();
-        builder.ToTable(table =>
-        {
-            table.HasCheckConstraint("CK_SponsoredInternalDetails_Dependents", "[DependentsCount] IS NULL OR [DependentsCount] >= 0");
-            table.HasCheckConstraint("CK_SponsoredInternalDetails_ContractRange", "[ContractEndDate] IS NULL OR [ContractStartDate] IS NULL OR [ContractEndDate] >= [ContractStartDate]");
-        });
-    }
-}
-
-internal sealed class OutsideRiderDetailsConfiguration : IEntityTypeConfiguration<OutsideRiderDetails>
-{
-    public void Configure(EntityTypeBuilder<OutsideRiderDetails> builder)
-    {
-        builder.ConfigureOperational("OutsideRiderDetails");
+        builder.Property(entity => entity.StatusReason).HasMaxLength(500);
         builder.Property(entity => entity.AlternateContactName).HasMaxLength(200);
         builder.Property(entity => entity.AlternateContactPhone).HasMaxLength(32);
-        builder.Property(entity => entity.EngagementReference).HasMaxLength(200);
-        builder.Property(entity => entity.EngagementNotes).HasMaxLength(4000);
-        builder.HasOne<Employee>().WithOne().HasForeignKey<OutsideRiderDetails>(entity => entity.EmployeeId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasIndex(entity => entity.EmployeeId).IsUnique();
+        builder.Property(entity => entity.Notes).HasMaxLength(4000);
+
+        builder.HasOne<EmployeeDocument>().WithMany().HasForeignKey(entity => entity.ProfilePhotoDocumentId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<OperationalWorkType>().WithMany().HasForeignKey(entity => entity.OperationalWorkTypeId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<OperatingCity>().WithMany().HasForeignKey(entity => entity.OperatingCityId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<Sponsor>().WithMany().HasForeignKey(entity => entity.SponsorId).OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasIndex(entity => entity.IqamaNo)
+            .IsUnique()
+            .HasFilter("[IqamaNo] IS NOT NULL AND [IsDeleted] = 0");
+        builder.HasIndex(entity => entity.FullNameAr);
+        builder.HasIndex(entity => entity.FullNameEn);
+        builder.HasIndex(entity => entity.PrimaryPhone);
+        builder.HasIndex(entity => new { entity.IsEmployee, entity.EngagementType, entity.Status });
+
+        builder.ToTable(table =>
+        {
+            table.HasCheckConstraint("CK_Employees_IqamaNo", "[IqamaNo] IS NULL OR (LEN([IqamaNo]) = 10 AND [IqamaNo] NOT LIKE '%[^0-9]%')");
+            table.HasCheckConstraint("CK_Employees_ActiveIqama", "[Status] <> 3 OR [IqamaNo] IS NOT NULL");
+            table.HasCheckConstraint("CK_Employees_OutsideIsRider", "[EngagementType] <> 2 OR [IsEmployee] = 0");
+            table.HasCheckConstraint("CK_Employees_ActiveInternalSponsor", "[Status] <> 3 OR [EngagementType] <> 1 OR [SponsorId] IS NOT NULL");
+            table.HasCheckConstraint("CK_Employees_ContractRange", "[ContractEndDate] IS NULL OR [ContractStartDate] IS NULL OR [ContractEndDate] >= [ContractStartDate]");
+        });
     }
 }
 
@@ -108,13 +59,20 @@ internal sealed class RiderProfileConfiguration : IEntityTypeConfiguration<Rider
         builder.ConfigureOperational("RiderProfiles");
         builder.Property(entity => entity.OperationalNotes).HasMaxLength(4000);
         builder.HasOne<Employee>().WithOne().HasForeignKey<RiderProfile>(entity => entity.EmployeeId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasOne<GlobalCity>().WithMany().HasForeignKey(entity => entity.PreferredCityId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasAlternateKey(entity => new { entity.Id, entity.EmployeeId });
         builder.HasIndex(entity => entity.EmployeeId).IsUnique();
-        builder.HasIndex(entity => entity.Status);
-        builder.ToTable(table => table.HasCheckConstraint(
-            "CK_RiderProfiles_DateRange",
-            "[RiderEndDate] IS NULL OR [RiderStartDate] IS NULL OR [RiderEndDate] >= [RiderStartDate]"));
+    }
+}
+
+internal sealed class EmployeeWorkHistoryConfiguration : IEntityTypeConfiguration<EmployeeWorkHistory>
+{
+    public void Configure(EntityTypeBuilder<EmployeeWorkHistory> builder)
+    {
+        builder.ConfigureHistory("EmployeeWorkHistory");
+        builder.Property(entity => entity.OldValue).HasMaxLength(1000);
+        builder.Property(entity => entity.NewValue).HasMaxLength(1000);
+        builder.Property(entity => entity.Reason).HasMaxLength(1000).IsRequired();
+        builder.HasOne<Employee>().WithMany().HasForeignKey(entity => entity.EmployeeId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(entity => new { entity.EmployeeId, entity.EffectiveDate, entity.ChangeType });
     }
 }
 
@@ -129,23 +87,5 @@ internal sealed class JobTitleConfiguration : IEntityTypeConfiguration<JobTitle>
         builder.Property(entity => entity.DescriptionAr).HasMaxLength(500);
         builder.Property(entity => entity.DescriptionEn).HasMaxLength(500);
         builder.HasIndex(entity => entity.Code).IsUnique();
-    }
-}
-
-internal sealed class EmployeeJobTitlePeriodConfiguration : IEntityTypeConfiguration<EmployeeJobTitlePeriod>
-{
-    public void Configure(EntityTypeBuilder<EmployeeJobTitlePeriod> builder)
-    {
-        builder.ConfigureTemporal("EmployeeJobTitlePeriods");
-        builder.Property(entity => entity.Reason).HasMaxLength(1000);
-        builder.HasOne<Employee>().WithMany().HasForeignKey(entity => entity.EmployeeId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasOne<JobTitle>().WithMany().HasForeignKey(entity => entity.JobTitleId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasOne<OperationalWorkType>().WithMany().HasForeignKey(entity => entity.OperationalWorkTypeId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasOne<OperatingCity>().WithMany().HasForeignKey(entity => entity.OperatingCityId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasIndex(entity => new { entity.EmployeeId, entity.EffectiveFrom });
-        builder.HasIndex(entity => new { entity.OperatingCityId, entity.OperationalWorkTypeId, entity.JobTitleId, entity.EffectiveTo });
-        builder.HasIndex(entity => entity.EmployeeId)
-            .IsUnique()
-            .HasFilter("[EffectiveTo] IS NULL");
     }
 }

@@ -57,7 +57,7 @@ public sealed record HousingPeriodResponse(
     Guid Id,
     Guid HousingId,
     Guid EmployeeId,
-    string EmployeeNumber,
+    string? IqamaNo,
     string EmployeeNameAr,
     DateOnly EffectiveFrom,
     DateOnly? EffectiveTo,
@@ -79,4 +79,3 @@ public interface IHousingService
     Task<Result<IReadOnlyList<HousingPeriodResponse>>> AssignSupervisorAsync(Guid housingId, AssignHousingSupervisorRequest request, CancellationToken cancellationToken = default);
     Task<Result> CloseSupervisorAsync(Guid periodId, ClosePeriodRequest request, CancellationToken cancellationToken = default);
 }
-

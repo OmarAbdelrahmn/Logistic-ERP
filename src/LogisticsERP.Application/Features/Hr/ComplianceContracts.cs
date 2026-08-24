@@ -1,35 +1,5 @@
 namespace LogisticsERP.Application.Features.Hr;
 
-public sealed record ResidencyPermitUpsertRequest(
-    Guid? SponsorId,
-    Guid ResidencyProfessionId,
-    string? PermitNumber,
-    DateOnly? IssueDate,
-    DateOnly ExpiryDate,
-    string Status,
-    bool IsCurrent,
-    Guid? PreviousPermitId,
-    Guid? EmployeeDocumentId,
-    string? Notes,
-    string? RowVersion);
-
-public sealed record ResidencyPermitResponse(
-    Guid Id,
-    Guid EmployeeId,
-    Guid? SponsorId,
-    string? SponsorNameAr,
-    Guid ResidencyProfessionId,
-    string ResidencyProfessionAr,
-    string PermitNumberMasked,
-    DateOnly? IssueDate,
-    DateOnly ExpiryDate,
-    string Status,
-    bool IsCurrent,
-    Guid? PreviousPermitId,
-    Guid? EmployeeDocumentId,
-    string? Notes,
-    string RowVersion);
-
 public sealed record DriverLicenseUpsertRequest(
     Guid DriverLicenseCategoryId,
     string? LicenseNumber,

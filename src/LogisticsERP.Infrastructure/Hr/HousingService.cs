@@ -21,20 +21,30 @@ internal sealed class HousingService(
     public async Task<Result<HousingResponse>> GetAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var row = await BuildHousingQuery(id).SingleOrDefaultAsync(cancellationToken);
-        return row is null ? Result.Failure<HousingResponse>(HrErrors.NotFound) : Result.Success(ToHousing(row));
+        return row is null ? Result.Failure<HousingResponse>(HrErrors.HousingNotFound) : Result.Success(ToHousing(row));
     }
 
     public async Task<Result<HousingResponse>> UpsertAsync(Guid? id, HousingUpsertRequest request, CancellationToken cancellationToken = default)
     {
-        if (!HrServiceSupport.HasText(request.Code) || !HrServiceSupport.HasText(request.NameAr)
-            || !HrServiceSupport.HasText(request.NameEn) || request.TotalCapacity <= 0
-            || request.Latitude is < -90 or > 90 || request.Longitude is < -180 or > 180
-            || request.ClosedDate is not null && request.OpenedDate is not null && request.ClosedDate < request.OpenedDate
-            || !TryParseEnum<HousingStatus>(request.Status, out var status)
-            || !await dbContext.GlobalCities.AnyAsync(item => item.Id == request.CityId, cancellationToken))
-        {
-            return Result.Failure<HousingResponse>(HrErrors.InvalidRequest);
-        }
+        if (!HrServiceSupport.HasText(request.Code))
+            return Result.Failure<HousingResponse>(HrErrors.Required("code"));
+        if (!HrServiceSupport.HasText(request.NameAr))
+            return Result.Failure<HousingResponse>(HrErrors.Required("nameAr"));
+        if (!HrServiceSupport.HasText(request.NameEn))
+            return Result.Failure<HousingResponse>(HrErrors.Required("nameEn"));
+        if (request.TotalCapacity <= 0)
+            return Result.Failure<HousingResponse>(HrErrors.Invalid("totalCapacity", "It must be greater than zero."));
+        if (request.Latitude is < -90 or > 90)
+            return Result.Failure<HousingResponse>(HrErrors.Invalid("latitude", "It must be between -90 and 90."));
+        if (request.Longitude is < -180 or > 180)
+            return Result.Failure<HousingResponse>(HrErrors.Invalid("longitude", "It must be between -180 and 180."));
+        if (request.ClosedDate is not null && request.OpenedDate is not null && request.ClosedDate < request.OpenedDate)
+            return Result.Failure<HousingResponse>(HrErrors.Invalid("closedDate", "It cannot be before 'openedDate'."));
+        if (!TryParseEnum<HousingStatus>(request.Status, out var status))
+            return Result.Failure<HousingResponse>(HrErrors.Invalid("status", "Use a valid housing status, such as 'Active', 'Inactive', or 'Archived'."));
+        if (!await dbContext.GlobalCities.AnyAsync(item => item.Id == request.CityId, cancellationToken))
+            return Result.Failure<HousingResponse>(HrErrors.CityNotFound);
+
         Housing entity;
         if (id is null)
         {
@@ -46,7 +56,7 @@ internal sealed class HousingService(
             entity = await dbContext.Housing.SingleOrDefaultAsync(item => item.Id == id, cancellationToken) ?? null!;
             if (entity is null)
             {
-                return Result.Failure<HousingResponse>(HrErrors.NotFound);
+                return Result.Failure<HousingResponse>(HrErrors.HousingNotFound);
             }
             if (!HrServiceSupport.MatchesRowVersion(entity.RowVersion, request.RowVersion))
             {
@@ -84,7 +94,7 @@ internal sealed class HousingService(
     public async Task<Result> ArchiveAsync(Guid id, ArchiveRequest request, CancellationToken cancellationToken = default)
     {
         var housing = await dbContext.Housing.SingleOrDefaultAsync(item => item.Id == id, cancellationToken);
-        if (housing is null) return Result.Failure(HrErrors.NotFound);
+        if (housing is null) return Result.Failure(HrErrors.HousingNotFound);
         if (!HrServiceSupport.HasText(request.Reason) || !HrServiceSupport.MatchesRowVersion(housing.RowVersion, request.RowVersion))
             return Result.Failure(HrErrors.ConcurrencyConflict);
         if (await dbContext.HousingResidencePeriods.AnyAsync(item => item.HousingId == id && item.EffectiveTo == null, cancellationToken))
@@ -96,8 +106,13 @@ internal sealed class HousingService(
         return Result.Success();
     }
 
-    public async Task<Result<IReadOnlyList<HousingPeriodResponse>>> GetResidentsAsync(Guid housingId, bool currentOnly, CancellationToken cancellationToken = default) =>
-        Result.Success<IReadOnlyList<HousingPeriodResponse>>(await BuildResidencePeriods(housingId, currentOnly, cancellationToken));
+    public async Task<Result<IReadOnlyList<HousingPeriodResponse>>> GetResidentsAsync(Guid housingId, bool currentOnly, CancellationToken cancellationToken = default)
+    {
+        if (!await dbContext.Housing.AnyAsync(item => item.Id == housingId, cancellationToken))
+            return Result.Failure<IReadOnlyList<HousingPeriodResponse>>(HrErrors.HousingNotFound);
+
+        return Result.Success<IReadOnlyList<HousingPeriodResponse>>(await BuildResidencePeriods(housingId, currentOnly, cancellationToken));
+    }
 
     public async Task<Result<IReadOnlyList<HousingPeriodResponse>>> AssignResidentAsync(Guid housingId, AssignHousingResidentRequest request, CancellationToken cancellationToken = default)
     {
@@ -106,11 +121,13 @@ internal sealed class HousingService(
         {
             return Result.Failure<IReadOnlyList<HousingPeriodResponse>>(HrErrors.InvalidRequest);
         }
-        var housing = await dbContext.Housing.SingleOrDefaultAsync(item => item.Id == housingId && item.Status == HousingStatus.Active, cancellationToken);
-        if (housing is null || !await dbContext.Employees.AnyAsync(item => item.Id == request.EmployeeId, cancellationToken))
-        {
-            return Result.Failure<IReadOnlyList<HousingPeriodResponse>>(HrErrors.NotFound);
-        }
+        var housing = await dbContext.Housing.SingleOrDefaultAsync(item => item.Id == housingId, cancellationToken);
+        if (housing is null)
+            return Result.Failure<IReadOnlyList<HousingPeriodResponse>>(HrErrors.HousingNotFound);
+        if (housing.Status != HousingStatus.Active)
+            return Result.Failure<IReadOnlyList<HousingPeriodResponse>>(HrErrors.HousingNotActive);
+        if (!await dbContext.Employees.AnyAsync(item => item.Id == request.EmployeeId, cancellationToken))
+            return Result.Failure<IReadOnlyList<HousingPeriodResponse>>(HrErrors.EmployeeNotFound);
         var currentResidents = await dbContext.HousingResidencePeriods.CountAsync(item => item.HousingId == housingId && item.EffectiveTo == null, cancellationToken);
         var existing = await dbContext.HousingResidencePeriods.SingleOrDefaultAsync(item => item.EmployeeId == request.EmployeeId && item.EffectiveTo == null, cancellationToken);
         if (currentResidents >= housing.TotalCapacity && existing?.HousingId != housingId && !request.CapacityOverrideUsed)
@@ -146,7 +163,7 @@ internal sealed class HousingService(
     {
         if (!HrServiceSupport.HasText(request.Reason)) return Result.Failure(HrErrors.InvalidRequest);
         var period = await dbContext.HousingResidencePeriods.SingleOrDefaultAsync(item => item.Id == periodId, cancellationToken);
-        if (period is null) return Result.Failure(HrErrors.NotFound);
+        if (period is null) return Result.Failure(HrErrors.ResidencePeriodNotFound);
         if (period.EffectiveTo is not null || request.EffectiveTo < period.EffectiveFrom) return Result.Failure(HrErrors.Conflict);
         period.EffectiveTo = request.EffectiveTo;
         period.MoveOutReason = request.Reason.Trim();
@@ -154,15 +171,21 @@ internal sealed class HousingService(
         return Result.Success();
     }
 
-    public async Task<Result<IReadOnlyList<HousingPeriodResponse>>> GetSupervisorsAsync(Guid housingId, bool currentOnly, CancellationToken cancellationToken = default) =>
-        Result.Success<IReadOnlyList<HousingPeriodResponse>>(await BuildSupervisorPeriods(housingId, currentOnly, cancellationToken));
+    public async Task<Result<IReadOnlyList<HousingPeriodResponse>>> GetSupervisorsAsync(Guid housingId, bool currentOnly, CancellationToken cancellationToken = default)
+    {
+        if (!await dbContext.Housing.AnyAsync(item => item.Id == housingId, cancellationToken))
+            return Result.Failure<IReadOnlyList<HousingPeriodResponse>>(HrErrors.HousingNotFound);
+
+        return Result.Success<IReadOnlyList<HousingPeriodResponse>>(await BuildSupervisorPeriods(housingId, currentOnly, cancellationToken));
+    }
 
     public async Task<Result<IReadOnlyList<HousingPeriodResponse>>> AssignSupervisorAsync(Guid housingId, AssignHousingSupervisorRequest request, CancellationToken cancellationToken = default)
     {
         if (currentUser.UserId is not { } userId) return Result.Failure<IReadOnlyList<HousingPeriodResponse>>(HrErrors.CurrentUserUnavailable);
-        if (!await dbContext.Housing.AnyAsync(item => item.Id == housingId, cancellationToken)
-            || !await dbContext.Employees.AnyAsync(item => item.Id == request.EmployeeId, cancellationToken))
-            return Result.Failure<IReadOnlyList<HousingPeriodResponse>>(HrErrors.NotFound);
+        if (!await dbContext.Housing.AnyAsync(item => item.Id == housingId, cancellationToken))
+            return Result.Failure<IReadOnlyList<HousingPeriodResponse>>(HrErrors.HousingNotFound);
+        if (!await dbContext.Employees.AnyAsync(item => item.Id == request.EmployeeId, cancellationToken))
+            return Result.Failure<IReadOnlyList<HousingPeriodResponse>>(HrErrors.EmployeeNotFound);
         var current = await dbContext.HousingSupervisorPeriods.SingleOrDefaultAsync(item => item.HousingId == housingId && item.EffectiveTo == null, cancellationToken);
         if (current is not null)
         {
@@ -186,7 +209,7 @@ internal sealed class HousingService(
     {
         if (!HrServiceSupport.HasText(request.Reason)) return Result.Failure(HrErrors.InvalidRequest);
         var period = await dbContext.HousingSupervisorPeriods.SingleOrDefaultAsync(item => item.Id == periodId, cancellationToken);
-        if (period is null) return Result.Failure(HrErrors.NotFound);
+        if (period is null) return Result.Failure(HrErrors.SupervisorPeriodNotFound);
         if (period.EffectiveTo is not null || request.EffectiveTo < period.EffectiveFrom) return Result.Failure(HrErrors.Conflict);
         period.EffectiveTo = request.EffectiveTo;
         period.EndReason = request.Reason.Trim();
@@ -207,7 +230,7 @@ internal sealed class HousingService(
                join employee in dbContext.Employees.AsNoTracking() on period.EmployeeId equals employee.Id
                where period.HousingId == housingId && (!currentOnly || period.EffectiveTo == null)
                orderby period.EffectiveFrom descending
-               select new HousingPeriodResponse(period.Id, period.HousingId, employee.Id, employee.EmployeeNumber,
+               select new HousingPeriodResponse(period.Id, period.HousingId, employee.Id, employee.IqamaNo,
                    employee.FullNameAr, period.EffectiveFrom, period.EffectiveTo, period.MoveInReason, period.MoveOutReason,
                    period.CapacityOverrideUsed, period.CapacityOverrideReason)).ToArrayAsync(cancellationToken);
 
@@ -216,7 +239,7 @@ internal sealed class HousingService(
                join employee in dbContext.Employees.AsNoTracking() on period.SupervisorEmployeeId equals employee.Id
                where period.HousingId == housingId && (!currentOnly || period.EffectiveTo == null)
                orderby period.EffectiveFrom descending
-               select new HousingPeriodResponse(period.Id, period.HousingId, employee.Id, employee.EmployeeNumber,
+               select new HousingPeriodResponse(period.Id, period.HousingId, employee.Id, employee.IqamaNo,
                    employee.FullNameAr, period.EffectiveFrom, period.EffectiveTo, period.AssignmentReason, period.EndReason,
                    false, null)).ToArrayAsync(cancellationToken);
 

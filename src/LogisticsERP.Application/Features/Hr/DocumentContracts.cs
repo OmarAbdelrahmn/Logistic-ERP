@@ -4,8 +4,6 @@ namespace LogisticsERP.Application.Features.Hr;
 
 public sealed record EmployeeDocumentMetadataRequest(
     string? DocumentNumber,
-    string? IssuingCountryCode,
-    string? IssuingAuthority,
     DateOnly? IssueDate,
     DateOnly? ExpiryDate,
     string? Notes);
@@ -23,8 +21,6 @@ public sealed record EmployeeDocumentResponse(
     string DocumentTypeCode,
     string DocumentTypeNameAr,
     string? DocumentNumber,
-    string? IssuingCountryCode,
-    string? IssuingAuthority,
     DateOnly? IssueDate,
     DateOnly? ExpiryDate,
     string Status,

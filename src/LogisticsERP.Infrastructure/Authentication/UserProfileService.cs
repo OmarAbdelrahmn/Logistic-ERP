@@ -239,43 +239,22 @@ internal sealed class UserProfileService(
                 .Where(item => item.Id == employeeId)
                 .Select(item => new EmployeeSnapshot(
                     item.Id,
-                    item.EmployeeNumber,
+                    item.IqamaNo,
                     item.FullNameAr,
                     item.FullNameEn,
                     item.PrimaryPhone,
-                    item.NationalityCountryCode,
+                    item.Nationality,
                     item.HireDate,
-                    item.CurrentStatus,
-                    item.CurrentRelationshipType,
+                    item.Status,
+                    item.EngagementType,
+                    item.IsEmployee,
                     applicationDbContext.RiderProfiles
                         .Where(rider => rider.EmployeeId == item.Id)
                         .Select(rider => (Guid?)rider.Id)
                         .SingleOrDefault(),
-                    applicationDbContext.RiderProfiles
-                        .Where(rider => rider.EmployeeId == item.Id)
-                        .Select(rider => (RiderStatus?)rider.Status)
-                        .SingleOrDefault(),
-                    (from assignment in applicationDbContext.EmployeeJobTitlePeriods
-                     join jobTitle in applicationDbContext.JobTitles on assignment.JobTitleId equals jobTitle.Id
-                     join workType in applicationDbContext.OperationalWorkTypes on assignment.OperationalWorkTypeId equals workType.Id
-                     join operatingCity in applicationDbContext.OperatingCities on assignment.OperatingCityId equals operatingCity.Id
-                     join globalCity in applicationDbContext.GlobalCities on operatingCity.GlobalCityId equals globalCity.Id
-                     where assignment.EmployeeId == item.Id && assignment.EffectiveTo == null
-                     select new OperationalAssignmentSnapshot(
-                         jobTitle.Id,
-                         jobTitle.Code,
-                         jobTitle.NameAr,
-                         jobTitle.NameEn,
-                         workType.Id,
-                         workType.Code,
-                         workType.NameAr,
-                         workType.NameEn,
-                         operatingCity.Id,
-                         globalCity.Code,
-                         globalCity.NameAr,
-                         globalCity.NameEn,
-                         assignment.EffectiveFrom))
-                    .SingleOrDefault()))
+                    item.WorkingForMeAs,
+                    item.OperationalWorkTypeId,
+                    item.OperatingCityId))
                 .SingleOrDefaultAsync(cancellationToken);
         }
 
@@ -298,32 +277,19 @@ internal sealed class UserProfileService(
                 ? null
                 : new EmployeeUserProfileResponse(
                     employee.Id,
-                    employee.EmployeeNumber,
+                    employee.IqamaNo,
                     employee.FullNameAr,
                     employee.FullNameEn,
                     employee.PrimaryPhone,
-                    employee.NationalityCountryCode,
+                    employee.Nationality,
                     employee.HireDate,
                     employee.Status.ToString(),
-                    employee.RelationshipType?.ToString(),
+                    employee.EngagementType.ToString(),
+                    employee.IsEmployee,
                     employee.RiderProfileId,
-                    employee.RiderStatus?.ToString(),
-                    employee.CurrentAssignment is null
-                        ? null
-                        : new CurrentOperationalAssignmentResponse(
-                            employee.CurrentAssignment.JobTitleId,
-                            employee.CurrentAssignment.JobTitleCode,
-                            employee.CurrentAssignment.JobTitleNameAr,
-                            employee.CurrentAssignment.JobTitleNameEn,
-                            employee.CurrentAssignment.OperationalWorkTypeId,
-                            employee.CurrentAssignment.OperationalWorkTypeCode,
-                            employee.CurrentAssignment.OperationalWorkTypeNameAr,
-                            employee.CurrentAssignment.OperationalWorkTypeNameEn,
-                            employee.CurrentAssignment.OperatingCityId,
-                            employee.CurrentAssignment.OperatingCityCode,
-                            employee.CurrentAssignment.OperatingCityNameAr,
-                            employee.CurrentAssignment.OperatingCityNameEn,
-                            employee.CurrentAssignment.EffectiveFrom)));
+                    employee.WorkingForMeAs,
+                    employee.OperationalWorkTypeId,
+                    employee.OperatingCityId));
     }
 
     private static bool HasValidPreferences(UpdateUserPreferencesRequest request)
@@ -346,32 +312,19 @@ internal sealed class UserProfileService(
 
     private sealed record EmployeeSnapshot(
         Guid Id,
-        string EmployeeNumber,
+        string? IqamaNo,
         string FullNameAr,
         string? FullNameEn,
         string? PrimaryPhone,
-        string? NationalityCountryCode,
+        string? Nationality,
         DateOnly? HireDate,
         EmployeeStatus Status,
-        EmployeeRelationshipType? RelationshipType,
+        EmployeeRelationshipType EngagementType,
+        bool IsEmployee,
         Guid? RiderProfileId,
-        RiderStatus? RiderStatus,
-        OperationalAssignmentSnapshot? CurrentAssignment);
-
-    private sealed record OperationalAssignmentSnapshot(
-        Guid JobTitleId,
-        string JobTitleCode,
-        string JobTitleNameAr,
-        string JobTitleNameEn,
-        Guid OperationalWorkTypeId,
-        string OperationalWorkTypeCode,
-        string OperationalWorkTypeNameAr,
-        string OperationalWorkTypeNameEn,
-        Guid OperatingCityId,
-        string OperatingCityCode,
-        string OperatingCityNameAr,
-        string OperatingCityNameEn,
-        DateOnly EffectiveFrom);
+        string? WorkingForMeAs,
+        Guid? OperationalWorkTypeId,
+        Guid? OperatingCityId);
 
     private sealed record RoleGrantRow(
         Guid AssignmentId,

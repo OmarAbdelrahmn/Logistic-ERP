@@ -282,14 +282,14 @@ internal sealed class FleetService(
         if (vehicle is null) return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.NotFound);
         if (!await support.HasVehiclePermissionAsync(vehicle, PermissionKeys.Fleet.AssignmentsManage, cancellationToken)) return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.Forbidden);
         if (vehicle.CurrentOperationalStatus != VehicleOperationalStatus.Available || vehicle.CurrentAssignmentId.HasValue || request.StartOdometer < vehicle.CurrentOdometer || !ValidFuel(request.StartFuelLevelPercentage) || !ValidPermission(request.PermissionStartsOn, request.PermissionEndsOn) || string.IsNullOrWhiteSpace(request.Reason)) return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.VehicleUnavailable);
-        var rider = await dbContext.RiderProfiles.AsNoTracking().SingleOrDefaultAsync(x => x.Id == request.RiderProfileId && x.Status == RiderStatus.Active, cancellationToken);
-        if (rider is null || !await dbContext.Employees.AnyAsync(x => x.Id == rider.EmployeeId && x.CurrentStatus == EmployeeStatus.Active, cancellationToken)
+        var rider = await dbContext.RiderProfiles.AsNoTracking().SingleOrDefaultAsync(x => x.Id == request.RiderProfileId, cancellationToken);
+        if (rider is null || !await dbContext.Employees.AnyAsync(x => x.Id == rider.EmployeeId && !x.IsEmployee && x.Status == EmployeeStatus.Active, cancellationToken)
             || await dbContext.RiderVehicleAssignments.AnyAsync(x => x.RiderProfileId == request.RiderProfileId && x.EndedAtUtc == null, cancellationToken)) return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.RiderUnavailable);
         await using var tx = await dbContext.Database.BeginTransactionAsync(cancellationToken);
         var operationId = Guid.CreateVersion7();
         var assignment = new RiderVehicleAssignment
         {
-            RiderProfileId = rider.Id, EmployeeId = rider.EmployeeId, VehicleId = vehicle.Id, OperationId = operationId, PreviousAssignmentId = previousAssignmentId,
+            RiderProfileId = rider.Id, VehicleId = vehicle.Id, OperationId = operationId, PreviousAssignmentId = previousAssignmentId,
             StartedAtUtc = request.StartedAtUtc, StartLocationId = request.StartLocationId ?? vehicle.CurrentLocationId, StartOdometer = request.StartOdometer,
             StartVehicleCondition = request.StartCondition, StartFuelLevelPercentage = request.StartFuelLevelPercentage, PermissionReference = FleetServiceSupport.TrimOrNull(request.PermissionReference),
             PermissionStartsOn = request.PermissionStartsOn, PermissionEndsOn = request.PermissionEndsOn, AssignmentReason = request.Reason.Trim(), AssignedByUserId = actor.Value,
@@ -353,7 +353,7 @@ internal sealed class FleetService(
         await SetStatusAsync(oldVehicle, await ResolveAvailableStatusAsync(oldVehicle.Id, null, cancellationToken), request.SwitchedAtUtc, request.Reason, VehicleStatusSourceType.Assignment, old.Id, actor.Value, cancellationToken);
         var newAssignment = new RiderVehicleAssignment
         {
-            RiderProfileId = old.RiderProfileId, EmployeeId = old.EmployeeId, VehicleId = next.Id, OperationId = old.OperationId, PreviousAssignmentId = old.Id,
+            RiderProfileId = old.RiderProfileId, VehicleId = next.Id, OperationId = old.OperationId, PreviousAssignmentId = old.Id,
             StartedAtUtc = request.SwitchedAtUtc, StartLocationId = request.LocationId ?? next.CurrentLocationId, StartOdometer = request.NewVehicleOdometer,
             StartVehicleCondition = request.NewVehicleCondition, StartFuelLevelPercentage = request.NewFuelLevelPercentage, PermissionReference = FleetServiceSupport.TrimOrNull(request.PermissionReference),
             PermissionStartsOn = request.PermissionStartsOn, PermissionEndsOn = request.PermissionEndsOn, AssignmentReason = request.Reason.Trim(), AssignedByUserId = actor.Value
@@ -591,7 +591,8 @@ internal sealed class FleetService(
     private async Task<RiderVehicleAssignmentResponse> MapAssignmentAsync(RiderVehicleAssignment item, CancellationToken cancellationToken)
     {
         var info = await (from v in dbContext.Vehicles.AsNoTracking() join r in dbContext.RiderProfiles.AsNoTracking() on item.RiderProfileId equals r.Id join e in dbContext.Employees.AsNoTracking() on r.EmployeeId equals e.Id where v.Id == item.VehicleId select new { v.AssetNumber, RiderName = e.FullNameAr }).SingleAsync(cancellationToken);
-        return new RiderVehicleAssignmentResponse(item.Id, item.RiderProfileId, item.EmployeeId, item.VehicleId, info.AssetNumber, info.RiderName, item.StartedAtUtc, item.EndedAtUtc, item.StartLocationId, item.EndLocationId, item.StartOdometer, item.EndOdometer, item.PermissionStartsOn, item.PermissionEndsOn, item.Status, item.AssignmentReason, item.CompletionReason, item.OperationId, FleetServiceSupport.EncodeRowVersion(item.RowVersion));
+        var employeeId = await dbContext.RiderProfiles.AsNoTracking().Where(x => x.Id == item.RiderProfileId).Select(x => x.EmployeeId).SingleAsync(cancellationToken);
+        return new RiderVehicleAssignmentResponse(item.Id, item.RiderProfileId, employeeId, item.VehicleId, info.AssetNumber, info.RiderName, item.StartedAtUtc, item.EndedAtUtc, item.StartLocationId, item.EndLocationId, item.StartOdometer, item.EndOdometer, item.PermissionStartsOn, item.PermissionEndsOn, item.Status, item.AssignmentReason, item.CompletionReason, item.OperationId, FleetServiceSupport.EncodeRowVersion(item.RowVersion));
     }
 
     private async Task<VehicleSummaryResponse[]> BuildSummariesAsync(Vehicle[] vehicles, CancellationToken cancellationToken)

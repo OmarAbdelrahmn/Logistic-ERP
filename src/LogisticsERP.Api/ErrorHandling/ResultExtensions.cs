@@ -17,7 +17,7 @@ internal static class ResultExtensions
             _ => StatusCodes.Status500InternalServerError
         };
 
-        return new ObjectResult(new ProblemDetails
+        var problem = new ProblemDetails
         {
             Status = statusCode,
             Title = result.Error.Code,
@@ -29,7 +29,13 @@ internal static class ResultExtensions
                 ["errorCode"] = result.Error.Code,
                 ["correlationId"] = httpContext.TraceIdentifier
             }
-        })
+        };
+        if (result.Error.Field is not null)
+        {
+            problem.Extensions["field"] = result.Error.Field;
+        }
+
+        return new ObjectResult(problem)
         {
             StatusCode = statusCode
         };

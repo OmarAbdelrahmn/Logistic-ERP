@@ -86,7 +86,7 @@ public sealed record EmployeeStatusChangeResolveRequest(bool Approve, string Res
 public sealed record EmployeeStatusChangeResponse(Guid Id, string RequestNumber, Guid EmployeeId,
     string EmployeeNameAr, string FromStatus, string RequestedStatus, DateOnly EffectiveFrom, string Reason,
     string Status, DateTimeOffset RequestedAtUtc, Guid? ResolvedByUserId, DateTimeOffset? ResolvedAtUtc,
-    string? ResolutionReason, Guid? ResultingStatusPeriodId, string RowVersion);
+    string? ResolutionReason, Guid? ResultingWorkHistoryId, string RowVersion);
 
 public interface IHrWorkflowService
 {

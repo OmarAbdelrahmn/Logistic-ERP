@@ -49,30 +49,30 @@ export type UserAuthorization = {
 
 export type Employee = {
   id: string;
-  employeeNumber: string;
+  iqamaNo: string | null;
   fullNameAr: string;
   fullNameEn: string | null;
+  nationality: string | null;
+  primaryPhone: string | null;
+  isEmployee: boolean;
+  engagementType: string;
   status: string;
-  relationshipType: string | null;
+  workingForMeAs: string | null;
+  residencyProfession: string | null;
   riderProfileId: string | null;
-  riderStatus: string | null;
-  jobTitleAr: string | null;
-  operationalWorkTypeAr: string | null;
-  operatingCityAr: string | null;
   sponsorNameAr: string | null;
 };
 
 export type Rider = {
   id: string;
   employeeId: string;
-  employeeNumber: string;
+  iqamaNo: string | null;
   fullNameAr: string;
   fullNameEn: string | null;
+  engagementType: string;
   status: string;
-  riderStartDate: string | null;
-  riderEndDate: string | null;
-  preferredCityAr: string | null;
-  isOutsideRider: boolean;
+  tShirtSize: string | null;
+  operationalNotes: string | null;
 };
 
 export type Housing = {
@@ -89,12 +89,11 @@ export type Housing = {
 
 export type PlatformAccount = {
   id: string;
-  contractNameAr: string;
   platformNameAr: string;
+  registeredEmployeeNameAr: string | null;
   operatingCityAr: string;
   code: string;
   externalAccountId: string;
-  labelAr: string | null;
   status: string;
   endDate: string | null;
 };
@@ -154,7 +153,6 @@ export type DashboardSnapshot = {
   housing: Housing[] | null;
   accounts: PlatformAccount[] | null;
   assignments: PlatformAssignment[] | null;
-  residencyPermits: ComplianceItem[] | null;
   driverLicenses: ComplianceItem[] | null;
   insurancePolicies: ComplianceItem[] | null;
   leaveRequests: LeaveRequest[] | null;
@@ -165,7 +163,7 @@ export type DashboardSnapshot = {
 
 export type HrImportIssue = {
   rowNumber: number;
-  employeeNumber: string | null;
+  iqamaNo: string | null;
   severity: string;
   message: string;
 };
@@ -178,7 +176,6 @@ export type HrImportResponse = {
   createdEmployees: number;
   updatedEmployees: number;
   createdRiders: number;
-  createdResidencyPermits: number;
   createdDriverLicenses: number;
   createdPlatformAccounts: number;
   createdPlatformAssignments: number;
