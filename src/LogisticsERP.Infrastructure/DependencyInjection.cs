@@ -60,6 +60,7 @@ public static class DependencyInjection
         services.AddScoped<IEmployeeDocumentService, EmployeeDocumentService>();
         services.AddScoped<IHousingService, HousingService>();
         services.AddScoped<IPlatformOperationsService, PlatformOperationsService>();
+        services.AddScoped<ISimplePlatformService, SimplePlatformService>();
         services.AddScoped<IHrWorkflowService, HrWorkflowService>();
         services.AddScoped<IHrExcelImportService, HrExcelImportService>();
         services.AddScoped<ILeaveDocumentService, LeaveDocumentService>();
