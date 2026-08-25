@@ -80,6 +80,25 @@ public sealed record SimplePlatformCredentialVersionResponse(
     Guid RotatedByUserId,
     string Reason);
 
+public sealed record ActivePlatformAccountErrorDetail(
+    Guid AssignmentId,
+    Guid AccountId,
+    Guid PlatformId,
+    string PlatformCode,
+    string PlatformNameAr,
+    string PlatformNameEn,
+    string ExternalAccountId,
+    string PaymentModel);
+
+public sealed record PlatformAssignmentLimitErrorDetail(
+    Guid RiderProfileId,
+    Guid RequestedAccountId,
+    string RequestedPaymentModel,
+    int MaximumActiveAccounts,
+    int MaximumSalaryAccounts,
+    IReadOnlyList<ActivePlatformAccountErrorDetail> ActiveAccounts,
+    IReadOnlyList<string> AllowedPaymentModels);
+
 public sealed record RiderPlatformHistoryItemResponse(
     Guid AssignmentId,
     Guid PlatformId,

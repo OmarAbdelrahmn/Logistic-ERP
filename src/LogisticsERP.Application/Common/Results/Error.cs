@@ -11,7 +11,12 @@ public enum ErrorType
     Failure = 6
 }
 
-public sealed record OperationError(string Code, string Description, ErrorType Type, string? Field = null)
+public sealed record OperationError(
+    string Code,
+    string Description,
+    ErrorType Type,
+    string? Field = null,
+    IReadOnlyDictionary<string, object?>? Details = null)
 {
     public static readonly OperationError None = new(string.Empty, string.Empty, ErrorType.None);
 }

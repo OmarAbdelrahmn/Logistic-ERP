@@ -348,14 +348,21 @@ internal sealed class PlatformOperationsService(
             || status is RiderAssignmentStatus.Ended or RiderAssignmentStatus.Cancelled
             || request.WasBackdated && !HrServiceSupport.HasText(request.BackdatedReason))
             return Result.Failure<PlatformAssignmentResponse>(HrErrors.InvalidRequest);
-        var riderEmployee = await dbContext.RiderProfiles.Where(item => item.Id == request.RiderProfileId)
-            .Select(item => dbContext.Employees.Any(employee => employee.Id == item.EmployeeId && !employee.IsEmployee && employee.Status == EmployeeStatus.Active))
+        var rider = await dbContext.RiderProfiles.Where(item => item.Id == request.RiderProfileId)
+            .Select(item => new
+            {
+                IsEligible = dbContext.Employees.Any(employee => employee.Id == item.EmployeeId && !employee.IsEmployee && employee.Status == EmployeeStatus.Active)
+            })
             .SingleOrDefaultAsync(cancellationToken);
         var account = await dbContext.PlatformRiderAccounts.SingleOrDefaultAsync(
             item => item.Id == request.PlatformRiderAccountId,
             cancellationToken);
         var contractPlatform = await dbContext.ClientContracts.Where(item => item.Id == request.ClientContractId).Select(item => (Guid?)item.ClientPlatformId).SingleOrDefaultAsync(cancellationToken);
-        if (!riderEmployee || account is null || account.ClientPlatformId != contractPlatform)
+        if (rider is null)
+            return Result.Failure<PlatformAssignmentResponse>(HrErrors.RiderProfileNotFound("riderProfileId", request.RiderProfileId));
+        if (!rider.IsEligible)
+            return Result.Failure<PlatformAssignmentResponse>(HrErrors.RiderProfileUnavailable("riderProfileId", request.RiderProfileId));
+        if (account is null || account.ClientPlatformId != contractPlatform)
             return Result.Failure<PlatformAssignmentResponse>(HrErrors.NotFound);
         if (account.Status != PlatformRiderAccountStatus.Available
             || await dbContext.RiderClientAssignments.AnyAsync(
@@ -370,7 +377,13 @@ internal sealed class PlatformOperationsService(
             activeAssignments.Select(item => item.PaymentModel),
             account.PaymentModel);
         if (assignmentDecision != PlatformAccountAssignmentDecision.Allowed)
-            return Result.Failure<PlatformAssignmentResponse>(ToAssignmentError(assignmentDecision));
+            return Result.Failure<PlatformAssignmentResponse>(
+                await CreateAssignmentLimitErrorAsync(
+                    assignmentDecision,
+                    request.RiderProfileId,
+                    account.Id,
+                    account.PaymentModel,
+                    cancellationToken));
         var riderAccountSlot = activeAssignments.Any(item => item.RiderAccountSlot == 1) ? 2 : 1;
         var entity = new RiderClientAssignment
         {
@@ -490,6 +503,47 @@ internal sealed class PlatformOperationsService(
         row.Item.OperationalAgreementReference, row.Item.OperationalAgreementNotes, row.Item.WasBackdated,
         row.Item.BackdatedReason, HrServiceSupport.EncodeRowVersion(row.Item.RowVersion));
 
+    private async Task<OperationError> CreateAssignmentLimitErrorAsync(
+        PlatformAccountAssignmentDecision decision,
+        Guid riderProfileId,
+        Guid requestedAccountId,
+        PlatformAccountPaymentModel requestedPaymentModel,
+        CancellationToken cancellationToken)
+    {
+        var activeAccounts = await (from assignment in dbContext.RiderClientAssignments.AsNoTracking()
+                                    join account in dbContext.PlatformRiderAccounts.AsNoTracking()
+                                        on assignment.PlatformRiderAccountId equals account.Id
+                                    join platform in dbContext.ClientPlatforms.AsNoTracking()
+                                        on account.ClientPlatformId equals platform.Id
+                                    where assignment.RiderProfileId == riderProfileId && assignment.EffectiveTo == null
+                                    orderby assignment.PaymentModel descending, assignment.EffectiveFrom
+                                    select new ActivePlatformAccountErrorDetail(
+                                        assignment.Id,
+                                        account.Id,
+                                        platform.Id,
+                                        platform.Code,
+                                        platform.NameAr,
+                                        platform.NameEn,
+                                        account.ExternalAccountId,
+                                        assignment.PaymentModel.ToString()))
+            .ToArrayAsync(cancellationToken);
+        var details = new PlatformAssignmentLimitErrorDetail(
+            riderProfileId,
+            requestedAccountId,
+            requestedPaymentModel.ToString(),
+            PlatformAccountAssignmentPolicy.MaximumActiveAccountsPerRider,
+            1,
+            activeAccounts,
+            GetAllowedPaymentModels(activeAccounts));
+        return ToAssignmentError(decision) with
+        {
+            Details = new Dictionary<string, object?>
+            {
+                ["assignmentLimit"] = details
+            }
+        };
+    }
+
     private static bool TryParseEnum<TEnum>(string? value, out TEnum parsed) where TEnum : struct, Enum =>
         Enum.TryParse(value, true, out parsed) && Enum.IsDefined(parsed);
 
@@ -537,6 +591,17 @@ internal sealed class PlatformOperationsService(
         PlatformAccountAssignmentDecision.AccountLimitReached => HrErrors.RiderAccountLimitReached,
         _ => HrErrors.Conflict
     };
+
+    private static IReadOnlyList<string> GetAllowedPaymentModels(
+        ActivePlatformAccountErrorDetail[] activeAccounts)
+    {
+        if (activeAccounts.Length >= PlatformAccountAssignmentPolicy.MaximumActiveAccountsPerRider)
+            return [];
+
+        return activeAccounts.Any(item => item.PaymentModel == nameof(PlatformAccountPaymentModel.Salary))
+            ? [nameof(PlatformAccountPaymentModel.PayPerOrder)]
+            : [nameof(PlatformAccountPaymentModel.PayPerOrder), nameof(PlatformAccountPaymentModel.Salary)];
+    }
 
     private sealed record ContractProjection(ClientContract Item, string PlatformNameAr);
     private sealed record AccountProjection(PlatformRiderAccount Item, string PlatformNameAr,

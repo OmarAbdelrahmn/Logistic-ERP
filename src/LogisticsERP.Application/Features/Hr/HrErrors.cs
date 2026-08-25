@@ -1,4 +1,5 @@
 using LogisticsERP.Application.Common.Results;
+using LogisticsERP.Domain.Enums;
 
 namespace LogisticsERP.Application.Features.Hr;
 
@@ -46,6 +47,36 @@ public static class HrErrors
         "platform.rider_account_limit_reached", "A rider can have at most two active platform accounts.", ErrorType.Conflict, "actualRiderProfileId");
     public static readonly OperationError RiderSalaryAccountLimitReached = new(
         "platform.rider_salary_account_limit_reached", "A rider can have at most one active salary platform account.", ErrorType.Conflict, "actualRiderProfileId");
+    public static OperationError RiderProfileNotFound(string field, Guid riderProfileId) => new(
+        "platform.rider_profile_not_found",
+        "The supplied rider profile was not found. Send the riderProfileId from the employee response, not the employee, account, or assignment ID.",
+        ErrorType.NotFound,
+        field,
+        new Dictionary<string, object?> { ["riderProfileId"] = riderProfileId });
+    public static OperationError RiderProfileUnavailable(string field, Guid riderProfileId) => new(
+        "platform.rider_profile_unavailable",
+        "The supplied rider profile belongs to an inactive or ineligible rider and cannot receive a platform account.",
+        ErrorType.Conflict,
+        field,
+        new Dictionary<string, object?> { ["riderProfileId"] = riderProfileId });
+    public static OperationError PlatformAccountNotFound(Guid accountId) => new(
+        "platform.account_not_found",
+        "The platform account in the assignment URL was not found.",
+        ErrorType.NotFound,
+        "id",
+        new Dictionary<string, object?> { ["accountId"] = accountId });
+    public static OperationError PlatformAccountUnavailable(Guid accountId, PlatformRiderAccountStatus status) => new(
+        "platform.account_unavailable",
+        "The platform account is not available for assignment. Release its current assignment before assigning it again.",
+        ErrorType.Conflict,
+        "id",
+        new Dictionary<string, object?> { ["accountId"] = accountId, ["accountStatus"] = status.ToString() });
+    public static OperationError PlatformAccountOwnerNotFound(Guid accountId, Guid ownerEmployeeId) => new(
+        "platform.account_owner_not_found",
+        "The platform account's registered owner is missing or is not an eligible rider. Correct the account owner before assigning the account.",
+        ErrorType.Conflict,
+        "ownerRiderProfileId",
+        new Dictionary<string, object?> { ["accountId"] = accountId, ["ownerEmployeeId"] = ownerEmployeeId });
     public static readonly OperationError CurrentUserUnavailable = new(
         "hr.current_user_unavailable", "The authenticated user could not be resolved.", ErrorType.Unauthorized);
     public static readonly OperationError InvalidFile = new(

@@ -34,6 +34,13 @@ internal static class ResultExtensions
         {
             problem.Extensions["field"] = result.Error.Field;
         }
+        if (result.Error.Details is not null)
+        {
+            foreach (var detail in result.Error.Details)
+            {
+                problem.Extensions[detail.Key] = detail.Value;
+            }
+        }
 
         return new ObjectResult(problem)
         {

@@ -260,3 +260,55 @@ No changes to either credential endpoint or payload.
 ### `GET /api/exports/{id}/download`
 
 When the export request uses `moduleKey: "platform-accounts"`, the downloaded CSV adds a `PaymentModel` column immediately before `Status`.
+
+## Error handling
+
+### Rider identifier errors when assigning
+
+`POST /api/platform-accounts/{accountId}/assign` requires `actualRiderProfileId`. This must be the `riderProfileId` on the selected employee returned by `GET /api/hr/employees`; do not send the employee `id`, account `id`, or an existing assignment `id`.
+
+If it is missing or belongs to no rider profile, the API returns `404` with `errorCode: "platform.rider_profile_not_found"`, `field: "actualRiderProfileId"`, and the rejected `riderProfileId` in the response body. If the rider profile exists but is inactive or ineligible, it returns `409` with `errorCode: "platform.rider_profile_unavailable"`.
+
+The same assignment endpoint now also identifies other failed records precisely: `platform.account_not_found` (`404`, route account ID is wrong), `platform.account_unavailable` (`409`, account is already assigned or otherwise unavailable), and `platform.account_owner_not_found` (`409`, the account has an invalid registered owner). Each response includes the relevant ID in its response body.
+
+Assignment-limit errors now include `assignmentLimit` in the existing `ProblemDetails` response:
+
+```json
+{
+  "title": "platform.rider_salary_account_limit_reached",
+  "status": 409,
+  "detail": "A rider can have at most one active salary platform account.",
+  "errorCode": "platform.rider_salary_account_limit_reached",
+  "field": "actualRiderProfileId",
+  "assignmentLimit": {
+    "riderProfileId": "01993c00-0000-7000-8000-000000000040",
+    "requestedAccountId": "01993c00-0000-7000-8000-000000000012",
+    "requestedPaymentModel": "Salary",
+    "maximumActiveAccounts": 2,
+    "maximumSalaryAccounts": 1,
+    "activeAccounts": [
+      {
+        "assignmentId": "01993c00-0000-7000-8000-000000000030",
+        "accountId": "01993c00-0000-7000-8000-000000000010",
+        "platformId": "01993c00-0000-7000-8000-000000000001",
+        "platformCode": "KEETA",
+        "platformNameAr": "كيتا",
+        "platformNameEn": "Keeta",
+        "externalAccountId": "KT-98421",
+        "paymentModel": "Salary"
+      }
+    ],
+    "allowedPaymentModels": ["PayPerOrder"]
+  }
+}
+```
+
+Use `activeAccounts` to show the user why the assignment failed and `allowedPaymentModels` to guide the next valid choice. All errors use the existing `ProblemDetails` format. Handle these new `errorCode` values:
+
+| Error code | HTTP status | Frontend action |
+| --- | --- | --- |
+| `platform.payment_model_not_supported` | 409 | Refresh the selected platform and choose only a value from `supportedPaymentModels`. |
+| `platform.payment_models_in_use` | 409 | Keep the model enabled, or archive/move accounts using it before updating the platform. |
+| `platform.rider_account_limit_reached` | 409 | The rider has two active accounts. Release one before assigning another. |
+| `platform.rider_salary_account_limit_reached` | 409 | The rider already has an active Salary account. Use PayPerOrder or release the Salary assignment. |
+| `hr.concurrency_conflict` | 409 | Reload the resource, then resubmit with the new `rowVersion`. |

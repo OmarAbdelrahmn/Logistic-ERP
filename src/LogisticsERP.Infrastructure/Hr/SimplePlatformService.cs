@@ -304,7 +304,7 @@ internal sealed class SimplePlatformService(
             cancellationToken);
         if (account is null)
         {
-            return Result.Failure<SimplePlatformAssignmentResponse>(HrErrors.NotFound);
+            return Result.Failure<SimplePlatformAssignmentResponse>(HrErrors.PlatformAccountNotFound(accountId));
         }
 
         if (account.Status != PlatformRiderAccountStatus.Available
@@ -312,13 +312,18 @@ internal sealed class SimplePlatformService(
                 item => item.EffectiveTo == null && item.PlatformRiderAccountId == accountId,
                 cancellationToken))
         {
-            return Result.Failure<SimplePlatformAssignmentResponse>(HrErrors.Conflict);
+            return Result.Failure<SimplePlatformAssignmentResponse>(
+                HrErrors.PlatformAccountUnavailable(accountId, account.Status));
         }
 
         var actualRider = await LoadRiderAsync(request.ActualRiderProfileId, true, cancellationToken);
         if (actualRider is null)
         {
-            return Result.Failure<SimplePlatformAssignmentResponse>(HrErrors.NotFound);
+            var riderExists = await dbContext.RiderProfiles.AsNoTracking()
+                .AnyAsync(item => item.Id == request.ActualRiderProfileId, cancellationToken);
+            return Result.Failure<SimplePlatformAssignmentResponse>(riderExists
+                ? HrErrors.RiderProfileUnavailable("actualRiderProfileId", request.ActualRiderProfileId)
+                : HrErrors.RiderProfileNotFound("actualRiderProfileId", request.ActualRiderProfileId));
         }
 
         var activeAssignments = await dbContext.RiderClientAssignments
@@ -330,7 +335,13 @@ internal sealed class SimplePlatformService(
             account.PaymentModel);
         if (assignmentDecision != PlatformAccountAssignmentDecision.Allowed)
         {
-            return Result.Failure<SimplePlatformAssignmentResponse>(ToAssignmentError(assignmentDecision));
+            return Result.Failure<SimplePlatformAssignmentResponse>(
+                await CreateAssignmentLimitErrorAsync(
+                    assignmentDecision,
+                    request.ActualRiderProfileId,
+                    account.Id,
+                    account.PaymentModel,
+                    cancellationToken));
         }
         var riderAccountSlot = activeAssignments.Any(item => item.RiderAccountSlot == 1) ? 2 : 1;
 
@@ -340,7 +351,8 @@ internal sealed class SimplePlatformService(
             owner = await LoadOwnerAsync(ownerEmployeeId, cancellationToken);
             if (owner is null)
             {
-                return Result.Failure<SimplePlatformAssignmentResponse>(HrErrors.NotFound);
+                return Result.Failure<SimplePlatformAssignmentResponse>(
+                    HrErrors.PlatformAccountOwnerNotFound(account.Id, ownerEmployeeId));
             }
         }
         else
@@ -1043,6 +1055,47 @@ internal sealed class SimplePlatformService(
         version.RotatedByUserId,
         version.RotationReason);
 
+    private async Task<OperationError> CreateAssignmentLimitErrorAsync(
+        PlatformAccountAssignmentDecision decision,
+        Guid riderProfileId,
+        Guid requestedAccountId,
+        PlatformAccountPaymentModel requestedPaymentModel,
+        CancellationToken cancellationToken)
+    {
+        var activeAccounts = await (from assignment in dbContext.RiderClientAssignments.AsNoTracking()
+                                    join account in dbContext.PlatformRiderAccounts.AsNoTracking()
+                                        on assignment.PlatformRiderAccountId equals account.Id
+                                    join platform in dbContext.ClientPlatforms.AsNoTracking()
+                                        on account.ClientPlatformId equals platform.Id
+                                    where assignment.RiderProfileId == riderProfileId && assignment.EffectiveTo == null
+                                    orderby assignment.PaymentModel descending, assignment.EffectiveFrom
+                                    select new ActivePlatformAccountErrorDetail(
+                                        assignment.Id,
+                                        account.Id,
+                                        platform.Id,
+                                        platform.Code,
+                                        platform.NameAr,
+                                        platform.NameEn,
+                                        account.ExternalAccountId,
+                                        assignment.PaymentModel.ToString()))
+            .ToArrayAsync(cancellationToken);
+        var details = new PlatformAssignmentLimitErrorDetail(
+            riderProfileId,
+            requestedAccountId,
+            requestedPaymentModel.ToString(),
+            PlatformAccountAssignmentPolicy.MaximumActiveAccountsPerRider,
+            1,
+            activeAccounts,
+            GetAllowedPaymentModels(activeAccounts));
+        return ToAssignmentError(decision) with
+        {
+            Details = new Dictionary<string, object?>
+            {
+                ["assignmentLimit"] = details
+            }
+        };
+    }
+
     private static bool TryParseEnum<TEnum>(string? value, out TEnum parsed) where TEnum : struct, Enum =>
         Enum.TryParse(value, true, out parsed) && Enum.IsDefined(parsed);
 
@@ -1107,6 +1160,19 @@ internal sealed class SimplePlatformService(
         PlatformAccountAssignmentDecision.AccountLimitReached => HrErrors.RiderAccountLimitReached,
         _ => HrErrors.Conflict
     };
+
+    private static IReadOnlyList<string> GetAllowedPaymentModels(
+        ActivePlatformAccountErrorDetail[] activeAccounts)
+    {
+        if (activeAccounts.Length >= PlatformAccountAssignmentPolicy.MaximumActiveAccountsPerRider)
+        {
+            return [];
+        }
+
+        return activeAccounts.Any(item => item.PaymentModel == nameof(PlatformAccountPaymentModel.Salary))
+            ? [nameof(PlatformAccountPaymentModel.PayPerOrder)]
+            : [nameof(PlatformAccountPaymentModel.PayPerOrder), nameof(PlatformAccountPaymentModel.Salary)];
+    }
 
     private static TEnum ParseEnum<TEnum>(string value) where TEnum : struct, Enum =>
         Enum.Parse<TEnum>(value, true);
