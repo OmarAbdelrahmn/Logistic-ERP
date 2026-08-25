@@ -17,6 +17,7 @@ internal sealed class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
         builder.Property(entity => entity.FullNameAr).HasMaxLength(200).IsRequired();
         builder.Property(entity => entity.FullNameEn).HasMaxLength(200);
         builder.Property(entity => entity.Nationality).HasMaxLength(100);
+        builder.Property(entity => entity.Iban).HasMaxLength(34).IsUnicode(false);
         builder.Property(entity => entity.PrimaryPhone).HasMaxLength(32);
         builder.Property(entity => entity.SecondaryPhone).HasMaxLength(32);
         builder.Property(entity => entity.Email).HasMaxLength(320);

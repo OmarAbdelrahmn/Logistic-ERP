@@ -145,8 +145,15 @@ internal sealed class ClientPlatformConfiguration : IEntityTypeConfiguration<Cli
         builder.Property(entity => entity.DescriptionAr).HasMaxLength(500);
         builder.Property(entity => entity.DescriptionEn).HasMaxLength(500);
         builder.Property(entity => entity.LogoAssetKey).HasMaxLength(500);
+        builder.Property(entity => entity.SupportedPaymentModels)
+            .HasDefaultValue(
+                LogisticsERP.Domain.Enums.SupportedPlatformPaymentModels.PayPerOrder
+                | LogisticsERP.Domain.Enums.SupportedPlatformPaymentModels.Salary);
         builder.Property(entity => entity.Notes).HasMaxLength(4000);
         builder.HasIndex(entity => entity.Code).IsUnique();
+        builder.ToTable(table => table.HasCheckConstraint(
+            "CK_ClientPlatforms_SupportedPaymentModels",
+            "[SupportedPaymentModels] IN (1, 2, 3)"));
     }
 }
 

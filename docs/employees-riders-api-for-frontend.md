@@ -21,7 +21,8 @@ Frontend integration reference for the current workforce API.
 | `EngagementType = SponsoredInternal` | Rider or employee connected to the company sponsorship. | موظف أو رايدر على كفالة الشركة. |
 | `EngagementType = OutsideRider` | External rider. Must have `IsEmployee = false`; `SponsorId` may be null. | رايدر خارجي. يجب أن يكون `IsEmployee = false` ويمكن أن يكون `SponsorId` فارغاً. |
 | `RiderProfile` | Optional one-to-one rider extension. A rider must have one when `IsEmployee = false`. | امتداد رايدر اختياري بعلاقة واحد لواحد، ويجب وجوده للرايدر. |
-| `CurrentWorkPlatform` | Current platform assignment for a rider. It is `null` when the rider has no open platform assignment. It includes the platform ID and the rider's platform-account ID. | المنصة التي يعمل عليها الرايدر حالياً. تكون `null` إذا لم يكن للرايدر إسناد منصة مفتوح، وتتضمن معرّف المنصة ومعرّف حساب الرايدر على المنصة. |
+| `CurrentWorkPlatform` | Compatibility field containing the first current platform account, or `null`. New clients should use `CurrentWorkPlatforms`. | حقل توافق يحتوي أول حساب منصة حالي أو `null`. على الواجهات الجديدة استخدام `CurrentWorkPlatforms`. |
+| `CurrentWorkPlatforms` | All current platform accounts for the rider (zero to two). Each item includes `paymentModel`. | جميع حسابات المنصات الحالية للرايدر (من صفر إلى اثنين)، ويتضمن كل عنصر `paymentModel`. |
 | `IqamaNo` | One plain 10-digit string containing digits only when supplied. It is required for `Active` employees. | رقم إقامة واحد كنص من 10 أرقام فقط عند إدخاله، ويكون مطلوباً للموظف النشط. |
 | `Status` | `Draft`, `Onboarding`, `Active`, `Suspended`, `OnLeave`, `Terminated`, `Archived`, `Fleeing`, `Accident`, `Sick`. | حالات دورة الحياة: مسودة، تهيئة، نشط، موقوف، إجازة، منتهٍ، مؤرشف، متغيب/هارب، حادث، مرضي. |
 

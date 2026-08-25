@@ -346,6 +346,11 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .HasMaxLength(4000)
                         .HasColumnType("nvarchar(4000)");
 
+                    b.Property<int>("PaymentModel")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
+
                     b.Property<Guid?>("RegisteredEmployeeId")
                         .HasColumnType("uniqueidentifier");
 
@@ -397,6 +402,8 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.ToTable("PlatformRiderAccounts", "app", t =>
                         {
                             t.HasCheckConstraint("CK_PlatformRiderAccounts_DateRange", "[EndDate] IS NULL OR [StartDate] IS NULL OR [EndDate] >= [StartDate]");
+
+                            t.HasCheckConstraint("CK_PlatformRiderAccounts_PaymentModel", "[PaymentModel] IN (1, 2)");
                         });
                 });
 
@@ -496,8 +503,18 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<int>("PaymentModel")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
+
                     b.Property<Guid>("PlatformRiderAccountId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("RiderAccountSlot")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
 
                     b.Property<Guid>("RiderProfileId")
                         .HasColumnType("uniqueidentifier");
@@ -533,7 +550,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .HasFilter("[EffectiveTo] IS NULL AND [IsDeleted] = 0");
 
                     b.HasIndex("RiderProfileId")
-                        .IsUnique()
                         .HasFilter("[EffectiveTo] IS NULL AND [IsDeleted] = 0");
 
                     b.HasIndex("ClientContractId", "Status");
@@ -546,11 +562,23 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("RiderProfileId", "EffectiveFrom"), new[] { "PlatformRiderAccountId", "EffectiveTo", "Status" });
 
+                    b.HasIndex("RiderProfileId", "PaymentModel")
+                        .IsUnique()
+                        .HasFilter("[EffectiveTo] IS NULL AND [PaymentModel] = 2 AND [IsDeleted] = 0");
+
+                    b.HasIndex("RiderProfileId", "RiderAccountSlot")
+                        .IsUnique()
+                        .HasFilter("[EffectiveTo] IS NULL AND [IsDeleted] = 0");
+
                     b.ToTable("RiderClientAssignments", "app", t =>
                         {
                             t.HasCheckConstraint("CK_RiderClientAssignments_BackdatedReason", "[WasBackdated] = 0 OR [BackdatedReason] IS NOT NULL");
 
                             t.HasCheckConstraint("CK_RiderClientAssignments_EffectiveRange", "[EffectiveTo] IS NULL OR [EffectiveTo] >= [EffectiveFrom]");
+
+                            t.HasCheckConstraint("CK_RiderClientAssignments_PaymentModel", "[PaymentModel] IN (1, 2)");
+
+                            t.HasCheckConstraint("CK_RiderClientAssignments_RiderAccountSlot", "[RiderAccountSlot] IN (1, 2)");
                         });
                 });
 
@@ -3094,6 +3122,11 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
+                    b.Property<int>("SupportedPaymentModels")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(3);
+
                     b.Property<DateTimeOffset?>("UpdatedAtUtc")
                         .HasColumnType("datetimeoffset");
 
@@ -3107,7 +3140,10 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.HasIndex("IsDeleted");
 
-                    b.ToTable("ClientPlatforms", "platform");
+                    b.ToTable("ClientPlatforms", "platform", t =>
+                        {
+                            t.HasCheckConstraint("CK_ClientPlatforms_SupportedPaymentModels", "[SupportedPaymentModels] IN (1, 2, 3)");
+                        });
                 });
 
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Platform.CompanyProfile", b =>
@@ -6193,6 +6229,11 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.Property<DateOnly?>("HireDate")
                         .HasColumnType("date");
+
+                    b.Property<string>("Iban")
+                        .HasMaxLength(34)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(34)");
 
                     b.Property<string>("IqamaNo")
                         .HasMaxLength(10)

@@ -6,6 +6,7 @@ public sealed record EmployeeListItemResponse(
     string FullNameAr,
     string? FullNameEn,
     string? Nationality,
+    string? Iban,
     string? PrimaryPhone,
     bool IsEmployee,
     string EngagementType,
@@ -19,6 +20,7 @@ public sealed record EmployeeListItemResponse(
     EmployeeResponse EmployeeDetails,
     RiderDetailsResponse? RiderDetails,
     CurrentRiderWorkPlatformResponse? CurrentWorkPlatform,
+    IReadOnlyList<CurrentRiderWorkPlatformResponse> CurrentWorkPlatforms,
     CatalogResponse? OperationalWorkType,
     OperatingCityResponse? OperatingCity,
     string? HousingNameAr);
@@ -29,7 +31,8 @@ public sealed record CurrentRiderWorkPlatformResponse(
     string NameAr,
     string NameEn,
     Guid PlatformRiderAccountId,
-    string ExternalAccountId);
+    string ExternalAccountId,
+    string PaymentModel);
 
 public sealed record EmployeeDetailsResponse(
     EmployeeResponse Employee,
@@ -45,6 +48,7 @@ public sealed record EmployeeResponse(
     string FullNameAr,
     string? FullNameEn,
     string? Nationality,
+    string? Iban,
     DateOnly? BirthDate,
     string? Gender,
     string? PrimaryPhone,
@@ -79,6 +83,7 @@ public sealed record EmployeeUpsertRequest(
     string FullNameAr,
     string? FullNameEn,
     string? Nationality,
+    string? Iban,
     DateOnly? BirthDate,
     string? Gender,
     string? PrimaryPhone,
@@ -118,6 +123,8 @@ public sealed record RiderDetailsResponse(
     string? IqamaNo,
     string FullNameAr,
     string? FullNameEn,
+    string? Nationality,
+    string? Iban,
     string EngagementType,
     string Status,
     string? TShirtSize,
@@ -127,6 +134,8 @@ public sealed record RiderDetailsResponse(
 public sealed record CreateExternalRiderRequest(
     string IqamaNo,
     string FullNameAr,
+    string? Nationality,
+    string? Iban,
     string PrimaryPhone,
     Guid OperatingCityId,
     Guid OperationalWorkTypeId);
@@ -134,6 +143,8 @@ public sealed record CreateExternalRiderRequest(
 public sealed record UpdateExternalRiderRequest(
     string IqamaNo,
     string FullNameAr,
+    string? Nationality,
+    string? Iban,
     string RowVersion);
 
 public sealed record ExternalRiderResponse(
@@ -141,6 +152,8 @@ public sealed record ExternalRiderResponse(
     Guid RiderProfileId,
     string? IqamaNo,
     string FullNameAr,
+    string? Nationality,
+    string? Iban,
     string? PrimaryPhone,
     Guid? OperatingCityId,
     Guid? OperationalWorkTypeId,

@@ -1,6 +1,7 @@
 using LogisticsERP.Domain.Entities.Clients;
 using LogisticsERP.Domain.Entities.Platform;
 using LogisticsERP.Domain.Entities.Workforce;
+using LogisticsERP.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -41,6 +42,8 @@ internal sealed class PlatformRiderAccountConfiguration : IEntityTypeConfigurati
         builder.Property(entity => entity.Code).HasMaxLength(32).IsRequired();
         builder.Property(entity => entity.ExternalAccountId).HasMaxLength(150).IsRequired();
         builder.Property(entity => entity.UserName).HasMaxLength(150);
+        builder.Property(entity => entity.PaymentModel)
+            .HasDefaultValue(PlatformAccountPaymentModel.PayPerOrder);
         builder.Property(entity => entity.StatusReason).HasMaxLength(500);
         builder.Property(entity => entity.OwnershipNotes).HasMaxLength(4000);
         builder.Property(entity => entity.OperationalNotes).HasMaxLength(4000);
@@ -55,7 +58,11 @@ internal sealed class PlatformRiderAccountConfiguration : IEntityTypeConfigurati
         builder.HasIndex(entity => new { entity.ClientPlatformId, entity.Status });
         builder.HasIndex(entity => new { entity.OperatingCityId, entity.Status, entity.ClientPlatformId })
             .HasFilter("[IsDeleted] = 0");
-        builder.ToTable(table => table.HasCheckConstraint("CK_PlatformRiderAccounts_DateRange", "[EndDate] IS NULL OR [StartDate] IS NULL OR [EndDate] >= [StartDate]"));
+        builder.ToTable(table =>
+        {
+            table.HasCheckConstraint("CK_PlatformRiderAccounts_DateRange", "[EndDate] IS NULL OR [StartDate] IS NULL OR [EndDate] >= [StartDate]");
+            table.HasCheckConstraint("CK_PlatformRiderAccounts_PaymentModel", "[PaymentModel] IN (1, 2)");
+        });
     }
 }
 
@@ -85,6 +92,9 @@ internal sealed class RiderClientAssignmentConfiguration : IEntityTypeConfigurat
         builder.Property(entity => entity.OperationalAgreementReference).HasMaxLength(200);
         builder.Property(entity => entity.OperationalAgreementNotes).HasMaxLength(4000);
         builder.Property(entity => entity.BackdatedReason).HasMaxLength(1000);
+        builder.Property(entity => entity.PaymentModel)
+            .HasDefaultValue(PlatformAccountPaymentModel.PayPerOrder);
+        builder.Property(entity => entity.RiderAccountSlot).HasDefaultValue(1);
         builder.HasOne<RiderProfile>().WithMany().HasForeignKey(entity => entity.RiderProfileId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<ClientContract>().WithMany().HasForeignKey(entity => entity.ClientContractId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<PlatformRiderAccount>().WithMany().HasForeignKey(entity => entity.PlatformRiderAccountId).OnDelete(DeleteBehavior.Restrict);
@@ -104,6 +114,11 @@ internal sealed class RiderClientAssignmentConfiguration : IEntityTypeConfigurat
             });
         builder.HasIndex(entity => new { entity.ClientContractId, entity.Status });
         builder.HasIndex(entity => entity.RiderProfileId)
+            .HasFilter("[EffectiveTo] IS NULL AND [IsDeleted] = 0");
+        builder.HasIndex(entity => new { entity.RiderProfileId, entity.PaymentModel })
+            .IsUnique()
+            .HasFilter("[EffectiveTo] IS NULL AND [PaymentModel] = 2 AND [IsDeleted] = 0");
+        builder.HasIndex(entity => new { entity.RiderProfileId, entity.RiderAccountSlot })
             .IsUnique()
             .HasFilter("[EffectiveTo] IS NULL AND [IsDeleted] = 0");
         builder.HasIndex(entity => entity.PlatformRiderAccountId)
@@ -113,6 +128,8 @@ internal sealed class RiderClientAssignmentConfiguration : IEntityTypeConfigurat
         {
             table.HasCheckConstraint("CK_RiderClientAssignments_EffectiveRange", "[EffectiveTo] IS NULL OR [EffectiveTo] >= [EffectiveFrom]");
             table.HasCheckConstraint("CK_RiderClientAssignments_BackdatedReason", "[WasBackdated] = 0 OR [BackdatedReason] IS NOT NULL");
+            table.HasCheckConstraint("CK_RiderClientAssignments_PaymentModel", "[PaymentModel] IN (1, 2)");
+            table.HasCheckConstraint("CK_RiderClientAssignments_RiderAccountSlot", "[RiderAccountSlot] IN (1, 2)");
         });
     }
 }

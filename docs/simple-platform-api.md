@@ -12,7 +12,11 @@ Contracts and registrations are still maintained internally for compatibility an
 - The owner rider is the person under whose platform identity the account is registered.
 - The actual rider may be the owner or another rider using the owner's platform identity.
 - An account can have only one active actual rider.
-- An actual rider can have only one active platform account.
+- Every platform enables one or both account payment models: `PayPerOrder` and `Salary`.
+- Every account selects exactly one payment model supported by its platform.
+- An actual rider can have at most two active platform accounts.
+- The two active accounts may be `PayPerOrder + PayPerOrder` or `PayPerOrder + Salary`.
+- An actual rider can never have two active `Salary` accounts.
 - Releasing an account closes the assignment; it never deletes assignment history.
 - Updates and releases use Base64 `rowVersion` values for optimistic concurrency.
 - Credential secrets are encrypted, never returned, and excluded from audit payloads.
@@ -27,6 +31,7 @@ Contracts and registrations are still maintained internally for compatibility an
   "code": "KEETA",
   "nameAr": "كيتا",
   "nameEn": "Keeta",
+  "supportedPaymentModels": ["PayPerOrder", "Salary"],
   "status": "Active",
   "notes": null,
   "rowVersion": "AAAAAAAAB9E="
@@ -52,6 +57,7 @@ Contracts and registrations are still maintained internally for compatibility an
   "code": "KEETA-1001",
   "externalAccountId": "KT-98421",
   "userName": "rider.account",
+  "paymentModel": "PayPerOrder",
   "status": "Assigned",
   "statusReason": null,
   "acquisitionDate": "2026-08-01",
@@ -61,6 +67,7 @@ Contracts and registrations are still maintained internally for compatibility an
   "currentAssignment": {
     "id": "01993c00-0000-7000-8000-000000000030",
     "accountId": "01993c00-0000-7000-8000-000000000010",
+    "paymentModel": "PayPerOrder",
     "actualRiderProfileId": "01993c00-0000-7000-8000-000000000040",
     "actualEmployeeId": "01993c00-0000-7000-8000-000000000041",
     "actualRiderNameAr": "اسم المندوب الفعلي",
@@ -101,6 +108,7 @@ Permission: `platform_accounts.manage`
   "code": "KEETA",
   "nameAr": "كيتا",
   "nameEn": "Keeta",
+  "supportedPaymentModels": ["PayPerOrder", "Salary"],
   "status": "Active",
   "notes": null,
   "archiveReason": null,
@@ -121,6 +129,7 @@ Permission: `platform_accounts.manage`
   "code": "KEETA",
   "nameAr": "كيتا",
   "nameEn": "Keeta",
+  "supportedPaymentModels": ["PayPerOrder", "Salary"],
   "status": "Disabled",
   "notes": "Temporarily disabled",
   "archiveReason": null,
@@ -146,6 +155,7 @@ Optional query parameters:
 - `ownerRiderProfileId`
 - `actualRiderProfileId`
 - `status`
+- `paymentModel` (`PayPerOrder` or `Salary`)
 - `currentOnly`
 - `includeArchived`
 
@@ -177,6 +187,7 @@ Permission: `platform_accounts.manage`
   "code": "KEETA-1001",
   "externalAccountId": "KT-98421",
   "userName": "rider.account",
+  "paymentModel": "PayPerOrder",
   "status": "Available",
   "statusReason": null,
   "acquisitionDate": "2026-08-01",
@@ -188,7 +199,7 @@ Permission: `platform_accounts.manage`
 }
 ```
 
-`ownerRiderProfileId` is required. Creating a second non-archived account for the same owner and platform returns `409 Conflict`.
+`ownerRiderProfileId` and `paymentModel` are required. `paymentModel` must be enabled in the selected platform's `supportedPaymentModels`. Creating a second non-archived account for the same owner and platform returns `409 Conflict`.
 
 Response: `200 OK` with the created Account response.
 
@@ -208,6 +219,7 @@ Request: the same fields as Create, with the current `rowVersion`.
   "code": "KEETA-1001",
   "externalAccountId": "KT-98421",
   "userName": "updated.account",
+  "paymentModel": "Salary",
   "status": "Available",
   "statusReason": null,
   "acquisitionDate": "2026-08-01",
@@ -239,7 +251,7 @@ Permission: `platform_assignments.manage`
 }
 ```
 
-The actual rider may differ from the account owner. The operation changes the account to `Assigned`, creates append-only assignment history, and automatically maintains the internal registration/contract compatibility records.
+The actual rider may differ from the account owner. The operation changes the account to `Assigned`, creates append-only assignment history, and automatically maintains the internal registration/contract compatibility records. It rejects a third active account and rejects a second active `Salary` account for the same rider.
 
 Response: `200 OK` with an Assignment response.
 
@@ -333,6 +345,7 @@ Request body: none.
       "accountId": "01993c00-0000-7000-8000-000000000010",
       "accountCode": "KEETA-1001",
       "externalAccountId": "KT-98421",
+      "paymentModel": "PayPerOrder",
       "ownerRiderProfileId": "01993c00-0000-7000-8000-000000000020",
       "ownerRiderNameAr": "اسم صاحب الحساب",
       "ownerRiderNameEn": "Account Owner",

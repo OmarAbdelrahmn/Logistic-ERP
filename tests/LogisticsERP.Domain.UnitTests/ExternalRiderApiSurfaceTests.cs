@@ -38,24 +38,31 @@ public sealed class ExternalRiderApiSurfaceTests
     }
 
     [Fact]
-    public void CreateContractContainsOnlyRequiredIdentityFields()
+    public void CreateContractContainsExternalRiderIdentityAndPaymentFields()
     {
         var properties = typeof(CreateExternalRiderRequest).GetProperties()
             .Select(property => property.Name)
             .ToArray();
 
         Assert.Equal(
-            ["IqamaNo", "FullNameAr", "PrimaryPhone", "OperatingCityId", "OperationalWorkTypeId"],
+            ["IqamaNo", "FullNameAr", "Nationality", "Iban", "PrimaryPhone", "OperatingCityId", "OperationalWorkTypeId"],
             properties);
     }
 
     [Fact]
-    public void UpdateContractAddsOnlyTheConcurrencyToken()
+    public void UpdateContractContainsIdentityPaymentFieldsAndConcurrencyToken()
     {
         var properties = typeof(UpdateExternalRiderRequest).GetProperties()
             .Select(property => property.Name)
             .ToArray();
 
-        Assert.Equal(["IqamaNo", "FullNameAr", "RowVersion"], properties);
+        Assert.Equal(["IqamaNo", "FullNameAr", "Nationality", "Iban", "RowVersion"], properties);
+    }
+
+    [Fact]
+    public void EmployeeAndRiderResponsesExposeIban()
+    {
+        Assert.Contains(nameof(EmployeeResponse.Iban), typeof(EmployeeResponse).GetProperties().Select(property => property.Name));
+        Assert.Contains(nameof(RiderDetailsResponse.Iban), typeof(RiderDetailsResponse).GetProperties().Select(property => property.Name));
     }
 }

@@ -11,6 +11,7 @@ public sealed class Employee : AuditableEntity
     public string FullNameAr { get; set; } = string.Empty;
     public string? FullNameEn { get; set; }
     public string? Nationality { get; set; }
+    public string? Iban { get; set; }
     public DateOnly? BirthDate { get; set; }
     public Gender? Gender { get; set; }
     public string? PrimaryPhone { get; set; }

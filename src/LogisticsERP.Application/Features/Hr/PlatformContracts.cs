@@ -2,8 +2,8 @@ using LogisticsERP.Application.Common.Results;
 
 namespace LogisticsERP.Application.Features.Hr;
 
-public sealed record ClientPlatformUpsertRequest(string Code, string NameAr, string NameEn, string Status, string? Notes, string? RowVersion);
-public sealed record ClientPlatformResponse(Guid Id, string Code, string NameAr, string NameEn, string Status, string? Notes, string RowVersion);
+public sealed record ClientPlatformUpsertRequest(string Code, string NameAr, string NameEn, IReadOnlyList<string> SupportedPaymentModels, string Status, string? Notes, string? RowVersion);
+public sealed record ClientPlatformResponse(Guid Id, string Code, string NameAr, string NameEn, IReadOnlyList<string> SupportedPaymentModels, string Status, string? Notes, string RowVersion);
 
 public sealed record ClientContractUpsertRequest(
     Guid ClientPlatformId,
@@ -23,8 +23,8 @@ public sealed record ClientContractUpsertRequest(
 
 public sealed record ClientContractResponse(Guid Id, Guid ClientPlatformId, string PlatformNameAr, string Code, string DisplayNameAr, string DisplayNameEn, string? ExternalBusinessAccountId, DateOnly? StartDate, DateOnly? EndDate, string Status, string? StatusReason, string? ContactName, string? ContactPhone, string? ContactEmail, string? Notes, string RowVersion);
 
-public sealed record PlatformAccountUpsertRequest(Guid ClientPlatformId, Guid? RegisteredEmployeeId, Guid OperatingCityId, string Code, string ExternalAccountId, string? UserName, string Status, string? StatusReason, DateOnly? AcquisitionDate, DateOnly? StartDate, DateOnly? EndDate, string? OwnershipNotes, string? OperationalNotes, string? RowVersion);
-public sealed record PlatformAccountResponse(Guid Id, Guid ClientPlatformId, string PlatformNameAr, Guid? RegisteredEmployeeId, string? RegisteredEmployeeNameAr, Guid OperatingCityId, string OperatingCityAr, string Code, string ExternalAccountId, string? UserName, string Status, string? StatusReason, DateOnly? AcquisitionDate, DateOnly? StartDate, DateOnly? EndDate, string? OwnershipNotes, string? OperationalNotes, string RowVersion);
+public sealed record PlatformAccountUpsertRequest(Guid ClientPlatformId, Guid? RegisteredEmployeeId, Guid OperatingCityId, string Code, string ExternalAccountId, string? UserName, string PaymentModel, string Status, string? StatusReason, DateOnly? AcquisitionDate, DateOnly? StartDate, DateOnly? EndDate, string? OwnershipNotes, string? OperationalNotes, string? RowVersion);
+public sealed record PlatformAccountResponse(Guid Id, Guid ClientPlatformId, string PlatformNameAr, Guid? RegisteredEmployeeId, string? RegisteredEmployeeNameAr, Guid OperatingCityId, string OperatingCityAr, string Code, string ExternalAccountId, string? UserName, string PaymentModel, string Status, string? StatusReason, DateOnly? AcquisitionDate, DateOnly? StartDate, DateOnly? EndDate, string? OwnershipNotes, string? OperationalNotes, string RowVersion);
 
 public sealed record RotatePlatformCredentialRequest(string Secret, string Reason);
 public sealed record PlatformCredentialVersionResponse(
@@ -41,7 +41,7 @@ public sealed record PlatformRegistrationResponse(Guid Id, Guid RegisteredEmploy
 
 public sealed record AssignPlatformAccountRequest(Guid RiderProfileId, Guid ClientContractId, Guid PlatformRiderAccountId, DateOnly EffectiveFrom, string Status, string? StartReason, string? OperationalAgreementReference, string? OperationalAgreementNotes, bool WasBackdated, string? BackdatedReason);
 public sealed record ClosePlatformAssignmentRequest(DateOnly EffectiveTo, string Status, string EndReason, string RowVersion);
-public sealed record PlatformAssignmentResponse(Guid Id, Guid ActualEmployeeId, string ActualEmployeeNameAr, Guid RiderProfileId, Guid ClientContractId, string ContractNameAr, Guid PlatformRiderAccountId, string ExternalAccountId, DateOnly EffectiveFrom, DateOnly? EffectiveTo, string Status, string? StartReason, string? EndReason, string? OperationalAgreementReference, string? OperationalAgreementNotes, bool WasBackdated, string? BackdatedReason, string RowVersion);
+public sealed record PlatformAssignmentResponse(Guid Id, Guid ActualEmployeeId, string ActualEmployeeNameAr, Guid RiderProfileId, Guid ClientContractId, string ContractNameAr, Guid PlatformRiderAccountId, string ExternalAccountId, string PaymentModel, DateOnly EffectiveFrom, DateOnly? EffectiveTo, string Status, string? StartReason, string? EndReason, string? OperationalAgreementReference, string? OperationalAgreementNotes, bool WasBackdated, string? BackdatedReason, string RowVersion);
 
 public interface IPlatformOperationsService
 {

@@ -11,6 +11,8 @@ public sealed class ClientPlatform : AuditableEntity
     public string? DescriptionAr { get; set; }
     public string? DescriptionEn { get; set; }
     public string? LogoAssetKey { get; set; }
+    public SupportedPlatformPaymentModels SupportedPaymentModels { get; set; } =
+        SupportedPlatformPaymentModels.PayPerOrder | SupportedPlatformPaymentModels.Salary;
     public CatalogStatus Status { get; set; } = CatalogStatus.Active;
     public string? Notes { get; set; }
 }

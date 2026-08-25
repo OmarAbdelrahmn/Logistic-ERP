@@ -38,6 +38,14 @@ public static class HrErrors
         "hr.conflict", "The operation conflicts with the current record state.", ErrorType.Conflict);
     public static readonly OperationError ConcurrencyConflict = new(
         "hr.concurrency_conflict", "The record changed after it was loaded. Reload it and retry.", ErrorType.Conflict);
+    public static readonly OperationError UnsupportedPlatformPaymentModel = new(
+        "platform.payment_model_not_supported", "The selected platform does not support this account payment model.", ErrorType.Conflict, "paymentModel");
+    public static readonly OperationError PlatformPaymentModelsInUse = new(
+        "platform.payment_models_in_use", "A payment model cannot be disabled while non-archived accounts still use it.", ErrorType.Conflict, "supportedPaymentModels");
+    public static readonly OperationError RiderAccountLimitReached = new(
+        "platform.rider_account_limit_reached", "A rider can have at most two active platform accounts.", ErrorType.Conflict, "actualRiderProfileId");
+    public static readonly OperationError RiderSalaryAccountLimitReached = new(
+        "platform.rider_salary_account_limit_reached", "A rider can have at most one active salary platform account.", ErrorType.Conflict, "actualRiderProfileId");
     public static readonly OperationError CurrentUserUnavailable = new(
         "hr.current_user_unavailable", "The authenticated user could not be resolved.", ErrorType.Unauthorized);
     public static readonly OperationError InvalidFile = new(

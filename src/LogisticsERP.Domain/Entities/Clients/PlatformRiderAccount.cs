@@ -11,6 +11,7 @@ public sealed class PlatformRiderAccount : AuditableEntity
     public string Code { get; set; } = string.Empty;
     public string ExternalAccountId { get; set; } = string.Empty;
     public string? UserName { get; set; }
+    public PlatformAccountPaymentModel PaymentModel { get; set; } = PlatformAccountPaymentModel.PayPerOrder;
     public PlatformRiderAccountStatus Status { get; set; } = PlatformRiderAccountStatus.Available;
     public string? StatusReason { get; set; }
     public DateOnly? AcquisitionDate { get; set; }

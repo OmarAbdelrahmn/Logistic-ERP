@@ -23,19 +23,32 @@ internal sealed class WorkforceService(
         var riders = await dbContext.RiderProfiles.AsNoTracking().Where(item => employeeIds.Contains(item.EmployeeId))
             .ToDictionaryAsync(item => item.EmployeeId, cancellationToken);
         var riderProfileIds = riderIds.Values.ToArray();
-        var currentWorkPlatforms = await (from assignment in dbContext.RiderClientAssignments.AsNoTracking()
-                                          join account in dbContext.PlatformRiderAccounts.AsNoTracking() on assignment.PlatformRiderAccountId equals account.Id
-                                          join platform in dbContext.ClientPlatforms.AsNoTracking() on account.ClientPlatformId equals platform.Id
-                                          where riderProfileIds.Contains(assignment.RiderProfileId) && assignment.EffectiveTo == null
-                                          select new RiderCurrentWorkPlatformProjection(
-                                              assignment.RiderProfileId,
-                                              platform.Id,
-                                              platform.Code,
-                                              platform.NameAr,
-                                              platform.NameEn,
-                                              account.Id,
-                                              account.ExternalAccountId))
-            .ToDictionaryAsync(item => item.RiderProfileId, cancellationToken);
+        var currentWorkPlatforms = (await (from assignment in dbContext.RiderClientAssignments.AsNoTracking()
+                                           join account in dbContext.PlatformRiderAccounts.AsNoTracking() on assignment.PlatformRiderAccountId equals account.Id
+                                           join platform in dbContext.ClientPlatforms.AsNoTracking() on account.ClientPlatformId equals platform.Id
+                                           where riderProfileIds.Contains(assignment.RiderProfileId) && assignment.EffectiveTo == null
+                                           orderby assignment.PaymentModel descending, assignment.EffectiveFrom
+                                           select new RiderCurrentWorkPlatformProjection(
+                                               assignment.RiderProfileId,
+                                               platform.Id,
+                                               platform.Code,
+                                               platform.NameAr,
+                                               platform.NameEn,
+                                               account.Id,
+                                               account.ExternalAccountId,
+                                               assignment.PaymentModel))
+            .ToArrayAsync(cancellationToken))
+            .GroupBy(item => item.RiderProfileId)
+            .ToDictionary(
+                group => group.Key,
+                group => group.Select(item => new CurrentRiderWorkPlatformResponse(
+                    item.PlatformId,
+                    item.PlatformCode,
+                    item.PlatformNameAr,
+                    item.PlatformNameEn,
+                    item.PlatformRiderAccountId,
+                    item.ExternalAccountId,
+                    item.PaymentModel.ToString())).ToArray());
         var sponsorIds = employees.Where(item => item.SponsorId.HasValue).Select(item => item.SponsorId!.Value).Distinct().ToArray();
         var sponsors = await dbContext.Sponsors.AsNoTracking().Where(item => sponsorIds.Contains(item.Id))
             .ToDictionaryAsync(item => item.Id, item => item.RegistryNameAr, cancellationToken);
@@ -59,21 +72,18 @@ internal sealed class WorkforceService(
             .ToDictionary(group => group.Key, group => group.First().HousingNameAr);
 
         return Result.Success<IReadOnlyList<EmployeeListItemResponse>>(employees.Select(item => new EmployeeListItemResponse(
-            item.Id, item.IqamaNo, item.FullNameAr, item.FullNameEn, item.Nationality, item.PrimaryPhone,
+            item.Id, item.IqamaNo, item.FullNameAr, item.FullNameEn, item.Nationality, item.Iban, item.PrimaryPhone,
             item.IsEmployee, item.EngagementType.ToString(), item.Status.ToString(), item.WorkingForMeAs,
             item.ResidencyProfession, item.SponsorId,
             item.SponsorId is { } sponsorId && sponsors.TryGetValue(sponsorId, out var sponsorName) ? sponsorName : null,
             riderIds.GetValueOrDefault(item.Id), HrServiceSupport.EncodeRowVersion(item.RowVersion),
             ToEmployee(item), riders.TryGetValue(item.Id, out var rider) ? ToRider(rider, item) : null,
             riderIds.TryGetValue(item.Id, out var riderProfileId) && currentWorkPlatforms.TryGetValue(riderProfileId, out var currentWorkPlatform)
-                ? new CurrentRiderWorkPlatformResponse(
-                    currentWorkPlatform.PlatformId,
-                    currentWorkPlatform.PlatformCode,
-                    currentWorkPlatform.PlatformNameAr,
-                    currentWorkPlatform.PlatformNameEn,
-                    currentWorkPlatform.PlatformRiderAccountId,
-                    currentWorkPlatform.ExternalAccountId)
+                ? currentWorkPlatform.FirstOrDefault()
                 : null,
+            riderIds.TryGetValue(item.Id, out var currentRiderProfileId) && currentWorkPlatforms.TryGetValue(currentRiderProfileId, out var workPlatforms)
+                ? workPlatforms
+                : [],
             item.OperationalWorkTypeId is { } workTypeId && workTypes.TryGetValue(workTypeId, out var workType)
                 ? new CatalogResponse(workType.Id, workType.Code, workType.NameAr, workType.NameEn, workType.Status.ToString(), HrServiceSupport.EncodeRowVersion(workType.RowVersion))
                 : null,
@@ -298,7 +308,9 @@ internal sealed class WorkforceService(
     {
         if (!TryValidateExternalRider(request.IqamaNo, request.FullNameAr, out var iqamaNo, out var fullNameAr)
             || !HrServiceSupport.HasText(request.PrimaryPhone)
-            || request.PrimaryPhone.Trim().Length > 32)
+            || request.PrimaryPhone.Trim().Length > 32
+            || !IsValidOptionalText(request.Nationality, 100)
+            || !IsValidOptionalIban(request.Iban))
             return Result.Failure<ExternalRiderResponse>(HrErrors.InvalidRequest);
         if (await dbContext.Employees.AnyAsync(item => item.IqamaNo == iqamaNo, cancellationToken))
             return Result.Failure<ExternalRiderResponse>(HrErrors.Duplicate);
@@ -310,6 +322,8 @@ internal sealed class WorkforceService(
         {
             IqamaNo = iqamaNo,
             FullNameAr = fullNameAr,
+            Nationality = HrServiceSupport.TrimOrNull(request.Nationality),
+            Iban = NormalizeIban(request.Iban),
             PrimaryPhone = request.PrimaryPhone.Trim(),
             OperatingCityId = request.OperatingCityId,
             OperationalWorkTypeId = request.OperationalWorkTypeId,
@@ -339,7 +353,9 @@ internal sealed class WorkforceService(
         UpdateExternalRiderRequest request,
         CancellationToken cancellationToken = default)
     {
-        if (!TryValidateExternalRider(request.IqamaNo, request.FullNameAr, out var iqamaNo, out var fullNameAr))
+        if (!TryValidateExternalRider(request.IqamaNo, request.FullNameAr, out var iqamaNo, out var fullNameAr)
+            || !IsValidOptionalText(request.Nationality, 100)
+            || !IsValidOptionalIban(request.Iban))
             return Result.Failure<ExternalRiderResponse>(HrErrors.InvalidRequest);
 
         var employee = await dbContext.Employees.SingleOrDefaultAsync(item =>
@@ -360,6 +376,8 @@ internal sealed class WorkforceService(
 
         employee.IqamaNo = iqamaNo;
         employee.FullNameAr = fullNameAr;
+        if (request.Nationality is not null) employee.Nationality = HrServiceSupport.TrimOrNull(request.Nationality);
+        if (request.Iban is not null) employee.Iban = NormalizeIban(request.Iban);
         await dbContext.SaveChangesAsync(cancellationToken);
         return Result.Success(ToExternalRider(rider, employee));
     }
@@ -446,6 +464,8 @@ internal sealed class WorkforceService(
             || !request.IsEmployee && request.Rider is null && employeeId is null
             || status == EmployeeStatus.Active && !IsValidIqama(request.IqamaNo)
             || status == EmployeeStatus.Active && engagement == EmployeeRelationshipType.SponsoredInternal && request.SponsorId is null
+            || !IsValidOptionalText(request.Nationality, 100)
+            || !IsValidOptionalIban(request.Iban)
             || !IsValidDateRange(request.ContractStartDate, request.ContractEndDate))
             return Result.Failure<ValidatedEmployeeRequest>(HrErrors.InvalidRequest);
 
@@ -476,6 +496,7 @@ internal sealed class WorkforceService(
         employee.FullNameAr = request.FullNameAr.Trim();
         employee.FullNameEn = HrServiceSupport.TrimOrNull(request.FullNameEn);
         employee.Nationality = HrServiceSupport.TrimOrNull(request.Nationality);
+        employee.Iban = NormalizeIban(request.Iban);
         employee.BirthDate = request.BirthDate;
         employee.Gender = gender;
         employee.PrimaryPhone = HrServiceSupport.TrimOrNull(request.PrimaryPhone);
@@ -576,7 +597,7 @@ internal sealed class WorkforceService(
 
     private static EmployeeResponse ToEmployee(Employee item) => new(
         item.Id, item.IqamaNo, item.ResidencyProfession, item.WorkingForMeAs, item.FullNameAr, item.FullNameEn,
-        item.Nationality, item.BirthDate, item.Gender?.ToString(), item.PrimaryPhone, item.SecondaryPhone, item.Email,
+        item.Nationality, item.Iban, item.BirthDate, item.Gender?.ToString(), item.PrimaryPhone, item.SecondaryPhone, item.Email,
         item.ProfilePhotoDocumentId, item.MaritalStatus?.ToString(), item.EmergencyContactName,
         item.EmergencyContactRelationship, item.EmergencyContactPhone, item.IsEmployee, item.EngagementType.ToString(),
         item.Status.ToString(), item.StatusReason, item.HireDate, item.OperationalWorkTypeId, item.OperatingCityId,
@@ -584,7 +605,7 @@ internal sealed class WorkforceService(
         item.AlternateContactName, item.AlternateContactPhone, item.Notes, HrServiceSupport.EncodeRowVersion(item.RowVersion));
 
     private static RiderDetailsResponse ToRider(RiderProfile rider, Employee employee) => new(
-        rider.Id, employee.Id, employee.IqamaNo, employee.FullNameAr, employee.FullNameEn,
+        rider.Id, employee.Id, employee.IqamaNo, employee.FullNameAr, employee.FullNameEn, employee.Nationality, employee.Iban,
         employee.EngagementType.ToString(), employee.Status.ToString(), rider.TShirtSize?.ToString(),
         rider.OperationalNotes, HrServiceSupport.EncodeRowVersion(rider.RowVersion));
 
@@ -593,6 +614,8 @@ internal sealed class WorkforceService(
         rider.Id,
         employee.IqamaNo,
         employee.FullNameAr,
+        employee.Nationality,
+        employee.Iban,
         employee.PrimaryPhone,
         employee.OperatingCityId,
         employee.OperationalWorkTypeId,
@@ -628,6 +651,13 @@ internal sealed class WorkforceService(
 
     private static bool IsValidIqama(string? value) => value is { Length: 10 } && value.All(char.IsAsciiDigit);
     private static bool IsValidDateRange(DateOnly? start, DateOnly? end) => end is null || start is null || end >= start;
+    private static bool IsValidOptionalText(string? value, int maximumLength) => HrServiceSupport.TrimOrNull(value) is not { } text
+        || text.Length <= maximumLength;
+    private static string? NormalizeIban(string? value) => HrServiceSupport.TrimOrNull(value) is { } iban
+        ? HrServiceSupport.NormalizeIdentifier(iban).ToUpperInvariant()
+        : null;
+    private static bool IsValidOptionalIban(string? value) => NormalizeIban(value) is not { } iban
+        || iban.Length <= 34 && iban.All(char.IsAsciiLetterOrDigit);
 
     private static bool TryValidateExternalRider(
         string? iqamaInput,
@@ -652,5 +682,6 @@ internal sealed class WorkforceService(
         string PlatformNameAr,
         string PlatformNameEn,
         Guid PlatformRiderAccountId,
-        string ExternalAccountId);
+        string ExternalAccountId,
+        PlatformAccountPaymentModel PaymentModel);
 }

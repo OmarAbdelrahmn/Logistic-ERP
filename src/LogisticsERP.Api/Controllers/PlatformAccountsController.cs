@@ -19,6 +19,7 @@ public sealed class PlatformAccountsController(ISimplePlatformService service) :
         [FromQuery] Guid? ownerRiderProfileId,
         [FromQuery] Guid? actualRiderProfileId,
         [FromQuery] string? status,
+        [FromQuery] string? paymentModel,
         [FromQuery] bool currentOnly = false,
         [FromQuery] bool includeArchived = false,
         CancellationToken cancellationToken = default) =>
@@ -29,6 +30,7 @@ public sealed class PlatformAccountsController(ISimplePlatformService service) :
             ownerRiderProfileId,
             actualRiderProfileId,
             status,
+            paymentModel,
             currentOnly,
             includeArchived,
             cancellationToken));

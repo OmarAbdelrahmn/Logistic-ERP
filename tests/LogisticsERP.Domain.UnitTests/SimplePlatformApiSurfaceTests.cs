@@ -2,7 +2,10 @@ using System.Reflection;
 using LogisticsERP.Api.Authorization;
 using LogisticsERP.Api.Controllers;
 using LogisticsERP.Application.Authorization;
+using LogisticsERP.Application.Features.Hr;
 using LogisticsERP.Domain.Entities.Clients;
+using LogisticsERP.Domain.Enums;
+using LogisticsERP.Domain.Platform;
 using LogisticsERP.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
@@ -47,6 +50,19 @@ public sealed class SimplePlatformApiSurfaceTests
         Assert.Equal(13, actions.Count());
     }
 
+    [Fact]
+    public void PublicContractsExposePlatformAndAccountPaymentModels()
+    {
+        Assert.Contains(nameof(SimplePlatformResponse.SupportedPaymentModels),
+            typeof(SimplePlatformResponse).GetProperties().Select(property => property.Name));
+        Assert.Contains(nameof(SimplePlatformAccountResponse.PaymentModel),
+            typeof(SimplePlatformAccountResponse).GetProperties().Select(property => property.Name));
+        Assert.Contains(nameof(SimplePlatformAssignmentResponse.PaymentModel),
+            typeof(SimplePlatformAssignmentResponse).GetProperties().Select(property => property.Name));
+        Assert.Contains(nameof(EmployeeListItemResponse.CurrentWorkPlatforms),
+            typeof(EmployeeListItemResponse).GetProperties().Select(property => property.Name));
+    }
+
     [Theory]
     [MemberData(nameof(Endpoints))]
     public void EndpointUsesExpectedVerbRouteAndPermission(
@@ -69,7 +85,7 @@ public sealed class SimplePlatformApiSurfaceTests
     }
 
     [Fact]
-    public void DatabaseModelEnforcesOwnerAndActualRiderUniqueness()
+    public void DatabaseModelEnforcesOwnerAccountAndSalaryAssignmentRules()
     {
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseSqlServer()
@@ -92,12 +108,33 @@ public sealed class SimplePlatformApiSurfaceTests
         var activeRiderIndex = Assert.Single(assignment.GetIndexes(), index =>
             index.Properties.Select(property => property.Name).SequenceEqual(
                 [nameof(RiderClientAssignment.RiderProfileId)]));
+        var activeSalaryIndex = Assert.Single(assignment.GetIndexes(), index =>
+            index.Properties.Select(property => property.Name).SequenceEqual(
+                [nameof(RiderClientAssignment.RiderProfileId), nameof(RiderClientAssignment.PaymentModel)]));
+        var activeSlotIndex = Assert.Single(assignment.GetIndexes(), index =>
+            index.Properties.Select(property => property.Name).SequenceEqual(
+                [nameof(RiderClientAssignment.RiderProfileId), nameof(RiderClientAssignment.RiderAccountSlot)]));
 
         Assert.True(activeAccountIndex.IsUnique);
-        Assert.True(activeRiderIndex.IsUnique);
+        Assert.False(activeRiderIndex.IsUnique);
+        Assert.True(activeSalaryIndex.IsUnique);
+        Assert.True(activeSlotIndex.IsUnique);
         Assert.Contains("[EffectiveTo] IS NULL", activeAccountIndex.GetFilter(), StringComparison.Ordinal);
         Assert.Contains("[EffectiveTo] IS NULL", activeRiderIndex.GetFilter(), StringComparison.Ordinal);
+        Assert.Contains("[PaymentModel] = 2", activeSalaryIndex.GetFilter(), StringComparison.Ordinal);
+        Assert.Contains("[EffectiveTo] IS NULL", activeSlotIndex.GetFilter(), StringComparison.Ordinal);
     }
+
+    [Theory]
+    [InlineData(new[] { PlatformAccountPaymentModel.PayPerOrder }, PlatformAccountPaymentModel.PayPerOrder, PlatformAccountAssignmentDecision.Allowed)]
+    [InlineData(new[] { PlatformAccountPaymentModel.Salary }, PlatformAccountPaymentModel.PayPerOrder, PlatformAccountAssignmentDecision.Allowed)]
+    [InlineData(new[] { PlatformAccountPaymentModel.Salary }, PlatformAccountPaymentModel.Salary, PlatformAccountAssignmentDecision.SalaryAccountLimitReached)]
+    [InlineData(new[] { PlatformAccountPaymentModel.PayPerOrder, PlatformAccountPaymentModel.PayPerOrder }, PlatformAccountPaymentModel.PayPerOrder, PlatformAccountAssignmentDecision.AccountLimitReached)]
+    public void AssignmentPolicyAllowsOnlyTwoAccountsAndOneSalary(
+        PlatformAccountPaymentModel[] activePaymentModels,
+        PlatformAccountPaymentModel requestedPaymentModel,
+        PlatformAccountAssignmentDecision expected) =>
+        Assert.Equal(expected, PlatformAccountAssignmentPolicy.Evaluate(activePaymentModels, requestedPaymentModel));
 
     [Fact]
     public void DatabaseModelIncludesPlatformHistoryIndexes()
