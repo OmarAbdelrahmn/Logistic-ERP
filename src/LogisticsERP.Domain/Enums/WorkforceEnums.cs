@@ -1,6 +1,18 @@
 namespace LogisticsERP.Domain.Enums;
 
-public enum EmployeeStatus { Draft = 1, Onboarding = 2, Active = 3, Suspended = 4, OnLeave = 5, Terminated = 6, Archived = 7 }
+public enum EmployeeStatus
+{
+    Draft = 1,
+    Onboarding = 2,
+    Active = 3,
+    Suspended = 4,
+    OnLeave = 5,
+    Terminated = 6,
+    Archived = 7,
+    Fleeing = 8,
+    Accident = 9,
+    Sick = 10
+}
 public enum EmployeeRelationshipType { SponsoredInternal = 1, OutsideRider = 2 }
 public enum EmployeeWorkChangeType { Role = 1, Status = 2, Engagement = 3, Profession = 4, OperationalWorkType = 5, OperatingCity = 6, Sponsor = 7 }
 public enum TShirtSize { ExtraSmall = 1, Small = 2, Medium = 3, Large = 4, ExtraLarge = 5, DoubleExtraLarge = 6, TripleExtraLarge = 7 }

@@ -14,6 +14,10 @@ public interface IWorkforceService
     Task<Result<IReadOnlyList<EmployeeWorkHistoryResponse>>> GetWorkHistoryAsync(Guid employeeId, CancellationToken cancellationToken = default);
     Task<Result<IReadOnlyList<RiderDetailsResponse>>> GetRidersAsync(bool? outsideOnly, CancellationToken cancellationToken = default);
     Task<Result<RiderDetailsResponse>> UpdateRiderProfileAsync(Guid riderProfileId, RiderProfileUpsertRequest request, CancellationToken cancellationToken = default);
+    Task<Result<IReadOnlyList<ExternalRiderResponse>>> GetExternalRidersAsync(CancellationToken cancellationToken = default);
+    Task<Result<ExternalRiderResponse>> GetExternalRiderAsync(Guid employeeId, CancellationToken cancellationToken = default);
+    Task<Result<ExternalRiderResponse>> CreateExternalRiderAsync(CreateExternalRiderRequest request, CancellationToken cancellationToken = default);
+    Task<Result<ExternalRiderResponse>> UpdateExternalRiderAsync(Guid employeeId, UpdateExternalRiderRequest request, CancellationToken cancellationToken = default);
     Task<Result<IReadOnlyList<SponsorResponse>>> GetSponsorsAsync(CancellationToken cancellationToken = default);
     Task<Result<SponsorResponse>> GetSponsorAsync(Guid sponsorId, CancellationToken cancellationToken = default);
     Task<Result<SponsorResponse>> UpsertSponsorAsync(Guid? sponsorId, SponsorUpsertRequest request, CancellationToken cancellationToken = default);

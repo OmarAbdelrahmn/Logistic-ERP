@@ -53,7 +53,8 @@ internal sealed class PlatformRiderAccountConfiguration : IEntityTypeConfigurati
             .IsUnique()
             .HasFilter("[RegisteredEmployeeId] IS NOT NULL AND [IsDeleted] = 0");
         builder.HasIndex(entity => new { entity.ClientPlatformId, entity.Status });
-        builder.HasIndex(entity => entity.OperatingCityId);
+        builder.HasIndex(entity => new { entity.OperatingCityId, entity.Status, entity.ClientPlatformId })
+            .HasFilter("[IsDeleted] = 0");
         builder.ToTable(table => table.HasCheckConstraint("CK_PlatformRiderAccounts_DateRange", "[EndDate] IS NULL OR [StartDate] IS NULL OR [EndDate] >= [StartDate]"));
     }
 }
@@ -87,7 +88,20 @@ internal sealed class RiderClientAssignmentConfiguration : IEntityTypeConfigurat
         builder.HasOne<RiderProfile>().WithMany().HasForeignKey(entity => entity.RiderProfileId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<ClientContract>().WithMany().HasForeignKey(entity => entity.ClientContractId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<PlatformRiderAccount>().WithMany().HasForeignKey(entity => entity.PlatformRiderAccountId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasIndex(entity => new { entity.RiderProfileId, entity.EffectiveFrom });
+        builder.HasIndex(entity => new { entity.RiderProfileId, entity.EffectiveFrom })
+            .IncludeProperties(entity => new
+            {
+                entity.PlatformRiderAccountId,
+                entity.EffectiveTo,
+                entity.Status
+            });
+        builder.HasIndex(entity => new { entity.PlatformRiderAccountId, entity.EffectiveFrom })
+            .IncludeProperties(entity => new
+            {
+                entity.RiderProfileId,
+                entity.EffectiveTo,
+                entity.Status
+            });
         builder.HasIndex(entity => new { entity.ClientContractId, entity.Status });
         builder.HasIndex(entity => entity.RiderProfileId)
             .IsUnique()

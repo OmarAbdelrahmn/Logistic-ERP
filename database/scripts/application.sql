@@ -7425,3 +7425,56 @@ END;
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260824132801_OptimizePlatformOperationsIndexes'
+)
+BEGIN
+    DROP INDEX [IX_RiderClientAssignments_RiderProfileId_EffectiveFrom] ON [app].[RiderClientAssignments];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260824132801_OptimizePlatformOperationsIndexes'
+)
+BEGIN
+    DROP INDEX [IX_PlatformRiderAccounts_OperatingCityId] ON [app].[PlatformRiderAccounts];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260824132801_OptimizePlatformOperationsIndexes'
+)
+BEGIN
+    CREATE INDEX [IX_RiderClientAssignments_PlatformRiderAccountId_EffectiveFrom] ON [app].[RiderClientAssignments] ([PlatformRiderAccountId], [EffectiveFrom]) INCLUDE ([RiderProfileId], [EffectiveTo], [Status]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260824132801_OptimizePlatformOperationsIndexes'
+)
+BEGIN
+    CREATE INDEX [IX_RiderClientAssignments_RiderProfileId_EffectiveFrom] ON [app].[RiderClientAssignments] ([RiderProfileId], [EffectiveFrom]) INCLUDE ([PlatformRiderAccountId], [EffectiveTo], [Status]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260824132801_OptimizePlatformOperationsIndexes'
+)
+BEGIN
+    EXEC(N'CREATE INDEX [IX_PlatformRiderAccounts_OperatingCityId_Status_ClientPlatformId] ON [app].[PlatformRiderAccounts] ([OperatingCityId], [Status], [ClientPlatformId]) WHERE [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260824132801_OptimizePlatformOperationsIndexes'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260824132801_OptimizePlatformOperationsIndexes', N'10.0.11');
+END;
+
+COMMIT;
+GO
+

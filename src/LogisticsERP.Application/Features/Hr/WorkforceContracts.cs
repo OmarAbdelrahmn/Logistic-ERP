@@ -18,9 +18,18 @@ public sealed record EmployeeListItemResponse(
     string RowVersion,
     EmployeeResponse EmployeeDetails,
     RiderDetailsResponse? RiderDetails,
+    CurrentRiderWorkPlatformResponse? CurrentWorkPlatform,
     CatalogResponse? OperationalWorkType,
     OperatingCityResponse? OperatingCity,
     string? HousingNameAr);
+
+public sealed record CurrentRiderWorkPlatformResponse(
+    Guid Id,
+    string Code,
+    string NameAr,
+    string NameEn,
+    Guid PlatformRiderAccountId,
+    string ExternalAccountId);
 
 public sealed record EmployeeDetailsResponse(
     EmployeeResponse Employee,
@@ -113,6 +122,29 @@ public sealed record RiderDetailsResponse(
     string Status,
     string? TShirtSize,
     string? OperationalNotes,
+    string RowVersion);
+
+public sealed record CreateExternalRiderRequest(
+    string IqamaNo,
+    string FullNameAr,
+    string PrimaryPhone,
+    Guid OperatingCityId,
+    Guid OperationalWorkTypeId);
+
+public sealed record UpdateExternalRiderRequest(
+    string IqamaNo,
+    string FullNameAr,
+    string RowVersion);
+
+public sealed record ExternalRiderResponse(
+    Guid EmployeeId,
+    Guid RiderProfileId,
+    string? IqamaNo,
+    string FullNameAr,
+    string? PrimaryPhone,
+    Guid? OperatingCityId,
+    Guid? OperationalWorkTypeId,
+    string Status,
     string RowVersion);
 
 public sealed record EmployeeWorkHistoryResponse(

@@ -22,6 +22,20 @@ internal sealed class WorkforceService(
             .ToDictionaryAsync(item => item.EmployeeId, item => item.Id, cancellationToken);
         var riders = await dbContext.RiderProfiles.AsNoTracking().Where(item => employeeIds.Contains(item.EmployeeId))
             .ToDictionaryAsync(item => item.EmployeeId, cancellationToken);
+        var riderProfileIds = riderIds.Values.ToArray();
+        var currentWorkPlatforms = await (from assignment in dbContext.RiderClientAssignments.AsNoTracking()
+                                          join account in dbContext.PlatformRiderAccounts.AsNoTracking() on assignment.PlatformRiderAccountId equals account.Id
+                                          join platform in dbContext.ClientPlatforms.AsNoTracking() on account.ClientPlatformId equals platform.Id
+                                          where riderProfileIds.Contains(assignment.RiderProfileId) && assignment.EffectiveTo == null
+                                          select new RiderCurrentWorkPlatformProjection(
+                                              assignment.RiderProfileId,
+                                              platform.Id,
+                                              platform.Code,
+                                              platform.NameAr,
+                                              platform.NameEn,
+                                              account.Id,
+                                              account.ExternalAccountId))
+            .ToDictionaryAsync(item => item.RiderProfileId, cancellationToken);
         var sponsorIds = employees.Where(item => item.SponsorId.HasValue).Select(item => item.SponsorId!.Value).Distinct().ToArray();
         var sponsors = await dbContext.Sponsors.AsNoTracking().Where(item => sponsorIds.Contains(item.Id))
             .ToDictionaryAsync(item => item.Id, item => item.RegistryNameAr, cancellationToken);
@@ -51,6 +65,15 @@ internal sealed class WorkforceService(
             item.SponsorId is { } sponsorId && sponsors.TryGetValue(sponsorId, out var sponsorName) ? sponsorName : null,
             riderIds.GetValueOrDefault(item.Id), HrServiceSupport.EncodeRowVersion(item.RowVersion),
             ToEmployee(item), riders.TryGetValue(item.Id, out var rider) ? ToRider(rider, item) : null,
+            riderIds.TryGetValue(item.Id, out var riderProfileId) && currentWorkPlatforms.TryGetValue(riderProfileId, out var currentWorkPlatform)
+                ? new CurrentRiderWorkPlatformResponse(
+                    currentWorkPlatform.PlatformId,
+                    currentWorkPlatform.PlatformCode,
+                    currentWorkPlatform.PlatformNameAr,
+                    currentWorkPlatform.PlatformNameEn,
+                    currentWorkPlatform.PlatformRiderAccountId,
+                    currentWorkPlatform.ExternalAccountId)
+                : null,
             item.OperationalWorkTypeId is { } workTypeId && workTypes.TryGetValue(workTypeId, out var workType)
                 ? new CatalogResponse(workType.Id, workType.Code, workType.NameAr, workType.NameEn, workType.Status.ToString(), HrServiceSupport.EncodeRowVersion(workType.RowVersion))
                 : null,
@@ -101,15 +124,22 @@ internal sealed class WorkforceService(
 
         var validation = await ValidateRequestAsync(request, employeeId, cancellationToken);
         if (validation.IsFailure) return Result.Failure<EmployeeDetailsResponse>(validation.Error);
-        if (employee.IsEmployee != request.IsEmployee || employee.Status != validation.Value!.Status)
+        if (validation.Value!.Status == EmployeeStatus.Archived)
             return Result.Failure<EmployeeDetailsResponse>(HrErrors.InvalidRequest);
+
+        var rider = await dbContext.RiderProfiles.SingleOrDefaultAsync(item => item.EmployeeId == employeeId, cancellationToken);
+        if (!employee.IsEmployee && request.IsEmployee && rider is not null
+            && (await dbContext.RiderClientAssignments.AnyAsync(item => item.RiderProfileId == rider.Id && item.EffectiveTo == null, cancellationToken)
+                || await dbContext.RiderVehicleAssignments.AnyAsync(item => item.RiderProfileId == rider.Id && item.EndedAtUtc == null, cancellationToken)))
+            return Result.Failure<EmployeeDetailsResponse>(HrErrors.Conflict);
 
         var actor = ActorId;
         var effectiveDate = DateOnly.FromDateTime(DateTime.UtcNow);
         TrackChanges(employee, request, validation.Value!, effectiveDate, "Employee details updated.", actor);
         Apply(employee, request, validation.Value!.Gender, validation.Value.MaritalStatus, validation.Value.EngagementType, validation.Value.Status);
+        if (employee.Status == EmployeeStatus.Terminated && employee.TerminationDate is null)
+            employee.TerminationDate = effectiveDate;
 
-        var rider = await dbContext.RiderProfiles.SingleOrDefaultAsync(item => item.EmployeeId == employeeId, cancellationToken);
         if (!request.IsEmployee)
         {
             if (rider is null && request.Rider is null)
@@ -164,7 +194,10 @@ internal sealed class WorkforceService(
 
         AddHistory(employeeId, EmployeeWorkChangeType.Status, employee.Status.ToString(), status.ToString(), request.EffectiveDate, request.Reason.Trim(), ActorId);
         employee.Status = status;
-        employee.StatusReason = status is EmployeeStatus.Suspended or EmployeeStatus.Terminated ? request.Reason.Trim() : null;
+        employee.StatusReason = status is EmployeeStatus.Suspended or EmployeeStatus.Terminated or EmployeeStatus.Fleeing
+            or EmployeeStatus.Accident or EmployeeStatus.Sick
+            ? request.Reason.Trim()
+            : null;
         if (status == EmployeeStatus.Terminated) employee.TerminationDate = request.EffectiveDate;
         await dbContext.SaveChangesAsync(cancellationToken);
         return Result.Success(await BuildEmployeeDetailsAsync(employee, cancellationToken));
@@ -229,6 +262,106 @@ internal sealed class WorkforceService(
         await dbContext.SaveChangesAsync(cancellationToken);
         var employee = await dbContext.Employees.AsNoTracking().SingleAsync(item => item.Id == rider.EmployeeId, cancellationToken);
         return Result.Success(ToRider(rider, employee));
+    }
+
+    public async Task<Result<IReadOnlyList<ExternalRiderResponse>>> GetExternalRidersAsync(CancellationToken cancellationToken = default)
+    {
+        var rows = await (from rider in dbContext.RiderProfiles.AsNoTracking()
+                          join employee in dbContext.Employees.AsNoTracking() on rider.EmployeeId equals employee.Id
+                          where !employee.IsEmployee && employee.EngagementType == EmployeeRelationshipType.OutsideRider
+                          orderby employee.FullNameAr
+                          select new { Rider = rider, Employee = employee })
+            .ToArrayAsync(cancellationToken);
+
+        return Result.Success<IReadOnlyList<ExternalRiderResponse>>(
+            rows.Select(row => ToExternalRider(row.Rider, row.Employee)).ToArray());
+    }
+
+    public async Task<Result<ExternalRiderResponse>> GetExternalRiderAsync(Guid employeeId, CancellationToken cancellationToken = default)
+    {
+        var row = await (from rider in dbContext.RiderProfiles.AsNoTracking()
+                         join employee in dbContext.Employees.AsNoTracking() on rider.EmployeeId equals employee.Id
+                         where employee.Id == employeeId
+                               && !employee.IsEmployee
+                               && employee.EngagementType == EmployeeRelationshipType.OutsideRider
+                         select new { Rider = rider, Employee = employee })
+            .SingleOrDefaultAsync(cancellationToken);
+
+        return row is null
+            ? Result.Failure<ExternalRiderResponse>(HrErrors.NotFound)
+            : Result.Success(ToExternalRider(row.Rider, row.Employee));
+    }
+
+    public async Task<Result<ExternalRiderResponse>> CreateExternalRiderAsync(
+        CreateExternalRiderRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        if (!TryValidateExternalRider(request.IqamaNo, request.FullNameAr, out var iqamaNo, out var fullNameAr)
+            || !HrServiceSupport.HasText(request.PrimaryPhone)
+            || request.PrimaryPhone.Trim().Length > 32)
+            return Result.Failure<ExternalRiderResponse>(HrErrors.InvalidRequest);
+        if (await dbContext.Employees.AnyAsync(item => item.IqamaNo == iqamaNo, cancellationToken))
+            return Result.Failure<ExternalRiderResponse>(HrErrors.Duplicate);
+        if (!await dbContext.OperatingCities.AnyAsync(item => item.Id == request.OperatingCityId, cancellationToken)
+            || !await dbContext.OperationalWorkTypes.AnyAsync(item => item.Id == request.OperationalWorkTypeId, cancellationToken))
+            return Result.Failure<ExternalRiderResponse>(HrErrors.NotFound);
+
+        var employee = new Employee
+        {
+            IqamaNo = iqamaNo,
+            FullNameAr = fullNameAr,
+            PrimaryPhone = request.PrimaryPhone.Trim(),
+            OperatingCityId = request.OperatingCityId,
+            OperationalWorkTypeId = request.OperationalWorkTypeId,
+            IsEmployee = false,
+            EngagementType = EmployeeRelationshipType.OutsideRider,
+            Status = EmployeeStatus.Active
+        };
+        var rider = new RiderProfile { EmployeeId = employee.Id };
+        dbContext.Employees.Add(employee);
+        dbContext.RiderProfiles.Add(rider);
+
+        var actor = ActorId;
+        var effectiveDate = DateOnly.FromDateTime(DateTime.UtcNow);
+        const string reason = "External rider record created.";
+        AddHistory(employee.Id, EmployeeWorkChangeType.Role, null, "Rider", effectiveDate, reason, actor);
+        AddHistory(employee.Id, EmployeeWorkChangeType.Status, null, EmployeeStatus.Active.ToString(), effectiveDate, reason, actor);
+        AddHistory(employee.Id, EmployeeWorkChangeType.Engagement, null, EmployeeRelationshipType.OutsideRider.ToString(), effectiveDate, reason, actor);
+        AddHistory(employee.Id, EmployeeWorkChangeType.OperatingCity, null, employee.OperatingCityId.ToString(), effectiveDate, reason, actor);
+        AddHistory(employee.Id, EmployeeWorkChangeType.OperationalWorkType, null, employee.OperationalWorkTypeId.ToString(), effectiveDate, reason, actor);
+
+        await dbContext.SaveChangesAsync(cancellationToken);
+        return Result.Success(ToExternalRider(rider, employee));
+    }
+
+    public async Task<Result<ExternalRiderResponse>> UpdateExternalRiderAsync(
+        Guid employeeId,
+        UpdateExternalRiderRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        if (!TryValidateExternalRider(request.IqamaNo, request.FullNameAr, out var iqamaNo, out var fullNameAr))
+            return Result.Failure<ExternalRiderResponse>(HrErrors.InvalidRequest);
+
+        var employee = await dbContext.Employees.SingleOrDefaultAsync(item =>
+            item.Id == employeeId
+            && !item.IsEmployee
+            && item.EngagementType == EmployeeRelationshipType.OutsideRider,
+            cancellationToken);
+        if (employee is null)
+            return Result.Failure<ExternalRiderResponse>(HrErrors.NotFound);
+        if (!HrServiceSupport.MatchesRowVersion(employee.RowVersion, request.RowVersion))
+            return Result.Failure<ExternalRiderResponse>(HrErrors.ConcurrencyConflict);
+        if (await dbContext.Employees.AnyAsync(item => item.Id != employeeId && item.IqamaNo == iqamaNo, cancellationToken))
+            return Result.Failure<ExternalRiderResponse>(HrErrors.Duplicate);
+
+        var rider = await dbContext.RiderProfiles.SingleOrDefaultAsync(item => item.EmployeeId == employeeId, cancellationToken);
+        if (rider is null)
+            return Result.Failure<ExternalRiderResponse>(HrErrors.NotFound);
+
+        employee.IqamaNo = iqamaNo;
+        employee.FullNameAr = fullNameAr;
+        await dbContext.SaveChangesAsync(cancellationToken);
+        return Result.Success(ToExternalRider(rider, employee));
     }
 
     public async Task<Result<IReadOnlyList<SponsorResponse>>> GetSponsorsAsync(CancellationToken cancellationToken = default)
@@ -382,7 +515,8 @@ internal sealed class WorkforceService(
         DateOnly effectiveDate, string reason, Guid actor)
     {
         Track(employee.Id, EmployeeWorkChangeType.Role, employee.IsEmployee ? "Administrative" : "Rider", request.IsEmployee ? "Administrative" : "Rider", effectiveDate, reason, actor);
-        Track(employee.Id, EmployeeWorkChangeType.Status, employee.Status.ToString(), validation.Status.ToString(), effectiveDate, reason, actor);
+        var statusReason = HrServiceSupport.TrimOrNull(request.StatusReason) ?? "Employee status updated.";
+        Track(employee.Id, EmployeeWorkChangeType.Status, employee.Status.ToString(), validation.Status.ToString(), effectiveDate, statusReason, actor);
         Track(employee.Id, EmployeeWorkChangeType.Engagement, employee.EngagementType.ToString(), validation.EngagementType.ToString(), effectiveDate, reason, actor);
         Track(employee.Id, EmployeeWorkChangeType.Profession, employee.WorkingForMeAs, HrServiceSupport.TrimOrNull(request.WorkingForMeAs), effectiveDate, reason, actor);
         Track(employee.Id, EmployeeWorkChangeType.Sponsor, employee.SponsorId?.ToString(), request.SponsorId?.ToString(), effectiveDate, reason, actor);
@@ -454,6 +588,17 @@ internal sealed class WorkforceService(
         employee.EngagementType.ToString(), employee.Status.ToString(), rider.TShirtSize?.ToString(),
         rider.OperationalNotes, HrServiceSupport.EncodeRowVersion(rider.RowVersion));
 
+    private static ExternalRiderResponse ToExternalRider(RiderProfile rider, Employee employee) => new(
+        employee.Id,
+        rider.Id,
+        employee.IqamaNo,
+        employee.FullNameAr,
+        employee.PrimaryPhone,
+        employee.OperatingCityId,
+        employee.OperationalWorkTypeId,
+        employee.Status.ToString(),
+        HrServiceSupport.EncodeRowVersion(employee.RowVersion));
+
     private static HousingResponse ToHousing(EmployeeHousingProjection row) => new(
         row.Housing.Id, row.Housing.Code, row.Housing.NameAr, row.Housing.NameEn, row.Housing.CityId, row.CityNameAr,
         HrServiceSupport.ToAddressResponse(row.Housing.Address), row.Housing.Latitude, row.Housing.Longitude,
@@ -484,9 +629,28 @@ internal sealed class WorkforceService(
     private static bool IsValidIqama(string? value) => value is { Length: 10 } && value.All(char.IsAsciiDigit);
     private static bool IsValidDateRange(DateOnly? start, DateOnly? end) => end is null || start is null || end >= start;
 
+    private static bool TryValidateExternalRider(
+        string? iqamaInput,
+        string? fullNameInput,
+        out string iqamaNo,
+        out string fullNameAr)
+    {
+        iqamaNo = HrServiceSupport.NormalizeIdentifier(iqamaInput ?? string.Empty);
+        fullNameAr = fullNameInput?.Trim() ?? string.Empty;
+        return IsValidIqama(iqamaNo) && fullNameAr.Length is > 0 and <= 200;
+    }
+
     private sealed record ValidatedEmployeeRequest(Gender? Gender, MaritalStatus? MaritalStatus,
         EmployeeRelationshipType EngagementType, EmployeeStatus Status);
 
     private sealed record EmployeeHousingProjection(Domain.Entities.Housing.Housing Housing, string CityNameAr, int CurrentResidents);
     private sealed record EmployeeHousingNameProjection(Guid EmployeeId, string HousingNameAr);
+    private sealed record RiderCurrentWorkPlatformProjection(
+        Guid RiderProfileId,
+        Guid PlatformId,
+        string PlatformCode,
+        string PlatformNameAr,
+        string PlatformNameEn,
+        Guid PlatformRiderAccountId,
+        string ExternalAccountId);
 }

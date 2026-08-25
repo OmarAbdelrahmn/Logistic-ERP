@@ -21,8 +21,9 @@ Frontend integration reference for the current workforce API.
 | `EngagementType = SponsoredInternal` | Rider or employee connected to the company sponsorship. | موظف أو رايدر على كفالة الشركة. |
 | `EngagementType = OutsideRider` | External rider. Must have `IsEmployee = false`; `SponsorId` may be null. | رايدر خارجي. يجب أن يكون `IsEmployee = false` ويمكن أن يكون `SponsorId` فارغاً. |
 | `RiderProfile` | Optional one-to-one rider extension. A rider must have one when `IsEmployee = false`. | امتداد رايدر اختياري بعلاقة واحد لواحد، ويجب وجوده للرايدر. |
-| `IqamaNo` | One plain 10-digit string containing digits only. It is nullable while `Draft` or `Onboarding`. | رقم إقامة واحد كنص من 10 أرقام فقط، ويمكن أن يكون فارغاً في حالتي المسودة والتهيئة. |
-| `Status` | `Draft`, `Onboarding`, `Active`, `Suspended`, `OnLeave`, `Terminated`, `Archived`. | حالات دورة الحياة: مسودة، تهيئة، نشط، موقوف، إجازة، منتهٍ، مؤرشف. |
+| `CurrentWorkPlatform` | Current platform assignment for a rider. It is `null` when the rider has no open platform assignment. It includes the platform ID and the rider's platform-account ID. | المنصة التي يعمل عليها الرايدر حالياً. تكون `null` إذا لم يكن للرايدر إسناد منصة مفتوح، وتتضمن معرّف المنصة ومعرّف حساب الرايدر على المنصة. |
+| `IqamaNo` | One plain 10-digit string containing digits only when supplied. It is required for `Active` employees. | رقم إقامة واحد كنص من 10 أرقام فقط عند إدخاله، ويكون مطلوباً للموظف النشط. |
+| `Status` | `Draft`, `Onboarding`, `Active`, `Suspended`, `OnLeave`, `Terminated`, `Archived`, `Fleeing`, `Accident`, `Sick`. | حالات دورة الحياة: مسودة، تهيئة، نشط، موقوف، إجازة، منتهٍ، مؤرشف، متغيب/هارب، حادث، مرضي. |
 
 `ResidencyProfession` and `WorkingForMeAs` are direct employee fields. There is no separate employee residency-permit entity. An Iqama scan or other proof is stored through the employee document APIs.
 
@@ -204,9 +205,9 @@ For an administrative employee, send `isEmployee: true` and `rider: null`.
 
 Permission: `employees.update`
 
-English: Updates ordinary employee fields. The role (`isEmployee`) and lifecycle status must not be changed through this endpoint; use the dedicated transition endpoints.
+English: Updates employee fields, lifecycle status, and role (`isEmployee`). Status and role changes are recorded in work history; `statusReason` is used for a status change, or the history entry uses "Employee status updated." if omitted. When changing an administrative employee to a rider, include `rider`; a rider with an active platform or vehicle assignment cannot be changed to an administrative employee. `Archived` must use the archive endpoint.
 
-العربية: يحدث بيانات الموظف العادية. لا يمكن تغيير الدور (`isEmployee`) أو حالة دورة الحياة من خلال هذه النقطة؛ استخدم نقاط التحويل المخصصة.
+العربية: يحدث بيانات الموظف وحالة دورة الحياة والدور (`isEmployee`). تُسجل تغييرات الحالة والدور في سجل العمل؛ ويستخدم `statusReason` عند تغيير الحالة، أو الرسالة الافتراضية "Employee status updated." إذا لم تُرسل. عند تحويل الموظف الإداري إلى رايدر أرسل كائن `rider`؛ ولا يمكن تحويل الرايدر إلى موظف إداري إذا كان لديه إسناد منصة أو مركبة نشط. حالة `Archived` تتم من خلال نقطة الأرشفة.
 
 Request: same shape as create. Include the current employee `rowVersion`. If the employee is a rider and rider fields are being changed, include the current rider `rowVersion`.
 
@@ -218,9 +219,9 @@ Response `200 OK`: `EmployeeDetailsResponse`.
 
 Permission: `employees.update`
 
-English: Changes the lifecycle status and records a status entry in work history. `Archived` is handled by the archive endpoint.
+English: Changes the lifecycle status and records a status entry in work history. `Archived` is handled by the archive endpoint. Use this endpoint for `Fleeing`, `Accident`, and `Sick` as well.
 
-العربية: يغير حالة دورة الحياة ويسجل التغيير في سجل العمل. حالة `Archived` تتم من خلال نقطة الأرشفة.
+العربية: يغير حالة دورة الحياة ويسجل التغيير في سجل العمل. حالة `Archived` تتم من خلال نقطة الأرشفة. استخدم هذه النقطة أيضاً لحالات `Fleeing` و`Accident` و`Sick`.
 
 Request:
 
@@ -395,6 +396,80 @@ Request:
 Allowed `tShirtSize` values: `ExtraSmall`, `Small`, `Medium`, `Large`, `ExtraLarge`, `DoubleExtraLarge`, `TripleExtraLarge`. Send `null` or an empty value when no size is selected.
 
 Response `200 OK`: `RiderDetailsResponse`.
+
+## Minimal external-rider endpoints
+
+Use these endpoints to create an external rider from the essential identity and operating information. The API creates and maintains the required `Employee` and `RiderProfile` rows automatically. New records are created with `isEmployee = false`, `engagementType = OutsideRider`, and `status = Active`.
+
+### List external riders
+
+`GET /api/external-riders`
+
+Permission: `riders.read`
+
+Response `200 OK`:
+
+```json
+[
+  {
+    "employeeId": "00000000-0000-0000-0000-000000000000",
+    "riderProfileId": "00000000-0000-0000-0000-000000000001",
+    "iqamaNo": "1234567890",
+    "fullNameAr": "أحمد محمد",
+    "primaryPhone": "0500000000",
+    "operatingCityId": "00000000-0000-0000-0000-000000000003",
+    "operationalWorkTypeId": "00000000-0000-0000-0000-000000000004",
+    "status": "Active",
+    "rowVersion": "AAAAAAAAAAA="
+  }
+]
+```
+
+### Get one external rider
+
+`GET /api/external-riders/{employeeId}`
+
+Permission: `riders.read`
+
+Response `200 OK`: one item with the same shape as the list response.
+
+### Create an external rider
+
+`POST /api/external-riders`
+
+Permission: `employees.create`
+
+Required fields:
+
+```json
+{
+  "iqamaNo": "1234567890",
+  "fullNameAr": "أحمد محمد",
+  "primaryPhone": "0500000000",
+  "operatingCityId": "00000000-0000-0000-0000-000000000003",
+  "operationalWorkTypeId": "00000000-0000-0000-0000-000000000004"
+}
+```
+
+`iqamaNo` must be a unique 10-digit value. `primaryPhone` cannot exceed 32 characters. `operatingCityId` and `operationalWorkTypeId` must reference existing catalog records. Load their selectable values from `GET /api/hr-catalogs/operating-cities` and `GET /api/hr-catalogs/operational-work-types`. Response: `201 Created` with the external-rider response and a `Location` header for the get-one endpoint.
+
+### Update an external rider
+
+`PUT /api/external-riders/{employeeId}`
+
+Permission: `employees.update`
+
+Send the latest `rowVersion` returned by a create, get, or update request:
+
+```json
+{
+  "iqamaNo": "1234567890",
+  "fullNameAr": "أحمد محمد المحدث",
+  "rowVersion": "AAAAAAAAAAA="
+}
+```
+
+The update changes only the Iqama number and Arabic full name. All other employee and rider data is preserved. Response: `200 OK` with a refreshed `rowVersion`.
 
 ## Frontend workflow
 

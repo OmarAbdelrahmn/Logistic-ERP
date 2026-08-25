@@ -523,6 +523,7 @@ internal sealed class HrWorkflowService(
             dbContext.EmployeeWorkHistory.Add(history);
             employee.Status = entity.RequestedStatus;
             employee.StatusReason = entity.RequestedStatus is EmployeeStatus.Suspended or EmployeeStatus.Terminated
+                or EmployeeStatus.Fleeing or EmployeeStatus.Accident or EmployeeStatus.Sick
                 ? entity.Reason
                 : null;
             if (entity.RequestedStatus == EmployeeStatus.Terminated) employee.TerminationDate = entity.EffectiveFrom;

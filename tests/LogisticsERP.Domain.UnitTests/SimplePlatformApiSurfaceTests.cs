@@ -72,7 +72,7 @@ public sealed class SimplePlatformApiSurfaceTests
     public void DatabaseModelEnforcesOwnerAndActualRiderUniqueness()
     {
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=LogisticsERP-Model-Test;Trusted_Connection=True")
+            .UseSqlServer()
             .Options;
         using var dbContext = new ApplicationDbContext(options);
 
@@ -97,5 +97,34 @@ public sealed class SimplePlatformApiSurfaceTests
         Assert.True(activeRiderIndex.IsUnique);
         Assert.Contains("[EffectiveTo] IS NULL", activeAccountIndex.GetFilter(), StringComparison.Ordinal);
         Assert.Contains("[EffectiveTo] IS NULL", activeRiderIndex.GetFilter(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void DatabaseModelIncludesPlatformHistoryIndexes()
+    {
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=LogisticsERP-Model-Test;Trusted_Connection=True")
+            .Options;
+        using var dbContext = new ApplicationDbContext(options);
+
+        var account = dbContext.Model.FindEntityType(typeof(PlatformRiderAccount));
+        Assert.NotNull(account);
+        var accountFilterIndex = Assert.Single(account!.GetIndexes(), index =>
+            index.Properties.Select(property => property.Name).SequenceEqual(
+                [
+                    nameof(PlatformRiderAccount.OperatingCityId),
+                    nameof(PlatformRiderAccount.Status),
+                    nameof(PlatformRiderAccount.ClientPlatformId)
+                ]));
+        Assert.Equal("[IsDeleted] = 0", accountFilterIndex.GetFilter());
+
+        var assignment = dbContext.Model.FindEntityType(typeof(RiderClientAssignment));
+        Assert.NotNull(assignment);
+        Assert.Single(assignment!.GetIndexes(), index =>
+            index.Properties.Select(property => property.Name).SequenceEqual(
+                [nameof(RiderClientAssignment.PlatformRiderAccountId), nameof(RiderClientAssignment.EffectiveFrom)]));
+        Assert.Single(assignment.GetIndexes(), index =>
+            index.Properties.Select(property => property.Name).SequenceEqual(
+                [nameof(RiderClientAssignment.RiderProfileId), nameof(RiderClientAssignment.EffectiveFrom)]));
     }
 }

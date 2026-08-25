@@ -104,8 +104,6 @@ internal sealed class SimplePlatformService(
         }
 
         var projections = await CreateAccountProjectionQuery(accountQuery, includeArchived)
-            .OrderBy(item => item.PlatformNameAr)
-            .ThenBy(item => item.Account.ExternalAccountId)
             .ToArrayAsync(cancellationToken);
         if (projections.Length == 0)
         {
@@ -714,6 +712,7 @@ internal sealed class SimplePlatformService(
                join platform in platforms on account.ClientPlatformId equals platform.Id
                join operatingCity in operatingCities on account.OperatingCityId equals operatingCity.Id
                join city in cities on operatingCity.GlobalCityId equals city.Id
+               orderby platform.NameAr, account.ExternalAccountId
                select new AccountProjection(
                    account,
                    platform.Code,
