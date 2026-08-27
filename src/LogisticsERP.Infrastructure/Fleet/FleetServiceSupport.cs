@@ -8,12 +8,10 @@ using LogisticsERP.Domain.Entities.Fleet;
 using LogisticsERP.Domain.Enums;
 using LogisticsERP.Domain.Fleet;
 using LogisticsERP.Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;
 
 namespace LogisticsERP.Infrastructure.Fleet;
 
 internal sealed class FleetServiceSupport(
-    ApplicationDbContext dbContext,
     ICurrentUser currentUser,
     IPermissionChecker permissionChecker,
     TimeProvider timeProvider)
@@ -24,38 +22,12 @@ internal sealed class FleetServiceSupport(
     public async Task<bool> HasPermissionAsync(string permissionKey, Guid? housingId, CancellationToken cancellationToken)
     {
         if (currentUser.UserId is not { } userId || currentUser.AuthorizationVersion is not { } version) return false;
-        var scope = housingId.HasValue ? new PermissionScope(AccessScopeType.Housing, housingId.Value) : null;
-        return await permissionChecker.HasPermissionAsync(userId, version, permissionKey, scope, cancellationToken);
+        return await permissionChecker.HasPermissionAsync(userId, version, permissionKey, null, cancellationToken);
     }
 
     public async Task<bool> HasVehiclePermissionAsync(Vehicle vehicle, string permissionKey, CancellationToken cancellationToken)
     {
-        var housingId = vehicle.CurrentLocationId.HasValue
-            ? await dbContext.FleetLocations.AsNoTracking()
-                .Where(x => x.Id == vehicle.CurrentLocationId)
-                .Select(x => x.HousingId)
-                .SingleOrDefaultAsync(cancellationToken)
-            : null;
-        return await HasPermissionAsync(permissionKey, housingId, cancellationToken);
-    }
-
-    public async Task<IReadOnlyList<Guid>> AccessibleLocationIdsAsync(string permissionKey, CancellationToken cancellationToken)
-    {
-        if (await HasPermissionAsync(permissionKey, null, cancellationToken))
-        {
-            return await dbContext.FleetLocations.AsNoTracking().Select(x => x.Id).ToArrayAsync(cancellationToken);
-        }
-
-        var locations = await dbContext.FleetLocations.AsNoTracking()
-            .Where(x => x.HousingId != null)
-            .Select(x => new { x.Id, HousingId = x.HousingId!.Value })
-            .ToArrayAsync(cancellationToken);
-        var result = new List<Guid>();
-        foreach (var location in locations)
-        {
-            if (await HasPermissionAsync(permissionKey, location.HousingId, cancellationToken)) result.Add(location.Id);
-        }
-        return result;
+        return await HasPermissionAsync(permissionKey, null, cancellationToken);
     }
 
     public static string NormalizeIdentifier(string value)
@@ -93,6 +65,8 @@ internal sealed class FleetServiceSupport(
 
     public static VehicleComplianceDueStatus DueStatus(DateOnly? expiry, DateOnly checkDate, int alertDays = 30) =>
         VehicleComplianceStatusCalculator.Calculate(expiry, checkDate, alertDays);
+
+    public static string NewVehicleAssetNumber(Guid id) => $"VEH-{id:N}"[..12].ToUpperInvariant();
 
     public static string NewNumber(string prefix, DateTimeOffset now, Guid id) => $"{prefix}-{now:yyyyMMdd}-{id:N}"[..(prefix.Length + 18)].ToUpperInvariant();
 }

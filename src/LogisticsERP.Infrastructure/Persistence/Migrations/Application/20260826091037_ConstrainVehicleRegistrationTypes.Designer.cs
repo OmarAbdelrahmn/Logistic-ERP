@@ -4,6 +4,7 @@ using LogisticsERP.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260826091037_ConstrainVehicleRegistrationTypes")]
+    partial class ConstrainVehicleRegistrationTypes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -974,9 +977,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .HasFilter("[DocumentNumber] IS NOT NULL AND [IsDeleted] = 0 AND [Status] <> 3");
 
                     b.HasIndex("EmployeeId", "DocumentTypeId", "Status");
-
-                    b.HasIndex("Status", "ExpiryDate", "EmployeeId")
-                        .HasFilter("[IsDeleted] = 0");
 
                     b.ToTable("EmployeeDocuments", "app", t =>
                         {
@@ -6953,9 +6953,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.HasIndex("EmployeeId", "DriverLicenseCategoryId", "LicenseStatus");
 
-                    b.HasIndex("IsCurrent", "ExpiryDate", "EmployeeId")
-                        .HasFilter("[IsDeleted] = 0");
-
                     b.ToTable("EmployeeDriverLicenses", "app", t =>
                         {
                             t.HasCheckConstraint("CK_EmployeeDriverLicenses_DateRange", "[ExpiryDate] IS NULL OR [IssueDate] IS NULL OR [ExpiryDate] >= [IssueDate]");
@@ -7076,9 +7073,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.HasIndex("InsurancePlanLevelId", "InsuranceCompanyId");
 
                     b.HasIndex("InsuranceCompanyId", "Status", "EndDate");
-
-                    b.HasIndex("IsCurrent", "EndDate", "EmployeeId")
-                        .HasFilter("[IsDeleted] = 0");
 
                     b.ToTable("EmployeeMedicalInsurancePolicies", "app", t =>
                         {
@@ -8745,9 +8739,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .IsUnique()
                         .HasFilter("[IsCurrent] = 1 AND [IsDeleted] = 0");
 
-                    b.HasIndex("IsCurrent", "ExpiryDate", "RiderProfileId")
-                        .HasFilter("[IsDeleted] = 0");
-
                     b.HasIndex("RiderProfileId", "CardType", "Status");
 
                     b.ToTable("RiderCards", "app", t =>
@@ -8856,9 +8847,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.HasIndex("RiderProfileId", "CardType")
                         .IsUnique()
                         .HasFilter("[IsCurrent] = 1 AND [IsDeleted] = 0");
-
-                    b.HasIndex("IsCurrent", "ExpiryDate", "RiderProfileId")
-                        .HasFilter("[IsDeleted] = 0");
 
                     b.HasIndex("RiderProfileId", "CardType", "Status");
 

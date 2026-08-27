@@ -107,6 +107,7 @@ public static class PermissionKeys
         public const string AccidentsFinalize = "fleet.accidents.finalize";
         public const string AccidentsDownload = "fleet.accidents.download";
         public const string CorrectionsManage = "fleet.corrections.manage";
+        public const string RegistrationTransitionsManage = "fleet.registration_transitions.manage";
     }
 
     public static class Workflows
@@ -196,6 +197,7 @@ public static class PermissionKeys
         Fleet.AccidentsFinalize,
         Fleet.AccidentsDownload,
         Fleet.CorrectionsManage,
+        Fleet.RegistrationTransitionsManage,
         Workflows.LeaveRequestsRead,
         Workflows.LeaveRequestsManage,
         Workflows.LeaveRequestsApprove,

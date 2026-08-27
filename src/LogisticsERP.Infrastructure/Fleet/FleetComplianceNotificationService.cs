@@ -28,35 +28,20 @@ internal sealed class FleetComplianceNotificationService(
 
         var compliance = await (
             from vehicle in dbContext.Vehicles.AsNoTracking()
-            join location in dbContext.FleetLocations.AsNoTracking() on vehicle.CurrentLocationId equals location.Id into locations
-            from location in locations.DefaultIfEmpty()
             join registration in dbContext.VehicleRegistrations.AsNoTracking().Where(x => x.IsCurrent) on vehicle.Id equals registration.VehicleId into registrations
             from registration in registrations.DefaultIfEmpty()
             join insurance in dbContext.VehicleInsurancePolicies.AsNoTracking().Where(x => x.IsCurrent) on vehicle.Id equals insurance.VehicleId into policies
             from insurance in policies.DefaultIfEmpty()
             join inspection in dbContext.VehiclePeriodicInspections.AsNoTracking().Where(x => x.IsCurrent) on vehicle.Id equals inspection.VehicleId into inspections
             from inspection in inspections.DefaultIfEmpty()
-            select new { vehicle.Id, vehicle.AssetNumber, HousingId = location == null ? null : location.HousingId, RegistrationId = registration == null ? (Guid?)null : registration.Id, RegistrationExpiry = registration == null ? null : (DateOnly?)registration.ExpiryDate, InsuranceId = insurance == null ? (Guid?)null : insurance.Id, InsuranceExpiry = insurance == null ? null : (DateOnly?)insurance.ExpiryDate, InspectionId = inspection == null ? (Guid?)null : inspection.Id, InspectionExpiry = inspection == null ? null : (DateOnly?)inspection.ExpiryDate })
+            select new { vehicle.Id, vehicle.AssetNumber, RegistrationId = registration == null ? (Guid?)null : registration.Id, RegistrationExpiry = registration == null ? null : (DateOnly?)registration.ExpiryDate, InsuranceId = insurance == null ? (Guid?)null : insurance.Id, InsuranceExpiry = insurance == null ? null : (DateOnly?)insurance.ExpiryDate, InspectionId = inspection == null ? (Guid?)null : inspection.Id, InspectionExpiry = inspection == null ? null : (DateOnly?)inspection.ExpiryDate })
             .ToArrayAsync(cancellationToken);
 
         foreach (var item in compliance)
         {
-            await NotifyAsync(users, PermissionKeys.Fleet.ComplianceRead, item.HousingId, "registration", item.RegistrationId, item.Id, item.AssetNumber, item.RegistrationExpiry, checkDate, now, cancellationToken);
-            await NotifyAsync(users, PermissionKeys.Fleet.ComplianceRead, item.HousingId, "insurance", item.InsuranceId, item.Id, item.AssetNumber, item.InsuranceExpiry, checkDate, now, cancellationToken);
-            await NotifyAsync(users, PermissionKeys.Fleet.ComplianceRead, item.HousingId, "inspection", item.InspectionId, item.Id, item.AssetNumber, item.InspectionExpiry, checkDate, now, cancellationToken);
-        }
-
-        var assignments = await (
-            from assignment in dbContext.RiderVehicleAssignments.AsNoTracking()
-            join vehicle in dbContext.Vehicles.AsNoTracking() on assignment.VehicleId equals vehicle.Id
-            join location in dbContext.FleetLocations.AsNoTracking() on vehicle.CurrentLocationId equals location.Id into locations
-            from location in locations.DefaultIfEmpty()
-            where assignment.EndedAtUtc == null && assignment.PermissionEndsOn != null
-            select new { assignment.Id, assignment.PermissionEndsOn, vehicle.AssetNumber, HousingId = location == null ? null : location.HousingId })
-            .ToArrayAsync(cancellationToken);
-        foreach (var assignment in assignments)
-        {
-            await NotifyAsync(users, PermissionKeys.Fleet.AssignmentsRead, assignment.HousingId, "assignment-permission", assignment.Id, assignment.Id, assignment.AssetNumber, assignment.PermissionEndsOn, checkDate, now, cancellationToken);
+            await NotifyAsync(users, PermissionKeys.Fleet.ComplianceRead, "registration", item.RegistrationId, item.Id, item.AssetNumber, item.RegistrationExpiry, checkDate, now, cancellationToken);
+            await NotifyAsync(users, PermissionKeys.Fleet.ComplianceRead, "insurance", item.InsuranceId, item.Id, item.AssetNumber, item.InsuranceExpiry, checkDate, now, cancellationToken);
+            await NotifyAsync(users, PermissionKeys.Fleet.ComplianceRead, "inspection", item.InspectionId, item.Id, item.AssetNumber, item.InspectionExpiry, checkDate, now, cancellationToken);
         }
 
         await dbContext.SaveChangesAsync(cancellationToken);
@@ -65,7 +50,6 @@ internal sealed class FleetComplianceNotificationService(
     private async Task NotifyAsync(
         IReadOnlyList<NotificationUser> users,
         string permission,
-        Guid? housingId,
         string type,
         Guid? recordId,
         Guid sourceId,
@@ -81,8 +65,7 @@ internal sealed class FleetComplianceNotificationService(
         if (band is null) return;
         foreach (var user in users)
         {
-            var scope = housingId.HasValue ? new PermissionScope(AccessScopeType.Housing, housingId.Value) : null;
-            if (!await permissionChecker.HasPermissionAsync(user.Id, user.AuthorizationVersion, permission, scope, cancellationToken)) continue;
+            if (!await permissionChecker.HasPermissionAsync(user.Id, user.AuthorizationVersion, permission, null, cancellationToken)) continue;
             var key = $"fleet:{type}:{recordId:N}:{band}";
             if (await dbContext.Notifications.AnyAsync(x => x.RecipientUserId == user.Id && x.DeduplicationKey == key, cancellationToken)) continue;
             var expired = days < 0;
@@ -98,7 +81,7 @@ internal sealed class FleetComplianceNotificationService(
                 SourceEntityType = type,
                 SourceEntityId = sourceId,
                 DeepLink = $"/fleet/vehicles/{sourceId}",
-                ScopeSnapshotJson = housingId.HasValue ? $"{{\"housingId\":\"{housingId}\"}}" : "{}",
+                ScopeSnapshotJson = "{}",
                 DeduplicationKey = key,
                 VisibleAtUtc = now
             });

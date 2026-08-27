@@ -148,6 +148,8 @@ internal sealed class EmployeeDriverLicenseConfiguration : IEntityTypeConfigurat
         builder.HasOne<EmployeeDocument>().WithMany().HasForeignKey(entity => entity.EmployeeDocumentId).OnDelete(DeleteBehavior.Restrict);
         builder.HasIndex(entity => entity.LicenseNumberLookupHash).HasFilter("[LicenseNumberLookupHash] IS NOT NULL");
         builder.HasIndex(entity => new { entity.EmployeeId, entity.DriverLicenseCategoryId, entity.LicenseStatus });
+        builder.HasIndex(entity => new { entity.IsCurrent, entity.ExpiryDate, entity.EmployeeId })
+            .HasFilter("[IsDeleted] = 0");
         builder.HasIndex(entity => new { entity.EmployeeId, entity.DriverLicenseCategoryId })
             .IsUnique()
             .HasFilter("[IsCurrent] = 1 AND [IsDeleted] = 0");
@@ -170,6 +172,8 @@ internal sealed class RiderCardConfiguration : IEntityTypeConfiguration<RiderCar
         builder.HasOne<EmployeeDocument>().WithMany().HasForeignKey(entity => entity.EmployeeDocumentId).OnDelete(DeleteBehavior.Restrict);
         builder.HasIndex(entity => entity.NormalizedCardNumber);
         builder.HasIndex(entity => new { entity.RiderProfileId, entity.CardType, entity.Status });
+        builder.HasIndex(entity => new { entity.IsCurrent, entity.ExpiryDate, entity.RiderProfileId })
+            .HasFilter("[IsDeleted] = 0");
         builder.HasIndex(entity => new { entity.RiderProfileId, entity.CardType })
             .IsUnique()
             .HasFilter("[IsCurrent] = 1 AND [IsDeleted] = 0");
@@ -198,6 +202,8 @@ internal sealed class RiderHealthCardConfiguration : IEntityTypeConfiguration<Ri
         builder.HasOne<EmployeeDocument>().WithMany().HasForeignKey(entity => entity.EmployeeDocumentId).OnDelete(DeleteBehavior.Restrict);
         builder.HasIndex(entity => entity.CardNumberLookupHash);
         builder.HasIndex(entity => new { entity.RiderProfileId, entity.CardType, entity.Status });
+        builder.HasIndex(entity => new { entity.IsCurrent, entity.ExpiryDate, entity.RiderProfileId })
+            .HasFilter("[IsDeleted] = 0");
         builder.HasIndex(entity => new { entity.RiderProfileId, entity.CardType })
             .IsUnique()
             .HasFilter("[IsCurrent] = 1 AND [IsDeleted] = 0");
@@ -306,6 +312,8 @@ internal sealed class EmployeeMedicalInsurancePolicyConfiguration : IEntityTypeC
         builder.HasIndex(entity => entity.PolicyNumberLookupHash).HasFilter("[PolicyNumberLookupHash] IS NOT NULL");
         builder.HasIndex(entity => entity.MemberNumberLookupHash).HasFilter("[MemberNumberLookupHash] IS NOT NULL");
         builder.HasIndex(entity => new { entity.InsuranceCompanyId, entity.Status, entity.EndDate });
+        builder.HasIndex(entity => new { entity.IsCurrent, entity.EndDate, entity.EmployeeId })
+            .HasFilter("[IsDeleted] = 0");
         builder.HasIndex(entity => entity.EmployeeId).IsUnique().HasFilter("[IsCurrent] = 1 AND [IsDeleted] = 0");
         builder.ToTable(table => table.HasCheckConstraint(
             "CK_EmployeeMedicalInsurancePolicies_DateRange",

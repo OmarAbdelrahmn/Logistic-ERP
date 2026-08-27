@@ -11,9 +11,9 @@ namespace LogisticsERP.Api.Controllers;
 public sealed class VehiclesController(IFleetService service) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> GetAll([FromQuery] string? search, [FromQuery] string? status, [FromQuery] Guid? locationId, [FromQuery] int page = 1, [FromQuery] int pageSize = 50, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetAll([FromQuery] string? search, [FromQuery] string? status, [FromQuery] Guid? operatingCityId, [FromQuery] int page = 1, [FromQuery] int pageSize = 50, CancellationToken cancellationToken = default)
     {
-        var result = await service.GetVehiclesAsync(search, status, locationId, page, pageSize, cancellationToken);
+        var result = await service.GetVehiclesAsync(search, status, operatingCityId, page, pageSize, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 
@@ -93,12 +93,55 @@ public sealed class VehiclesController(IFleetService service) : ControllerBase
         var result = await service.GetVehicleTimelineAsync(id, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
+
+    [HttpGet("{id:guid}/readiness")]
+    public async Task<IActionResult> Readiness(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await service.GetReadinessAsync(id, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpPost("{id:guid}/identity-corrections")]
+    public async Task<IActionResult> CorrectIdentity(Guid id, [FromBody] VehicleIdentityCorrectionRequest request, CancellationToken cancellationToken)
+    {
+        var result = await service.CorrectIdentityAsync(id, request, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpGet("{id:guid}/identity-corrections")]
+    public async Task<IActionResult> IdentityCorrections(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await service.GetIdentityCorrectionHistoryAsync(id, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpPost("{id:guid}/registration-transitions/private-to-public")]
+    [Consumes("multipart/form-data")]
+    [RequestSizeLimit(22 * 1024 * 1024)]
+    public async Task<IActionResult> TransitionToPublic(Guid id, [FromForm] VehicleRegistrationTransitionForm form, CancellationToken cancellationToken)
+    {
+        if (form.Istimara is null || form.OperationCard is null || form.Istimara.Length == 0 || form.OperationCard.Length == 0) return BadRequest();
+        await using var istimara = form.Istimara.OpenReadStream();
+        await using var operationCard = form.OperationCard.OpenReadStream();
+        var request = new VehicleRegistrationTransitionRequest(form.PlateNumberAr, form.PlateNumberEn, form.PlateLettersAr, form.PlateLettersEn, form.PlateDigits, form.EffectiveAtUtc, form.Reason, form.RowVersion);
+        var result = await service.TransitionToPublicTransportAsync(id, request,
+            new PrivateFileUpload(istimara, form.Istimara.FileName, form.Istimara.ContentType, form.Istimara.Length),
+            new PrivateFileUpload(operationCard, form.OperationCard.FileName, form.OperationCard.ContentType, form.OperationCard.Length), cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpGet("{id:guid}/registration-transitions")]
+    public async Task<IActionResult> RegistrationTransitions(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await service.GetRegistrationTransitionHistoryAsync(id, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
 }
 
 public sealed record RowVersionRequest(string RowVersion);
 
 [ApiController]
-[Route("api/vehicles/{vehicleId:guid}/attachments")]
+[Route("api/vehicles/{vehicleId:guid}/files")]
 [RequestSizeLimit(11 * 1024 * 1024)]
 public sealed class VehicleFilesController(IVehicleFileService service) : ControllerBase
 {
@@ -109,11 +152,14 @@ public sealed class VehicleFilesController(IVehicleFileService service) : Contro
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 
-    [HttpPost]
-    public Task<IActionResult> Upload(Guid vehicleId, [FromForm] VehicleFileUploadForm form, CancellationToken cancellationToken) => UploadInternal(vehicleId, null, form, cancellationToken);
-
-    [HttpPost("{attachmentId:guid}/versions")]
-    public Task<IActionResult> UploadVersion(Guid vehicleId, Guid attachmentId, [FromForm] VehicleFileUploadForm form, CancellationToken cancellationToken) => UploadInternal(vehicleId, attachmentId, form, cancellationToken);
+    [HttpPut("{kind}")]
+    public async Task<IActionResult> Upload(Guid vehicleId, VehicleFileKind kind, [FromForm] VehicleFileUploadForm form, CancellationToken cancellationToken)
+    {
+        if (form.File is null || form.File.Length == 0) return BadRequest();
+        await using var stream = form.File.OpenReadStream();
+        var result = await service.UploadSlotAsync(vehicleId, kind, new PrivateFileUpload(stream, form.File.FileName, form.File.ContentType, form.File.Length), cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
 
     [HttpGet("{attachmentId:guid}/versions")]
     public async Task<IActionResult> Versions(Guid vehicleId, Guid attachmentId, CancellationToken cancellationToken)
@@ -129,25 +175,23 @@ public sealed class VehicleFilesController(IVehicleFileService service) : Contro
         return result.IsSuccess ? File(result.Value!.Content, result.Value.ContentType, result.Value.DownloadFileName, enableRangeProcessing: true) : result.ToProblem(HttpContext);
     }
 
-    [HttpPatch("{attachmentId:guid}/archive")]
-    public async Task<IActionResult> Archive(Guid vehicleId, Guid attachmentId, [FromBody] ArchiveFleetRequest request, CancellationToken cancellationToken)
-    {
-        var result = await service.ArchiveAsync(vehicleId, attachmentId, request, cancellationToken);
-        return result.IsSuccess ? NoContent() : result.ToProblem(HttpContext);
-    }
-
-    private async Task<IActionResult> UploadInternal(Guid vehicleId, Guid? attachmentId, VehicleFileUploadForm form, CancellationToken cancellationToken)
-    {
-        if (form.File is null || form.File.Length == 0) return BadRequest();
-        await using var stream = form.File.OpenReadStream();
-        var result = await service.UploadAsync(vehicleId, attachmentId, form.Category, form.DisplayName, new PrivateFileUpload(stream, form.File.FileName, form.File.ContentType, form.File.Length), cancellationToken);
-        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
-    }
 }
 
 public sealed class VehicleFileUploadForm
 {
-    public VehicleAttachmentCategory Category { get; init; }
-    public string DisplayName { get; init; } = string.Empty;
     public IFormFile File { get; init; } = null!;
+}
+
+public sealed class VehicleRegistrationTransitionForm
+{
+    public string PlateNumberAr { get; init; } = string.Empty;
+    public string PlateNumberEn { get; init; } = string.Empty;
+    public string? PlateLettersAr { get; init; }
+    public string? PlateLettersEn { get; init; }
+    public string? PlateDigits { get; init; }
+    public DateTimeOffset EffectiveAtUtc { get; init; }
+    public string Reason { get; init; } = string.Empty;
+    public string RowVersion { get; init; } = string.Empty;
+    public IFormFile Istimara { get; init; } = null!;
+    public IFormFile OperationCard { get; init; } = null!;
 }

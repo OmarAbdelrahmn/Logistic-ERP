@@ -24,6 +24,7 @@ internal sealed class GlobalExceptionHandler(
         }
 
         var system = ResolveSystem(httpContext.Request.Path);
+        var includeExceptionDetails = IsFleetPath(httpContext.Request.Path);
         var (status, title, detail, type, errorCode) = exception switch
         {
             DbUpdateConcurrencyException => (
@@ -49,11 +50,13 @@ internal sealed class GlobalExceptionHandler(
         LogUnhandledException(logger, status, httpContext.TraceIdentifier, exception);
 
         httpContext.Response.StatusCode = status;
-        await httpContext.Response.WriteAsJsonAsync(new ProblemDetails
+        var problem = new ProblemDetails
         {
             Status = status,
             Title = title,
-            Detail = detail,
+            Detail = includeExceptionDetails && status == StatusCodes.Status500InternalServerError
+                ? exception.Message
+                : detail,
             Type = type,
             Instance = httpContext.Request.Path,
             Extensions =
@@ -62,7 +65,15 @@ internal sealed class GlobalExceptionHandler(
                 ["system"] = system,
                 ["correlationId"] = httpContext.TraceIdentifier
             }
-        }, cancellationToken);
+        };
+        if (includeExceptionDetails && status == StatusCodes.Status500InternalServerError)
+        {
+            problem.Extensions["exceptionType"] = exception.GetType().FullName;
+            problem.Extensions["exception"] = exception.ToString();
+            problem.Extensions["innerException"] = exception.InnerException?.ToString();
+        }
+
+        await httpContext.Response.WriteAsJsonAsync(problem, cancellationToken);
 
         return true;
     }
@@ -91,4 +102,12 @@ internal sealed class GlobalExceptionHandler(
     }
 
     private static string ToDisplayName(string system) => system.Replace('_', ' ');
+
+    private static bool IsFleetPath(PathString path)
+    {
+        var value = path.Value ?? string.Empty;
+        return value.StartsWith("/api/vehicle", StringComparison.OrdinalIgnoreCase)
+            || value.Contains("/vehicle-timeline", StringComparison.OrdinalIgnoreCase)
+            || value.Contains("/promissory-files", StringComparison.OrdinalIgnoreCase);
+    }
 }

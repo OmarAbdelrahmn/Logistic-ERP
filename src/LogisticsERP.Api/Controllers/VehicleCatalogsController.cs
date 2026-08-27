@@ -50,24 +50,4 @@ public sealed class VehicleCatalogsController(IFleetService service) : Controlle
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 
-    [HttpGet("locations")]
-    public async Task<IActionResult> Locations(CancellationToken cancellationToken)
-    {
-        var result = await service.GetLocationsAsync(cancellationToken);
-        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
-    }
-
-    [HttpPost("locations")]
-    public async Task<IActionResult> CreateLocation([FromBody] FleetLocationRequest request, CancellationToken cancellationToken)
-    {
-        var result = await service.UpsertLocationAsync(null, request, cancellationToken);
-        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
-    }
-
-    [HttpPut("locations/{id:guid}")]
-    public async Task<IActionResult> UpdateLocation(Guid id, [FromBody] FleetLocationRequest request, CancellationToken cancellationToken)
-    {
-        var result = await service.UpsertLocationAsync(id, request, cancellationToken);
-        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
-    }
 }

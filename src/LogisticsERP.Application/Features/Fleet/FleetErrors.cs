@@ -13,10 +13,10 @@ public static class FleetErrors
     public static readonly OperationError ConcurrencyConflict = new("fleet.concurrency_conflict", "The record changed after it was loaded. Reload it and retry.", ErrorType.Conflict);
     public static readonly OperationError IdempotencyConflict = new("fleet.idempotency_conflict", "The idempotency key was already used for a different request.", ErrorType.Conflict);
     public static readonly OperationError IdempotencyRequired = new("fleet.idempotency_required", "An Idempotency-Key header is required.", ErrorType.Validation);
-    public static readonly OperationError Forbidden = new("fleet.forbidden", "The current user cannot access this fleet record or location.", ErrorType.Forbidden);
+    public static readonly OperationError Forbidden = new("fleet.forbidden", "The current user cannot access this fleet record.", ErrorType.Forbidden);
     public static readonly OperationError CurrentUserUnavailable = new("fleet.current_user_unavailable", "The authenticated user could not be resolved.", ErrorType.Unauthorized);
     public static readonly OperationError InvalidFile = new("fleet.invalid_file", "The file is empty, too large, unsupported, or does not match its declared type.", ErrorType.Validation);
-    public static readonly OperationError FileLimit = new("fleet.file_limit", "The maximum number of active files has been reached.", ErrorType.Conflict);
+    public static readonly OperationError FileLimit = new("fleet.file_limit", "A rider can have at most three active promissory-note files.", ErrorType.Conflict);
     public static readonly OperationError FileMissing = new("fleet.file_missing", "The stored file could not be found.", ErrorType.NotFound);
     public static readonly OperationError InvalidState = new("fleet.invalid_state", "The requested transition is not valid for the current state.", ErrorType.Conflict);
     public static readonly OperationError OdometerDecreased = new("fleet.odometer_decreased", "The odometer cannot decrease without an authorized correction reason.", ErrorType.Conflict);

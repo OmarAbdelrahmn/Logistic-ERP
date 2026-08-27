@@ -5,7 +5,17 @@ public enum VehicleType { Motorcycle = 1, Car = 2, Van = 3, Truck = 4, Other = 5
 public enum VehicleFuelType { Petrol = 1, Diesel = 2, Electric = 3, Hybrid = 4, Other = 5 }
 public enum VehicleTransmissionType { Manual = 1, Automatic = 2, Other = 3 }
 public enum VehicleOwnershipType { Owned = 1, Leased = 2, ThirdParty = 3 }
-public enum FleetLocationType { Company = 1, Housing = 2, Workshop = 3, ExternalWorkshop = 4 }
+public enum VehicleRegistrationType
+{
+    Private = 1,
+    PrivateTransport = 2,
+    SmallBus = 3,
+    Taxi = 4,
+    PublicTransport = 5,
+    PublicBus = 6,
+    Motorcycle = 7,
+    PublicWorks = 8
+}
 public enum VehicleOperationalStatus
 {
     Available = 1,
@@ -33,7 +43,16 @@ public enum VehicleCondition { Unknown = 1, Good = 2, Fair = 3, Damaged = 4, Uns
 public enum ComplianceRecordStatus { Active = 1, Superseded = 2, Cancelled = 3 }
 public enum VehicleInspectionResult { Passed = 1, Conditional = 2, Failed = 3 }
 public enum VehicleComplianceDueStatus { Valid = 1, Upcoming = 2, DueToday = 3, Expired = 4, Missing = 5 }
-public enum VehicleAttachmentCategory { Registration = 1, Insurance = 2, Inspection = 3, Ownership = 4, Image = 5, Other = 6 }
+public enum VehicleFileKind
+{
+    Istimara = 1,
+    OperationCard = 2,
+    FrontImage = 3,
+    RearImage = 4,
+    LeftImage = 5,
+    RightImage = 6,
+    Legacy = 99
+}
 public enum VehicleIssueCategory { Problem = 1, Accident = 2, Theft = 3, Damage = 4, Administrative = 5 }
 public enum VehicleIssueSeverity { Low = 1, Medium = 2, High = 3, Critical = 4 }
 public enum VehicleIssueStatus { Open = 1, UnderReview = 2, Resolved = 3, Closed = 4, Rejected = 5 }

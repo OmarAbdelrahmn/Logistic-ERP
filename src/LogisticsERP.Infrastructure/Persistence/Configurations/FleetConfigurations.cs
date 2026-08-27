@@ -1,5 +1,5 @@
 using LogisticsERP.Domain.Entities.Fleet;
-using LogisticsERP.Domain.Entities.Housing;
+using LogisticsERP.Domain.Entities.Platform;
 using LogisticsERP.Domain.Entities.Workforce;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -32,23 +32,23 @@ internal sealed class VehicleModelConfiguration : IEntityTypeConfiguration<Vehic
     }
 }
 
-internal sealed class FleetLocationConfiguration : IEntityTypeConfiguration<FleetLocation>
+internal sealed class VehicleSupplierConfiguration : IEntityTypeConfiguration<VehicleSupplier>
 {
-    public void Configure(EntityTypeBuilder<FleetLocation> builder)
+    public void Configure(EntityTypeBuilder<VehicleSupplier> builder)
     {
-        builder.ConfigureOperational("FleetLocations");
+        builder.ConfigureOperational("VehicleSuppliers");
         builder.Property(x => x.Code).HasMaxLength(32).IsRequired();
         builder.Property(x => x.NameAr).HasMaxLength(200).IsRequired();
         builder.Property(x => x.NameEn).HasMaxLength(200).IsRequired();
-        builder.Property(x => x.Address).HasMaxLength(1000);
-        builder.Property(x => x.Latitude).HasPrecision(9, 6);
-        builder.Property(x => x.Longitude).HasPrecision(9, 6);
-        builder.HasOne<Housing>().WithMany().HasForeignKey(x => x.HousingId).OnDelete(DeleteBehavior.Restrict);
+        builder.Property(x => x.CommercialRegistrationNumber).HasMaxLength(100);
+        builder.Property(x => x.TaxNumber).HasMaxLength(100);
+        builder.Property(x => x.Phone).HasMaxLength(32);
+        builder.Property(x => x.Notes).HasMaxLength(4000);
+        builder.OwnsOne(x => x.Address, owned => owned.ConfigureAddress("Address"));
         builder.HasIndex(x => x.Code).IsUnique();
-        builder.HasIndex(x => new { x.LocationType, x.Status });
-        builder.ToTable(table => table.HasCheckConstraint(
-            "CK_FleetLocations_Housing",
-            "([LocationType] = 2 AND [HousingId] IS NOT NULL) OR ([LocationType] <> 2 AND [HousingId] IS NULL)"));
+        builder.HasIndex(x => x.CommercialRegistrationNumber).IsUnique().HasFilter("[CommercialRegistrationNumber] IS NOT NULL AND [IsDeleted] = 0");
+        builder.HasIndex(x => x.TaxNumber).IsUnique().HasFilter("[TaxNumber] IS NOT NULL AND [IsDeleted] = 0");
+        builder.HasIndex(x => new { x.Status, x.NameAr });
     }
 }
 
@@ -59,6 +59,8 @@ internal sealed class VehicleConfiguration : IEntityTypeConfiguration<Vehicle>
         builder.ConfigureOperational("Vehicles");
         builder.Property(x => x.AssetNumber).HasMaxLength(64).IsRequired();
         builder.Property(x => x.NormalizedAssetNumber).HasMaxLength(64).IsRequired();
+        builder.Property(x => x.SerialNumber).HasMaxLength(100);
+        builder.Property(x => x.NormalizedSerialNumber).HasMaxLength(100);
         builder.Property(x => x.PlateNumberAr).HasMaxLength(32);
         builder.Property(x => x.NormalizedPlateNumberAr).HasMaxLength(32);
         builder.Property(x => x.PlateNumberEn).HasMaxLength(32);
@@ -68,6 +70,7 @@ internal sealed class VehicleConfiguration : IEntityTypeConfiguration<Vehicle>
         builder.Property(x => x.PlateDigits).HasMaxLength(8);
         builder.Property(x => x.Vin).HasMaxLength(64);
         builder.Property(x => x.ChassisNumber).HasMaxLength(100);
+        builder.Property(x => x.NormalizedChassisNumber).HasMaxLength(100);
         builder.Property(x => x.EngineNumber).HasMaxLength(100);
         builder.Property(x => x.ColorAr).HasMaxLength(100);
         builder.Property(x => x.ColorEn).HasMaxLength(100);
@@ -80,17 +83,60 @@ internal sealed class VehicleConfiguration : IEntityTypeConfiguration<Vehicle>
             .HasForeignKey(x => new { x.VehicleModelId, x.VehicleManufacturerId })
             .HasPrincipalKey(x => new { x.Id, x.VehicleManufacturerId })
             .OnDelete(DeleteBehavior.Restrict);
-        builder.HasOne<FleetLocation>().WithMany().HasForeignKey(x => x.CurrentLocationId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<Sponsor>().WithMany().HasForeignKey(x => x.SponsorId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<OperatingCity>().WithMany().HasForeignKey(x => x.OperatingCityId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<VehicleSupplier>().WithMany().HasForeignKey(x => x.PurchasedFromSupplierId).OnDelete(DeleteBehavior.Restrict);
         builder.HasIndex(x => x.NormalizedAssetNumber).IsUnique();
+        builder.HasIndex(x => x.NormalizedSerialNumber).IsUnique().HasFilter("[NormalizedSerialNumber] IS NOT NULL AND [IsDeleted] = 0");
+        builder.HasIndex(x => x.NormalizedChassisNumber).IsUnique().HasFilter("[NormalizedChassisNumber] IS NOT NULL AND [IsDeleted] = 0");
         builder.HasIndex(x => x.NormalizedPlateNumberAr).IsUnique().HasFilter("[NormalizedPlateNumberAr] IS NOT NULL AND [IsDeleted] = 0");
         builder.HasIndex(x => x.NormalizedPlateNumberEn).IsUnique().HasFilter("[NormalizedPlateNumberEn] IS NOT NULL AND [IsDeleted] = 0");
         builder.HasIndex(x => x.Vin).IsUnique().HasFilter("[Vin] IS NOT NULL AND [IsDeleted] = 0");
-        builder.HasIndex(x => new { x.CurrentOperationalStatus, x.CurrentLocationId });
+        builder.HasIndex(x => new { x.CurrentOperationalStatus, x.OperatingCityId });
+        builder.HasIndex(x => new { x.SponsorId, x.RegistrationType });
         builder.ToTable(table =>
         {
             table.HasCheckConstraint("CK_Vehicles_Odometer", "[CurrentOdometer] >= 0");
             table.HasCheckConstraint("CK_Vehicles_ModelYear", "[ModelYear] IS NULL OR ([ModelYear] >= 1950 AND [ModelYear] <= 2200)");
+            table.HasCheckConstraint("CK_Vehicles_RegistrationType", "[RegistrationType] IS NULL OR [RegistrationType] BETWEEN 1 AND 8");
         });
+    }
+}
+
+internal sealed class VehicleIdentityCorrectionConfiguration : IEntityTypeConfiguration<VehicleIdentityCorrection>
+{
+    public void Configure(EntityTypeBuilder<VehicleIdentityCorrection> builder)
+    {
+        builder.ConfigureHistory("VehicleIdentityCorrections");
+        builder.Property(x => x.BeforeJson).HasColumnType("nvarchar(max)").IsRequired();
+        builder.Property(x => x.AfterJson).HasColumnType("nvarchar(max)").IsRequired();
+        builder.Property(x => x.DocumentVersionReferencesJson).HasColumnType("nvarchar(max)");
+        builder.Property(x => x.Reason).HasMaxLength(1000).IsRequired();
+        builder.HasOne<Vehicle>().WithMany().HasForeignKey(x => x.VehicleId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(x => new { x.VehicleId, x.EffectiveAtUtc });
+    }
+}
+
+internal sealed class VehicleRegistrationTransitionConfiguration : IEntityTypeConfiguration<VehicleRegistrationTransition>
+{
+    public void Configure(EntityTypeBuilder<VehicleRegistrationTransition> builder)
+    {
+        builder.ConfigureHistory("VehicleRegistrationTransitions");
+        builder.Property(x => x.OldPlateNumberAr).HasMaxLength(32).IsRequired();
+        builder.Property(x => x.OldPlateNumberEn).HasMaxLength(32).IsRequired();
+        builder.Property(x => x.NewPlateNumberAr).HasMaxLength(32).IsRequired();
+        builder.Property(x => x.NewPlateNumberEn).HasMaxLength(32).IsRequired();
+        builder.Property(x => x.OldPlateLettersAr).HasMaxLength(8);
+        builder.Property(x => x.OldPlateLettersEn).HasMaxLength(8);
+        builder.Property(x => x.OldPlateDigits).HasMaxLength(8);
+        builder.Property(x => x.NewPlateLettersAr).HasMaxLength(8);
+        builder.Property(x => x.NewPlateLettersEn).HasMaxLength(8);
+        builder.Property(x => x.NewPlateDigits).HasMaxLength(8);
+        builder.Property(x => x.Reason).HasMaxLength(1000).IsRequired();
+        builder.HasOne<Vehicle>().WithMany().HasForeignKey(x => x.VehicleId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<VehicleAttachmentVersion>().WithMany().HasForeignKey(x => x.IstimaraVersionId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<VehicleAttachmentVersion>().WithMany().HasForeignKey(x => x.OperationCardVersionId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(x => new { x.VehicleId, x.EffectiveAtUtc });
     }
 }
 
@@ -132,14 +178,14 @@ internal sealed class RiderVehicleAssignmentConfiguration : IEntityTypeConfigura
         builder.ConfigureOperational("RiderVehicleAssignments");
         builder.Property(x => x.PermissionReference).HasMaxLength(200);
         builder.Property(x => x.AssignmentReason).HasMaxLength(1000).IsRequired();
+        builder.Property(x => x.StartLocationSnapshot).HasMaxLength(400);
+        builder.Property(x => x.EndLocationSnapshot).HasMaxLength(400);
         builder.Property(x => x.CompletionReason).HasMaxLength(1000);
         builder.Property(x => x.BackdatedReason).HasMaxLength(1000);
         builder.Property(x => x.CorrectionReason).HasMaxLength(1000);
         builder.Property(x => x.Notes).HasMaxLength(4000);
         builder.HasOne<RiderProfile>().WithMany().HasForeignKey(x => x.RiderProfileId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<Vehicle>().WithMany().HasForeignKey(x => x.VehicleId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasOne<FleetLocation>().WithMany().HasForeignKey(x => x.StartLocationId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasOne<FleetLocation>().WithMany().HasForeignKey(x => x.EndLocationId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<RiderVehicleAssignment>().WithMany().HasForeignKey(x => x.PreviousAssignmentId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<RiderVehicleAssignment>().WithMany().HasForeignKey(x => x.CorrectionOfAssignmentId).OnDelete(DeleteBehavior.Restrict);
         builder.HasIndex(x => x.RiderProfileId).IsUnique().HasFilter("[EndedAtUtc] IS NULL AND [IsDeleted] = 0");
@@ -155,6 +201,17 @@ internal sealed class RiderVehicleAssignmentConfiguration : IEntityTypeConfigura
             table.HasCheckConstraint("CK_RiderVehicleAssignments_Permission", "[PermissionEndsOn] IS NULL OR [PermissionStartsOn] IS NULL OR [PermissionEndsOn] >= [PermissionStartsOn]");
             table.HasCheckConstraint("CK_RiderVehicleAssignments_Backdated", "[WasBackdated] = 0 OR [BackdatedReason] IS NOT NULL");
         });
+    }
+}
+
+internal sealed class RiderVehicleAssignmentPromissoryFileConfiguration : IEntityTypeConfiguration<RiderVehicleAssignmentPromissoryFile>
+{
+    public void Configure(EntityTypeBuilder<RiderVehicleAssignmentPromissoryFile> builder)
+    {
+        builder.ConfigureHistory("RiderVehicleAssignmentPromissoryFiles");
+        builder.HasOne<RiderVehicleAssignment>().WithMany().HasForeignKey(x => x.RiderVehicleAssignmentId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<RiderPromissoryFileVersion>().WithMany().HasForeignKey(x => x.RiderPromissoryFileVersionId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(x => new { x.RiderVehicleAssignmentId, x.RiderPromissoryFileVersionId }).IsUnique();
     }
 }
 
@@ -252,7 +309,36 @@ internal sealed class VehicleAttachmentConfiguration : IEntityTypeConfiguration<
         builder.Property(x => x.DisplayName).HasMaxLength(200).IsRequired();
         builder.HasOne<Vehicle>().WithMany().HasForeignKey(x => x.VehicleId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<VehicleAttachmentVersion>().WithMany().HasForeignKey(x => x.CurrentVersionId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(x => new { x.VehicleId, x.Kind }).IsUnique().HasFilter("[Kind] <> 99 AND [IsDeleted] = 0");
         builder.HasIndex(x => new { x.VehicleId, x.IsDeleted });
+    }
+}
+
+internal sealed class RiderPromissoryFileConfiguration : IEntityTypeConfiguration<RiderPromissoryFile>
+{
+    public void Configure(EntityTypeBuilder<RiderPromissoryFile> builder)
+    {
+        builder.ConfigureOperational("RiderPromissoryFiles");
+        builder.HasOne<RiderProfile>().WithMany().HasForeignKey(x => x.RiderProfileId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<RiderPromissoryFileVersion>().WithMany().HasForeignKey(x => x.CurrentVersionId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(x => new { x.RiderProfileId, x.IsDeleted });
+    }
+}
+
+internal sealed class RiderPromissoryFileVersionConfiguration : IEntityTypeConfiguration<RiderPromissoryFileVersion>
+{
+    public void Configure(EntityTypeBuilder<RiderPromissoryFileVersion> builder)
+    {
+        builder.ConfigureHistory("RiderPromissoryFileVersions");
+        VehicleAttachmentVersionConfiguration.ConfigureFile(builder);
+        builder.HasOne<RiderPromissoryFile>().WithMany().HasForeignKey(x => x.RiderPromissoryFileId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<RiderPromissoryFileVersion>().WithMany().HasForeignKey(x => x.SupersededVersionId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(x => new { x.RiderPromissoryFileId, x.VersionNumber }).IsUnique();
+        builder.ToTable(t =>
+        {
+            t.HasCheckConstraint("CK_RiderPromissoryFileVersions_Version", "[VersionNumber] > 0");
+            t.HasCheckConstraint("CK_RiderPromissoryFileVersions_Size", "[FileSizeBytes] > 0");
+        });
     }
 }
 
@@ -290,8 +376,8 @@ internal sealed class VehicleIssueConfiguration : IEntityTypeConfiguration<Vehic
         builder.Property(x => x.IssueNumber).HasMaxLength(64).IsRequired();
         builder.Property(x => x.Description).HasMaxLength(4000).IsRequired();
         builder.Property(x => x.ResolutionSummary).HasMaxLength(4000);
+        builder.Property(x => x.LocationDescription).HasMaxLength(400);
         builder.HasOne<Vehicle>().WithMany().HasForeignKey(x => x.VehicleId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasOne<FleetLocation>().WithMany().HasForeignKey(x => x.LocationId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<RiderVehicleAssignment>().WithMany().HasForeignKey(x => x.RelatedAssignmentId).OnDelete(DeleteBehavior.Restrict);
         builder.HasIndex(x => x.IssueNumber).IsUnique();
         builder.HasIndex(x => new { x.VehicleId, x.Status, x.BlocksOperation });
@@ -334,7 +420,6 @@ internal sealed class VehicleAccidentConfiguration : IEntityTypeConfiguration<Ve
         builder.HasOne<RiderVehicleAssignment>().WithMany().HasForeignKey(x => x.RiderVehicleAssignmentId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<VehicleIssue>().WithMany().HasForeignKey(x => x.VehicleIssueId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<VehicleInsurancePolicy>().WithMany().HasForeignKey(x => x.VehicleInsurancePolicyId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasOne<FleetLocation>().WithMany().HasForeignKey(x => x.LocationId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<VehicleAccidentReportVersion>().WithMany().HasForeignKey(x => x.CurrentReportVersionId).OnDelete(DeleteBehavior.Restrict);
         builder.HasIndex(x => x.AccidentNumber).IsUnique();
         builder.HasIndex(x => new { x.VehicleId, x.OccurredAtUtc });

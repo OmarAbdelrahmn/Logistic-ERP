@@ -4,6 +4,7 @@ using LogisticsERP.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260826090210_RedesignVehicleFleet")]
+    partial class RedesignVehicleFleet
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -975,9 +978,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.HasIndex("EmployeeId", "DocumentTypeId", "Status");
 
-                    b.HasIndex("Status", "ExpiryDate", "EmployeeId")
-                        .HasFilter("[IsDeleted] = 0");
-
                     b.ToTable("EmployeeDocuments", "app", t =>
                         {
                             t.HasCheckConstraint("CK_EmployeeDocuments_DateRange", "[ExpiryDate] IS NULL OR [IssueDate] IS NULL OR [ExpiryDate] >= [IssueDate]");
@@ -1678,8 +1678,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                             t.HasCheckConstraint("CK_Vehicles_ModelYear", "[ModelYear] IS NULL OR ([ModelYear] >= 1950 AND [ModelYear] <= 2200)");
 
                             t.HasCheckConstraint("CK_Vehicles_Odometer", "[CurrentOdometer] >= 0");
-
-                            t.HasCheckConstraint("CK_Vehicles_RegistrationType", "[RegistrationType] IS NULL OR [RegistrationType] BETWEEN 1 AND 8");
                         });
                 });
 
@@ -6953,9 +6951,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.HasIndex("EmployeeId", "DriverLicenseCategoryId", "LicenseStatus");
 
-                    b.HasIndex("IsCurrent", "ExpiryDate", "EmployeeId")
-                        .HasFilter("[IsDeleted] = 0");
-
                     b.ToTable("EmployeeDriverLicenses", "app", t =>
                         {
                             t.HasCheckConstraint("CK_EmployeeDriverLicenses_DateRange", "[ExpiryDate] IS NULL OR [IssueDate] IS NULL OR [ExpiryDate] >= [IssueDate]");
@@ -7076,9 +7071,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.HasIndex("InsurancePlanLevelId", "InsuranceCompanyId");
 
                     b.HasIndex("InsuranceCompanyId", "Status", "EndDate");
-
-                    b.HasIndex("IsCurrent", "EndDate", "EmployeeId")
-                        .HasFilter("[IsDeleted] = 0");
 
                     b.ToTable("EmployeeMedicalInsurancePolicies", "app", t =>
                         {
@@ -8745,9 +8737,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .IsUnique()
                         .HasFilter("[IsCurrent] = 1 AND [IsDeleted] = 0");
 
-                    b.HasIndex("IsCurrent", "ExpiryDate", "RiderProfileId")
-                        .HasFilter("[IsDeleted] = 0");
-
                     b.HasIndex("RiderProfileId", "CardType", "Status");
 
                     b.ToTable("RiderCards", "app", t =>
@@ -8856,9 +8845,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.HasIndex("RiderProfileId", "CardType")
                         .IsUnique()
                         .HasFilter("[IsCurrent] = 1 AND [IsDeleted] = 0");
-
-                    b.HasIndex("IsCurrent", "ExpiryDate", "RiderProfileId")
-                        .HasFilter("[IsDeleted] = 0");
 
                     b.HasIndex("RiderProfileId", "CardType", "Status");
 

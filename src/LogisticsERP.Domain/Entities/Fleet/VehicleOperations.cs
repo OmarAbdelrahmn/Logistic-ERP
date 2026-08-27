@@ -36,12 +36,12 @@ public sealed class RiderVehicleAssignment : AuditableEntity
     public Guid OperationId { get; set; }
     public Guid? PreviousAssignmentId { get; set; }
     public DateTimeOffset StartedAtUtc { get; set; }
-    public Guid? StartLocationId { get; set; }
+    public string? StartLocationSnapshot { get; set; }
     public long StartOdometer { get; set; }
     public VehicleCondition StartVehicleCondition { get; set; }
     public byte? StartFuelLevelPercentage { get; set; }
     public DateTimeOffset? EndedAtUtc { get; set; }
-    public Guid? EndLocationId { get; set; }
+    public string? EndLocationSnapshot { get; set; }
     public long? EndOdometer { get; set; }
     public VehicleCondition? EndVehicleCondition { get; set; }
     public byte? EndFuelLevelPercentage { get; set; }
@@ -78,4 +78,10 @@ public sealed class FleetCommandReceipt : HistoryEntity
     public string IdempotencyKey { get; set; } = string.Empty;
     public string RequestHash { get; set; } = string.Empty;
     public Guid ResultEntityId { get; set; }
+}
+
+public sealed class RiderVehicleAssignmentPromissoryFile : HistoryEntity
+{
+    public Guid RiderVehicleAssignmentId { get; set; }
+    public Guid RiderPromissoryFileVersionId { get; set; }
 }

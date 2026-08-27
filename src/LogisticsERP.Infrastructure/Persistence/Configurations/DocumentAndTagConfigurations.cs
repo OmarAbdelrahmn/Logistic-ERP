@@ -40,6 +40,8 @@ internal sealed class EmployeeDocumentConfiguration : IEntityTypeConfiguration<E
         builder.HasOne<DocumentType>().WithMany().HasForeignKey(entity => entity.DocumentTypeId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<EmployeeDocumentVersion>().WithMany().HasForeignKey(entity => entity.CurrentVersionId).OnDelete(DeleteBehavior.Restrict);
         builder.HasIndex(entity => new { entity.EmployeeId, entity.DocumentTypeId, entity.Status });
+        builder.HasIndex(entity => new { entity.Status, entity.ExpiryDate, entity.EmployeeId })
+            .HasFilter("[IsDeleted] = 0");
         builder.HasIndex(entity => new { entity.DocumentTypeId, entity.DocumentNumber })
             .IsUnique()
             .HasFilter("[DocumentNumber] IS NOT NULL AND [IsDeleted] = 0 AND [Status] <> 3");

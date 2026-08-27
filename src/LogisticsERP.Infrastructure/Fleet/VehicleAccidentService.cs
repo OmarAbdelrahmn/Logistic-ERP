@@ -27,9 +27,8 @@ internal sealed class VehicleAccidentService(
             var access = await GetVehicleAsync(vehicleId.Value, PermissionKeys.Fleet.AccidentsRead, cancellationToken);
             if (access.IsFailure) return Result.Failure<PagedResponse<VehicleAccidentSummaryResponse>>(access.Error);
         }
-        var locations = await support.AccessibleLocationIdsAsync(PermissionKeys.Fleet.AccidentsRead, cancellationToken);
-        var global = await support.HasPermissionAsync(PermissionKeys.Fleet.AccidentsRead, null, cancellationToken);
-        var vehicleIds = dbContext.Vehicles.AsNoTracking().Where(v => global || v.CurrentLocationId != null && locations.Contains(v.CurrentLocationId.Value)).Select(v => v.Id);
+        if (!await support.HasPermissionAsync(PermissionKeys.Fleet.AccidentsRead, null, cancellationToken)) return Result.Failure<PagedResponse<VehicleAccidentSummaryResponse>>(FleetErrors.Forbidden);
+        var vehicleIds = dbContext.Vehicles.AsNoTracking().Select(v => v.Id);
         var query = dbContext.VehicleAccidents.AsNoTracking().Where(x => vehicleIds.Contains(x.VehicleId));
         if (vehicleId.HasValue) query = query.Where(x => x.VehicleId == vehicleId);
         if (riderProfileId.HasValue) query = query.Where(x => x.RiderProfileId == riderProfileId);
@@ -69,21 +68,20 @@ internal sealed class VehicleAccidentService(
         var vehicle = vehicleResult.Value!;
         var insurance = await dbContext.VehicleInsurancePolicies.AsNoTracking().Where(x => x.VehicleId == vehicle.Id && x.EffectiveFrom <= DateOnly.FromDateTime(request.OccurredAtUtc.UtcDateTime) && x.ExpiryDate >= DateOnly.FromDateTime(request.OccurredAtUtc.UtcDateTime)).OrderByDescending(x => x.EffectiveFrom).FirstOrDefaultAsync(cancellationToken);
         var employeeId = await dbContext.RiderProfiles.AsNoTracking().Where(x => x.Id == assignment.RiderProfileId).Select(x => x.EmployeeId).SingleAsync(cancellationToken);
-        await using var tx = await dbContext.Database.BeginTransactionAsync(cancellationToken);
         var issueId = Guid.CreateVersion7();
         var accidentId = Guid.CreateVersion7();
         var issue = new VehicleIssue
         {
             Id = issueId, IssueNumber = FleetServiceSupport.NewNumber("ISS", support.UtcNow, issueId), VehicleId = vehicle.Id,
             Category = VehicleIssueCategory.Accident, Severity = ToIssueSeverity(request.Severity), Description = request.DamageDescription.Trim(),
-            ReportedAtUtc = support.UtcNow, LocationId = request.LocationId ?? vehicle.CurrentLocationId, OdometerAtReport = vehicle.CurrentOdometer,
+            ReportedAtUtc = support.UtcNow, LocationDescription = request.LocationDescription.Trim(), OdometerAtReport = vehicle.CurrentOdometer,
             RelatedAssignmentId = assignment.Id, BlocksOperation = !request.IsDrivable, ReportedByUserId = actor.Value
         };
         var accident = new VehicleAccident
         {
             Id = accidentId, AccidentNumber = FleetServiceSupport.NewNumber("ACC", support.UtcNow, accidentId), VehicleId = vehicle.Id,
             RiderProfileId = assignment.RiderProfileId, EmployeeId = employeeId, RiderVehicleAssignmentId = assignment.Id, VehicleIssueId = issue.Id,
-            VehicleInsurancePolicyId = insurance?.Id, OccurredAtUtc = request.OccurredAtUtc, ReportedAtUtc = support.UtcNow, LocationId = request.LocationId ?? vehicle.CurrentLocationId,
+            VehicleInsurancePolicyId = insurance?.Id, OccurredAtUtc = request.OccurredAtUtc, ReportedAtUtc = support.UtcNow,
             LocationDescription = request.LocationDescription.Trim(), Latitude = request.Latitude, Longitude = request.Longitude,
             PoliceReportNumber = FleetServiceSupport.TrimOrNull(request.PoliceReportNumber), InsuranceClaimNumber = FleetServiceSupport.TrimOrNull(request.InsuranceClaimNumber),
             Severity = request.Severity, IsDrivable = request.IsDrivable, HasInjuries = request.HasInjuries, InjuryDetails = FleetServiceSupport.TrimOrNull(request.InjuryDetails),
@@ -96,15 +94,15 @@ internal sealed class VehicleAccidentService(
         dbContext.VehicleAccidentEvents.Add(new VehicleAccidentEvent { VehicleAccidentId = accident.Id, EventType = VehicleAccidentEventType.Reported, OccurredAtUtc = support.UtcNow, ActorUserId = actor.Value, Reason = request.Narrative.Trim() });
         if (!request.IsDrivable && assignment.EndedAtUtc is null && vehicle.CurrentAssignmentId == assignment.Id)
         {
-            assignment.EndedAtUtc = support.UtcNow; assignment.EndLocationId = vehicle.CurrentLocationId; assignment.EndOdometer = vehicle.CurrentOdometer;
+            assignment.EndedAtUtc = support.UtcNow; assignment.EndLocationSnapshot = assignment.StartLocationSnapshot; assignment.EndOdometer = vehicle.CurrentOdometer;
             assignment.EndVehicleCondition = VehicleCondition.Damaged; assignment.Status = RiderVehicleAssignmentStatus.Completed; assignment.CompletionReason = $"Accident {accident.AccidentNumber}"; assignment.EndedByUserId = actor.Value;
             vehicle.CurrentAssignmentId = null;
             dbContext.RiderVehicleAssignmentEvents.Add(new RiderVehicleAssignmentEvent { RiderVehicleAssignmentId = assignment.Id, OperationId = assignment.OperationId, EventType = RiderVehicleAssignmentEventType.Returned, OccurredAtUtc = support.UtcNow, ActorUserId = actor.Value, Reason = $"Non-drivable accident {accident.AccidentNumber}" });
             await SetAccidentHoldAsync(vehicle, accident, actor.Value, cancellationToken);
         }
         dbContext.FleetCommandReceipts.Add(new FleetCommandReceipt { CommandName = "create-accident", IdempotencyKey = idempotencyKey.Trim(), RequestHash = hash, ResultEntityId = accident.Id });
-        try { await dbContext.SaveChangesAsync(cancellationToken); await tx.CommitAsync(cancellationToken); }
-        catch (DbUpdateException) { await tx.RollbackAsync(cancellationToken); return Result.Failure<VehicleAccidentDetailResponse>(FleetErrors.Conflict); }
+        try { await dbContext.SaveChangesAsync(cancellationToken); }
+        catch (DbUpdateException) { return Result.Failure<VehicleAccidentDetailResponse>(FleetErrors.Conflict); }
         return Result.Success(await BuildDetailAsync(accident, cancellationToken));
     }
 

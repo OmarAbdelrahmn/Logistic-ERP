@@ -44,7 +44,8 @@ internal static class AuthorizationSeedCatalog
         PermissionKeys.Fleet.AccidentsReport,
         PermissionKeys.Fleet.AccidentsFinalize,
         PermissionKeys.Fleet.AccidentsDownload,
-        PermissionKeys.Fleet.CorrectionsManage
+        PermissionKeys.Fleet.CorrectionsManage,
+        PermissionKeys.Fleet.RegistrationTransitionsManage
     ];
 
     public static IReadOnlyList<string> ManagerPermissions { get; } =
@@ -117,9 +118,11 @@ internal static class AuthorizationSeedCatalog
         AddRolePermissions(seeds, SystemRoles.ManagerId,
             ManagerPermissions.Except(legacyManagerPermissions).Where(key => !key.StartsWith("fleet.", StringComparison.Ordinal)), ref sequence);
         AddRolePermissions(seeds, SystemRoles.SystemAdminId,
-            SystemAdminPermissions.Where(key => key.StartsWith("fleet.", StringComparison.Ordinal)), ref sequence);
+            SystemAdminPermissions.Where(key => key.StartsWith("fleet.", StringComparison.Ordinal) && key != PermissionKeys.Fleet.RegistrationTransitionsManage), ref sequence);
         AddRolePermissions(seeds, SystemRoles.ManagerId,
             ManagerPermissions.Where(key => key.StartsWith("fleet.", StringComparison.Ordinal)), ref sequence);
+        AddRolePermissions(seeds, SystemRoles.SystemAdminId,
+            [PermissionKeys.Fleet.RegistrationTransitionsManage], ref sequence);
 
         return seeds;
     }

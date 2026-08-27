@@ -24,47 +24,47 @@ internal sealed class VehicleFileService(
         return Result.Success<IReadOnlyList<VehicleAttachmentResponse>>(await BuildAsync(vehicleId, cancellationToken));
     }
 
-    public async Task<Result<VehicleAttachmentResponse>> UploadAsync(Guid vehicleId, Guid? attachmentId, VehicleAttachmentCategory category, string displayName, PrivateFileUpload file, CancellationToken cancellationToken = default)
+    public async Task<Result<VehicleAttachmentResponse>> UploadSlotAsync(Guid vehicleId, VehicleFileKind kind, PrivateFileUpload file, CancellationToken cancellationToken = default)
     {
         var vehicle = await dbContext.Vehicles.AsNoTracking().SingleOrDefaultAsync(x => x.Id == vehicleId, cancellationToken);
         if (vehicle is null) return Result.Failure<VehicleAttachmentResponse>(FleetErrors.NotFound);
         if (!await support.HasVehiclePermissionAsync(vehicle, PermissionKeys.Fleet.FilesUpload, cancellationToken)) return Result.Failure<VehicleAttachmentResponse>(FleetErrors.Forbidden);
-        if (string.IsNullOrWhiteSpace(displayName)) return Result.Failure<VehicleAttachmentResponse>(FleetErrors.InvalidRequest);
-        VehicleAttachment? attachment = null;
-        if (attachmentId.HasValue)
-        {
-            attachment = await dbContext.VehicleAttachments.SingleOrDefaultAsync(x => x.Id == attachmentId && x.VehicleId == vehicleId, cancellationToken);
-            if (attachment is null) return Result.Failure<VehicleAttachmentResponse>(FleetErrors.NotFound);
-        }
-        else if (await dbContext.VehicleAttachments.CountAsync(x => x.VehicleId == vehicleId, cancellationToken) >= 5)
-        {
-            return Result.Failure<VehicleAttachmentResponse>(FleetErrors.FileLimit);
-        }
-
-        attachment ??= new VehicleAttachment { VehicleId = vehicleId };
+        if (kind == VehicleFileKind.Legacy || !Enum.IsDefined(kind) || IsImage(kind) != file.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase) && IsImage(kind)) return Result.Failure<VehicleAttachmentResponse>(FleetErrors.InvalidFile);
+        if (kind == VehicleFileKind.OperationCard && vehicle.RegistrationType != VehicleRegistrationType.PublicTransport) return Result.Failure<VehicleAttachmentResponse>(FleetErrors.InvalidState);
+        var attachment = await dbContext.VehicleAttachments.SingleOrDefaultAsync(x => x.VehicleId == vehicleId && x.Kind == kind, cancellationToken)
+            ?? new VehicleAttachment { VehicleId = vehicleId, Kind = kind, DisplayName = DisplayName(kind) };
+        var isNew = dbContext.Entry(attachment).State == EntityState.Detached;
         var versionId = Guid.CreateVersion7();
         var stored = await fileStorage.StoreAsync($"vehicles/{vehicleId:N}/{attachment.Id:N}/{versionId:N}", file, MaximumFileSize, cancellationToken);
         if (stored.IsFailure) return Result.Failure<VehicleAttachmentResponse>(FleetErrors.InvalidFile);
-        var number = await dbContext.VehicleAttachmentVersions.Where(x => x.VehicleAttachmentId == attachment.Id).MaxAsync(x => (int?)x.VersionNumber, cancellationToken) + 1 ?? 1;
-        var version = new VehicleAttachmentVersion
-        {
-            Id = versionId, VehicleAttachmentId = attachment.Id, VersionNumber = number, OriginalFileName = stored.Value!.OriginalFileName,
-            StoredFileName = stored.Value.StoredFileName, ContentType = stored.Value.ContentType, FileSizeBytes = stored.Value.Length,
-            Sha256Checksum = stored.Value.Sha256Checksum, StoragePath = stored.Value.StoragePath, UploadedByUserId = support.UserId!.Value,
-            UploadedAtUtc = support.UtcNow, SupersededVersionId = attachment.CurrentVersionId
-        };
-        attachment.Category = category; attachment.DisplayName = displayName.Trim();
-        if (!attachmentId.HasValue) dbContext.VehicleAttachments.Add(attachment);
-        dbContext.VehicleAttachmentVersions.Add(version);
         try
         {
-            await dbContext.SaveChangesAsync(cancellationToken);
-            attachment.CurrentVersionId = version.Id;
-            await dbContext.SaveChangesAsync(cancellationToken);
+            await dbContext.ExecuteTransactionAsync(async _ =>
+            {
+                var number = await dbContext.VehicleAttachmentVersions.Where(x => x.VehicleAttachmentId == attachment.Id).MaxAsync(x => (int?)x.VersionNumber, cancellationToken) + 1 ?? 1;
+                var version = new VehicleAttachmentVersion
+                {
+                    Id = versionId, VehicleAttachmentId = attachment.Id, VersionNumber = number, OriginalFileName = stored.Value!.OriginalFileName,
+                    StoredFileName = stored.Value.StoredFileName, ContentType = stored.Value.ContentType, FileSizeBytes = stored.Value.Length,
+                    Sha256Checksum = stored.Value.Sha256Checksum, StoragePath = stored.Value.StoragePath, UploadedByUserId = support.UserId!.Value,
+                    UploadedAtUtc = support.UtcNow, SupersededVersionId = attachment.CurrentVersionId
+                };
+                if (isNew) dbContext.VehicleAttachments.Add(attachment);
+                dbContext.VehicleAttachmentVersions.Add(version);
+                await dbContext.SaveChangesAsync(cancellationToken);
+                attachment.CurrentVersionId = version.Id;
+                await dbContext.SaveChangesAsync(cancellationToken);
+                return true;
+            }, cancellationToken);
+        }
+        catch (DbUpdateException)
+        {
+            fileStorage.DeleteBestEffort(stored.Value!.StoragePath);
+            return Result.Failure<VehicleAttachmentResponse>(FleetErrors.Conflict);
         }
         catch
         {
-            fileStorage.DeleteBestEffort(stored.Value.StoragePath);
+            fileStorage.DeleteBestEffort(stored.Value!.StoragePath);
             throw;
         }
         return Result.Success((await BuildAsync(vehicleId, cancellationToken)).Single(x => x.Id == attachment.Id));
@@ -89,14 +89,27 @@ internal sealed class VehicleFileService(
         return result.IsFailure ? Result.Failure<PrivateFileDownload>(FleetErrors.FileMissing) : result;
     }
 
-    public async Task<Result> ArchiveAsync(Guid vehicleId, Guid attachmentId, ArchiveFleetRequest request, CancellationToken cancellationToken = default)
+    public async Task<Result<IReadOnlyList<RiderPromissoryFileResponse>>> GetRiderPromissoryFilesAsync(Guid riderProfileId, CancellationToken cancellationToken = default)
     {
-        var access = await GetAttachmentAsync(vehicleId, attachmentId, PermissionKeys.Fleet.FilesUpload, cancellationToken);
-        if (access.IsFailure) return Result.Failure(access.Error);
-        if (string.IsNullOrWhiteSpace(request.Reason) || !FleetServiceSupport.MatchesRowVersion(access.Value!.RowVersion, request.RowVersion)) return Result.Failure(FleetErrors.ConcurrencyConflict);
-        access.Value.IsDeleted = true; access.Value.DeletionReason = request.Reason.Trim();
-        await dbContext.SaveChangesAsync(cancellationToken);
-        return Result.Success();
+        if (!await support.HasPermissionAsync(PermissionKeys.Fleet.AssignmentsRead, null, cancellationToken)) return Result.Failure<IReadOnlyList<RiderPromissoryFileResponse>>(FleetErrors.Forbidden);
+        if (!await dbContext.RiderProfiles.AsNoTracking().AnyAsync(x => x.Id == riderProfileId, cancellationToken)) return Result.Failure<IReadOnlyList<RiderPromissoryFileResponse>>(FleetErrors.NotFound);
+        var rows = await (from file in dbContext.RiderPromissoryFiles.AsNoTracking()
+                          join version in dbContext.RiderPromissoryFileVersions.AsNoTracking() on file.CurrentVersionId equals version.Id
+                          where file.RiderProfileId == riderProfileId
+                          orderby file.CreatedAtUtc
+                          select new { file, version }).ToArrayAsync(cancellationToken);
+        return Result.Success<IReadOnlyList<RiderPromissoryFileResponse>>(rows.Select(x => new RiderPromissoryFileResponse(x.file.Id, x.file.RiderProfileId, x.version.Id, x.version.VersionNumber, x.version.OriginalFileName, x.version.ContentType, x.version.FileSizeBytes, x.version.Sha256Checksum, x.version.UploadedAtUtc, FleetServiceSupport.EncodeRowVersion(x.file.RowVersion))).ToArray());
+    }
+
+    public async Task<Result<PrivateFileDownload>> DownloadRiderPromissoryFileAsync(Guid riderProfileId, Guid fileId, Guid? versionId, CancellationToken cancellationToken = default)
+    {
+        if (!await support.HasPermissionAsync(PermissionKeys.Fleet.FilesDownload, null, cancellationToken)) return Result.Failure<PrivateFileDownload>(FleetErrors.Forbidden);
+        var file = await dbContext.RiderPromissoryFiles.AsNoTracking().SingleOrDefaultAsync(x => x.Id == fileId && x.RiderProfileId == riderProfileId, cancellationToken);
+        if (file is null) return Result.Failure<PrivateFileDownload>(FleetErrors.NotFound);
+        var version = await dbContext.RiderPromissoryFileVersions.AsNoTracking().SingleOrDefaultAsync(x => x.RiderPromissoryFileId == fileId && x.Id == (versionId ?? file.CurrentVersionId), cancellationToken);
+        if (version is null) return Result.Failure<PrivateFileDownload>(FleetErrors.NotFound);
+        var result = await fileStorage.OpenReadAsync(version.StoragePath, version.ContentType, version.OriginalFileName, version.FileSizeBytes, cancellationToken);
+        return result.IsFailure ? Result.Failure<PrivateFileDownload>(FleetErrors.FileMissing) : result;
     }
 
     private async Task<Result<VehicleAttachment>> GetAttachmentAsync(Guid vehicleId, Guid attachmentId, string permission, CancellationToken cancellationToken)
@@ -116,8 +129,20 @@ internal sealed class VehicleFileService(
                           where attachment.VehicleId == vehicleId
                           orderby attachment.CreatedAtUtc
                           select new { attachment, version }).ToArrayAsync(cancellationToken);
-        return rows.Select(x => new VehicleAttachmentResponse(x.attachment.Id, x.attachment.VehicleId, x.attachment.Category, x.attachment.DisplayName,
+        return rows.Select(x => new VehicleAttachmentResponse(x.attachment.Id, x.attachment.VehicleId, x.attachment.Kind, x.attachment.DisplayName,
             x.attachment.CurrentVersionId, x.version == null ? null : x.version.VersionNumber, x.version == null ? null : x.version.OriginalFileName,
-            x.version == null ? null : x.version.ContentType, x.version == null ? null : x.version.FileSizeBytes, FleetServiceSupport.EncodeRowVersion(x.attachment.RowVersion))).ToArray();
+            x.version == null ? null : x.version.ContentType, x.version == null ? null : x.version.FileSizeBytes, x.attachment.Kind == VehicleFileKind.Legacy, FleetServiceSupport.EncodeRowVersion(x.attachment.RowVersion))).ToArray();
     }
+
+    private static bool IsImage(VehicleFileKind kind) => kind is VehicleFileKind.FrontImage or VehicleFileKind.RearImage or VehicleFileKind.LeftImage or VehicleFileKind.RightImage;
+    private static string DisplayName(VehicleFileKind kind) => kind switch
+    {
+        VehicleFileKind.Istimara => "الاستمارة",
+        VehicleFileKind.OperationCard => "كرت تشغيل",
+        VehicleFileKind.FrontImage => "صورة أمامية",
+        VehicleFileKind.RearImage => "صورة خلفية",
+        VehicleFileKind.LeftImage => "صورة الجانب الأيسر",
+        VehicleFileKind.RightImage => "صورة الجانب الأيمن",
+        _ => "ملف قديم"
+    };
 }

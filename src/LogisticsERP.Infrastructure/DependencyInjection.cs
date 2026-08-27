@@ -57,6 +57,7 @@ public static class DependencyInjection
         services.AddScoped<IHrCatalogService, HrCatalogService>();
         services.AddScoped<IWorkforceService, WorkforceService>();
         services.AddScoped<IComplianceService, ComplianceService>();
+        services.AddScoped<IEmployeeExpiryComplianceService, EmployeeExpiryComplianceService>();
         services.AddScoped<IEmployeeDocumentService, EmployeeDocumentService>();
         services.AddScoped<IHousingService, HousingService>();
         services.AddScoped<IPlatformOperationsService, PlatformOperationsService>();

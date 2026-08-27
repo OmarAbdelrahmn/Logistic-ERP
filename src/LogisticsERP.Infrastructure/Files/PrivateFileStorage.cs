@@ -71,7 +71,7 @@ internal sealed class PrivateFileStorage(IHostEnvironment hostEnvironment) : IPr
             await using var destination = new FileStream(fullPath, FileMode.CreateNew, FileAccess.Write, FileShare.None, 64 * 1024, FileOptions.Asynchronous | FileOptions.SequentialScan);
             using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
             var buffer = new byte[64 * 1024];
-            var header = new byte[8];
+            var header = new byte[12];
             var headerLength = 0;
             long total = 0;
             while (true)

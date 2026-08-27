@@ -11,7 +11,7 @@ public sealed class VehicleIssue : AuditableEntity
     public VehicleIssueSeverity Severity { get; set; }
     public string Description { get; set; } = string.Empty;
     public DateTimeOffset ReportedAtUtc { get; set; }
-    public Guid? LocationId { get; set; }
+    public string? LocationDescription { get; set; }
     public long? OdometerAtReport { get; set; }
     public Guid? RelatedAssignmentId { get; set; }
     public bool BlocksOperation { get; set; }
@@ -48,7 +48,6 @@ public sealed class VehicleAccident : AuditableEntity
     public Guid? VehicleInsurancePolicyId { get; set; }
     public DateTimeOffset OccurredAtUtc { get; set; }
     public DateTimeOffset ReportedAtUtc { get; set; }
-    public Guid? LocationId { get; set; }
     public string LocationDescription { get; set; } = string.Empty;
     public decimal? Latitude { get; set; }
     public decimal? Longitude { get; set; }

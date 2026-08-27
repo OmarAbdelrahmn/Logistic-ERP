@@ -508,3 +508,37 @@ Form fields:
 The frontend does not send `documentTypeId` to this dedicated rider endpoint. The API assigns the seeded `AJEER_CONTRACT` type (`019c18d5-62e1-7000-8000-000000000036`) automatically.
 
 Response `200 OK`: `EmployeeDocumentResponse`, including `documentTypeCode: "AJEER_CONTRACT"` and `documentTypeNameAr: "عقود اجير"`.
+
+## Employee and rider expiry compliance
+
+The expiry dashboard is read-only. It calculates live status from the existing employee document, driver-license, rider-card, health-card, and medical-insurance records. It does not update the source records and does not include fleet or vehicle compliance.
+
+### Dashboard
+
+`GET /api/compliance/expiries`
+
+Permission: `employees.read`
+
+Optional query parameters: `checkDate` (`YYYY-MM-DD`), `employeeId`, `riderProfileId`, `sourceType`, `dueStatus`, `employeeStatus`, `operatingCityId`, `sponsorId`, `page`, and `pageSize`.
+
+`sourceType` values are `EmployeeDocument`, `DriverLicense`, `RiderCard`, `HealthCard`, and `MedicalInsurance`. `dueStatus` values are `Valid`, `Upcoming`, `DueToday`, `Expired`, and `Missing`.
+
+The response is paged and includes a `summary` count for every status. Each item includes employee/rider identifiers, employee name and lifecycle status, source/category details, a masked reference number, the source record status, expiry date, `daysRemaining`, calculated `dueStatus`, and an optional `employeeDocumentId`.
+
+### Employee detail
+
+`GET /api/employees/{employeeId}/compliance-expiries?checkDate=YYYY-MM-DD`
+
+Permission: `employees.read`
+
+Returns the same item and summary shape for one non-archived employee.
+
+### Statuses and reminders
+
+- `Valid`: more than 30 days remain.
+- `Upcoming`: 1 to 30 days remain.
+- `DueToday`: the expiry date is today in Riyadh.
+- `Expired`: the expiry date has passed.
+- `Missing`: an active employee document type requires an expiry date but none exists.
+
+The worker creates in-app reminders for users with `employees.read` at 30, 7, 1, and 0 days before expiry, once after expiry, and once for missing required expiry dates. A linked specialised license/card/insurance record takes precedence over its employee-document entry, preventing duplicate dashboard rows and reminders.
