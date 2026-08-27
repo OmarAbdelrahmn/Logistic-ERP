@@ -518,6 +518,8 @@ Assignments connect a rider to a vehicle and update operational status, odometer
 
 Starts an assignment. This is `multipart/form-data` because promissory-note files may be uploaded with the command. The JSON command is sent as a string in the `metadata` form field, and files are sent as one or more `promissoryFiles` fields.
 
+The assignment links the rider's existing active promissory-note files and any newly uploaded files. At least one active or newly uploaded file is required, and the combined total cannot exceed three.
+
 Required header: `Idempotency-Key`.
 
 `metadata` JSON shape (`TakeVehicleRequest`):

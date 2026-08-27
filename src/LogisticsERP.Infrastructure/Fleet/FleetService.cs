@@ -448,7 +448,8 @@ internal sealed class FleetService(
         if (rider is null || !await dbContext.Employees.AnyAsync(x => x.Id == rider.EmployeeId && !x.IsEmployee && x.Status == EmployeeStatus.Active, cancellationToken)
             || await dbContext.RiderVehicleAssignments.AnyAsync(x => x.RiderProfileId == request.RiderProfileId && x.EndedAtUtc == null, cancellationToken)) { CleanupStaged(staged); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.RiderUnavailable); }
         var existingPromissoryVersions = await CurrentPromissoryVersionsAsync(rider.Id, cancellationToken);
-        if (existingPromissoryVersions.Count == 0 && staged.Count == 0 || existingPromissoryVersions.Count > 0 && staged.Count > 0) { CleanupStaged(staged); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.InvalidRequest); }
+        if (existingPromissoryVersions.Count == 0 && staged.Count == 0) { CleanupStaged(staged); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.InvalidRequest); }
+        if (existingPromissoryVersions.Count + staged.Count > 3) { CleanupStaged(staged); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.FileLimit); }
         try
         {
             return await dbContext.ExecuteTransactionAsync(async _ =>
@@ -464,7 +465,9 @@ internal sealed class FleetService(
                     WasBackdated = request.StartedAtUtc < support.UtcNow.AddMinutes(-5), BackdatedReason = request.StartedAtUtc < support.UtcNow.AddMinutes(-5) ? request.Reason.Trim() : null, Notes = FleetServiceSupport.TrimOrNull(request.Notes)
                 };
                 dbContext.RiderVehicleAssignments.Add(assignment);
-                var versions = existingPromissoryVersions.Count > 0 ? existingPromissoryVersions : AddStagedPromissoryFiles(rider.Id, staged, actor.Value);
+                var versions = existingPromissoryVersions
+                    .Concat(AddStagedPromissoryFiles(rider.Id, staged, actor.Value))
+                    .ToArray();
                 foreach (var versionId in versions) dbContext.RiderVehicleAssignmentPromissoryFiles.Add(new RiderVehicleAssignmentPromissoryFile { RiderVehicleAssignmentId = assignment.Id, RiderPromissoryFileVersionId = versionId });
                 dbContext.RiderVehicleAssignmentEvents.Add(NewAssignmentEvent(assignment.Id, operationId, eventType, request.StartedAtUtc, actor.Value, request.Reason));
                 if (request.StartOdometer > vehicle.CurrentOdometer)
@@ -545,7 +548,8 @@ internal sealed class FleetService(
         if (!await support.HasVehiclePermissionAsync(oldVehicle, PermissionKeys.Fleet.AssignmentsManage, cancellationToken) || !await support.HasVehiclePermissionAsync(next, PermissionKeys.Fleet.AssignmentsManage, cancellationToken)) { CleanupStaged(staged); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.Forbidden); }
         if (!FleetServiceSupport.MatchesRowVersion(old.RowVersion, request.RowVersion) || next.CurrentOperationalStatus != VehicleOperationalStatus.Available || next.CurrentAssignmentId.HasValue || !FleetBusinessRules.IsCoreIdentityReady(next) || request.OldVehicleOdometer < old.StartOdometer || request.NewVehicleOdometer < next.CurrentOdometer || string.IsNullOrWhiteSpace(request.PermissionReference) || string.IsNullOrWhiteSpace(request.Reason)) { CleanupStaged(staged); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.Conflict); }
         var existingPromissoryVersions = await CurrentPromissoryVersionsAsync(old.RiderProfileId, cancellationToken);
-        if (existingPromissoryVersions.Count == 0 && staged.Count == 0 || existingPromissoryVersions.Count > 0 && staged.Count > 0) { CleanupStaged(staged); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.InvalidRequest); }
+        if (existingPromissoryVersions.Count == 0 && staged.Count == 0) { CleanupStaged(staged); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.InvalidRequest); }
+        if (existingPromissoryVersions.Count + staged.Count > 3) { CleanupStaged(staged); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.FileLimit); }
         try
         {
             return await dbContext.ExecuteTransactionAsync(async _ =>
@@ -560,7 +564,9 @@ internal sealed class FleetService(
                     PermissionStartsOn = FleetBusinessRules.RiyadhDate(request.SwitchedAtUtc), PermissionEndsOn = FleetBusinessRules.PermitEnd(FleetBusinessRules.RiyadhDate(request.SwitchedAtUtc)), AssignmentReason = request.Reason.Trim(), AssignedByUserId = actor.Value
                 };
                 dbContext.RiderVehicleAssignments.Add(newAssignment);
-                var versions = existingPromissoryVersions.Count > 0 ? existingPromissoryVersions : AddStagedPromissoryFiles(old.RiderProfileId, staged, actor.Value);
+                var versions = existingPromissoryVersions
+                    .Concat(AddStagedPromissoryFiles(old.RiderProfileId, staged, actor.Value))
+                    .ToArray();
                 foreach (var versionId in versions) dbContext.RiderVehicleAssignmentPromissoryFiles.Add(new RiderVehicleAssignmentPromissoryFile { RiderVehicleAssignmentId = newAssignment.Id, RiderPromissoryFileVersionId = versionId });
                 dbContext.RiderVehicleAssignmentEvents.Add(NewAssignmentEvent(newAssignment.Id, old.OperationId, RiderVehicleAssignmentEventType.SwitchedIn, request.SwitchedAtUtc, actor.Value, request.Reason));
                 if (request.NewVehicleOdometer > next.CurrentOdometer) dbContext.VehicleOdometerReadings.Add(NewOdometer(next.Id, request.NewVehicleOdometer, request.SwitchedAtUtc, VehicleOdometerSourceType.AssignmentTake, newAssignment.Id, request.Reason));
