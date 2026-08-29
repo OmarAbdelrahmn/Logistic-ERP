@@ -1,3 +1,4 @@
+using LogisticsERP.Application.Features.Fleet;
 using LogisticsERP.Domain.Entities.Fleet;
 using LogisticsERP.Domain.Enums;
 using LogisticsERP.Infrastructure.Fleet;
@@ -7,6 +8,12 @@ namespace LogisticsERP.Fleet.UnitTests;
 
 public sealed class FleetBusinessRulesTests
 {
+    [Fact]
+    public void VehicleComplianceContractExposesPermitEndDate()
+    {
+        Assert.NotNull(typeof(VehicleSummaryResponse).GetProperty(nameof(VehicleSummaryResponse.PermitEndDate)));
+    }
+
     [Fact]
     public void VehicleAssetNumberDoesNotContainTheDate()
     {
@@ -22,7 +29,6 @@ public sealed class FleetBusinessRulesTests
 
         var start = FleetBusinessRules.RiyadhDate(timestamp);
         var end = FleetBusinessRules.PermitEnd(start);
-
         Assert.Equal(new DateOnly(2026, 8, 27), start);
         Assert.Equal(new DateOnly(2027, 8, 26), end);
     }

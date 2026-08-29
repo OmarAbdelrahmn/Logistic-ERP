@@ -235,6 +235,10 @@ internal sealed class UserSessionConfiguration : IEntityTypeConfiguration<UserSe
         builder.HasOne<ApplicationUser>().WithMany().HasForeignKey(entity => entity.UserId).OnDelete(DeleteBehavior.Restrict);
         builder.HasIndex(entity => entity.RefreshTokenHash).IsUnique();
         builder.HasIndex(entity => new { entity.UserId, entity.RevokedAtUtc, entity.AbsoluteExpiresAtUtc });
+        builder.HasIndex(entity => entity.UserId)
+            .IsUnique()
+            .HasDatabaseName("UX_UserSessions_OneOpenSessionPerUser")
+            .HasFilter("[RevokedAtUtc] IS NULL AND [IsDeleted] = 0");
         builder.ToTable(table =>
         {
             table.HasCheckConstraint("CK_UserSessions_IdleExpiry", "[IdleExpiresAtUtc] > [CreatedAtUtc]");
@@ -251,7 +255,6 @@ internal sealed class TemporaryCredentialConfiguration : IEntityTypeConfiguratio
         builder.Property(entity => entity.CredentialHash).HasMaxLength(128).IsRequired();
         builder.HasOne<ApplicationUser>().WithMany().HasForeignKey(entity => entity.UserId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<ApplicationUser>().WithMany().HasForeignKey(entity => entity.IssuedByUserId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasIndex(entity => entity.CredentialHash).IsUnique();
         builder.HasIndex(entity => new { entity.UserId, entity.Purpose, entity.ExpiresAtUtc });
     }
 }

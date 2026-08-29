@@ -109,7 +109,7 @@ The `LogisticsERP.Api` launch profile opens Swagger automatically. Swagger is in
 
 Development generates an ephemeral JWT signing key if no secret is configured. Production startup fails closed unless `Authentication:SigningKey` comes from a secret source.
 
-Authentication defaults to 10-minute access tokens, 7-day refresh idle expiry, 30-day absolute refresh-family expiry, 10 active sessions, and a 15-second session-validation cache. See the authorization document below for endpoint and security details.
+Authentication defaults to 10-minute access tokens, 7-day refresh idle expiry, a 30-day absolute refresh-family expiry, and exactly one active session per user. A successful login revokes the previous device before issuing the replacement session, and access-token session checks are uncached so the old JWT stops working immediately. See the authorization document below for endpoint and security details.
 
 `DeviceLabel` on login is optional. It is a user-facing session label such as `Omar Laptop`, limited to 200 characters; it is not a trusted device identifier.
 
@@ -123,3 +123,5 @@ The private document root is `src/LogisticsERP.Api/wwwroot/private/employee-docu
 - [Authorization roles and 55-permission catalog (Arabic)](docs/authorization-permission-catalog-ar.md)
 - [Vehicle, maintenance, inventory, and fuel V2 plan](docs/vehicle-maintenance-v2-plan.md)
 - [Leave, absence compliance, and employee status V2 plan](docs/leave-absence-status-v2-plan.md)
+- [HR form-template storage and frontend API](docs/hr-form-template-api.md)
+- [Create users with roles and permissions](docs/user-creation-authorization-api.md)

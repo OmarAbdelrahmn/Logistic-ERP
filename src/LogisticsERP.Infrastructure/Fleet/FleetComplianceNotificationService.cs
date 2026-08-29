@@ -34,7 +34,11 @@ internal sealed class FleetComplianceNotificationService(
             from insurance in policies.DefaultIfEmpty()
             join inspection in dbContext.VehiclePeriodicInspections.AsNoTracking().Where(x => x.IsCurrent) on vehicle.Id equals inspection.VehicleId into inspections
             from inspection in inspections.DefaultIfEmpty()
-            select new { vehicle.Id, vehicle.AssetNumber, RegistrationId = registration == null ? (Guid?)null : registration.Id, RegistrationExpiry = registration == null ? null : (DateOnly?)registration.ExpiryDate, InsuranceId = insurance == null ? (Guid?)null : insurance.Id, InsuranceExpiry = insurance == null ? null : (DateOnly?)insurance.ExpiryDate, InspectionId = inspection == null ? (Guid?)null : inspection.Id, InspectionExpiry = inspection == null ? null : (DateOnly?)inspection.ExpiryDate })
+            join operationCard in dbContext.VehicleOperationCards.AsNoTracking().Where(x => x.IsCurrent) on vehicle.Id equals operationCard.VehicleId into operationCards
+            from operationCard in operationCards.DefaultIfEmpty()
+            join assignment in dbContext.RiderVehicleAssignments.AsNoTracking().Where(x => x.EndedAtUtc == null) on vehicle.Id equals assignment.VehicleId into assignments
+            from assignment in assignments.DefaultIfEmpty()
+            select new { vehicle.Id, vehicle.AssetNumber, vehicle.RegistrationType, RegistrationId = registration == null ? (Guid?)null : registration.Id, RegistrationExpiry = registration == null ? null : (DateOnly?)registration.ExpiryDate, InsuranceId = insurance == null ? (Guid?)null : insurance.Id, InsuranceExpiry = insurance == null ? null : (DateOnly?)insurance.ExpiryDate, InspectionId = inspection == null ? (Guid?)null : inspection.Id, InspectionExpiry = inspection == null ? null : (DateOnly?)inspection.ExpiryDate, OperationCardId = operationCard == null ? (Guid?)null : operationCard.Id, OperationCardExpiry = operationCard == null ? null : (DateOnly?)operationCard.ExpiryDate, AssignmentId = assignment == null ? (Guid?)null : assignment.Id, PermitEndDate = assignment == null ? null : assignment.PermissionEndsOn })
             .ToArrayAsync(cancellationToken);
 
         foreach (var item in compliance)
@@ -42,6 +46,9 @@ internal sealed class FleetComplianceNotificationService(
             await NotifyAsync(users, PermissionKeys.Fleet.ComplianceRead, "registration", item.RegistrationId, item.Id, item.AssetNumber, item.RegistrationExpiry, checkDate, now, cancellationToken);
             await NotifyAsync(users, PermissionKeys.Fleet.ComplianceRead, "insurance", item.InsuranceId, item.Id, item.AssetNumber, item.InsuranceExpiry, checkDate, now, cancellationToken);
             await NotifyAsync(users, PermissionKeys.Fleet.ComplianceRead, "inspection", item.InspectionId, item.Id, item.AssetNumber, item.InspectionExpiry, checkDate, now, cancellationToken);
+            await NotifyAsync(users, PermissionKeys.Fleet.ComplianceRead, "permit", item.AssignmentId, item.Id, item.AssetNumber, item.PermitEndDate, checkDate, now, cancellationToken);
+            if (item.RegistrationType == VehicleRegistrationType.PublicTransport)
+                await NotifyAsync(users, PermissionKeys.Fleet.ComplianceRead, "operation-card", item.OperationCardId, item.Id, item.AssetNumber, item.OperationCardExpiry, checkDate, now, cancellationToken);
         }
 
         await dbContext.SaveChangesAsync(cancellationToken);
@@ -88,7 +95,7 @@ internal sealed class FleetComplianceNotificationService(
         }
     }
 
-    private static string EnglishType(string type) => type switch { "registration" => "Vehicle registration", "insurance" => "Vehicle insurance", "inspection" => "Periodic inspection", _ => "Vehicle permission" };
-    private static string ArabicType(string type) => type switch { "registration" => "تسجيل المركبة", "insurance" => "تأمين المركبة", "inspection" => "الفحص الدوري", _ => "تصريح عهدة المركبة" };
+    private static string EnglishType(string type) => type switch { "registration" => "Vehicle registration", "insurance" => "Vehicle insurance", "inspection" => "Periodic inspection", "operation-card" => "Operation card", _ => "Vehicle permission" };
+    private static string ArabicType(string type) => type switch { "registration" => "تسجيل المركبة", "insurance" => "تأمين المركبة", "inspection" => "الفحص الدوري", "operation-card" => "كرت التشغيل", _ => "تصريح عهدة المركبة" };
     private sealed record NotificationUser(Guid Id, long AuthorizationVersion);
 }

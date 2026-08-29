@@ -443,6 +443,7 @@ internal sealed class FleetService(
         var vehicle = await dbContext.Vehicles.SingleOrDefaultAsync(x => x.Id == request.VehicleId, cancellationToken);
         if (vehicle is null) { CleanupStaged(staged); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.NotFound); }
         if (!await support.HasVehiclePermissionAsync(vehicle, PermissionKeys.Fleet.AssignmentsManage, cancellationToken)) { CleanupStaged(staged); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.Forbidden); }
+        var permitStart = FleetBusinessRules.RiyadhDate(request.StartedAtUtc);
         if (vehicle.CurrentOperationalStatus != VehicleOperationalStatus.Available || vehicle.CurrentAssignmentId.HasValue || !FleetBusinessRules.IsCoreIdentityReady(vehicle) || request.StartOdometer < vehicle.CurrentOdometer || !ValidFuel(request.StartFuelLevelPercentage) || string.IsNullOrWhiteSpace(request.PermissionReference) || string.IsNullOrWhiteSpace(request.Reason)) { CleanupStaged(staged); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.VehicleUnavailable); }
         var rider = await dbContext.RiderProfiles.AsNoTracking().SingleOrDefaultAsync(x => x.Id == request.RiderProfileId, cancellationToken);
         if (rider is null || !await dbContext.Employees.AnyAsync(x => x.Id == rider.EmployeeId && !x.IsEmployee && x.Status == EmployeeStatus.Active, cancellationToken)
@@ -455,7 +456,6 @@ internal sealed class FleetService(
             return await dbContext.ExecuteTransactionAsync(async _ =>
             {
                 var operationId = Guid.CreateVersion7();
-                var permitStart = FleetBusinessRules.RiyadhDate(request.StartedAtUtc);
                 var assignment = new RiderVehicleAssignment
                 {
                     RiderProfileId = rider.Id, VehicleId = vehicle.Id, OperationId = operationId, PreviousAssignmentId = previousAssignmentId,
@@ -546,6 +546,7 @@ internal sealed class FleetService(
         if (old is null || next is null) { CleanupStaged(staged); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.NotFound); }
         var oldVehicle = await dbContext.Vehicles.SingleAsync(x => x.Id == old.VehicleId, cancellationToken);
         if (!await support.HasVehiclePermissionAsync(oldVehicle, PermissionKeys.Fleet.AssignmentsManage, cancellationToken) || !await support.HasVehiclePermissionAsync(next, PermissionKeys.Fleet.AssignmentsManage, cancellationToken)) { CleanupStaged(staged); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.Forbidden); }
+        var permitStart = FleetBusinessRules.RiyadhDate(request.SwitchedAtUtc);
         if (!FleetServiceSupport.MatchesRowVersion(old.RowVersion, request.RowVersion) || next.CurrentOperationalStatus != VehicleOperationalStatus.Available || next.CurrentAssignmentId.HasValue || !FleetBusinessRules.IsCoreIdentityReady(next) || request.OldVehicleOdometer < old.StartOdometer || request.NewVehicleOdometer < next.CurrentOdometer || string.IsNullOrWhiteSpace(request.PermissionReference) || string.IsNullOrWhiteSpace(request.Reason)) { CleanupStaged(staged); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.Conflict); }
         var existingPromissoryVersions = await CurrentPromissoryVersionsAsync(old.RiderProfileId, cancellationToken);
         if (existingPromissoryVersions.Count == 0 && staged.Count == 0) { CleanupStaged(staged); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.InvalidRequest); }
@@ -561,7 +562,7 @@ internal sealed class FleetService(
                     RiderProfileId = old.RiderProfileId, VehicleId = next.Id, OperationId = old.OperationId, PreviousAssignmentId = old.Id,
                     StartedAtUtc = request.SwitchedAtUtc, StartLocationSnapshot = await OperatingCitySnapshotAsync(next.OperatingCityId, cancellationToken), StartOdometer = request.NewVehicleOdometer,
                     StartVehicleCondition = request.NewVehicleCondition, StartFuelLevelPercentage = request.NewFuelLevelPercentage, PermissionReference = request.PermissionReference.Trim(),
-                    PermissionStartsOn = FleetBusinessRules.RiyadhDate(request.SwitchedAtUtc), PermissionEndsOn = FleetBusinessRules.PermitEnd(FleetBusinessRules.RiyadhDate(request.SwitchedAtUtc)), AssignmentReason = request.Reason.Trim(), AssignedByUserId = actor.Value
+                    PermissionStartsOn = permitStart, PermissionEndsOn = FleetBusinessRules.PermitEnd(permitStart), AssignmentReason = request.Reason.Trim(), AssignedByUserId = actor.Value
                 };
                 dbContext.RiderVehicleAssignments.Add(newAssignment);
                 var versions = existingPromissoryVersions
@@ -645,9 +646,12 @@ internal sealed class FleetService(
             "registrations" => await dbContext.VehicleRegistrations.AsNoTracking().Where(x => x.VehicleId == vehicleId).OrderByDescending(x => x.ExpiryDate).Select(x => new VehicleComplianceResponse(x.Id, x.VehicleId, "Registration", x.RegistrationNumber, x.IssuingAuthority, x.IssueDate, x.ExpiryDate, FleetServiceSupport.DueStatus(x.ExpiryDate, check), x.IsCurrent, x.PreviousRecordId, Convert.ToBase64String(x.RowVersion))).ToArrayAsync(cancellationToken),
             "insurance-policies" => await dbContext.VehicleInsurancePolicies.AsNoTracking().Where(x => x.VehicleId == vehicleId).OrderByDescending(x => x.ExpiryDate).Select(x => new VehicleComplianceResponse(x.Id, x.VehicleId, "Insurance", x.PolicyNumber, x.ProviderName, x.EffectiveFrom, x.ExpiryDate, FleetServiceSupport.DueStatus(x.ExpiryDate, check), x.IsCurrent, x.PreviousRecordId, Convert.ToBase64String(x.RowVersion))).ToArrayAsync(cancellationToken),
             "inspections" => await dbContext.VehiclePeriodicInspections.AsNoTracking().Where(x => x.VehicleId == vehicleId).OrderByDescending(x => x.ExpiryDate).Select(x => new VehicleComplianceResponse(x.Id, x.VehicleId, "Inspection", x.InspectionNumber, x.StationName, x.InspectionDate, x.ExpiryDate, FleetServiceSupport.DueStatus(x.ExpiryDate, check), x.IsCurrent, x.PreviousRecordId, Convert.ToBase64String(x.RowVersion))).ToArrayAsync(cancellationToken),
+            "operation-cards" when access.Value!.RegistrationType == VehicleRegistrationType.PublicTransport => await dbContext.VehicleOperationCards.AsNoTracking().Where(x => x.VehicleId == vehicleId).OrderByDescending(x => x.ExpiryDate).Select(x => new VehicleComplianceResponse(x.Id, x.VehicleId, "OperationCard", x.CardNumber, x.IssuingAuthority, x.IssueDate, x.ExpiryDate, FleetServiceSupport.DueStatus(x.ExpiryDate, check), x.IsCurrent, x.PreviousRecordId, Convert.ToBase64String(x.RowVersion))).ToArrayAsync(cancellationToken),
             _ => []
         };
-        return type is "registrations" or "insurance-policies" or "inspections" ? Result.Success(result) : Result.Failure<IReadOnlyList<VehicleComplianceResponse>>(FleetErrors.InvalidRequest);
+        return type is "registrations" or "insurance-policies" or "inspections" or "operation-cards" && (type != "operation-cards" || access.Value!.RegistrationType == VehicleRegistrationType.PublicTransport)
+            ? Result.Success(result)
+            : Result.Failure<IReadOnlyList<VehicleComplianceResponse>>(FleetErrors.InvalidRequest);
     }
 
     public async Task<Result<VehicleComplianceResponse>> RenewRegistrationAsync(Guid vehicleId, VehicleRegistrationRequest request, CancellationToken cancellationToken = default)
@@ -686,6 +690,32 @@ internal sealed class FleetService(
         return Result.Success(MapCompliance(item));
     }
 
+    public async Task<Result<VehicleComplianceResponse>> RenewOperationCardAsync(Guid vehicleId, VehicleOperationCardRequest request, CancellationToken cancellationToken = default)
+    {
+        var access = await GetAccessibleVehicleAsync(vehicleId, PermissionKeys.Fleet.ComplianceManage, cancellationToken);
+        if (access.IsFailure) return Result.Failure<VehicleComplianceResponse>(access.Error);
+        if (access.Value!.RegistrationType != VehicleRegistrationType.PublicTransport
+            || string.IsNullOrWhiteSpace(request.CardNumber)
+            || string.IsNullOrWhiteSpace(request.IssuingAuthority)
+            || request.ExpiryDate < request.IssueDate) return Result.Failure<VehicleComplianceResponse>(FleetErrors.InvalidRequest);
+
+        var previous = await dbContext.VehicleOperationCards.SingleOrDefaultAsync(x => x.VehicleId == vehicleId && x.IsCurrent, cancellationToken);
+        if (previous is not null) { previous.IsCurrent = false; previous.Status = ComplianceRecordStatus.Superseded; }
+        var item = new VehicleOperationCard
+        {
+            VehicleId = vehicleId,
+            CardNumber = request.CardNumber.Trim(),
+            IssuingAuthority = request.IssuingAuthority.Trim(),
+            IssueDate = request.IssueDate,
+            ExpiryDate = request.ExpiryDate,
+            PreviousRecordId = previous?.Id,
+            Notes = FleetServiceSupport.TrimOrNull(request.Notes)
+        };
+        dbContext.VehicleOperationCards.Add(item);
+        await dbContext.SaveChangesAsync(cancellationToken);
+        return Result.Success(MapCompliance(item));
+    }
+
     public async Task<Result<IReadOnlyList<VehicleComplianceDueResponse>>> GetComplianceDueAsync(DateOnly checkDate, CancellationToken cancellationToken = default)
     {
         var vehiclesResult = await GetVehiclesAsync(null, null, null, 1, 200, cancellationToken);
@@ -696,6 +726,10 @@ internal sealed class FleetService(
             AddDue(result, vehicle.Id, vehicle.AssetNumber, "Registration", vehicle.RegistrationExpiryDate, vehicle.RegistrationStatus, checkDate);
             AddDue(result, vehicle.Id, vehicle.AssetNumber, "Insurance", vehicle.InsuranceExpiryDate, vehicle.InsuranceStatus, checkDate);
             AddDue(result, vehicle.Id, vehicle.AssetNumber, "Inspection", vehicle.InspectionExpiryDate, vehicle.InspectionStatus, checkDate);
+            if (vehicle.CurrentAssignmentId.HasValue)
+                AddDue(result, vehicle.Id, vehicle.AssetNumber, "Permit", vehicle.PermitEndDate, vehicle.PermitStatus, checkDate, vehicle.CurrentAssignmentId);
+            if (vehicle.RegistrationType == VehicleRegistrationType.PublicTransport)
+                AddDue(result, vehicle.Id, vehicle.AssetNumber, "OperationCard", vehicle.OperationCardExpiryDate, vehicle.OperationCardStatus, checkDate);
         }
         return Result.Success<IReadOnlyList<VehicleComplianceDueResponse>>(result.Where(x => x.Status != VehicleComplianceDueStatus.Valid).OrderBy(x => x.ExpiryDate).ToArray());
     }
@@ -821,17 +855,18 @@ internal sealed class FleetService(
         var models = await dbContext.VehicleModels.AsNoTracking().ToDictionaryAsync(x => x.Id, cancellationToken);
         var sponsors = await dbContext.Sponsors.AsNoTracking().ToDictionaryAsync(x => x.Id, cancellationToken);
         var cities = await (from oc in dbContext.OperatingCities.AsNoTracking() join gc in dbContext.GlobalCities.AsNoTracking() on oc.GlobalCityId equals gc.Id select new { oc.Id, gc.NameAr }).ToDictionaryAsync(x => x.Id, cancellationToken);
-        var assignments = await (from a in dbContext.RiderVehicleAssignments.AsNoTracking() join r in dbContext.RiderProfiles.AsNoTracking() on a.RiderProfileId equals r.Id join e in dbContext.Employees.AsNoTracking() on r.EmployeeId equals e.Id where ids.Contains(a.VehicleId) && a.EndedAtUtc == null select new { a.VehicleId, a.Id, a.RiderProfileId, e.FullNameAr }).ToDictionaryAsync(x => x.VehicleId, cancellationToken);
+        var assignments = await (from a in dbContext.RiderVehicleAssignments.AsNoTracking() join r in dbContext.RiderProfiles.AsNoTracking() on a.RiderProfileId equals r.Id join e in dbContext.Employees.AsNoTracking() on r.EmployeeId equals e.Id where ids.Contains(a.VehicleId) && a.EndedAtUtc == null select new { a.VehicleId, a.Id, a.RiderProfileId, a.PermissionEndsOn, e.FullNameAr }).ToDictionaryAsync(x => x.VehicleId, cancellationToken);
         var registrations = await dbContext.VehicleRegistrations.AsNoTracking().Where(x => ids.Contains(x.VehicleId) && x.IsCurrent).ToDictionaryAsync(x => x.VehicleId, cancellationToken);
         var insurance = await dbContext.VehicleInsurancePolicies.AsNoTracking().Where(x => ids.Contains(x.VehicleId) && x.IsCurrent).ToDictionaryAsync(x => x.VehicleId, cancellationToken);
         var inspections = await dbContext.VehiclePeriodicInspections.AsNoTracking().Where(x => ids.Contains(x.VehicleId) && x.IsCurrent).ToDictionaryAsync(x => x.VehicleId, cancellationToken);
+        var operationCards = await dbContext.VehicleOperationCards.AsNoTracking().Where(x => ids.Contains(x.VehicleId) && x.IsCurrent).ToDictionaryAsync(x => x.VehicleId, cancellationToken);
         var check = DateOnly.FromDateTime(support.UtcNow.UtcDateTime);
         return vehicles.Select(v =>
         {
-            assignments.TryGetValue(v.Id, out var a); registrations.TryGetValue(v.Id, out var reg); insurance.TryGetValue(v.Id, out var ins); inspections.TryGetValue(v.Id, out var chk);
+            assignments.TryGetValue(v.Id, out var a); registrations.TryGetValue(v.Id, out var reg); insurance.TryGetValue(v.Id, out var ins); inspections.TryGetValue(v.Id, out var chk); operationCards.TryGetValue(v.Id, out var operationCard);
             var sponsorName = v.SponsorId.HasValue && sponsors.TryGetValue(v.SponsorId.Value, out var sponsor) ? sponsor.RegistryNameAr : null;
             var cityName = v.OperatingCityId.HasValue && cities.TryGetValue(v.OperatingCityId.Value, out var city) ? city.NameAr : null;
-            return new VehicleSummaryResponse(v.Id, v.AssetNumber, v.PlateNumberAr, v.PlateNumberEn, v.SerialNumber, manufacturers[v.VehicleManufacturerId].NameEn, models[v.VehicleModelId].NameEn, v.VehicleType, v.RegistrationType, v.CurrentOperationalStatus, v.SponsorId, sponsorName, v.OperatingCityId, cityName, v.CurrentOdometer, a?.Id, a?.RiderProfileId, a?.FullNameAr, reg?.ExpiryDate, FleetServiceSupport.DueStatus(reg?.ExpiryDate, check), ins?.ExpiryDate, FleetServiceSupport.DueStatus(ins?.ExpiryDate, check), chk?.ExpiryDate, FleetServiceSupport.DueStatus(chk?.ExpiryDate, check), FleetBusinessRules.IsCoreIdentityReady(v), FleetServiceSupport.EncodeRowVersion(v.RowVersion));
+            return new VehicleSummaryResponse(v.Id, v.AssetNumber, v.PlateNumberAr, v.PlateNumberEn, v.SerialNumber, manufacturers[v.VehicleManufacturerId].NameEn, models[v.VehicleModelId].NameEn, v.VehicleType, v.RegistrationType, v.CurrentOperationalStatus, v.SponsorId, sponsorName, v.OperatingCityId, cityName, v.CurrentOdometer, a?.Id, a?.RiderProfileId, a?.FullNameAr, reg?.ExpiryDate, FleetServiceSupport.DueStatus(reg?.ExpiryDate, check), ins?.ExpiryDate, FleetServiceSupport.DueStatus(ins?.ExpiryDate, check), chk?.ExpiryDate, FleetServiceSupport.DueStatus(chk?.ExpiryDate, check), a?.PermissionEndsOn, FleetServiceSupport.DueStatus(a?.PermissionEndsOn, check), operationCard?.ExpiryDate, FleetServiceSupport.DueStatus(operationCard?.ExpiryDate, check), FleetBusinessRules.IsCoreIdentityReady(v), FleetServiceSupport.EncodeRowVersion(v.RowVersion));
         }).ToArray();
     }
 
@@ -1013,9 +1048,10 @@ internal sealed class FleetService(
     private static VehicleComplianceResponse MapCompliance(VehicleRegistration x) => new(x.Id, x.VehicleId, "Registration", x.RegistrationNumber, x.IssuingAuthority, x.IssueDate, x.ExpiryDate, FleetServiceSupport.DueStatus(x.ExpiryDate, DateOnly.FromDateTime(DateTime.UtcNow)), x.IsCurrent, x.PreviousRecordId, FleetServiceSupport.EncodeRowVersion(x.RowVersion));
     private static VehicleComplianceResponse MapCompliance(VehicleInsurancePolicy x) => new(x.Id, x.VehicleId, "Insurance", x.PolicyNumber, x.ProviderName, x.EffectiveFrom, x.ExpiryDate, FleetServiceSupport.DueStatus(x.ExpiryDate, DateOnly.FromDateTime(DateTime.UtcNow)), x.IsCurrent, x.PreviousRecordId, FleetServiceSupport.EncodeRowVersion(x.RowVersion));
     private static VehicleComplianceResponse MapCompliance(VehiclePeriodicInspection x) => new(x.Id, x.VehicleId, "Inspection", x.InspectionNumber, x.StationName, x.InspectionDate, x.ExpiryDate, FleetServiceSupport.DueStatus(x.ExpiryDate, DateOnly.FromDateTime(DateTime.UtcNow)), x.IsCurrent, x.PreviousRecordId, FleetServiceSupport.EncodeRowVersion(x.RowVersion));
-    private static void AddDue(List<VehicleComplianceDueResponse> result, Guid vehicleId, string asset, string type, DateOnly? expiry, VehicleComplianceDueStatus ignored, DateOnly check)
+    private static VehicleComplianceResponse MapCompliance(VehicleOperationCard x) => new(x.Id, x.VehicleId, "OperationCard", x.CardNumber, x.IssuingAuthority, x.IssueDate, x.ExpiryDate, FleetServiceSupport.DueStatus(x.ExpiryDate, DateOnly.FromDateTime(DateTime.UtcNow)), x.IsCurrent, x.PreviousRecordId, FleetServiceSupport.EncodeRowVersion(x.RowVersion));
+    private static void AddDue(List<VehicleComplianceDueResponse> result, Guid vehicleId, string asset, string type, DateOnly? expiry, VehicleComplianceDueStatus ignored, DateOnly check, Guid? recordId = null)
     {
         var status = FleetServiceSupport.DueStatus(expiry, check);
-        result.Add(new VehicleComplianceDueResponse(vehicleId, asset, type, null, expiry, status, expiry.HasValue ? expiry.Value.DayNumber - check.DayNumber : null));
+        result.Add(new VehicleComplianceDueResponse(vehicleId, asset, type, recordId, expiry, status, expiry.HasValue ? expiry.Value.DayNumber - check.DayNumber : null));
     }
 }

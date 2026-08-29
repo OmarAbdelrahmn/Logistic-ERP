@@ -122,6 +122,12 @@ public static class PermissionKeys
         public const string EmployeeStatusChangesApprove = "employee_status_changes.approve";
     }
 
+    public static class HrForms
+    {
+        public const string TemplatesRead = "hr_forms.templates.read";
+        public const string TemplatesManage = "hr_forms.templates.manage";
+    }
+
     public static FrozenSet<string> All { get; } = new[]
     {
         Security.UsersRead,
@@ -205,6 +211,8 @@ public static class PermissionKeys
         Workflows.AbsenceCasesManage,
         Workflows.EmployeeStatusChangesRead,
         Workflows.EmployeeStatusChangesManage,
-        Workflows.EmployeeStatusChangesApprove
+        Workflows.EmployeeStatusChangesApprove,
+        HrForms.TemplatesRead,
+        HrForms.TemplatesManage
     }.ToFrozenSet(StringComparer.Ordinal);
 }

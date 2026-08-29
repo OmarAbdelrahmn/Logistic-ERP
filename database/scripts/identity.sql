@@ -880,3 +880,98 @@ END;
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__IdentityMigrationsHistory]
+    WHERE [MigrationId] = N'20260826090732_GrantVehicleRegistrationTransitionAccess'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'IsDeleted', N'PermissionKey', N'RoleId', N'UpdatedAtUtc', N'UpdatedByUserId') AND [object_id] = OBJECT_ID(N'[identity].[RolePermissions]'))
+        SET IDENTITY_INSERT [identity].[RolePermissions] ON;
+    EXEC(N'INSERT INTO [identity].[RolePermissions] ([Id], [CreatedAtUtc], [CreatedByUserId], [DeletedAtUtc], [DeletedByUserId], [DeletionReason], [IsDeleted], [PermissionKey], [RoleId], [UpdatedAtUtc], [UpdatedByUserId])
+    VALUES (''019c18d5-62e1-7000-b000-000000000063'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''fleet.registration_transitions.manage'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL)');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'IsDeleted', N'PermissionKey', N'RoleId', N'UpdatedAtUtc', N'UpdatedByUserId') AND [object_id] = OBJECT_ID(N'[identity].[RolePermissions]'))
+        SET IDENTITY_INSERT [identity].[RolePermissions] OFF;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__IdentityMigrationsHistory]
+    WHERE [MigrationId] = N'20260826090732_GrantVehicleRegistrationTransitionAccess'
+)
+BEGIN
+    INSERT INTO [migration].[__IdentityMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260826090732_GrantVehicleRegistrationTransitionAccess', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__IdentityMigrationsHistory]
+    WHERE [MigrationId] = N'20260829090518_EnforceSingleActiveUserSession'
+)
+BEGIN
+    ;WITH RankedOpenSessions AS
+    (
+        SELECT
+            [Id],
+            ROW_NUMBER() OVER
+            (
+                PARTITION BY [UserId]
+                ORDER BY [LastUsedAtUtc] DESC, [CreatedAtUtc] DESC, [Id] DESC
+            ) AS [SessionRank]
+        FROM [identity].[UserSessions]
+        WHERE [RevokedAtUtc] IS NULL AND [IsDeleted] = 0
+    )
+    UPDATE [session]
+    SET
+        [RevokedAtUtc] = SYSUTCDATETIME(),
+        [RevocationReason] = N'Revoked while enabling the single-active-session policy.',
+        [UpdatedAtUtc] = SYSUTCDATETIME()
+    FROM [identity].[UserSessions] AS [session]
+    INNER JOIN RankedOpenSessions AS [ranked] ON [ranked].[Id] = [session].[Id]
+    WHERE [ranked].[SessionRank] > 1;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__IdentityMigrationsHistory]
+    WHERE [MigrationId] = N'20260829090518_EnforceSingleActiveUserSession'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [UX_UserSessions_OneOpenSessionPerUser] ON [identity].[UserSessions] ([UserId]) WHERE [RevokedAtUtc] IS NULL AND [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__IdentityMigrationsHistory]
+    WHERE [MigrationId] = N'20260829090518_EnforceSingleActiveUserSession'
+)
+BEGIN
+    INSERT INTO [migration].[__IdentityMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260829090518_EnforceSingleActiveUserSession', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__IdentityMigrationsHistory]
+    WHERE [MigrationId] = N'20260829095458_AllowRepeatedTemporaryCredentialHashes'
+)
+BEGIN
+    DROP INDEX [IX_TemporaryCredentials_CredentialHash] ON [identity].[TemporaryCredentials];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__IdentityMigrationsHistory]
+    WHERE [MigrationId] = N'20260829095458_AllowRepeatedTemporaryCredentialHashes'
+)
+BEGIN
+    INSERT INTO [migration].[__IdentityMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260829095458_AllowRepeatedTemporaryCredentialHashes', N'10.0.11');
+END;
+
+COMMIT;
+GO
+

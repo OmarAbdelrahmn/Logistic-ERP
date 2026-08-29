@@ -301,6 +301,23 @@ internal sealed class VehiclePeriodicInspectionConfiguration : IEntityTypeConfig
     }
 }
 
+internal sealed class VehicleOperationCardConfiguration : IEntityTypeConfiguration<VehicleOperationCard>
+{
+    public void Configure(EntityTypeBuilder<VehicleOperationCard> builder)
+    {
+        builder.ConfigureOperational("VehicleOperationCards");
+        builder.Property(x => x.CardNumber).HasMaxLength(150).IsRequired();
+        builder.Property(x => x.IssuingAuthority).HasMaxLength(200).IsRequired();
+        builder.Property(x => x.Notes).HasMaxLength(4000);
+        builder.HasOne<Vehicle>().WithMany().HasForeignKey(x => x.VehicleId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<VehicleOperationCard>().WithMany().HasForeignKey(x => x.PreviousRecordId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(x => new { x.VehicleId, x.CardNumber }).IsUnique();
+        builder.HasIndex(x => x.VehicleId).IsUnique().HasFilter("[IsCurrent] = 1 AND [IsDeleted] = 0");
+        builder.HasIndex(x => new { x.ExpiryDate, x.IsCurrent });
+        builder.ToTable(t => t.HasCheckConstraint("CK_VehicleOperationCards_DateRange", "[ExpiryDate] >= [IssueDate]"));
+    }
+}
+
 internal sealed class VehicleAttachmentConfiguration : IEntityTypeConfiguration<VehicleAttachment>
 {
     public void Configure(EntityTypeBuilder<VehicleAttachment> builder)

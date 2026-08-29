@@ -22,7 +22,9 @@ public sealed class MissingModelApiSurfaceTests
         { typeof(RiderDocumentsController), nameof(RiderDocumentsController.AjeerContract), typeof(HttpPostAttribute), PermissionKeys.Documents.Upload },
         { typeof(ExportsController), nameof(ExportsController.Create), typeof(HttpPostAttribute), PermissionKeys.Reporting.ExportsCreate },
         { typeof(AuditEntriesController), nameof(AuditEntriesController.Query), typeof(HttpGetAttribute), PermissionKeys.Security.AuditRead },
-        { typeof(DatasetVersionsController), nameof(DatasetVersionsController.Get), typeof(HttpGetAttribute), PermissionKeys.Reporting.ReportsRead }
+        { typeof(DatasetVersionsController), nameof(DatasetVersionsController.Get), typeof(HttpGetAttribute), PermissionKeys.Reporting.ReportsRead },
+        { typeof(HrFormTemplatesController), nameof(HrFormTemplatesController.Create), typeof(HttpPostAttribute), PermissionKeys.HrForms.TemplatesManage },
+        { typeof(HrFormTemplatesController), nameof(HrFormTemplatesController.GetByCode), typeof(HttpGetAttribute), PermissionKeys.HrForms.TemplatesRead }
     };
 
     [Fact]
@@ -36,7 +38,9 @@ public sealed class MissingModelApiSurfaceTests
             PermissionKeys.Catalog.TagsManage,
             PermissionKeys.Documents.CatalogManage,
             PermissionKeys.Operations.PlatformCredentialsRead,
-            PermissionKeys.Operations.PlatformCredentialsRotate
+            PermissionKeys.Operations.PlatformCredentialsRotate,
+            PermissionKeys.HrForms.TemplatesRead,
+            PermissionKeys.HrForms.TemplatesManage
         ];
 
         Assert.Equal(PermissionKeys.All.Count, PermissionKeys.All.Distinct(StringComparer.Ordinal).Count());
@@ -60,5 +64,18 @@ public sealed class MissingModelApiSurfaceTests
             .Concat(controllerType.GetCustomAttributes<RequirePermissionAttribute>(true));
         Assert.Contains(permissionAttributes, attribute =>
             attribute.Policy?.EndsWith(permissionKey, StringComparison.Ordinal) == true);
+    }
+
+    [Fact]
+    public void CreateUserRequiresUserRoleAndPermissionManagementAccess()
+    {
+        var action = typeof(UsersController).GetMethod(nameof(UsersController.Create))!;
+        var permissions = action.GetCustomAttributes<RequirePermissionAttribute>(true)
+            .Select(attribute => attribute.Policy)
+            .ToArray();
+
+        Assert.Contains(permissions, policy => policy?.EndsWith(PermissionKeys.Security.UsersCreate, StringComparison.Ordinal) == true);
+        Assert.Contains(permissions, policy => policy?.EndsWith(PermissionKeys.Security.RolesManage, StringComparison.Ordinal) == true);
+        Assert.Contains(permissions, policy => policy?.EndsWith(PermissionKeys.Security.PermissionsManage, StringComparison.Ordinal) == true);
     }
 }

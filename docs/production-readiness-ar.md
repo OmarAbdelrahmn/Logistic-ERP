@@ -16,7 +16,7 @@
 | `Authentication__Audience` | لا | اسم/عنوان الـAPI الذي تقبله التوكنات. |
 | `Cors__AllowedOrigins__0` | لا | رابط واجهة Next.js الإنتاجي فقط، ثم أرقام إضافية عند الحاجة. |
 
-إعدادات Auth غير السرية الاختيارية هي `Authentication__AccessTokenMinutes` و`Authentication__RefreshTokenIdleDays` و`Authentication__RefreshTokenAbsoluteDays` و`Authentication__MaxActiveSessions` و`Authentication__SessionValidationCacheSeconds`. القيم الافتراضية الآمنة موثقة في ملف حالة الصلاحيات.
+إعدادات Auth غير السرية الاختيارية للأعمار هي `Authentication__AccessTokenMinutes` و`Authentication__RefreshTokenIdleDays` و`Authentication__RefreshTokenAbsoluteDays`. سياسة الأمان الحالية تفرض `Authentication__MaxActiveSessions=1` و`Authentication__SessionValidationCacheSeconds=0`؛ يرفض التطبيق التشغيل إذا حاولت بيئة النشر تغييرهما، لأن ذلك سيكسر ضمان الخروج الفوري من الجهاز السابق.
 
 يجب تدوير كلمة مرور قاعدة البيانات الحالية قبل أي نشر لأنها وُضعت في ملف إعدادات محلي. بعد التدوير، احذف السر من الملف ومن تاريخ Git إن كان قد تم عمل commit له، وراجع سجلات البناء والنشر للتأكد أنه لم يظهر فيها.
 

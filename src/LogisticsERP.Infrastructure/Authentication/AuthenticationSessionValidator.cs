@@ -24,7 +24,8 @@ internal sealed class AuthenticationSessionValidator(
         var userEpoch = UserEpochs.GetOrAdd(userId, 0);
         var cacheKey = CreateCacheKey(userId, sessionId, authorizationVersion, userEpoch);
 
-        if (cache.TryGetValue(cacheKey, out bool isValid))
+        if (options.SessionValidationCacheSeconds > 0
+            && cache.TryGetValue(cacheKey, out bool isValid))
         {
             return isValid;
         }
@@ -47,10 +48,13 @@ internal sealed class AuthenticationSessionValidator(
             select session.Id)
             .AnyAsync(cancellationToken);
 
-        cache.Set(
-            cacheKey,
-            isValid,
-            TimeSpan.FromSeconds(options.SessionValidationCacheSeconds));
+        if (options.SessionValidationCacheSeconds > 0)
+        {
+            cache.Set(
+                cacheKey,
+                isValid,
+                TimeSpan.FromSeconds(options.SessionValidationCacheSeconds));
+        }
 
         return isValid;
     }

@@ -28,11 +28,13 @@ public sealed class UsersController(IUserManagementService service) : Controller
 
     [HttpPost]
     [RequirePermission(PermissionKeys.Security.UsersCreate)]
+    [RequirePermission(PermissionKeys.Security.RolesManage)]
+    [RequirePermission(PermissionKeys.Security.PermissionsManage)]
     public async Task<IActionResult> Create([FromBody] CreateManagedUserRequest request, CancellationToken cancellationToken)
     {
         var result = await service.CreateUserAsync(request, cancellationToken);
         return result.IsSuccess
-            ? CreatedAtAction(nameof(Get), new { userId = result.Value!.Id }, result.Value)
+            ? CreatedAtAction(nameof(Get), new { userId = result.Value!.User.Id }, result.Value)
             : result.ToProblem(HttpContext);
     }
 

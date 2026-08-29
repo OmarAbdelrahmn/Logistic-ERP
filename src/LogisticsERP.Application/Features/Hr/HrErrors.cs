@@ -44,7 +44,7 @@ public static class HrErrors
     public static readonly OperationError PlatformPaymentModelsInUse = new(
         "platform.payment_models_in_use", "A payment model cannot be disabled while non-archived accounts still use it.", ErrorType.Conflict, "supportedPaymentModels");
     public static readonly OperationError RiderAccountLimitReached = new(
-        "platform.rider_account_limit_reached", "A rider can have at most two active platform accounts.", ErrorType.Conflict, "actualRiderProfileId");
+        "platform.rider_account_limit_reached", "A rider can have at most one active platform account.", ErrorType.Conflict, "actualRiderProfileId");
     public static readonly OperationError RiderSalaryAccountLimitReached = new(
         "platform.rider_salary_account_limit_reached", "A rider can have at most one active salary platform account.", ErrorType.Conflict, "actualRiderProfileId");
     public static OperationError RiderProfileNotFound(string field, Guid riderProfileId) => new(

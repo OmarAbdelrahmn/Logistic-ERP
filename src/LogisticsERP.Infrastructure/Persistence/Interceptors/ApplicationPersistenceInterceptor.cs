@@ -29,7 +29,8 @@ internal sealed class ApplicationPersistenceInterceptor(
         "RefreshTokenHash",
         "PasswordHash",
         "SecurityStamp",
-        "ConcurrencyStamp"
+        "ConcurrencyStamp",
+        "DefinitionJson"
     };
 
     public override InterceptionResult<int> SavingChanges(

@@ -39,6 +39,7 @@ public interface IFleetService
     Task<Result<VehicleComplianceResponse>> RenewRegistrationAsync(Guid vehicleId, VehicleRegistrationRequest request, CancellationToken cancellationToken = default);
     Task<Result<VehicleComplianceResponse>> RenewInsuranceAsync(Guid vehicleId, VehicleInsuranceRequest request, CancellationToken cancellationToken = default);
     Task<Result<VehicleComplianceResponse>> RenewInspectionAsync(Guid vehicleId, VehicleInspectionRequest request, CancellationToken cancellationToken = default);
+    Task<Result<VehicleComplianceResponse>> RenewOperationCardAsync(Guid vehicleId, VehicleOperationCardRequest request, CancellationToken cancellationToken = default);
     Task<Result<IReadOnlyList<VehicleComplianceDueResponse>>> GetComplianceDueAsync(DateOnly checkDate, CancellationToken cancellationToken = default);
     Task<Result<PagedResponse<VehicleIssueSummaryResponse>>> GetIssuesAsync(Guid? vehicleId, string? status, int page, int pageSize, CancellationToken cancellationToken = default);
     Task<Result<VehicleIssueSummaryResponse>> CreateIssueAsync(CreateVehicleIssueRequest request, string idempotencyKey, CancellationToken cancellationToken = default);

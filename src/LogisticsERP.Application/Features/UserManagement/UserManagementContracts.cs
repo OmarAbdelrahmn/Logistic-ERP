@@ -25,7 +25,13 @@ public sealed record CreateManagedUserRequest(
     string? DisplayNameEn,
     string? Email,
     string? PhoneNumber,
-    Guid? EmployeeId);
+    Guid? EmployeeId,
+    IReadOnlyList<ManagedRoleAssignmentRequest>? RoleAssignments,
+    IReadOnlyList<ManagedDirectPermissionAssignmentRequest>? DirectPermissionAssignments);
+
+public sealed record CreatedManagedUserResponse(
+    ManagedUserResponse User,
+    ManagedUserAuthorizationResponse Authorization);
 
 public sealed record UpdateManagedUserRequest(
     string UserName,
@@ -153,7 +159,7 @@ public interface IUserManagementService
 {
     Task<Result<IReadOnlyList<ManagedUserResponse>>> GetUsersAsync(string? search, CancellationToken cancellationToken = default);
     Task<Result<ManagedUserResponse>> GetUserAsync(Guid userId, CancellationToken cancellationToken = default);
-    Task<Result<ManagedUserResponse>> CreateUserAsync(CreateManagedUserRequest request, CancellationToken cancellationToken = default);
+    Task<Result<CreatedManagedUserResponse>> CreateUserAsync(CreateManagedUserRequest request, CancellationToken cancellationToken = default);
     Task<Result<ManagedUserResponse>> UpdateUserAsync(Guid userId, UpdateManagedUserRequest request, CancellationToken cancellationToken = default);
     Task<Result<ManagedUserResponse>> UpdateStatusAsync(Guid userId, UpdateManagedUserStatusRequest request, CancellationToken cancellationToken = default);
     Task<Result> ResetPasswordAsync(Guid userId, ResetManagedUserPasswordRequest request, CancellationToken cancellationToken = default);

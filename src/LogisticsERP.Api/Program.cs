@@ -52,8 +52,8 @@ if (authenticationOptions.AccessTokenMinutes is < 1 or > 60
     || authenticationOptions.RefreshTokenIdleDays is < 1 or > 30
     || authenticationOptions.RefreshTokenAbsoluteDays < authenticationOptions.RefreshTokenIdleDays
     || authenticationOptions.RefreshTokenAbsoluteDays > 90
-    || authenticationOptions.MaxActiveSessions is < 1 or > 50
-    || authenticationOptions.SessionValidationCacheSeconds is < 1 or > 60)
+    || authenticationOptions.MaxActiveSessions != 1
+    || authenticationOptions.SessionValidationCacheSeconds != 0)
 {
     throw new InvalidOperationException("Authentication lifetime configuration is outside the allowed security limits.");
 }

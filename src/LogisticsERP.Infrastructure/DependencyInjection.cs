@@ -65,6 +65,7 @@ public static class DependencyInjection
         services.AddScoped<IHrWorkflowService, HrWorkflowService>();
         services.AddScoped<IHrExcelImportService, HrExcelImportService>();
         services.AddScoped<ILeaveDocumentService, LeaveDocumentService>();
+        services.AddScoped<IHrFormTemplateService, HrFormTemplateService>();
         services.AddScoped<ICompanyProfileService, CompanyProfileService>();
         services.AddScoped<ITagService, TagService>();
         services.AddScoped<INotificationService, NotificationService>();
@@ -91,12 +92,14 @@ public static class DependencyInjection
 
         services.AddDbContext<ApplicationDbContext>((provider, options) =>
         {
-            ConfigureSqlServer(options, connectionString, "__ApplicationMigrationsHistory");
+            ConfigureSqlServer(options, connectionString, "__ApplicationMigrationsHistory", enableRetryOnFailure: true);
             options.AddInterceptors(provider.GetRequiredService<ApplicationPersistenceInterceptor>());
         });
         services.AddDbContext<IdentityDbContext>((provider, options) =>
         {
-            ConfigureSqlServer(options, connectionString, "__IdentityMigrationsHistory");
+            // Authentication deliberately uses explicit transactions for session replacement.
+            // Client retries are safer than an execution strategy retrying a security transaction.
+            ConfigureSqlServer(options, connectionString, "__IdentityMigrationsHistory", enableRetryOnFailure: false);
             options.AddInterceptors(provider.GetRequiredService<IdentityPersistenceInterceptor>());
         });
 
@@ -155,13 +158,17 @@ public static class DependencyInjection
     private static void ConfigureSqlServer(
         DbContextOptionsBuilder options,
         string connectionString,
-        string migrationsHistoryTable)
+        string migrationsHistoryTable,
+        bool enableRetryOnFailure)
     {
         options.UseSqlServer(connectionString, sqlOptions =>
         {
             sqlOptions.MigrationsAssembly(typeof(DependencyInjection).Assembly.FullName);
             sqlOptions.MigrationsHistoryTable(migrationsHistoryTable, "migration");
-            sqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
+            if (enableRetryOnFailure)
+            {
+                sqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
+            }
         });
         options.EnableDetailedErrors();
     }

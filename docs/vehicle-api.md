@@ -538,7 +538,10 @@ Required header: `Idempotency-Key`.
 }
 ```
 
-The vehicle must be available and the rider must be eligible without another active vehicle. The service creates the assignment and associated operational history. Response: `200 OK`, `RiderVehicleAssignmentResponse`.
+The vehicle must be available and the rider must be eligible without another active vehicle. The backend calculates the permit end date as one year minus one day from the assignment start date, then the date is exposed through Fleet Compliance. The service creates the assignment and associated operational history. Response: `200 OK`, `RiderVehicleAssignmentResponse`.
+
+For the active assignment, `VehicleSummaryResponse.permitEndDate` and `permitStatus`
+expose this date in Fleet Compliance.
 
 The request limit is 32 MiB. Invalid or missing `metadata` returns `400 Bad Request`.
 
@@ -566,6 +569,7 @@ Returns compliance history. `type` must be one of:
 - `registrations`
 - `insurance-policies`
 - `inspections`
+- `operation-cards` — available only when the vehicle's registration type is `PublicTransport`.
 
 Response: `VehicleComplianceResponse[]`, ordered by expiry date descending. Invalid types return `400`.
 
@@ -593,9 +597,17 @@ Request (`VehicleInspectionRequest`): `inspectionNumber`, `stationName`, `inspec
 
 `expiryDate` cannot be earlier than `inspectionDate`; an odometer value cannot be negative. Response: `VehicleComplianceResponse`.
 
+### `POST /api/vehicles/{vehicleId}/operation-cards`
+
+Adds and makes current an operation-card record for a public-transport vehicle. Previous current cards are superseded. The vehicle must have `registrationType` set to `PublicTransport`.
+
+Request (`VehicleOperationCardRequest`): `cardNumber`, `issuingAuthority`, `issueDate`, `expiryDate`, `notes`.
+
+`expiryDate` cannot be earlier than `issueDate`. Response: `VehicleComplianceResponse`.
+
 ### `GET /api/vehicle-compliance/due?checkDate=YYYY-MM-DD`
 
-Returns all non-valid compliance items for the requested date. If `checkDate` is omitted, the service uses the current local business date (`UTC+3`). Results include registration, insurance, and inspection entries whose status is not `Valid`, ordered by expiry date.
+Returns all non-valid compliance items for the requested date. If `checkDate` is omitted, the service uses the current local business date (`UTC+3`). Results include registration, insurance, inspection, active-assignment permit, and (for public-transport vehicles) operation-card entries whose status is not `Valid`, ordered by expiry date.
 
 Response: `VehicleComplianceDueResponse[]`.
 

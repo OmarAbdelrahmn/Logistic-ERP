@@ -49,28 +49,89 @@ internal sealed class UserManagementService(
             : Result.Success(ToResponse(user));
     }
 
-    public async Task<Result<ManagedUserResponse>> CreateUserAsync(CreateManagedUserRequest request, CancellationToken cancellationToken = default)
+    public async Task<Result<CreatedManagedUserResponse>> CreateUserAsync(
+        CreateManagedUserRequest request,
+        CancellationToken cancellationToken = default)
     {
-        if (!TryGetActor(out var actorId) || !IsValidCreateRequest(request))
+        if (!TryGetActor(out var actorId))
         {
-            return Result.Failure<ManagedUserResponse>(UserManagementErrors.InvalidRequest);
+            return Result.Failure<CreatedManagedUserResponse>(UserManagementErrors.CurrentUserUnavailable);
+        }
+        if (!IsValidCreateRequest(request))
+        {
+            return Result.Failure<CreatedManagedUserResponse>(DescribeInvalidCreateRequest(request));
+        }
+
+        IReadOnlyList<ManagedRoleAssignmentRequest> roleAssignments = request.RoleAssignments ??
+        [
+            new ManagedRoleAssignmentRequest(
+                SystemRoles.UserId,
+                null,
+                null,
+                "Default minimal user access.",
+                false,
+                false,
+                false,
+                null)
+        ];
+        IReadOnlyList<ManagedDirectPermissionAssignmentRequest> permissionAssignments =
+            request.DirectPermissionAssignments ?? [];
+        if (roleAssignments.Count == 0 || !ValidateRoleAssignments(roleAssignments))
+        {
+            return Result.Failure<CreatedManagedUserResponse>(DescribeInvalidRoleAssignments(roleAssignments));
+        }
+        if (!ValidatePermissionAssignments(permissionAssignments))
+        {
+            return Result.Failure<CreatedManagedUserResponse>(DescribeInvalidPermissionAssignments(permissionAssignments));
         }
 
         if (await IsUserNameInUseAsync(request.UserName, null, cancellationToken)
             || await IsEmailInUseAsync(request.Email, null, cancellationToken)
             || !await IsEmployeeAvailableAsync(request.EmployeeId, null, cancellationToken))
         {
-            return Result.Failure<ManagedUserResponse>(UserManagementErrors.Duplicate);
+            return Result.Failure<CreatedManagedUserResponse>(UserManagementErrors.Duplicate);
         }
 
-        var defaultRoleExists = await identityDbContext.Roles
+        var roleIds = roleAssignments.Select(assignment => assignment.RoleId).ToArray();
+        var activeRoleCount = await identityDbContext.Roles
             .AsNoTracking()
-            .AnyAsync(role => role.Id == SystemRoles.UserId && role.Status == RoleStatus.Active, cancellationToken);
-        if (!defaultRoleExists)
+            .CountAsync(role => roleIds.Contains(role.Id) && role.Status == RoleStatus.Active, cancellationToken);
+        if (activeRoleCount != roleIds.Length)
         {
-            return Result.Failure<ManagedUserResponse>(UserManagementErrors.NotFound);
+            return Result.Failure<CreatedManagedUserResponse>(UserManagementErrors.NotFound);
         }
 
+        var parsedRoleScopes = new List<ParsedScope[]>(roleAssignments.Count);
+        foreach (var assignment in roleAssignments)
+        {
+            var validation = await ParseAndValidateScopesAsync(
+                assignment.Scopes,
+                assignment.IsAllHousingScope,
+                assignment.IsAllClientScope,
+                cancellationToken);
+            if (validation.IsFailure)
+            {
+                return Result.Failure<CreatedManagedUserResponse>(validation.Error);
+            }
+            parsedRoleScopes.Add(validation.Value!);
+        }
+
+        var parsedPermissionScopes = new List<ParsedScope[]>(permissionAssignments.Count);
+        foreach (var assignment in permissionAssignments)
+        {
+            var validation = await ParseAndValidateScopesAsync(
+                assignment.Scopes,
+                assignment.IsAllHousingScope,
+                assignment.IsAllClientScope,
+                cancellationToken);
+            if (validation.IsFailure)
+            {
+                return Result.Failure<CreatedManagedUserResponse>(validation.Error);
+            }
+            parsedPermissionScopes.Add(validation.Value!);
+        }
+
+        await using var transaction = await identityDbContext.Database.BeginTransactionAsync(cancellationToken);
         var user = new ApplicationUser
         {
             UserName = request.UserName.Trim(),
@@ -93,28 +154,64 @@ internal sealed class UserManagementService(
         var created = await userManager.CreateAsync(user, request.InitialPassword);
         if (!created.Succeeded)
         {
-            return Result.Failure<ManagedUserResponse>(UserManagementErrors.PasswordRejected);
+            return Result.Failure<CreatedManagedUserResponse>(DescribeIdentityFailure(created, "initialPassword"));
         }
 
-        identityDbContext.UserRoleAssignments.Add(new UserRoleAssignment
+        var now = timeProvider.GetUtcNow();
+        for (var index = 0; index < roleAssignments.Count; index++)
         {
-            UserId = user.Id,
-            RoleId = SystemRoles.UserId,
-            StartsAtUtc = timeProvider.GetUtcNow(),
-            GrantedByUserId = actorId,
-            GrantReason = "Default minimal user access."
-        });
+            var input = roleAssignments[index];
+            var assignment = new UserRoleAssignment
+            {
+                UserId = user.Id,
+                RoleId = input.RoleId,
+                StartsAtUtc = input.StartsAtUtc ?? now,
+                ExpiresAtUtc = input.ExpiresAtUtc,
+                GrantedByUserId = actorId,
+                GrantReason = TrimOrNull(input.Reason) ?? "Role assigned during user creation.",
+                IsAllHousingScope = input.IsAllHousingScope,
+                IsAllClientScope = input.IsAllClientScope,
+                IncludesFuturePlatformContracts = input.IncludesFuturePlatformContracts
+            };
+            identityDbContext.UserRoleAssignments.Add(assignment);
+            AddScopes(assignment.Id, null, parsedRoleScopes[index]);
+        }
+
+        for (var index = 0; index < permissionAssignments.Count; index++)
+        {
+            var input = permissionAssignments[index];
+            var assignment = new UserDirectPermissionAssignment
+            {
+                UserId = user.Id,
+                PermissionKey = input.PermissionKey.Trim(),
+                Effect = Enum.Parse<PermissionEffect>(input.Effect, true),
+                StartsAtUtc = input.StartsAtUtc ?? now,
+                ExpiresAtUtc = input.ExpiresAtUtc,
+                GrantedByUserId = actorId,
+                GrantReason = TrimOrNull(input.Reason) ?? "Direct permission assigned during user creation.",
+                IsAllHousingScope = input.IsAllHousingScope,
+                IsAllClientScope = input.IsAllClientScope,
+                IncludesFuturePlatformContracts = input.IncludesFuturePlatformContracts
+            };
+            identityDbContext.UserDirectPermissionAssignments.Add(assignment);
+            AddScopes(null, assignment.Id, parsedPermissionScopes[index]);
+        }
+
         identityDbContext.TemporaryCredentials.Add(new TemporaryCredential
         {
             UserId = user.Id,
             Purpose = CredentialPurpose.InitialActivation,
-            CredentialHash = HashTemporarySecret(request.InitialPassword),
-            ExpiresAtUtc = timeProvider.GetUtcNow().AddHours(24),
+            CredentialHash = HashTemporarySecret(userManager.PasswordHasher, user, request.InitialPassword),
+            ExpiresAtUtc = now.AddHours(24),
             IssuedByUserId = actorId
         });
         user.AuthorizationVersion++;
         await identityDbContext.SaveChangesAsync(cancellationToken);
-        return Result.Success(ToResponse(user));
+        await transaction.CommitAsync(cancellationToken);
+
+        return Result.Success(new CreatedManagedUserResponse(
+            ToResponse(user),
+            await BuildAuthorizationResponseAsync(user.Id, cancellationToken)));
     }
 
     public async Task<Result<ManagedUserResponse>> UpdateUserAsync(Guid userId, UpdateManagedUserRequest request, CancellationToken cancellationToken = default)
@@ -215,7 +312,7 @@ internal sealed class UserManagementService(
         var reset = await userManager.ResetPasswordAsync(user, token, request.NewPassword);
         if (!reset.Succeeded)
         {
-            return Result.Failure(UserManagementErrors.PasswordRejected);
+            return Result.Failure(DescribeIdentityFailure(reset, "newPassword"));
         }
 
         var now = timeProvider.GetUtcNow();
@@ -224,7 +321,7 @@ internal sealed class UserManagementService(
         {
             UserId = user.Id,
             Purpose = CredentialPurpose.PasswordReset,
-            CredentialHash = HashTemporarySecret(request.NewPassword),
+            CredentialHash = HashTemporarySecret(userManager.PasswordHasher, user, request.NewPassword),
             ExpiresAtUtc = now.AddHours(24),
             IssuedByUserId = actorId
         });
@@ -275,7 +372,7 @@ internal sealed class UserManagementService(
         {
             UserId = user.Id,
             Purpose = purpose,
-            CredentialHash = HashTemporarySecret(secret),
+            CredentialHash = HashTemporarySecret(userManager.PasswordHasher, user, secret),
             ExpiresAtUtc = now.AddMinutes(request.ValidForMinutes),
             IssuedByUserId = actorId
         };
@@ -744,7 +841,7 @@ internal sealed class UserManagementService(
         {
             if (scope.TargetId == Guid.Empty || !Enum.TryParse<AccessScopeType>(scope.Type, true, out var type))
             {
-                return Result.Failure<ParsedScope[]>(UserManagementErrors.InvalidRequest);
+                return Result.Failure<ParsedScope[]>(InvalidField("scopes", "Each scope requires a supported type and a non-empty targetId."));
             }
             parsed.Add(new ParsedScope(type, scope.TargetId));
         }
@@ -752,7 +849,7 @@ internal sealed class UserManagementService(
             || isAllHousingScope && parsed.Any(scope => scope.Type == AccessScopeType.Housing)
             || isAllClientScope && parsed.Any(scope => scope.Type is AccessScopeType.ClientPlatform or AccessScopeType.ClientContract))
         {
-            return Result.Failure<ParsedScope[]>(UserManagementErrors.InvalidRequest);
+            return Result.Failure<ParsedScope[]>(InvalidField("scopes", "Scopes must be unique and cannot overlap with an all-housing or all-client scope flag."));
         }
 
         foreach (var scope in parsed)
@@ -896,6 +993,91 @@ internal sealed class UserManagementService(
     private static bool IsValidWindow(DateTimeOffset? startsAtUtc, DateTimeOffset? expiresAtUtc) =>
         expiresAtUtc is null || (startsAtUtc is not null && expiresAtUtc > startsAtUtc);
 
+    private static OperationError DescribeInvalidCreateRequest(CreateManagedUserRequest request)
+    {
+        var invalidFields = new List<string>();
+        if (!HasText(request.UserName, 256)) invalidFields.Add("userName is required and must be 256 characters or fewer.");
+        if (!HasText(request.InitialPassword, 512)) invalidFields.Add("initialPassword is required and must be 512 characters or fewer.");
+        if (!HasText(request.DisplayNameAr, 200)) invalidFields.Add("displayNameAr is required and must be 200 characters or fewer.");
+        if (!IsOptionalText(request.DisplayNameEn, 200)) invalidFields.Add("displayNameEn must be 200 characters or fewer.");
+        if (!IsOptionalText(request.Email, 256)) invalidFields.Add("email must be 256 characters or fewer.");
+        if (!IsOptionalText(request.PhoneNumber, 50)) invalidFields.Add("phoneNumber must be 50 characters or fewer.");
+
+        return UserManagementErrors.InvalidRequest with
+        {
+            Field = "request",
+            Details = new Dictionary<string, object?> { ["validationErrors"] = invalidFields }
+        };
+    }
+
+    private static OperationError DescribeInvalidRoleAssignments(IReadOnlyList<ManagedRoleAssignmentRequest> assignments)
+    {
+        if (assignments.Count == 0)
+        {
+            return InvalidField("roleAssignments", "At least one role assignment is required. Omit roleAssignments entirely to use the default USER role.");
+        }
+
+        for (var index = 0; index < assignments.Count; index++)
+        {
+            var assignment = assignments[index];
+            var field = $"roleAssignments[{index}]";
+            if (assignment.RoleId == Guid.Empty) return InvalidField(field + ".roleId", "A non-empty roleId is required.");
+            if (!IsValidWindow(assignment.StartsAtUtc, assignment.ExpiresAtUtc)) return InvalidField(field, "expiresAtUtc requires startsAtUtc and must be later than it.");
+            if (!IsOptionalText(assignment.Reason, 1000)) return InvalidField(field + ".reason", "reason must be 1,000 characters or fewer.");
+        }
+
+        return InvalidField("roleAssignments", "Each role may be assigned only once.");
+    }
+
+    private static OperationError DescribeInvalidPermissionAssignments(IReadOnlyList<ManagedDirectPermissionAssignmentRequest> assignments)
+    {
+        for (var index = 0; index < assignments.Count; index++)
+        {
+            var assignment = assignments[index];
+            var field = $"directPermissionAssignments[{index}]";
+            if (string.IsNullOrWhiteSpace(assignment.PermissionKey) || !PermissionKeys.All.Contains(assignment.PermissionKey.Trim())) return InvalidField(field + ".permissionKey", "The permissionKey is missing or is not in the permission catalog.");
+            if (!Enum.TryParse<PermissionEffect>(assignment.Effect, true, out _)) return InvalidField(field + ".effect", "effect must be Grant or Deny.");
+            if (!IsValidWindow(assignment.StartsAtUtc, assignment.ExpiresAtUtc)) return InvalidField(field, "expiresAtUtc requires startsAtUtc and must be later than it.");
+            if (!IsOptionalText(assignment.Reason, 1000)) return InvalidField(field + ".reason", "reason must be 1,000 characters or fewer.");
+        }
+
+        return InvalidField("directPermissionAssignments", "Each permissionKey may be assigned only once.");
+    }
+
+    private static OperationError InvalidField(string field, string reason) =>
+        UserManagementErrors.InvalidRequest with
+        {
+            Field = field,
+            Details = new Dictionary<string, object?> { ["reason"] = reason }
+        };
+
+    private static OperationError DescribeIdentityFailure(IdentityResult result, string passwordField)
+    {
+        var errors = result.Errors.ToArray();
+        var details = new Dictionary<string, object?>
+        {
+            ["identityErrors"] = errors
+                .Select(error => new { error.Code, error.Description })
+                .ToArray()
+        };
+
+        if (errors.Any(error => error.Code.StartsWith("Password", StringComparison.Ordinal)))
+        {
+            return UserManagementErrors.PasswordRejected with
+            {
+                Field = passwordField,
+                Details = details
+            };
+        }
+
+        if (errors.Any(error => error.Code is "DuplicateUserName" or "DuplicateEmail"))
+        {
+            return UserManagementErrors.Duplicate with { Details = details };
+        }
+
+        return UserManagementErrors.InvalidRequest with { Details = details };
+    }
+
     private static bool MatchesRowVersion(byte[] rowVersion, string? supplied) =>
         !string.IsNullOrWhiteSpace(supplied) && Convert.TryFromBase64String(supplied, new Span<byte>(new byte[rowVersion.Length]), out _)
         && string.Equals(Convert.ToBase64String(rowVersion), supplied, StringComparison.Ordinal);
@@ -911,8 +1093,39 @@ internal sealed class UserManagementService(
     private static bool HasText(string? value, int maxLength) => !string.IsNullOrWhiteSpace(value) && value.Trim().Length <= maxLength;
     private static bool IsOptionalText(string? value, int maxLength) => value is null || value.Trim().Length <= maxLength;
     private static string? TrimOrNull(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
-    internal static string HashTemporarySecret(string value) =>
-        Convert.ToHexString(SHA512.HashData(Encoding.UTF8.GetBytes(value)));
+    internal static string HashTemporarySecret(
+        IPasswordHasher<ApplicationUser> passwordHasher,
+        ApplicationUser user,
+        string value) =>
+        passwordHasher.HashPassword(user, value);
+
+    internal static PasswordVerificationResult VerifyTemporarySecret(
+        IPasswordHasher<ApplicationUser> passwordHasher,
+        ApplicationUser user,
+        string storedHash,
+        string value)
+    {
+        // Credentials issued before the salted-hash migration use the legacy SHA-512 format.
+        // Treat a successful legacy verification as a rehash request so the next sign-in upgrades it.
+        if (storedHash.Length == 128 && storedHash.All(Uri.IsHexDigit))
+        {
+            var legacyHash = Convert.ToHexString(SHA512.HashData(Encoding.UTF8.GetBytes(value)));
+            return CryptographicOperations.FixedTimeEquals(
+                    Encoding.UTF8.GetBytes(storedHash),
+                    Encoding.UTF8.GetBytes(legacyHash))
+                ? PasswordVerificationResult.SuccessRehashNeeded
+                : PasswordVerificationResult.Failed;
+        }
+
+        try
+        {
+            return passwordHasher.VerifyHashedPassword(user, storedHash, value);
+        }
+        catch (FormatException)
+        {
+            return PasswordVerificationResult.Failed;
+        }
+    }
 
     internal static string CreateTemporarySecret() =>
         $"{Convert.ToBase64String(RandomNumberGenerator.GetBytes(18))}aA1!";

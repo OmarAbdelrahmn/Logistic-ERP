@@ -100,6 +100,20 @@ public sealed class FleetModelTests
     }
 
     [Fact]
+    public void OperationCardsKeepOneCurrentRecordPerVehicle()
+    {
+        using var context = CreateContext();
+        var entity = context.GetService<IDesignTimeModel>().Model.FindEntityType(typeof(VehicleOperationCard))!;
+        var index = Assert.Single(entity.GetIndexes(), candidate => candidate.IsUnique
+            && candidate.Properties.Select(property => property.Name).SequenceEqual([nameof(VehicleOperationCard.VehicleId)]));
+
+        Assert.Equal("[IsCurrent] = 1 AND [IsDeleted] = 0", index.GetFilter());
+        Assert.Contains(entity.GetCheckConstraints(), constraint =>
+            constraint.Name == "CK_VehicleOperationCards_DateRange"
+            && constraint.Sql.Contains("[ExpiryDate] >= [IssueDate]", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public void SupplierCommercialAndTaxNumbersUseFilteredUniqueIndexes()
     {
         using var context = CreateContext();

@@ -70,6 +70,10 @@ public sealed record VehicleSummaryResponse(
     VehicleComplianceDueStatus InsuranceStatus,
     DateOnly? InspectionExpiryDate,
     VehicleComplianceDueStatus InspectionStatus,
+    DateOnly? PermitEndDate,
+    VehicleComplianceDueStatus PermitStatus,
+    DateOnly? OperationCardExpiryDate,
+    VehicleComplianceDueStatus OperationCardStatus,
     bool IsReadyForAssignment,
     string RowVersion);
 
@@ -122,6 +126,7 @@ public sealed record RiderVehicleTimelineResponse(RiderVehicleAssignmentResponse
 public sealed record VehicleRegistrationRequest(string RegistrationNumber, string IssuingAuthority, DateOnly IssueDate, DateOnly ExpiryDate, string? Notes);
 public sealed record VehicleInsuranceRequest(string ProviderName, string PolicyNumber, string? CoverageType, DateOnly EffectiveFrom, DateOnly ExpiryDate, string? ClaimReference, string? ClaimContact, string? Notes);
 public sealed record VehicleInspectionRequest(string InspectionNumber, string StationName, DateOnly InspectionDate, DateOnly ExpiryDate, VehicleInspectionResult Result, long? Odometer, string? FailureNotes, string? Notes);
+public sealed record VehicleOperationCardRequest(string CardNumber, string IssuingAuthority, DateOnly IssueDate, DateOnly ExpiryDate, string? Notes);
 public sealed record VehicleComplianceResponse(Guid Id, Guid VehicleId, string Type, string Number, string Issuer, DateOnly EffectiveFrom, DateOnly ExpiryDate, VehicleComplianceDueStatus DueStatus, bool IsCurrent, Guid? PreviousRecordId, string RowVersion);
 public sealed record VehicleComplianceDueResponse(Guid VehicleId, string AssetNumber, string Type, Guid? RecordId, DateOnly? ExpiryDate, VehicleComplianceDueStatus Status, int? DaysRemaining);
 

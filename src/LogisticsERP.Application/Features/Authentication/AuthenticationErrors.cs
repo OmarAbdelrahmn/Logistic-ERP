@@ -58,4 +58,9 @@ public static class AuthenticationErrors
         "Authentication.ConcurrentRefresh",
         "The refresh token has already been used. Sign in again.",
         ErrorType.Unauthorized);
+
+    public static readonly OperationError ConcurrentLogin = new(
+        "Authentication.ConcurrentLogin",
+        "Another sign-in completed at the same time. Retry sign-in to make this device the active session.",
+        ErrorType.Conflict);
 }

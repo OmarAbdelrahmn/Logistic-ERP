@@ -40,6 +40,8 @@ public sealed class ApplicationDbContext(
     public DbSet<RiderCard> RiderCards => Set<RiderCard>();
     public DbSet<RiderHealthCard> RiderHealthCards => Set<RiderHealthCard>();
     public DbSet<EmployeePromissoryNote> EmployeePromissoryNotes => Set<EmployeePromissoryNote>();
+    public DbSet<HrFormTemplate> HrFormTemplates => Set<HrFormTemplate>();
+    public DbSet<HrFormTemplateVersion> HrFormTemplateVersions => Set<HrFormTemplateVersion>();
     public DbSet<InsuranceCompany> InsuranceCompanies => Set<InsuranceCompany>();
     public DbSet<InsurancePlanLevel> InsurancePlanLevels => Set<InsurancePlanLevel>();
     public DbSet<EmployeeMedicalInsurancePolicy> EmployeeMedicalInsurancePolicies => Set<EmployeeMedicalInsurancePolicy>();
@@ -93,6 +95,7 @@ public sealed class ApplicationDbContext(
     public DbSet<VehicleRegistration> VehicleRegistrations => Set<VehicleRegistration>();
     public DbSet<VehicleInsurancePolicy> VehicleInsurancePolicies => Set<VehicleInsurancePolicy>();
     public DbSet<VehiclePeriodicInspection> VehiclePeriodicInspections => Set<VehiclePeriodicInspection>();
+    public DbSet<VehicleOperationCard> VehicleOperationCards => Set<VehicleOperationCard>();
     public DbSet<VehicleAttachment> VehicleAttachments => Set<VehicleAttachment>();
     public DbSet<VehicleAttachmentVersion> VehicleAttachmentVersions => Set<VehicleAttachmentVersion>();
     public DbSet<RiderPromissoryFile> RiderPromissoryFiles => Set<RiderPromissoryFile>();

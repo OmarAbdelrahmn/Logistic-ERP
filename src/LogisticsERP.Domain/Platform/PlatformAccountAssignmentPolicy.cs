@@ -11,7 +11,9 @@ public enum PlatformAccountAssignmentDecision
 
 public static class PlatformAccountAssignmentPolicy
 {
-    public const int MaximumActiveAccountsPerRider = 2;
+    // TEMPORARY: Restrict riders to one active platform account. Restore this to 2 when
+    // assigning two platform accounts to one rider is enabled again.
+    public const int MaximumActiveAccountsPerRider = 1;
 
     public static PlatformAccountAssignmentDecision Evaluate(
         IEnumerable<PlatformAccountPaymentModel> activePaymentModels,

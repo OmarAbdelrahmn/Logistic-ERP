@@ -50,3 +50,17 @@ public sealed class VehiclePeriodicInspection : AuditableEntity
     public Guid? ProofAttachmentId { get; set; }
     public string? Notes { get; set; }
 }
+
+public sealed class VehicleOperationCard : AuditableEntity
+{
+    public Guid VehicleId { get; set; }
+    public string CardNumber { get; set; } = string.Empty;
+    public string IssuingAuthority { get; set; } = string.Empty;
+    public DateOnly IssueDate { get; set; }
+    public DateOnly ExpiryDate { get; set; }
+    public ComplianceRecordStatus Status { get; set; } = ComplianceRecordStatus.Active;
+    public bool IsCurrent { get; set; } = true;
+    public Guid? PreviousRecordId { get; set; }
+    public Guid? ProofAttachmentId { get; set; }
+    public string? Notes { get; set; }
+}

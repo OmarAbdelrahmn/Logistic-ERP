@@ -5,6 +5,7 @@ using LogisticsERP.Application.Common.Results;
 using LogisticsERP.Application.Features.Authentication;
 using LogisticsERP.Domain.Enums;
 using LogisticsERP.Infrastructure.Identity;
+using Microsoft.Data.SqlClient;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -68,23 +69,38 @@ internal sealed class AuthenticationService(
 
         if (user.RequiresPasswordChange)
         {
-            var credentialHash = UserManagementService.HashTemporarySecret(request.Password);
-            var temporaryCredential = await dbContext.TemporaryCredentials
+            var temporaryCredentialCandidates = await dbContext.TemporaryCredentials
                 .IgnoreQueryFilters()
-                .Where(item => item.UserId == user.Id && item.CredentialHash == credentialHash)
+                .Where(item => item.UserId == user.Id)
                 .OrderByDescending(item => item.CreatedAtUtc)
-                .FirstOrDefaultAsync(cancellationToken);
-            if (temporaryCredential is not null)
+                .ToListAsync(cancellationToken);
+            var temporaryCredential = temporaryCredentialCandidates.FirstOrDefault(item =>
+                UserManagementService.VerifyTemporarySecret(
+                    userManager.PasswordHasher,
+                    user,
+                    item.CredentialHash,
+                    request.Password) != PasswordVerificationResult.Failed);
+            if (temporaryCredential is null
+                || temporaryCredential.IsDeleted
+                || temporaryCredential.ConsumedAtUtc is not null
+                || temporaryCredential.RevokedAtUtc is not null
+                || temporaryCredential.ExpiresAtUtc <= now)
             {
-                if (temporaryCredential.IsDeleted
-                    || temporaryCredential.ConsumedAtUtc is not null
-                    || temporaryCredential.RevokedAtUtc is not null
-                    || temporaryCredential.ExpiresAtUtc <= now)
-                {
-                    return Result.Failure<AuthenticationTokenResponse>(AuthenticationErrors.InvalidCredentials);
-                }
-                temporaryCredential.ConsumedAtUtc = now;
+                return Result.Failure<AuthenticationTokenResponse>(AuthenticationErrors.InvalidCredentials);
             }
+
+            if (UserManagementService.VerifyTemporarySecret(
+                    userManager.PasswordHasher,
+                    user,
+                    temporaryCredential.CredentialHash,
+                    request.Password) == PasswordVerificationResult.SuccessRehashNeeded)
+            {
+                temporaryCredential.CredentialHash = UserManagementService.HashTemporarySecret(
+                    userManager.PasswordHasher,
+                    user,
+                    request.Password);
+            }
+            temporaryCredential.ConsumedAtUtc = now;
         }
 
         user.AccessFailedCount = 0;
@@ -92,23 +108,47 @@ internal sealed class AuthenticationService(
         user.LastLoginAtUtc = now;
         user.LastActivityAtUtc = now;
 
-        await RevokeExcessSessionsAsync(user.Id, now, cancellationToken);
-
-        var refreshToken = CreateRefreshToken();
-        var session = CreateSession(
-            user,
-            refreshToken,
-            Guid.CreateVersion7(),
+        var priorSessions = await dbContext.UserSessions
+            .Where(session => session.UserId == user.Id && session.RevokedAtUtc == null)
+            .ToListAsync(cancellationToken);
+        RevokeSessions(
+            priorSessions,
             now,
-            now.AddDays(options.RefreshTokenAbsoluteDays),
-            request.DeviceLabel,
-            clientContext);
-        dbContext.UserSessions.Add(session);
+            user.Id,
+            "Signed out because the account was used to sign in on another device.");
+        user.AuthorizationVersion++;
+        user.SessionsRevokedAtUtc = now;
 
-        var roles = await GetActiveRoleCodesAsync(user.Id, now, cancellationToken);
-        await dbContext.SaveChangesAsync(cancellationToken);
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+        try
+        {
+            // Persist revocations first so the filtered unique index permits the replacement session.
+            await dbContext.SaveChangesAsync(cancellationToken);
 
-        return Result.Success(CreateTokenResponse(user, session, refreshToken, roles, now));
+            var refreshToken = CreateRefreshToken();
+            var session = CreateSession(
+                user,
+                refreshToken,
+                Guid.CreateVersion7(),
+                now,
+                now.AddDays(options.RefreshTokenAbsoluteDays),
+                request.DeviceLabel,
+                clientContext);
+            dbContext.UserSessions.Add(session);
+
+            var roles = await GetActiveRoleCodesAsync(user.Id, now, cancellationToken);
+            await dbContext.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+
+            sessionValidator.InvalidateUser(user.Id);
+            return Result.Success(CreateTokenResponse(user, session, refreshToken, roles, now));
+        }
+        catch (DbUpdateException exception) when (IsSessionReplacementConflict(exception))
+        {
+            await transaction.RollbackAsync(cancellationToken);
+            dbContext.ChangeTracker.Clear();
+            return Result.Failure<AuthenticationTokenResponse>(AuthenticationErrors.ConcurrentLogin);
+        }
     }
 
     public async Task<Result<AuthenticationTokenResponse>> RefreshAsync(
@@ -158,35 +198,41 @@ internal sealed class AuthenticationService(
         previousSession.RevokedAtUtc = now;
         previousSession.RevocationReason = RotatedReason;
         previousSession.LastUsedAtUtc = now;
-
-        var refreshToken = CreateRefreshToken();
-        var newSession = CreateSession(
-            user,
-            refreshToken,
-            previousSession.RefreshTokenFamilyId,
-            now,
-            previousSession.AbsoluteExpiresAtUtc,
-            previousSession.DeviceLabel,
-            clientContext);
-        dbContext.UserSessions.Add(newSession);
         user.LastActivityAtUtc = now;
 
-        var roles = await GetActiveRoleCodesAsync(user.Id, now, cancellationToken);
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
         try
         {
+            // Close the current row before inserting its rotated replacement.
             await dbContext.SaveChangesAsync(cancellationToken);
+
+            var refreshToken = CreateRefreshToken();
+            var newSession = CreateSession(
+                user,
+                refreshToken,
+                previousSession.RefreshTokenFamilyId,
+                now,
+                previousSession.AbsoluteExpiresAtUtc,
+                previousSession.DeviceLabel,
+                clientContext);
+            dbContext.UserSessions.Add(newSession);
+
+            var roles = await GetActiveRoleCodesAsync(user.Id, now, cancellationToken);
+            await dbContext.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+
+            sessionValidator.InvalidateSession(
+                previousSession.UserId,
+                previousSession.Id,
+                previousSession.AuthorizationVersion);
+            return Result.Success(CreateTokenResponse(user, newSession, refreshToken, roles, now));
         }
-        catch (DbUpdateConcurrencyException)
+        catch (DbUpdateException exception) when (IsSessionReplacementConflict(exception))
         {
+            await transaction.RollbackAsync(cancellationToken);
             dbContext.ChangeTracker.Clear();
             return Result.Failure<AuthenticationTokenResponse>(AuthenticationErrors.ConcurrentRefresh);
         }
-
-        sessionValidator.InvalidateSession(
-            previousSession.UserId,
-            previousSession.Id,
-            previousSession.AuthorizationVersion);
-        return Result.Success(CreateTokenResponse(user, newSession, refreshToken, roles, now));
     }
 
     public async Task<Result> LogoutAsync(CancellationToken cancellationToken = default)
@@ -279,6 +325,7 @@ internal sealed class AuthenticationService(
         user.RequiresPasswordChange = false;
         user.PasswordChangedAtUtc = now;
         user.AuthorizationVersion++;
+        user.SessionsRevokedAtUtc = now;
         if (user.Status == UserAccountStatus.PendingTemporaryPassword)
         {
             user.Status = UserAccountStatus.Active;
@@ -288,6 +335,10 @@ internal sealed class AuthenticationService(
             .Where(item => item.UserId == userId && item.RevokedAtUtc == null)
             .ToListAsync(cancellationToken);
         RevokeSessions(sessions, now, userId, "Password changed.");
+
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+        // Persist the password and old-session revocations before creating the replacement session.
+        await dbContext.SaveChangesAsync(cancellationToken);
 
         var refreshToken = CreateRefreshToken();
         var newSession = CreateSession(
@@ -302,6 +353,7 @@ internal sealed class AuthenticationService(
 
         var roles = await GetActiveRoleCodesAsync(user.Id, now, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
 
         sessionValidator.InvalidateUser(userId);
         return Result.Success(CreateTokenResponse(user, newSession, refreshToken, roles, now));
@@ -407,27 +459,6 @@ internal sealed class AuthenticationService(
             select role.Code)
             .Distinct()
             .ToArrayAsync(cancellationToken);
-
-    private async Task RevokeExcessSessionsAsync(
-        Guid userId,
-        DateTimeOffset now,
-        CancellationToken cancellationToken)
-    {
-        var sessionsToRevoke = await dbContext.UserSessions
-            .Where(session => session.UserId == userId
-                && session.RevokedAtUtc == null
-                && session.IdleExpiresAtUtc > now
-                && session.AbsoluteExpiresAtUtc > now)
-            .OrderByDescending(session => session.LastUsedAtUtc)
-            .Skip(options.MaxActiveSessions - 1)
-            .ToListAsync(cancellationToken);
-
-        RevokeSessions(sessionsToRevoke, now, userId, "Maximum active session limit reached.");
-        foreach (var session in sessionsToRevoke)
-        {
-            sessionValidator.InvalidateSession(session.UserId, session.Id, session.AuthorizationVersion);
-        }
-    }
 
     private async Task RevokeTokenFamilyAsync(
         UserSession sourceSession,
@@ -546,4 +577,8 @@ internal sealed class AuthenticationService(
 
     private static DateTimeOffset Earlier(DateTimeOffset left, DateTimeOffset right) =>
         left <= right ? left : right;
+
+    private static bool IsSessionReplacementConflict(DbUpdateException exception) =>
+        exception is DbUpdateConcurrencyException
+        || exception.InnerException is SqlException { Number: 2601 or 2627 };
 }

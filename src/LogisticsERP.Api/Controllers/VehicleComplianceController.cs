@@ -8,7 +8,7 @@ namespace LogisticsERP.Api.Controllers;
 [Route("api/vehicles/{vehicleId:guid}")]
 public sealed class VehicleComplianceController(IFleetService service) : ControllerBase
 {
-    [HttpGet("{type:regex(^(registrations|insurance-policies|inspections)$)}")]
+    [HttpGet("{type:regex(^(registrations|insurance-policies|inspections|operation-cards)$)}")]
     public async Task<IActionResult> Get(Guid vehicleId, string type, CancellationToken cancellationToken)
     {
         var result = await service.GetComplianceAsync(vehicleId, type, cancellationToken);
@@ -33,6 +33,13 @@ public sealed class VehicleComplianceController(IFleetService service) : Control
     public async Task<IActionResult> Inspection(Guid vehicleId, [FromBody] VehicleInspectionRequest request, CancellationToken cancellationToken)
     {
         var result = await service.RenewInspectionAsync(vehicleId, request, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpPost("operation-cards")]
+    public async Task<IActionResult> OperationCard(Guid vehicleId, [FromBody] VehicleOperationCardRequest request, CancellationToken cancellationToken)
+    {
+        var result = await service.RenewOperationCardAsync(vehicleId, request, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 }

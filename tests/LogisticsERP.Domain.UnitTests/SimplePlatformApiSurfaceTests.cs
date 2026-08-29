@@ -126,11 +126,11 @@ public sealed class SimplePlatformApiSurfaceTests
     }
 
     [Theory]
-    [InlineData(new[] { PlatformAccountPaymentModel.PayPerOrder }, PlatformAccountPaymentModel.PayPerOrder, PlatformAccountAssignmentDecision.Allowed)]
-    [InlineData(new[] { PlatformAccountPaymentModel.Salary }, PlatformAccountPaymentModel.PayPerOrder, PlatformAccountAssignmentDecision.Allowed)]
+    [InlineData(new[] { PlatformAccountPaymentModel.PayPerOrder }, PlatformAccountPaymentModel.PayPerOrder, PlatformAccountAssignmentDecision.AccountLimitReached)]
+    [InlineData(new[] { PlatformAccountPaymentModel.Salary }, PlatformAccountPaymentModel.PayPerOrder, PlatformAccountAssignmentDecision.AccountLimitReached)]
     [InlineData(new[] { PlatformAccountPaymentModel.Salary }, PlatformAccountPaymentModel.Salary, PlatformAccountAssignmentDecision.SalaryAccountLimitReached)]
     [InlineData(new[] { PlatformAccountPaymentModel.PayPerOrder, PlatformAccountPaymentModel.PayPerOrder }, PlatformAccountPaymentModel.PayPerOrder, PlatformAccountAssignmentDecision.AccountLimitReached)]
-    public void AssignmentPolicyAllowsOnlyTwoAccountsAndOneSalary(
+    public void AssignmentPolicyAllowsOnlyOneAccountPerRider(
         PlatformAccountPaymentModel[] activePaymentModels,
         PlatformAccountPaymentModel requestedPaymentModel,
         PlatformAccountAssignmentDecision expected) =>
