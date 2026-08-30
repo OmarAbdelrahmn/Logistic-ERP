@@ -50,13 +50,20 @@ internal sealed class PlatformRiderAccountConfiguration : IEntityTypeConfigurati
         builder.HasOne<ClientPlatform>().WithMany().HasForeignKey(entity => entity.ClientPlatformId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<Employee>().WithMany().HasForeignKey(entity => entity.RegisteredEmployeeId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<OperatingCity>().WithMany().HasForeignKey(entity => entity.OperatingCityId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<Sponsor>().WithMany().HasForeignKey(entity => entity.SponsorId).OnDelete(DeleteBehavior.Restrict);
         builder.HasIndex(entity => entity.Code).IsUnique();
         builder.HasIndex(entity => new { entity.ClientPlatformId, entity.ExternalAccountId }).IsUnique();
-        builder.HasIndex(entity => new { entity.RegisteredEmployeeId, entity.ClientPlatformId })
+        builder.HasIndex(entity => new
+            {
+                entity.RegisteredEmployeeId,
+                entity.ClientPlatformId,
+                entity.OperatingCityId,
+                entity.SponsorId
+            })
             .IsUnique()
-            .HasFilter("[RegisteredEmployeeId] IS NOT NULL AND [IsDeleted] = 0");
+            .HasFilter("[RegisteredEmployeeId] IS NOT NULL AND [Status] IN (1, 2) AND [IsDeleted] = 0");
         builder.HasIndex(entity => new { entity.ClientPlatformId, entity.Status });
-        builder.HasIndex(entity => new { entity.OperatingCityId, entity.Status, entity.ClientPlatformId })
+        builder.HasIndex(entity => new { entity.SponsorId, entity.OperatingCityId, entity.Status, entity.ClientPlatformId })
             .HasFilter("[IsDeleted] = 0");
         builder.ToTable(table =>
         {

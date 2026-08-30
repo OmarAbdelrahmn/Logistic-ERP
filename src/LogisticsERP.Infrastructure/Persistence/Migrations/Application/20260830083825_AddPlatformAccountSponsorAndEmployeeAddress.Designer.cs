@@ -4,6 +4,7 @@ using LogisticsERP.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260830083825_AddPlatformAccountSponsorAndEmployeeAddress")]
+    partial class AddPlatformAccountSponsorAndEmployeeAddress
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1107,47 +1110,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.ToTable("FleetCommandReceipts", "app");
                 });
 
-            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.RealRider", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset>("CreatedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid?>("CreatedByUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("IqamaNo")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(10)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("RelationshipToAssignedRider")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<Guid>("RiderVehicleAssignmentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RiderVehicleAssignmentId")
-                        .IsUnique();
-
-                    b.ToTable("RealRiders", "app", t =>
-                        {
-                            t.HasCheckConstraint("CK_RealRiders_IqamaNo", "LEN([IqamaNo]) = 10 AND [IqamaNo] NOT LIKE '%[^0-9]%'");
-                        });
-                });
-
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.RiderPromissoryFile", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1336,11 +1298,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
-
-                    b.Property<bool>("IsRealRider")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
 
                     b.Property<string>("Notes")
                         .HasMaxLength(4000)
@@ -3001,209 +2958,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                             t.HasCheckConstraint("CK_VehiclePeriodicInspections_DateRange", "[ExpiryDate] >= [InspectionDate]");
 
                             t.HasCheckConstraint("CK_VehiclePeriodicInspections_Odometer", "[Odometer] IS NULL OR [Odometer] >= 0");
-                        });
-                });
-
-            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehiclePlatformAccountAssignment", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("ApprovalStatus")
-                        .HasColumnType("int");
-
-                    b.Property<DateTimeOffset>("ApprovedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid>("ApprovedByUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset>("AssignedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("AssignmentReason")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<DateTimeOffset>("CreatedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid?>("CreatedByUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset?>("DeletedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid?>("DeletedByUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("DeletionReason")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("EndReason")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<DateTimeOffset?>("EndedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid?>("EndedByUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid>("PlatformRiderAccountId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid?>("UpdatedByUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("VehicleId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("IsDeleted");
-
-                    b.HasIndex("PlatformRiderAccountId", "EndedAtUtc");
-
-                    b.HasIndex("Status", "ApprovedAtUtc");
-
-                    b.HasIndex("VehicleId", "ApprovedAtUtc");
-
-                    b.HasIndex("VehicleId", "EndedAtUtc");
-
-                    b.HasIndex("VehicleId", "PlatformRiderAccountId")
-                        .HasFilter("[EndedAtUtc] IS NULL AND [IsDeleted] = 0");
-
-                    b.ToTable("VehiclePlatformAccountAssignments", "app", t =>
-                        {
-                            t.HasCheckConstraint("CK_VehiclePlatformAccountAssignments_AlwaysApproved", "[ApprovalStatus] = 1");
-
-                            t.HasCheckConstraint("CK_VehiclePlatformAccountAssignments_Status", "([Status] = 1 AND [EndedAtUtc] IS NULL) OR ([Status] = 2 AND [EndedAtUtc] IS NOT NULL)");
-
-                            t.HasCheckConstraint("CK_VehiclePlatformAccountAssignments_TimeRange", "[EndedAtUtc] IS NULL OR [EndedAtUtc] >= [AssignedAtUtc]");
-                        });
-                });
-
-            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehiclePlatformAccountSwitch", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset?>("AcceptedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid?>("AcceptedByUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset>("CreatedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid?>("CreatedByUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset?>("DeletedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid?>("DeletedByUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("DeletionReason")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<DateTimeOffset?>("EffectiveAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("Mode")
-                        .HasColumnType("int");
-
-                    b.Property<Guid?>("NewAssignmentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("PlatformRiderAccountId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Reason")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<DateTimeOffset>("RequestedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid>("RequestedByUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.Property<Guid>("SourceAssignmentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("SourceVehicleId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("TargetVehicleId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid?>("UpdatedByUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("IsDeleted");
-
-                    b.HasIndex("NewAssignmentId");
-
-                    b.HasIndex("SourceAssignmentId")
-                        .IsUnique()
-                        .HasFilter("[Status] = 1 AND [IsDeleted] = 0");
-
-                    b.HasIndex("SourceVehicleId");
-
-                    b.HasIndex("PlatformRiderAccountId", "Status");
-
-                    b.HasIndex("Status", "RequestedAtUtc");
-
-                    b.HasIndex("TargetVehicleId", "Status");
-
-                    b.ToTable("VehiclePlatformAccountSwitches", "app", t =>
-                        {
-                            t.HasCheckConstraint("CK_VehiclePlatformAccountSwitches_Acceptance", "([Status] = 1 AND [EffectiveAtUtc] IS NULL AND [AcceptedAtUtc] IS NULL AND [AcceptedByUserId] IS NULL AND [NewAssignmentId] IS NULL) OR ([Status] = 2 AND [EffectiveAtUtc] IS NOT NULL AND [AcceptedAtUtc] IS NOT NULL AND [AcceptedByUserId] IS NOT NULL AND [NewAssignmentId] IS NOT NULL)");
-
-                            t.HasCheckConstraint("CK_VehiclePlatformAccountSwitches_AcceptedAfterRequested", "[AcceptedAtUtc] IS NULL OR [AcceptedAtUtc] >= [RequestedAtUtc]");
-
-                            t.HasCheckConstraint("CK_VehiclePlatformAccountSwitches_DifferentVehicles", "[SourceVehicleId] <> [TargetVehicleId]");
-
-                            t.HasCheckConstraint("CK_VehiclePlatformAccountSwitches_ModeStatus", "([Mode] = 1 AND [Status] = 2) OR ([Mode] = 2 AND [Status] IN (1, 2))");
                         });
                 });
 
@@ -9763,15 +9517,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .OnDelete(DeleteBehavior.Restrict);
                 });
 
-            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.RealRider", b =>
-                {
-                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.RiderVehicleAssignment", null)
-                        .WithOne()
-                        .HasForeignKey("LogisticsERP.Domain.Entities.Fleet.RealRider", "RiderVehicleAssignmentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.RiderPromissoryFile", b =>
                 {
                     b.HasOne("LogisticsERP.Domain.Entities.Fleet.RiderPromissoryFileVersion", null)
@@ -10081,53 +9826,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.HasOne("LogisticsERP.Domain.Entities.Fleet.Vehicle", null)
                         .WithMany()
                         .HasForeignKey("VehicleId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehiclePlatformAccountAssignment", b =>
-                {
-                    b.HasOne("LogisticsERP.Domain.Entities.Clients.PlatformRiderAccount", null)
-                        .WithMany()
-                        .HasForeignKey("PlatformRiderAccountId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.Vehicle", null)
-                        .WithMany()
-                        .HasForeignKey("VehicleId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehiclePlatformAccountSwitch", b =>
-                {
-                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.VehiclePlatformAccountAssignment", null)
-                        .WithMany()
-                        .HasForeignKey("NewAssignmentId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("LogisticsERP.Domain.Entities.Clients.PlatformRiderAccount", null)
-                        .WithMany()
-                        .HasForeignKey("PlatformRiderAccountId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.VehiclePlatformAccountAssignment", null)
-                        .WithMany()
-                        .HasForeignKey("SourceAssignmentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.Vehicle", null)
-                        .WithMany()
-                        .HasForeignKey("SourceVehicleId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.Vehicle", null)
-                        .WithMany()
-                        .HasForeignKey("TargetVehicleId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });

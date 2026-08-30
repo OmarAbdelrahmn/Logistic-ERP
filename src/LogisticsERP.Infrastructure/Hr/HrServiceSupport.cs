@@ -73,6 +73,9 @@ internal static class HrServiceSupport
             AdditionalNumber = TrimOrNull(request.AdditionalNumber)
         };
 
+    public static Address? ToNullableAddress(AddressRequest? request) =>
+        request is null ? null : ToAddress(request);
+
     public static AddressResponse ToAddressResponse(Address address) => new(
         address.BuildingNumber,
         address.Street,
@@ -80,6 +83,9 @@ internal static class HrServiceSupport
         address.City,
         address.PostalCode,
         address.AdditionalNumber);
+
+    public static AddressResponse? ToNullableAddressResponse(Address? address) =>
+        address is null ? null : ToAddressResponse(address);
 
     public static string? TrimOrNull(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 

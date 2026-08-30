@@ -73,6 +73,7 @@ internal sealed class WorkforceService(
 
         return Result.Success<IReadOnlyList<EmployeeListItemResponse>>(employees.Select(item => new EmployeeListItemResponse(
             item.Id, item.IqamaNo, item.FullNameAr, item.FullNameEn, item.Nationality, item.Iban, item.PrimaryPhone,
+            HrServiceSupport.ToNullableAddressResponse(item.Address),
             item.IsEmployee, item.EngagementType.ToString(), item.Status.ToString(), item.WorkingForMeAs,
             item.ResidencyProfession, item.SponsorId,
             item.SponsorId is { } sponsorId && sponsors.TryGetValue(sponsorId, out var sponsorName) ? sponsorName : null,
@@ -325,6 +326,7 @@ internal sealed class WorkforceService(
             Nationality = HrServiceSupport.TrimOrNull(request.Nationality),
             Iban = NormalizeIban(request.Iban),
             PrimaryPhone = request.PrimaryPhone.Trim(),
+            Address = HrServiceSupport.ToNullableAddress(request.Address),
             OperatingCityId = request.OperatingCityId,
             OperationalWorkTypeId = request.OperationalWorkTypeId,
             IsEmployee = false,
@@ -378,6 +380,7 @@ internal sealed class WorkforceService(
         employee.FullNameAr = fullNameAr;
         if (request.Nationality is not null) employee.Nationality = HrServiceSupport.TrimOrNull(request.Nationality);
         if (request.Iban is not null) employee.Iban = NormalizeIban(request.Iban);
+        employee.Address = HrServiceSupport.ToNullableAddress(request.Address);
         await dbContext.SaveChangesAsync(cancellationToken);
         return Result.Success(ToExternalRider(rider, employee));
     }
@@ -444,7 +447,8 @@ internal sealed class WorkforceService(
         if (sponsor is null) return Result.Failure(HrErrors.NotFound);
         if (!HrServiceSupport.HasText(request.Reason) || !HrServiceSupport.MatchesRowVersion(sponsor.RowVersion, request.RowVersion))
             return Result.Failure(HrErrors.ConcurrencyConflict);
-        if (await dbContext.Employees.AnyAsync(item => item.SponsorId == sponsorId, cancellationToken))
+        if (await dbContext.Employees.AnyAsync(item => item.SponsorId == sponsorId, cancellationToken)
+            || await dbContext.PlatformRiderAccounts.AnyAsync(item => item.SponsorId == sponsorId, cancellationToken))
             return Result.Failure(HrErrors.Conflict);
         sponsor.IsDeleted = true;
         sponsor.Status = CatalogStatus.Archived;
@@ -502,6 +506,7 @@ internal sealed class WorkforceService(
         employee.PrimaryPhone = HrServiceSupport.TrimOrNull(request.PrimaryPhone);
         employee.SecondaryPhone = HrServiceSupport.TrimOrNull(request.SecondaryPhone);
         employee.Email = HrServiceSupport.TrimOrNull(request.Email);
+        employee.Address = HrServiceSupport.ToNullableAddress(request.Address);
         employee.ProfilePhotoDocumentId = request.ProfilePhotoDocumentId;
         employee.MaritalStatus = maritalStatus;
         employee.EmergencyContactName = HrServiceSupport.TrimOrNull(request.EmergencyContactName);
@@ -598,6 +603,7 @@ internal sealed class WorkforceService(
     private static EmployeeResponse ToEmployee(Employee item) => new(
         item.Id, item.IqamaNo, item.ResidencyProfession, item.WorkingForMeAs, item.FullNameAr, item.FullNameEn,
         item.Nationality, item.Iban, item.BirthDate, item.Gender?.ToString(), item.PrimaryPhone, item.SecondaryPhone, item.Email,
+        HrServiceSupport.ToNullableAddressResponse(item.Address),
         item.ProfilePhotoDocumentId, item.MaritalStatus?.ToString(), item.EmergencyContactName,
         item.EmergencyContactRelationship, item.EmergencyContactPhone, item.IsEmployee, item.EngagementType.ToString(),
         item.Status.ToString(), item.StatusReason, item.HireDate, item.OperationalWorkTypeId, item.OperatingCityId,
@@ -606,6 +612,7 @@ internal sealed class WorkforceService(
 
     private static RiderDetailsResponse ToRider(RiderProfile rider, Employee employee) => new(
         rider.Id, employee.Id, employee.IqamaNo, employee.FullNameAr, employee.FullNameEn, employee.Nationality, employee.Iban,
+        HrServiceSupport.ToNullableAddressResponse(employee.Address),
         employee.EngagementType.ToString(), employee.Status.ToString(), rider.TShirtSize?.ToString(),
         rider.OperationalNotes, HrServiceSupport.EncodeRowVersion(rider.RowVersion));
 
@@ -617,6 +624,7 @@ internal sealed class WorkforceService(
         employee.Nationality,
         employee.Iban,
         employee.PrimaryPhone,
+        HrServiceSupport.ToNullableAddressResponse(employee.Address),
         employee.OperatingCityId,
         employee.OperationalWorkTypeId,
         employee.Status.ToString(),

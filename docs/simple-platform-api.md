@@ -8,15 +8,16 @@ Contracts and registrations are still maintained internally for compatibility an
 
 ## Business rules
 
-- An owner rider can have at most one non-archived account on each platform.
+- Every account is registered under one required sponsor.
+- An owner rider can have one usable (`Available` or `Assigned`) account for each platform, city, and sponsor combination.
+- The same owner may have accounts for the same platform and city under different sponsors.
+- A `Suspended`, `Retired`, or archived account is historical and does not block creating a replacement account, including under the same sponsor.
 - The owner rider is the person under whose platform identity the account is registered.
 - The actual rider may be the owner or another rider using the owner's platform identity.
 - An account can have only one active actual rider.
 - Every platform enables one or both account payment models: `PayPerOrder` and `Salary`.
 - Every account selects exactly one payment model supported by its platform.
-- An actual rider can have at most two active platform accounts.
-- The two active accounts may be `PayPerOrder + PayPerOrder` or `PayPerOrder + Salary`.
-- An actual rider can never have two active `Salary` accounts.
+- An actual rider can currently have at most one active platform account.
 - Releasing an account closes the assignment; it never deletes assignment history.
 - Updates and releases use Base64 `rowVersion` values for optimistic concurrency.
 - Credential secrets are encrypted, never returned, and excluded from audit payloads.
@@ -50,6 +51,9 @@ Contracts and registrations are still maintained internally for compatibility an
   "operatingCityId": "11111111-1111-1111-1111-111111111111",
   "operatingCityNameAr": "جدة",
   "operatingCityNameEn": "Jeddah",
+  "sponsorId": "019c18d5-62e1-7000-8000-000000000042",
+  "sponsorNameAr": "اكسبرس جايت",
+  "sponsorNameEn": null,
   "ownerRiderProfileId": "01993c00-0000-7000-8000-000000000020",
   "ownerEmployeeId": "01993c00-0000-7000-8000-000000000021",
   "ownerRiderNameAr": "اسم صاحب الحساب",
@@ -152,6 +156,7 @@ Optional query parameters:
 - `accountId`
 - `platformId`
 - `operatingCityId`
+- `sponsorId`
 - `ownerRiderProfileId`
 - `actualRiderProfileId`
 - `status`
@@ -183,6 +188,7 @@ Permission: `platform_accounts.manage`
 {
   "platformId": "01993c00-0000-7000-8000-000000000001",
   "operatingCityId": "11111111-1111-1111-1111-111111111111",
+  "sponsorId": "019c18d5-62e1-7000-8000-000000000042",
   "ownerRiderProfileId": "01993c00-0000-7000-8000-000000000020",
   "code": "KEETA-1001",
   "externalAccountId": "KT-98421",
@@ -199,7 +205,7 @@ Permission: `platform_accounts.manage`
 }
 ```
 
-`ownerRiderProfileId` and `paymentModel` are required. `paymentModel` must be enabled in the selected platform's `supportedPaymentModels`. Creating a second non-archived account for the same owner and platform returns `409 Conflict`.
+`ownerRiderProfileId`, `sponsorId`, and `paymentModel` are required. `paymentModel` must be enabled in the selected platform's `supportedPaymentModels`. A second usable account for the same owner, platform, city, and sponsor returns `409 Conflict`; suspended, retired, and archived accounts do not block a replacement.
 
 Response: `200 OK` with the created Account response.
 
@@ -215,6 +221,7 @@ Request: the same fields as Create, with the current `rowVersion`.
 {
   "platformId": "01993c00-0000-7000-8000-000000000001",
   "operatingCityId": "11111111-1111-1111-1111-111111111111",
+  "sponsorId": "019c18d5-62e1-7000-8000-000000000042",
   "ownerRiderProfileId": "01993c00-0000-7000-8000-000000000020",
   "code": "KEETA-1001",
   "externalAccountId": "KT-98421",
@@ -231,7 +238,7 @@ Request: the same fields as Create, with the current `rowVersion`.
 }
 ```
 
-An actively assigned account must remain `Assigned`; its platform, owner, and city cannot be changed. To archive, release it first, then use `status: "Archived"` with an `archiveReason`.
+An actively assigned account must remain `Assigned`; its platform, owner, city, and sponsor cannot be changed. To suspend or archive it, release it first, then update its account status. Once suspended, a replacement account can be created for that rider and platform.
 
 Response: `200 OK` with the updated Account response.
 
@@ -251,7 +258,7 @@ Permission: `platform_assignments.manage`
 }
 ```
 
-The actual rider may differ from the account owner. The operation changes the account to `Assigned`, creates append-only assignment history, and automatically maintains the internal registration/contract compatibility records. It rejects a third active account and rejects a second active `Salary` account for the same rider.
+The actual rider may differ from the account owner. The operation changes the account to `Assigned`, creates append-only assignment history, and automatically maintains the internal registration/contract compatibility records. The current assignment policy rejects another active account for the same actual rider.
 
 Response: `200 OK` with an Assignment response.
 

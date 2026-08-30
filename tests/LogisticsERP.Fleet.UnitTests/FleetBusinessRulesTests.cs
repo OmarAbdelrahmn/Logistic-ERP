@@ -1,6 +1,7 @@
 using LogisticsERP.Application.Features.Fleet;
 using LogisticsERP.Domain.Entities.Fleet;
 using LogisticsERP.Domain.Enums;
+using LogisticsERP.Domain.Fleet;
 using LogisticsERP.Infrastructure.Fleet;
 using Xunit;
 
@@ -9,9 +10,39 @@ namespace LogisticsERP.Fleet.UnitTests;
 public sealed class FleetBusinessRulesTests
 {
     [Fact]
+    public void CarAllowsTwoPlatformAccountsPerPlatformAndCity()
+    {
+        Assert.Equal(2, VehiclePlatformAccountAssignmentPolicy.GetMaximumAccounts(VehicleType.Car));
+        Assert.False(VehiclePlatformAccountAssignmentPolicy.IsCapacityExceeded(VehicleType.Car, 2));
+        Assert.True(VehiclePlatformAccountAssignmentPolicy.IsCapacityExceeded(VehicleType.Car, 3));
+    }
+
+    [Fact]
+    public void MotorcycleAllowsThreePlatformAccountsPerPlatformAndCity()
+    {
+        Assert.Equal(3, VehiclePlatformAccountAssignmentPolicy.GetMaximumAccounts(VehicleType.Motorcycle));
+        Assert.False(VehiclePlatformAccountAssignmentPolicy.IsCapacityExceeded(VehicleType.Motorcycle, 3));
+        Assert.True(VehiclePlatformAccountAssignmentPolicy.IsCapacityExceeded(VehicleType.Motorcycle, 4));
+    }
+
+    [Theory]
+    [InlineData(VehicleType.Van)]
+    [InlineData(VehicleType.Truck)]
+    [InlineData(VehicleType.Other)]
+    public void UnspecifiedVehicleTypesHaveNoConfiguredCapacity(VehicleType vehicleType) =>
+        Assert.Null(VehiclePlatformAccountAssignmentPolicy.GetMaximumAccounts(vehicleType));
+
+    [Fact]
     public void VehicleComplianceContractExposesPermitEndDate()
     {
         Assert.NotNull(typeof(VehicleSummaryResponse).GetProperty(nameof(VehicleSummaryResponse.PermitEndDate)));
+    }
+
+    [Fact]
+    public void VehicleSummaryExposesActualRiderDetails()
+    {
+        Assert.NotNull(typeof(VehicleSummaryResponse).GetProperty(nameof(VehicleSummaryResponse.IsRealRider)));
+        Assert.NotNull(typeof(VehicleSummaryResponse).GetProperty(nameof(VehicleSummaryResponse.RealRider)));
     }
 
     [Fact]

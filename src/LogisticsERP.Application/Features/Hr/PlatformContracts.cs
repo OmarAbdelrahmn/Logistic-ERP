@@ -23,8 +23,8 @@ public sealed record ClientContractUpsertRequest(
 
 public sealed record ClientContractResponse(Guid Id, Guid ClientPlatformId, string PlatformNameAr, string Code, string DisplayNameAr, string DisplayNameEn, string? ExternalBusinessAccountId, DateOnly? StartDate, DateOnly? EndDate, string Status, string? StatusReason, string? ContactName, string? ContactPhone, string? ContactEmail, string? Notes, string RowVersion);
 
-public sealed record PlatformAccountUpsertRequest(Guid ClientPlatformId, Guid? RegisteredEmployeeId, Guid OperatingCityId, string Code, string ExternalAccountId, string? UserName, string PaymentModel, string Status, string? StatusReason, DateOnly? AcquisitionDate, DateOnly? StartDate, DateOnly? EndDate, string? OwnershipNotes, string? OperationalNotes, string? RowVersion);
-public sealed record PlatformAccountResponse(Guid Id, Guid ClientPlatformId, string PlatformNameAr, Guid? RegisteredEmployeeId, string? RegisteredEmployeeNameAr, Guid OperatingCityId, string OperatingCityAr, string Code, string ExternalAccountId, string? UserName, string PaymentModel, string Status, string? StatusReason, DateOnly? AcquisitionDate, DateOnly? StartDate, DateOnly? EndDate, string? OwnershipNotes, string? OperationalNotes, string RowVersion);
+public sealed record PlatformAccountUpsertRequest(Guid ClientPlatformId, Guid? RegisteredEmployeeId, Guid OperatingCityId, Guid SponsorId, string Code, string ExternalAccountId, string? UserName, string PaymentModel, string Status, string? StatusReason, DateOnly? AcquisitionDate, DateOnly? StartDate, DateOnly? EndDate, string? OwnershipNotes, string? OperationalNotes, string? RowVersion);
+public sealed record PlatformAccountResponse(Guid Id, Guid ClientPlatformId, string PlatformNameAr, Guid? RegisteredEmployeeId, string? RegisteredEmployeeNameAr, Guid OperatingCityId, string OperatingCityAr, Guid SponsorId, string SponsorNameAr, string? SponsorNameEn, string Code, string ExternalAccountId, string? UserName, string PaymentModel, string Status, string? StatusReason, DateOnly? AcquisitionDate, DateOnly? StartDate, DateOnly? EndDate, string? OwnershipNotes, string? OperationalNotes, string RowVersion);
 
 public sealed record RotatePlatformCredentialRequest(string Secret, string Reason);
 public sealed record PlatformCredentialVersionResponse(
@@ -49,7 +49,7 @@ public interface IPlatformOperationsService
     Task<Result<ClientPlatformResponse>> UpsertPlatformAsync(Guid? id, ClientPlatformUpsertRequest request, CancellationToken cancellationToken = default);
     Task<Result<IReadOnlyList<ClientContractResponse>>> GetContractsAsync(Guid? platformId, CancellationToken cancellationToken = default);
     Task<Result<ClientContractResponse>> UpsertContractAsync(Guid? id, ClientContractUpsertRequest request, CancellationToken cancellationToken = default);
-    Task<Result<IReadOnlyList<PlatformAccountResponse>>> GetAccountsAsync(Guid? platformId, CancellationToken cancellationToken = default);
+    Task<Result<IReadOnlyList<PlatformAccountResponse>>> GetAccountsAsync(Guid? platformId, Guid? sponsorId, CancellationToken cancellationToken = default);
     Task<Result<PlatformAccountResponse>> UpsertAccountAsync(Guid? id, PlatformAccountUpsertRequest request, CancellationToken cancellationToken = default);
     Task<Result<IReadOnlyList<PlatformCredentialVersionResponse>>> GetCredentialVersionsAsync(Guid accountId, CancellationToken cancellationToken = default);
     Task<Result<PlatformCredentialVersionResponse>> RotateCredentialAsync(Guid accountId, RotatePlatformCredentialRequest request, CancellationToken cancellationToken = default);

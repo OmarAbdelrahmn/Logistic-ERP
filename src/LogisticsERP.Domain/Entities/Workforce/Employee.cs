@@ -17,6 +17,7 @@ public sealed class Employee : AuditableEntity
     public string? PrimaryPhone { get; set; }
     public string? SecondaryPhone { get; set; }
     public string? Email { get; set; }
+    public Address? Address { get; set; }
     public Guid? ProfilePhotoDocumentId { get; set; }
     public MaritalStatus? MaritalStatus { get; set; }
     public string? EmergencyContactName { get; set; }

@@ -28,6 +28,7 @@ internal sealed class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
         builder.Property(entity => entity.AlternateContactName).HasMaxLength(200);
         builder.Property(entity => entity.AlternateContactPhone).HasMaxLength(32);
         builder.Property(entity => entity.Notes).HasMaxLength(4000);
+        builder.OwnsOne(entity => entity.Address, owned => owned.ConfigureAddress("Address"));
 
         builder.HasOne<EmployeeDocument>().WithMany().HasForeignKey(entity => entity.ProfilePhotoDocumentId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<OperationalWorkType>().WithMany().HasForeignKey(entity => entity.OperationalWorkTypeId).OnDelete(DeleteBehavior.Restrict);

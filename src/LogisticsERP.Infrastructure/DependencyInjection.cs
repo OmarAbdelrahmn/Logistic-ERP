@@ -76,6 +76,7 @@ public static class DependencyInjection
         services.AddScoped<IPrivateFileStorage, PrivateFileStorage>();
         services.AddScoped<FleetServiceSupport>();
         services.AddScoped<IFleetService, FleetService>();
+        services.AddScoped<IVehiclePlatformAccountAssignmentService, VehiclePlatformAccountAssignmentService>();
         services.AddScoped<IVehicleFileService, VehicleFileService>();
         services.AddOptions<PdfGenerationOptions>()
             .Bind(configuration.GetSection(PdfGenerationOptions.SectionName))

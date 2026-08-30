@@ -64,6 +64,8 @@ public sealed record VehicleSummaryResponse(
     Guid? CurrentAssignmentId,
     Guid? CurrentRiderProfileId,
     string? CurrentRiderName,
+    bool? IsRealRider,
+    RealRiderResponse? RealRider,
     DateOnly? RegistrationExpiryDate,
     VehicleComplianceDueStatus RegistrationStatus,
     DateOnly? InsuranceExpiryDate,
@@ -115,12 +117,14 @@ public sealed record OdometerReadingRequest(long Reading, DateTimeOffset Recorde
 public sealed record VehicleStatusPeriodResponse(Guid Id, VehicleOperationalStatus Status, DateTimeOffset EffectiveFromUtc, DateTimeOffset? EffectiveToUtc, string Reason, VehicleStatusSourceType SourceType, Guid? SourceEntityId);
 public sealed record VehicleOdometerReadingResponse(Guid Id, long Reading, DateTimeOffset RecordedAtUtc, VehicleOdometerSourceType SourceType, bool IsCorrection, string? CorrectionReason, string? Notes);
 
-public sealed record TakeVehicleRequest(Guid RiderProfileId, Guid VehicleId, DateTimeOffset StartedAtUtc, long StartOdometer, VehicleCondition StartCondition, byte? StartFuelLevelPercentage, string PermissionReference, string Reason, string? Notes);
+public sealed record RealRiderRequest(string Name, string IqamaNo, string RelationshipToAssignedRider);
+public sealed record RealRiderResponse(Guid Id, string Name, string IqamaNo, string RelationshipToAssignedRider);
+public sealed record TakeVehicleRequest(Guid RiderProfileId, bool IsRealRider, RealRiderRequest? RealRider, Guid VehicleId, DateTimeOffset StartedAtUtc, long StartOdometer, VehicleCondition StartCondition, byte? StartFuelLevelPercentage, string PermissionReference, string Reason, string? Notes);
 public sealed record ReturnVehicleRequest(Guid AssignmentId, DateTimeOffset EndedAtUtc, long EndOdometer, VehicleCondition EndCondition, byte? EndFuelLevelPercentage, string Reason, string RowVersion);
 public sealed record SwitchVehicleRequest(Guid CurrentAssignmentId, Guid NewVehicleId, DateTimeOffset SwitchedAtUtc, long OldVehicleOdometer, long NewVehicleOdometer, VehicleCondition OldVehicleCondition, VehicleCondition NewVehicleCondition, byte? OldFuelLevelPercentage, byte? NewFuelLevelPercentage, string PermissionReference, string Reason, string RowVersion);
 public sealed record RenewVehiclePermissionRequest(DateOnly PermissionStartsOn, string PermissionReference, string Reason, string RowVersion);
 public sealed record RiderPromissoryFileResponse(Guid Id, Guid RiderProfileId, Guid CurrentVersionId, int VersionNumber, string OriginalFileName, string ContentType, long FileSizeBytes, string Sha256Checksum, DateTimeOffset UploadedAtUtc, string RowVersion);
-public sealed record RiderVehicleAssignmentResponse(Guid Id, Guid RiderProfileId, Guid EmployeeId, Guid VehicleId, string AssetNumber, string RiderName, DateTimeOffset StartedAtUtc, DateTimeOffset? EndedAtUtc, string? StartLocationSnapshot, string? EndLocationSnapshot, long StartOdometer, long? EndOdometer, string? PermissionReference, DateOnly? PermissionStartsOn, DateOnly? PermissionEndsOn, RiderVehicleAssignmentStatus Status, string AssignmentReason, string? CompletionReason, Guid OperationId, IReadOnlyList<Guid> PromissoryFileVersionIds, string RowVersion);
+public sealed record RiderVehicleAssignmentResponse(Guid Id, Guid RiderProfileId, Guid EmployeeId, bool IsRealRider, RealRiderResponse? RealRider, Guid VehicleId, string AssetNumber, string RiderName, DateTimeOffset StartedAtUtc, DateTimeOffset? EndedAtUtc, string? StartLocationSnapshot, string? EndLocationSnapshot, long StartOdometer, long? EndOdometer, string? PermissionReference, DateOnly? PermissionStartsOn, DateOnly? PermissionEndsOn, RiderVehicleAssignmentStatus Status, string AssignmentReason, string? CompletionReason, Guid OperationId, IReadOnlyList<Guid> PromissoryFileVersionIds, string RowVersion);
 public sealed record RiderVehicleTimelineResponse(RiderVehicleAssignmentResponse Assignment, IReadOnlyList<VehicleIssueSummaryResponse> Issues, IReadOnlyList<VehicleAccidentSummaryResponse> Accidents);
 
 public sealed record VehicleRegistrationRequest(string RegistrationNumber, string IssuingAuthority, DateOnly IssueDate, DateOnly ExpiryDate, string? Notes);

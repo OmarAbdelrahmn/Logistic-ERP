@@ -4,6 +4,7 @@ using LogisticsERP.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260830111116_AddVehiclePlatformAccountSwitches")]
+    partial class AddVehiclePlatformAccountSwitches
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1107,47 +1110,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.ToTable("FleetCommandReceipts", "app");
                 });
 
-            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.RealRider", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset>("CreatedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid?>("CreatedByUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("IqamaNo")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(10)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("RelationshipToAssignedRider")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<Guid>("RiderVehicleAssignmentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RiderVehicleAssignmentId")
-                        .IsUnique();
-
-                    b.ToTable("RealRiders", "app", t =>
-                        {
-                            t.HasCheckConstraint("CK_RealRiders_IqamaNo", "LEN([IqamaNo]) = 10 AND [IqamaNo] NOT LIKE '%[^0-9]%'");
-                        });
-                });
-
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.RiderPromissoryFile", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1336,11 +1298,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
-
-                    b.Property<bool>("IsRealRider")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
 
                     b.Property<string>("Notes")
                         .HasMaxLength(4000)
@@ -9761,15 +9718,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .WithMany()
                         .HasForeignKey("SupersededVersionId")
                         .OnDelete(DeleteBehavior.Restrict);
-                });
-
-            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.RealRider", b =>
-                {
-                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.RiderVehicleAssignment", null)
-                        .WithOne()
-                        .HasForeignKey("LogisticsERP.Domain.Entities.Fleet.RealRider", "RiderVehicleAssignmentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.RiderPromissoryFile", b =>

@@ -514,6 +514,16 @@ Downloads the current attachment version when `versionId` is omitted, or the req
 
 Assignments connect a rider to a vehicle and update operational status, odometer history, and audit events.
 
+### `GET /api/vehicle-assignments`
+
+Returns vehicle-rider assignments ordered from newest to oldest. Each item is a `RiderVehicleAssignmentResponse`, including `isRealRider` and `realRider`.
+
+Optional query parameters:
+
+- `vehicleId`
+- `riderProfileId`
+- `activeOnly` — set to `true` to return only assignments not yet returned.
+
 ### `POST /api/vehicle-assignments/take`
 
 Starts an assignment. This is `multipart/form-data` because promissory-note files may be uploaded with the command. The JSON command is sent as a string in the `metadata` form field, and files are sent as one or more `promissoryFiles` fields.
@@ -527,6 +537,8 @@ Required header: `Idempotency-Key`.
 ```json
 {
   "riderProfileId": "00000000-0000-0000-0000-000000000000",
+  "isRealRider": true,
+  "realRider": null,
   "vehicleId": "00000000-0000-0000-0000-000000000000",
   "startedAtUtc": "2026-08-26T08:00:00Z",
   "startOdometer": 12000,
@@ -537,6 +549,21 @@ Required header: `Idempotency-Key`.
   "notes": null
 }
 ```
+
+`isRealRider` indicates whether the selected rider profile is the person who will actually drive the vehicle. When it is `true`, `realRider` must be `null`. When it is `false`, provide the actual rider details:
+
+```json
+{
+  "isRealRider": false,
+  "realRider": {
+    "name": "Actual rider name",
+    "iqamaNo": "1234567890",
+    "relationshipToAssignedRider": "Brother"
+  }
+}
+```
+
+The iqama must contain exactly 10 digits. The name and relationship are required and limited to 200 characters. The real-rider record is stored one-to-one with the vehicle assignment. A vehicle switch carries the same real-rider details into the replacement assignment.
 
 The vehicle must be available and the rider must be eligible without another active vehicle. The backend calculates the permit end date as one year minus one day from the assignment start date, then the date is exposed through Fleet Compliance. The service creates the assignment and associated operational history. Response: `200 OK`, `RiderVehicleAssignmentResponse`.
 
@@ -732,7 +759,8 @@ Downloads the current generated accident PDF, or the requested report version wh
 | `vehicleType`, `registrationType`, `status` | Classification and operational state |
 | `sponsorId`, `sponsorName`, `operatingCityId`, `operatingCity` | Scope and ownership relationships |
 | `currentOdometer` | Latest odometer reading |
-| `currentAssignmentId`, `currentRiderProfileId`, `currentRiderName` | Active assignment, if any |
+| `currentAssignmentId`, `currentRiderProfileId`, `currentRiderName` | Active selected-rider assignment, if any |
+| `isRealRider`, `realRider` | Actual-rider details for the active assignment. `realRider` is populated only when the selected rider is not the actual rider. |
 | `registrationExpiryDate`, `registrationStatus` | Registration compliance |
 | `insuranceExpiryDate`, `insuranceStatus` | Insurance compliance |
 | `inspectionExpiryDate`, `inspectionStatus` | Inspection compliance |
@@ -743,7 +771,7 @@ Downloads the current generated accident PDF, or the requested report version wh
 
 ### Assignment response
 
-`RiderVehicleAssignmentResponse` contains assignment `id`, rider and employee IDs, vehicle ID and asset number, rider name, start/end timestamps, location snapshots, start/end odometers, permission reference and dates, status, assignment reason, completion reason, operation ID, promissory-file version IDs, and row version.
+`RiderVehicleAssignmentResponse` contains assignment `id`, rider and employee IDs, `isRealRider`, optional `realRider` details, vehicle ID and asset number, rider name, start/end timestamps, location snapshots, start/end odometers, permission reference and dates, status, assignment reason, completion reason, operation ID, promissory-file version IDs, and row version.
 
 ### Issue response
 

@@ -43,6 +43,7 @@ internal sealed class SimplePlatformService(
         Guid? accountId,
         Guid? platformId,
         Guid? operatingCityId,
+        Guid? sponsorId,
         Guid? ownerRiderProfileId,
         Guid? actualRiderProfileId,
         string? status,
@@ -90,6 +91,11 @@ internal sealed class SimplePlatformService(
         if (operatingCityId is not null)
         {
             accountQuery = accountQuery.Where(item => item.OperatingCityId == operatingCityId);
+        }
+
+        if (sponsorId is not null)
+        {
+            accountQuery = accountQuery.Where(item => item.SponsorId == sponsorId);
         }
 
         if (parsedStatus is not null)
@@ -168,6 +174,7 @@ internal sealed class SimplePlatformService(
             ClientPlatformId = request.PlatformId,
             RegisteredEmployeeId = validation.Value,
             OperatingCityId = request.OperatingCityId,
+            SponsorId = request.SponsorId,
             Code = HrServiceSupport.NormalizeCode(request.Code),
             ExternalAccountId = request.ExternalAccountId.Trim(),
             UserName = HrServiceSupport.TrimOrNull(request.UserName),
@@ -229,7 +236,8 @@ internal sealed class SimplePlatformService(
         if (hasActiveAssignment
             && (entity.ClientPlatformId != request.PlatformId
                 || entity.RegisteredEmployeeId != validation.Value
-                || entity.OperatingCityId != request.OperatingCityId))
+                || entity.OperatingCityId != request.OperatingCityId
+                || entity.SponsorId != request.SponsorId))
         {
             return Result.Failure<SimplePlatformAccountResponse>(HrErrors.Conflict);
         }
@@ -265,6 +273,7 @@ internal sealed class SimplePlatformService(
         entity.ClientPlatformId = request.PlatformId;
         entity.RegisteredEmployeeId = validation.Value;
         entity.OperatingCityId = request.OperatingCityId;
+        entity.SponsorId = request.SponsorId;
         entity.Code = HrServiceSupport.NormalizeCode(request.Code);
         entity.ExternalAccountId = request.ExternalAccountId.Trim();
         entity.UserName = HrServiceSupport.TrimOrNull(request.UserName);
@@ -711,6 +720,7 @@ internal sealed class SimplePlatformService(
     {
         if (request.PlatformId == Guid.Empty
             || request.OperatingCityId == Guid.Empty
+            || request.SponsorId == Guid.Empty
             || request.OwnerRiderProfileId == Guid.Empty
             || !HrServiceSupport.HasText(request.Code)
             || !HrServiceSupport.HasText(request.ExternalAccountId)
@@ -729,7 +739,10 @@ internal sealed class SimplePlatformService(
             .SingleOrDefaultAsync(cancellationToken);
         var referencesExist = owner is not null
             && supportedPaymentModels is not null
-            && await dbContext.OperatingCities.AnyAsync(item => item.Id == request.OperatingCityId, cancellationToken);
+            && await dbContext.OperatingCities.AnyAsync(item => item.Id == request.OperatingCityId, cancellationToken)
+            && await dbContext.Sponsors.AnyAsync(
+                item => item.Id == request.SponsorId && item.Status == CatalogStatus.Active,
+                cancellationToken);
         if (!referencesExist)
         {
             return Result.Failure<Guid>(HrErrors.NotFound);
@@ -746,7 +759,13 @@ internal sealed class SimplePlatformService(
             item.Id != accountId
             && (item.Code == code
                 || item.ClientPlatformId == request.PlatformId && item.ExternalAccountId == externalAccountId
-                || !item.IsDeleted && item.ClientPlatformId == request.PlatformId && item.RegisteredEmployeeId == owner!.EmployeeId),
+                || !item.IsDeleted
+                    && (item.Status == PlatformRiderAccountStatus.Available
+                        || item.Status == PlatformRiderAccountStatus.Assigned)
+                    && item.ClientPlatformId == request.PlatformId
+                    && item.RegisteredEmployeeId == owner!.EmployeeId
+                    && item.OperatingCityId == request.OperatingCityId
+                    && item.SponsorId == request.SponsorId),
             cancellationToken);
         if (duplicate)
         {
@@ -796,11 +815,15 @@ internal sealed class SimplePlatformService(
         var cities = includeArchived
             ? dbContext.GlobalCities.IgnoreQueryFilters().AsNoTracking()
             : dbContext.GlobalCities.AsNoTracking();
+        var sponsors = includeArchived
+            ? dbContext.Sponsors.IgnoreQueryFilters().AsNoTracking()
+            : dbContext.Sponsors.AsNoTracking();
 
         return from account in accounts
                join platform in platforms on account.ClientPlatformId equals platform.Id
                join operatingCity in operatingCities on account.OperatingCityId equals operatingCity.Id
                join city in cities on operatingCity.GlobalCityId equals city.Id
+               join sponsor in sponsors on account.SponsorId equals sponsor.Id
                orderby platform.NameAr, account.ExternalAccountId
                select new AccountProjection(
                    account,
@@ -808,7 +831,9 @@ internal sealed class SimplePlatformService(
                    platform.NameAr,
                    platform.NameEn,
                    city.NameAr,
-                   city.NameEn);
+                   city.NameEn,
+                   sponsor.RegistryNameAr,
+                   sponsor.RegistryNameEn);
     }
 
     private async Task<Dictionary<Guid, OwnerProjection>> LoadOwnersAsync(
@@ -827,8 +852,7 @@ internal sealed class SimplePlatformService(
                               rider.Id,
                               employee.Id,
                               employee.FullNameAr,
-                              employee.FullNameEn,
-                              employee.SponsorId))
+                              employee.FullNameEn))
             .ToArrayAsync(cancellationToken);
         return rows.GroupBy(item => item.EmployeeId).ToDictionary(group => group.Key, group => group.First());
     }
@@ -841,8 +865,7 @@ internal sealed class SimplePlatformService(
                    rider.Id,
                    employee.Id,
                    employee.FullNameAr,
-                   employee.FullNameEn,
-                   employee.SponsorId))
+                   employee.FullNameEn))
             .SingleOrDefaultAsync(cancellationToken);
 
     private async Task<OwnerProjection?> LoadRiderAsync(
@@ -858,8 +881,7 @@ internal sealed class SimplePlatformService(
                    rider.Id,
                    employee.Id,
                    employee.FullNameAr,
-                   employee.FullNameEn,
-                   employee.SponsorId))
+                   employee.FullNameEn))
             .SingleOrDefaultAsync(cancellationToken);
 
     private async Task<SimplePlatformAssignmentResponse[]> LoadAssignmentsAsync(
@@ -978,11 +1000,9 @@ internal sealed class SimplePlatformService(
         registration.RiderProfileId = owner.RiderProfileId;
         registration.ClientPlatformId = account.ClientPlatformId;
         registration.ClientContractId = contractId;
-        registration.SponsorId = owner.SponsorId;
+        registration.SponsorId = account.SponsorId;
         registration.OperatingCityId = account.OperatingCityId;
-        registration.RegistrationType = owner.SponsorId is null
-            ? PlatformRegistrationType.Freelancer
-            : PlatformRegistrationType.Sponsored;
+        registration.RegistrationType = PlatformRegistrationType.Sponsored;
         registration.Status = PlatformAccountRegistrationStatus.Activated;
         registration.RequestedAtUtc ??= timeProvider.GetUtcNow();
         registration.ActivatedAtUtc ??= timeProvider.GetUtcNow();
@@ -1012,6 +1032,9 @@ internal sealed class SimplePlatformService(
             projection.Account.OperatingCityId,
             projection.CityNameAr,
             projection.CityNameEn,
+            projection.Account.SponsorId,
+            projection.SponsorNameAr,
+            projection.SponsorNameEn,
             owner?.RiderProfileId,
             owner?.EmployeeId,
             owner?.NameAr,
@@ -1186,14 +1209,15 @@ internal sealed class SimplePlatformService(
         string PlatformNameAr,
         string PlatformNameEn,
         string CityNameAr,
-        string CityNameEn);
+        string CityNameEn,
+        string SponsorNameAr,
+        string? SponsorNameEn);
 
     private sealed record OwnerProjection(
         Guid RiderProfileId,
         Guid EmployeeId,
         string NameAr,
-        string? NameEn,
-        Guid? SponsorId);
+        string? NameEn);
 
     private sealed record AssignmentProjection(
         RiderClientAssignment Assignment,

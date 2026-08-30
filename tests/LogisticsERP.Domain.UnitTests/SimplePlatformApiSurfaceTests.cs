@@ -4,6 +4,7 @@ using LogisticsERP.Api.Controllers;
 using LogisticsERP.Application.Authorization;
 using LogisticsERP.Application.Features.Hr;
 using LogisticsERP.Domain.Entities.Clients;
+using LogisticsERP.Domain.Entities.Workforce;
 using LogisticsERP.Domain.Enums;
 using LogisticsERP.Domain.Platform;
 using LogisticsERP.Infrastructure.Persistence;
@@ -57,6 +58,14 @@ public sealed class SimplePlatformApiSurfaceTests
             typeof(SimplePlatformResponse).GetProperties().Select(property => property.Name));
         Assert.Contains(nameof(SimplePlatformAccountResponse.PaymentModel),
             typeof(SimplePlatformAccountResponse).GetProperties().Select(property => property.Name));
+        Assert.Contains(nameof(SimplePlatformAccountResponse.SponsorId),
+            typeof(SimplePlatformAccountResponse).GetProperties().Select(property => property.Name));
+        Assert.Contains(nameof(SimplePlatformAccountUpsertRequest.SponsorId),
+            typeof(SimplePlatformAccountUpsertRequest).GetProperties().Select(property => property.Name));
+        Assert.Contains(nameof(PlatformAccountResponse.SponsorId),
+            typeof(PlatformAccountResponse).GetProperties().Select(property => property.Name));
+        Assert.Contains(nameof(PlatformAccountUpsertRequest.SponsorId),
+            typeof(PlatformAccountUpsertRequest).GetProperties().Select(property => property.Name));
         Assert.Contains(nameof(SimplePlatformAssignmentResponse.PaymentModel),
             typeof(SimplePlatformAssignmentResponse).GetProperties().Select(property => property.Name));
         Assert.Contains(nameof(EmployeeListItemResponse.CurrentWorkPlatforms),
@@ -85,7 +94,7 @@ public sealed class SimplePlatformApiSurfaceTests
     }
 
     [Fact]
-    public void DatabaseModelEnforcesOwnerAccountAndSalaryAssignmentRules()
+    public void DatabaseModelEnforcesSponsorScopedOwnerAccountAndSalaryAssignmentRules()
     {
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseSqlServer()
@@ -96,9 +105,20 @@ public sealed class SimplePlatformApiSurfaceTests
         Assert.NotNull(account);
         var ownerIndex = Assert.Single(account!.GetIndexes(), index =>
             index.Properties.Select(property => property.Name).SequenceEqual(
-                [nameof(PlatformRiderAccount.RegisteredEmployeeId), nameof(PlatformRiderAccount.ClientPlatformId)]));
+                [
+                    nameof(PlatformRiderAccount.RegisteredEmployeeId),
+                    nameof(PlatformRiderAccount.ClientPlatformId),
+                    nameof(PlatformRiderAccount.OperatingCityId),
+                    nameof(PlatformRiderAccount.SponsorId)
+                ]));
         Assert.True(ownerIndex.IsUnique);
+        Assert.Contains("[Status] IN (1, 2)", ownerIndex.GetFilter(), StringComparison.Ordinal);
         Assert.Contains("[IsDeleted] = 0", ownerIndex.GetFilter(), StringComparison.Ordinal);
+
+        var sponsorForeignKey = Assert.Single(account.GetForeignKeys(), foreignKey =>
+            foreignKey.Properties.Select(property => property.Name).SequenceEqual(
+                [nameof(PlatformRiderAccount.SponsorId)]));
+        Assert.Equal(typeof(Sponsor), sponsorForeignKey.PrincipalEntityType.ClrType);
 
         var assignment = dbContext.Model.FindEntityType(typeof(RiderClientAssignment));
         Assert.NotNull(assignment);
@@ -149,6 +169,7 @@ public sealed class SimplePlatformApiSurfaceTests
         var accountFilterIndex = Assert.Single(account!.GetIndexes(), index =>
             index.Properties.Select(property => property.Name).SequenceEqual(
                 [
+                    nameof(PlatformRiderAccount.SponsorId),
                     nameof(PlatformRiderAccount.OperatingCityId),
                     nameof(PlatformRiderAccount.Status),
                     nameof(PlatformRiderAccount.ClientPlatformId)

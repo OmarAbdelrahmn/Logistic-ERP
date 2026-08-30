@@ -12,6 +12,7 @@ public sealed class FleetEntityIdentifierTests
         {
             new Vehicle(),
             new RiderVehicleAssignment(),
+            new RealRider(),
             new VehicleOperationalStatusPeriod(),
             new VehicleInsurancePolicy(),
             new VehicleAttachment(),

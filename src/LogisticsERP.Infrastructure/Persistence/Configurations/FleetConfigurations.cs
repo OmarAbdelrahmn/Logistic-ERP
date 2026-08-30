@@ -1,3 +1,4 @@
+using LogisticsERP.Domain.Entities.Clients;
 using LogisticsERP.Domain.Entities.Fleet;
 using LogisticsERP.Domain.Entities.Platform;
 using LogisticsERP.Domain.Entities.Workforce;
@@ -176,6 +177,7 @@ internal sealed class RiderVehicleAssignmentConfiguration : IEntityTypeConfigura
     public void Configure(EntityTypeBuilder<RiderVehicleAssignment> builder)
     {
         builder.ConfigureOperational("RiderVehicleAssignments");
+        builder.Property(x => x.IsRealRider).HasDefaultValue(true);
         builder.Property(x => x.PermissionReference).HasMaxLength(200);
         builder.Property(x => x.AssignmentReason).HasMaxLength(1000).IsRequired();
         builder.Property(x => x.StartLocationSnapshot).HasMaxLength(400);
@@ -200,6 +202,94 @@ internal sealed class RiderVehicleAssignmentConfiguration : IEntityTypeConfigura
             table.HasCheckConstraint("CK_RiderVehicleAssignments_EndFuel", "[EndFuelLevelPercentage] IS NULL OR [EndFuelLevelPercentage] BETWEEN 0 AND 100");
             table.HasCheckConstraint("CK_RiderVehicleAssignments_Permission", "[PermissionEndsOn] IS NULL OR [PermissionStartsOn] IS NULL OR [PermissionEndsOn] >= [PermissionStartsOn]");
             table.HasCheckConstraint("CK_RiderVehicleAssignments_Backdated", "[WasBackdated] = 0 OR [BackdatedReason] IS NOT NULL");
+        });
+    }
+}
+
+internal sealed class RealRiderConfiguration : IEntityTypeConfiguration<RealRider>
+{
+    public void Configure(EntityTypeBuilder<RealRider> builder)
+    {
+        builder.ConfigureHistory("RealRiders");
+        builder.Property(x => x.Name).HasMaxLength(200).IsRequired();
+        builder.Property(x => x.IqamaNo).HasMaxLength(10).IsUnicode(false).IsRequired();
+        builder.Property(x => x.RelationshipToAssignedRider).HasMaxLength(200).IsRequired();
+        builder.HasOne<RiderVehicleAssignment>().WithOne()
+            .HasForeignKey<RealRider>(x => x.RiderVehicleAssignmentId)
+            .OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(x => x.RiderVehicleAssignmentId).IsUnique();
+        builder.ToTable(table => table.HasCheckConstraint(
+            "CK_RealRiders_IqamaNo",
+            "LEN([IqamaNo]) = 10 AND [IqamaNo] NOT LIKE '%[^0-9]%'"));
+    }
+}
+
+internal sealed class VehiclePlatformAccountAssignmentConfiguration : IEntityTypeConfiguration<VehiclePlatformAccountAssignment>
+{
+    public void Configure(EntityTypeBuilder<VehiclePlatformAccountAssignment> builder)
+    {
+        builder.ConfigureOperational("VehiclePlatformAccountAssignments");
+        builder.Property(x => x.AssignmentReason).HasMaxLength(1000);
+        builder.Property(x => x.EndReason).HasMaxLength(1000);
+        builder.HasOne<Vehicle>().WithMany().HasForeignKey(x => x.VehicleId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<PlatformRiderAccount>().WithMany().HasForeignKey(x => x.PlatformRiderAccountId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(x => new { x.VehicleId, x.EndedAtUtc });
+        builder.HasIndex(x => new { x.PlatformRiderAccountId, x.EndedAtUtc });
+        builder.HasIndex(x => new { x.VehicleId, x.ApprovedAtUtc });
+        builder.HasIndex(x => new { x.Status, x.ApprovedAtUtc });
+        builder.HasIndex(x => new { x.VehicleId, x.PlatformRiderAccountId })
+            .HasFilter("[EndedAtUtc] IS NULL AND [IsDeleted] = 0");
+        builder.ToTable(table =>
+        {
+            table.HasCheckConstraint(
+                "CK_VehiclePlatformAccountAssignments_AlwaysApproved",
+                "[ApprovalStatus] = 1");
+            table.HasCheckConstraint(
+                "CK_VehiclePlatformAccountAssignments_Status",
+                "([Status] = 1 AND [EndedAtUtc] IS NULL) OR ([Status] = 2 AND [EndedAtUtc] IS NOT NULL)");
+            table.HasCheckConstraint(
+                "CK_VehiclePlatformAccountAssignments_TimeRange",
+                "[EndedAtUtc] IS NULL OR [EndedAtUtc] >= [AssignedAtUtc]");
+        });
+    }
+}
+
+internal sealed class VehiclePlatformAccountSwitchConfiguration : IEntityTypeConfiguration<VehiclePlatformAccountSwitch>
+{
+    public void Configure(EntityTypeBuilder<VehiclePlatformAccountSwitch> builder)
+    {
+        builder.ConfigureOperational("VehiclePlatformAccountSwitches");
+        builder.Property(x => x.Reason).HasMaxLength(1000).IsRequired();
+        builder.HasOne<VehiclePlatformAccountAssignment>().WithMany()
+            .HasForeignKey(x => x.SourceAssignmentId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<Vehicle>().WithMany()
+            .HasForeignKey(x => x.SourceVehicleId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<Vehicle>().WithMany()
+            .HasForeignKey(x => x.TargetVehicleId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<PlatformRiderAccount>().WithMany()
+            .HasForeignKey(x => x.PlatformRiderAccountId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<VehiclePlatformAccountAssignment>().WithMany()
+            .HasForeignKey(x => x.NewAssignmentId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(x => new { x.Status, x.RequestedAtUtc });
+        builder.HasIndex(x => new { x.PlatformRiderAccountId, x.Status });
+        builder.HasIndex(x => new { x.TargetVehicleId, x.Status });
+        builder.HasIndex(x => x.SourceAssignmentId).IsUnique()
+            .HasFilter("[Status] = 1 AND [IsDeleted] = 0");
+        builder.ToTable(table =>
+        {
+            table.HasCheckConstraint(
+                "CK_VehiclePlatformAccountSwitches_DifferentVehicles",
+                "[SourceVehicleId] <> [TargetVehicleId]");
+            table.HasCheckConstraint(
+                "CK_VehiclePlatformAccountSwitches_ModeStatus",
+                "([Mode] = 1 AND [Status] = 2) OR ([Mode] = 2 AND [Status] IN (1, 2))");
+            table.HasCheckConstraint(
+                "CK_VehiclePlatformAccountSwitches_Acceptance",
+                "([Status] = 1 AND [EffectiveAtUtc] IS NULL AND [AcceptedAtUtc] IS NULL AND [AcceptedByUserId] IS NULL AND [NewAssignmentId] IS NULL) OR " +
+                "([Status] = 2 AND [EffectiveAtUtc] IS NOT NULL AND [AcceptedAtUtc] IS NOT NULL AND [AcceptedByUserId] IS NOT NULL AND [NewAssignmentId] IS NOT NULL)");
+            table.HasCheckConstraint(
+                "CK_VehiclePlatformAccountSwitches_AcceptedAfterRequested",
+                "[AcceptedAtUtc] IS NULL OR [AcceptedAtUtc] >= [RequestedAtUtc]");
         });
     }
 }

@@ -1,4 +1,6 @@
 using LogisticsERP.Domain.Entities.Fleet;
+using LogisticsERP.Domain.Entities.Clients;
+using LogisticsERP.Domain.Entities.Workforce;
 using LogisticsERP.Domain.Enums;
 using LogisticsERP.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -28,6 +30,71 @@ public sealed class FleetModelTests
         Assert.True(vehicleIndex.IsUnique);
         Assert.Equal("[EndedAtUtc] IS NULL AND [IsDeleted] = 0", riderIndex.GetFilter());
         Assert.Equal("[EndedAtUtc] IS NULL AND [IsDeleted] = 0", vehicleIndex.GetFilter());
+    }
+
+    [Fact]
+    public void RealRiderIsOptionalOneToOneAssignmentDetailsWithValidatedIqama()
+    {
+        using var context = CreateContext();
+        var entity = context.GetService<IDesignTimeModel>().Model.FindEntityType(typeof(RealRider))!;
+        var foreignKey = Assert.Single(entity.GetForeignKeys());
+
+        Assert.True(foreignKey.IsUnique);
+        Assert.Equal(typeof(RiderVehicleAssignment), foreignKey.PrincipalEntityType.ClrType);
+        Assert.Equal(
+            [nameof(RealRider.RiderVehicleAssignmentId)],
+            foreignKey.Properties.Select(property => property.Name));
+        Assert.Equal(200, entity.FindProperty(nameof(RealRider.Name))!.GetMaxLength());
+        Assert.Equal(10, entity.FindProperty(nameof(RealRider.IqamaNo))!.GetMaxLength());
+        Assert.Contains(entity.GetCheckConstraints(), constraint => constraint.Name == "CK_RealRiders_IqamaNo");
+    }
+
+    [Fact]
+    public void PlatformAccountVehicleAssignmentsAreIndependentAndNeverDatabaseRejectedForDuplicates()
+    {
+        using var context = CreateContext();
+        var entity = context.GetService<IDesignTimeModel>().Model
+            .FindEntityType(typeof(VehiclePlatformAccountAssignment))!;
+        var pairIndex = Assert.Single(entity.GetIndexes(), index =>
+            index.Properties.Select(property => property.Name).SequenceEqual(
+                [
+                    nameof(VehiclePlatformAccountAssignment.VehicleId),
+                    nameof(VehiclePlatformAccountAssignment.PlatformRiderAccountId)
+                ]));
+
+        Assert.False(pairIndex.IsUnique);
+        Assert.Contains(entity.GetCheckConstraints(), constraint =>
+            constraint.Name == "CK_VehiclePlatformAccountAssignments_AlwaysApproved"
+            && constraint.Sql.Contains("[ApprovalStatus] = 1", StringComparison.Ordinal));
+        Assert.Contains(entity.GetForeignKeys(), foreignKey => foreignKey.PrincipalEntityType.ClrType == typeof(Vehicle));
+        Assert.Contains(entity.GetForeignKeys(), foreignKey => foreignKey.PrincipalEntityType.ClrType == typeof(PlatformRiderAccount));
+        Assert.Null(entity.FindProperty("RiderProfileId"));
+        Assert.DoesNotContain(entity.GetForeignKeys(), foreignKey =>
+            foreignKey.PrincipalEntityType.ClrType == typeof(RiderProfile));
+    }
+
+    [Fact]
+    public void PlatformAccountSwitchesAllowOnlyOnePendingRequestPerSourceAssignment()
+    {
+        using var context = CreateContext();
+        var entity = context.GetService<IDesignTimeModel>().Model
+            .FindEntityType(typeof(VehiclePlatformAccountSwitch))!;
+        var pendingIndex = Assert.Single(entity.GetIndexes(), index =>
+            index.IsUnique
+            && index.Properties.Select(property => property.Name)
+                .SequenceEqual([nameof(VehiclePlatformAccountSwitch.SourceAssignmentId)]));
+
+        Assert.Equal("[Status] = 1 AND [IsDeleted] = 0", pendingIndex.GetFilter());
+        Assert.Contains(entity.GetCheckConstraints(), constraint =>
+            constraint.Name == "CK_VehiclePlatformAccountSwitches_Acceptance");
+        Assert.Equal(
+            2,
+            entity.GetForeignKeys().Count(foreignKey =>
+                foreignKey.PrincipalEntityType.ClrType == typeof(VehiclePlatformAccountAssignment)));
+        Assert.Equal(
+            2,
+            entity.GetForeignKeys().Count(foreignKey =>
+                foreignKey.PrincipalEntityType.ClrType == typeof(Vehicle)));
     }
 
     [Fact]

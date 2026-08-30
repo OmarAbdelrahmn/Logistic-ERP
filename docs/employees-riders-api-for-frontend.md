@@ -22,8 +22,9 @@ Frontend integration reference for the current workforce API.
 | `EngagementType = OutsideRider` | External rider. Must have `IsEmployee = false`; `SponsorId` may be null. | رايدر خارجي. يجب أن يكون `IsEmployee = false` ويمكن أن يكون `SponsorId` فارغاً. |
 | `RiderProfile` | Optional one-to-one rider extension. A rider must have one when `IsEmployee = false`. | امتداد رايدر اختياري بعلاقة واحد لواحد، ويجب وجوده للرايدر. |
 | `CurrentWorkPlatform` | Compatibility field containing the first current platform account, or `null`. New clients should use `CurrentWorkPlatforms`. | حقل توافق يحتوي أول حساب منصة حالي أو `null`. على الواجهات الجديدة استخدام `CurrentWorkPlatforms`. |
-| `CurrentWorkPlatforms` | All current platform accounts for the rider (zero to two). Each item includes `paymentModel`. | جميع حسابات المنصات الحالية للرايدر (من صفر إلى اثنين)، ويتضمن كل عنصر `paymentModel`. |
+| `CurrentWorkPlatforms` | All current platform accounts for the rider. The current assignment policy allows zero or one. | جميع حسابات المنصات الحالية للرايدر، وتسمح سياسة الإسناد الحالية بصفر أو حساب واحد. |
 | `IqamaNo` | One plain 10-digit string containing digits only when supplied. It is required for `Active` employees. | رقم إقامة واحد كنص من 10 أرقام فقط عند إدخاله، ويكون مطلوباً للموظف النشط. |
+| `Address` | Optional structured address with building number, street, district, city, postal code, and additional number. | عنوان اختياري منظم يشمل رقم المبنى والشارع والحي والمدينة والرمز البريدي والرقم الإضافي. |
 | `Status` | `Draft`, `Onboarding`, `Active`, `Suspended`, `OnLeave`, `Terminated`, `Archived`, `Fleeing`, `Accident`, `Sick`. | حالات دورة الحياة: مسودة، تهيئة، نشط، موقوف، إجازة، منتهٍ، مؤرشف، متغيب/هارب، حادث، مرضي. |
 
 `ResidencyProfession` and `WorkingForMeAs` are direct employee fields. There is no separate employee residency-permit entity. An Iqama scan or other proof is stored through the employee document APIs.
@@ -62,6 +63,7 @@ Response `200 OK`:
     "fullNameEn": "Ahmed Mohammed",
     "nationality": "Saudi",
     "primaryPhone": "0500000000",
+    "address": null,
     "isEmployee": false,
     "engagementType": "OutsideRider",
     "status": "Active",
@@ -102,6 +104,14 @@ Response `200 OK`:
     "primaryPhone": "0500000000",
     "secondaryPhone": null,
     "email": "ahmed@example.com",
+    "address": {
+      "buildingNumber": "1234",
+      "street": "King Fahd Road",
+      "district": "Al Rawdah",
+      "city": "Jeddah",
+      "postalCode": "23434",
+      "additionalNumber": "5678"
+    },
     "profilePhotoDocumentId": null,
     "maritalStatus": "Married",
     "emergencyContactName": "محمد أحمد",
@@ -169,6 +179,7 @@ Request body:
   "primaryPhone": "0500000000",
   "secondaryPhone": null,
   "email": "ahmed@example.com",
+  "address": null,
   "profilePhotoDocumentId": null,
   "maritalStatus": "Married",
   "emergencyContactName": null,
@@ -418,6 +429,7 @@ Response `200 OK`:
     "iqamaNo": "1234567890",
     "fullNameAr": "أحمد محمد",
     "primaryPhone": "0500000000",
+    "address": null,
     "operatingCityId": "00000000-0000-0000-0000-000000000003",
     "operationalWorkTypeId": "00000000-0000-0000-0000-000000000004",
     "status": "Active",
@@ -447,6 +459,7 @@ Required fields:
   "iqamaNo": "1234567890",
   "fullNameAr": "أحمد محمد",
   "primaryPhone": "0500000000",
+  "address": null,
   "operatingCityId": "00000000-0000-0000-0000-000000000003",
   "operationalWorkTypeId": "00000000-0000-0000-0000-000000000004"
 }
@@ -466,11 +479,12 @@ Send the latest `rowVersion` returned by a create, get, or update request:
 {
   "iqamaNo": "1234567890",
   "fullNameAr": "أحمد محمد المحدث",
+  "address": null,
   "rowVersion": "AAAAAAAAAAA="
 }
 ```
 
-The update changes only the Iqama number and Arabic full name. All other employee and rider data is preserved. Response: `200 OK` with a refreshed `rowVersion`.
+The update accepts the Iqama number, Arabic full name, nationality, IBAN, and optional address. Sending `address: null` clears the address. Response: `200 OK` with a refreshed `rowVersion`.
 
 ## Frontend workflow
 

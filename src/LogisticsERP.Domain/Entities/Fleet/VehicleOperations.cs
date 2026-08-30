@@ -32,6 +32,7 @@ public sealed class VehicleOdometerReading : HistoryEntity
 public sealed class RiderVehicleAssignment : AuditableEntity
 {
     public Guid RiderProfileId { get; set; }
+    public bool IsRealRider { get; set; } = true;
     public Guid VehicleId { get; set; }
     public Guid OperationId { get; set; }
     public Guid? PreviousAssignmentId { get; set; }
@@ -58,6 +59,14 @@ public sealed class RiderVehicleAssignment : AuditableEntity
     public Guid? CorrectionOfAssignmentId { get; set; }
     public string? CorrectionReason { get; set; }
     public string? Notes { get; set; }
+}
+
+public sealed class RealRider : HistoryEntity
+{
+    public Guid RiderVehicleAssignmentId { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string IqamaNo { get; set; } = string.Empty;
+    public string RelationshipToAssignedRider { get; set; } = string.Empty;
 }
 
 public sealed class RiderVehicleAssignmentEvent : HistoryEntity

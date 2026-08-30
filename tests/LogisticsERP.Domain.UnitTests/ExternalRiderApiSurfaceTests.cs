@@ -45,7 +45,7 @@ public sealed class ExternalRiderApiSurfaceTests
             .ToArray();
 
         Assert.Equal(
-            ["IqamaNo", "FullNameAr", "Nationality", "Iban", "PrimaryPhone", "OperatingCityId", "OperationalWorkTypeId"],
+            ["IqamaNo", "FullNameAr", "Nationality", "Iban", "PrimaryPhone", "Address", "OperatingCityId", "OperationalWorkTypeId"],
             properties);
     }
 
@@ -56,7 +56,7 @@ public sealed class ExternalRiderApiSurfaceTests
             .Select(property => property.Name)
             .ToArray();
 
-        Assert.Equal(["IqamaNo", "FullNameAr", "Nationality", "Iban", "RowVersion"], properties);
+        Assert.Equal(["IqamaNo", "FullNameAr", "Nationality", "Iban", "Address", "RowVersion"], properties);
     }
 
     [Fact]
@@ -64,5 +64,9 @@ public sealed class ExternalRiderApiSurfaceTests
     {
         Assert.Contains(nameof(EmployeeResponse.Iban), typeof(EmployeeResponse).GetProperties().Select(property => property.Name));
         Assert.Contains(nameof(RiderDetailsResponse.Iban), typeof(RiderDetailsResponse).GetProperties().Select(property => property.Name));
+        Assert.Contains(nameof(EmployeeResponse.Address), typeof(EmployeeResponse).GetProperties().Select(property => property.Name));
+        Assert.Contains(nameof(EmployeeUpsertRequest.Address), typeof(EmployeeUpsertRequest).GetProperties().Select(property => property.Name));
+        Assert.Contains(nameof(RiderDetailsResponse.Address), typeof(RiderDetailsResponse).GetProperties().Select(property => property.Name));
+        Assert.Contains(nameof(ExternalRiderResponse.Address), typeof(ExternalRiderResponse).GetProperties().Select(property => property.Name));
     }
 }

@@ -20,6 +20,17 @@ public sealed class VehicleAssignmentsController(
             new EventId(1001, nameof(VehicleAssignmentsController)),
             "Vehicle assignment command failed. CorrelationId: {CorrelationId}");
 
+    [HttpGet]
+    public async Task<IActionResult> Get(
+        [FromQuery] Guid? vehicleId,
+        [FromQuery] Guid? riderProfileId,
+        [FromQuery] bool activeOnly = false,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await service.GetAssignmentsAsync(vehicleId, riderProfileId, activeOnly, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
     [HttpPost("take")]
     [Consumes("multipart/form-data")]
     [RequestSizeLimit(32 * 1024 * 1024)]

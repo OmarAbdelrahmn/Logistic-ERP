@@ -153,8 +153,8 @@ internal sealed partial class ExportJobProcessor(
             case "platform-accounts":
             {
                 var rows = await dbContext.PlatformRiderAccounts.AsNoTracking().OrderBy(item => item.Code).ToArrayAsync(cancellationToken);
-                return Prepend(["Code", "ExternalAccountId", "ClientPlatformId", "RegisteredEmployeeId", "PaymentModel", "Status"],
-                    rows.Select(item => new[] { item.Code ?? "", item.ExternalAccountId ?? "", item.ClientPlatformId.ToString(), item.RegisteredEmployeeId?.ToString() ?? "", item.PaymentModel.ToString(), item.Status.ToString() }));
+                return Prepend(["Code", "ExternalAccountId", "ClientPlatformId", "OperatingCityId", "SponsorId", "RegisteredEmployeeId", "PaymentModel", "Status"],
+                    rows.Select(item => new[] { item.Code ?? "", item.ExternalAccountId ?? "", item.ClientPlatformId.ToString(), item.OperatingCityId.ToString(), item.SponsorId.ToString(), item.RegisteredEmployeeId?.ToString() ?? "", item.PaymentModel.ToString(), item.Status.ToString() }));
             }
             case "leave-requests":
             {

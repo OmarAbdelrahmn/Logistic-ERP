@@ -8,6 +8,7 @@ public sealed record EmployeeListItemResponse(
     string? Nationality,
     string? Iban,
     string? PrimaryPhone,
+    AddressResponse? Address,
     bool IsEmployee,
     string EngagementType,
     string Status,
@@ -54,6 +55,7 @@ public sealed record EmployeeResponse(
     string? PrimaryPhone,
     string? SecondaryPhone,
     string? Email,
+    AddressResponse? Address,
     Guid? ProfilePhotoDocumentId,
     string? MaritalStatus,
     string? EmergencyContactName,
@@ -89,6 +91,7 @@ public sealed record EmployeeUpsertRequest(
     string? PrimaryPhone,
     string? SecondaryPhone,
     string? Email,
+    AddressRequest? Address,
     Guid? ProfilePhotoDocumentId,
     string? MaritalStatus,
     string? EmergencyContactName,
@@ -125,6 +128,7 @@ public sealed record RiderDetailsResponse(
     string? FullNameEn,
     string? Nationality,
     string? Iban,
+    AddressResponse? Address,
     string EngagementType,
     string Status,
     string? TShirtSize,
@@ -137,6 +141,7 @@ public sealed record CreateExternalRiderRequest(
     string? Nationality,
     string? Iban,
     string PrimaryPhone,
+    AddressRequest? Address,
     Guid OperatingCityId,
     Guid OperationalWorkTypeId);
 
@@ -145,6 +150,7 @@ public sealed record UpdateExternalRiderRequest(
     string FullNameAr,
     string? Nationality,
     string? Iban,
+    AddressRequest? Address,
     string RowVersion);
 
 public sealed record ExternalRiderResponse(
@@ -155,6 +161,7 @@ public sealed record ExternalRiderResponse(
     string? Nationality,
     string? Iban,
     string? PrimaryPhone,
+    AddressResponse? Address,
     Guid? OperatingCityId,
     Guid? OperationalWorkTypeId,
     string Status,

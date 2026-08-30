@@ -8732,3 +8732,492 @@ END;
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260829113437_AddVehicleOperationCardCompliance'
+)
+BEGIN
+    CREATE TABLE [app].[VehicleOperationCards] (
+        [Id] uniqueidentifier NOT NULL,
+        [VehicleId] uniqueidentifier NOT NULL,
+        [CardNumber] nvarchar(150) NOT NULL,
+        [IssuingAuthority] nvarchar(200) NOT NULL,
+        [IssueDate] date NOT NULL,
+        [ExpiryDate] date NOT NULL,
+        [Status] int NOT NULL,
+        [IsCurrent] bit NOT NULL,
+        [PreviousRecordId] uniqueidentifier NULL,
+        [ProofAttachmentId] uniqueidentifier NULL,
+        [Notes] nvarchar(4000) NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_VehicleOperationCards] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_VehicleOperationCards_DateRange] CHECK ([ExpiryDate] >= [IssueDate]),
+        CONSTRAINT [FK_VehicleOperationCards_VehicleOperationCards_PreviousRecordId] FOREIGN KEY ([PreviousRecordId]) REFERENCES [app].[VehicleOperationCards] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_VehicleOperationCards_Vehicles_VehicleId] FOREIGN KEY ([VehicleId]) REFERENCES [app].[Vehicles] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260829113437_AddVehicleOperationCardCompliance'
+)
+BEGIN
+    CREATE INDEX [IX_VehicleOperationCards_ExpiryDate_IsCurrent] ON [app].[VehicleOperationCards] ([ExpiryDate], [IsCurrent]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260829113437_AddVehicleOperationCardCompliance'
+)
+BEGIN
+    CREATE INDEX [IX_VehicleOperationCards_IsDeleted] ON [app].[VehicleOperationCards] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260829113437_AddVehicleOperationCardCompliance'
+)
+BEGIN
+    CREATE INDEX [IX_VehicleOperationCards_PreviousRecordId] ON [app].[VehicleOperationCards] ([PreviousRecordId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260829113437_AddVehicleOperationCardCompliance'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_VehicleOperationCards_VehicleId] ON [app].[VehicleOperationCards] ([VehicleId]) WHERE [IsCurrent] = 1 AND [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260829113437_AddVehicleOperationCardCompliance'
+)
+BEGIN
+    CREATE UNIQUE INDEX [IX_VehicleOperationCards_VehicleId_CardNumber] ON [app].[VehicleOperationCards] ([VehicleId], [CardNumber]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260829113437_AddVehicleOperationCardCompliance'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260829113437_AddVehicleOperationCardCompliance', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260830083825_AddPlatformAccountSponsorAndEmployeeAddress'
+)
+BEGIN
+    DROP INDEX [IX_PlatformRiderAccounts_OperatingCityId_Status_ClientPlatformId] ON [app].[PlatformRiderAccounts];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260830083825_AddPlatformAccountSponsorAndEmployeeAddress'
+)
+BEGIN
+    DROP INDEX [IX_PlatformRiderAccounts_RegisteredEmployeeId_ClientPlatformId] ON [app].[PlatformRiderAccounts];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260830083825_AddPlatformAccountSponsorAndEmployeeAddress'
+)
+BEGIN
+    ALTER TABLE [app].[PlatformRiderAccounts] ADD [SponsorId] uniqueidentifier NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260830083825_AddPlatformAccountSponsorAndEmployeeAddress'
+)
+BEGIN
+    UPDATE account
+    SET account.[SponsorId] = COALESCE(registration.[SponsorId], employee.[SponsorId], '019c18d5-62e1-7000-8000-000000000042')
+    FROM [app].[PlatformRiderAccounts] AS account
+    LEFT JOIN [app].[PlatformAccountRegistrations] AS registration
+        ON registration.[PlatformRiderAccountId] = account.[Id]
+        AND registration.[IsDeleted] = 0
+    LEFT JOIN [app].[Employees] AS employee
+        ON employee.[Id] = account.[RegisteredEmployeeId]
+        AND employee.[IsDeleted] = 0;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260830083825_AddPlatformAccountSponsorAndEmployeeAddress'
+)
+BEGIN
+    DECLARE @var33 nvarchar(max);
+    SELECT @var33 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[app].[PlatformRiderAccounts]') AND [c].[name] = N'SponsorId');
+    IF @var33 IS NOT NULL EXEC(N'ALTER TABLE [app].[PlatformRiderAccounts] DROP CONSTRAINT ' + @var33 + ';');
+    ALTER TABLE [app].[PlatformRiderAccounts] ALTER COLUMN [SponsorId] uniqueidentifier NOT NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260830083825_AddPlatformAccountSponsorAndEmployeeAddress'
+)
+BEGIN
+    ALTER TABLE [app].[Employees] ADD [AddressAdditionalNumber] nvarchar(32) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260830083825_AddPlatformAccountSponsorAndEmployeeAddress'
+)
+BEGIN
+    ALTER TABLE [app].[Employees] ADD [AddressBuildingNumber] nvarchar(32) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260830083825_AddPlatformAccountSponsorAndEmployeeAddress'
+)
+BEGIN
+    ALTER TABLE [app].[Employees] ADD [AddressCity] nvarchar(200) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260830083825_AddPlatformAccountSponsorAndEmployeeAddress'
+)
+BEGIN
+    ALTER TABLE [app].[Employees] ADD [AddressDistrict] nvarchar(200) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260830083825_AddPlatformAccountSponsorAndEmployeeAddress'
+)
+BEGIN
+    ALTER TABLE [app].[Employees] ADD [AddressPostalCode] nvarchar(32) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260830083825_AddPlatformAccountSponsorAndEmployeeAddress'
+)
+BEGIN
+    ALTER TABLE [app].[Employees] ADD [AddressStreet] nvarchar(200) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260830083825_AddPlatformAccountSponsorAndEmployeeAddress'
+)
+BEGIN
+    CREATE INDEX [IX_PlatformRiderAccounts_OperatingCityId] ON [app].[PlatformRiderAccounts] ([OperatingCityId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260830083825_AddPlatformAccountSponsorAndEmployeeAddress'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_PlatformRiderAccounts_RegisteredEmployeeId_ClientPlatformId_OperatingCityId_SponsorId] ON [app].[PlatformRiderAccounts] ([RegisteredEmployeeId], [ClientPlatformId], [OperatingCityId], [SponsorId]) WHERE [RegisteredEmployeeId] IS NOT NULL AND [Status] IN (1, 2) AND [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260830083825_AddPlatformAccountSponsorAndEmployeeAddress'
+)
+BEGIN
+    EXEC(N'CREATE INDEX [IX_PlatformRiderAccounts_SponsorId_OperatingCityId_Status_ClientPlatformId] ON [app].[PlatformRiderAccounts] ([SponsorId], [OperatingCityId], [Status], [ClientPlatformId]) WHERE [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260830083825_AddPlatformAccountSponsorAndEmployeeAddress'
+)
+BEGIN
+    ALTER TABLE [app].[PlatformRiderAccounts] ADD CONSTRAINT [FK_PlatformRiderAccounts_Sponsors_SponsorId] FOREIGN KEY ([SponsorId]) REFERENCES [app].[Sponsors] ([Id]) ON DELETE NO ACTION;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260830083825_AddPlatformAccountSponsorAndEmployeeAddress'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260830083825_AddPlatformAccountSponsorAndEmployeeAddress', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260830085921_AddVehiclePlatformAccountAssignments'
+)
+BEGIN
+    CREATE TABLE [app].[VehiclePlatformAccountAssignments] (
+        [Id] uniqueidentifier NOT NULL,
+        [VehicleId] uniqueidentifier NOT NULL,
+        [PlatformRiderAccountId] uniqueidentifier NOT NULL,
+        [AssignedAtUtc] datetimeoffset NOT NULL,
+        [AssignmentReason] nvarchar(1000) NULL,
+        [ApprovalStatus] int NOT NULL,
+        [ApprovedAtUtc] datetimeoffset NOT NULL,
+        [ApprovedByUserId] uniqueidentifier NOT NULL,
+        [Status] int NOT NULL,
+        [EndedAtUtc] datetimeoffset NULL,
+        [EndedByUserId] uniqueidentifier NULL,
+        [EndReason] nvarchar(1000) NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_VehiclePlatformAccountAssignments] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_VehiclePlatformAccountAssignments_AlwaysApproved] CHECK ([ApprovalStatus] = 1),
+        CONSTRAINT [CK_VehiclePlatformAccountAssignments_Status] CHECK (([Status] = 1 AND [EndedAtUtc] IS NULL) OR ([Status] = 2 AND [EndedAtUtc] IS NOT NULL)),
+        CONSTRAINT [CK_VehiclePlatformAccountAssignments_TimeRange] CHECK ([EndedAtUtc] IS NULL OR [EndedAtUtc] >= [AssignedAtUtc]),
+        CONSTRAINT [FK_VehiclePlatformAccountAssignments_PlatformRiderAccounts_PlatformRiderAccountId] FOREIGN KEY ([PlatformRiderAccountId]) REFERENCES [app].[PlatformRiderAccounts] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_VehiclePlatformAccountAssignments_Vehicles_VehicleId] FOREIGN KEY ([VehicleId]) REFERENCES [app].[Vehicles] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260830085921_AddVehiclePlatformAccountAssignments'
+)
+BEGIN
+    CREATE INDEX [IX_VehiclePlatformAccountAssignments_IsDeleted] ON [app].[VehiclePlatformAccountAssignments] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260830085921_AddVehiclePlatformAccountAssignments'
+)
+BEGIN
+    CREATE INDEX [IX_VehiclePlatformAccountAssignments_PlatformRiderAccountId_EndedAtUtc] ON [app].[VehiclePlatformAccountAssignments] ([PlatformRiderAccountId], [EndedAtUtc]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260830085921_AddVehiclePlatformAccountAssignments'
+)
+BEGIN
+    CREATE INDEX [IX_VehiclePlatformAccountAssignments_Status_ApprovedAtUtc] ON [app].[VehiclePlatformAccountAssignments] ([Status], [ApprovedAtUtc]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260830085921_AddVehiclePlatformAccountAssignments'
+)
+BEGIN
+    CREATE INDEX [IX_VehiclePlatformAccountAssignments_VehicleId_ApprovedAtUtc] ON [app].[VehiclePlatformAccountAssignments] ([VehicleId], [ApprovedAtUtc]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260830085921_AddVehiclePlatformAccountAssignments'
+)
+BEGIN
+    CREATE INDEX [IX_VehiclePlatformAccountAssignments_VehicleId_EndedAtUtc] ON [app].[VehiclePlatformAccountAssignments] ([VehicleId], [EndedAtUtc]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260830085921_AddVehiclePlatformAccountAssignments'
+)
+BEGIN
+    EXEC(N'CREATE INDEX [IX_VehiclePlatformAccountAssignments_VehicleId_PlatformRiderAccountId] ON [app].[VehiclePlatformAccountAssignments] ([VehicleId], [PlatformRiderAccountId]) WHERE [EndedAtUtc] IS NULL AND [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260830085921_AddVehiclePlatformAccountAssignments'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260830085921_AddVehiclePlatformAccountAssignments', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260830111116_AddVehiclePlatformAccountSwitches'
+)
+BEGIN
+    CREATE TABLE [app].[VehiclePlatformAccountSwitches] (
+        [Id] uniqueidentifier NOT NULL,
+        [SourceAssignmentId] uniqueidentifier NOT NULL,
+        [SourceVehicleId] uniqueidentifier NOT NULL,
+        [TargetVehicleId] uniqueidentifier NOT NULL,
+        [PlatformRiderAccountId] uniqueidentifier NOT NULL,
+        [Mode] int NOT NULL,
+        [Status] int NOT NULL,
+        [Reason] nvarchar(1000) NOT NULL,
+        [RequestedAtUtc] datetimeoffset NOT NULL,
+        [RequestedByUserId] uniqueidentifier NOT NULL,
+        [EffectiveAtUtc] datetimeoffset NULL,
+        [AcceptedAtUtc] datetimeoffset NULL,
+        [AcceptedByUserId] uniqueidentifier NULL,
+        [NewAssignmentId] uniqueidentifier NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_VehiclePlatformAccountSwitches] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_VehiclePlatformAccountSwitches_Acceptance] CHECK (([Status] = 1 AND [EffectiveAtUtc] IS NULL AND [AcceptedAtUtc] IS NULL AND [AcceptedByUserId] IS NULL AND [NewAssignmentId] IS NULL) OR ([Status] = 2 AND [EffectiveAtUtc] IS NOT NULL AND [AcceptedAtUtc] IS NOT NULL AND [AcceptedByUserId] IS NOT NULL AND [NewAssignmentId] IS NOT NULL)),
+        CONSTRAINT [CK_VehiclePlatformAccountSwitches_AcceptedAfterRequested] CHECK ([AcceptedAtUtc] IS NULL OR [AcceptedAtUtc] >= [RequestedAtUtc]),
+        CONSTRAINT [CK_VehiclePlatformAccountSwitches_DifferentVehicles] CHECK ([SourceVehicleId] <> [TargetVehicleId]),
+        CONSTRAINT [CK_VehiclePlatformAccountSwitches_ModeStatus] CHECK (([Mode] = 1 AND [Status] = 2) OR ([Mode] = 2 AND [Status] IN (1, 2))),
+        CONSTRAINT [FK_VehiclePlatformAccountSwitches_PlatformRiderAccounts_PlatformRiderAccountId] FOREIGN KEY ([PlatformRiderAccountId]) REFERENCES [app].[PlatformRiderAccounts] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_VehiclePlatformAccountSwitches_VehiclePlatformAccountAssignments_NewAssignmentId] FOREIGN KEY ([NewAssignmentId]) REFERENCES [app].[VehiclePlatformAccountAssignments] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_VehiclePlatformAccountSwitches_VehiclePlatformAccountAssignments_SourceAssignmentId] FOREIGN KEY ([SourceAssignmentId]) REFERENCES [app].[VehiclePlatformAccountAssignments] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_VehiclePlatformAccountSwitches_Vehicles_SourceVehicleId] FOREIGN KEY ([SourceVehicleId]) REFERENCES [app].[Vehicles] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_VehiclePlatformAccountSwitches_Vehicles_TargetVehicleId] FOREIGN KEY ([TargetVehicleId]) REFERENCES [app].[Vehicles] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260830111116_AddVehiclePlatformAccountSwitches'
+)
+BEGIN
+    CREATE INDEX [IX_VehiclePlatformAccountSwitches_IsDeleted] ON [app].[VehiclePlatformAccountSwitches] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260830111116_AddVehiclePlatformAccountSwitches'
+)
+BEGIN
+    CREATE INDEX [IX_VehiclePlatformAccountSwitches_NewAssignmentId] ON [app].[VehiclePlatformAccountSwitches] ([NewAssignmentId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260830111116_AddVehiclePlatformAccountSwitches'
+)
+BEGIN
+    CREATE INDEX [IX_VehiclePlatformAccountSwitches_PlatformRiderAccountId_Status] ON [app].[VehiclePlatformAccountSwitches] ([PlatformRiderAccountId], [Status]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260830111116_AddVehiclePlatformAccountSwitches'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_VehiclePlatformAccountSwitches_SourceAssignmentId] ON [app].[VehiclePlatformAccountSwitches] ([SourceAssignmentId]) WHERE [Status] = 1 AND [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260830111116_AddVehiclePlatformAccountSwitches'
+)
+BEGIN
+    CREATE INDEX [IX_VehiclePlatformAccountSwitches_SourceVehicleId] ON [app].[VehiclePlatformAccountSwitches] ([SourceVehicleId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260830111116_AddVehiclePlatformAccountSwitches'
+)
+BEGIN
+    CREATE INDEX [IX_VehiclePlatformAccountSwitches_Status_RequestedAtUtc] ON [app].[VehiclePlatformAccountSwitches] ([Status], [RequestedAtUtc]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260830111116_AddVehiclePlatformAccountSwitches'
+)
+BEGIN
+    CREATE INDEX [IX_VehiclePlatformAccountSwitches_TargetVehicleId_Status] ON [app].[VehiclePlatformAccountSwitches] ([TargetVehicleId], [Status]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260830111116_AddVehiclePlatformAccountSwitches'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260830111116_AddVehiclePlatformAccountSwitches', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260830124234_AddRealRiderToVehicleAssignments'
+)
+BEGIN
+    ALTER TABLE [app].[RiderVehicleAssignments] ADD [IsRealRider] bit NOT NULL DEFAULT CAST(1 AS bit);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260830124234_AddRealRiderToVehicleAssignments'
+)
+BEGIN
+    CREATE TABLE [app].[RealRiders] (
+        [Id] uniqueidentifier NOT NULL,
+        [RiderVehicleAssignmentId] uniqueidentifier NOT NULL,
+        [Name] nvarchar(200) NOT NULL,
+        [IqamaNo] varchar(10) NOT NULL,
+        [RelationshipToAssignedRider] nvarchar(200) NOT NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        CONSTRAINT [PK_RealRiders] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_RealRiders_IqamaNo] CHECK (LEN([IqamaNo]) = 10 AND [IqamaNo] NOT LIKE '%[^0-9]%'),
+        CONSTRAINT [FK_RealRiders_RiderVehicleAssignments_RiderVehicleAssignmentId] FOREIGN KEY ([RiderVehicleAssignmentId]) REFERENCES [app].[RiderVehicleAssignments] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260830124234_AddRealRiderToVehicleAssignments'
+)
+BEGIN
+    CREATE UNIQUE INDEX [IX_RealRiders_RiderVehicleAssignmentId] ON [app].[RealRiders] ([RiderVehicleAssignmentId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260830124234_AddRealRiderToVehicleAssignments'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260830124234_AddRealRiderToVehicleAssignments', N'10.0.11');
+END;
+
+COMMIT;
+GO
+

@@ -36,7 +36,8 @@ public sealed class PlatformOperationsController(IPlatformOperationsService serv
 
     [HttpGet("accounts")]
     [RequirePermission(PermissionKeys.Operations.PlatformAccountsRead)]
-    public Task<IActionResult> Accounts([FromQuery] Guid? platformId, CancellationToken cancellationToken) => ToAction(service.GetAccountsAsync(platformId, cancellationToken));
+    public Task<IActionResult> Accounts([FromQuery] Guid? platformId, [FromQuery] Guid? sponsorId, CancellationToken cancellationToken) =>
+        ToAction(service.GetAccountsAsync(platformId, sponsorId, cancellationToken));
 
     [HttpPost("accounts")]
     [RequirePermission(PermissionKeys.Operations.PlatformAccountsManage)]

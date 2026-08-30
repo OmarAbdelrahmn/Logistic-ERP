@@ -113,7 +113,10 @@ internal sealed class PlatformOperationsService(
         return (await GetContractsAsync(null, cancellationToken)).MapSingle(item => item.Id == entity.Id);
     }
 
-    public async Task<Result<IReadOnlyList<PlatformAccountResponse>>> GetAccountsAsync(Guid? platformId, CancellationToken cancellationToken = default)
+    public async Task<Result<IReadOnlyList<PlatformAccountResponse>>> GetAccountsAsync(
+        Guid? platformId,
+        Guid? sponsorId,
+        CancellationToken cancellationToken = default)
     {
         var rows = await (from account in dbContext.PlatformRiderAccounts.AsNoTracking()
                           join platform in dbContext.ClientPlatforms.AsNoTracking() on account.ClientPlatformId equals platform.Id
@@ -121,10 +124,13 @@ internal sealed class PlatformOperationsService(
                           from employee in employees.DefaultIfEmpty()
                           join operatingCity in dbContext.OperatingCities.AsNoTracking() on account.OperatingCityId equals operatingCity.Id
                           join city in dbContext.GlobalCities.AsNoTracking() on operatingCity.GlobalCityId equals city.Id
-                          where platformId == null || account.ClientPlatformId == platformId
+                          join sponsor in dbContext.Sponsors.AsNoTracking() on account.SponsorId equals sponsor.Id
+                          where (platformId == null || account.ClientPlatformId == platformId)
+                              && (sponsorId == null || account.SponsorId == sponsorId)
                           orderby platform.NameAr, account.ExternalAccountId
                           select new AccountProjection(account, platform.NameAr,
-                              employee == null ? null : employee.FullNameAr, city.NameAr))
+                              employee == null ? null : employee.FullNameAr, city.NameAr,
+                              sponsor.RegistryNameAr, sponsor.RegistryNameEn))
             .ToArrayAsync(cancellationToken);
         return Result.Success<IReadOnlyList<PlatformAccountResponse>>(rows.Select(ToAccount).ToArray());
     }
@@ -133,6 +139,7 @@ internal sealed class PlatformOperationsService(
     {
         if (!TryParseEnum<PlatformRiderAccountStatus>(request.Status, out var status)
             || !TryParseEnum<PlatformAccountPaymentModel>(request.PaymentModel, out var paymentModel)
+            || request.SponsorId == Guid.Empty
             || !HrServiceSupport.HasText(request.Code) || !HrServiceSupport.HasText(request.ExternalAccountId)
             || request.EndDate is not null && request.StartDate is not null && request.EndDate < request.StartDate)
             return Result.Failure<PlatformAccountResponse>(HrErrors.InvalidRequest);
@@ -142,6 +149,9 @@ internal sealed class PlatformOperationsService(
             .SingleOrDefaultAsync(cancellationToken);
         var refsValid = supportedPaymentModels is not null
             && await dbContext.OperatingCities.AnyAsync(item => item.Id == request.OperatingCityId, cancellationToken)
+            && await dbContext.Sponsors.AnyAsync(
+                item => item.Id == request.SponsorId && item.Status == CatalogStatus.Active,
+                cancellationToken)
             && (request.RegisteredEmployeeId is null || await dbContext.Employees.AnyAsync(item => item.Id == request.RegisteredEmployeeId && !item.IsEmployee, cancellationToken));
         if (!refsValid) return Result.Failure<PlatformAccountResponse>(HrErrors.NotFound);
         if (!IsPaymentModelSupported(supportedPaymentModels!.Value, paymentModel))
@@ -161,6 +171,15 @@ internal sealed class PlatformOperationsService(
         var activeAssignment = await dbContext.RiderClientAssignments.SingleOrDefaultAsync(
             item => item.PlatformRiderAccountId == entity.Id && item.EffectiveTo == null,
             cancellationToken);
+        if (activeAssignment is not null && status != PlatformRiderAccountStatus.Assigned
+            || activeAssignment is null && status == PlatformRiderAccountStatus.Assigned)
+            return Result.Failure<PlatformAccountResponse>(HrErrors.Conflict);
+        if (activeAssignment is not null
+            && (entity.ClientPlatformId != request.ClientPlatformId
+                || entity.RegisteredEmployeeId != request.RegisteredEmployeeId
+                || entity.OperatingCityId != request.OperatingCityId
+                || entity.SponsorId != request.SponsorId))
+            return Result.Failure<PlatformAccountResponse>(HrErrors.Conflict);
         if (activeAssignment is not null && entity.PaymentModel != paymentModel)
         {
             var otherPaymentModels = await dbContext.RiderClientAssignments
@@ -176,11 +195,24 @@ internal sealed class PlatformOperationsService(
         }
         var code = HrServiceSupport.NormalizeCode(request.Code);
         var externalId = request.ExternalAccountId.Trim();
-        if (await dbContext.PlatformRiderAccounts.AnyAsync(item => item.Id != entity.Id && (item.Code == code || item.ClientPlatformId == request.ClientPlatformId && item.ExternalAccountId == externalId), cancellationToken))
+        if (await dbContext.PlatformRiderAccounts.IgnoreQueryFilters().AnyAsync(item =>
+                item.Id != entity.Id
+                && (item.Code == code
+                    || item.ClientPlatformId == request.ClientPlatformId && item.ExternalAccountId == externalId
+                    || !item.IsDeleted
+                        && (item.Status == PlatformRiderAccountStatus.Available
+                            || item.Status == PlatformRiderAccountStatus.Assigned)
+                        && item.RegisteredEmployeeId != null
+                        && item.RegisteredEmployeeId == request.RegisteredEmployeeId
+                        && item.ClientPlatformId == request.ClientPlatformId
+                        && item.OperatingCityId == request.OperatingCityId
+                        && item.SponsorId == request.SponsorId),
+                cancellationToken))
             return Result.Failure<PlatformAccountResponse>(HrErrors.Duplicate);
         entity.ClientPlatformId = request.ClientPlatformId;
         entity.RegisteredEmployeeId = request.RegisteredEmployeeId;
         entity.OperatingCityId = request.OperatingCityId;
+        entity.SponsorId = request.SponsorId;
         entity.Code = code;
         entity.ExternalAccountId = externalId;
         entity.UserName = HrServiceSupport.TrimOrNull(request.UserName);
@@ -192,8 +224,15 @@ internal sealed class PlatformOperationsService(
         entity.EndDate = request.EndDate;
         entity.OwnershipNotes = HrServiceSupport.TrimOrNull(request.OwnershipNotes);
         entity.OperationalNotes = HrServiceSupport.TrimOrNull(request.OperationalNotes);
-        await dbContext.SaveChangesAsync(cancellationToken);
-        return (await GetAccountsAsync(null, cancellationToken)).MapSingle(item => item.Id == entity.Id);
+        try
+        {
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException)
+        {
+            return Result.Failure<PlatformAccountResponse>(HrErrors.Duplicate);
+        }
+        return (await GetAccountsAsync(null, null, cancellationToken)).MapSingle(item => item.Id == entity.Id);
     }
 
     public async Task<Result<IReadOnlyList<PlatformCredentialVersionResponse>>> GetCredentialVersionsAsync(
@@ -297,7 +336,13 @@ internal sealed class PlatformOperationsService(
         var refsValid = riderEmployeeId == request.RegisteredEmployeeId && contractPlatform == request.ClientPlatformId
             && await dbContext.OperatingCities.AnyAsync(item => item.Id == request.OperatingCityId, cancellationToken)
             && (request.SponsorId is null || await dbContext.Sponsors.AnyAsync(item => item.Id == request.SponsorId, cancellationToken))
-            && (request.PlatformRiderAccountId is null || await dbContext.PlatformRiderAccounts.AnyAsync(item => item.Id == request.PlatformRiderAccountId && item.ClientPlatformId == request.ClientPlatformId, cancellationToken));
+            && (request.PlatformRiderAccountId is null || await dbContext.PlatformRiderAccounts.AnyAsync(item =>
+                item.Id == request.PlatformRiderAccountId
+                && item.ClientPlatformId == request.ClientPlatformId
+                && item.RegisteredEmployeeId == request.RegisteredEmployeeId
+                && item.OperatingCityId == request.OperatingCityId
+                && item.SponsorId == request.SponsorId,
+                cancellationToken));
         if (!refsValid) return Result.Failure<PlatformRegistrationResponse>(HrErrors.NotFound);
         PlatformAccountRegistration entity;
         if (id is null)
@@ -487,7 +532,8 @@ internal sealed class PlatformOperationsService(
         row.Item.ContactPhone, row.Item.ContactEmail, row.Item.Notes, HrServiceSupport.EncodeRowVersion(row.Item.RowVersion));
     private static PlatformAccountResponse ToAccount(AccountProjection row) => new(row.Item.Id,
         row.Item.ClientPlatformId, row.PlatformNameAr, row.Item.RegisteredEmployeeId, row.EmployeeNameAr,
-        row.Item.OperatingCityId, row.CityNameAr, row.Item.Code, row.Item.ExternalAccountId, row.Item.UserName,
+        row.Item.OperatingCityId, row.CityNameAr, row.Item.SponsorId, row.SponsorNameAr, row.SponsorNameEn,
+        row.Item.Code, row.Item.ExternalAccountId, row.Item.UserName,
         row.Item.PaymentModel.ToString(), row.Item.Status.ToString(), row.Item.StatusReason, row.Item.AcquisitionDate, row.Item.StartDate,
         row.Item.EndDate, row.Item.OwnershipNotes, row.Item.OperationalNotes, HrServiceSupport.EncodeRowVersion(row.Item.RowVersion));
     private static PlatformRegistrationResponse ToRegistration(RegistrationProjection row) => new(row.Item.Id,
@@ -605,7 +651,7 @@ internal sealed class PlatformOperationsService(
 
     private sealed record ContractProjection(ClientContract Item, string PlatformNameAr);
     private sealed record AccountProjection(PlatformRiderAccount Item, string PlatformNameAr,
-        string? EmployeeNameAr, string CityNameAr);
+        string? EmployeeNameAr, string CityNameAr, string SponsorNameAr, string? SponsorNameEn);
     private sealed record RegistrationProjection(PlatformAccountRegistration Item, string EmployeeNameAr,
         string PlatformNameAr, string ContractNameAr, string? SponsorNameAr, string CityNameAr);
     private sealed record AssignmentProjection(RiderClientAssignment Item, Guid EmployeeId, string EmployeeNameAr, string ContractNameAr, string ExternalAccountId);

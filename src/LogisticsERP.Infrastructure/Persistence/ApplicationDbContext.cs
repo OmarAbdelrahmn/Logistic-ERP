@@ -89,6 +89,9 @@ public sealed class ApplicationDbContext(
     public DbSet<VehicleOperationalStatusPeriod> VehicleOperationalStatusPeriods => Set<VehicleOperationalStatusPeriod>();
     public DbSet<VehicleOdometerReading> VehicleOdometerReadings => Set<VehicleOdometerReading>();
     public DbSet<RiderVehicleAssignment> RiderVehicleAssignments => Set<RiderVehicleAssignment>();
+    public DbSet<RealRider> RealRiders => Set<RealRider>();
+    public DbSet<VehiclePlatformAccountAssignment> VehiclePlatformAccountAssignments => Set<VehiclePlatformAccountAssignment>();
+    public DbSet<VehiclePlatformAccountSwitch> VehiclePlatformAccountSwitches => Set<VehiclePlatformAccountSwitch>();
     public DbSet<RiderVehicleAssignmentEvent> RiderVehicleAssignmentEvents => Set<RiderVehicleAssignmentEvent>();
     public DbSet<RiderVehicleAssignmentPromissoryFile> RiderVehicleAssignmentPromissoryFiles => Set<RiderVehicleAssignmentPromissoryFile>();
     public DbSet<FleetCommandReceipt> FleetCommandReceipts => Set<FleetCommandReceipt>();
