@@ -14,6 +14,7 @@ internal sealed class ApplicationUserConfiguration : IEntityTypeConfiguration<Ap
         builder.ToTable("Users", "identity");
         builder.Property(entity => entity.DisplayNameAr).HasMaxLength(200).IsRequired();
         builder.Property(entity => entity.DisplayNameEn).HasMaxLength(200).IsRequired();
+        builder.Property(entity => entity.ProfileImageUrl).HasMaxLength(512);
         builder.Property(entity => entity.PreferredLocale).HasMaxLength(10).IsRequired();
         builder.Property(entity => entity.PreferredTheme).HasMaxLength(32).IsRequired();
         builder.Property(entity => entity.PreferredDensity).HasMaxLength(32).IsRequired();

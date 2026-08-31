@@ -5,6 +5,11 @@ public sealed record UpdateUserPreferencesRequest(
     string? PreferredTheme,
     string? PreferredDensity);
 
+public sealed record UserProfileImageUpload(
+    Stream Content,
+    string ContentType,
+    long Length);
+
 public sealed record EmployeeUserProfileResponse(
     Guid Id,
     string? IqamaNo,
@@ -29,6 +34,7 @@ public sealed record UserProfileResponse(
     string? PhoneNumber,
     string DisplayNameAr,
     string DisplayNameEn,
+    string? ProfileImageUrl,
     string Status,
     string PreferredLocale,
     string PreferredTheme,

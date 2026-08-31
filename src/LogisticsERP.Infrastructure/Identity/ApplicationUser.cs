@@ -8,6 +8,7 @@ public sealed class ApplicationUser : IdentityUser<Guid>
     public Guid? EmployeeId { get; set; }
     public string DisplayNameAr { get; set; } = string.Empty;
     public string DisplayNameEn { get; set; } = string.Empty;
+    public string? ProfileImageUrl { get; set; }
     public UserAccountStatus Status { get; set; } = UserAccountStatus.PendingTemporaryPassword;
     public string PreferredLocale { get; set; } = "ar";
     public string PreferredTheme { get; set; } = "light";

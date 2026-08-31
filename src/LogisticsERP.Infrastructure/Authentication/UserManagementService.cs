@@ -1084,7 +1084,7 @@ internal sealed class UserManagementService(
 
     private static ManagedUserResponse ToResponse(ApplicationUser user) => new(
         user.Id, user.EmployeeId, user.UserName ?? string.Empty, user.Email, user.PhoneNumber,
-        user.DisplayNameAr, user.DisplayNameEn, user.Status.ToString(), user.RequiresPasswordChange,
+        user.DisplayNameAr, user.DisplayNameEn, user.ProfileImageUrl, user.Status.ToString(), user.RequiresPasswordChange,
         user.IsDevelopmentOnly, user.LastLoginAtUtc, user.LastActivityAtUtc, user.CreatedAtUtc,
         Convert.ToBase64String(user.RowVersion));
 

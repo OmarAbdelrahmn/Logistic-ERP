@@ -5,6 +5,7 @@ using LogisticsERP.Domain.Enums;
 using LogisticsERP.Infrastructure.Identity;
 using LogisticsERP.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 
 namespace LogisticsERP.Infrastructure.Authentication;
 
@@ -12,11 +13,20 @@ internal sealed class UserProfileService(
     IdentityDbContext identityDbContext,
     ApplicationDbContext applicationDbContext,
     ICurrentUser currentUser,
-    TimeProvider timeProvider) : IUserProfileService
+    TimeProvider timeProvider,
+    IHostEnvironment hostEnvironment) : IUserProfileService
 {
+    private const long MaximumProfileImageBytes = 5 * 1024 * 1024;
     private static readonly HashSet<string> AllowedLocales = new(StringComparer.OrdinalIgnoreCase) { "ar", "en" };
     private static readonly HashSet<string> AllowedThemes = new(StringComparer.OrdinalIgnoreCase) { "light", "dark", "system" };
     private static readonly HashSet<string> AllowedDensities = new(StringComparer.OrdinalIgnoreCase) { "compact", "comfortable" };
+    private static readonly Dictionary<string, string> ProfileImageExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["image/jpeg"] = ".jpg",
+        ["image/png"] = ".png",
+        ["image/webp"] = ".webp"
+    };
+    private readonly string profileImageDirectory = Path.GetFullPath(Path.Combine(hostEnvironment.ContentRootPath, "wwwroot", "profile-images"));
 
     public async Task<Result<UserProfileResponse>> GetCurrentAsync(CancellationToken cancellationToken = default)
     {
@@ -67,6 +77,43 @@ internal sealed class UserProfileService(
         }
 
         await identityDbContext.SaveChangesAsync(cancellationToken);
+        return Result.Success(await CreateResponseAsync(user, cancellationToken));
+    }
+
+    public async Task<Result<UserProfileResponse>> UpdateProfileImageAsync(
+        UserProfileImageUpload image,
+        CancellationToken cancellationToken = default)
+    {
+        if (currentUser.UserId is not { } userId)
+        {
+            return Result.Failure<UserProfileResponse>(UserProfileErrors.CurrentUserUnavailable);
+        }
+
+        var user = await identityDbContext.Users.SingleOrDefaultAsync(item => item.Id == userId, cancellationToken);
+        if (user is null)
+        {
+            return Result.Failure<UserProfileResponse>(UserProfileErrors.CurrentUserUnavailable);
+        }
+
+        var storedImage = await StoreProfileImageAsync(userId, image, cancellationToken);
+        if (storedImage is null)
+        {
+            return Result.Failure<UserProfileResponse>(UserProfileErrors.InvalidProfileImage);
+        }
+
+        var previousImageUrl = user.ProfileImageUrl;
+        user.ProfileImageUrl = storedImage.Url;
+        try
+        {
+            await identityDbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch
+        {
+            DeleteFileBestEffort(storedImage.FullPath);
+            throw;
+        }
+
+        DeletePreviousProfileImageBestEffort(previousImageUrl);
         return Result.Success(await CreateResponseAsync(user, cancellationToken));
     }
 
@@ -266,6 +313,7 @@ internal sealed class UserProfileService(
             user.PhoneNumber,
             user.DisplayNameAr,
             user.DisplayNameEn,
+            user.ProfileImageUrl,
             user.Status.ToString(),
             user.PreferredLocale,
             user.PreferredTheme,
@@ -306,6 +354,116 @@ internal sealed class UserProfileService(
 
     private static bool IsAllowed(string? value, HashSet<string> allowed) =>
         value is null || allowed.Contains(value.Trim());
+
+    private async Task<StoredProfileImage?> StoreProfileImageAsync(
+        Guid userId,
+        UserProfileImageUpload image,
+        CancellationToken cancellationToken)
+    {
+        if (image.Length is <= 0 or > MaximumProfileImageBytes
+            || image.Content is null
+            || string.IsNullOrWhiteSpace(image.ContentType)
+            || !ProfileImageExtensions.TryGetValue(image.ContentType, out var extension))
+        {
+            return null;
+        }
+
+        Directory.CreateDirectory(profileImageDirectory);
+        var fileName = $"{userId:N}-{Guid.CreateVersion7():N}{extension}";
+        var fullPath = Path.Combine(profileImageDirectory, fileName);
+        var completed = false;
+        try
+        {
+            await using var destination = new FileStream(
+                fullPath,
+                FileMode.CreateNew,
+                FileAccess.Write,
+                FileShare.None,
+                64 * 1024,
+                FileOptions.Asynchronous | FileOptions.SequentialScan);
+
+            var buffer = new byte[64 * 1024];
+            var header = new byte[12];
+            var headerLength = 0;
+            long total = 0;
+            while (true)
+            {
+                var read = await image.Content.ReadAsync(buffer, cancellationToken);
+                if (read == 0)
+                {
+                    break;
+                }
+
+                if (headerLength < header.Length)
+                {
+                    var count = Math.Min(read, header.Length - headerLength);
+                    buffer.AsSpan(0, count).CopyTo(header.AsSpan(headerLength));
+                    headerLength += count;
+                }
+
+                total += read;
+                if (total > MaximumProfileImageBytes)
+                {
+                    return null;
+                }
+
+                await destination.WriteAsync(buffer.AsMemory(0, read), cancellationToken);
+            }
+
+            if (total != image.Length || !HeaderMatches(image.ContentType, header.AsSpan(0, headerLength)))
+            {
+                return null;
+            }
+
+            await destination.FlushAsync(cancellationToken);
+            completed = true;
+            return new StoredProfileImage(fullPath, $"/profile-images/{fileName}");
+        }
+        finally
+        {
+            if (!completed)
+            {
+                DeleteFileBestEffort(fullPath);
+            }
+        }
+    }
+
+    private void DeletePreviousProfileImageBestEffort(string? profileImageUrl)
+    {
+        const string pathPrefix = "/profile-images/";
+        if (string.IsNullOrWhiteSpace(profileImageUrl)
+            || !profileImageUrl.StartsWith(pathPrefix, StringComparison.Ordinal)
+            || profileImageUrl[pathPrefix.Length..].Contains('/')
+            || profileImageUrl[pathPrefix.Length..].Contains('\\'))
+        {
+            return;
+        }
+
+        var fileName = profileImageUrl[pathPrefix.Length..];
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            return;
+        }
+
+        var fullPath = Path.GetFullPath(Path.Combine(profileImageDirectory, fileName));
+        if (fullPath.StartsWith(profileImageDirectory + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+        {
+            DeleteFileBestEffort(fullPath);
+        }
+    }
+
+    private static bool HeaderMatches(string contentType, ReadOnlySpan<byte> header) => contentType.ToLowerInvariant() switch
+    {
+        "image/jpeg" => header.Length >= 3 && header[0] == 0xFF && header[1] == 0xD8 && header[2] == 0xFF,
+        "image/png" => header.Length >= 8 && header[..8].SequenceEqual(new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A }),
+        "image/webp" => header.Length >= 12 && header[..4].SequenceEqual("RIFF"u8) && header[8..12].SequenceEqual("WEBP"u8),
+        _ => false
+    };
+
+    private static void DeleteFileBestEffort(string fullPath)
+    {
+        try { File.Delete(fullPath); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+    }
 
     private static AuthorizationScopeResponse ToScopeResponse(ScopeRow scope) =>
         new(scope.ScopeType.ToString(), scope.TargetId);
@@ -354,4 +512,6 @@ internal sealed class UserProfileService(
         Guid? DirectPermissionAssignmentId,
         AccessScopeType ScopeType,
         Guid TargetId);
+
+    private sealed record StoredProfileImage(string FullPath, string Url);
 }

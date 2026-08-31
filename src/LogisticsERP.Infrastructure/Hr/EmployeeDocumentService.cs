@@ -15,8 +15,7 @@ internal sealed class EmployeeDocumentService(
     IPrivateFileStorage fileStorage,
     TimeProvider timeProvider) : IEmployeeDocumentService
 {
-    // The employee-documents API is temporarily available anonymously for Swagger verification.
-    // Keep a deterministic actor on document-version history until controller authorization is restored.
+    // Non-HTTP callers still need a deterministic actor in immutable version history.
     private static readonly Guid AnonymousEmployeeDocumentsApiActorId =
         Guid.Parse("019c18d5-62e1-7000-d000-000000000003");
 
@@ -424,7 +423,7 @@ internal sealed class EmployeeDocumentService(
         bool isRequired,
         DateOnly checkDate)
     {
-        if (documents.Count == 0)
+        if (documents.Length == 0)
         {
             return new ChecklistEvaluation(isRequired ? "Missing" : "Optional", isRequired ? ["document"] : []);
         }

@@ -13,4 +13,9 @@ public static class UserProfileErrors
         "UserProfile.InvalidPreferences",
         "At least one valid user preference must be supplied.",
         ErrorType.Validation);
+
+    public static readonly OperationError InvalidProfileImage = new(
+        "UserProfile.InvalidProfileImage",
+        "The profile image must be a JPEG, PNG, or WebP image no larger than 5 MB.",
+        ErrorType.Validation);
 }

@@ -59,10 +59,11 @@ public sealed class StaffDocumentApiSurfaceTests
     public void RiderControllerSupportsCustomDocumentTypeUploads()
     {
         var action = typeof(RiderDocumentsController).GetMethod(nameof(RiderDocumentsController.UploadCustom));
+        Assert.NotNull(action);
         var post = Assert.Single(action!.GetCustomAttributes<HttpPostAttribute>());
 
         Assert.Null(post.Template);
-        Assert.Contains(action.GetParameters(), parameter => parameter.ParameterType == typeof(EmployeeDocumentUploadForm));
+        Assert.Contains(action!.GetParameters(), parameter => parameter.ParameterType == typeof(EmployeeDocumentUploadForm));
     }
 
     [Fact]

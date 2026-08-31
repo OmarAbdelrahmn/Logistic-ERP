@@ -10,6 +10,10 @@ public interface IUserProfileService
         UpdateUserPreferencesRequest request,
         CancellationToken cancellationToken = default);
 
+    Task<Result<UserProfileResponse>> UpdateProfileImageAsync(
+        UserProfileImageUpload image,
+        CancellationToken cancellationToken = default);
+
     Task<Result<UserAuthorizationResponse>> GetAuthorizationAsync(
         CancellationToken cancellationToken = default);
 }

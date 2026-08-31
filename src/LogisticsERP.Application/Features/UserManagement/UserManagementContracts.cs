@@ -10,6 +10,7 @@ public sealed record ManagedUserResponse(
     string? PhoneNumber,
     string DisplayNameAr,
     string DisplayNameEn,
+    string? ProfileImageUrl,
     string Status,
     bool RequiresPasswordChange,
     bool IsDevelopmentOnly,
