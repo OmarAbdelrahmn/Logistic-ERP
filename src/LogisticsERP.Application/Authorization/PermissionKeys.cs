@@ -76,6 +76,8 @@ public static class PermissionKeys
         public const string PlatformAssignmentsManage = "platform_assignments.manage";
         public const string HousingRead = "housing.read";
         public const string HousingManage = "housing.manage";
+        public const string PhoneSimsRead = "phone_sims.read";
+        public const string PhoneSimsManage = "phone_sims.manage";
     }
 
     public static class Reporting
@@ -180,6 +182,8 @@ public static class PermissionKeys
         Operations.PlatformAssignmentsManage,
         Operations.HousingRead,
         Operations.HousingManage,
+        Operations.PhoneSimsRead,
+        Operations.PhoneSimsManage,
         Reporting.ReportsRead,
         Reporting.ExportsCreate,
         Reporting.NotificationsRead,

@@ -3,29 +3,38 @@ using LogisticsERP.Api.ErrorHandling;
 using LogisticsERP.Application.Authorization;
 using LogisticsERP.Application.Features.Hr;
 using LogisticsERP.Domain.Entities.Documents;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LogisticsERP.Api.Controllers;
 
 [ApiController]
 [Route("api/employees/{employeeId:guid}/documents")]
-[AllowAnonymous]
 public sealed class EmployeeDocumentsController(IEmployeeDocumentService service) : ControllerBase
 {
     [HttpGet]
+    [RequirePermission(PermissionKeys.Documents.Read)]
     public async Task<IActionResult> GetAll(Guid employeeId, CancellationToken cancellationToken)
     {
         var result = await service.GetEmployeeDocumentsAsync(employeeId, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 
+    [HttpGet("checklist")]
+    [RequirePermission(PermissionKeys.Documents.Read)]
+    public async Task<IActionResult> Checklist(Guid employeeId, CancellationToken cancellationToken)
+    {
+        var result = await service.GetEmployeeDocumentChecklistAsync(employeeId, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
     [HttpPost]
+    [RequirePermission(PermissionKeys.Documents.Upload)]
     [RequestSizeLimit(11 * 1024 * 1024)]
     public Task<IActionResult> Upload(Guid employeeId, [FromForm] EmployeeDocumentUploadForm request, CancellationToken cancellationToken) =>
         UploadInternal(employeeId, request.DocumentTypeId, request, cancellationToken);
 
     [HttpPost("{documentId:guid}/versions")]
+    [RequirePermission(PermissionKeys.Documents.Upload)]
     [RequestSizeLimit(11 * 1024 * 1024)]
     public async Task<IActionResult> UploadVersion(Guid employeeId, Guid documentId, [FromForm] DocumentVersionUploadForm request, CancellationToken cancellationToken)
     {
@@ -37,6 +46,7 @@ public sealed class EmployeeDocumentsController(IEmployeeDocumentService service
     }
 
     [HttpPut("{documentId:guid}")]
+    [RequirePermission(PermissionKeys.Documents.Upload)]
     public async Task<IActionResult> UpdateMetadata(Guid employeeId, Guid documentId, [FromBody] UpdateDocumentMetadataRequest request, CancellationToken cancellationToken)
     {
         var result = await service.UpdateMetadataAsync(employeeId, documentId, request.Metadata, request.RowVersion, cancellationToken);
@@ -44,6 +54,7 @@ public sealed class EmployeeDocumentsController(IEmployeeDocumentService service
     }
 
     [HttpGet("{documentId:guid}/versions")]
+    [RequirePermission(PermissionKeys.Documents.Read)]
     public async Task<IActionResult> Versions(Guid employeeId, Guid documentId, CancellationToken cancellationToken)
     {
         var result = await service.GetVersionsAsync(employeeId, documentId, cancellationToken);
@@ -51,6 +62,7 @@ public sealed class EmployeeDocumentsController(IEmployeeDocumentService service
     }
 
     [HttpGet("{documentId:guid}/download")]
+    [RequirePermission(PermissionKeys.Documents.DownloadSensitive)]
     public async Task<IActionResult> Download(Guid employeeId, Guid documentId, [FromQuery] Guid? versionId, CancellationToken cancellationToken)
     {
         var result = await service.DownloadAsync(employeeId, documentId, versionId, cancellationToken);
@@ -60,6 +72,7 @@ public sealed class EmployeeDocumentsController(IEmployeeDocumentService service
     }
 
     [HttpGet("{documentId:guid}/preview")]
+    [RequirePermission(PermissionKeys.Documents.DownloadSensitive)]
     public async Task<IActionResult> Preview(Guid employeeId, Guid documentId, [FromQuery] Guid? versionId, CancellationToken cancellationToken)
     {
         var result = await service.DownloadAsync(employeeId, documentId, versionId, cancellationToken);
@@ -70,6 +83,7 @@ public sealed class EmployeeDocumentsController(IEmployeeDocumentService service
     }
 
     [HttpPatch("{documentId:guid}/archive")]
+    [RequirePermission(PermissionKeys.Documents.Upload)]
     public async Task<IActionResult> Archive(Guid employeeId, Guid documentId, [FromBody] ArchiveRequest request, CancellationToken cancellationToken)
     {
         var result = await service.ArchiveAsync(employeeId, documentId, request, cancellationToken);
@@ -95,6 +109,22 @@ public sealed class EmployeeDocumentsController(IEmployeeDocumentService service
 [RequestSizeLimit(11 * 1024 * 1024)]
 public sealed class RiderDocumentsController(IEmployeeDocumentService service) : ControllerBase
 {
+    [HttpGet("checklist")]
+    [RequirePermission(PermissionKeys.Documents.Read)]
+    public async Task<IActionResult> Checklist(Guid riderProfileId, CancellationToken cancellationToken)
+    {
+        var result = await service.GetRiderDocumentChecklistAsync(riderProfileId, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpPost]
+    [RequirePermission(PermissionKeys.Documents.Upload)]
+    public Task<IActionResult> UploadCustom(
+        Guid riderProfileId,
+        [FromForm] EmployeeDocumentUploadForm request,
+        CancellationToken cancellationToken) =>
+        Upload(riderProfileId, request.DocumentTypeId, request, cancellationToken);
+
     [HttpPost("residency-permit")]
     [RequirePermission(PermissionKeys.Documents.Upload)]
     public Task<IActionResult> Residency(Guid riderProfileId, [FromForm] EmployeeDocumentUploadForm request, CancellationToken cancellationToken) => Upload(riderProfileId, DocumentType.ResidencyPermitId, request, cancellationToken);

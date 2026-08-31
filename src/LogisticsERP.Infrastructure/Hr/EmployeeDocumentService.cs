@@ -12,7 +12,8 @@ namespace LogisticsERP.Infrastructure.Hr;
 internal sealed class EmployeeDocumentService(
     ApplicationDbContext dbContext,
     ICurrentUser currentUser,
-    IPrivateFileStorage fileStorage) : IEmployeeDocumentService
+    IPrivateFileStorage fileStorage,
+    TimeProvider timeProvider) : IEmployeeDocumentService
 {
     // The employee-documents API is temporarily available anonymously for Swagger verification.
     // Keep a deterministic actor on document-version history until controller authorization is restored.
@@ -33,6 +34,38 @@ internal sealed class EmployeeDocumentService(
         return Result.Success<IReadOnlyList<EmployeeDocumentResponse>>(await BuildDocuments(employeeId, cancellationToken));
     }
 
+    public async Task<Result<IReadOnlyList<EmployeeDocumentChecklistItemResponse>>> GetEmployeeDocumentChecklistAsync(
+        Guid employeeId,
+        CancellationToken cancellationToken = default)
+    {
+        var employee = await dbContext.Employees.AsNoTracking()
+            .Where(item => item.Id == employeeId)
+            .Select(item => new EmployeeChecklistProjection(item.Id, item.EngagementType))
+            .SingleOrDefaultAsync(cancellationToken);
+        if (employee is null)
+        {
+            return Result.Failure<IReadOnlyList<EmployeeDocumentChecklistItemResponse>>(HrErrors.NotFound);
+        }
+
+        var hasRiderProfile = await dbContext.RiderProfiles.AsNoTracking()
+            .AnyAsync(item => item.EmployeeId == employeeId, cancellationToken);
+        var checklist = await BuildChecklistAsync(employee, hasRiderProfile, cancellationToken);
+        return Result.Success<IReadOnlyList<EmployeeDocumentChecklistItemResponse>>(checklist);
+    }
+
+    public async Task<Result<IReadOnlyList<EmployeeDocumentChecklistItemResponse>>> GetRiderDocumentChecklistAsync(
+        Guid riderProfileId,
+        CancellationToken cancellationToken = default)
+    {
+        var employeeId = await dbContext.RiderProfiles.AsNoTracking()
+            .Where(item => item.Id == riderProfileId)
+            .Select(item => (Guid?)item.EmployeeId)
+            .SingleOrDefaultAsync(cancellationToken);
+        return employeeId is null
+            ? Result.Failure<IReadOnlyList<EmployeeDocumentChecklistItemResponse>>(HrErrors.NotFound)
+            : await GetEmployeeDocumentChecklistAsync(employeeId.Value, cancellationToken);
+    }
+
     public async Task<Result<EmployeeDocumentResponse>> UploadAsync(
         Guid employeeId,
         Guid documentTypeId,
@@ -46,6 +79,12 @@ internal sealed class EmployeeDocumentService(
         if (employee is null || documentType is null)
         {
             return Result.Failure<EmployeeDocumentResponse>(HrErrors.NotFound);
+        }
+        var hasRiderProfile = await dbContext.RiderProfiles.AsNoTracking()
+            .AnyAsync(item => item.EmployeeId == employeeId, cancellationToken);
+        if (!IsDocumentTypeApplicable(documentType, employee.EngagementType, hasRiderProfile))
+        {
+            return Result.Failure<EmployeeDocumentResponse>(HrErrors.InvalidRequest);
         }
         if (!ValidateMetadata(documentType, metadata))
         {
@@ -264,6 +303,68 @@ internal sealed class EmployeeDocumentService(
             Convert.ToBase64String(row.Document.RowVersion))).ToArray();
     }
 
+    private async Task<EmployeeDocumentChecklistItemResponse[]> BuildChecklistAsync(
+        EmployeeChecklistProjection employee,
+        bool hasRiderProfile,
+        CancellationToken cancellationToken)
+    {
+        var checkDate = DateOnly.FromDateTime(timeProvider.GetUtcNow().ToOffset(TimeSpan.FromHours(3)).DateTime);
+        var rows = await (from requirement in dbContext.DocumentRequirements.AsNoTracking()
+                          join type in dbContext.DocumentTypes.AsNoTracking() on requirement.DocumentTypeId equals type.Id
+                          where requirement.Status == CatalogStatus.Active
+                              && type.Status == CatalogStatus.Active
+                              && requirement.EffectiveFrom <= checkDate
+                              && (requirement.EffectiveTo == null || requirement.EffectiveTo >= checkDate)
+                              && (requirement.RelationshipType == null || requirement.RelationshipType == employee.EngagementType)
+                              && (!requirement.AppliesToRiderProfile || hasRiderProfile)
+                          select new DocumentAssignmentProjection(requirement, type))
+            .ToArrayAsync(cancellationToken);
+
+        var assignments = rows
+            .Where(row => IsDocumentTypeApplicable(row.Type, employee.EngagementType, hasRiderProfile))
+            .GroupBy(row => row.Type.Id)
+            .ToArray();
+        if (assignments.Length == 0)
+        {
+            return [];
+        }
+
+        var documents = await BuildDocuments(employee.Id, cancellationToken);
+        var documentsByType = documents
+            .GroupBy(item => item.DocumentTypeId)
+            .ToDictionary(group => group.Key, group => group.ToArray());
+
+        return assignments
+            .Select(group =>
+            {
+                var type = group.First().Type;
+                var assignedDocuments = documentsByType.GetValueOrDefault(type.Id) ?? [];
+                var isRequired = group.Any(row => row.Requirement.IsRequired);
+                var evaluation = EvaluateChecklist(type, assignedDocuments, isRequired, checkDate);
+                var reminderOffsets = group
+                    .SelectMany(row => ParseReminderOffsets(row.Requirement.ReminderOffsetsDays))
+                    .Distinct()
+                    .OrderDescending()
+                    .ToArray();
+                return new EmployeeDocumentChecklistItemResponse(
+                    type.Id,
+                    type.Code,
+                    type.NameAr,
+                    type.NameEn,
+                    type.RequiresNumber,
+                    type.RequiresIssueDate,
+                    type.RequiresExpiryDate,
+                    type.RequiresFile,
+                    isRequired,
+                    reminderOffsets,
+                    evaluation.Status,
+                    evaluation.MissingFields,
+                    assignedDocuments);
+            })
+            .OrderBy(item => item.DocumentTypeNameAr)
+            .ToArray();
+    }
+
     private async Task<Result<StoredFile>> StoreFileAsync(Guid employeeId, Guid documentId, Guid versionId, long maxSize, FileUploadContent file, CancellationToken cancellationToken)
     {
         var result = await fileStorage.StoreAsync(
@@ -305,15 +406,86 @@ internal sealed class EmployeeDocumentService(
         return file.Length is > 0
             && file.Length <= type.MaxFileSizeBytes
             && AllowedContentTypes.Contains(file.ContentType)
-            && (allowedByType.Contains(file.ContentType, StringComparer.OrdinalIgnoreCase)
-                || file.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase) && AllowedContentTypes.Contains(file.ContentType))
+            && allowedByType.Contains(file.ContentType, StringComparer.OrdinalIgnoreCase)
             && HrServiceSupport.HasText(file.OriginalFileName);
+    }
+
+    private static bool IsDocumentTypeApplicable(
+        DocumentType type,
+        EmployeeRelationshipType relationshipType,
+        bool hasRiderProfile) =>
+        relationshipType == EmployeeRelationshipType.SponsoredInternal && type.AppliesToSponsoredInternal
+        || relationshipType == EmployeeRelationshipType.OutsideRider && type.AppliesToOutsideRider
+        || hasRiderProfile && type.AppliesToRiderProfile;
+
+    private static ChecklistEvaluation EvaluateChecklist(
+        DocumentType type,
+        EmployeeDocumentResponse[] documents,
+        bool isRequired,
+        DateOnly checkDate)
+    {
+        if (documents.Count == 0)
+        {
+            return new ChecklistEvaluation(isRequired ? "Missing" : "Optional", isRequired ? ["document"] : []);
+        }
+
+        var activeDocuments = documents
+            .Where(item => string.Equals(item.Status, DocumentStatus.Active.ToString(), StringComparison.Ordinal))
+            .ToArray();
+        var evaluations = activeDocuments
+            .Select(item => RequiredFieldFailures(type, item, checkDate))
+            .OrderBy(item => item.Length)
+            .ToArray();
+        if (evaluations.Any(item => item.Length == 0))
+        {
+            return new ChecklistEvaluation("Complete", []);
+        }
+
+        if (documents.Any(item =>
+                string.Equals(item.Status, DocumentStatus.Expired.ToString(), StringComparison.Ordinal)
+                || item.ExpiryDate < checkDate))
+        {
+            return new ChecklistEvaluation("Expired", ["validExpiryDate"]);
+        }
+
+        return new ChecklistEvaluation("Incomplete", evaluations.FirstOrDefault() ?? ["activeDocument"]);
+    }
+
+    private static string[] RequiredFieldFailures(
+        DocumentType type,
+        EmployeeDocumentResponse document,
+        DateOnly checkDate)
+    {
+        var missing = new List<string>(4);
+        if (type.RequiresNumber && !HrServiceSupport.HasText(document.DocumentNumber)) missing.Add("documentNumber");
+        if (type.RequiresIssueDate && document.IssueDate is null) missing.Add("issueDate");
+        if (type.RequiresExpiryDate)
+        {
+            if (document.ExpiryDate is null) missing.Add("expiryDate");
+            else if (document.ExpiryDate < checkDate) missing.Add("validExpiryDate");
+        }
+        if (type.RequiresFile && document.CurrentVersionId is null) missing.Add("file");
+        return [.. missing];
+    }
+
+    private static IEnumerable<int> ParseReminderOffsets(string value)
+    {
+        foreach (var part in value.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
+        {
+            if (int.TryParse(part, out var offset)) yield return offset;
+        }
     }
 
     private sealed record EmployeeDocumentProjection(
         EmployeeDocument Document,
         DocumentType Type,
         EmployeeDocumentVersion? Version);
+
+    private sealed record EmployeeChecklistProjection(Guid Id, EmployeeRelationshipType EngagementType);
+
+    private sealed record DocumentAssignmentProjection(DocumentRequirement Requirement, DocumentType Type);
+
+    private sealed record ChecklistEvaluation(string Status, IReadOnlyList<string> MissingFields);
 
     private sealed record StoredFile(string StoragePath, string StoredName, long Length, string Checksum);
 }

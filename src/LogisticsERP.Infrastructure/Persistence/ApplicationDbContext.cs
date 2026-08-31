@@ -7,6 +7,7 @@ using LogisticsERP.Domain.Entities.Fleet;
 using LogisticsERP.Domain.Entities.Platform;
 using LogisticsERP.Domain.Entities.System;
 using LogisticsERP.Domain.Entities.Tags;
+using LogisticsERP.Domain.Entities.Telecom;
 using LogisticsERP.Domain.Entities.Workforce;
 using Microsoft.EntityFrameworkCore;
 using HousingEntity = LogisticsERP.Domain.Entities.Housing.Housing;
@@ -109,6 +110,9 @@ public sealed class ApplicationDbContext(
     public DbSet<VehicleAccidentEvent> VehicleAccidentEvents => Set<VehicleAccidentEvent>();
     public DbSet<VehicleAccidentAttachment> VehicleAccidentAttachments => Set<VehicleAccidentAttachment>();
     public DbSet<VehicleAccidentReportVersion> VehicleAccidentReportVersions => Set<VehicleAccidentReportVersion>();
+    public DbSet<PhoneSimCard> PhoneSimCards => Set<PhoneSimCard>();
+    public DbSet<RiderPhoneSimAssignment> RiderPhoneSimAssignments => Set<RiderPhoneSimAssignment>();
+    public DbSet<PhoneSimResponsibilityChange> PhoneSimResponsibilityChanges => Set<PhoneSimResponsibilityChange>();
 
     public IQueryable<TEntity> Query<TEntity>() where TEntity : Entity => Set<TEntity>();
 
@@ -219,6 +223,7 @@ public sealed class ApplicationDbContext(
         if (entityNamespace.EndsWith(".Documents", StringComparison.Ordinal)) return "documents";
         if (entityNamespace.EndsWith(".Housing", StringComparison.Ordinal)) return "housing";
         if (entityNamespace.EndsWith(".Clients", StringComparison.Ordinal)) return "platform-operations";
+        if (entityNamespace.EndsWith(".Telecom", StringComparison.Ordinal)) return "telecom";
         if (entityNamespace.EndsWith(".Platform", StringComparison.Ordinal)) return "catalog";
         if (entityNamespace.EndsWith(".Workforce", StringComparison.Ordinal)) return "workforce";
 

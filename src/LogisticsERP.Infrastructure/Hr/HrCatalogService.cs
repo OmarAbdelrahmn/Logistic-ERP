@@ -11,6 +11,11 @@ namespace LogisticsERP.Infrastructure.Hr;
 
 internal sealed class HrCatalogService(ApplicationDbContext dbContext) : IHrCatalogService
 {
+    private static readonly HashSet<string> SupportedDocumentMimeTypes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "application/pdf", "image/jpeg", "image/png", "image/webp", "image/gif", "image/bmp"
+    };
+
     public async Task<Result<IReadOnlyList<GlobalCityResponse>>> GetGlobalCitiesAsync(CancellationToken cancellationToken = default)
     {
         var rows = await dbContext.GlobalCities.AsNoTracking()
@@ -154,7 +159,8 @@ internal sealed class HrCatalogService(ApplicationDbContext dbContext) : IHrCata
         var mimeTypes = request.AllowedMimeTypes.Select(item => item.Trim().ToLowerInvariant()).Where(item => item.Length > 0).Distinct().ToArray();
         if (!HrServiceSupport.HasText(request.Code) || !HrServiceSupport.HasText(request.NameAr)
             || !HrServiceSupport.HasText(request.NameEn) || mimeTypes.Length == 0
-            || mimeTypes.Any(item => !item.Contains('/') || item.Length > 150)
+            || mimeTypes.Any(item => !item.Contains('/') || item.Length > 150 || !SupportedDocumentMimeTypes.Contains(item))
+            || !request.AppliesToSponsoredInternal && !request.AppliesToOutsideRider && !request.AppliesToRiderProfile
             || request.MaxFileSizeBytes is <= 0 or > 100 * 1024 * 1024
             || !Enum.TryParse<CatalogStatus>(request.Status, true, out var status))
             return Result.Failure<DocumentTypeResponse>(HrErrors.InvalidRequest);

@@ -9221,3 +9221,199 @@ END;
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260831061901_AddPhoneSimManagement'
+)
+BEGIN
+    CREATE TABLE [app].[PhoneSimCards] (
+        [Id] uniqueidentifier NOT NULL,
+        [PhoneNumber] nvarchar(32) NOT NULL,
+        [NormalizedPhoneNumber] varchar(32) NOT NULL,
+        [Iccid] varchar(22) NULL,
+        [NormalizedIccid] varchar(22) NULL,
+        [CarrierName] nvarchar(200) NULL,
+        [ResponsibleEmployeeId] uniqueidentifier NOT NULL,
+        [Status] int NOT NULL,
+        [StatusReason] nvarchar(500) NULL,
+        [Notes] nvarchar(4000) NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_PhoneSimCards] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_PhoneSimCards_Status] CHECK ([Status] BETWEEN 1 AND 5),
+        CONSTRAINT [FK_PhoneSimCards_Employees_ResponsibleEmployeeId] FOREIGN KEY ([ResponsibleEmployeeId]) REFERENCES [app].[Employees] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260831061901_AddPhoneSimManagement'
+)
+BEGIN
+    CREATE TABLE [app].[PhoneSimResponsibilityChanges] (
+        [Id] uniqueidentifier NOT NULL,
+        [PhoneSimCardId] uniqueidentifier NOT NULL,
+        [PreviousResponsibleEmployeeId] uniqueidentifier NULL,
+        [ResponsibleEmployeeId] uniqueidentifier NOT NULL,
+        [ChangedAtUtc] datetimeoffset NOT NULL,
+        [ChangedByUserId] uniqueidentifier NOT NULL,
+        [Reason] nvarchar(1000) NOT NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        CONSTRAINT [PK_PhoneSimResponsibilityChanges] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_PhoneSimResponsibilityChanges_ChangedResponsibleEmployee] CHECK ([PreviousResponsibleEmployeeId] IS NULL OR [PreviousResponsibleEmployeeId] <> [ResponsibleEmployeeId]),
+        CONSTRAINT [FK_PhoneSimResponsibilityChanges_Employees_PreviousResponsibleEmployeeId] FOREIGN KEY ([PreviousResponsibleEmployeeId]) REFERENCES [app].[Employees] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_PhoneSimResponsibilityChanges_Employees_ResponsibleEmployeeId] FOREIGN KEY ([ResponsibleEmployeeId]) REFERENCES [app].[Employees] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_PhoneSimResponsibilityChanges_PhoneSimCards_PhoneSimCardId] FOREIGN KEY ([PhoneSimCardId]) REFERENCES [app].[PhoneSimCards] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260831061901_AddPhoneSimManagement'
+)
+BEGIN
+    CREATE TABLE [app].[RiderPhoneSimAssignments] (
+        [Id] uniqueidentifier NOT NULL,
+        [PhoneSimCardId] uniqueidentifier NOT NULL,
+        [RiderProfileId] uniqueidentifier NOT NULL,
+        [AssignedByUserId] uniqueidentifier NOT NULL,
+        [AssignmentReason] nvarchar(1000) NULL,
+        [EndReason] nvarchar(1000) NULL,
+        [Notes] nvarchar(4000) NULL,
+        [EffectiveFrom] date NOT NULL,
+        [EffectiveTo] date NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [ClosedAtUtc] datetimeoffset NULL,
+        [ClosedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        CONSTRAINT [PK_RiderPhoneSimAssignments] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_RiderPhoneSimAssignments_EffectiveRange] CHECK ([EffectiveTo] IS NULL OR [EffectiveTo] >= [EffectiveFrom]),
+        CONSTRAINT [FK_RiderPhoneSimAssignments_PhoneSimCards_PhoneSimCardId] FOREIGN KEY ([PhoneSimCardId]) REFERENCES [app].[PhoneSimCards] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_RiderPhoneSimAssignments_RiderProfiles_RiderProfileId] FOREIGN KEY ([RiderProfileId]) REFERENCES [app].[RiderProfiles] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260831061901_AddPhoneSimManagement'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Category', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'DescriptionAr', N'DescriptionEn', N'DisplayOrder', N'GrantabilityRule', N'IsDeleted', N'IsDeprecated', N'IsHighTrust', N'IsSensitive', N'Key', N'NameAr', N'NameEn', N'ReplacementKey', N'RequiresClientScope', N'RequiresHousingScope', N'UpdatedAtUtc', N'UpdatedByUserId', N'Version') AND [object_id] = OBJECT_ID(N'[platform].[PermissionDefinitions]'))
+        SET IDENTITY_INSERT [platform].[PermissionDefinitions] ON;
+    EXEC(N'INSERT INTO [platform].[PermissionDefinitions] ([Id], [Category], [CreatedAtUtc], [CreatedByUserId], [DeletedAtUtc], [DeletedByUserId], [DeletionReason], [DescriptionAr], [DescriptionEn], [DisplayOrder], [GrantabilityRule], [IsDeleted], [IsDeprecated], [IsHighTrust], [IsSensitive], [Key], [NameAr], [NameEn], [ReplacementKey], [RequiresClientScope], [RequiresHousingScope], [UpdatedAtUtc], [UpdatedByUserId], [Version])
+    VALUES (''019c18d5-62e1-7000-a000-000000000085'', N''Operations'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''عرض شرائح الاتصال والمسؤول الحالي وسجل تسليمها للمناديب.'', N''View phone SIM inventory, current responsible employees, and rider assignment history.'', 85, N''SENSITIVE_DATA'', CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), N''phone_sims.read'', N''عرض شرائح الاتصال'', N''Read phone SIMs'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000086'', N''Operations'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''إدارة بيانات شرائح الاتصال والمسؤولين وتسليم الشرائح للمناديب وإرجاعها.'', N''Manage phone SIM details, responsible employees, rider assignments, and returns.'', 86, N''SENSITIVE_DATA'', CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), N''phone_sims.manage'', N''إدارة شرائح الاتصال'', N''Manage phone SIMs'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1)');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Category', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'DescriptionAr', N'DescriptionEn', N'DisplayOrder', N'GrantabilityRule', N'IsDeleted', N'IsDeprecated', N'IsHighTrust', N'IsSensitive', N'Key', N'NameAr', N'NameEn', N'ReplacementKey', N'RequiresClientScope', N'RequiresHousingScope', N'UpdatedAtUtc', N'UpdatedByUserId', N'Version') AND [object_id] = OBJECT_ID(N'[platform].[PermissionDefinitions]'))
+        SET IDENTITY_INSERT [platform].[PermissionDefinitions] OFF;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260831061901_AddPhoneSimManagement'
+)
+BEGIN
+    CREATE INDEX [IX_PhoneSimCards_IsDeleted] ON [app].[PhoneSimCards] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260831061901_AddPhoneSimManagement'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_PhoneSimCards_NormalizedIccid] ON [app].[PhoneSimCards] ([NormalizedIccid]) WHERE [NormalizedIccid] IS NOT NULL AND [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260831061901_AddPhoneSimManagement'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_PhoneSimCards_NormalizedPhoneNumber] ON [app].[PhoneSimCards] ([NormalizedPhoneNumber]) WHERE [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260831061901_AddPhoneSimManagement'
+)
+BEGIN
+    CREATE INDEX [IX_PhoneSimCards_ResponsibleEmployeeId] ON [app].[PhoneSimCards] ([ResponsibleEmployeeId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260831061901_AddPhoneSimManagement'
+)
+BEGIN
+    CREATE INDEX [IX_PhoneSimCards_Status_ResponsibleEmployeeId] ON [app].[PhoneSimCards] ([Status], [ResponsibleEmployeeId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260831061901_AddPhoneSimManagement'
+)
+BEGIN
+    CREATE INDEX [IX_PhoneSimResponsibilityChanges_PhoneSimCardId_ChangedAtUtc] ON [app].[PhoneSimResponsibilityChanges] ([PhoneSimCardId], [ChangedAtUtc]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260831061901_AddPhoneSimManagement'
+)
+BEGIN
+    CREATE INDEX [IX_PhoneSimResponsibilityChanges_PreviousResponsibleEmployeeId] ON [app].[PhoneSimResponsibilityChanges] ([PreviousResponsibleEmployeeId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260831061901_AddPhoneSimManagement'
+)
+BEGIN
+    CREATE INDEX [IX_PhoneSimResponsibilityChanges_ResponsibleEmployeeId_ChangedAtUtc] ON [app].[PhoneSimResponsibilityChanges] ([ResponsibleEmployeeId], [ChangedAtUtc]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260831061901_AddPhoneSimManagement'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_RiderPhoneSimAssignments_PhoneSimCardId] ON [app].[RiderPhoneSimAssignments] ([PhoneSimCardId]) WHERE [EffectiveTo] IS NULL');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260831061901_AddPhoneSimManagement'
+)
+BEGIN
+    CREATE INDEX [IX_RiderPhoneSimAssignments_PhoneSimCardId_EffectiveFrom] ON [app].[RiderPhoneSimAssignments] ([PhoneSimCardId], [EffectiveFrom]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260831061901_AddPhoneSimManagement'
+)
+BEGIN
+    CREATE INDEX [IX_RiderPhoneSimAssignments_RiderProfileId_EffectiveFrom] ON [app].[RiderPhoneSimAssignments] ([RiderProfileId], [EffectiveFrom]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260831061901_AddPhoneSimManagement'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260831061901_AddPhoneSimManagement', N'10.0.11');
+END;
+
+COMMIT;
+GO
+

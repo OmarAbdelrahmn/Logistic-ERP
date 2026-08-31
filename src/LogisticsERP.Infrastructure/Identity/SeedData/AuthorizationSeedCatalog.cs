@@ -45,7 +45,9 @@ internal static class AuthorizationSeedCatalog
         PermissionKeys.Fleet.AccidentsFinalize,
         PermissionKeys.Fleet.AccidentsDownload,
         PermissionKeys.Fleet.CorrectionsManage,
-        PermissionKeys.Fleet.RegistrationTransitionsManage
+        PermissionKeys.Fleet.RegistrationTransitionsManage,
+        PermissionKeys.Operations.PhoneSimsRead,
+        PermissionKeys.Operations.PhoneSimsManage
     ];
 
     public static IReadOnlyList<string> ManagerPermissions { get; } =
@@ -72,7 +74,9 @@ internal static class AuthorizationSeedCatalog
         PermissionKeys.Fleet.FilesDownload,
         PermissionKeys.Fleet.AccidentsRead,
         PermissionKeys.Fleet.AccidentsReport,
-        PermissionKeys.Fleet.AccidentsDownload
+        PermissionKeys.Fleet.AccidentsDownload,
+        PermissionKeys.Operations.PhoneSimsRead,
+        PermissionKeys.Operations.PhoneSimsManage
     ];
 
     public static IReadOnlyList<RolePermissionSeed> RolePermissions { get; } =
@@ -114,15 +118,24 @@ internal static class AuthorizationSeedCatalog
         AddRolePermissions(seeds, SystemRoles.SystemAdminId, legacySystemAdminPermissions, ref sequence);
         AddRolePermissions(seeds, SystemRoles.ManagerId, legacyManagerPermissions, ref sequence);
         AddRolePermissions(seeds, SystemRoles.SystemAdminId,
-            SystemAdminPermissions.Except(legacySystemAdminPermissions).Where(key => !key.StartsWith("fleet.", StringComparison.Ordinal)), ref sequence);
+            SystemAdminPermissions.Except(legacySystemAdminPermissions).Where(key =>
+                !key.StartsWith("fleet.", StringComparison.Ordinal)
+                && !key.StartsWith("phone_sims.", StringComparison.Ordinal)), ref sequence);
         AddRolePermissions(seeds, SystemRoles.ManagerId,
-            ManagerPermissions.Except(legacyManagerPermissions).Where(key => !key.StartsWith("fleet.", StringComparison.Ordinal)), ref sequence);
+            ManagerPermissions.Except(legacyManagerPermissions).Where(key =>
+                !key.StartsWith("fleet.", StringComparison.Ordinal)
+                && !key.StartsWith("phone_sims.", StringComparison.Ordinal)), ref sequence);
         AddRolePermissions(seeds, SystemRoles.SystemAdminId,
             SystemAdminPermissions.Where(key => key.StartsWith("fleet.", StringComparison.Ordinal) && key != PermissionKeys.Fleet.RegistrationTransitionsManage), ref sequence);
         AddRolePermissions(seeds, SystemRoles.ManagerId,
             ManagerPermissions.Where(key => key.StartsWith("fleet.", StringComparison.Ordinal)), ref sequence);
         AddRolePermissions(seeds, SystemRoles.SystemAdminId,
             [PermissionKeys.Fleet.RegistrationTransitionsManage], ref sequence);
+        // New grants are appended explicitly so existing sequence-derived seed IDs remain stable.
+        AddRolePermissions(seeds, SystemRoles.SystemAdminId,
+            [PermissionKeys.Operations.PhoneSimsRead, PermissionKeys.Operations.PhoneSimsManage], ref sequence);
+        AddRolePermissions(seeds, SystemRoles.ManagerId,
+            [PermissionKeys.Operations.PhoneSimsRead, PermissionKeys.Operations.PhoneSimsManage], ref sequence);
 
         return seeds;
     }

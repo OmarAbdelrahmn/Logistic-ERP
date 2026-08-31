@@ -43,6 +43,21 @@ public sealed record EmployeeDocumentVersionResponse(
     Guid UploadedByUserId,
     DateTimeOffset UploadedAtUtc);
 
+public sealed record EmployeeDocumentChecklistItemResponse(
+    Guid DocumentTypeId,
+    string DocumentTypeCode,
+    string DocumentTypeNameAr,
+    string DocumentTypeNameEn,
+    bool RequiresNumber,
+    bool RequiresIssueDate,
+    bool RequiresExpiryDate,
+    bool RequiresFile,
+    bool IsRequired,
+    IReadOnlyList<int> ReminderOffsetsDays,
+    string FulfillmentStatus,
+    IReadOnlyList<string> MissingFields,
+    IReadOnlyList<EmployeeDocumentResponse> Documents);
+
 public sealed record DocumentDownloadResponse(
     Stream Content,
     string ContentType,
@@ -52,6 +67,8 @@ public sealed record DocumentDownloadResponse(
 public interface IEmployeeDocumentService
 {
     Task<Result<IReadOnlyList<EmployeeDocumentResponse>>> GetEmployeeDocumentsAsync(Guid employeeId, CancellationToken cancellationToken = default);
+    Task<Result<IReadOnlyList<EmployeeDocumentChecklistItemResponse>>> GetEmployeeDocumentChecklistAsync(Guid employeeId, CancellationToken cancellationToken = default);
+    Task<Result<IReadOnlyList<EmployeeDocumentChecklistItemResponse>>> GetRiderDocumentChecklistAsync(Guid riderProfileId, CancellationToken cancellationToken = default);
     Task<Result<EmployeeDocumentResponse>> UploadAsync(Guid employeeId, Guid documentTypeId, EmployeeDocumentMetadataRequest metadata, FileUploadContent file, CancellationToken cancellationToken = default);
     Task<Result<EmployeeDocumentResponse>> UploadForRiderAsync(Guid riderProfileId, Guid documentTypeId, EmployeeDocumentMetadataRequest metadata, FileUploadContent file, CancellationToken cancellationToken = default);
     Task<Result<EmployeeDocumentResponse>> UploadNewVersionAsync(Guid employeeId, Guid documentId, FileUploadContent file, CancellationToken cancellationToken = default);
