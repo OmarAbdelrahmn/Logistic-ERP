@@ -124,7 +124,8 @@ public static class DependencyInjection
                 options.SignIn.RequireConfirmedAccount = true;
             })
             .AddRoles<ApplicationRole>()
-            .AddEntityFrameworkStores<IdentityDbContext>();
+            .AddEntityFrameworkStores<IdentityDbContext>()
+            .AddDefaultTokenProviders();
 
         return services;
     }

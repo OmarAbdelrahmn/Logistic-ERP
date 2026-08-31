@@ -6,6 +6,7 @@
     <InternalsVisibleTo Include="LogisticsERP.Fleet.UnitTests" />
   </ItemGroup>
   <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <ProjectReference Include="..\LogisticsERP.Application\LogisticsERP.Application.csproj" />
     <ProjectReference Include="..\LogisticsERP.Domain\LogisticsERP.Domain.csproj" />
   </ItemGroup>
@@ -21,8 +22,6 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" />
     <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" />
     <PackageReference Include="QuestPDF" />
   </ItemGroup>
