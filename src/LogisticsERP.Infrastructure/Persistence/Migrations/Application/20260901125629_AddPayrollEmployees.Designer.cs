@@ -4,6 +4,7 @@ using LogisticsERP.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260901125629_AddPayrollEmployees")]
+    partial class AddPayrollEmployees
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -9423,9 +9426,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<Guid>("SponsorId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -9455,8 +9455,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .IsUnique()
                         .HasFilter("[IsDeleted] = 0");
 
-                    b.HasIndex("SponsorId");
-
                     b.HasIndex("Status", "JoiningDate");
 
                     b.ToTable("PayrollEmployees", "app", t =>
@@ -9484,7 +9482,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                             PersonalIban = "SA6980000107608016495857",
                             RowVersion = new byte[0],
                             Salary = 1000m,
-                            SponsorId = new Guid("019c18d5-62e1-7000-8000-000000000040"),
                             Status = ""
                         },
                         new
@@ -9500,7 +9497,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                             PersonalIban = "SA6980000209608016472812",
                             RowVersion = new byte[0],
                             Salary = 1000m,
-                            SponsorId = new Guid("019c18d5-62e1-7000-8000-000000000040"),
                             Status = ""
                         },
                         new
@@ -9516,7 +9512,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                             PersonalIban = "SA7680000688608010011525",
                             RowVersion = new byte[0],
                             Salary = 1000m,
-                            SponsorId = new Guid("019c18d5-62e1-7000-8000-000000000040"),
                             Status = ""
                         },
                         new
@@ -9532,7 +9527,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                             PersonalIban = "SA6380000209608016490962",
                             RowVersion = new byte[0],
                             Salary = 1000m,
-                            SponsorId = new Guid("019c18d5-62e1-7000-8000-000000000040"),
                             Status = ""
                         },
                         new
@@ -9548,7 +9542,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                             PersonalIban = "SA7480000209608014899867",
                             RowVersion = new byte[0],
                             Salary = 1000m,
-                            SponsorId = new Guid("019c18d5-62e1-7000-8000-000000000040"),
                             Status = ""
                         },
                         new
@@ -9564,7 +9557,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                             PersonalIban = "SA8080000107608016555023",
                             RowVersion = new byte[0],
                             Salary = 1000m,
-                            SponsorId = new Guid("019c18d5-62e1-7000-8000-000000000040"),
                             Status = ""
                         },
                         new
@@ -9580,7 +9572,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                             PersonalIban = "SA2380000437608016041454",
                             RowVersion = new byte[0],
                             Salary = 1000m,
-                            SponsorId = new Guid("019c18d5-62e1-7000-8000-000000000040"),
                             Status = ""
                         },
                         new
@@ -9596,7 +9587,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                             PersonalIban = "SA5880000347608010801019",
                             RowVersion = new byte[0],
                             Salary = 1000m,
-                            SponsorId = new Guid("019c18d5-62e1-7000-8000-000000000040"),
                             Status = ""
                         },
                         new
@@ -9612,7 +9602,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                             PersonalIban = "SA3980000176608010913604",
                             RowVersion = new byte[0],
                             Salary = 1500m,
-                            SponsorId = new Guid("019c18d5-62e1-7000-8000-000000000040"),
                             Status = ""
                         });
                 });
@@ -11306,15 +11295,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .WithMany()
                         .HasForeignKey("SupersededVersionId")
                         .OnDelete(DeleteBehavior.Restrict);
-                });
-
-            modelBuilder.Entity("LogisticsERP.Domain.Entities.Workforce.PayrollEmployee", b =>
-                {
-                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.Sponsor", null)
-                        .WithMany()
-                        .HasForeignKey("SponsorId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Workforce.RiderCard", b =>

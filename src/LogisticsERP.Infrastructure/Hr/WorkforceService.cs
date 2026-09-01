@@ -448,6 +448,7 @@ internal sealed class WorkforceService(
         if (!HrServiceSupport.HasText(request.Reason) || !HrServiceSupport.MatchesRowVersion(sponsor.RowVersion, request.RowVersion))
             return Result.Failure(HrErrors.ConcurrencyConflict);
         if (await dbContext.Employees.AnyAsync(item => item.SponsorId == sponsorId, cancellationToken)
+            || await dbContext.PayrollEmployees.AnyAsync(item => item.SponsorId == sponsorId, cancellationToken)
             || await dbContext.PlatformRiderAccounts.AnyAsync(item => item.SponsorId == sponsorId, cancellationToken))
             return Result.Failure(HrErrors.Conflict);
         sponsor.IsDeleted = true;

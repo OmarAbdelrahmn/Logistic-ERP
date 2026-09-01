@@ -54,6 +54,73 @@ internal sealed class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
     }
 }
 
+internal sealed class PayrollEmployeeConfiguration : IEntityTypeConfiguration<PayrollEmployee>
+{
+    public void Configure(EntityTypeBuilder<PayrollEmployee> builder)
+    {
+        builder.ConfigureOperational("PayrollEmployees");
+        builder.Property(entity => entity.Name).HasMaxLength(200).IsRequired();
+        builder.Property(entity => entity.NationalId).HasMaxLength(10).IsUnicode(false).IsRequired();
+        builder.Property(entity => entity.Country).HasMaxLength(100).IsRequired();
+        builder.Property(entity => entity.PersonalIban).HasMaxLength(24).IsUnicode(false).IsRequired();
+        builder.Property(entity => entity.Salary).HasPrecision(18, 2);
+        builder.Property(entity => entity.Status).HasMaxLength(100).IsRequired();
+
+        builder.HasOne<Sponsor>().WithMany()
+            .HasForeignKey(entity => entity.SponsorId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasIndex(entity => entity.Number).IsUnique().HasFilter("[IsDeleted] = 0");
+        builder.HasIndex(entity => entity.NationalId).IsUnique().HasFilter("[IsDeleted] = 0");
+        builder.HasIndex(entity => entity.PersonalIban).IsUnique().HasFilter("[IsDeleted] = 0");
+        builder.HasIndex(entity => entity.Name);
+        builder.HasIndex(entity => new { entity.Status, entity.JoiningDate });
+
+        builder.ToTable(table =>
+        {
+            table.HasCheckConstraint("CK_PayrollEmployees_Number", "[Number] > 0");
+            table.HasCheckConstraint("CK_PayrollEmployees_NationalId", "LEN([NationalId]) = 10 AND [NationalId] NOT LIKE '%[^0-9]%'");
+            table.HasCheckConstraint("CK_PayrollEmployees_PersonalIban", "LEN([PersonalIban]) = 24 AND LEFT([PersonalIban], 2) = 'SA' AND SUBSTRING([PersonalIban], 3, 22) NOT LIKE '%[^0-9]%'");
+            table.HasCheckConstraint("CK_PayrollEmployees_Salary", "[Salary] >= 0");
+        });
+
+        var createdAt = new DateTimeOffset(2026, 9, 1, 0, 0, 0, TimeSpan.Zero);
+        builder.HasData(
+            Seed(1, "01990000-0000-7000-8000-000000000001", "جمانه عبدالكريم بن حسن القحطاني", "1125236081", new DateOnly(2025, 9, 24), "SA6980000107608016495857", 1000m, createdAt),
+            Seed(2, "01990000-0000-7000-8000-000000000002", "ندى علي سلمان غمقه", "1055695991", new DateOnly(2025, 10, 14), "SA6980000209608016472812", 1000m, createdAt),
+            Seed(3, "01990000-0000-7000-8000-000000000003", "ريم محمد ابن حابي آل بسام", "1094893391", new DateOnly(2025, 10, 14), "SA7680000688608010011525", 1000m, createdAt),
+            Seed(4, "01990000-0000-7000-8000-000000000004", "هتون سعد سالم آل بسام", "1109500338", new DateOnly(2025, 10, 14), "SA6380000209608016490962", 1000m, createdAt),
+            Seed(5, "01990000-0000-7000-8000-000000000005", "هديل سعد سالم آل بسام", "1120249709", new DateOnly(2025, 10, 14), "SA7480000209608014899867", 1000m, createdAt),
+            Seed(6, "01990000-0000-7000-8000-000000000006", "فيصل سعد سالم آل بسام", "1140492552", new DateOnly(2025, 11, 4), "SA8080000107608016555023", 1000m, createdAt),
+            Seed(7, "01990000-0000-7000-8000-000000000007", "رغد عبدالله بن محمد آل هادي", "1124916642", new DateOnly(2025, 10, 14), "SA2380000437608016041454", 1000m, createdAt),
+            Seed(8, "01990000-0000-7000-8000-000000000008", "بتلا يحي محمد القحطاني", "1012865497", new DateOnly(2025, 12, 22), "SA5880000347608010801019", 1000m, createdAt),
+            Seed(10, "01990000-0000-7000-8000-000000000010", "شذي مشعل بن جبر السلمى", "1108386739", new DateOnly(2025, 12, 30), "SA3980000176608010913604", 1500m, createdAt));
+    }
+
+    private static PayrollEmployee Seed(
+        int number,
+        string id,
+        string name,
+        string nationalId,
+        DateOnly joiningDate,
+        string personalIban,
+        decimal salary,
+        DateTimeOffset createdAt) => new()
+    {
+        Id = Guid.Parse(id),
+        Number = number,
+        SponsorId = Sponsor.AlBawabaCommercialEstablishmentId,
+        Name = name,
+        NationalId = nationalId,
+        Country = "السعودية",
+        JoiningDate = joiningDate,
+        PersonalIban = personalIban,
+        Salary = salary,
+        Status = string.Empty,
+        CreatedAtUtc = createdAt
+    };
+}
+
 internal sealed class RiderProfileConfiguration : IEntityTypeConfiguration<RiderProfile>
 {
     public void Configure(EntityTypeBuilder<RiderProfile> builder)

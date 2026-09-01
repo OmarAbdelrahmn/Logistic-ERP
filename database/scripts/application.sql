@@ -9417,3 +9417,176 @@ END;
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260901125629_AddPayrollEmployees'
+)
+BEGIN
+    CREATE TABLE [app].[PayrollEmployees] (
+        [Id] uniqueidentifier NOT NULL,
+        [Number] int NOT NULL,
+        [Name] nvarchar(200) NOT NULL,
+        [NationalId] varchar(10) NOT NULL,
+        [Country] nvarchar(100) NOT NULL,
+        [JoiningDate] date NOT NULL,
+        [PersonalIban] varchar(24) NOT NULL,
+        [Salary] decimal(18,2) NOT NULL,
+        [Status] nvarchar(100) NOT NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_PayrollEmployees] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_PayrollEmployees_NationalId] CHECK (LEN([NationalId]) = 10 AND [NationalId] NOT LIKE '%[^0-9]%'),
+        CONSTRAINT [CK_PayrollEmployees_Number] CHECK ([Number] > 0),
+        CONSTRAINT [CK_PayrollEmployees_PersonalIban] CHECK (LEN([PersonalIban]) = 24 AND LEFT([PersonalIban], 2) = 'SA' AND SUBSTRING([PersonalIban], 3, 22) NOT LIKE '%[^0-9]%'),
+        CONSTRAINT [CK_PayrollEmployees_Salary] CHECK ([Salary] >= 0)
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260901125629_AddPayrollEmployees'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Country', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'IsDeleted', N'JoiningDate', N'Name', N'NationalId', N'Number', N'PersonalIban', N'Salary', N'Status', N'UpdatedAtUtc', N'UpdatedByUserId') AND [object_id] = OBJECT_ID(N'[app].[PayrollEmployees]'))
+        SET IDENTITY_INSERT [app].[PayrollEmployees] ON;
+    EXEC(N'INSERT INTO [app].[PayrollEmployees] ([Id], [Country], [CreatedAtUtc], [CreatedByUserId], [DeletedAtUtc], [DeletedByUserId], [DeletionReason], [IsDeleted], [JoiningDate], [Name], [NationalId], [Number], [PersonalIban], [Salary], [Status], [UpdatedAtUtc], [UpdatedByUserId])
+    VALUES (''01990000-0000-7000-8000-000000000001'', N''السعودية'', ''2026-09-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), ''2025-09-24'', N''جمانه عبدالكريم بن حسن القحطاني'', ''1125236081'', 1, ''SA6980000107608016495857'', 1000.0, N'''', NULL, NULL),
+    (''01990000-0000-7000-8000-000000000002'', N''السعودية'', ''2026-09-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), ''2025-10-14'', N''ندى علي سلمان غمقه'', ''1055695991'', 2, ''SA6980000209608016472812'', 1000.0, N'''', NULL, NULL),
+    (''01990000-0000-7000-8000-000000000003'', N''السعودية'', ''2026-09-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), ''2025-10-14'', N''ريم محمد ابن حابي آل بسام'', ''1094893391'', 3, ''SA7680000688608010011525'', 1000.0, N'''', NULL, NULL),
+    (''01990000-0000-7000-8000-000000000004'', N''السعودية'', ''2026-09-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), ''2025-10-14'', N''هتون سعد سالم آل بسام'', ''1109500338'', 4, ''SA6380000209608016490962'', 1000.0, N'''', NULL, NULL),
+    (''01990000-0000-7000-8000-000000000005'', N''السعودية'', ''2026-09-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), ''2025-10-14'', N''هديل سعد سالم آل بسام'', ''1120249709'', 5, ''SA7480000209608014899867'', 1000.0, N'''', NULL, NULL),
+    (''01990000-0000-7000-8000-000000000006'', N''السعودية'', ''2026-09-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), ''2025-11-04'', N''فيصل سعد سالم آل بسام'', ''1140492552'', 6, ''SA8080000107608016555023'', 1000.0, N'''', NULL, NULL),
+    (''01990000-0000-7000-8000-000000000007'', N''السعودية'', ''2026-09-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), ''2025-10-14'', N''رغد عبدالله بن محمد آل هادي'', ''1124916642'', 7, ''SA2380000437608016041454'', 1000.0, N'''', NULL, NULL),
+    (''01990000-0000-7000-8000-000000000008'', N''السعودية'', ''2026-09-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), ''2025-12-22'', N''بتلا يحي محمد القحطاني'', ''1012865497'', 8, ''SA5880000347608010801019'', 1000.0, N'''', NULL, NULL),
+    (''01990000-0000-7000-8000-000000000010'', N''السعودية'', ''2026-09-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), ''2025-12-30'', N''شذي مشعل بن جبر السلمى'', ''1108386739'', 10, ''SA3980000176608010913604'', 1500.0, N'''', NULL, NULL)');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Country', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'IsDeleted', N'JoiningDate', N'Name', N'NationalId', N'Number', N'PersonalIban', N'Salary', N'Status', N'UpdatedAtUtc', N'UpdatedByUserId') AND [object_id] = OBJECT_ID(N'[app].[PayrollEmployees]'))
+        SET IDENTITY_INSERT [app].[PayrollEmployees] OFF;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260901125629_AddPayrollEmployees'
+)
+BEGIN
+    CREATE INDEX [IX_PayrollEmployees_IsDeleted] ON [app].[PayrollEmployees] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260901125629_AddPayrollEmployees'
+)
+BEGIN
+    CREATE INDEX [IX_PayrollEmployees_Name] ON [app].[PayrollEmployees] ([Name]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260901125629_AddPayrollEmployees'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_PayrollEmployees_NationalId] ON [app].[PayrollEmployees] ([NationalId]) WHERE [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260901125629_AddPayrollEmployees'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_PayrollEmployees_Number] ON [app].[PayrollEmployees] ([Number]) WHERE [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260901125629_AddPayrollEmployees'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_PayrollEmployees_PersonalIban] ON [app].[PayrollEmployees] ([PersonalIban]) WHERE [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260901125629_AddPayrollEmployees'
+)
+BEGIN
+    CREATE INDEX [IX_PayrollEmployees_Status_JoiningDate] ON [app].[PayrollEmployees] ([Status], [JoiningDate]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260901125629_AddPayrollEmployees'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260901125629_AddPayrollEmployees', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260901131037_LinkPayrollEmployeesToSponsors'
+)
+BEGIN
+    ALTER TABLE [app].[PayrollEmployees] ADD [SponsorId] uniqueidentifier NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260901131037_LinkPayrollEmployeesToSponsors'
+)
+BEGIN
+    UPDATE [app].[PayrollEmployees] SET [SponsorId] = '019c18d5-62e1-7000-8000-000000000040' WHERE [SponsorId] IS NULL
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260901131037_LinkPayrollEmployeesToSponsors'
+)
+BEGIN
+    DECLARE @var34 nvarchar(max);
+    SELECT @var34 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[app].[PayrollEmployees]') AND [c].[name] = N'SponsorId');
+    IF @var34 IS NOT NULL EXEC(N'ALTER TABLE [app].[PayrollEmployees] DROP CONSTRAINT ' + @var34 + ';');
+    ALTER TABLE [app].[PayrollEmployees] ALTER COLUMN [SponsorId] uniqueidentifier NOT NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260901131037_LinkPayrollEmployeesToSponsors'
+)
+BEGIN
+    CREATE INDEX [IX_PayrollEmployees_SponsorId] ON [app].[PayrollEmployees] ([SponsorId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260901131037_LinkPayrollEmployeesToSponsors'
+)
+BEGIN
+    ALTER TABLE [app].[PayrollEmployees] ADD CONSTRAINT [FK_PayrollEmployees_Sponsors_SponsorId] FOREIGN KEY ([SponsorId]) REFERENCES [app].[Sponsors] ([Id]) ON DELETE NO ACTION;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260901131037_LinkPayrollEmployeesToSponsors'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260901131037_LinkPayrollEmployeesToSponsors', N'10.0.11');
+END;
+
+COMMIT;
+GO
+

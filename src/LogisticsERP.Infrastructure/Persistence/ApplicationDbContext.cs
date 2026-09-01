@@ -29,6 +29,7 @@ public sealed class ApplicationDbContext(
     public DbSet<ClientPlatform> ClientPlatforms => Set<ClientPlatform>();
     public DbSet<PermissionDefinition> PermissionDefinitions => Set<PermissionDefinition>();
     public DbSet<Employee> Employees => Set<Employee>();
+    public DbSet<PayrollEmployee> PayrollEmployees => Set<PayrollEmployee>();
     public DbSet<RiderProfile> RiderProfiles => Set<RiderProfile>();
     public DbSet<EmployeeWorkHistory> EmployeeWorkHistory => Set<EmployeeWorkHistory>();
     public DbSet<JobTitle> JobTitles => Set<JobTitle>();
