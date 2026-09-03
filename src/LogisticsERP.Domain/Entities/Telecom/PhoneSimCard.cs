@@ -14,4 +14,10 @@ public sealed class PhoneSimCard : AuditableEntity
     public PhoneSimStatus Status { get; set; } = PhoneSimStatus.Available;
     public string? StatusReason { get; set; }
     public string? Notes { get; set; }
+    public string? ReceiptFormOriginalFileName { get; set; }
+    public string? ReceiptFormStoredFileName { get; set; }
+    public string? ReceiptFormContentType { get; set; }
+    public long? ReceiptFormSizeBytes { get; set; }
+    public string? ReceiptFormSha256Checksum { get; set; }
+    public string? ReceiptFormStoragePath { get; set; }
 }

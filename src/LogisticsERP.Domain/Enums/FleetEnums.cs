@@ -28,6 +28,7 @@ public enum VehicleOperationalStatus
 }
 public enum VehicleStatusSourceType { Vehicle = 1, Assignment = 2, Issue = 3, Accident = 4, Administrative = 5 }
 public enum VehicleOdometerSourceType { Manual = 1, AssignmentTake = 2, AssignmentReturn = 3, Accident = 4, Correction = 5 }
+public enum VehicleDailyDistanceSource { None = 0, Manual = 1, Gps = 2 }
 public enum RiderVehicleAssignmentStatus { Active = 1, Completed = 2, Cancelled = 3, Corrected = 4 }
 public enum VehiclePlatformAccountAssignmentStatus { Active = 1, Ended = 2 }
 public enum VehiclePlatformAccountApprovalStatus { Approved = 1 }

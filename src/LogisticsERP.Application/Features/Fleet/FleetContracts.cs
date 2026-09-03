@@ -61,6 +61,7 @@ public sealed record VehicleSummaryResponse(
     Guid? OperatingCityId,
     string? OperatingCity,
     long CurrentOdometer,
+    decimal TrackedDistanceKm,
     Guid? CurrentAssignmentId,
     Guid? CurrentRiderProfileId,
     string? CurrentRiderName,
@@ -120,8 +121,9 @@ public sealed record VehicleOdometerReadingResponse(Guid Id, long Reading, DateT
 public sealed record RealRiderRequest(string Name, string IqamaNo, string RelationshipToAssignedRider);
 public sealed record RealRiderResponse(Guid Id, string Name, string IqamaNo, string RelationshipToAssignedRider);
 public sealed record TakeVehicleRequest(Guid RiderProfileId, bool IsRealRider, RealRiderRequest? RealRider, Guid VehicleId, DateTimeOffset StartedAtUtc, long StartOdometer, VehicleCondition StartCondition, byte? StartFuelLevelPercentage, string PermissionReference, string Reason, string? Notes);
-public sealed record ReturnVehicleRequest(Guid AssignmentId, DateTimeOffset EndedAtUtc, long EndOdometer, VehicleCondition EndCondition, byte? EndFuelLevelPercentage, string Reason, string RowVersion);
-public sealed record SwitchVehicleRequest(Guid CurrentAssignmentId, Guid NewVehicleId, DateTimeOffset SwitchedAtUtc, long OldVehicleOdometer, long NewVehicleOdometer, VehicleCondition OldVehicleCondition, VehicleCondition NewVehicleCondition, byte? OldFuelLevelPercentage, byte? NewFuelLevelPercentage, string PermissionReference, string Reason, string RowVersion);
+public sealed record VehicleConditionReportRequest(VehicleIssueCategory Category, VehicleIssueSeverity Severity, string ProblemDescription, bool IsRiderResponsible, decimal EstimatedRepairCost);
+public sealed record ReturnVehicleRequest(Guid AssignmentId, DateTimeOffset EndedAtUtc, long EndOdometer, VehicleCondition EndCondition, byte? EndFuelLevelPercentage, string Reason, string RowVersion, VehicleConditionReportRequest? ConditionReport = null);
+public sealed record SwitchVehicleRequest(Guid CurrentAssignmentId, Guid NewVehicleId, DateTimeOffset SwitchedAtUtc, long OldVehicleOdometer, long NewVehicleOdometer, VehicleCondition OldVehicleCondition, VehicleCondition NewVehicleCondition, byte? OldFuelLevelPercentage, byte? NewFuelLevelPercentage, string PermissionReference, string Reason, string RowVersion, VehicleConditionReportRequest? ConditionReport = null);
 public sealed record RenewVehiclePermissionRequest(DateOnly PermissionStartsOn, string PermissionReference, string Reason, string RowVersion);
 public sealed record RiderPromissoryFileResponse(Guid Id, Guid RiderProfileId, Guid CurrentVersionId, int VersionNumber, string OriginalFileName, string ContentType, long FileSizeBytes, string Sha256Checksum, DateTimeOffset UploadedAtUtc, string RowVersion);
 public sealed record RiderVehicleAssignmentResponse(Guid Id, Guid RiderProfileId, Guid EmployeeId, bool IsRealRider, RealRiderResponse? RealRider, Guid VehicleId, string AssetNumber, string RiderName, DateTimeOffset StartedAtUtc, DateTimeOffset? EndedAtUtc, string? StartLocationSnapshot, string? EndLocationSnapshot, long StartOdometer, long? EndOdometer, string? PermissionReference, DateOnly? PermissionStartsOn, DateOnly? PermissionEndsOn, RiderVehicleAssignmentStatus Status, string AssignmentReason, string? CompletionReason, Guid OperationId, IReadOnlyList<Guid> PromissoryFileVersionIds, string RowVersion);
@@ -140,7 +142,9 @@ public sealed record VehicleAttachmentVersionResponse(Guid Id, Guid VehicleAttac
 public sealed record CreateVehicleIssueRequest(Guid VehicleId, VehicleIssueCategory Category, VehicleIssueSeverity Severity, string Description, DateTimeOffset ReportedAtUtc, string? LocationDescription, long? OdometerAtReport, bool BlocksOperation);
 public sealed record ResolveVehicleIssueRequest(string ResolutionSummary, string RowVersion);
 public sealed record VehicleIssueActionRequest(string Reason, string RowVersion);
-public sealed record VehicleIssueSummaryResponse(Guid Id, string IssueNumber, Guid VehicleId, VehicleIssueCategory Category, VehicleIssueSeverity Severity, bool BlocksOperation, VehicleIssueStatus Status, DateTimeOffset ReportedAtUtc, string Description, string? LocationDescription, string? ResolutionSummary, string RowVersion);
+public sealed record VehicleIssueRiderResponse(Guid RiderProfileId, Guid EmployeeId, string RiderName, bool IsRealRider, RealRiderResponse? RealRider);
+public sealed record VehicleIssueSummaryResponse(Guid Id, string IssueNumber, Guid VehicleId, VehicleIssueCategory Category, VehicleIssueSeverity Severity, bool BlocksOperation, VehicleIssueStatus Status, DateTimeOffset ReportedAtUtc, string Description, string? LocationDescription, Guid? RelatedAssignmentId, VehicleIssueRiderResponse? Rider, bool? IsRiderResponsible, decimal? EstimatedRepairCost, string? ResolutionSummary, string RowVersion);
+public sealed record VehicleIssueEvidenceResponse(Guid Id, Guid VehicleIssueId, string OriginalFileName, string ContentType, long FileSizeBytes, string Sha256Checksum, DateTimeOffset UploadedAtUtc, string RowVersion);
 
 public sealed record CreateVehicleAccidentRequest(Guid VehicleId, Guid RiderProfileId, DateTimeOffset OccurredAtUtc, string LocationDescription, decimal? Latitude, decimal? Longitude, string? PoliceReportNumber, string? InsuranceClaimNumber, VehicleAccidentSeverity Severity, bool IsDrivable, bool HasInjuries, string? InjuryDetails, string? ThirdPartyDetails, string DamageDescription, string? FaultAssessment, string Narrative);
 public sealed record CorrectVehicleAccidentRequest(string? PoliceReportNumber, string? InsuranceClaimNumber, string LocationDescription, decimal? Latitude, decimal? Longitude, VehicleAccidentSeverity Severity, bool IsDrivable, bool HasInjuries, string? InjuryDetails, string? ThirdPartyDetails, string DamageDescription, string? FaultAssessment, string Narrative, string CorrectionReason, string RowVersion);

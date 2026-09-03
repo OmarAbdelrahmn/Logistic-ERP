@@ -14,6 +14,8 @@ public sealed class VehicleIssue : AuditableEntity
     public string? LocationDescription { get; set; }
     public long? OdometerAtReport { get; set; }
     public Guid? RelatedAssignmentId { get; set; }
+    public bool? IsRiderResponsible { get; set; }
+    public decimal? EstimatedRepairCost { get; set; }
     public bool BlocksOperation { get; set; }
     public VehicleIssueStatus Status { get; set; } = VehicleIssueStatus.Open;
     public Guid ReportedByUserId { get; set; }
@@ -23,6 +25,19 @@ public sealed class VehicleIssue : AuditableEntity
     public string? ResolutionSummary { get; set; }
     public DateTimeOffset? ClosedAtUtc { get; set; }
     public Guid? ClosedByUserId { get; set; }
+}
+
+public sealed class VehicleIssueEvidence : AuditableEntity
+{
+    public Guid VehicleIssueId { get; set; }
+    public string OriginalFileName { get; set; } = string.Empty;
+    public string StoredFileName { get; set; } = string.Empty;
+    public string ContentType { get; set; } = string.Empty;
+    public long FileSizeBytes { get; set; }
+    public string Sha256Checksum { get; set; } = string.Empty;
+    public string StoragePath { get; set; } = string.Empty;
+    public Guid UploadedByUserId { get; set; }
+    public DateTimeOffset UploadedAtUtc { get; set; }
 }
 
 public sealed class VehicleIssueEvent : HistoryEntity

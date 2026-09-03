@@ -44,24 +44,41 @@ public sealed class VehicleAssignmentsController(
     }
 
     [HttpPost("return")]
+    [Consumes("application/json")]
     public async Task<IActionResult> Return([FromBody] ReturnVehicleRequest request, [FromHeader(Name = "Idempotency-Key")] string? idempotencyKey, CancellationToken cancellationToken)
     {
         return await ExecuteAssignmentAsync(async () =>
         {
-            var result = await service.ReturnAsync(request, idempotencyKey ?? string.Empty, cancellationToken);
+            var result = await service.ReturnAsync(request, [], idempotencyKey ?? string.Empty, cancellationToken);
             return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
         }, cancellationToken);
     }
 
+    [HttpPost("return-with-condition-report")]
+    [Consumes("multipart/form-data")]
+    [RequestSizeLimit(22 * 1024 * 1024)]
+    public async Task<IActionResult> ReturnWithConditionReport([FromForm] VehicleReturnMultipartForm form, [FromHeader(Name = "Idempotency-Key")] string? idempotencyKey, CancellationToken cancellationToken)
+    {
+        var request = Deserialize<ReturnVehicleRequest>(form.Metadata);
+        if (request is null) return BadRequest();
+        if (request.EndCondition == LogisticsERP.Domain.Enums.VehicleCondition.Good) return BadRequest();
+        return await ExecuteAssignmentAsync(
+            () => WithUploadsAsync(form.EvidenceFiles, uploads => service.ReturnAsync(request, uploads, idempotencyKey ?? string.Empty, cancellationToken)),
+            cancellationToken);
+    }
+
     [HttpPost("switch")]
     [Consumes("multipart/form-data")]
-    [RequestSizeLimit(32 * 1024 * 1024)]
-    public async Task<IActionResult> Switch([FromForm] VehicleAssignmentMultipartForm form, [FromHeader(Name = "Idempotency-Key")] string? idempotencyKey, CancellationToken cancellationToken)
+    [RequestSizeLimit(54 * 1024 * 1024)]
+    public async Task<IActionResult> Switch([FromForm] VehicleSwitchMultipartForm form, [FromHeader(Name = "Idempotency-Key")] string? idempotencyKey, CancellationToken cancellationToken)
     {
         var request = Deserialize<SwitchVehicleRequest>(form.Metadata);
         if (request is null) return BadRequest();
         return await ExecuteAssignmentAsync(
-            () => WithUploadsAsync(form.PromissoryFiles, uploads => service.SwitchAsync(request, uploads, idempotencyKey ?? string.Empty, cancellationToken)),
+            () => WithUploadGroupsAsync(
+                form.PromissoryFiles,
+                form.EvidenceFiles,
+                (promissoryUploads, evidenceUploads) => service.SwitchAsync(request, promissoryUploads, evidenceUploads, idempotencyKey ?? string.Empty, cancellationToken)),
             cancellationToken);
     }
 
@@ -93,6 +110,30 @@ public sealed class VehicleAssignmentsController(
                 return new PrivateFileUpload(stream, file.FileName, file.ContentType, file.Length);
             }).ToArray();
             var result = await action(uploads);
+            return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+        }
+        finally
+        {
+            foreach (var stream in streams) await stream.DisposeAsync();
+        }
+    }
+
+    private async Task<IActionResult> WithUploadGroupsAsync(
+        List<IFormFile> firstFiles,
+        List<IFormFile> secondFiles,
+        Func<IReadOnlyList<PrivateFileUpload>, IReadOnlyList<PrivateFileUpload>, Task<Result<RiderVehicleAssignmentResponse>>> action)
+    {
+        var streams = new List<Stream>(firstFiles.Count + secondFiles.Count);
+        try
+        {
+            PrivateFileUpload[] OpenFiles(IEnumerable<IFormFile> files) => files.Select(file =>
+            {
+                var stream = file.OpenReadStream();
+                streams.Add(stream);
+                return new PrivateFileUpload(stream, file.FileName, file.ContentType, file.Length);
+            }).ToArray();
+
+            var result = await action(OpenFiles(firstFiles), OpenFiles(secondFiles));
             return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
         }
         finally
@@ -141,6 +182,19 @@ public sealed class VehicleAssignmentMultipartForm
 {
     public string Metadata { get; init; } = string.Empty;
     public List<IFormFile> PromissoryFiles { get; init; } = [];
+}
+
+public sealed class VehicleSwitchMultipartForm
+{
+    public string Metadata { get; init; } = string.Empty;
+    public List<IFormFile> PromissoryFiles { get; init; } = [];
+    public List<IFormFile> EvidenceFiles { get; init; } = [];
+}
+
+public sealed class VehicleReturnMultipartForm
+{
+    public string Metadata { get; init; } = string.Empty;
+    public List<IFormFile> EvidenceFiles { get; init; } = [];
 }
 
 [ApiController]

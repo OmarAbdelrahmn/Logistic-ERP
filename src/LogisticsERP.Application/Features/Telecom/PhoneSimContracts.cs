@@ -18,9 +18,16 @@ public sealed record PhoneSimResponse(
     string? ResponsibleEmployeeNameEn,
     PhoneSimCurrentRiderResponse? CurrentRider,
     string? Notes,
+    PhoneSimReceiptFormResponse? ReceiptForm,
     DateTimeOffset CreatedAtUtc,
     DateTimeOffset? UpdatedAtUtc,
     string RowVersion);
+
+public sealed record PhoneSimReceiptFormResponse(
+    string OriginalFileName,
+    string ContentType,
+    long FileSizeBytes,
+    string Sha256Checksum);
 
 public sealed record PhoneSimCurrentRiderResponse(
     Guid AssignmentId,

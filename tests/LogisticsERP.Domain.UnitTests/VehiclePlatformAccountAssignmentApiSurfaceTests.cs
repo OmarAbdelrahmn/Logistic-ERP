@@ -22,7 +22,12 @@ public sealed class VehiclePlatformAccountAssignmentApiSurfaceTests
         { nameof(VehiclePlatformAccountAssignmentsController.GetSwitches), typeof(HttpGetAttribute), "switches", PermissionKeys.Fleet.AssignmentsRead },
         { nameof(VehiclePlatformAccountAssignmentsController.GetSwitch), typeof(HttpGetAttribute), "switches/{switchId:guid}", PermissionKeys.Fleet.AssignmentsRead },
         { nameof(VehiclePlatformAccountAssignmentsController.Switch), typeof(HttpPostAttribute), "{id:guid}/switch", PermissionKeys.Fleet.AssignmentsManage },
-        { nameof(VehiclePlatformAccountAssignmentsController.AcceptSwitch), typeof(HttpPostAttribute), "switches/{switchId:guid}/accept", PermissionKeys.Fleet.AssignmentsManage }
+        { nameof(VehiclePlatformAccountAssignmentsController.AcceptSwitch), typeof(HttpPostAttribute), "switches/{switchId:guid}/accept", PermissionKeys.Fleet.AssignmentsManage },
+        { nameof(VehiclePlatformAccountAssignmentsController.GetLeaseAgreements), typeof(HttpGetAttribute), "lease-agreements", PermissionKeys.Fleet.AssignmentsRead },
+        { nameof(VehiclePlatformAccountAssignmentsController.GetLeaseEligibleVehicles), typeof(HttpGetAttribute), "lease-agreements/eligible-vehicles", PermissionKeys.Fleet.AssignmentsRead },
+        { nameof(VehiclePlatformAccountAssignmentsController.GetLeaseAgreement), typeof(HttpGetAttribute), "lease-agreements/{agreementId:guid}", PermissionKeys.Fleet.AssignmentsRead },
+        { nameof(VehiclePlatformAccountAssignmentsController.CreateLeaseAgreement), typeof(HttpPostAttribute), "lease-agreements", PermissionKeys.Fleet.AssignmentsManage },
+        { nameof(VehiclePlatformAccountAssignmentsController.CloseLeaseAgreement), typeof(HttpPostAttribute), "lease-agreements/{agreementId:guid}/close", PermissionKeys.Fleet.AssignmentsManage }
     };
 
     [Fact]
@@ -61,8 +66,25 @@ public sealed class VehiclePlatformAccountAssignmentApiSurfaceTests
             .GetProperty(nameof(VehiclePlatformAccountAssignmentResponse.VehiclePlateNumberAr)));
         Assert.NotNull(typeof(VehiclePlatformAccountAssignmentResponse)
             .GetProperty(nameof(VehiclePlatformAccountAssignmentResponse.Problems)));
+        Assert.NotNull(typeof(VehiclePlatformAccountAssignmentResponse)
+            .GetProperty(nameof(VehiclePlatformAccountAssignmentResponse.SponsorVehicleLeaseAgreementId)));
+        Assert.NotNull(typeof(VehiclePlatformAccountAssignmentResponse)
+            .GetProperty(nameof(VehiclePlatformAccountAssignmentResponse.UsesSponsorVehicleLeaseAgreement)));
         Assert.NotNull(typeof(VehiclePlatformAssignmentProblemResponse)
             .GetProperty(nameof(VehiclePlatformAssignmentProblemResponse.Code)));
+    }
+
+    [Fact]
+    public void LeaseAgreementContractContainsBothSponsorsAndSelectedVehicles()
+    {
+        Assert.NotNull(typeof(CreateSponsorVehicleLeaseAgreementRequest)
+            .GetProperty(nameof(CreateSponsorVehicleLeaseAgreementRequest.LessorSponsorId)));
+        Assert.NotNull(typeof(CreateSponsorVehicleLeaseAgreementRequest)
+            .GetProperty(nameof(CreateSponsorVehicleLeaseAgreementRequest.LesseeSponsorId)));
+        Assert.NotNull(typeof(CreateSponsorVehicleLeaseAgreementRequest)
+            .GetProperty(nameof(CreateSponsorVehicleLeaseAgreementRequest.VehicleIds)));
+        Assert.NotNull(typeof(SponsorVehicleLeaseAgreementResponse)
+            .GetProperty(nameof(SponsorVehicleLeaseAgreementResponse.Vehicles)));
     }
 
     [Fact]

@@ -25,6 +25,8 @@ Atomically ends the current vehicle assignment and starts a new vehicle assignme
 
 Requires `Idempotency-Key`; response is `RiderVehicleAssignmentResponse` for the resulting assignment.
 
+When `oldVehicleCondition` is not `Good=2`, `metadata` must also contain `conditionReport` with frontend-selected `category`, frontend-selected `severity`, `problemDescription`, `isRiderResponsible`, and `estimatedRepairCost`. Add one or two multipart `evidenceFiles`. The old vehicle is moved to `ProblemHold`, while the replacement vehicle becomes `Assigned`. When the old condition is good, omit both `conditionReport` and `evidenceFiles`. See [Vehicle Return and Switch Condition Report — Frontend Handoff](vehicle-return-condition-frontend-handoff.md).
+
 ### `POST /api/vehicle-assignments/{assignmentId}/renew-permission`
 
 Updates the permission date/reference for an assignment. Requires `Idempotency-Key`.
@@ -576,6 +578,8 @@ The request limit is 32 MiB. Invalid or missing `metadata` returns `400 Bad Requ
 
 Completes an active assignment and records end time, end odometer, condition, fuel level, reason, and concurrency token. Requires `Idempotency-Key`.
 
+When `endCondition` is `Good=2`, use the existing `application/json` request below. `conditionReport` must be omitted and no evidence files are accepted.
+
 ```json
 {
   "assignmentId": "00000000-0000-0000-0000-000000000000",
@@ -588,7 +592,33 @@ Completes an active assignment and records end time, end odometer, condition, fu
 }
 ```
 
-Response: `200 OK`, `RiderVehicleAssignment
+When `endCondition` is any value other than `Good`, the frontend must open the vehicle-condition report modal and call `POST /api/vehicle-assignments/return-with-condition-report` using `multipart/form-data` with:
+
+- `metadata`: the JSON request, including a required `conditionReport` object.
+- `evidenceFiles`: one or two PDF/image files, up to 10 MiB each.
+
+```json
+{
+  "assignmentId": "00000000-0000-0000-0000-000000000000",
+  "endedAtUtc": "2026-08-26T18:00:00Z",
+  "endOdometer": 12120,
+  "endCondition": 4,
+  "endFuelLevelPercentage": 65,
+  "reason": "End of shift",
+  "rowVersion": "AAAAAAA...",
+  "conditionReport": {
+    "category": 4,
+    "severity": 3,
+    "problemDescription": "Rear wheel and mudguard are damaged",
+    "isRiderResponsible": true,
+    "estimatedRepairCost": 450.00
+  }
+}
+```
+
+The return, blocking vehicle issue, rider-responsibility decision, repair-cost estimate, and evidence records are saved together. The issue is linked to the returned assignment and the vehicle moves to `ProblemHold` until the issue is resolved or rejected. Incomplete reports, zero or more than two files, or report data submitted for a good vehicle return are rejected with `400 Bad Request`.
+
+Response: `200 OK`, `RiderVehicleAssignmentResponse`.
 ### `GET /api/vehicles/{vehicleId}/{type}`
 
 Returns compliance history. `type` must be one of:
@@ -653,6 +683,16 @@ Creates an issue for a vehicle. Requires `Idempotency-Key` and `fleet.issues.man
 Request (`CreateVehicleIssueRequest`): `vehicleId`, `category`, `severity`, `description`, `reportedAtUtc`, `locationDescription`, `odometerAtReport`, and `blocksOperation`.
 
 If `blocksOperation=true`, the service ends the active assignment and places the vehicle in `ProblemHold`.
+
+Issue responses expose a nullable `rider` object derived by the backend from `relatedAssignmentId`; clients do not send rider data. It contains `riderProfileId`, `employeeId`, `riderName`, `isRealRider`, and optional `realRider` details. Return-created issue responses also expose `relatedAssignmentId`, `isRiderResponsible`, and `estimatedRepairCost`.
+
+### `GET /api/vehicle-issues/{id}/evidence`
+
+Lists the private proof files attached during a non-good vehicle return. Response: `VehicleIssueEvidenceResponse[]`.
+
+### `GET /api/vehicle-issues/{id}/evidence/{evidenceId}/download`
+
+Downloads an issue evidence file as binary with range processing enabled. Access uses the existing `fleet.issues.read` permission and vehicle scope.
 
 ### `POST /api/vehicle-issues/{id}/{operation}`
 
@@ -775,7 +815,7 @@ Downloads the current generated accident PDF, or the requested report version wh
 
 ### Issue response
 
-`VehicleIssueSummaryResponse` contains `id`, `issueNumber`, `vehicleId`, category, severity, blocking flag, status, report timestamp, description, location, optional resolution summary, and row version.
+`VehicleIssueSummaryResponse` contains `id`, `issueNumber`, `vehicleId`, category, severity, blocking flag, status, report timestamp, description, location, optional related assignment, nullable rider details, optional rider responsibility, optional estimated repair cost, optional resolution summary, and row version. The `rider` object contains `riderProfileId`, `employeeId`, `riderName`, `isRealRider`, and optional `realRider` (`id`, `name`, `iqamaNo`, `relationshipToAssignedRider`). For display, prefer `rider.realRider.name` when present and otherwise use `rider.riderName`.
 
 ### Accident response
 

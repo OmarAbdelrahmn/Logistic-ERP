@@ -24,6 +24,58 @@ public sealed record AcceptVehiclePlatformAccountSwitchRequest(
     DateTimeOffset? EffectiveAtUtc,
     string RowVersion);
 
+public sealed record CreateSponsorVehicleLeaseAgreementRequest(
+    Guid LessorSponsorId,
+    Guid LesseeSponsorId,
+    IReadOnlyList<Guid> VehicleIds,
+    DateOnly? AgreementDate,
+    string? AgreementReference,
+    DateOnly? EffectiveFrom,
+    DateOnly? EffectiveTo,
+    string? Notes);
+
+public sealed record CloseSponsorVehicleLeaseAgreementRequest(
+    DateOnly? EffectiveTo,
+    string Reason,
+    string RowVersion);
+
+public sealed record SponsorVehicleLeaseAgreementVehicleResponse(
+    Guid Id,
+    Guid VehicleId,
+    string AssetNumber,
+    string? RegistrationNumber,
+    string? PlateNumberAr,
+    string? PlateNumberEn);
+
+public sealed record SponsorVehicleLeaseEligibleVehicleResponse(
+    Guid VehicleId,
+    string AssetNumber,
+    string? RegistrationNumber,
+    string? PlateNumberAr,
+    string? PlateNumberEn,
+    string VehicleType,
+    string OperationalStatus,
+    Guid? OperatingCityId);
+
+public sealed record SponsorVehicleLeaseAgreementResponse(
+    Guid Id,
+    Guid PlatformId,
+    string PlatformCode,
+    string PlatformNameAr,
+    Guid LessorSponsorId,
+    string LessorSponsorNameAr,
+    Guid LesseeSponsorId,
+    string LesseeSponsorNameAr,
+    DateOnly? AgreementDate,
+    string? AgreementReference,
+    DateOnly EffectiveFrom,
+    DateOnly? EffectiveTo,
+    string Status,
+    string? EndReason,
+    string? Notes,
+    IReadOnlyList<SponsorVehicleLeaseAgreementVehicleResponse> Vehicles,
+    string RowVersion);
+
 public sealed record VehiclePlatformAccountSwitchResponse(
     Guid Id,
     Guid SourceAssignmentId,
@@ -94,6 +146,8 @@ public sealed record VehiclePlatformAccountAssignmentResponse(
     DateTimeOffset? EndedAtUtc,
     Guid? EndedByUserId,
     string? EndReason,
+    bool UsesSponsorVehicleLeaseAgreement,
+    Guid? SponsorVehicleLeaseAgreementId,
     bool HasProblems,
     IReadOnlyList<VehiclePlatformAssignmentProblemResponse> Problems,
     string RowVersion);
@@ -138,6 +192,31 @@ public interface IVehiclePlatformAccountAssignmentService
     Task<Result<VehiclePlatformAccountSwitchResponse>> AcceptSwitchAsync(
         Guid switchId,
         AcceptVehiclePlatformAccountSwitchRequest request,
+        CancellationToken cancellationToken = default);
+
+    Task<Result<IReadOnlyList<SponsorVehicleLeaseAgreementResponse>>> GetLeaseAgreementsAsync(
+        Guid? lessorSponsorId,
+        Guid? lesseeSponsorId,
+        bool activeOnly,
+        CancellationToken cancellationToken = default);
+
+    Task<Result<SponsorVehicleLeaseAgreementResponse>> GetLeaseAgreementAsync(
+        Guid agreementId,
+        CancellationToken cancellationToken = default);
+
+    Task<Result<IReadOnlyList<SponsorVehicleLeaseEligibleVehicleResponse>>> GetLeaseEligibleVehiclesAsync(
+        Guid lessorSponsorId,
+        DateOnly? effectiveFrom,
+        DateOnly? effectiveTo,
+        CancellationToken cancellationToken = default);
+
+    Task<Result<SponsorVehicleLeaseAgreementResponse>> CreateLeaseAgreementAsync(
+        CreateSponsorVehicleLeaseAgreementRequest request,
+        CancellationToken cancellationToken = default);
+
+    Task<Result<SponsorVehicleLeaseAgreementResponse>> CloseLeaseAgreementAsync(
+        Guid agreementId,
+        CloseSponsorVehicleLeaseAgreementRequest request,
         CancellationToken cancellationToken = default);
 
     Task<Result<IReadOnlyList<VehiclePlatformAccountAssignmentResponse>>> GetProblemsAsync(

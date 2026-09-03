@@ -4,6 +4,7 @@ namespace LogisticsERP.Domain.Fleet;
 
 public static class VehiclePlatformAccountAssignmentPolicy
 {
+    public const string KeetaPlatformCode = "KEETA";
     public const int CarMaximumAccountsPerPlatformAndCity = 2;
     public const int MotorcycleMaximumAccountsPerPlatformAndCity = 3;
 
@@ -25,4 +26,11 @@ public static class VehiclePlatformAccountAssignmentPolicy
 
     public static bool IsPlatformAccountStatusAllowed(PlatformRiderAccountStatus status) =>
         status is PlatformRiderAccountStatus.Available or PlatformRiderAccountStatus.Assigned;
+
+    public static bool IsSponsorCompatible(
+        Guid? vehicleSponsorId,
+        Guid accountSponsorId,
+        bool hasApplicableLeaseAgreement) =>
+        vehicleSponsorId.HasValue
+        && (vehicleSponsorId.Value == accountSponsorId || hasApplicableLeaseAgreement);
 }

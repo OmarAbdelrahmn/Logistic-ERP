@@ -30,8 +30,8 @@ public interface IFleetService
     Task<Result<VehicleOdometerReadingResponse>> RecordOdometerAsync(Guid vehicleId, OdometerReadingRequest request, CancellationToken cancellationToken = default);
     Task<Result<IReadOnlyList<VehicleOdometerReadingResponse>>> GetOdometerHistoryAsync(Guid vehicleId, CancellationToken cancellationToken = default);
     Task<Result<RiderVehicleAssignmentResponse>> TakeAsync(TakeVehicleRequest request, IReadOnlyList<PrivateFileUpload> promissoryFiles, string idempotencyKey, CancellationToken cancellationToken = default);
-    Task<Result<RiderVehicleAssignmentResponse>> ReturnAsync(ReturnVehicleRequest request, string idempotencyKey, CancellationToken cancellationToken = default);
-    Task<Result<RiderVehicleAssignmentResponse>> SwitchAsync(SwitchVehicleRequest request, IReadOnlyList<PrivateFileUpload> promissoryFiles, string idempotencyKey, CancellationToken cancellationToken = default);
+    Task<Result<RiderVehicleAssignmentResponse>> ReturnAsync(ReturnVehicleRequest request, IReadOnlyList<PrivateFileUpload> evidenceFiles, string idempotencyKey, CancellationToken cancellationToken = default);
+    Task<Result<RiderVehicleAssignmentResponse>> SwitchAsync(SwitchVehicleRequest request, IReadOnlyList<PrivateFileUpload> promissoryFiles, IReadOnlyList<PrivateFileUpload> evidenceFiles, string idempotencyKey, CancellationToken cancellationToken = default);
     Task<Result<RiderVehicleAssignmentResponse>> RenewPermissionAsync(Guid assignmentId, RenewVehiclePermissionRequest request, string idempotencyKey, CancellationToken cancellationToken = default);
     Task<Result<IReadOnlyList<RiderVehicleAssignmentResponse>>> GetAssignmentsAsync(Guid? vehicleId, Guid? riderProfileId, bool activeOnly, CancellationToken cancellationToken = default);
     Task<Result<IReadOnlyList<RiderVehicleTimelineResponse>>> GetVehicleTimelineAsync(Guid vehicleId, CancellationToken cancellationToken = default);
@@ -43,6 +43,8 @@ public interface IFleetService
     Task<Result<VehicleComplianceResponse>> RenewOperationCardAsync(Guid vehicleId, VehicleOperationCardRequest request, CancellationToken cancellationToken = default);
     Task<Result<IReadOnlyList<VehicleComplianceDueResponse>>> GetComplianceDueAsync(DateOnly checkDate, CancellationToken cancellationToken = default);
     Task<Result<PagedResponse<VehicleIssueSummaryResponse>>> GetIssuesAsync(Guid? vehicleId, string? status, int page, int pageSize, CancellationToken cancellationToken = default);
+    Task<Result<IReadOnlyList<VehicleIssueEvidenceResponse>>> GetIssueEvidenceAsync(Guid issueId, CancellationToken cancellationToken = default);
+    Task<Result<PrivateFileDownload>> DownloadIssueEvidenceAsync(Guid issueId, Guid evidenceId, CancellationToken cancellationToken = default);
     Task<Result<VehicleIssueSummaryResponse>> CreateIssueAsync(CreateVehicleIssueRequest request, string idempotencyKey, CancellationToken cancellationToken = default);
     Task<Result<VehicleIssueSummaryResponse>> ActOnIssueAsync(Guid issueId, string action, VehicleIssueActionRequest request, CancellationToken cancellationToken = default);
     Task<Result<VehicleIssueSummaryResponse>> ResolveIssueAsync(Guid issueId, ResolveVehicleIssueRequest request, CancellationToken cancellationToken = default);

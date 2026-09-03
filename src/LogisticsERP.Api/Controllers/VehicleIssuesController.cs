@@ -15,6 +15,20 @@ public sealed class VehicleIssuesController(IFleetService service) : ControllerB
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 
+    [HttpGet("{id:guid}/evidence")]
+    public async Task<IActionResult> GetEvidence(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await service.GetIssueEvidenceAsync(id, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpGet("{id:guid}/evidence/{evidenceId:guid}/download")]
+    public async Task<IActionResult> DownloadEvidence(Guid id, Guid evidenceId, CancellationToken cancellationToken)
+    {
+        var result = await service.DownloadIssueEvidenceAsync(id, evidenceId, cancellationToken);
+        return result.IsSuccess ? File(result.Value!.Content, result.Value.ContentType, result.Value.DownloadFileName, enableRangeProcessing: true) : result.ToProblem(HttpContext);
+    }
+
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateVehicleIssueRequest request, [FromHeader(Name = "Idempotency-Key")] string? idempotencyKey, CancellationToken cancellationToken)
     {

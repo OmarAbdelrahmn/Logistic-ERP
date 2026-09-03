@@ -68,5 +68,7 @@ internal sealed class FleetServiceSupport(
 
     public static string NewVehicleAssetNumber(Guid id) => $"VEH-{id:N}"[..12].ToUpperInvariant();
 
+    public static string NewIssueNumber(Guid id) => $"ISS-{id.ToString("N")[^16..]}".ToUpperInvariant();
+
     public static string NewNumber(string prefix, DateTimeOffset now, Guid id) => $"{prefix}-{now:yyyyMMdd}-{id:N}"[..(prefix.Length + 18)].ToUpperInvariant();
 }

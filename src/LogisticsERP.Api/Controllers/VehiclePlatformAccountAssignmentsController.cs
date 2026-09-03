@@ -125,4 +125,69 @@ public sealed class VehiclePlatformAccountAssignmentsController(
         var result = await service.AcceptSwitchAsync(switchId, request, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
+
+    [HttpGet("lease-agreements")]
+    [RequirePermission(PermissionKeys.Fleet.AssignmentsRead)]
+    public async Task<IActionResult> GetLeaseAgreements(
+        [FromQuery] Guid? lessorSponsorId,
+        [FromQuery] Guid? lesseeSponsorId,
+        [FromQuery] bool activeOnly = true,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await service.GetLeaseAgreementsAsync(
+            lessorSponsorId,
+            lesseeSponsorId,
+            activeOnly,
+            cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpGet("lease-agreements/eligible-vehicles")]
+    [RequirePermission(PermissionKeys.Fleet.AssignmentsRead)]
+    public async Task<IActionResult> GetLeaseEligibleVehicles(
+        [FromQuery] Guid lessorSponsorId,
+        [FromQuery] DateOnly? effectiveFrom,
+        [FromQuery] DateOnly? effectiveTo,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await service.GetLeaseEligibleVehiclesAsync(
+            lessorSponsorId,
+            effectiveFrom,
+            effectiveTo,
+            cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpGet("lease-agreements/{agreementId:guid}")]
+    [RequirePermission(PermissionKeys.Fleet.AssignmentsRead)]
+    public async Task<IActionResult> GetLeaseAgreement(
+        Guid agreementId,
+        CancellationToken cancellationToken)
+    {
+        var result = await service.GetLeaseAgreementAsync(agreementId, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpPost("lease-agreements")]
+    [RequirePermission(PermissionKeys.Fleet.AssignmentsManage)]
+    public async Task<IActionResult> CreateLeaseAgreement(
+        [FromBody] CreateSponsorVehicleLeaseAgreementRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await service.CreateLeaseAgreementAsync(request, cancellationToken);
+        return result.IsSuccess
+            ? CreatedAtAction(nameof(GetLeaseAgreement), new { agreementId = result.Value!.Id }, result.Value)
+            : result.ToProblem(HttpContext);
+    }
+
+    [HttpPost("lease-agreements/{agreementId:guid}/close")]
+    [RequirePermission(PermissionKeys.Fleet.AssignmentsManage)]
+    public async Task<IActionResult> CloseLeaseAgreement(
+        Guid agreementId,
+        [FromBody] CloseSponsorVehicleLeaseAgreementRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await service.CloseLeaseAgreementAsync(agreementId, request, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
 }

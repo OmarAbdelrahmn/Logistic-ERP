@@ -17,6 +17,11 @@ internal sealed class PhoneSimCardConfiguration : IEntityTypeConfiguration<Phone
         builder.Property(entity => entity.CarrierName).HasMaxLength(200);
         builder.Property(entity => entity.StatusReason).HasMaxLength(500);
         builder.Property(entity => entity.Notes).HasMaxLength(4000);
+        builder.Property(entity => entity.ReceiptFormOriginalFileName).HasMaxLength(255);
+        builder.Property(entity => entity.ReceiptFormStoredFileName).HasMaxLength(255).IsUnicode(false);
+        builder.Property(entity => entity.ReceiptFormContentType).HasMaxLength(100).IsUnicode(false);
+        builder.Property(entity => entity.ReceiptFormSha256Checksum).HasMaxLength(64).IsUnicode(false);
+        builder.Property(entity => entity.ReceiptFormStoragePath).HasMaxLength(1000).IsUnicode(false);
         builder.HasOne<Employee>().WithMany()
             .HasForeignKey(entity => entity.ResponsibleEmployeeId)
             .OnDelete(DeleteBehavior.Restrict);

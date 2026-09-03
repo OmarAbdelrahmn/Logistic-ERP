@@ -110,6 +110,9 @@ public static class PermissionKeys
         public const string AccidentsDownload = "fleet.accidents.download";
         public const string CorrectionsManage = "fleet.corrections.manage";
         public const string RegistrationTransitionsManage = "fleet.registration_transitions.manage";
+        public const string DailyDistancesRead = "fleet.daily_distances.read";
+        public const string DailyDistancesManage = "fleet.daily_distances.manage";
+        public const string DailyDistancesImport = "fleet.daily_distances.import";
     }
 
     public static class Workflows
@@ -208,6 +211,9 @@ public static class PermissionKeys
         Fleet.AccidentsDownload,
         Fleet.CorrectionsManage,
         Fleet.RegistrationTransitionsManage,
+        Fleet.DailyDistancesRead,
+        Fleet.DailyDistancesManage,
+        Fleet.DailyDistancesImport,
         Workflows.LeaveRequestsRead,
         Workflows.LeaveRequestsManage,
         Workflows.LeaveRequestsApprove,

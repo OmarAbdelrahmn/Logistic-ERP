@@ -72,7 +72,7 @@ internal sealed class VehicleAccidentService(
         var accidentId = Guid.CreateVersion7();
         var issue = new VehicleIssue
         {
-            Id = issueId, IssueNumber = FleetServiceSupport.NewNumber("ISS", support.UtcNow, issueId), VehicleId = vehicle.Id,
+            Id = issueId, IssueNumber = FleetServiceSupport.NewIssueNumber(issueId), VehicleId = vehicle.Id,
             Category = VehicleIssueCategory.Accident, Severity = ToIssueSeverity(request.Severity), Description = request.DamageDescription.Trim(),
             ReportedAtUtc = support.UtcNow, LocationDescription = request.LocationDescription.Trim(), OdometerAtReport = vehicle.CurrentOdometer,
             RelatedAssignmentId = assignment.Id, BlocksOperation = !request.IsDrivable, ReportedByUserId = actor.Value

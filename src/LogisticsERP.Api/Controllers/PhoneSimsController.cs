@@ -1,5 +1,6 @@
 using LogisticsERP.Api.Authorization;
 using LogisticsERP.Api.ErrorHandling;
+using LogisticsERP.Application.Abstractions.Files;
 using LogisticsERP.Application.Authorization;
 using LogisticsERP.Application.Features.Telecom;
 using Microsoft.AspNetCore.Mvc;
@@ -40,13 +41,40 @@ public sealed class PhoneSimsController(IPhoneSimService service) : ControllerBa
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 
+    [HttpGet("{id:guid}/receipt-form")]
+    [RequirePermission(PermissionKeys.Operations.PhoneSimsRead)]
+    public async Task<IActionResult> DownloadReceiptForm(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await service.DownloadReceiptFormAsync(id, cancellationToken);
+        if (result.IsFailure)
+        {
+            return result.ToProblem(HttpContext);
+        }
+
+        Response.Headers.ContentDisposition = $"inline; filename=\"{Uri.EscapeDataString(result.Value!.DownloadFileName)}\"";
+        return File(result.Value.Content, result.Value.ContentType, enableRangeProcessing: true);
+    }
+
     [HttpPost]
+    [Consumes("multipart/form-data")]
+    [RequestSizeLimit(11 * 1024 * 1024)]
     [RequirePermission(PermissionKeys.Operations.PhoneSimsManage)]
     public async Task<IActionResult> Create(
-        [FromBody] CreatePhoneSimRequest request,
+        [FromForm] CreatePhoneSimForm form,
         CancellationToken cancellationToken)
     {
-        var result = await service.CreateAsync(request, cancellationToken);
+        if (form.ReceiptForm is null || form.ReceiptForm.Length == 0)
+        {
+            return BadRequest();
+        }
+
+        await using var stream = form.ReceiptForm.OpenReadStream();
+        var receiptForm = new PrivateFileUpload(
+            stream,
+            form.ReceiptForm.FileName,
+            form.ReceiptForm.ContentType,
+            form.ReceiptForm.Length);
+        var result = await service.CreateAsync(form.ToRequest(), receiptForm, cancellationToken);
         return result.IsSuccess
             ? CreatedAtAction(nameof(Get), new { id = result.Value!.Id }, result.Value)
             : result.ToProblem(HttpContext);
@@ -138,4 +166,17 @@ public sealed class PhoneSimsController(IPhoneSimService service) : ControllerBa
         var result = await service.CloseAssignmentAsync(id, assignmentId, request, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
+}
+
+public sealed class CreatePhoneSimForm
+{
+    public string PhoneNumber { get; init; } = string.Empty;
+    public string? Iccid { get; init; }
+    public string? CarrierName { get; init; }
+    public Guid ResponsibleEmployeeId { get; init; }
+    public string? Notes { get; init; }
+    public IFormFile ReceiptForm { get; init; } = null!;
+
+    public CreatePhoneSimRequest ToRequest() =>
+        new(PhoneNumber, Iccid, CarrierName, ResponsibleEmployeeId, Notes);
 }

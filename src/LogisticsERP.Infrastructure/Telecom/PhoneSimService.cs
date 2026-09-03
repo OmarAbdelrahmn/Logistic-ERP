@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using LogisticsERP.Application.Abstractions.Authentication;
+using LogisticsERP.Application.Abstractions.Files;
 using LogisticsERP.Application.Common.Results;
 using LogisticsERP.Application.Features.Telecom;
 using LogisticsERP.Domain.Entities.Telecom;
@@ -13,8 +14,11 @@ namespace LogisticsERP.Infrastructure.Telecom;
 internal sealed class PhoneSimService(
     ApplicationDbContext dbContext,
     ICurrentUser currentUser,
+    IPrivateFileStorage fileStorage,
     TimeProvider timeProvider) : IPhoneSimService
 {
+    private const long MaximumReceiptFormSize = 10 * 1024 * 1024;
+
     public async Task<Result<PhoneSimPageResponse>> GetAllAsync(
         string? search,
         string? status,
@@ -95,8 +99,46 @@ internal sealed class PhoneSimService(
         return Result.Success(MapSim(projection, currentRider));
     }
 
+    public async Task<Result<PrivateFileDownload>> DownloadReceiptFormAsync(
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        var sim = await dbContext.PhoneSimCards.AsNoTracking()
+            .Where(item => item.Id == id)
+            .Select(item => new
+            {
+                item.ReceiptFormStoragePath,
+                item.ReceiptFormContentType,
+                item.ReceiptFormOriginalFileName,
+                item.ReceiptFormSizeBytes
+            })
+            .SingleOrDefaultAsync(cancellationToken);
+        if (sim is null)
+        {
+            return Result.Failure<PrivateFileDownload>(PhoneSimErrors.NotFound);
+        }
+        if (string.IsNullOrWhiteSpace(sim.ReceiptFormStoragePath)
+            || string.IsNullOrWhiteSpace(sim.ReceiptFormContentType)
+            || string.IsNullOrWhiteSpace(sim.ReceiptFormOriginalFileName)
+            || !sim.ReceiptFormSizeBytes.HasValue)
+        {
+            return Result.Failure<PrivateFileDownload>(PhoneSimErrors.ReceiptFormNotFound);
+        }
+
+        var file = await fileStorage.OpenReadAsync(
+            sim.ReceiptFormStoragePath,
+            sim.ReceiptFormContentType,
+            sim.ReceiptFormOriginalFileName,
+            sim.ReceiptFormSizeBytes.Value,
+            cancellationToken);
+        return file.IsSuccess
+            ? file
+            : Result.Failure<PrivateFileDownload>(PhoneSimErrors.ReceiptFormNotFound);
+    }
+
     public async Task<Result<PhoneSimResponse>> CreateAsync(
         CreatePhoneSimRequest request,
+        PrivateFileUpload receiptForm,
         CancellationToken cancellationToken = default)
     {
         if (currentUser.UserId is not { } actorId)
@@ -146,6 +188,23 @@ internal sealed class PhoneSimService(
             Notes = TrimOrNull(request.Notes)
         };
 
+        var storedReceiptForm = await fileStorage.StoreAsync(
+            $"phone-sims/{sim.Id:N}/receipt-form",
+            receiptForm,
+            MaximumReceiptFormSize,
+            cancellationToken);
+        if (storedReceiptForm.IsFailure)
+        {
+            return Result.Failure<PhoneSimResponse>(storedReceiptForm.Error);
+        }
+
+        sim.ReceiptFormOriginalFileName = storedReceiptForm.Value!.OriginalFileName;
+        sim.ReceiptFormStoredFileName = storedReceiptForm.Value.StoredFileName;
+        sim.ReceiptFormContentType = storedReceiptForm.Value.ContentType;
+        sim.ReceiptFormSizeBytes = storedReceiptForm.Value.Length;
+        sim.ReceiptFormSha256Checksum = storedReceiptForm.Value.Sha256Checksum;
+        sim.ReceiptFormStoragePath = storedReceiptForm.Value.StoragePath;
+
         dbContext.PhoneSimCards.Add(sim);
         dbContext.PhoneSimResponsibilityChanges.Add(new PhoneSimResponsibilityChange
         {
@@ -162,7 +221,13 @@ internal sealed class PhoneSimService(
         }
         catch (DbUpdateException)
         {
+            fileStorage.DeleteBestEffort(storedReceiptForm.Value.StoragePath);
             return Result.Failure<PhoneSimResponse>(PhoneSimErrors.PersistenceConflict);
+        }
+        catch
+        {
+            fileStorage.DeleteBestEffort(storedReceiptForm.Value.StoragePath);
+            throw;
         }
 
         return await GetAsync(sim.Id, cancellationToken);
@@ -703,6 +768,11 @@ internal sealed class PhoneSimService(
             currentRider.EffectiveFrom,
             EncodeRowVersion(currentRider.RowVersion)),
         row.Sim.Notes,
+        row.Sim.ReceiptFormStoragePath is null ? null : new PhoneSimReceiptFormResponse(
+            row.Sim.ReceiptFormOriginalFileName!,
+            row.Sim.ReceiptFormContentType!,
+            row.Sim.ReceiptFormSizeBytes!.Value,
+            row.Sim.ReceiptFormSha256Checksum!),
         row.Sim.CreatedAtUtc,
         row.Sim.UpdatedAtUtc,
         EncodeRowVersion(row.Sim.RowVersion));

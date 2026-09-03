@@ -115,7 +115,10 @@ internal static class PermissionSeedCatalog
         Create(83, PermissionKeys.HrForms.TemplatesRead, "HrForms", "عرض قوالب نماذج الموارد البشرية", "Read HR form templates", "عرض القوالب المنشورة ومسودات تصميم نماذج الموارد البشرية.", "View published HR form templates and design drafts."),
         Create(84, PermissionKeys.HrForms.TemplatesManage, "HrForms", "إدارة قوالب نماذج الموارد البشرية", "Manage HR form templates", "إنشاء إصدارات قوالب النماذج ونشرها وأرشفتها.", "Create, version, publish, and archive HR form templates.", sensitive: true, highTrust: true),
         Create(85, PermissionKeys.Operations.PhoneSimsRead, "Operations", "عرض شرائح الاتصال", "Read phone SIMs", "عرض شرائح الاتصال والمسؤول الحالي وسجل تسليمها للمناديب.", "View phone SIM inventory, current responsible employees, and rider assignment history.", sensitive: true),
-        Create(86, PermissionKeys.Operations.PhoneSimsManage, "Operations", "إدارة شرائح الاتصال", "Manage phone SIMs", "إدارة بيانات شرائح الاتصال والمسؤولين وتسليم الشرائح للمناديب وإرجاعها.", "Manage phone SIM details, responsible employees, rider assignments, and returns.", sensitive: true)
+        Create(86, PermissionKeys.Operations.PhoneSimsManage, "Operations", "إدارة شرائح الاتصال", "Manage phone SIMs", "إدارة بيانات شرائح الاتصال والمسؤولين وتسليم الشرائح للمناديب وإرجاعها.", "Manage phone SIM details, responsible employees, rider assignments, and returns.", sensitive: true),
+        Create(87, PermissionKeys.Fleet.DailyDistancesRead, "Fleet", "عرض المسافات اليومية للمركبات", "Read vehicle daily distances", "عرض المسافة اليومية من نظام GPS أو الإدخال اليدوي للمركبات.", "View each vehicle's daily GPS or manually entered distance."),
+        Create(88, PermissionKeys.Fleet.DailyDistancesManage, "Fleet", "إدارة المسافات اليومية للمركبات", "Manage vehicle daily distances", "إدخال وتعديل قراءة العداد اليدوية اليومية للمركبات.", "Enter and update a vehicle's daily manual odometer reading.", sensitive: true),
+        Create(89, PermissionKeys.Fleet.DailyDistancesImport, "Fleet", "استيراد مسافات GPS اليومية", "Import daily GPS distances", "استيراد ملف GPS اليومي وتطبيق المسافات على المركبات المطابقة.", "Import a daily GPS report and apply distances to matching vehicles.", sensitive: true)
     ];
 
     private static PermissionSeed Create(

@@ -79,6 +79,7 @@ internal sealed class VehicleConfiguration : IEntityTypeConfiguration<Vehicle>
         builder.Property(x => x.LeaseReference).HasMaxLength(200);
         builder.Property(x => x.DecommissionReason).HasMaxLength(1000);
         builder.Property(x => x.Notes).HasMaxLength(4000);
+        builder.Property(x => x.TrackedDistanceKm).HasPrecision(18, 2);
         builder.HasOne<VehicleManufacturer>().WithMany().HasForeignKey(x => x.VehicleManufacturerId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<VehicleModel>().WithMany()
             .HasForeignKey(x => new { x.VehicleModelId, x.VehicleManufacturerId })
@@ -98,6 +99,7 @@ internal sealed class VehicleConfiguration : IEntityTypeConfiguration<Vehicle>
         builder.ToTable(table =>
         {
             table.HasCheckConstraint("CK_Vehicles_Odometer", "[CurrentOdometer] >= 0");
+            table.HasCheckConstraint("CK_Vehicles_TrackedDistanceKm", "[TrackedDistanceKm] >= 0");
             table.HasCheckConstraint("CK_Vehicles_ModelYear", "[ModelYear] IS NULL OR ([ModelYear] >= 1950 AND [ModelYear] <= 2200)");
             table.HasCheckConstraint("CK_Vehicles_RegistrationType", "[RegistrationType] IS NULL OR [RegistrationType] BETWEEN 1 AND 8");
         });
@@ -172,6 +174,47 @@ internal sealed class VehicleOdometerReadingConfiguration : IEntityTypeConfigura
     }
 }
 
+internal sealed class VehicleDailyDistanceConfiguration : IEntityTypeConfiguration<VehicleDailyDistance>
+{
+    public void Configure(EntityTypeBuilder<VehicleDailyDistance> builder)
+    {
+        builder.ConfigureOperational("VehicleDailyDistances");
+        builder.Property(x => x.GpsDistanceKm).HasPrecision(18, 2);
+        builder.Property(x => x.ManualDistanceKm).HasPrecision(18, 2);
+        builder.Property(x => x.AppliedDistanceKm).HasPrecision(18, 2);
+        builder.Property(x => x.GpsPlateNumber).HasMaxLength(64);
+        builder.Property(x => x.ManualNotes).HasMaxLength(1000);
+        builder.HasOne<Vehicle>().WithMany().HasForeignKey(x => x.VehicleId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<VehicleDailyDistanceImport>().WithMany().HasForeignKey(x => x.LastGpsImportId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(x => new { x.VehicleId, x.WorkDate }).IsUnique().HasFilter("[IsDeleted] = 0");
+        builder.HasIndex(x => new { x.WorkDate, x.AppliedSource });
+        builder.ToTable(table =>
+        {
+            table.HasCheckConstraint("CK_VehicleDailyDistances_GpsDistance", "[GpsDistanceKm] IS NULL OR [GpsDistanceKm] >= 0");
+            table.HasCheckConstraint("CK_VehicleDailyDistances_ManualDistance", "[ManualDistanceKm] IS NULL OR [ManualDistanceKm] >= 0");
+            table.HasCheckConstraint("CK_VehicleDailyDistances_AppliedDistance", "[AppliedDistanceKm] >= 0");
+            table.HasCheckConstraint("CK_VehicleDailyDistances_Source", "[AppliedSource] BETWEEN 0 AND 2");
+            table.HasCheckConstraint("CK_VehicleDailyDistances_ManualOdometer", "[ManualOdometerReading] IS NULL OR ([ManualBaselineOdometerReading] IS NOT NULL AND [ManualOdometerReading] >= [ManualBaselineOdometerReading])");
+        });
+    }
+}
+
+internal sealed class VehicleDailyDistanceImportConfiguration : IEntityTypeConfiguration<VehicleDailyDistanceImport>
+{
+    public void Configure(EntityTypeBuilder<VehicleDailyDistanceImport> builder)
+    {
+        builder.ConfigureHistory("VehicleDailyDistanceImports");
+        builder.Property(x => x.OriginalFileName).HasMaxLength(255).IsRequired();
+        builder.Property(x => x.Sha256Checksum).HasMaxLength(64).IsFixedLength().IsUnicode(false).IsRequired();
+        builder.Property(x => x.RowErrorsJson).HasColumnType("nvarchar(max)").IsRequired();
+        builder.HasIndex(x => new { x.WorkDate, x.Sha256Checksum }).IsUnique();
+        builder.HasIndex(x => x.CreatedAtUtc);
+        builder.ToTable(table => table.HasCheckConstraint(
+            "CK_VehicleDailyDistanceImports_Counts",
+            "[TotalVehicleRows] >= 0 AND [GpsRows] >= 0 AND [NoGpsRows] >= 0 AND [MatchedRows] >= 0 AND [CreatedRows] >= 0 AND [UpdatedRows] >= 0 AND [UnmatchedRows] >= 0 AND [InvalidRows] >= 0"));
+    }
+}
+
 internal sealed class RiderVehicleAssignmentConfiguration : IEntityTypeConfiguration<RiderVehicleAssignment>
 {
     public void Configure(EntityTypeBuilder<RiderVehicleAssignment> builder)
@@ -221,6 +264,42 @@ internal sealed class RealRiderConfiguration : IEntityTypeConfiguration<RealRide
         builder.ToTable(table => table.HasCheckConstraint(
             "CK_RealRiders_IqamaNo",
             "LEN([IqamaNo]) = 10 AND [IqamaNo] NOT LIKE '%[^0-9]%'"));
+    }
+}
+
+internal sealed class SponsorVehicleLeaseAgreementConfiguration : IEntityTypeConfiguration<SponsorVehicleLeaseAgreement>
+{
+    public void Configure(EntityTypeBuilder<SponsorVehicleLeaseAgreement> builder)
+    {
+        builder.ConfigureTemporal("SponsorVehicleLeaseAgreements");
+        builder.Property(x => x.AgreementReference).HasMaxLength(200);
+        builder.Property(x => x.EndReason).HasMaxLength(1000);
+        builder.Property(x => x.Notes).HasMaxLength(4000);
+        builder.HasOne<ClientPlatform>().WithMany()
+            .HasForeignKey(x => x.ClientPlatformId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<Sponsor>().WithMany()
+            .HasForeignKey(x => x.LessorSponsorId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<Sponsor>().WithMany()
+            .HasForeignKey(x => x.LesseeSponsorId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(x => new { x.ClientPlatformId, x.LessorSponsorId, x.LesseeSponsorId, x.EffectiveFrom });
+        builder.HasIndex(x => new { x.ClientPlatformId, x.EffectiveFrom, x.EffectiveTo });
+        builder.ToTable(table => table.HasCheckConstraint(
+            "CK_SponsorVehicleLeaseAgreements_DifferentSponsors",
+            "[LessorSponsorId] <> [LesseeSponsorId]"));
+    }
+}
+
+internal sealed class SponsorVehicleLeaseAgreementVehicleConfiguration : IEntityTypeConfiguration<SponsorVehicleLeaseAgreementVehicle>
+{
+    public void Configure(EntityTypeBuilder<SponsorVehicleLeaseAgreementVehicle> builder)
+    {
+        builder.ConfigureHistory("SponsorVehicleLeaseAgreementVehicles");
+        builder.HasOne<SponsorVehicleLeaseAgreement>().WithMany()
+            .HasForeignKey(x => x.SponsorVehicleLeaseAgreementId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<Vehicle>().WithMany()
+            .HasForeignKey(x => x.VehicleId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(x => new { x.SponsorVehicleLeaseAgreementId, x.VehicleId }).IsUnique();
+        builder.HasIndex(x => new { x.VehicleId, x.SponsorVehicleLeaseAgreementId });
     }
 }
 
@@ -484,10 +563,28 @@ internal sealed class VehicleIssueConfiguration : IEntityTypeConfiguration<Vehic
         builder.Property(x => x.Description).HasMaxLength(4000).IsRequired();
         builder.Property(x => x.ResolutionSummary).HasMaxLength(4000);
         builder.Property(x => x.LocationDescription).HasMaxLength(400);
+        builder.Property(x => x.EstimatedRepairCost).HasPrecision(18, 2);
         builder.HasOne<Vehicle>().WithMany().HasForeignKey(x => x.VehicleId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<RiderVehicleAssignment>().WithMany().HasForeignKey(x => x.RelatedAssignmentId).OnDelete(DeleteBehavior.Restrict);
         builder.HasIndex(x => x.IssueNumber).IsUnique();
         builder.HasIndex(x => new { x.VehicleId, x.Status, x.BlocksOperation });
+        builder.ToTable(table => table.HasCheckConstraint(
+            "CK_VehicleIssues_EstimatedRepairCost",
+            "[EstimatedRepairCost] IS NULL OR [EstimatedRepairCost] >= 0"));
+    }
+}
+
+internal sealed class VehicleIssueEvidenceConfiguration : IEntityTypeConfiguration<VehicleIssueEvidence>
+{
+    public void Configure(EntityTypeBuilder<VehicleIssueEvidence> builder)
+    {
+        builder.ConfigureOperational("VehicleIssueEvidenceFiles");
+        VehicleAttachmentVersionConfiguration.ConfigureFile(builder);
+        builder.HasOne<VehicleIssue>().WithMany().HasForeignKey(x => x.VehicleIssueId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(x => new { x.VehicleIssueId, x.UploadedAtUtc });
+        builder.ToTable(table => table.HasCheckConstraint(
+            "CK_VehicleIssueEvidenceFiles_Size",
+            "[FileSizeBytes] > 0"));
     }
 }
 

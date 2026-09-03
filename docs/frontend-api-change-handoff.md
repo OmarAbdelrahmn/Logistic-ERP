@@ -4,7 +4,8 @@ This document describes the API changes now available in the hosted API. It cove
 
 1. sponsor as a required property of every platform account;
 2. an optional structured address on employees and riders; and
-3. vehicle-to-platform-account assignments, including non-blocking operational warnings.
+3. vehicle-to-platform-account assignments, including non-blocking operational warnings; and
+4. Keeta sponsor vehicle lease agreements.
 
 ## General rules
 
@@ -122,6 +123,8 @@ Vehicle  <->  Platform account
 
 It is **not** a rider-to-vehicle assignment and has no rider ID. The owner of the platform account does not need to be the rider currently using the vehicle.
 
+For the complete Keeta sponsor vehicle lease workflow, including selectable vehicles, agreement lifecycle, response types, and assignment integration, see [Keeta sponsor vehicle lease frontend handoff](keeta-sponsor-vehicle-lease-frontend-handoff.md).
+
 ### Capacity rules
 
 Capacity is calculated per **vehicle + platform + account operating city**. It is not shared between platforms and is not separated further by sponsor.
@@ -136,7 +139,7 @@ Examples:
 - A car may be linked to two Keeta accounts in Riyadh and, at the same time, two HungerStation accounts in Riyadh.
 - A motorcycle may be linked to three Keeta accounts in Riyadh.
 - The platform-account owner may be different for each account.
-- A vehicle/account sponsor mismatch or city mismatch is allowed, but reported as a warning.
+- A vehicle/account city mismatch is allowed but reported as a warning. A sponsor mismatch is not reported when an effective Keeta sponsor vehicle lease covers that vehicle and account sponsor; otherwise it remains a warning.
 
 ### Create and approve an assignment
 
@@ -375,7 +378,7 @@ Each warning has this shape:
 | `PlatformAccountStatus` | Account is not `Available` or `Assigned`. | Show its current status. |
 | `UnsupportedVehicleType` | No car/motorcycle capacity policy applies. | Show warning and allow the approved result. |
 | `VehicleSponsorMissing` | Vehicle has no sponsor. | Prompt for vehicle sponsor data. |
-| `SponsorMismatch` | Vehicle sponsor differs from account sponsor. | Highlight both sponsors. |
+| `SponsorMismatch` | Vehicle sponsor differs from account sponsor and no effective Keeta sponsor vehicle lease applies. | Highlight both sponsors or create/review the sponsor vehicle lease agreement. |
 | `VehicleCityMissing` | Vehicle has no operating city. | Prompt for vehicle city data. |
 | `OperatingCityMismatch` | Vehicle city differs from account city. | Highlight both cities. |
 | `DuplicateActiveAssignment` | Same vehicle/account was linked more than once. | Show duplicate warning; close the extra record if appropriate. |

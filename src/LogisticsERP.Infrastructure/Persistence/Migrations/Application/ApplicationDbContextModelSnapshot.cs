@@ -1512,6 +1512,104 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.ToTable("RiderVehicleAssignmentPromissoryFiles", "app");
                 });
 
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.SponsorVehicleLeaseAgreement", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly?>("AgreementDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("AgreementReference")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<Guid>("ClientPlatformId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("ClosedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("ClosedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly>("EffectiveFrom")
+                        .HasColumnType("date");
+
+                    b.Property<DateOnly?>("EffectiveTo")
+                        .HasColumnType("date");
+
+                    b.Property<string>("EndReason")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<Guid>("LesseeSponsorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("LessorSponsorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LesseeSponsorId");
+
+                    b.HasIndex("LessorSponsorId");
+
+                    b.HasIndex("ClientPlatformId", "EffectiveFrom", "EffectiveTo");
+
+                    b.HasIndex("ClientPlatformId", "LessorSponsorId", "LesseeSponsorId", "EffectiveFrom");
+
+                    b.ToTable("SponsorVehicleLeaseAgreements", "app", t =>
+                        {
+                            t.HasCheckConstraint("CK_SponsorVehicleLeaseAgreements_DifferentSponsors", "[LessorSponsorId] <> [LesseeSponsorId]");
+
+                            t.HasCheckConstraint("CK_SponsorVehicleLeaseAgreements_EffectiveRange", "[EffectiveTo] IS NULL OR [EffectiveTo] >= [EffectiveFrom]");
+                        });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.SponsorVehicleLeaseAgreementVehicle", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SponsorVehicleLeaseAgreementId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("VehicleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SponsorVehicleLeaseAgreementId", "VehicleId")
+                        .IsUnique();
+
+                    b.HasIndex("VehicleId", "SponsorVehicleLeaseAgreementId");
+
+                    b.ToTable("SponsorVehicleLeaseAgreementVehicles", "app");
+                });
+
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.Vehicle", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1663,6 +1761,10 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<Guid?>("SponsorId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<decimal>("TrackedDistanceKm")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<int>("TransmissionType")
                         .HasColumnType("int");
 
@@ -1731,6 +1833,8 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                             t.HasCheckConstraint("CK_Vehicles_Odometer", "[CurrentOdometer] >= 0");
 
                             t.HasCheckConstraint("CK_Vehicles_RegistrationType", "[RegistrationType] IS NULL OR [RegistrationType] BETWEEN 1 AND 8");
+
+                            t.HasCheckConstraint("CK_Vehicles_TrackedDistanceKm", "[TrackedDistanceKm] >= 0");
                         });
                 });
 
@@ -2233,6 +2337,191 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         });
                 });
 
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehicleDailyDistance", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("AppliedDistanceKm")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("AppliedSource")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<decimal?>("GpsDistanceKm")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTimeOffset?>("GpsImportedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("GpsImportedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("GpsPlateNumber")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid?>("LastGpsImportId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<long?>("ManualBaselineOdometerReading")
+                        .HasColumnType("bigint");
+
+                    b.Property<decimal?>("ManualDistanceKm")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTimeOffset?>("ManualEnteredAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("ManualEnteredByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ManualNotes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<long?>("ManualOdometerReading")
+                        .HasColumnType("bigint");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("VehicleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly>("WorkDate")
+                        .HasColumnType("date");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("LastGpsImportId");
+
+                    b.HasIndex("VehicleId", "WorkDate")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.HasIndex("WorkDate", "AppliedSource");
+
+                    b.ToTable("VehicleDailyDistances", "app", t =>
+                        {
+                            t.HasCheckConstraint("CK_VehicleDailyDistances_AppliedDistance", "[AppliedDistanceKm] >= 0");
+
+                            t.HasCheckConstraint("CK_VehicleDailyDistances_GpsDistance", "[GpsDistanceKm] IS NULL OR [GpsDistanceKm] >= 0");
+
+                            t.HasCheckConstraint("CK_VehicleDailyDistances_ManualDistance", "[ManualDistanceKm] IS NULL OR [ManualDistanceKm] >= 0");
+
+                            t.HasCheckConstraint("CK_VehicleDailyDistances_ManualOdometer", "[ManualOdometerReading] IS NULL OR ([ManualBaselineOdometerReading] IS NOT NULL AND [ManualOdometerReading] >= [ManualBaselineOdometerReading])");
+
+                            t.HasCheckConstraint("CK_VehicleDailyDistances_Source", "[AppliedSource] BETWEEN 0 AND 2");
+                        });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehicleDailyDistanceImport", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("CreatedRows")
+                        .HasColumnType("int");
+
+                    b.Property<int>("GpsRows")
+                        .HasColumnType("int");
+
+                    b.Property<int>("InvalidRows")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MatchedRows")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NoGpsRows")
+                        .HasColumnType("int");
+
+                    b.Property<string>("OriginalFileName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<DateTimeOffset?>("PeriodEndUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset?>("PeriodStartUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("RowErrorsJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Sha256Checksum")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .IsUnicode(false)
+                        .HasColumnType("char(64)")
+                        .IsFixedLength();
+
+                    b.Property<int>("TotalVehicleRows")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UnmatchedRows")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UpdatedRows")
+                        .HasColumnType("int");
+
+                    b.Property<DateOnly>("WorkDate")
+                        .HasColumnType("date");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAtUtc");
+
+                    b.HasIndex("WorkDate", "Sha256Checksum")
+                        .IsUnique();
+
+                    b.ToTable("VehicleDailyDistanceImports", "app", t =>
+                        {
+                            t.HasCheckConstraint("CK_VehicleDailyDistanceImports_Counts", "[TotalVehicleRows] >= 0 AND [GpsRows] >= 0 AND [NoGpsRows] >= 0 AND [MatchedRows] >= 0 AND [CreatedRows] >= 0 AND [UpdatedRows] >= 0 AND [UnmatchedRows] >= 0 AND [InvalidRows] >= 0");
+                        });
+                });
+
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehicleIdentityCorrection", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2418,7 +2707,14 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .HasMaxLength(4000)
                         .HasColumnType("nvarchar(4000)");
 
+                    b.Property<decimal?>("EstimatedRepairCost")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool?>("IsRiderResponsible")
                         .HasColumnType("bit");
 
                     b.Property<string>("IssueNumber")
@@ -2487,7 +2783,10 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.HasIndex("VehicleId", "Status", "BlocksOperation");
 
-                    b.ToTable("VehicleIssues", "app");
+                    b.ToTable("VehicleIssues", "app", t =>
+                        {
+                            t.HasCheckConstraint("CK_VehicleIssues_EstimatedRepairCost", "[EstimatedRepairCost] IS NULL OR [EstimatedRepairCost] >= 0");
+                        });
                 });
 
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehicleIssueEvent", b =>
@@ -2532,6 +2831,92 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.HasIndex("VehicleIssueId", "OccurredAtUtc");
 
                     b.ToTable("VehicleIssueEvents", "app");
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehicleIssueEvidence", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<long>("FileSizeBytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("OriginalFileName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<string>("Sha256Checksum")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nchar(64)")
+                        .IsFixedLength();
+
+                    b.Property<string>("StoragePath")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("StoredFileName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("UploadedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("UploadedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("VehicleIssueId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("VehicleIssueId", "UploadedAtUtc");
+
+                    b.ToTable("VehicleIssueEvidenceFiles", "app", t =>
+                        {
+                            t.HasCheckConstraint("CK_VehicleIssueEvidenceFiles_Size", "[FileSizeBytes] > 0");
+                        });
                 });
 
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehicleManufacturer", b =>
@@ -6045,6 +6430,68 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                             RequiresHousingScope = false,
                             RowVersion = new byte[0],
                             Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000087"),
+                            Category = "Fleet",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "عرض المسافة اليومية من نظام GPS أو الإدخال اليدوي للمركبات.",
+                            DescriptionEn = "View each vehicle's daily GPS or manually entered distance.",
+                            DisplayOrder = 87,
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = false,
+                            Key = "fleet.daily_distances.read",
+                            NameAr = "عرض المسافات اليومية للمركبات",
+                            NameEn = "Read vehicle daily distances",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000088"),
+                            Category = "Fleet",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "إدخال وتعديل قراءة العداد اليدوية اليومية للمركبات.",
+                            DescriptionEn = "Enter and update a vehicle's daily manual odometer reading.",
+                            DisplayOrder = 88,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "fleet.daily_distances.manage",
+                            NameAr = "إدارة المسافات اليومية للمركبات",
+                            NameEn = "Manage vehicle daily distances",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000089"),
+                            Category = "Fleet",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "استيراد ملف GPS اليومي وتطبيق المسافات على المركبات المطابقة.",
+                            DescriptionEn = "Import a daily GPS report and apply distances to matching vehicles.",
+                            DisplayOrder = 89,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "fleet.daily_distances.import",
+                            NameAr = "استيراد مسافات GPS اليومية",
+                            NameEn = "Import daily GPS distances",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
                         });
                 });
 
@@ -6894,6 +7341,33 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .IsRequired()
                         .HasMaxLength(32)
                         .HasColumnType("nvarchar(32)");
+
+                    b.Property<string>("ReceiptFormContentType")
+                        .HasMaxLength(100)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<string>("ReceiptFormOriginalFileName")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("ReceiptFormSha256Checksum")
+                        .HasMaxLength(64)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(64)");
+
+                    b.Property<long?>("ReceiptFormSizeBytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("ReceiptFormStoragePath")
+                        .HasMaxLength(1000)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(1000)");
+
+                    b.Property<string>("ReceiptFormStoredFileName")
+                        .HasMaxLength(255)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(255)");
 
                     b.Property<Guid>("ResponsibleEmployeeId")
                         .HasColumnType("uniqueidentifier");
@@ -10355,6 +10829,42 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.SponsorVehicleLeaseAgreement", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Platform.ClientPlatform", null)
+                        .WithMany()
+                        .HasForeignKey("ClientPlatformId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.Sponsor", null)
+                        .WithMany()
+                        .HasForeignKey("LesseeSponsorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.Sponsor", null)
+                        .WithMany()
+                        .HasForeignKey("LessorSponsorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.SponsorVehicleLeaseAgreementVehicle", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.SponsorVehicleLeaseAgreement", null)
+                        .WithMany()
+                        .HasForeignKey("SponsorVehicleLeaseAgreementId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.Vehicle", null)
+                        .WithMany()
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.Vehicle", b =>
                 {
                     b.HasOne("LogisticsERP.Domain.Entities.Platform.OperatingCity", null)
@@ -10490,6 +11000,20 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehicleDailyDistance", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.VehicleDailyDistanceImport", null)
+                        .WithMany()
+                        .HasForeignKey("LastGpsImportId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.Vehicle", null)
+                        .WithMany()
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehicleIdentityCorrection", b =>
                 {
                     b.HasOne("LogisticsERP.Domain.Entities.Fleet.Vehicle", null)
@@ -10528,6 +11052,15 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                 });
 
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehicleIssueEvent", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.VehicleIssue", null)
+                        .WithMany()
+                        .HasForeignKey("VehicleIssueId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehicleIssueEvidence", b =>
                 {
                     b.HasOne("LogisticsERP.Domain.Entities.Fleet.VehicleIssue", null)
                         .WithMany()

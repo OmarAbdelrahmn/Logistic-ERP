@@ -70,6 +70,7 @@ public sealed class Vehicle : AuditableEntity
     public DateOnly? AcquisitionDate { get; set; }
     public string? LeaseReference { get; set; }
     public long CurrentOdometer { get; set; }
+    public decimal TrackedDistanceKm { get; set; }
     public DateTimeOffset? LastOdometerAtUtc { get; set; }
     public VehicleOperationalStatus CurrentOperationalStatus { get; set; } = VehicleOperationalStatus.Available;
     public Guid? CurrentAssignmentId { get; set; }

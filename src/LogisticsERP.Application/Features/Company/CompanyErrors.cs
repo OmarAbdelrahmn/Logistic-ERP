@@ -5,12 +5,11 @@ namespace LogisticsERP.Application.Features.Company;
 public static class CompanyErrors
 {
     public static readonly OperationError InvalidRequest = new(
-        "company.invalid_request", "The company profile request is invalid.", ErrorType.Validation);
+        "company.invalid_request", "طلب ملف الشركة غير صالح.", ErrorType.Validation);
     public static readonly OperationError NotFound = new(
-        "company.not_found", "The company profile was not found.", ErrorType.NotFound);
+        "company.not_found", "لم يتم العثور على ملف الشركة.", ErrorType.NotFound);
     public static readonly OperationError ConcurrencyConflict = new(
-        "company.concurrency_conflict", "The company profile changed after it was loaded.", ErrorType.Conflict);
+        "company.concurrency_conflict", "تغير ملف الشركة بعد تحميله.", ErrorType.Conflict);
     public static readonly OperationError CurrentUserUnavailable = new(
-        "company.current_user_unavailable", "The authenticated user could not be resolved.", ErrorType.Unauthorized);
+        "company.current_user_unavailable", "تعذر تحديد هوية المستخدم المصادق عليه.", ErrorType.Unauthorized);
 }
-

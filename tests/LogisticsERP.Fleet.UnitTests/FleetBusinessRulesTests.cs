@@ -33,6 +33,30 @@ public sealed class FleetBusinessRulesTests
         Assert.Null(VehiclePlatformAccountAssignmentPolicy.GetMaximumAccounts(vehicleType));
 
     [Fact]
+    public void SponsorCompatibilityAllowsOwnerAndContractualKeetaLessee()
+    {
+        var ownerSponsorId = Guid.CreateVersion7();
+        var lesseeSponsorId = Guid.CreateVersion7();
+
+        Assert.True(VehiclePlatformAccountAssignmentPolicy.IsSponsorCompatible(
+            ownerSponsorId,
+            ownerSponsorId,
+            hasApplicableLeaseAgreement: false));
+        Assert.True(VehiclePlatformAccountAssignmentPolicy.IsSponsorCompatible(
+            ownerSponsorId,
+            lesseeSponsorId,
+            hasApplicableLeaseAgreement: true));
+        Assert.False(VehiclePlatformAccountAssignmentPolicy.IsSponsorCompatible(
+            ownerSponsorId,
+            lesseeSponsorId,
+            hasApplicableLeaseAgreement: false));
+        Assert.False(VehiclePlatformAccountAssignmentPolicy.IsSponsorCompatible(
+            null,
+            lesseeSponsorId,
+            hasApplicableLeaseAgreement: true));
+    }
+
+    [Fact]
     public void VehicleComplianceContractExposesPermitEndDate()
     {
         Assert.NotNull(typeof(VehicleSummaryResponse).GetProperty(nameof(VehicleSummaryResponse.PermitEndDate)));
@@ -54,6 +78,15 @@ public sealed class FleetBusinessRulesTests
     }
 
     [Fact]
+    public void VehicleIssueNumberDoesNotContainTheDate()
+    {
+        var number = FleetServiceSupport.NewIssueNumber(Guid.Parse("01a04223-0000-7000-8000-1234567890ab"));
+
+        Assert.Equal("ISS-80001234567890AB", number);
+        Assert.DoesNotContain("20260903", number);
+    }
+
+    [Fact]
     public void InitialPermitUsesRiyadhDateAndOneYearMinusOneDay()
     {
         var timestamp = new DateTimeOffset(2026, 8, 26, 22, 30, 0, TimeSpan.Zero);
@@ -62,6 +95,32 @@ public sealed class FleetBusinessRulesTests
         var end = FleetBusinessRules.PermitEnd(start);
         Assert.Equal(new DateOnly(2026, 8, 27), start);
         Assert.Equal(new DateOnly(2027, 8, 26), end);
+    }
+
+    [Fact]
+    public void GoodReturnRejectsAConditionReportAndEvidence()
+    {
+        Assert.False(FleetBusinessRules.RequiresReturnConditionReport(VehicleCondition.Good));
+        Assert.True(FleetBusinessRules.IsValidReturnConditionReport(VehicleCondition.Good, false, null, null, null, null, 0));
+        Assert.False(FleetBusinessRules.IsValidReturnConditionReport(VehicleCondition.Good, true, VehicleIssueCategory.Damage, VehicleIssueSeverity.Low, "Scratch", 100m, 1));
+    }
+
+    [Theory]
+    [InlineData(VehicleCondition.Unknown)]
+    [InlineData(VehicleCondition.Fair)]
+    [InlineData(VehicleCondition.Damaged)]
+    [InlineData(VehicleCondition.Unsafe)]
+    public void NonGoodReturnRequiresCompleteReportAndOneOrTwoEvidenceFiles(VehicleCondition condition)
+    {
+        Assert.True(FleetBusinessRules.RequiresReturnConditionReport(condition));
+        Assert.True(FleetBusinessRules.IsValidReturnConditionReport(condition, true, VehicleIssueCategory.Damage, VehicleIssueSeverity.High, "Visible damage", 350.50m, 1));
+        Assert.True(FleetBusinessRules.IsValidReturnConditionReport(condition, true, VehicleIssueCategory.Damage, VehicleIssueSeverity.High, "Visible damage", 350.50m, 2));
+        Assert.False(FleetBusinessRules.IsValidReturnConditionReport(condition, false, null, null, null, null, 1));
+        Assert.False(FleetBusinessRules.IsValidReturnConditionReport(condition, true, null, VehicleIssueSeverity.High, "Visible damage", 350.50m, 1));
+        Assert.False(FleetBusinessRules.IsValidReturnConditionReport(condition, true, VehicleIssueCategory.Damage, null, "Visible damage", 350.50m, 1));
+        Assert.False(FleetBusinessRules.IsValidReturnConditionReport(condition, true, VehicleIssueCategory.Damage, VehicleIssueSeverity.High, "Visible damage", 350.50m, 0));
+        Assert.False(FleetBusinessRules.IsValidReturnConditionReport(condition, true, VehicleIssueCategory.Damage, VehicleIssueSeverity.High, "Visible damage", 350.50m, 3));
+        Assert.False(FleetBusinessRules.IsValidReturnConditionReport(condition, true, VehicleIssueCategory.Damage, VehicleIssueSeverity.High, "Visible damage", -1m, 1));
     }
 
     [Fact]

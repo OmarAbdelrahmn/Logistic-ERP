@@ -16,6 +16,8 @@ internal sealed class FleetService(
     FleetServiceSupport support,
     IPrivateFileStorage fileStorage) : IFleetService
 {
+    private const long MaximumReturnEvidenceSize = 10 * 1024 * 1024;
+
     public async Task<Result<IReadOnlyList<VehicleManufacturerResponse>>> GetManufacturersAsync(CancellationToken cancellationToken = default)
     {
         if (!await support.HasPermissionAsync(PermissionKeys.Fleet.VehiclesRead, null, cancellationToken)) return Result.Failure<IReadOnlyList<VehicleManufacturerResponse>>(FleetErrors.Forbidden);
@@ -199,6 +201,7 @@ internal sealed class FleetService(
         ApplyVehicle(vehicle, request with { AssetNumber = assetNumber }, normalizedAsset, normalizedSerial, normalizedChassis, normalizedAr, normalizedEn);
         if (isNew)
         {
+            vehicle.TrackedDistanceKm = request.CurrentOdometer;
             dbContext.Vehicles.Add(vehicle);
             dbContext.VehicleOperationalStatusPeriods.Add(NewStatus(vehicle.Id, VehicleOperationalStatus.Available, support.UtcNow, "Vehicle created.", VehicleStatusSourceType.Vehicle, vehicle.Id, actor.Value));
             dbContext.VehicleOdometerReadings.Add(NewOdometer(vehicle.Id, request.CurrentOdometer, support.UtcNow, VehicleOdometerSourceType.Manual, vehicle.Id, "Initial odometer reading."));
@@ -508,26 +511,75 @@ internal sealed class FleetService(
         }
     }
 
-    public async Task<Result<RiderVehicleAssignmentResponse>> ReturnAsync(ReturnVehicleRequest request, string idempotencyKey, CancellationToken cancellationToken = default)
+    public async Task<Result<RiderVehicleAssignmentResponse>> ReturnAsync(ReturnVehicleRequest request, IReadOnlyList<PrivateFileUpload> evidenceFiles, string idempotencyKey, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(idempotencyKey)) return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.IdempotencyRequired);
-        var hash = FleetServiceSupport.HashRequest(request);
+        if (!Enum.IsDefined(request.EndCondition)) return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.InvalidRequest);
+        var needsReport = FleetBusinessRules.RequiresReturnConditionReport(request.EndCondition);
+        if (!FleetBusinessRules.IsValidReturnConditionReport(
+                request.EndCondition,
+                request.ConditionReport is not null,
+                request.ConditionReport?.Category,
+                request.ConditionReport?.Severity,
+                request.ConditionReport?.ProblemDescription,
+                request.ConditionReport?.EstimatedRepairCost,
+                evidenceFiles.Count))
+        {
+            return Result.Failure<RiderVehicleAssignmentResponse>(needsReport
+                ? FleetErrors.ReturnConditionReportRequired
+                : FleetErrors.ReturnConditionReportNotAllowed);
+        }
+
+        var issueId = Guid.CreateVersion7();
+        var stagedResult = await StageIssueEvidenceAsync(issueId, evidenceFiles, cancellationToken);
+        if (stagedResult.IsFailure) return Result.Failure<RiderVehicleAssignmentResponse>(stagedResult.Error);
+        var staged = stagedResult.Value!;
+        var hash = evidenceFiles.Count == 0
+            ? FleetServiceSupport.HashRequest(request)
+            : FleetServiceSupport.HashRequest(new { Request = request, Files = staged.Select(x => x.Stored.Sha256Checksum).ToArray() });
         var replay = await ReplayAssignmentAsync("return", idempotencyKey, hash, cancellationToken);
-        if (replay is not null) return replay;
+        if (replay is not null) { CleanupIssueEvidence(staged); return replay; }
         var actor = support.UserId;
-        if (!actor.HasValue) return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.CurrentUserUnavailable);
+        if (!actor.HasValue) { CleanupIssueEvidence(staged); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.CurrentUserUnavailable); }
         var assignment = await dbContext.RiderVehicleAssignments.SingleOrDefaultAsync(x => x.Id == request.AssignmentId && x.EndedAtUtc == null, cancellationToken);
-        if (assignment is null) return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.NotFound);
+        if (assignment is null) { CleanupIssueEvidence(staged); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.NotFound); }
         var vehicle = await dbContext.Vehicles.SingleAsync(x => x.Id == assignment.VehicleId, cancellationToken);
-        if (!await support.HasVehiclePermissionAsync(vehicle, PermissionKeys.Fleet.AssignmentsManage, cancellationToken)) return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.Forbidden);
-        if (!FleetServiceSupport.MatchesRowVersion(assignment.RowVersion, request.RowVersion) || request.EndedAtUtc < assignment.StartedAtUtc || request.EndOdometer < assignment.StartOdometer || !ValidFuel(request.EndFuelLevelPercentage) || string.IsNullOrWhiteSpace(request.Reason)) return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.InvalidRequest);
+        if (!await support.HasVehiclePermissionAsync(vehicle, PermissionKeys.Fleet.AssignmentsManage, cancellationToken)) { CleanupIssueEvidence(staged); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.Forbidden); }
+        if (!FleetServiceSupport.MatchesRowVersion(assignment.RowVersion, request.RowVersion) || request.EndedAtUtc < assignment.StartedAtUtc || request.EndOdometer < assignment.StartOdometer || !ValidFuel(request.EndFuelLevelPercentage) || string.IsNullOrWhiteSpace(request.Reason)) { CleanupIssueEvidence(staged); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.InvalidRequest); }
         try
         {
             return await dbContext.ExecuteTransactionAsync(async _ =>
             {
                 EndAssignment(assignment, vehicle, request.EndedAtUtc, request.EndOdometer, request.EndCondition, request.EndFuelLevelPercentage, request.Reason, actor.Value, RiderVehicleAssignmentEventType.Returned);
-                var target = await ResolveAvailableStatusAsync(vehicle.Id, null, cancellationToken);
-                await SetStatusAsync(vehicle, target, request.EndedAtUtc, request.Reason, VehicleStatusSourceType.Assignment, assignment.Id, actor.Value, cancellationToken);
+                if (needsReport)
+                {
+                    var report = request.ConditionReport!;
+                    var issue = new VehicleIssue
+                    {
+                        Id = issueId,
+                        IssueNumber = FleetServiceSupport.NewIssueNumber(issueId),
+                        VehicleId = vehicle.Id,
+                        Category = report.Category,
+                        Severity = report.Severity,
+                        Description = report.ProblemDescription.Trim(),
+                        ReportedAtUtc = request.EndedAtUtc,
+                        OdometerAtReport = request.EndOdometer,
+                        RelatedAssignmentId = assignment.Id,
+                        IsRiderResponsible = report.IsRiderResponsible,
+                        EstimatedRepairCost = report.EstimatedRepairCost,
+                        BlocksOperation = true,
+                        ReportedByUserId = actor.Value
+                    };
+                    dbContext.VehicleIssues.Add(issue);
+                    dbContext.VehicleIssueEvents.Add(NewIssueEvent(issue.Id, VehicleIssueEventType.Reported, null, VehicleIssueStatus.Open, request.EndedAtUtc, actor.Value, report.ProblemDescription));
+                    AddStagedIssueEvidence(issue.Id, staged, actor.Value);
+                    await SetStatusAsync(vehicle, VehicleOperationalStatus.ProblemHold, request.EndedAtUtc, report.ProblemDescription, VehicleStatusSourceType.Issue, issue.Id, actor.Value, cancellationToken);
+                }
+                else
+                {
+                    var target = await ResolveAvailableStatusAsync(vehicle.Id, null, cancellationToken);
+                    await SetStatusAsync(vehicle, target, request.EndedAtUtc, request.Reason, VehicleStatusSourceType.Assignment, assignment.Id, actor.Value, cancellationToken);
+                }
                 dbContext.FleetCommandReceipts.Add(new FleetCommandReceipt { CommandName = "return", IdempotencyKey = idempotencyKey.Trim(), RequestHash = hash, ResultEntityId = assignment.Id });
                 await dbContext.SaveChangesAsync(cancellationToken);
                 return Result.Success(await MapAssignmentAsync(assignment, cancellationToken));
@@ -535,44 +587,106 @@ internal sealed class FleetService(
         }
         catch (DbUpdateException)
         {
+            CleanupIssueEvidence(staged);
             return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.Conflict);
+        }
+        catch
+        {
+            CleanupIssueEvidence(staged);
+            throw;
         }
     }
 
-    public async Task<Result<RiderVehicleAssignmentResponse>> SwitchAsync(SwitchVehicleRequest request, IReadOnlyList<PrivateFileUpload> promissoryFiles, string idempotencyKey, CancellationToken cancellationToken = default)
+    public async Task<Result<RiderVehicleAssignmentResponse>> SwitchAsync(SwitchVehicleRequest request, IReadOnlyList<PrivateFileUpload> promissoryFiles, IReadOnlyList<PrivateFileUpload> evidenceFiles, string idempotencyKey, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(idempotencyKey)) return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.IdempotencyRequired);
         if (promissoryFiles.Count > 3) return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.FileLimit);
+        if (!Enum.IsDefined(request.OldVehicleCondition) || !Enum.IsDefined(request.NewVehicleCondition)) return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.InvalidRequest);
+        var needsReport = FleetBusinessRules.RequiresReturnConditionReport(request.OldVehicleCondition);
+        if (!FleetBusinessRules.IsValidReturnConditionReport(
+                request.OldVehicleCondition,
+                request.ConditionReport is not null,
+                request.ConditionReport?.Category,
+                request.ConditionReport?.Severity,
+                request.ConditionReport?.ProblemDescription,
+                request.ConditionReport?.EstimatedRepairCost,
+                evidenceFiles.Count))
+        {
+            return Result.Failure<RiderVehicleAssignmentResponse>(needsReport
+                ? FleetErrors.ReturnConditionReportRequired
+                : FleetErrors.ReturnConditionReportNotAllowed);
+        }
+
         var oldForRider = await dbContext.RiderVehicleAssignments.AsNoTracking().SingleOrDefaultAsync(x => x.Id == request.CurrentAssignmentId && x.EndedAtUtc == null, cancellationToken);
         if (oldForRider is null) return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.NotFound);
         var oldRealRider = oldForRider.IsRealRider
             ? null
             : await dbContext.RealRiders.AsNoTracking().SingleOrDefaultAsync(x => x.RiderVehicleAssignmentId == oldForRider.Id, cancellationToken);
         if (!oldForRider.IsRealRider && oldRealRider is null) return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.InvalidRequest);
-        var stagedResult = await StagePromissoryFilesAsync(oldForRider.RiderProfileId, promissoryFiles, cancellationToken);
-        if (stagedResult.IsFailure) return Result.Failure<RiderVehicleAssignmentResponse>(stagedResult.Error);
-        var staged = stagedResult.Value!;
-        var hash = FleetServiceSupport.HashRequest(new { Request = request, Files = staged.Select(x => x.Stored.Sha256Checksum).ToArray() });
+        var promissoryResult = await StagePromissoryFilesAsync(oldForRider.RiderProfileId, promissoryFiles, cancellationToken);
+        if (promissoryResult.IsFailure) return Result.Failure<RiderVehicleAssignmentResponse>(promissoryResult.Error);
+        var stagedPromissory = promissoryResult.Value!;
+        var issueId = Guid.CreateVersion7();
+        var evidenceResult = await StageIssueEvidenceAsync(issueId, evidenceFiles, cancellationToken);
+        if (evidenceResult.IsFailure)
+        {
+            CleanupStaged(stagedPromissory);
+            return Result.Failure<RiderVehicleAssignmentResponse>(evidenceResult.Error);
+        }
+        var stagedEvidence = evidenceResult.Value!;
+        var hash = FleetServiceSupport.HashRequest(new
+        {
+            Request = request,
+            PromissoryFiles = stagedPromissory.Select(x => x.Stored.Sha256Checksum).ToArray(),
+            EvidenceFiles = stagedEvidence.Select(x => x.Stored.Sha256Checksum).ToArray()
+        });
         var replay = await ReplayAssignmentAsync("switch", idempotencyKey, hash, cancellationToken);
-        if (replay is not null) { CleanupStaged(staged); return replay; }
+        if (replay is not null) { CleanupSwitchFiles(stagedPromissory, stagedEvidence); return replay; }
         var actor = support.UserId;
-        if (!actor.HasValue) { CleanupStaged(staged); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.CurrentUserUnavailable); }
+        if (!actor.HasValue) { CleanupSwitchFiles(stagedPromissory, stagedEvidence); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.CurrentUserUnavailable); }
         var old = await dbContext.RiderVehicleAssignments.SingleOrDefaultAsync(x => x.Id == request.CurrentAssignmentId && x.EndedAtUtc == null, cancellationToken);
         var next = await dbContext.Vehicles.SingleOrDefaultAsync(x => x.Id == request.NewVehicleId, cancellationToken);
-        if (old is null || next is null) { CleanupStaged(staged); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.NotFound); }
+        if (old is null || next is null) { CleanupSwitchFiles(stagedPromissory, stagedEvidence); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.NotFound); }
         var oldVehicle = await dbContext.Vehicles.SingleAsync(x => x.Id == old.VehicleId, cancellationToken);
-        if (!await support.HasVehiclePermissionAsync(oldVehicle, PermissionKeys.Fleet.AssignmentsManage, cancellationToken) || !await support.HasVehiclePermissionAsync(next, PermissionKeys.Fleet.AssignmentsManage, cancellationToken)) { CleanupStaged(staged); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.Forbidden); }
+        if (!await support.HasVehiclePermissionAsync(oldVehicle, PermissionKeys.Fleet.AssignmentsManage, cancellationToken) || !await support.HasVehiclePermissionAsync(next, PermissionKeys.Fleet.AssignmentsManage, cancellationToken)) { CleanupSwitchFiles(stagedPromissory, stagedEvidence); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.Forbidden); }
         var permitStart = FleetBusinessRules.RiyadhDate(request.SwitchedAtUtc);
-        if (!FleetServiceSupport.MatchesRowVersion(old.RowVersion, request.RowVersion) || next.CurrentOperationalStatus != VehicleOperationalStatus.Available || next.CurrentAssignmentId.HasValue || !FleetBusinessRules.IsCoreIdentityReady(next) || request.OldVehicleOdometer < old.StartOdometer || request.NewVehicleOdometer < next.CurrentOdometer || string.IsNullOrWhiteSpace(request.PermissionReference) || string.IsNullOrWhiteSpace(request.Reason)) { CleanupStaged(staged); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.Conflict); }
+        if (!FleetServiceSupport.MatchesRowVersion(old.RowVersion, request.RowVersion) || next.CurrentOperationalStatus != VehicleOperationalStatus.Available || next.CurrentAssignmentId.HasValue || !FleetBusinessRules.IsCoreIdentityReady(next) || request.OldVehicleOdometer < old.StartOdometer || request.NewVehicleOdometer < next.CurrentOdometer || !ValidFuel(request.OldFuelLevelPercentage) || !ValidFuel(request.NewFuelLevelPercentage) || string.IsNullOrWhiteSpace(request.PermissionReference) || string.IsNullOrWhiteSpace(request.Reason)) { CleanupSwitchFiles(stagedPromissory, stagedEvidence); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.Conflict); }
         var existingPromissoryVersions = await CurrentPromissoryVersionsAsync(old.RiderProfileId, cancellationToken);
-        if (existingPromissoryVersions.Count == 0 && staged.Count == 0) { CleanupStaged(staged); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.InvalidRequest); }
-        if (existingPromissoryVersions.Count + staged.Count > 3) { CleanupStaged(staged); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.FileLimit); }
+        if (existingPromissoryVersions.Count == 0 && stagedPromissory.Count == 0) { CleanupSwitchFiles(stagedPromissory, stagedEvidence); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.InvalidRequest); }
+        if (existingPromissoryVersions.Count + stagedPromissory.Count > 3) { CleanupSwitchFiles(stagedPromissory, stagedEvidence); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.FileLimit); }
         try
         {
             return await dbContext.ExecuteTransactionAsync(async _ =>
             {
                 EndAssignment(old, oldVehicle, request.SwitchedAtUtc, request.OldVehicleOdometer, request.OldVehicleCondition, request.OldFuelLevelPercentage, request.Reason, actor.Value, RiderVehicleAssignmentEventType.SwitchedOut);
-                await SetStatusAsync(oldVehicle, await ResolveAvailableStatusAsync(oldVehicle.Id, null, cancellationToken), request.SwitchedAtUtc, request.Reason, VehicleStatusSourceType.Assignment, old.Id, actor.Value, cancellationToken);
+                if (needsReport)
+                {
+                    var report = request.ConditionReport!;
+                    var issue = new VehicleIssue
+                    {
+                        Id = issueId,
+                        IssueNumber = FleetServiceSupport.NewIssueNumber(issueId),
+                        VehicleId = oldVehicle.Id,
+                        Category = report.Category,
+                        Severity = report.Severity,
+                        Description = report.ProblemDescription.Trim(),
+                        ReportedAtUtc = request.SwitchedAtUtc,
+                        OdometerAtReport = request.OldVehicleOdometer,
+                        RelatedAssignmentId = old.Id,
+                        IsRiderResponsible = report.IsRiderResponsible,
+                        EstimatedRepairCost = report.EstimatedRepairCost,
+                        BlocksOperation = true,
+                        ReportedByUserId = actor.Value
+                    };
+                    dbContext.VehicleIssues.Add(issue);
+                    dbContext.VehicleIssueEvents.Add(NewIssueEvent(issue.Id, VehicleIssueEventType.Reported, null, VehicleIssueStatus.Open, request.SwitchedAtUtc, actor.Value, report.ProblemDescription));
+                    AddStagedIssueEvidence(issue.Id, stagedEvidence, actor.Value);
+                    await SetStatusAsync(oldVehicle, VehicleOperationalStatus.ProblemHold, request.SwitchedAtUtc, report.ProblemDescription, VehicleStatusSourceType.Issue, issue.Id, actor.Value, cancellationToken);
+                }
+                else
+                {
+                    await SetStatusAsync(oldVehicle, await ResolveAvailableStatusAsync(oldVehicle.Id, null, cancellationToken), request.SwitchedAtUtc, request.Reason, VehicleStatusSourceType.Assignment, old.Id, actor.Value, cancellationToken);
+                }
                 var newAssignment = new RiderVehicleAssignment
                 {
                     RiderProfileId = old.RiderProfileId, IsRealRider = old.IsRealRider, VehicleId = next.Id, OperationId = old.OperationId, PreviousAssignmentId = old.Id,
@@ -593,7 +707,7 @@ internal sealed class FleetService(
                     });
                 }
                 var versions = existingPromissoryVersions
-                    .Concat(AddStagedPromissoryFiles(old.RiderProfileId, staged, actor.Value))
+                    .Concat(AddStagedPromissoryFiles(old.RiderProfileId, stagedPromissory, actor.Value))
                     .ToArray();
                 foreach (var versionId in versions) dbContext.RiderVehicleAssignmentPromissoryFiles.Add(new RiderVehicleAssignmentPromissoryFile { RiderVehicleAssignmentId = newAssignment.Id, RiderPromissoryFileVersionId = versionId });
                 dbContext.RiderVehicleAssignmentEvents.Add(NewAssignmentEvent(newAssignment.Id, old.OperationId, RiderVehicleAssignmentEventType.SwitchedIn, request.SwitchedAtUtc, actor.Value, request.Reason));
@@ -602,19 +716,19 @@ internal sealed class FleetService(
                 await SetStatusAsync(next, VehicleOperationalStatus.Assigned, request.SwitchedAtUtc, request.Reason, VehicleStatusSourceType.Assignment, newAssignment.Id, actor.Value, cancellationToken);
                 dbContext.FleetCommandReceipts.Add(new FleetCommandReceipt { CommandName = "switch", IdempotencyKey = idempotencyKey.Trim(), RequestHash = hash, ResultEntityId = newAssignment.Id });
                 await dbContext.SaveChangesAsync(cancellationToken);
-                ActivateStagedPromissoryFiles(staged);
-                if (staged.Count > 0) await dbContext.SaveChangesAsync(cancellationToken);
+                ActivateStagedPromissoryFiles(stagedPromissory);
+                if (stagedPromissory.Count > 0) await dbContext.SaveChangesAsync(cancellationToken);
                 return Result.Success(await MapAssignmentAsync(newAssignment, cancellationToken));
             }, cancellationToken);
         }
         catch (DbUpdateException)
         {
-            CleanupStaged(staged);
+            CleanupSwitchFiles(stagedPromissory, stagedEvidence);
             return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.Conflict);
         }
         catch
         {
-            CleanupStaged(staged);
+            CleanupSwitchFiles(stagedPromissory, stagedEvidence);
             throw;
         }
     }
@@ -678,7 +792,9 @@ internal sealed class FleetService(
             if (!await support.HasVehiclePermissionAsync(vehicle, PermissionKeys.Fleet.AssignmentsRead, cancellationToken)) continue;
             var issues = await dbContext.VehicleIssues.AsNoTracking().Where(x => x.RelatedAssignmentId == assignment.Id).OrderByDescending(x => x.ReportedAtUtc).ToArrayAsync(cancellationToken);
             var accidents = await dbContext.VehicleAccidents.AsNoTracking().Where(x => x.RiderVehicleAssignmentId == assignment.Id).OrderByDescending(x => x.OccurredAtUtc).ToArrayAsync(cancellationToken);
-            result.Add(new RiderVehicleTimelineResponse(await MapAssignmentAsync(assignment, cancellationToken), issues.Select(MapIssue).ToArray(), accidents.Select(MapAccident).ToArray()));
+            var assignmentResponse = await MapAssignmentAsync(assignment, cancellationToken);
+            var rider = new VehicleIssueRiderResponse(assignmentResponse.RiderProfileId, assignmentResponse.EmployeeId, assignmentResponse.RiderName, assignmentResponse.IsRealRider, assignmentResponse.RealRider);
+            result.Add(new RiderVehicleTimelineResponse(assignmentResponse, issues.Select(issue => MapIssue(issue, rider)).ToArray(), accidents.Select(MapAccident).ToArray()));
         }
         return Result.Success<IReadOnlyList<RiderVehicleTimelineResponse>>(result);
     }
@@ -796,7 +912,33 @@ internal sealed class FleetService(
         if (Enum.TryParse<VehicleIssueStatus>(status, true, out var parsed)) query = query.Where(x => x.Status == parsed);
         var count = await query.CountAsync(cancellationToken);
         var items = await query.OrderByDescending(x => x.ReportedAtUtc).Skip((page - 1) * pageSize).Take(pageSize).ToArrayAsync(cancellationToken);
-        return Result.Success(new PagedResponse<VehicleIssueSummaryResponse>(items.Select(MapIssue).ToArray(), page, pageSize, count));
+        var responses = await BuildIssueResponsesAsync(items, cancellationToken);
+        return Result.Success(new PagedResponse<VehicleIssueSummaryResponse>(responses, page, pageSize, count));
+    }
+
+    public async Task<Result<IReadOnlyList<VehicleIssueEvidenceResponse>>> GetIssueEvidenceAsync(Guid issueId, CancellationToken cancellationToken = default)
+    {
+        var issue = await dbContext.VehicleIssues.AsNoTracking().SingleOrDefaultAsync(x => x.Id == issueId, cancellationToken);
+        if (issue is null) return Result.Failure<IReadOnlyList<VehicleIssueEvidenceResponse>>(FleetErrors.NotFound);
+        var access = await GetAccessibleVehicleAsync(issue.VehicleId, PermissionKeys.Fleet.IssuesRead, cancellationToken);
+        if (access.IsFailure) return Result.Failure<IReadOnlyList<VehicleIssueEvidenceResponse>>(access.Error);
+        var files = await dbContext.VehicleIssueEvidenceFiles.AsNoTracking()
+            .Where(x => x.VehicleIssueId == issueId)
+            .OrderBy(x => x.UploadedAtUtc)
+            .ToArrayAsync(cancellationToken);
+        return Result.Success<IReadOnlyList<VehicleIssueEvidenceResponse>>(files.Select(MapIssueEvidence).ToArray());
+    }
+
+    public async Task<Result<PrivateFileDownload>> DownloadIssueEvidenceAsync(Guid issueId, Guid evidenceId, CancellationToken cancellationToken = default)
+    {
+        var evidence = await dbContext.VehicleIssueEvidenceFiles.AsNoTracking()
+            .SingleOrDefaultAsync(x => x.Id == evidenceId && x.VehicleIssueId == issueId, cancellationToken);
+        if (evidence is null) return Result.Failure<PrivateFileDownload>(FleetErrors.NotFound);
+        var issue = await dbContext.VehicleIssues.AsNoTracking().SingleAsync(x => x.Id == issueId, cancellationToken);
+        var access = await GetAccessibleVehicleAsync(issue.VehicleId, PermissionKeys.Fleet.IssuesRead, cancellationToken);
+        if (access.IsFailure) return Result.Failure<PrivateFileDownload>(access.Error);
+        var file = await fileStorage.OpenReadAsync(evidence.StoragePath, evidence.ContentType, evidence.OriginalFileName, evidence.FileSizeBytes, cancellationToken);
+        return file.IsFailure ? Result.Failure<PrivateFileDownload>(FleetErrors.FileMissing) : file;
     }
 
     public async Task<Result<VehicleIssueSummaryResponse>> CreateIssueAsync(CreateVehicleIssueRequest request, string idempotencyKey, CancellationToken cancellationToken = default)
@@ -808,7 +950,7 @@ internal sealed class FleetService(
         {
             if (receipt.RequestHash != hash) return Result.Failure<VehicleIssueSummaryResponse>(FleetErrors.IdempotencyConflict);
             var existing = await dbContext.VehicleIssues.AsNoTracking().SingleAsync(x => x.Id == receipt.ResultEntityId, cancellationToken);
-            return Result.Success(MapIssue(existing));
+            return Result.Success(await BuildIssueResponseAsync(existing, cancellationToken));
         }
         var vehicle = await dbContext.Vehicles.SingleOrDefaultAsync(x => x.Id == request.VehicleId, cancellationToken);
         if (vehicle is null) return Result.Failure<VehicleIssueSummaryResponse>(FleetErrors.NotFound);
@@ -817,7 +959,7 @@ internal sealed class FleetService(
         var actor = support.UserId;
         if (!actor.HasValue) return Result.Failure<VehicleIssueSummaryResponse>(FleetErrors.CurrentUserUnavailable);
         var assignment = await dbContext.RiderVehicleAssignments.SingleOrDefaultAsync(x => x.VehicleId == vehicle.Id && x.EndedAtUtc == null, cancellationToken);
-        var issue = new VehicleIssue { IssueNumber = FleetServiceSupport.NewNumber("ISS", support.UtcNow, Guid.CreateVersion7()), VehicleId = vehicle.Id, Category = request.Category, Severity = request.Severity, Description = request.Description.Trim(), ReportedAtUtc = request.ReportedAtUtc, LocationDescription = FleetServiceSupport.TrimOrNull(request.LocationDescription), OdometerAtReport = request.OdometerAtReport, RelatedAssignmentId = assignment?.Id, BlocksOperation = request.BlocksOperation, ReportedByUserId = actor.Value };
+        var issue = new VehicleIssue { IssueNumber = FleetServiceSupport.NewIssueNumber(Guid.CreateVersion7()), VehicleId = vehicle.Id, Category = request.Category, Severity = request.Severity, Description = request.Description.Trim(), ReportedAtUtc = request.ReportedAtUtc, LocationDescription = FleetServiceSupport.TrimOrNull(request.LocationDescription), OdometerAtReport = request.OdometerAtReport, RelatedAssignmentId = assignment?.Id, BlocksOperation = request.BlocksOperation, ReportedByUserId = actor.Value };
         dbContext.VehicleIssues.Add(issue);
         dbContext.VehicleIssueEvents.Add(NewIssueEvent(issue.Id, VehicleIssueEventType.Reported, null, VehicleIssueStatus.Open, request.ReportedAtUtc, actor.Value, request.Description));
         if (request.BlocksOperation)
@@ -827,7 +969,7 @@ internal sealed class FleetService(
         }
         dbContext.FleetCommandReceipts.Add(new FleetCommandReceipt { CommandName = "create-issue", IdempotencyKey = idempotencyKey.Trim(), RequestHash = hash, ResultEntityId = issue.Id });
         await dbContext.SaveChangesAsync(cancellationToken);
-        return Result.Success(MapIssue(issue));
+        return Result.Success(await BuildIssueResponseAsync(issue, cancellationToken));
     }
 
     public async Task<Result<VehicleIssueSummaryResponse>> ActOnIssueAsync(Guid issueId, string action, VehicleIssueActionRequest request, CancellationToken cancellationToken = default)
@@ -851,7 +993,7 @@ internal sealed class FleetService(
         dbContext.VehicleIssueEvents.Add(NewIssueEvent(issue.Id, eventType, from, issue.Status, support.UtcNow, actor.Value, request.Reason));
         if (eventType == VehicleIssueEventType.Rejected && issue.BlocksOperation) await RestoreAfterIssueAsync(vehicle, issue.Id, request.Reason, actor.Value, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
-        return Result.Success(MapIssue(issue));
+        return Result.Success(await BuildIssueResponseAsync(issue, cancellationToken));
     }
 
     public async Task<Result<VehicleIssueSummaryResponse>> ResolveIssueAsync(Guid issueId, ResolveVehicleIssueRequest request, CancellationToken cancellationToken = default)
@@ -867,7 +1009,7 @@ internal sealed class FleetService(
         dbContext.VehicleIssueEvents.Add(NewIssueEvent(issue.Id, VehicleIssueEventType.Resolved, from, issue.Status, support.UtcNow, actor.Value, request.ResolutionSummary));
         if (issue.BlocksOperation) await RestoreAfterIssueAsync(vehicle, issue.Id, request.ResolutionSummary, actor.Value, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
-        return Result.Success(MapIssue(issue));
+        return Result.Success(await BuildIssueResponseAsync(issue, cancellationToken));
     }
 
     private async Task<Result<Vehicle>> GetAccessibleVehicleAsync(Guid id, string permission, CancellationToken cancellationToken)
@@ -896,6 +1038,61 @@ internal sealed class FleetService(
             .SingleOrDefaultAsync(cancellationToken);
         var versionIds = await dbContext.RiderVehicleAssignmentPromissoryFiles.AsNoTracking().Where(x => x.RiderVehicleAssignmentId == item.Id).Select(x => x.RiderPromissoryFileVersionId).ToArrayAsync(cancellationToken);
         return new RiderVehicleAssignmentResponse(item.Id, item.RiderProfileId, employeeId, item.IsRealRider, realRider, item.VehicleId, info.AssetNumber, info.RiderName, item.StartedAtUtc, item.EndedAtUtc, item.StartLocationSnapshot, item.EndLocationSnapshot, item.StartOdometer, item.EndOdometer, item.PermissionReference, item.PermissionStartsOn, item.PermissionEndsOn, item.Status, item.AssignmentReason, item.CompletionReason, item.OperationId, versionIds, FleetServiceSupport.EncodeRowVersion(item.RowVersion));
+    }
+
+    private async Task<VehicleIssueSummaryResponse> BuildIssueResponseAsync(VehicleIssue issue, CancellationToken cancellationToken) =>
+        (await BuildIssueResponsesAsync([issue], cancellationToken))[0];
+
+    private async Task<VehicleIssueSummaryResponse[]> BuildIssueResponsesAsync(VehicleIssue[] issues, CancellationToken cancellationToken)
+    {
+        if (issues.Length == 0) return [];
+
+        var assignmentIds = issues
+            .Where(x => x.RelatedAssignmentId.HasValue)
+            .Select(x => x.RelatedAssignmentId!.Value)
+            .Distinct()
+            .ToArray();
+
+        var riderRows = await (
+            from assignment in dbContext.RiderVehicleAssignments.AsNoTracking()
+            join profile in dbContext.RiderProfiles.AsNoTracking() on assignment.RiderProfileId equals profile.Id
+            join employee in dbContext.Employees.AsNoTracking() on profile.EmployeeId equals employee.Id
+            join realRiderRow in dbContext.RealRiders.AsNoTracking() on assignment.Id equals realRiderRow.RiderVehicleAssignmentId into realRiders
+            from realRider in realRiders.DefaultIfEmpty()
+            where assignmentIds.Contains(assignment.Id)
+            select new
+            {
+                AssignmentId = assignment.Id,
+                RiderProfileId = profile.Id,
+                profile.EmployeeId,
+                RiderName = employee.FullNameAr,
+                assignment.IsRealRider,
+                RealRiderId = realRider == null ? null : (Guid?)realRider.Id,
+                RealRiderName = realRider == null ? null : realRider.Name,
+                RealRiderIqamaNo = realRider == null ? null : realRider.IqamaNo,
+                RealRiderRelationship = realRider == null ? null : realRider.RelationshipToAssignedRider
+            }).ToArrayAsync(cancellationToken);
+
+        var ridersByAssignmentId = riderRows.ToDictionary(
+            x => x.AssignmentId,
+            x => new VehicleIssueRiderResponse(
+                x.RiderProfileId,
+                x.EmployeeId,
+                x.RiderName,
+                x.IsRealRider,
+                x.IsRealRider || !x.RealRiderId.HasValue
+                    ? null
+                    : new RealRiderResponse(x.RealRiderId.Value, x.RealRiderName!, x.RealRiderIqamaNo!, x.RealRiderRelationship!)));
+
+        return issues.Select(issue =>
+        {
+            VehicleIssueRiderResponse? rider = null;
+            if (issue.RelatedAssignmentId.HasValue)
+            {
+                ridersByAssignmentId.TryGetValue(issue.RelatedAssignmentId.Value, out rider);
+            }
+            return MapIssue(issue, rider);
+        }).ToArray();
     }
 
     private async Task<VehicleSummaryResponse[]> BuildSummariesAsync(Vehicle[] vehicles, CancellationToken cancellationToken)
@@ -939,7 +1136,7 @@ internal sealed class FleetService(
             var realRider = a?.IsRealRider is false && a.RealRiderId.HasValue
                 ? new RealRiderResponse(a.RealRiderId.Value, a.RealRiderName!, a.RealRiderIqamaNo!, a.RealRiderRelationship!)
                 : null;
-            return new VehicleSummaryResponse(v.Id, v.AssetNumber, v.PlateNumberAr, v.PlateNumberEn, v.SerialNumber, manufacturers[v.VehicleManufacturerId].NameEn, models[v.VehicleModelId].NameEn, v.VehicleType, v.RegistrationType, v.CurrentOperationalStatus, v.SponsorId, sponsorName, v.OperatingCityId, cityName, v.CurrentOdometer, a?.Id, a?.RiderProfileId, a?.FullNameAr, a?.IsRealRider, realRider, reg?.ExpiryDate, FleetServiceSupport.DueStatus(reg?.ExpiryDate, check), ins?.ExpiryDate, FleetServiceSupport.DueStatus(ins?.ExpiryDate, check), chk?.ExpiryDate, FleetServiceSupport.DueStatus(chk?.ExpiryDate, check), a?.PermissionEndsOn, FleetServiceSupport.DueStatus(a?.PermissionEndsOn, check), operationCard?.ExpiryDate, FleetServiceSupport.DueStatus(operationCard?.ExpiryDate, check), FleetBusinessRules.IsCoreIdentityReady(v), FleetServiceSupport.EncodeRowVersion(v.RowVersion));
+            return new VehicleSummaryResponse(v.Id, v.AssetNumber, v.PlateNumberAr, v.PlateNumberEn, v.SerialNumber, manufacturers[v.VehicleManufacturerId].NameEn, models[v.VehicleModelId].NameEn, v.VehicleType, v.RegistrationType, v.CurrentOperationalStatus, v.SponsorId, sponsorName, v.OperatingCityId, cityName, v.CurrentOdometer, v.TrackedDistanceKm, a?.Id, a?.RiderProfileId, a?.FullNameAr, a?.IsRealRider, realRider, reg?.ExpiryDate, FleetServiceSupport.DueStatus(reg?.ExpiryDate, check), ins?.ExpiryDate, FleetServiceSupport.DueStatus(ins?.ExpiryDate, check), chk?.ExpiryDate, FleetServiceSupport.DueStatus(chk?.ExpiryDate, check), a?.PermissionEndsOn, FleetServiceSupport.DueStatus(a?.PermissionEndsOn, check), operationCard?.ExpiryDate, FleetServiceSupport.DueStatus(operationCard?.ExpiryDate, check), FleetBusinessRules.IsCoreIdentityReady(v), FleetServiceSupport.EncodeRowVersion(v.RowVersion));
         }).ToArray();
     }
 
@@ -976,7 +1173,8 @@ internal sealed class FleetService(
     private static VehicleOdometerReadingResponse MapOdometer(VehicleOdometerReading x) => new(x.Id, x.Reading, x.RecordedAtUtc, x.SourceType, x.IsCorrection, x.CorrectionReason, x.Notes);
     private static RiderVehicleAssignmentEvent NewAssignmentEvent(Guid assignmentId, Guid operationId, RiderVehicleAssignmentEventType type, DateTimeOffset at, Guid actor, string reason) => new() { RiderVehicleAssignmentId = assignmentId, OperationId = operationId, EventType = type, OccurredAtUtc = at, ActorUserId = actor, Reason = reason.Trim() };
     private static VehicleIssueEvent NewIssueEvent(Guid issueId, VehicleIssueEventType type, VehicleIssueStatus? from, VehicleIssueStatus to, DateTimeOffset at, Guid actor, string reason) => new() { VehicleIssueId = issueId, EventType = type, FromStatus = from, ToStatus = to, OccurredAtUtc = at, ActorUserId = actor, Reason = reason.Trim() };
-    private static VehicleIssueSummaryResponse MapIssue(VehicleIssue x) => new(x.Id, x.IssueNumber, x.VehicleId, x.Category, x.Severity, x.BlocksOperation, x.Status, x.ReportedAtUtc, x.Description, x.LocationDescription, x.ResolutionSummary, FleetServiceSupport.EncodeRowVersion(x.RowVersion));
+    private static VehicleIssueSummaryResponse MapIssue(VehicleIssue x, VehicleIssueRiderResponse? rider) => new(x.Id, x.IssueNumber, x.VehicleId, x.Category, x.Severity, x.BlocksOperation, x.Status, x.ReportedAtUtc, x.Description, x.LocationDescription, x.RelatedAssignmentId, rider, x.IsRiderResponsible, x.EstimatedRepairCost, x.ResolutionSummary, FleetServiceSupport.EncodeRowVersion(x.RowVersion));
+    private static VehicleIssueEvidenceResponse MapIssueEvidence(VehicleIssueEvidence x) => new(x.Id, x.VehicleIssueId, x.OriginalFileName, x.ContentType, x.FileSizeBytes, x.Sha256Checksum, x.UploadedAtUtc, FleetServiceSupport.EncodeRowVersion(x.RowVersion));
     private static VehicleAccidentSummaryResponse MapAccident(VehicleAccident x) => new(x.Id, x.AccidentNumber, x.VehicleId, x.RiderProfileId, x.RiderVehicleAssignmentId, x.VehicleIssueId, x.OccurredAtUtc, x.Severity, x.IsDrivable, x.Status, x.LocationDescription, FleetServiceSupport.EncodeRowVersion(x.RowVersion));
 
     private static bool TryNormalizeRealRider(bool isRealRider, RealRiderRequest? request, out RealRiderRequest? normalized)
@@ -1091,6 +1289,40 @@ internal sealed class FleetService(
         return Result.Success(result);
     }
 
+    private async Task<Result<List<StagedIssueEvidence>>> StageIssueEvidenceAsync(Guid issueId, IReadOnlyList<PrivateFileUpload> uploads, CancellationToken cancellationToken)
+    {
+        var result = new List<StagedIssueEvidence>(uploads.Count);
+        foreach (var upload in uploads)
+        {
+            if (!IsDocument(upload)) { CleanupIssueEvidence(result); return Result.Failure<List<StagedIssueEvidence>>(FleetErrors.InvalidFile); }
+            var evidenceId = Guid.CreateVersion7();
+            var stored = await fileStorage.StoreAsync($"vehicle-issues/{issueId:N}/evidence/{evidenceId:N}", upload, MaximumReturnEvidenceSize, cancellationToken);
+            if (stored.IsFailure) { CleanupIssueEvidence(result); return Result.Failure<List<StagedIssueEvidence>>(FleetErrors.InvalidFile); }
+            result.Add(new StagedIssueEvidence(evidenceId, stored.Value!));
+        }
+        return Result.Success(result);
+    }
+
+    private void AddStagedIssueEvidence(Guid issueId, IReadOnlyList<StagedIssueEvidence> staged, Guid actor)
+    {
+        foreach (var item in staged)
+        {
+            dbContext.VehicleIssueEvidenceFiles.Add(new VehicleIssueEvidence
+            {
+                Id = item.EvidenceId,
+                VehicleIssueId = issueId,
+                OriginalFileName = item.Stored.OriginalFileName,
+                StoredFileName = item.Stored.StoredFileName,
+                ContentType = item.Stored.ContentType,
+                FileSizeBytes = item.Stored.Length,
+                Sha256Checksum = item.Stored.Sha256Checksum,
+                StoragePath = item.Stored.StoragePath,
+                UploadedByUserId = actor,
+                UploadedAtUtc = support.UtcNow
+            });
+        }
+    }
+
     private List<Guid> AddStagedPromissoryFiles(Guid riderProfileId, IReadOnlyList<StagedPromissoryFile> staged, Guid actor)
     {
         var result = new List<Guid>(staged.Count);
@@ -1121,6 +1353,17 @@ internal sealed class FleetService(
         foreach (var item in staged) fileStorage.DeleteBestEffort(item.Stored.StoragePath);
     }
 
+    private void CleanupIssueEvidence(IEnumerable<StagedIssueEvidence> staged)
+    {
+        foreach (var item in staged) fileStorage.DeleteBestEffort(item.Stored.StoragePath);
+    }
+
+    private void CleanupSwitchFiles(IEnumerable<StagedPromissoryFile> promissoryFiles, IEnumerable<StagedIssueEvidence> evidenceFiles)
+    {
+        CleanupStaged(promissoryFiles);
+        CleanupIssueEvidence(evidenceFiles);
+    }
+
     private async Task<string?> OperatingCitySnapshotAsync(Guid? operatingCityId, CancellationToken cancellationToken)
     {
         if (!operatingCityId.HasValue) return null;
@@ -1134,6 +1377,7 @@ internal sealed class FleetService(
 
     private sealed record StagedVehicleSlot(VehicleAttachment Attachment, VehicleAttachmentVersion Version, StoredPrivateFile Stored, bool IsNew);
     private sealed record StagedPromissoryFile(Guid FileId, Guid VersionId, StoredPrivateFile Stored);
+    private sealed record StagedIssueEvidence(Guid EvidenceId, StoredPrivateFile Stored);
 
     private static bool ValidFuel(byte? value) => value is null or <= 100;
     private static (int Page, int PageSize) NormalizePage(int page, int pageSize) => (Math.Max(1, page), Math.Clamp(pageSize <= 0 ? 50 : pageSize, 1, 200));

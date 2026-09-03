@@ -1,3 +1,4 @@
+using LogisticsERP.Application.Abstractions.Files;
 using LogisticsERP.Application.Common.Results;
 
 namespace LogisticsERP.Application.Features.Telecom;
@@ -17,8 +18,13 @@ public interface IPhoneSimService
         Guid id,
         CancellationToken cancellationToken = default);
 
+    Task<Result<PrivateFileDownload>> DownloadReceiptFormAsync(
+        Guid id,
+        CancellationToken cancellationToken = default);
+
     Task<Result<PhoneSimResponse>> CreateAsync(
         CreatePhoneSimRequest request,
+        PrivateFileUpload receiptForm,
         CancellationToken cancellationToken = default);
 
     Task<Result<PhoneSimResponse>> UpdateAsync(

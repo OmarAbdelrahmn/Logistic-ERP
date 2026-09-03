@@ -6,61 +6,61 @@ public static class AuthenticationErrors
 {
     public static readonly OperationError InvalidRequest = new(
         "Authentication.InvalidRequest",
-        "The authentication request is invalid.",
+        "طلب المصادقة غير صالح.",
         ErrorType.Validation);
 
     public static readonly OperationError InvalidCredentials = new(
         "Authentication.InvalidCredentials",
-        "The login or password is incorrect.",
+        "اسم المستخدم أو كلمة المرور غير صحيحة.",
         ErrorType.Unauthorized);
 
     public static readonly OperationError AccountLocked = new(
         "Authentication.AccountLocked",
-        "The account is temporarily locked. Try again later.",
+        "الحساب مقفل مؤقتًا. حاول مرة أخرى لاحقًا.",
         ErrorType.Forbidden);
 
     public static readonly OperationError AccountUnavailable = new(
         "Authentication.AccountUnavailable",
-        "The account is not available for sign in.",
+        "الحساب غير متاح لتسجيل الدخول.",
         ErrorType.Forbidden);
 
     public static readonly OperationError AccountNotConfirmed = new(
         "Authentication.AccountNotConfirmed",
-        "The account must be confirmed before sign in.",
+        "يجب تأكيد الحساب قبل تسجيل الدخول.",
         ErrorType.Forbidden);
 
     public static readonly OperationError InvalidRefreshToken = new(
         "Authentication.InvalidRefreshToken",
-        "The refresh token is invalid or expired.",
+        "رمز التحديث غير صالح أو منتهي الصلاحية.",
         ErrorType.Unauthorized);
 
     public static readonly OperationError CurrentUserUnavailable = new(
         "Authentication.CurrentUserUnavailable",
-        "The current authenticated user is unavailable.",
+        "المستخدم المصادق عليه حاليًا غير متاح.",
         ErrorType.Unauthorized);
 
     public static readonly OperationError InvalidCurrentPassword = new(
         "Authentication.InvalidCurrentPassword",
-        "The current password is incorrect.",
+        "كلمة المرور الحالية غير صحيحة.",
         ErrorType.Validation);
 
     public static readonly OperationError PasswordRejected = new(
         "Authentication.PasswordRejected",
-        "The new password does not satisfy the password policy.",
+        "كلمة المرور الجديدة لا تستوفي سياسة كلمات المرور.",
         ErrorType.Validation);
 
     public static readonly OperationError SessionNotFound = new(
         "Authentication.SessionNotFound",
-        "The session was not found.",
+        "لم يتم العثور على الجلسة.",
         ErrorType.NotFound);
 
     public static readonly OperationError ConcurrentRefresh = new(
         "Authentication.ConcurrentRefresh",
-        "The refresh token has already been used. Sign in again.",
+        "تم استخدام رمز التحديث مسبقًا. سجّل الدخول مرة أخرى.",
         ErrorType.Unauthorized);
 
     public static readonly OperationError ConcurrentLogin = new(
         "Authentication.ConcurrentLogin",
-        "Another sign-in completed at the same time. Retry sign-in to make this device the active session.",
+        "اكتمل تسجيل دخول آخر في الوقت نفسه. أعد تسجيل الدخول لجعل هذا الجهاز الجلسة النشطة.",
         ErrorType.Conflict);
 }

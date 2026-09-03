@@ -18,6 +18,26 @@ public sealed class FleetModelTests
             .Options);
 
     [Fact]
+    public void DailyDistanceLedgerIsUniquePerVehicleAndDateAndPreservesGpsDecimals()
+    {
+        using var context = CreateContext();
+        var model = context.GetService<IDesignTimeModel>().Model;
+        var distance = model.FindEntityType(typeof(VehicleDailyDistance))!;
+        var vehicle = model.FindEntityType(typeof(Vehicle))!;
+
+        var dailyIndex = Assert.Single(distance.GetIndexes(), index =>
+            index.IsUnique
+            && index.Properties.Select(property => property.Name).SequenceEqual(
+                [nameof(VehicleDailyDistance.VehicleId), nameof(VehicleDailyDistance.WorkDate)]));
+        Assert.Equal("[IsDeleted] = 0", dailyIndex.GetFilter());
+        Assert.Equal(18, distance.FindProperty(nameof(VehicleDailyDistance.GpsDistanceKm))!.GetPrecision());
+        Assert.Equal(2, distance.FindProperty(nameof(VehicleDailyDistance.GpsDistanceKm))!.GetScale());
+        Assert.Equal(18, vehicle.FindProperty(nameof(Vehicle.TrackedDistanceKm))!.GetPrecision());
+        Assert.Contains(distance.GetCheckConstraints(), constraint =>
+            constraint.Name == "CK_VehicleDailyDistances_ManualOdometer");
+    }
+
+    [Fact]
     public void AssignmentIndexesGuaranteeOneActiveVehiclePerRiderAndVehicle()
     {
         using var context = CreateContext();
@@ -98,6 +118,31 @@ public sealed class FleetModelTests
     }
 
     [Fact]
+    public void SponsorVehicleLeaseAgreementKeepsPartiesAndVehiclesNormalized()
+    {
+        using var context = CreateContext();
+        var model = context.GetService<IDesignTimeModel>().Model;
+        var agreement = model.FindEntityType(typeof(SponsorVehicleLeaseAgreement))!;
+        var relation = model.FindEntityType(typeof(SponsorVehicleLeaseAgreementVehicle))!;
+
+        Assert.Equal(
+            2,
+            agreement.GetForeignKeys().Count(foreignKey =>
+                foreignKey.PrincipalEntityType.ClrType == typeof(Sponsor)));
+        Assert.Contains(agreement.GetCheckConstraints(), constraint =>
+            constraint.Name == "CK_SponsorVehicleLeaseAgreements_DifferentSponsors");
+        Assert.Contains(agreement.GetCheckConstraints(), constraint =>
+            constraint.Name == "CK_SponsorVehicleLeaseAgreements_EffectiveRange");
+        var uniqueVehicle = Assert.Single(relation.GetIndexes(), index => index.IsUnique);
+        Assert.Equal(
+            [
+                nameof(SponsorVehicleLeaseAgreementVehicle.SponsorVehicleLeaseAgreementId),
+                nameof(SponsorVehicleLeaseAgreementVehicle.VehicleId)
+            ],
+            uniqueVehicle.Properties.Select(property => property.Name));
+    }
+
+    [Fact]
     public void StatusTimelineGuaranteesOneOpenPeriodPerVehicle()
     {
         using var context = CreateContext();
@@ -164,6 +209,26 @@ public sealed class FleetModelTests
             && candidate.Properties.Select(property => property.Name).SequenceEqual([nameof(VehicleAttachment.VehicleId), nameof(VehicleAttachment.Kind)]));
 
         Assert.Equal("[Kind] <> 99 AND [IsDeleted] = 0", index.GetFilter());
+    }
+
+    [Fact]
+    public void ReturnIssueStoresResponsibilityCostAndPrivateEvidence()
+    {
+        using var context = CreateContext();
+        var model = context.GetService<IDesignTimeModel>().Model;
+        var issue = model.FindEntityType(typeof(VehicleIssue))!;
+        var evidence = model.FindEntityType(typeof(VehicleIssueEvidence))!;
+
+        Assert.True(issue.FindProperty(nameof(VehicleIssue.IsRiderResponsible))!.IsNullable);
+        Assert.Equal(18, issue.FindProperty(nameof(VehicleIssue.EstimatedRepairCost))!.GetPrecision());
+        Assert.Equal(2, issue.FindProperty(nameof(VehicleIssue.EstimatedRepairCost))!.GetScale());
+        Assert.Contains(issue.GetCheckConstraints(), constraint =>
+            constraint.Name == "CK_VehicleIssues_EstimatedRepairCost");
+        Assert.Contains(evidence.GetForeignKeys(), foreignKey =>
+            foreignKey.PrincipalEntityType.ClrType == typeof(VehicleIssue));
+        Assert.Equal(1000, evidence.FindProperty(nameof(VehicleIssueEvidence.StoragePath))!.GetMaxLength());
+        Assert.Contains(evidence.GetCheckConstraints(), constraint =>
+            constraint.Name == "CK_VehicleIssueEvidenceFiles_Size");
     }
 
     [Fact]

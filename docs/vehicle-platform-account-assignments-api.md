@@ -23,11 +23,56 @@ The limits are:
 
 Assignments to another platform have an independent limit. The account does not need to belong to the rider who currently has the vehicle. Vehicle types without a configured limit are approved with an `UnsupportedVehicleType` warning.
 
-Sponsor and city are validation dimensions. A vehicle/account sponsor mismatch or a vehicle/account city mismatch is approved and reported as a warning. Sponsor does not create a separate capacity bucket.
+Sponsor and city are validation dimensions. A vehicle/account city mismatch is approved and reported as a warning. A sponsor mismatch is also a warning unless the account is a Keeta account for the lessee sponsor and the vehicle is covered by a currently effective sponsor vehicle lease agreement. During that agreement, the vehicle is valid for both its original lessor sponsor and the agreement's lessee sponsor. Sponsor does not create a separate capacity bucket.
 
 ## Endpoints
 
 All endpoints require JWT authentication. Read operations require `fleet.assignments.read`; create, close, switch, and accept operations require `fleet.assignments.manage`.
+
+### Create a Keeta sponsor vehicle lease agreement
+
+Use `POST /api/vehicle-platform-account-assignments/lease-agreements`. The backend resolves the active `KEETA` platform record; the UI selects only the two sponsors and the lessor's vehicles.
+
+```json
+{
+  "lessorSponsorId": "11111111-1111-1111-1111-111111111111",
+  "lesseeSponsorId": "22222222-2222-2222-2222-222222222222",
+  "vehicleIds": [
+    "33333333-3333-3333-3333-333333333333",
+    "44444444-4444-4444-4444-444444444444"
+  ],
+  "agreementDate": "2026-03-26",
+  "agreementReference": "Keeta vehicle lease 2026-03",
+  "effectiveFrom": "2026-03-26",
+  "effectiveTo": null,
+  "notes": null
+}
+```
+
+The sponsors must be different and active. Every selected vehicle must currently have `SponsorId = lessorSponsorId`. The API rejects overlapping Keeta lease periods for the same vehicle.
+
+To populate the vehicle selector, call:
+
+`GET /api/vehicle-platform-account-assignments/lease-agreements/eligible-vehicles?lessorSponsorId={id}&effectiveFrom=2026-03-26&effectiveTo=2027-03-25`
+
+This returns non-archived vehicles belonging to the lessor and excludes vehicles already covered by an overlapping Keeta sponsor lease.
+
+List and read agreements with:
+
+- `GET /api/vehicle-platform-account-assignments/lease-agreements?lessorSponsorId={id}&lesseeSponsorId={id}&activeOnly=true`
+- `GET /api/vehicle-platform-account-assignments/lease-agreements/{agreementId}`
+
+End an agreement with `POST /api/vehicle-platform-account-assignments/lease-agreements/{agreementId}/close`:
+
+```json
+{
+  "effectiveTo": "2027-03-25",
+  "reason": "Lease agreement ended",
+  "rowVersion": "AAAAAAAAB9E="
+}
+```
+
+Agreement dates are inclusive and evaluated using the Riyadh calendar date.
 
 ### Approve an assignment
 
@@ -43,6 +88,18 @@ All endpoints require JWT authentication. Read operations require `fleet.assignm
 ```
 
 Returns `201 Created`. `approvalStatus` is always `Approved`. The same response includes `hasProblems` and `problems`, so the client can show warnings without blocking the operation.
+
+When a Keeta sponsor mismatch is covered by an effective lease agreement, the response includes:
+
+```json
+{
+  "usesSponsorVehicleLeaseAgreement": true,
+  "sponsorVehicleLeaseAgreementId": "55555555-5555-5555-5555-555555555555",
+  "hasProblems": false
+}
+```
+
+Other warnings such as a city mismatch or capacity overflow can still make `hasProblems` true.
 
 Every assignment response (`POST`, list, get, problems, and close) includes these vehicle identity fields:
 
@@ -171,7 +228,7 @@ Possible codes are:
 - `PlatformAccountStatus`
 - `UnsupportedVehicleType`
 - `VehicleSponsorMissing`
-- `SponsorMismatch`
+- `SponsorMismatch` (only when the sponsors differ and no applicable Keeta sponsor vehicle lease exists)
 - `VehicleCityMissing`
 - `OperatingCityMismatch`
 - `DuplicateActiveAssignment`

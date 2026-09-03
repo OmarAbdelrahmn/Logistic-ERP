@@ -90,8 +90,12 @@ public sealed class ApplicationDbContext(
     public DbSet<VehicleRegistrationTransition> VehicleRegistrationTransitions => Set<VehicleRegistrationTransition>();
     public DbSet<VehicleOperationalStatusPeriod> VehicleOperationalStatusPeriods => Set<VehicleOperationalStatusPeriod>();
     public DbSet<VehicleOdometerReading> VehicleOdometerReadings => Set<VehicleOdometerReading>();
+    public DbSet<VehicleDailyDistance> VehicleDailyDistances => Set<VehicleDailyDistance>();
+    public DbSet<VehicleDailyDistanceImport> VehicleDailyDistanceImports => Set<VehicleDailyDistanceImport>();
     public DbSet<RiderVehicleAssignment> RiderVehicleAssignments => Set<RiderVehicleAssignment>();
     public DbSet<RealRider> RealRiders => Set<RealRider>();
+    public DbSet<SponsorVehicleLeaseAgreement> SponsorVehicleLeaseAgreements => Set<SponsorVehicleLeaseAgreement>();
+    public DbSet<SponsorVehicleLeaseAgreementVehicle> SponsorVehicleLeaseAgreementVehicles => Set<SponsorVehicleLeaseAgreementVehicle>();
     public DbSet<VehiclePlatformAccountAssignment> VehiclePlatformAccountAssignments => Set<VehiclePlatformAccountAssignment>();
     public DbSet<VehiclePlatformAccountSwitch> VehiclePlatformAccountSwitches => Set<VehiclePlatformAccountSwitch>();
     public DbSet<RiderVehicleAssignmentEvent> RiderVehicleAssignmentEvents => Set<RiderVehicleAssignmentEvent>();
@@ -106,6 +110,7 @@ public sealed class ApplicationDbContext(
     public DbSet<RiderPromissoryFile> RiderPromissoryFiles => Set<RiderPromissoryFile>();
     public DbSet<RiderPromissoryFileVersion> RiderPromissoryFileVersions => Set<RiderPromissoryFileVersion>();
     public DbSet<VehicleIssue> VehicleIssues => Set<VehicleIssue>();
+    public DbSet<VehicleIssueEvidence> VehicleIssueEvidenceFiles => Set<VehicleIssueEvidence>();
     public DbSet<VehicleIssueEvent> VehicleIssueEvents => Set<VehicleIssueEvent>();
     public DbSet<VehicleAccident> VehicleAccidents => Set<VehicleAccident>();
     public DbSet<VehicleAccidentEvent> VehicleAccidentEvents => Set<VehicleAccidentEvent>();

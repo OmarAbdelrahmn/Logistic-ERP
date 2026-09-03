@@ -17,6 +17,7 @@ public sealed class PhoneSimApiSurfaceTests
     {
         { nameof(PhoneSimsController.GetAll), typeof(HttpGetAttribute), null, PermissionKeys.Operations.PhoneSimsRead },
         { nameof(PhoneSimsController.Get), typeof(HttpGetAttribute), "{id:guid}", PermissionKeys.Operations.PhoneSimsRead },
+        { nameof(PhoneSimsController.DownloadReceiptForm), typeof(HttpGetAttribute), "{id:guid}/receipt-form", PermissionKeys.Operations.PhoneSimsRead },
         { nameof(PhoneSimsController.Create), typeof(HttpPostAttribute), null, PermissionKeys.Operations.PhoneSimsManage },
         { nameof(PhoneSimsController.Update), typeof(HttpPutAttribute), "{id:guid}", PermissionKeys.Operations.PhoneSimsManage },
         { nameof(PhoneSimsController.ChangeResponsibleEmployee), typeof(HttpPatchAttribute), "{id:guid}/responsible-employee", PermissionKeys.Operations.PhoneSimsManage },
@@ -63,6 +64,22 @@ public sealed class PhoneSimApiSurfaceTests
         Assert.NotNull(typeof(PhoneSimResponse).GetProperty(nameof(PhoneSimResponse.CurrentRider)));
         Assert.NotNull(typeof(PhoneSimCurrentRiderResponse).GetProperty(nameof(PhoneSimCurrentRiderResponse.RiderProfileId)));
         Assert.NotNull(typeof(PhoneSimCurrentRiderResponse).GetProperty(nameof(PhoneSimCurrentRiderResponse.EmployeeId)));
+        Assert.NotNull(typeof(PhoneSimResponse).GetProperty(nameof(PhoneSimResponse.ReceiptForm)));
+        Assert.NotNull(typeof(CreatePhoneSimForm).GetProperty(nameof(CreatePhoneSimForm.ReceiptForm)));
+    }
+
+    [Fact]
+    public void CreateAcceptsMultipartFormData()
+    {
+        var method = typeof(PhoneSimsController).GetMethod(nameof(PhoneSimsController.Create));
+        Assert.NotNull(method);
+
+        var formParameter = Assert.Single(method!.GetParameters(), parameter =>
+            parameter.ParameterType == typeof(CreatePhoneSimForm));
+        Assert.NotNull(formParameter.GetCustomAttribute<FromFormAttribute>());
+
+        var consumes = Assert.Single(method.GetCustomAttributes<ConsumesAttribute>());
+        Assert.Contains("multipart/form-data", consumes.ContentTypes);
     }
 
     [Fact]

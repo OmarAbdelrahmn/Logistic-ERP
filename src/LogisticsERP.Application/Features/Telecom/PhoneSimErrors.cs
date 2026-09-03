@@ -6,102 +6,108 @@ public static class PhoneSimErrors
 {
     public static readonly OperationError InvalidRequest = new(
         "phone_sim.invalid_request",
-        "The phone SIM request contains invalid or incomplete data.",
+        "تعذر تنفيذ العملية المطلوبة.",
         ErrorType.Validation);
 
     public static readonly OperationError InvalidPhoneNumber = new(
         "phone_sim.invalid_phone_number",
-        "The phone number is not a supported Saudi mobile or international E.164 number.",
+        "تعذر تنفيذ العملية المطلوبة.",
         ErrorType.Validation,
         "phoneNumber");
 
     public static readonly OperationError InvalidIccid = new(
         "phone_sim.invalid_iccid",
-        "The ICCID must contain 18 to 22 digits and start with 89.",
+        "تعذر تنفيذ العملية المطلوبة.",
         ErrorType.Validation,
         "iccid");
 
     public static readonly OperationError InvalidStatus = new(
         "phone_sim.invalid_status",
-        "The requested phone SIM status is invalid or cannot be set directly.",
+        "تعذر تنفيذ العملية المطلوبة.",
         ErrorType.Validation,
         "status");
 
     public static readonly OperationError NotFound = new(
         "phone_sim.not_found",
-        "The requested phone SIM card was not found.",
+        "تعذر تنفيذ العملية المطلوبة.",
+        ErrorType.NotFound,
+        "id");
+
+    public static readonly OperationError ReceiptFormNotFound = new(
+        "phone_sim.receipt_form_not_found",
+        "تعذر تنفيذ العملية المطلوبة.",
         ErrorType.NotFound,
         "id");
 
     public static readonly OperationError AssignmentNotFound = new(
         "phone_sim.assignment_not_found",
-        "The requested phone SIM assignment was not found.",
+        "تعذر تنفيذ العملية المطلوبة.",
         ErrorType.NotFound,
         "assignmentId");
 
     public static readonly OperationError ResponsibleEmployeeNotFound = new(
         "phone_sim.responsible_employee_not_found",
-        "The selected responsible employee was not found.",
+        "تعذر تنفيذ العملية المطلوبة.",
         ErrorType.NotFound,
         "responsibleEmployeeId");
 
     public static readonly OperationError ResponsibleEmployeeUnavailable = new(
         "phone_sim.responsible_employee_unavailable",
-        "The selected responsible person must be an active internal employee.",
+        "تعذر تنفيذ العملية المطلوبة.",
         ErrorType.Conflict,
         "responsibleEmployeeId");
 
     public static readonly OperationError RiderNotFound = new(
         "phone_sim.rider_not_found",
-        "The selected rider profile was not found.",
+        "تعذر تنفيذ العملية المطلوبة.",
         ErrorType.NotFound,
         "riderProfileId");
 
     public static readonly OperationError RiderUnavailable = new(
         "phone_sim.rider_unavailable",
-        "The selected rider is not active or eligible to receive a phone SIM.",
+        "تعذر تنفيذ العملية المطلوبة.",
         ErrorType.Conflict,
         "riderProfileId");
 
     public static readonly OperationError DuplicatePhoneNumber = new(
         "phone_sim.duplicate_phone_number",
-        "Another active phone SIM card already uses this phone number.",
+        "تعذر تنفيذ العملية المطلوبة.",
         ErrorType.Conflict,
         "phoneNumber");
 
     public static readonly OperationError DuplicateIccid = new(
         "phone_sim.duplicate_iccid",
-        "Another active phone SIM card already uses this ICCID.",
+        "تعذر تنفيذ العملية المطلوبة.",
         ErrorType.Conflict,
         "iccid");
 
     public static readonly OperationError ActiveAssignmentConflict = new(
         "phone_sim.active_assignment_conflict",
-        "The operation is not allowed while the SIM has an active rider assignment.",
+        "تعذر تنفيذ العملية المطلوبة.",
         ErrorType.Conflict);
 
     public static readonly OperationError AssignmentConflict = new(
         "phone_sim.assignment_conflict",
-        "The assignment conflicts with the current SIM or rider state.",
+        "تعذر تنفيذ العملية المطلوبة.",
         ErrorType.Conflict);
 
     public static readonly OperationError InvalidDateRange = new(
         "phone_sim.invalid_date_range",
-        "The assignment dates are invalid. Future dates are not allowed and the end date cannot precede the start date.",
+        "تعذر تنفيذ العملية المطلوبة.",
         ErrorType.Validation);
 
     public static readonly OperationError ConcurrencyConflict = new(
         "phone_sim.concurrency_conflict",
-        "The record changed after it was loaded. Reload it and retry.",
+        "تعذر تنفيذ العملية المطلوبة.",
         ErrorType.Conflict);
 
     public static readonly OperationError CurrentUserUnavailable = new(
         "phone_sim.current_user_unavailable",
-        "The authenticated user could not be resolved.",
+        "تعذر تنفيذ العملية المطلوبة.",
         ErrorType.Unauthorized);
 
     public static readonly OperationError PersistenceConflict = new(
         "phone_sim.persistence_conflict",
-        "The operation could not be completed because the phone SIM state changed or conflicts with another record.",
+        "تعذر تنفيذ العملية المطلوبة.",
         ErrorType.Conflict);
 }
