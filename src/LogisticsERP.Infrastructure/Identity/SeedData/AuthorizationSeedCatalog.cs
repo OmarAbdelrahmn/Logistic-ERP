@@ -47,7 +47,31 @@ internal static class AuthorizationSeedCatalog
         PermissionKeys.Fleet.CorrectionsManage,
         PermissionKeys.Fleet.RegistrationTransitionsManage,
         PermissionKeys.Operations.PhoneSimsRead,
-        PermissionKeys.Operations.PhoneSimsManage
+        PermissionKeys.Operations.PhoneSimsManage,
+        PermissionKeys.Fuel.Read,
+        PermissionKeys.Fuel.Manage,
+        PermissionKeys.Fuel.Import,
+        PermissionKeys.Maintenance.LocationsRead,
+        PermissionKeys.Maintenance.LocationsManage,
+        PermissionKeys.Maintenance.WorkOrdersRead,
+        PermissionKeys.Maintenance.WorkOrdersManage,
+        PermissionKeys.Maintenance.OilRead,
+        PermissionKeys.Maintenance.OilComplete,
+        PermissionKeys.Maintenance.ExternalJobsRead,
+        PermissionKeys.Maintenance.ExternalJobsManage,
+        PermissionKeys.Maintenance.PartSalesManage,
+        PermissionKeys.Maintenance.CustomerLaborChargesManage,
+        PermissionKeys.Maintenance.MechanicLaborPaymentsManage,
+        PermissionKeys.Maintenance.ProfitReportsRead,
+        PermissionKeys.Maintenance.ProfitReportsExport,
+        PermissionKeys.Inventory.ItemsRead,
+        PermissionKeys.Inventory.ItemsManage,
+        PermissionKeys.Inventory.StockRead,
+        PermissionKeys.Inventory.StockMove,
+        PermissionKeys.Inventory.StockAdjust,
+        PermissionKeys.Inventory.CostLayersRead,
+        PermissionKeys.Inventory.ReceiptsManage,
+        PermissionKeys.Inventory.ReturnsManage
     ];
 
     public static IReadOnlyList<string> ManagerPermissions { get; } =
@@ -76,7 +100,26 @@ internal static class AuthorizationSeedCatalog
         PermissionKeys.Fleet.AccidentsReport,
         PermissionKeys.Fleet.AccidentsDownload,
         PermissionKeys.Operations.PhoneSimsRead,
-        PermissionKeys.Operations.PhoneSimsManage
+        PermissionKeys.Operations.PhoneSimsManage,
+        PermissionKeys.Fuel.Read,
+        PermissionKeys.Fuel.Manage,
+        PermissionKeys.Fuel.Import,
+        PermissionKeys.Maintenance.LocationsRead,
+        PermissionKeys.Maintenance.WorkOrdersRead,
+        PermissionKeys.Maintenance.WorkOrdersManage,
+        PermissionKeys.Maintenance.OilRead,
+        PermissionKeys.Maintenance.OilComplete,
+        PermissionKeys.Maintenance.ExternalJobsRead,
+        PermissionKeys.Maintenance.ExternalJobsManage,
+        PermissionKeys.Maintenance.PartSalesManage,
+        PermissionKeys.Maintenance.CustomerLaborChargesManage,
+        PermissionKeys.Maintenance.MechanicLaborPaymentsManage,
+        PermissionKeys.Inventory.ItemsRead,
+        PermissionKeys.Inventory.ItemsManage,
+        PermissionKeys.Inventory.StockRead,
+        PermissionKeys.Inventory.StockMove,
+        PermissionKeys.Inventory.ReceiptsManage,
+        PermissionKeys.Inventory.ReturnsManage
     ];
 
     public static IReadOnlyList<RolePermissionSeed> RolePermissions { get; } =
@@ -120,11 +163,17 @@ internal static class AuthorizationSeedCatalog
         AddRolePermissions(seeds, SystemRoles.SystemAdminId,
             SystemAdminPermissions.Except(legacySystemAdminPermissions).Where(key =>
                 !key.StartsWith("fleet.", StringComparison.Ordinal)
-                && !key.StartsWith("phone_sims.", StringComparison.Ordinal)), ref sequence);
+                && !key.StartsWith("phone_sims.", StringComparison.Ordinal)
+                && !key.StartsWith("fuel.", StringComparison.Ordinal)
+                && !key.StartsWith("maintenance.", StringComparison.Ordinal)
+                && !key.StartsWith("inventory.", StringComparison.Ordinal)), ref sequence);
         AddRolePermissions(seeds, SystemRoles.ManagerId,
             ManagerPermissions.Except(legacyManagerPermissions).Where(key =>
                 !key.StartsWith("fleet.", StringComparison.Ordinal)
-                && !key.StartsWith("phone_sims.", StringComparison.Ordinal)), ref sequence);
+                && !key.StartsWith("phone_sims.", StringComparison.Ordinal)
+                && !key.StartsWith("fuel.", StringComparison.Ordinal)
+                && !key.StartsWith("maintenance.", StringComparison.Ordinal)
+                && !key.StartsWith("inventory.", StringComparison.Ordinal)), ref sequence);
         AddRolePermissions(seeds, SystemRoles.SystemAdminId,
             SystemAdminPermissions.Where(key => key.StartsWith("fleet.", StringComparison.Ordinal) && key != PermissionKeys.Fleet.RegistrationTransitionsManage), ref sequence);
         AddRolePermissions(seeds, SystemRoles.ManagerId,
@@ -136,6 +185,14 @@ internal static class AuthorizationSeedCatalog
             [PermissionKeys.Operations.PhoneSimsRead, PermissionKeys.Operations.PhoneSimsManage], ref sequence);
         AddRolePermissions(seeds, SystemRoles.ManagerId,
             [PermissionKeys.Operations.PhoneSimsRead, PermissionKeys.Operations.PhoneSimsManage], ref sequence);
+        AddRolePermissions(seeds, SystemRoles.SystemAdminId,
+            [PermissionKeys.Fuel.Read, PermissionKeys.Fuel.Manage, PermissionKeys.Fuel.Import], ref sequence);
+        AddRolePermissions(seeds, SystemRoles.ManagerId,
+            [PermissionKeys.Fuel.Read, PermissionKeys.Fuel.Manage, PermissionKeys.Fuel.Import], ref sequence);
+        AddRolePermissions(seeds, SystemRoles.SystemAdminId,
+            SystemAdminPermissions.Where(key => key.StartsWith("maintenance.", StringComparison.Ordinal) || key.StartsWith("inventory.", StringComparison.Ordinal)), ref sequence);
+        AddRolePermissions(seeds, SystemRoles.ManagerId,
+            ManagerPermissions.Where(key => key.StartsWith("maintenance.", StringComparison.Ordinal) || key.StartsWith("inventory.", StringComparison.Ordinal)), ref sequence);
 
         return seeds;
     }

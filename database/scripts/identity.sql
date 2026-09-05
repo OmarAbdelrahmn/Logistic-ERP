@@ -1004,3 +1004,190 @@ END;
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__IdentityMigrationsHistory]
+    WHERE [MigrationId] = N'20260831080424_AddUserProfileImage'
+)
+BEGIN
+    ALTER TABLE [identity].[Users] ADD [ProfileImageUrl] nvarchar(512) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__IdentityMigrationsHistory]
+    WHERE [MigrationId] = N'20260831080424_AddUserProfileImage'
+)
+BEGIN
+    INSERT INTO [migration].[__IdentityMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260831080424_AddUserProfileImage', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__IdentityMigrationsHistory]
+    WHERE [MigrationId] = N'20260903153722_GrantFuelPermissions'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'IsDeleted', N'PermissionKey', N'RoleId', N'UpdatedAtUtc', N'UpdatedByUserId') AND [object_id] = OBJECT_ID(N'[identity].[RolePermissions]'))
+        SET IDENTITY_INSERT [identity].[RolePermissions] ON;
+    EXEC(N'INSERT INTO [identity].[RolePermissions] ([Id], [CreatedAtUtc], [CreatedByUserId], [DeletedAtUtc], [DeletedByUserId], [DeletionReason], [IsDeleted], [PermissionKey], [RoleId], [UpdatedAtUtc], [UpdatedByUserId])
+    VALUES (''019c18d5-62e1-7000-b000-000000000068'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''fuel.read'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000069'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''fuel.manage'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000070'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''fuel.import'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000071'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''fuel.read'', ''019c18d5-62e1-7000-9000-000000000002'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000072'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''fuel.manage'', ''019c18d5-62e1-7000-9000-000000000002'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000073'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''fuel.import'', ''019c18d5-62e1-7000-9000-000000000002'', NULL, NULL)');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'IsDeleted', N'PermissionKey', N'RoleId', N'UpdatedAtUtc', N'UpdatedByUserId') AND [object_id] = OBJECT_ID(N'[identity].[RolePermissions]'))
+        SET IDENTITY_INSERT [identity].[RolePermissions] OFF;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__IdentityMigrationsHistory]
+    WHERE [MigrationId] = N'20260903153722_GrantFuelPermissions'
+)
+BEGIN
+    INSERT INTO [migration].[__IdentityMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260903153722_GrantFuelPermissions', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__IdentityMigrationsHistory]
+    WHERE [MigrationId] = N'20260903155037_GrantFuelPermissionsToDefaultUser'
+)
+BEGIN
+    DECLARE @OmarUserId uniqueidentifier;
+    DECLARE @NowUtc datetimeoffset = SYSUTCDATETIME();
+    DECLARE @InsertedCount int = 0;
+
+    SELECT @OmarUserId = [Id]
+    FROM [identity].[Users]
+    WHERE [NormalizedUserName] = N'OMAR'
+        OR UPPER([UserName]) = N'OMAR';
+
+    IF @OmarUserId IS NOT NULL
+    BEGIN
+        INSERT INTO [identity].[UserDirectPermissionAssignments]
+        (
+            [Id], [UserId], [PermissionKey], [Effect], [StartsAtUtc], [ExpiresAtUtc],
+            [GrantedByUserId], [GrantReason], [IsAllHousingScope], [IsAllClientScope],
+            [IncludesFuturePlatformContracts], [CreatedAtUtc], [CreatedByUserId],
+            [UpdatedAtUtc], [UpdatedByUserId], [IsDeleted], [DeletedAtUtc],
+            [DeletedByUserId], [DeletionReason]
+        )
+        SELECT
+            source.[Id], @OmarUserId, source.[PermissionKey], 1, @NowUtc, NULL,
+            @OmarUserId, N'Direct fuel access grant for user omar.', 1, 1,
+            1, @NowUtc, @OmarUserId, NULL, NULL, 0, NULL, NULL, NULL
+        FROM (VALUES
+            (CAST('019c18d5-62e1-7000-e000-000000000001' AS uniqueidentifier), N'fuel.read'),
+            (CAST('019c18d5-62e1-7000-e000-000000000002' AS uniqueidentifier), N'fuel.manage'),
+            (CAST('019c18d5-62e1-7000-e000-000000000003' AS uniqueidentifier), N'fuel.import')
+        ) source([Id], [PermissionKey])
+        WHERE NOT EXISTS (
+            SELECT 1
+            FROM [identity].[UserDirectPermissionAssignments] existing
+            WHERE existing.[UserId] = @OmarUserId
+                AND existing.[PermissionKey] = source.[PermissionKey]
+                AND existing.[Effect] = 1
+                AND existing.[ExpiresAtUtc] IS NULL
+                AND existing.[IsDeleted] = 0
+                AND existing.[IsAllHousingScope] = 1
+                AND existing.[IsAllClientScope] = 1
+                AND existing.[IncludesFuturePlatformContracts] = 1)
+            AND NOT EXISTS (
+                SELECT 1
+                FROM [identity].[UserDirectPermissionAssignments] existing
+                WHERE existing.[Id] = source.[Id]);
+
+        SET @InsertedCount = @@ROWCOUNT;
+
+        IF @InsertedCount > 0
+        BEGIN
+            UPDATE [identity].[Users]
+            SET [AuthorizationVersion] = [AuthorizationVersion] + 1
+            WHERE [Id] = @OmarUserId;
+        END
+    END
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__IdentityMigrationsHistory]
+    WHERE [MigrationId] = N'20260903155037_GrantFuelPermissionsToDefaultUser'
+)
+BEGIN
+    INSERT INTO [migration].[__IdentityMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260903155037_GrantFuelPermissionsToDefaultUser', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__IdentityMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093829_GrantMaintenancePermissions'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'IsDeleted', N'PermissionKey', N'RoleId', N'UpdatedAtUtc', N'UpdatedByUserId') AND [object_id] = OBJECT_ID(N'[identity].[RolePermissions]'))
+        SET IDENTITY_INSERT [identity].[RolePermissions] ON;
+    EXEC(N'INSERT INTO [identity].[RolePermissions] ([Id], [CreatedAtUtc], [CreatedByUserId], [DeletedAtUtc], [DeletedByUserId], [DeletionReason], [IsDeleted], [PermissionKey], [RoleId], [UpdatedAtUtc], [UpdatedByUserId])
+    VALUES (''019c18d5-62e1-7000-b000-000000000074'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''maintenance.locations.read'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000075'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''maintenance.locations.manage'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000076'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''maintenance.work_orders.read'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000077'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''maintenance.work_orders.manage'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000078'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''maintenance.oil.read'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000079'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''maintenance.oil.complete'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000080'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''maintenance.external_jobs.read'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000081'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''maintenance.external_jobs.manage'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000082'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''maintenance.part_sales.manage'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000083'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''maintenance.customer_labor_charges.manage'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000084'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''maintenance.mechanic_labor_payments.manage'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000085'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''maintenance.profit_reports.read'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000086'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''maintenance.profit_reports.export'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000087'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''inventory.items.read'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000088'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''inventory.items.manage'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000089'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''inventory.stock.read'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000090'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''inventory.stock.move'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000091'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''inventory.stock.adjust'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000092'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''inventory.cost_layers.read'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000093'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''inventory.receipts.manage'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000094'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''inventory.returns.manage'', ''019c18d5-62e1-7000-9000-000000000001'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000095'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''maintenance.locations.read'', ''019c18d5-62e1-7000-9000-000000000002'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000096'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''maintenance.work_orders.read'', ''019c18d5-62e1-7000-9000-000000000002'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000097'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''maintenance.work_orders.manage'', ''019c18d5-62e1-7000-9000-000000000002'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000098'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''maintenance.oil.read'', ''019c18d5-62e1-7000-9000-000000000002'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000099'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''maintenance.oil.complete'', ''019c18d5-62e1-7000-9000-000000000002'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000100'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''maintenance.external_jobs.read'', ''019c18d5-62e1-7000-9000-000000000002'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000101'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''maintenance.external_jobs.manage'', ''019c18d5-62e1-7000-9000-000000000002'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000102'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''maintenance.part_sales.manage'', ''019c18d5-62e1-7000-9000-000000000002'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000103'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''maintenance.customer_labor_charges.manage'', ''019c18d5-62e1-7000-9000-000000000002'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000104'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''maintenance.mechanic_labor_payments.manage'', ''019c18d5-62e1-7000-9000-000000000002'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000105'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''inventory.items.read'', ''019c18d5-62e1-7000-9000-000000000002'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000106'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''inventory.items.manage'', ''019c18d5-62e1-7000-9000-000000000002'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000107'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''inventory.stock.read'', ''019c18d5-62e1-7000-9000-000000000002'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000108'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''inventory.stock.move'', ''019c18d5-62e1-7000-9000-000000000002'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000109'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''inventory.receipts.manage'', ''019c18d5-62e1-7000-9000-000000000002'', NULL, NULL),
+    (''019c18d5-62e1-7000-b000-000000000110'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), N''inventory.returns.manage'', ''019c18d5-62e1-7000-9000-000000000002'', NULL, NULL)');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'IsDeleted', N'PermissionKey', N'RoleId', N'UpdatedAtUtc', N'UpdatedByUserId') AND [object_id] = OBJECT_ID(N'[identity].[RolePermissions]'))
+        SET IDENTITY_INSERT [identity].[RolePermissions] OFF;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__IdentityMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093829_GrantMaintenancePermissions'
+)
+BEGIN
+    INSERT INTO [migration].[__IdentityMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260905093829_GrantMaintenancePermissions', N'10.0.11');
+END;
+
+COMMIT;
+GO
+

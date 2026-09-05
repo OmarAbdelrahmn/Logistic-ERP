@@ -115,6 +115,42 @@ public static class PermissionKeys
         public const string DailyDistancesImport = "fleet.daily_distances.import";
     }
 
+    public static class Fuel
+    {
+        public const string Read = "fuel.read";
+        public const string Manage = "fuel.manage";
+        public const string Import = "fuel.import";
+    }
+
+    public static class Maintenance
+    {
+        public const string LocationsRead = "maintenance.locations.read";
+        public const string LocationsManage = "maintenance.locations.manage";
+        public const string WorkOrdersRead = "maintenance.work_orders.read";
+        public const string WorkOrdersManage = "maintenance.work_orders.manage";
+        public const string OilRead = "maintenance.oil.read";
+        public const string OilComplete = "maintenance.oil.complete";
+        public const string ExternalJobsRead = "maintenance.external_jobs.read";
+        public const string ExternalJobsManage = "maintenance.external_jobs.manage";
+        public const string PartSalesManage = "maintenance.part_sales.manage";
+        public const string CustomerLaborChargesManage = "maintenance.customer_labor_charges.manage";
+        public const string MechanicLaborPaymentsManage = "maintenance.mechanic_labor_payments.manage";
+        public const string ProfitReportsRead = "maintenance.profit_reports.read";
+        public const string ProfitReportsExport = "maintenance.profit_reports.export";
+    }
+
+    public static class Inventory
+    {
+        public const string ItemsRead = "inventory.items.read";
+        public const string ItemsManage = "inventory.items.manage";
+        public const string StockRead = "inventory.stock.read";
+        public const string StockMove = "inventory.stock.move";
+        public const string StockAdjust = "inventory.stock.adjust";
+        public const string CostLayersRead = "inventory.cost_layers.read";
+        public const string ReceiptsManage = "inventory.receipts.manage";
+        public const string ReturnsManage = "inventory.returns.manage";
+    }
+
     public static class Workflows
     {
         public const string LeaveRequestsRead = "leave_requests.read";
@@ -214,6 +250,30 @@ public static class PermissionKeys
         Fleet.DailyDistancesRead,
         Fleet.DailyDistancesManage,
         Fleet.DailyDistancesImport,
+        Fuel.Read,
+        Fuel.Manage,
+        Fuel.Import,
+        Maintenance.LocationsRead,
+        Maintenance.LocationsManage,
+        Maintenance.WorkOrdersRead,
+        Maintenance.WorkOrdersManage,
+        Maintenance.OilRead,
+        Maintenance.OilComplete,
+        Maintenance.ExternalJobsRead,
+        Maintenance.ExternalJobsManage,
+        Maintenance.PartSalesManage,
+        Maintenance.CustomerLaborChargesManage,
+        Maintenance.MechanicLaborPaymentsManage,
+        Maintenance.ProfitReportsRead,
+        Maintenance.ProfitReportsExport,
+        Inventory.ItemsRead,
+        Inventory.ItemsManage,
+        Inventory.StockRead,
+        Inventory.StockMove,
+        Inventory.StockAdjust,
+        Inventory.CostLayersRead,
+        Inventory.ReceiptsManage,
+        Inventory.ReturnsManage,
         Workflows.LeaveRequestsRead,
         Workflows.LeaveRequestsManage,
         Workflows.LeaveRequestsApprove,

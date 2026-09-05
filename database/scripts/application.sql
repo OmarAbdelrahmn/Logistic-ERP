@@ -10026,3 +10026,2587 @@ END;
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260903153704_AddFuelCardManagement'
+)
+BEGIN
+    CREATE TABLE [app].[FuelCardImports] (
+        [Id] uniqueidentifier NOT NULL,
+        [Provider] int NOT NULL,
+        [ReportMonth] date NOT NULL,
+        [ReportThroughAtUtc] datetimeoffset NULL,
+        [OriginalFileName] nvarchar(255) NOT NULL,
+        [Sha256Checksum] char(64) NOT NULL,
+        [SourceRows] int NOT NULL,
+        [CardRows] int NOT NULL,
+        [CreatedCards] int NOT NULL,
+        [CreatedMonthlyRecords] int NOT NULL,
+        [UpdatedMonthlyRecords] int NOT NULL,
+        [UnassignedCards] int NOT NULL,
+        [InvalidRows] int NOT NULL,
+        [RowErrorsJson] nvarchar(max) NOT NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        CONSTRAINT [PK_FuelCardImports] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_FuelCardImports_Counts] CHECK ([SourceRows] >= 0 AND [CardRows] >= 0 AND [CreatedCards] >= 0 AND [CreatedMonthlyRecords] >= 0 AND [UpdatedMonthlyRecords] >= 0 AND [UnassignedCards] >= 0 AND [InvalidRows] >= 0),
+        CONSTRAINT [CK_FuelCardImports_MonthStart] CHECK (DAY([ReportMonth]) = 1),
+        CONSTRAINT [CK_FuelCardImports_Provider] CHECK ([Provider] BETWEEN 1 AND 2)
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260903153704_AddFuelCardManagement'
+)
+BEGIN
+    CREATE TABLE [app].[FuelCards] (
+        [Id] uniqueidentifier NOT NULL,
+        [Provider] int NOT NULL,
+        [IdentifierType] int NOT NULL,
+        [CardNumber] nvarchar(100) NOT NULL,
+        [NormalizedCardNumber] nvarchar(100) NOT NULL,
+        [PlateNumberText] nvarchar(100) NULL,
+        [NormalizedPlateNumber] nvarchar(100) NULL,
+        [Notes] nvarchar(4000) NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_FuelCards] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_FuelCards_IdentifierType] CHECK ([IdentifierType] BETWEEN 1 AND 2),
+        CONSTRAINT [CK_FuelCards_Provider] CHECK ([Provider] BETWEEN 1 AND 2)
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260903153704_AddFuelCardManagement'
+)
+BEGIN
+    CREATE TABLE [app].[FuelCardMonthlyUsages] (
+        [Id] uniqueidentifier NOT NULL,
+        [FuelCardId] uniqueidentifier NOT NULL,
+        [RiderProfileId] uniqueidentifier NOT NULL,
+        [EmployeeId] uniqueidentifier NOT NULL,
+        [ReportMonth] date NOT NULL,
+        [TotalLiters] decimal(18,3) NOT NULL,
+        [TotalAmount] decimal(18,2) NOT NULL,
+        [AmountBeforeTax] decimal(18,2) NULL,
+        [VatAmount] decimal(18,2) NULL,
+        [TransactionCount] int NULL,
+        [FuelType] nvarchar(100) NULL,
+        [SourcePlateNumber] nvarchar(100) NULL,
+        [NormalizedSourcePlateNumber] nvarchar(100) NULL,
+        [FirstTransactionAtUtc] datetimeoffset NULL,
+        [LastTransactionAtUtc] datetimeoffset NULL,
+        [ReportThroughAtUtc] datetimeoffset NULL,
+        [LastImportId] uniqueidentifier NOT NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_FuelCardMonthlyUsages] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_FuelCardMonthlyUsages_Amounts] CHECK ([TotalLiters] >= 0 AND [TotalAmount] >= 0 AND ([AmountBeforeTax] IS NULL OR [AmountBeforeTax] >= 0) AND ([VatAmount] IS NULL OR [VatAmount] >= 0)),
+        CONSTRAINT [CK_FuelCardMonthlyUsages_MonthStart] CHECK (DAY([ReportMonth]) = 1),
+        CONSTRAINT [CK_FuelCardMonthlyUsages_TransactionCount] CHECK ([TransactionCount] IS NULL OR [TransactionCount] >= 0),
+        CONSTRAINT [FK_FuelCardMonthlyUsages_Employees_EmployeeId] FOREIGN KEY ([EmployeeId]) REFERENCES [app].[Employees] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_FuelCardMonthlyUsages_FuelCardImports_LastImportId] FOREIGN KEY ([LastImportId]) REFERENCES [app].[FuelCardImports] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_FuelCardMonthlyUsages_FuelCards_FuelCardId] FOREIGN KEY ([FuelCardId]) REFERENCES [app].[FuelCards] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_FuelCardMonthlyUsages_RiderProfiles_RiderProfileId] FOREIGN KEY ([RiderProfileId]) REFERENCES [app].[RiderProfiles] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260903153704_AddFuelCardManagement'
+)
+BEGIN
+    CREATE TABLE [app].[FuelCardRiderAssignments] (
+        [Id] uniqueidentifier NOT NULL,
+        [FuelCardId] uniqueidentifier NOT NULL,
+        [RiderProfileId] uniqueidentifier NOT NULL,
+        [EmployeeId] uniqueidentifier NOT NULL,
+        [AssignedByUserId] uniqueidentifier NOT NULL,
+        [AssignmentReason] nvarchar(1000) NOT NULL,
+        [EndReason] nvarchar(1000) NULL,
+        [Notes] nvarchar(4000) NULL,
+        [EffectiveFrom] date NOT NULL,
+        [EffectiveTo] date NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [ClosedAtUtc] datetimeoffset NULL,
+        [ClosedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        CONSTRAINT [PK_FuelCardRiderAssignments] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_FuelCardRiderAssignments_EffectiveRange] CHECK ([EffectiveTo] IS NULL OR [EffectiveTo] >= [EffectiveFrom]),
+        CONSTRAINT [FK_FuelCardRiderAssignments_Employees_EmployeeId] FOREIGN KEY ([EmployeeId]) REFERENCES [app].[Employees] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_FuelCardRiderAssignments_FuelCards_FuelCardId] FOREIGN KEY ([FuelCardId]) REFERENCES [app].[FuelCards] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_FuelCardRiderAssignments_RiderProfiles_RiderProfileId] FOREIGN KEY ([RiderProfileId]) REFERENCES [app].[RiderProfiles] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260903153704_AddFuelCardManagement'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Category', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'DescriptionAr', N'DescriptionEn', N'DisplayOrder', N'GrantabilityRule', N'IsDeleted', N'IsDeprecated', N'IsHighTrust', N'IsSensitive', N'Key', N'NameAr', N'NameEn', N'ReplacementKey', N'RequiresClientScope', N'RequiresHousingScope', N'UpdatedAtUtc', N'UpdatedByUserId', N'Version') AND [object_id] = OBJECT_ID(N'[platform].[PermissionDefinitions]'))
+        SET IDENTITY_INSERT [platform].[PermissionDefinitions] ON;
+    EXEC(N'INSERT INTO [platform].[PermissionDefinitions] ([Id], [Category], [CreatedAtUtc], [CreatedByUserId], [DeletedAtUtc], [DeletedByUserId], [DeletionReason], [DescriptionAr], [DescriptionEn], [DisplayOrder], [GrantabilityRule], [IsDeleted], [IsDeprecated], [IsHighTrust], [IsSensitive], [Key], [NameAr], [NameEn], [ReplacementKey], [RequiresClientScope], [RequiresHousingScope], [UpdatedAtUtc], [UpdatedByUserId], [Version])
+    VALUES (''019c18d5-62e1-7000-a000-000000000090'', N''Fuel'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''عرض بطاقات الوقود وإسناداتها واستهلاكها الشهري.'', N''View fuel cards, rider assignments, and monthly usage.'', 90, N''SENSITIVE_DATA'', CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), N''fuel.read'', N''عرض بطاقات واستهلاك الوقود'', N''Read fuel cards and usage'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000091'', N''Fuel'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''إنشاء بطاقات الوقود وإسنادها إلى رايدر واحد في الشهر وإيقاف الإسناد.'', N''Create fuel cards, enforce one rider per month, and stop assignments.'', 91, N''SENSITIVE_DATA'', CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), N''fuel.manage'', N''إدارة بطاقات الوقود'', N''Manage fuel cards'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000092'', N''Fuel'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''استيراد تقارير بترو أب وسيارة أب وتحديث السجل الشهري للبطاقة.'', N''Import Petro App and Sayara App reports and update each card''''s monthly record.'', 92, N''SENSITIVE_DATA'', CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), N''fuel.import'', N''استيراد تقارير الوقود'', N''Import fuel reports'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1)');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Category', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'DescriptionAr', N'DescriptionEn', N'DisplayOrder', N'GrantabilityRule', N'IsDeleted', N'IsDeprecated', N'IsHighTrust', N'IsSensitive', N'Key', N'NameAr', N'NameEn', N'ReplacementKey', N'RequiresClientScope', N'RequiresHousingScope', N'UpdatedAtUtc', N'UpdatedByUserId', N'Version') AND [object_id] = OBJECT_ID(N'[platform].[PermissionDefinitions]'))
+        SET IDENTITY_INSERT [platform].[PermissionDefinitions] OFF;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260903153704_AddFuelCardManagement'
+)
+BEGIN
+    CREATE INDEX [IX_FuelCardImports_CreatedAtUtc] ON [app].[FuelCardImports] ([CreatedAtUtc]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260903153704_AddFuelCardManagement'
+)
+BEGIN
+    CREATE INDEX [IX_FuelCardImports_ReportMonth_Provider] ON [app].[FuelCardImports] ([ReportMonth], [Provider]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260903153704_AddFuelCardManagement'
+)
+BEGIN
+    CREATE INDEX [IX_FuelCardImports_Sha256Checksum] ON [app].[FuelCardImports] ([Sha256Checksum]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260903153704_AddFuelCardManagement'
+)
+BEGIN
+    CREATE INDEX [IX_FuelCardMonthlyUsages_EmployeeId] ON [app].[FuelCardMonthlyUsages] ([EmployeeId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260903153704_AddFuelCardManagement'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_FuelCardMonthlyUsages_FuelCardId_ReportMonth] ON [app].[FuelCardMonthlyUsages] ([FuelCardId], [ReportMonth]) WHERE [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260903153704_AddFuelCardManagement'
+)
+BEGIN
+    CREATE INDEX [IX_FuelCardMonthlyUsages_IsDeleted] ON [app].[FuelCardMonthlyUsages] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260903153704_AddFuelCardManagement'
+)
+BEGIN
+    CREATE INDEX [IX_FuelCardMonthlyUsages_LastImportId] ON [app].[FuelCardMonthlyUsages] ([LastImportId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260903153704_AddFuelCardManagement'
+)
+BEGIN
+    CREATE INDEX [IX_FuelCardMonthlyUsages_ReportMonth_EmployeeId] ON [app].[FuelCardMonthlyUsages] ([ReportMonth], [EmployeeId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260903153704_AddFuelCardManagement'
+)
+BEGIN
+    CREATE INDEX [IX_FuelCardMonthlyUsages_ReportMonth_RiderProfileId] ON [app].[FuelCardMonthlyUsages] ([ReportMonth], [RiderProfileId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260903153704_AddFuelCardManagement'
+)
+BEGIN
+    CREATE INDEX [IX_FuelCardMonthlyUsages_RiderProfileId] ON [app].[FuelCardMonthlyUsages] ([RiderProfileId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260903153704_AddFuelCardManagement'
+)
+BEGIN
+    CREATE INDEX [IX_FuelCardRiderAssignments_EmployeeId_EffectiveFrom] ON [app].[FuelCardRiderAssignments] ([EmployeeId], [EffectiveFrom]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260903153704_AddFuelCardManagement'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_FuelCardRiderAssignments_FuelCardId] ON [app].[FuelCardRiderAssignments] ([FuelCardId]) WHERE [EffectiveTo] IS NULL');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260903153704_AddFuelCardManagement'
+)
+BEGIN
+    CREATE INDEX [IX_FuelCardRiderAssignments_FuelCardId_EffectiveFrom] ON [app].[FuelCardRiderAssignments] ([FuelCardId], [EffectiveFrom]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260903153704_AddFuelCardManagement'
+)
+BEGIN
+    CREATE INDEX [IX_FuelCardRiderAssignments_RiderProfileId_EffectiveFrom] ON [app].[FuelCardRiderAssignments] ([RiderProfileId], [EffectiveFrom]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260903153704_AddFuelCardManagement'
+)
+BEGIN
+    CREATE INDEX [IX_FuelCards_IsDeleted] ON [app].[FuelCards] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260903153704_AddFuelCardManagement'
+)
+BEGIN
+    CREATE INDEX [IX_FuelCards_Provider_IdentifierType] ON [app].[FuelCards] ([Provider], [IdentifierType]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260903153704_AddFuelCardManagement'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_FuelCards_Provider_NormalizedCardNumber] ON [app].[FuelCards] ([Provider], [NormalizedCardNumber]) WHERE [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260903153704_AddFuelCardManagement'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260903153704_AddFuelCardManagement', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    IF SCHEMA_ID(N'maintenance') IS NULL EXEC(N'CREATE SCHEMA [maintenance];');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE TABLE [maintenance].[InventoryItems] (
+        [Id] uniqueidentifier NOT NULL,
+        [Sku] nvarchar(100) NOT NULL,
+        [NormalizedSku] varchar(100) NOT NULL,
+        [Barcode] nvarchar(100) NULL,
+        [ItemType] int NOT NULL,
+        [NameAr] nvarchar(200) NOT NULL,
+        [NameEn] nvarchar(200) NOT NULL,
+        [DescriptionAr] nvarchar(2000) NULL,
+        [DescriptionEn] nvarchar(2000) NULL,
+        [BaseUnitOfMeasure] int NOT NULL,
+        [PurchaseUnitOfMeasure] int NOT NULL,
+        [DefaultPackageQuantity] decimal(18,3) NULL,
+        [MinimumStockLevel] decimal(18,3) NOT NULL,
+        [ReorderQuantity] decimal(18,3) NOT NULL,
+        [IsSerialized] bit NOT NULL,
+        [IsLotTracked] bit NOT NULL,
+        [Status] int NOT NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_InventoryItems] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_InventoryItems_ItemType] CHECK ([ItemType] BETWEEN 1 AND 4),
+        CONSTRAINT [CK_InventoryItems_OilUnit] CHECK ([ItemType] <> 3 OR [BaseUnitOfMeasure] = 2),
+        CONSTRAINT [CK_InventoryItems_Quantities] CHECK (([DefaultPackageQuantity] IS NULL OR [DefaultPackageQuantity] > 0) AND [MinimumStockLevel] >= 0 AND [ReorderQuantity] >= 0),
+        CONSTRAINT [CK_InventoryItems_Status] CHECK ([Status] BETWEEN 1 AND 3),
+        CONSTRAINT [CK_InventoryItems_Units] CHECK ([BaseUnitOfMeasure] BETWEEN 1 AND 5 AND [PurchaseUnitOfMeasure] BETWEEN 1 AND 5)
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE TABLE [maintenance].[MaintenanceLocations] (
+        [Id] uniqueidentifier NOT NULL,
+        [Code] varchar(64) NOT NULL,
+        [NameAr] nvarchar(200) NOT NULL,
+        [NameEn] nvarchar(200) NOT NULL,
+        [OperatingCityId] uniqueidentifier NOT NULL,
+        [LocationType] int NOT NULL,
+        [AllowsCompanyVehicles] bit NOT NULL,
+        [AllowsExternalVehicles] bit NOT NULL,
+        [AllowsSparePartSales] bit NOT NULL,
+        [AllowsPaidExternalRepairs] bit NOT NULL,
+        [InventoryEnabled] bit NOT NULL,
+        [Address] nvarchar(500) NULL,
+        [Latitude] decimal(9,6) NULL,
+        [Longitude] decimal(9,6) NULL,
+        [Status] int NOT NULL,
+        [Notes] nvarchar(2000) NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_MaintenanceLocations] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_MaintenanceLocations_Latitude] CHECK ([Latitude] IS NULL OR [Latitude] BETWEEN -90 AND 90),
+        CONSTRAINT [CK_MaintenanceLocations_Longitude] CHECK ([Longitude] IS NULL OR [Longitude] BETWEEN -180 AND 180),
+        CONSTRAINT [CK_MaintenanceLocations_Status] CHECK ([Status] BETWEEN 1 AND 3),
+        CONSTRAINT [CK_MaintenanceLocations_Type] CHECK ([LocationType] BETWEEN 1 AND 3),
+        CONSTRAINT [FK_MaintenanceLocations_OperatingCities_OperatingCityId] FOREIGN KEY ([OperatingCityId]) REFERENCES [app].[OperatingCities] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE TABLE [maintenance].[Suppliers] (
+        [Id] uniqueidentifier NOT NULL,
+        [SupplierNumber] varchar(64) NOT NULL,
+        [LegalNameAr] nvarchar(250) NOT NULL,
+        [LegalNameEn] nvarchar(250) NOT NULL,
+        [VatNumber] nvarchar(32) NULL,
+        [CommercialRegistrationNumber] nvarchar(32) NULL,
+        [ContactName] nvarchar(200) NULL,
+        [Phone] nvarchar(32) NULL,
+        [Email] nvarchar(254) NULL,
+        [Address] nvarchar(500) NULL,
+        [PaymentTermsDays] int NULL,
+        [Status] int NOT NULL,
+        [Notes] nvarchar(2000) NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_Suppliers] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_MaintenanceSuppliers_PaymentTerms] CHECK ([PaymentTermsDays] IS NULL OR [PaymentTermsDays] >= 0),
+        CONSTRAINT [CK_MaintenanceSuppliers_Status] CHECK ([Status] BETWEEN 1 AND 3)
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE TABLE [maintenance].[VehicleExpenses] (
+        [Id] uniqueidentifier NOT NULL,
+        [VehicleId] uniqueidentifier NOT NULL,
+        [RiderVehicleAssignmentId] uniqueidentifier NULL,
+        [RiderProfileId] uniqueidentifier NULL,
+        [ExpenseType] nvarchar(100) NOT NULL,
+        [SourceEntityType] nvarchar(100) NOT NULL,
+        [SourceEntityId] uniqueidentifier NOT NULL,
+        [OccurredOn] date NOT NULL,
+        [AmountBeforeTax] decimal(18,2) NOT NULL,
+        [TaxAmount] decimal(18,2) NOT NULL,
+        [TotalAmount] decimal(18,2) NOT NULL,
+        [CurrencyCode] char(3) NOT NULL,
+        [Description] nvarchar(1000) NOT NULL,
+        [ReversalOfExpenseId] uniqueidentifier NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        CONSTRAINT [PK_VehicleExpenses] PRIMARY KEY ([Id]),
+        CONSTRAINT [FK_VehicleExpenses_RiderProfiles_RiderProfileId] FOREIGN KEY ([RiderProfileId]) REFERENCES [app].[RiderProfiles] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_VehicleExpenses_RiderVehicleAssignments_RiderVehicleAssignmentId] FOREIGN KEY ([RiderVehicleAssignmentId]) REFERENCES [app].[RiderVehicleAssignments] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_VehicleExpenses_VehicleExpenses_ReversalOfExpenseId] FOREIGN KEY ([ReversalOfExpenseId]) REFERENCES [maintenance].[VehicleExpenses] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_VehicleExpenses_Vehicles_VehicleId] FOREIGN KEY ([VehicleId]) REFERENCES [app].[Vehicles] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE TABLE [maintenance].[Plans] (
+        [Id] uniqueidentifier NOT NULL,
+        [Code] varchar(100) NOT NULL,
+        [NameAr] nvarchar(200) NOT NULL,
+        [NameEn] nvarchar(200) NOT NULL,
+        [VehicleModelId] uniqueidentifier NULL,
+        [VehicleType] int NULL,
+        [TriggerType] int NOT NULL,
+        [IntervalDays] int NULL,
+        [IntervalKilometers] bigint NULL,
+        [ReminderAfterKilometers] bigint NULL,
+        [MaximumAfterKilometers] bigint NULL,
+        [AlertDaysBefore] int NULL,
+        [AlertKilometersBefore] bigint NULL,
+        [InventoryItemId] uniqueidentifier NULL,
+        [DefaultOilQuantityLiters] decimal(9,3) NULL,
+        [ChecklistJson] nvarchar(max) NULL,
+        [Status] int NOT NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_Plans] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_MaintenancePlans_Intervals] CHECK (([TriggerType] <> 3) OR ([ReminderAfterKilometers] > 0 AND [MaximumAfterKilometers] > [ReminderAfterKilometers])),
+        CONSTRAINT [FK_Plans_InventoryItems_InventoryItemId] FOREIGN KEY ([InventoryItemId]) REFERENCES [maintenance].[InventoryItems] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_Plans_VehicleModels_VehicleModelId] FOREIGN KEY ([VehicleModelId]) REFERENCES [app].[VehicleModels] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE TABLE [maintenance].[InventoryLocations] (
+        [Id] uniqueidentifier NOT NULL,
+        [Code] varchar(64) NOT NULL,
+        [NameAr] nvarchar(200) NOT NULL,
+        [NameEn] nvarchar(200) NOT NULL,
+        [MaintenanceLocationId] uniqueidentifier NOT NULL,
+        [Status] int NOT NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_InventoryLocations] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_InventoryLocations_Status] CHECK ([Status] BETWEEN 1 AND 3),
+        CONSTRAINT [FK_InventoryLocations_MaintenanceLocations_MaintenanceLocationId] FOREIGN KEY ([MaintenanceLocationId]) REFERENCES [maintenance].[MaintenanceLocations] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE TABLE [maintenance].[WorkOrders] (
+        [Id] uniqueidentifier NOT NULL,
+        [WorkOrderNumber] varchar(64) NOT NULL,
+        [ServiceSubjectType] int NOT NULL,
+        [VehicleId] uniqueidentifier NULL,
+        [VehicleIssueId] uniqueidentifier NULL,
+        [MaintenanceLocationId] uniqueidentifier NOT NULL,
+        [MaintenanceType] int NOT NULL,
+        [Status] int NOT NULL,
+        [OpenedAtUtc] datetimeoffset NOT NULL,
+        [ScheduledAtUtc] datetimeoffset NULL,
+        [StartedAtUtc] datetimeoffset NULL,
+        [CompletedAtUtc] datetimeoffset NULL,
+        [ClosedAtUtc] datetimeoffset NULL,
+        [OdometerAtOpen] bigint NULL,
+        [OdometerAtCompletion] bigint NULL,
+        [Diagnosis] nvarchar(4000) NULL,
+        [WorkPerformed] nvarchar(4000) NULL,
+        [QualityCheckNotes] nvarchar(4000) NULL,
+        [OpenedByUserId] uniqueidentifier NOT NULL,
+        [AssignedTechnicianUserId] uniqueidentifier NULL,
+        [ApprovedByUserId] uniqueidentifier NULL,
+        [ClosedByUserId] uniqueidentifier NULL,
+        [RiderVehicleAssignmentId] uniqueidentifier NULL,
+        [AttributedRiderProfileId] uniqueidentifier NULL,
+        [EstimatedCost] decimal(18,2) NOT NULL,
+        [ActualMaterialCost] decimal(18,2) NOT NULL,
+        [ActualLaborCost] decimal(18,2) NOT NULL,
+        [ActualOtherCost] decimal(18,2) NOT NULL,
+        [ActualTotalCost] decimal(18,2) NOT NULL,
+        [Notes] nvarchar(4000) NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_WorkOrders] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_MaintenanceWorkOrders_Costs] CHECK ([EstimatedCost] >= 0 AND [ActualMaterialCost] >= 0 AND [ActualLaborCost] >= 0 AND [ActualOtherCost] >= 0 AND [ActualTotalCost] >= 0),
+        CONSTRAINT [CK_MaintenanceWorkOrders_Odometers] CHECK (([OdometerAtOpen] IS NULL OR [OdometerAtOpen] >= 0) AND ([OdometerAtCompletion] IS NULL OR [OdometerAtCompletion] >= 0)),
+        CONSTRAINT [CK_MaintenanceWorkOrders_Subject] CHECK (([ServiceSubjectType] = 1 AND [VehicleId] IS NOT NULL) OR ([ServiceSubjectType] = 2 AND [VehicleId] IS NULL AND [VehicleIssueId] IS NULL)),
+        CONSTRAINT [FK_WorkOrders_MaintenanceLocations_MaintenanceLocationId] FOREIGN KEY ([MaintenanceLocationId]) REFERENCES [maintenance].[MaintenanceLocations] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_WorkOrders_RiderProfiles_AttributedRiderProfileId] FOREIGN KEY ([AttributedRiderProfileId]) REFERENCES [app].[RiderProfiles] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_WorkOrders_RiderVehicleAssignments_RiderVehicleAssignmentId] FOREIGN KEY ([RiderVehicleAssignmentId]) REFERENCES [app].[RiderVehicleAssignments] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_WorkOrders_VehicleIssues_VehicleIssueId] FOREIGN KEY ([VehicleIssueId]) REFERENCES [app].[VehicleIssues] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_WorkOrders_Vehicles_VehicleId] FOREIGN KEY ([VehicleId]) REFERENCES [app].[Vehicles] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE TABLE [maintenance].[StockBalances] (
+        [Id] uniqueidentifier NOT NULL,
+        [InventoryItemId] uniqueidentifier NOT NULL,
+        [InventoryLocationId] uniqueidentifier NOT NULL,
+        [QuantityOnHand] decimal(18,3) NOT NULL,
+        [QuantityReserved] decimal(18,3) NOT NULL,
+        [ReportingAverageUnitCost] decimal(18,6) NOT NULL,
+        [LastMovementAtUtc] datetimeoffset NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_StockBalances] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_StockBalances_Quantities] CHECK ([QuantityOnHand] >= 0 AND [QuantityReserved] >= 0 AND [QuantityReserved] <= [QuantityOnHand] AND [ReportingAverageUnitCost] >= 0),
+        CONSTRAINT [FK_StockBalances_InventoryItems_InventoryItemId] FOREIGN KEY ([InventoryItemId]) REFERENCES [maintenance].[InventoryItems] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_StockBalances_InventoryLocations_InventoryLocationId] FOREIGN KEY ([InventoryLocationId]) REFERENCES [maintenance].[InventoryLocations] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE TABLE [maintenance].[StockMovements] (
+        [Id] uniqueidentifier NOT NULL,
+        [MovementNumber] varchar(64) NOT NULL,
+        [MovementType] int NOT NULL,
+        [OccurredAtUtc] datetimeoffset NOT NULL,
+        [SourceLocationId] uniqueidentifier NULL,
+        [DestinationLocationId] uniqueidentifier NULL,
+        [SourceDocumentType] nvarchar(100) NOT NULL,
+        [SourceDocumentId] uniqueidentifier NOT NULL,
+        [Reason] nvarchar(1000) NOT NULL,
+        [PostedByUserId] uniqueidentifier NOT NULL,
+        [ReversalOfMovementId] uniqueidentifier NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        CONSTRAINT [PK_StockMovements] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_StockMovements_Type] CHECK ([MovementType] BETWEEN 1 AND 8),
+        CONSTRAINT [FK_StockMovements_InventoryLocations_DestinationLocationId] FOREIGN KEY ([DestinationLocationId]) REFERENCES [maintenance].[InventoryLocations] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_StockMovements_InventoryLocations_SourceLocationId] FOREIGN KEY ([SourceLocationId]) REFERENCES [maintenance].[InventoryLocations] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_StockMovements_StockMovements_ReversalOfMovementId] FOREIGN KEY ([ReversalOfMovementId]) REFERENCES [maintenance].[StockMovements] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE TABLE [maintenance].[ExternalCustomerPayments] (
+        [Id] uniqueidentifier NOT NULL,
+        [MaintenanceWorkOrderId] uniqueidentifier NOT NULL,
+        [PaidAtUtc] datetimeoffset NOT NULL,
+        [Amount] decimal(18,2) NOT NULL,
+        [PaymentMethod] int NOT NULL,
+        [Reference] nvarchar(200) NULL,
+        [RecordedByUserId] uniqueidentifier NOT NULL,
+        [ReversalOfPaymentId] uniqueidentifier NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        CONSTRAINT [PK_ExternalCustomerPayments] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_ExternalCustomerPayments_Amount] CHECK ([ReversalOfPaymentId] IS NOT NULL OR [Amount] > 0),
+        CONSTRAINT [FK_ExternalCustomerPayments_ExternalCustomerPayments_ReversalOfPaymentId] FOREIGN KEY ([ReversalOfPaymentId]) REFERENCES [maintenance].[ExternalCustomerPayments] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_ExternalCustomerPayments_WorkOrders_MaintenanceWorkOrderId] FOREIGN KEY ([MaintenanceWorkOrderId]) REFERENCES [maintenance].[WorkOrders] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE TABLE [maintenance].[ExternalFinancialEntries] (
+        [Id] uniqueidentifier NOT NULL,
+        [MaintenanceWorkOrderId] uniqueidentifier NOT NULL,
+        [EntryType] int NOT NULL,
+        [SourceType] int NOT NULL,
+        [SourceEntityId] uniqueidentifier NULL,
+        [OccurredAtUtc] datetimeoffset NOT NULL,
+        [AmountBeforeTax] decimal(18,2) NOT NULL,
+        [TaxAmount] decimal(18,2) NOT NULL,
+        [TotalAmount] decimal(18,2) NOT NULL,
+        [CurrencyCode] char(3) NOT NULL,
+        [Description] nvarchar(1000) NOT NULL,
+        [RecordedByUserId] uniqueidentifier NOT NULL,
+        [MechanicEmployeeId] uniqueidentifier NULL,
+        [ExternalMechanicName] nvarchar(200) NULL,
+        [ReversalOfEntryId] uniqueidentifier NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        CONSTRAINT [PK_ExternalFinancialEntries] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_ExternalFinancialEntries_Reversal] CHECK ([ReversalOfEntryId] IS NOT NULL OR ([AmountBeforeTax] >= 0 AND [TaxAmount] >= 0 AND [TotalAmount] >= 0)),
+        CONSTRAINT [FK_ExternalFinancialEntries_ExternalFinancialEntries_ReversalOfEntryId] FOREIGN KEY ([ReversalOfEntryId]) REFERENCES [maintenance].[ExternalFinancialEntries] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_ExternalFinancialEntries_WorkOrders_MaintenanceWorkOrderId] FOREIGN KEY ([MaintenanceWorkOrderId]) REFERENCES [maintenance].[WorkOrders] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE TABLE [maintenance].[ExternalVehicleSnapshots] (
+        [Id] uniqueidentifier NOT NULL,
+        [MaintenanceWorkOrderId] uniqueidentifier NOT NULL,
+        [PlateOrReference] nvarchar(100) NULL,
+        [VehicleType] int NULL,
+        [CustomerName] nvarchar(200) NULL,
+        [CustomerPhone] nvarchar(32) NULL,
+        [Notes] nvarchar(2000) NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        CONSTRAINT [PK_ExternalVehicleSnapshots] PRIMARY KEY ([Id]),
+        CONSTRAINT [FK_ExternalVehicleSnapshots_WorkOrders_MaintenanceWorkOrderId] FOREIGN KEY ([MaintenanceWorkOrderId]) REFERENCES [maintenance].[WorkOrders] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE TABLE [maintenance].[LaborEntries] (
+        [Id] uniqueidentifier NOT NULL,
+        [MaintenanceWorkOrderId] uniqueidentifier NOT NULL,
+        [TechnicianUserId] uniqueidentifier NULL,
+        [ExternalTechnicianName] nvarchar(200) NULL,
+        [StartedAtUtc] datetimeoffset NOT NULL,
+        [EndedAtUtc] datetimeoffset NOT NULL,
+        [Hours] decimal(18,2) NOT NULL,
+        [HourlyRate] decimal(18,2) NOT NULL,
+        [TotalCost] decimal(18,2) NOT NULL,
+        [Description] nvarchar(1000) NOT NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        CONSTRAINT [PK_LaborEntries] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_MaintenanceLaborEntries_Actor] CHECK (([TechnicianUserId] IS NOT NULL AND [ExternalTechnicianName] IS NULL) OR ([TechnicianUserId] IS NULL AND [ExternalTechnicianName] IS NOT NULL)),
+        CONSTRAINT [CK_MaintenanceLaborEntries_Values] CHECK ([EndedAtUtc] >= [StartedAtUtc] AND [Hours] >= 0 AND [HourlyRate] >= 0 AND [TotalCost] >= 0),
+        CONSTRAINT [FK_LaborEntries_WorkOrders_MaintenanceWorkOrderId] FOREIGN KEY ([MaintenanceWorkOrderId]) REFERENCES [maintenance].[WorkOrders] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE TABLE [maintenance].[VehicleSchedules] (
+        [Id] uniqueidentifier NOT NULL,
+        [VehicleId] uniqueidentifier NOT NULL,
+        [MaintenancePlanId] uniqueidentifier NOT NULL,
+        [LastCompletedWorkOrderId] uniqueidentifier NULL,
+        [LastCompletedAtUtc] datetimeoffset NULL,
+        [LastCompletedOdometer] bigint NULL,
+        [NextDueOn] date NULL,
+        [ReminderFromOdometer] bigint NULL,
+        [MaximumDueOdometer] bigint NULL,
+        [ComputedStatus] int NOT NULL,
+        [ComputedAtUtc] datetimeoffset NOT NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_VehicleSchedules] PRIMARY KEY ([Id]),
+        CONSTRAINT [FK_VehicleSchedules_Plans_MaintenancePlanId] FOREIGN KEY ([MaintenancePlanId]) REFERENCES [maintenance].[Plans] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_VehicleSchedules_Vehicles_VehicleId] FOREIGN KEY ([VehicleId]) REFERENCES [app].[Vehicles] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_VehicleSchedules_WorkOrders_LastCompletedWorkOrderId] FOREIGN KEY ([LastCompletedWorkOrderId]) REFERENCES [maintenance].[WorkOrders] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE TABLE [maintenance].[PurchaseReceipts] (
+        [Id] uniqueidentifier NOT NULL,
+        [ReceiptNumber] varchar(64) NOT NULL,
+        [SupplierId] uniqueidentifier NOT NULL,
+        [SupplierInvoiceNumber] nvarchar(100) NULL,
+        [InvoiceDate] date NOT NULL,
+        [ReceivedAtUtc] datetimeoffset NOT NULL,
+        [InventoryLocationId] uniqueidentifier NOT NULL,
+        [Subtotal] decimal(18,2) NOT NULL,
+        [DiscountAmount] decimal(18,2) NOT NULL,
+        [TaxAmount] decimal(18,2) NOT NULL,
+        [InventoryValuationAmount] decimal(18,2) NOT NULL,
+        [TotalAmount] decimal(18,2) NOT NULL,
+        [CurrencyCode] char(3) NOT NULL,
+        [Status] int NOT NULL,
+        [PostedMovementId] uniqueidentifier NOT NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_PurchaseReceipts] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_PurchaseReceipts_Amounts] CHECK ([Subtotal] >= 0 AND [DiscountAmount] >= 0 AND [DiscountAmount] <= [Subtotal] AND [TaxAmount] >= 0 AND [InventoryValuationAmount] >= 0 AND [TotalAmount] >= 0),
+        CONSTRAINT [FK_PurchaseReceipts_InventoryLocations_InventoryLocationId] FOREIGN KEY ([InventoryLocationId]) REFERENCES [maintenance].[InventoryLocations] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_PurchaseReceipts_StockMovements_PostedMovementId] FOREIGN KEY ([PostedMovementId]) REFERENCES [maintenance].[StockMovements] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_PurchaseReceipts_Suppliers_SupplierId] FOREIGN KEY ([SupplierId]) REFERENCES [maintenance].[Suppliers] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE TABLE [maintenance].[RiderInventoryIssues] (
+        [Id] uniqueidentifier NOT NULL,
+        [IssueNumber] varchar(64) NOT NULL,
+        [RiderProfileId] uniqueidentifier NOT NULL,
+        [IssuedFromLocationId] uniqueidentifier NOT NULL,
+        [IssuedAtUtc] datetimeoffset NOT NULL,
+        [IssuedByUserId] uniqueidentifier NOT NULL,
+        [RelatedAssignmentId] uniqueidentifier NULL,
+        [Status] int NOT NULL,
+        [Notes] nvarchar(2000) NULL,
+        [PostedMovementId] uniqueidentifier NOT NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_RiderInventoryIssues] PRIMARY KEY ([Id]),
+        CONSTRAINT [FK_RiderInventoryIssues_InventoryLocations_IssuedFromLocationId] FOREIGN KEY ([IssuedFromLocationId]) REFERENCES [maintenance].[InventoryLocations] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_RiderInventoryIssues_RiderProfiles_RiderProfileId] FOREIGN KEY ([RiderProfileId]) REFERENCES [app].[RiderProfiles] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_RiderInventoryIssues_RiderVehicleAssignments_RelatedAssignmentId] FOREIGN KEY ([RelatedAssignmentId]) REFERENCES [app].[RiderVehicleAssignments] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_RiderInventoryIssues_StockMovements_PostedMovementId] FOREIGN KEY ([PostedMovementId]) REFERENCES [maintenance].[StockMovements] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE TABLE [maintenance].[StockTransfers] (
+        [Id] uniqueidentifier NOT NULL,
+        [TransferNumber] varchar(64) NOT NULL,
+        [SourceLocationId] uniqueidentifier NOT NULL,
+        [DestinationLocationId] uniqueidentifier NOT NULL,
+        [PostedAtUtc] datetimeoffset NOT NULL,
+        [PostedByUserId] uniqueidentifier NOT NULL,
+        [Reason] nvarchar(1000) NOT NULL,
+        [Status] int NOT NULL,
+        [SourceMovementId] uniqueidentifier NOT NULL,
+        [DestinationMovementId] uniqueidentifier NOT NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_StockTransfers] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_StockTransfers_Locations] CHECK ([SourceLocationId] <> [DestinationLocationId]),
+        CONSTRAINT [FK_StockTransfers_InventoryLocations_DestinationLocationId] FOREIGN KEY ([DestinationLocationId]) REFERENCES [maintenance].[InventoryLocations] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_StockTransfers_InventoryLocations_SourceLocationId] FOREIGN KEY ([SourceLocationId]) REFERENCES [maintenance].[InventoryLocations] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_StockTransfers_StockMovements_DestinationMovementId] FOREIGN KEY ([DestinationMovementId]) REFERENCES [maintenance].[StockMovements] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_StockTransfers_StockMovements_SourceMovementId] FOREIGN KEY ([SourceMovementId]) REFERENCES [maintenance].[StockMovements] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE TABLE [maintenance].[PurchaseReceiptAttachments] (
+        [Id] uniqueidentifier NOT NULL,
+        [PurchaseReceiptId] uniqueidentifier NOT NULL,
+        [OriginalFileName] nvarchar(255) NOT NULL,
+        [StoredFileName] nvarchar(255) NOT NULL,
+        [ContentType] nvarchar(100) NOT NULL,
+        [FileSizeBytes] bigint NOT NULL,
+        [Sha256Checksum] char(64) NOT NULL,
+        [StoragePath] nvarchar(1000) NOT NULL,
+        [UploadedByUserId] uniqueidentifier NOT NULL,
+        [UploadedAtUtc] datetimeoffset NOT NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        CONSTRAINT [PK_PurchaseReceiptAttachments] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_PurchaseReceiptAttachments_Size] CHECK ([FileSizeBytes] > 0),
+        CONSTRAINT [FK_PurchaseReceiptAttachments_PurchaseReceipts_PurchaseReceiptId] FOREIGN KEY ([PurchaseReceiptId]) REFERENCES [maintenance].[PurchaseReceipts] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE TABLE [maintenance].[SupplierReturns] (
+        [Id] uniqueidentifier NOT NULL,
+        [ReturnNumber] varchar(64) NOT NULL,
+        [SupplierId] uniqueidentifier NOT NULL,
+        [InventoryLocationId] uniqueidentifier NOT NULL,
+        [PurchaseReceiptId] uniqueidentifier NULL,
+        [ReturnedAtUtc] datetimeoffset NOT NULL,
+        [Reason] nvarchar(1000) NOT NULL,
+        [Status] int NOT NULL,
+        [PostedMovementId] uniqueidentifier NOT NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_SupplierReturns] PRIMARY KEY ([Id]),
+        CONSTRAINT [FK_SupplierReturns_InventoryLocations_InventoryLocationId] FOREIGN KEY ([InventoryLocationId]) REFERENCES [maintenance].[InventoryLocations] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_SupplierReturns_PurchaseReceipts_PurchaseReceiptId] FOREIGN KEY ([PurchaseReceiptId]) REFERENCES [maintenance].[PurchaseReceipts] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_SupplierReturns_StockMovements_PostedMovementId] FOREIGN KEY ([PostedMovementId]) REFERENCES [maintenance].[StockMovements] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_SupplierReturns_Suppliers_SupplierId] FOREIGN KEY ([SupplierId]) REFERENCES [maintenance].[Suppliers] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE TABLE [maintenance].[StockTransferLines] (
+        [Id] uniqueidentifier NOT NULL,
+        [StockTransferId] uniqueidentifier NOT NULL,
+        [InventoryItemId] uniqueidentifier NOT NULL,
+        [Quantity] decimal(18,3) NOT NULL,
+        [BaseUnitOfMeasure] int NOT NULL,
+        [TotalCost] decimal(18,2) NOT NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        CONSTRAINT [PK_StockTransferLines] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_StockTransferLines_Values] CHECK ([Quantity] > 0 AND [TotalCost] >= 0),
+        CONSTRAINT [FK_StockTransferLines_InventoryItems_InventoryItemId] FOREIGN KEY ([InventoryItemId]) REFERENCES [maintenance].[InventoryItems] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_StockTransferLines_StockTransfers_StockTransferId] FOREIGN KEY ([StockTransferId]) REFERENCES [maintenance].[StockTransfers] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE TABLE [maintenance].[ExternalPartSaleLines] (
+        [Id] uniqueidentifier NOT NULL,
+        [MaintenanceWorkOrderId] uniqueidentifier NOT NULL,
+        [InventoryItemId] uniqueidentifier NOT NULL,
+        [Quantity] decimal(18,3) NOT NULL,
+        [SellingUnitPriceBeforeTax] decimal(18,2) NOT NULL,
+        [DiscountAmount] decimal(18,2) NOT NULL,
+        [TaxAmount] decimal(18,2) NOT NULL,
+        [LineTotal] decimal(18,2) NOT NULL,
+        [MaintenanceMaterialUsageId] uniqueidentifier NOT NULL,
+        [InventoryCost] decimal(18,2) NOT NULL,
+        [PartsGrossProfit] decimal(18,2) NOT NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        CONSTRAINT [PK_ExternalPartSaleLines] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_ExternalPartSaleLines_Values] CHECK ([Quantity] > 0 AND [SellingUnitPriceBeforeTax] >= 0 AND [DiscountAmount] >= 0 AND [TaxAmount] >= 0 AND [InventoryCost] >= 0),
+        CONSTRAINT [FK_ExternalPartSaleLines_InventoryItems_InventoryItemId] FOREIGN KEY ([InventoryItemId]) REFERENCES [maintenance].[InventoryItems] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_ExternalPartSaleLines_WorkOrders_MaintenanceWorkOrderId] FOREIGN KEY ([MaintenanceWorkOrderId]) REFERENCES [maintenance].[WorkOrders] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE TABLE [maintenance].[MaterialUsages] (
+        [Id] uniqueidentifier NOT NULL,
+        [MaintenanceWorkOrderId] uniqueidentifier NOT NULL,
+        [InventoryItemId] uniqueidentifier NOT NULL,
+        [InventoryLocationId] uniqueidentifier NOT NULL,
+        [UsageType] int NOT NULL,
+        [Direction] int NOT NULL,
+        [Quantity] decimal(18,3) NOT NULL,
+        [UnitOfMeasure] int NOT NULL,
+        [TotalCost] decimal(18,2) NOT NULL,
+        [StockMovementId] uniqueidentifier NOT NULL,
+        [StockMovementLineId] uniqueidentifier NOT NULL,
+        [VehicleId] uniqueidentifier NULL,
+        [RiderVehicleAssignmentId] uniqueidentifier NULL,
+        [RiderProfileId] uniqueidentifier NULL,
+        [AttributionStatus] int NOT NULL,
+        [UsedAtUtc] datetimeoffset NOT NULL,
+        [UsedByUserId] uniqueidentifier NOT NULL,
+        [Notes] nvarchar(2000) NULL,
+        [ReversalOfUsageId] uniqueidentifier NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        CONSTRAINT [PK_MaterialUsages] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_MaterialUsages_Values] CHECK ([Quantity] > 0 AND [TotalCost] >= 0),
+        CONSTRAINT [FK_MaterialUsages_InventoryItems_InventoryItemId] FOREIGN KEY ([InventoryItemId]) REFERENCES [maintenance].[InventoryItems] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_MaterialUsages_InventoryLocations_InventoryLocationId] FOREIGN KEY ([InventoryLocationId]) REFERENCES [maintenance].[InventoryLocations] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_MaterialUsages_MaterialUsages_ReversalOfUsageId] FOREIGN KEY ([ReversalOfUsageId]) REFERENCES [maintenance].[MaterialUsages] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_MaterialUsages_RiderProfiles_RiderProfileId] FOREIGN KEY ([RiderProfileId]) REFERENCES [app].[RiderProfiles] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_MaterialUsages_RiderVehicleAssignments_RiderVehicleAssignmentId] FOREIGN KEY ([RiderVehicleAssignmentId]) REFERENCES [app].[RiderVehicleAssignments] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_MaterialUsages_StockMovements_StockMovementId] FOREIGN KEY ([StockMovementId]) REFERENCES [maintenance].[StockMovements] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_MaterialUsages_Vehicles_VehicleId] FOREIGN KEY ([VehicleId]) REFERENCES [app].[Vehicles] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_MaterialUsages_WorkOrders_MaintenanceWorkOrderId] FOREIGN KEY ([MaintenanceWorkOrderId]) REFERENCES [maintenance].[WorkOrders] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE TABLE [maintenance].[OilChangeOperations] (
+        [Id] uniqueidentifier NOT NULL,
+        [MaintenanceWorkOrderId] uniqueidentifier NOT NULL,
+        [PerformedAtUtc] datetimeoffset NOT NULL,
+        [OdometerAtChange] bigint NOT NULL,
+        [VehicleTypeSnapshot] int NOT NULL,
+        [OilInventoryItemId] uniqueidentifier NOT NULL,
+        [OilQuantityLiters] decimal(9,3) NOT NULL,
+        [OilMaterialUsageId] uniqueidentifier NOT NULL,
+        [OilCost] decimal(18,2) NOT NULL,
+        [OilFilterChanged] bit NOT NULL,
+        [OilFilterInventoryItemId] uniqueidentifier NULL,
+        [OilFilterMaterialUsageId] uniqueidentifier NULL,
+        [OilFilterCost] decimal(18,2) NOT NULL,
+        [LaborCost] decimal(18,2) NOT NULL,
+        [OtherCost] decimal(18,2) NOT NULL,
+        [TotalCost] decimal(18,2) NOT NULL,
+        [PerformedByUserId] uniqueidentifier NOT NULL,
+        [Notes] nvarchar(2000) NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        CONSTRAINT [PK_OilChangeOperations] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_OilChangeOperations_CarQuantity] CHECK ([VehicleTypeSnapshot] <> 2 OR ([OilFilterChanged] = 0 AND [OilQuantityLiters] = 3.500) OR ([OilFilterChanged] = 1 AND [OilQuantityLiters] = 4.000)),
+        CONSTRAINT [CK_OilChangeOperations_Filter] CHECK (([OilFilterChanged] = 0 AND [OilFilterInventoryItemId] IS NULL AND [OilFilterMaterialUsageId] IS NULL AND [OilFilterCost] = 0) OR ([OilFilterChanged] = 1 AND [OilFilterInventoryItemId] IS NOT NULL AND [OilFilterMaterialUsageId] IS NOT NULL)),
+        CONSTRAINT [CK_OilChangeOperations_Values] CHECK ([OdometerAtChange] >= 0 AND [OilQuantityLiters] > 0 AND [OilCost] >= 0 AND [OilFilterCost] >= 0 AND [LaborCost] >= 0 AND [OtherCost] >= 0 AND [TotalCost] >= 0),
+        CONSTRAINT [FK_OilChangeOperations_InventoryItems_OilFilterInventoryItemId] FOREIGN KEY ([OilFilterInventoryItemId]) REFERENCES [maintenance].[InventoryItems] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_OilChangeOperations_InventoryItems_OilInventoryItemId] FOREIGN KEY ([OilInventoryItemId]) REFERENCES [maintenance].[InventoryItems] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_OilChangeOperations_MaterialUsages_OilFilterMaterialUsageId] FOREIGN KEY ([OilFilterMaterialUsageId]) REFERENCES [maintenance].[MaterialUsages] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_OilChangeOperations_MaterialUsages_OilMaterialUsageId] FOREIGN KEY ([OilMaterialUsageId]) REFERENCES [maintenance].[MaterialUsages] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_OilChangeOperations_WorkOrders_MaintenanceWorkOrderId] FOREIGN KEY ([MaintenanceWorkOrderId]) REFERENCES [maintenance].[WorkOrders] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE TABLE [maintenance].[PurchaseReceiptLines] (
+        [Id] uniqueidentifier NOT NULL,
+        [PurchaseReceiptId] uniqueidentifier NOT NULL,
+        [InventoryItemId] uniqueidentifier NOT NULL,
+        [PurchaseUnit] int NOT NULL,
+        [PackageCount] decimal(18,3) NOT NULL,
+        [DeclaredQuantityPerPackage] decimal(18,3) NOT NULL,
+        [ReceivedBaseQuantity] decimal(18,3) NOT NULL,
+        [BaseUnitOfMeasure] int NOT NULL,
+        [GrossWeightKg] decimal(18,3) NULL,
+        [NetWeightKg] decimal(18,3) NULL,
+        [PackageUnitPrice] decimal(18,2) NOT NULL,
+        [LineSubtotal] decimal(18,2) NOT NULL,
+        [DiscountAmount] decimal(18,2) NOT NULL,
+        [TaxAmount] decimal(18,2) NOT NULL,
+        [InventoryValuationAmount] decimal(18,2) NOT NULL,
+        [BaseUnitCost] decimal(18,6) NOT NULL,
+        [LotNumber] nvarchar(100) NULL,
+        [ExpiryDate] date NULL,
+        [StockMovementLineId] uniqueidentifier NOT NULL,
+        [StockCostLayerId] uniqueidentifier NOT NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        CONSTRAINT [PK_PurchaseReceiptLines] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_PurchaseReceiptLines_Values] CHECK ([PackageCount] > 0 AND [DeclaredQuantityPerPackage] > 0 AND [ReceivedBaseQuantity] > 0 AND ([GrossWeightKg] IS NULL OR [GrossWeightKg] > 0) AND ([NetWeightKg] IS NULL OR [NetWeightKg] > 0) AND [PackageUnitPrice] >= 0 AND [LineSubtotal] >= 0 AND [DiscountAmount] >= 0 AND [TaxAmount] >= 0 AND [InventoryValuationAmount] >= 0 AND [BaseUnitCost] >= 0),
+        CONSTRAINT [FK_PurchaseReceiptLines_InventoryItems_InventoryItemId] FOREIGN KEY ([InventoryItemId]) REFERENCES [maintenance].[InventoryItems] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_PurchaseReceiptLines_PurchaseReceipts_PurchaseReceiptId] FOREIGN KEY ([PurchaseReceiptId]) REFERENCES [maintenance].[PurchaseReceipts] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE TABLE [maintenance].[RiderInventoryIssueLines] (
+        [Id] uniqueidentifier NOT NULL,
+        [RiderInventoryIssueId] uniqueidentifier NOT NULL,
+        [InventoryItemId] uniqueidentifier NOT NULL,
+        [Quantity] decimal(18,3) NOT NULL,
+        [TotalCost] decimal(18,2) NOT NULL,
+        [StockMovementLineId] uniqueidentifier NOT NULL,
+        [ExpectedReturn] bit NOT NULL,
+        [ReturnedQuantity] decimal(18,3) NOT NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        CONSTRAINT [PK_RiderInventoryIssueLines] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_RiderInventoryIssueLines_Values] CHECK ([Quantity] > 0 AND [TotalCost] >= 0 AND [ReturnedQuantity] >= 0 AND [ReturnedQuantity] <= [Quantity]),
+        CONSTRAINT [FK_RiderInventoryIssueLines_InventoryItems_InventoryItemId] FOREIGN KEY ([InventoryItemId]) REFERENCES [maintenance].[InventoryItems] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_RiderInventoryIssueLines_RiderInventoryIssues_RiderInventoryIssueId] FOREIGN KEY ([RiderInventoryIssueId]) REFERENCES [maintenance].[RiderInventoryIssues] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE TABLE [maintenance].[StockCostAllocations] (
+        [Id] uniqueidentifier NOT NULL,
+        [StockMovementLineId] uniqueidentifier NOT NULL,
+        [MaintenanceMaterialUsageId] uniqueidentifier NULL,
+        [RiderInventoryIssueLineId] uniqueidentifier NULL,
+        [StockCostLayerId] uniqueidentifier NOT NULL,
+        [AllocatedQuantity] decimal(18,3) NOT NULL,
+        [UnitCost] decimal(18,6) NOT NULL,
+        [AllocatedCost] decimal(18,2) NOT NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        CONSTRAINT [PK_StockCostAllocations] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_StockCostAllocations_Values] CHECK ([AllocatedQuantity] > 0 AND [UnitCost] >= 0 AND [AllocatedCost] >= 0),
+        CONSTRAINT [FK_StockCostAllocations_MaterialUsages_MaintenanceMaterialUsageId] FOREIGN KEY ([MaintenanceMaterialUsageId]) REFERENCES [maintenance].[MaterialUsages] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_StockCostAllocations_RiderInventoryIssueLines_RiderInventoryIssueLineId] FOREIGN KEY ([RiderInventoryIssueLineId]) REFERENCES [maintenance].[RiderInventoryIssueLines] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE TABLE [maintenance].[StockCostLayers] (
+        [Id] uniqueidentifier NOT NULL,
+        [InventoryItemId] uniqueidentifier NOT NULL,
+        [InventoryLocationId] uniqueidentifier NOT NULL,
+        [SourceReceiptLineId] uniqueidentifier NULL,
+        [SourceMovementLineId] uniqueidentifier NULL,
+        [SourceCostLayerId] uniqueidentifier NULL,
+        [ReceivedAtUtc] datetimeoffset NOT NULL,
+        [OriginalSequence] bigint NOT NULL,
+        [OriginalQuantity] decimal(18,3) NOT NULL,
+        [RemainingQuantity] decimal(18,3) NOT NULL,
+        [BaseUnitOfMeasure] int NOT NULL,
+        [UnitCost] decimal(18,6) NOT NULL,
+        [OriginalTotalCost] decimal(18,2) NOT NULL,
+        [LotNumber] nvarchar(100) NULL,
+        [ExpiryDate] date NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_StockCostLayers] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_StockCostLayers_Values] CHECK ([OriginalQuantity] > 0 AND [RemainingQuantity] >= 0 AND [RemainingQuantity] <= [OriginalQuantity] AND [UnitCost] >= 0 AND [OriginalTotalCost] >= 0),
+        CONSTRAINT [FK_StockCostLayers_InventoryItems_InventoryItemId] FOREIGN KEY ([InventoryItemId]) REFERENCES [maintenance].[InventoryItems] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_StockCostLayers_InventoryLocations_InventoryLocationId] FOREIGN KEY ([InventoryLocationId]) REFERENCES [maintenance].[InventoryLocations] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_StockCostLayers_PurchaseReceiptLines_SourceReceiptLineId] FOREIGN KEY ([SourceReceiptLineId]) REFERENCES [maintenance].[PurchaseReceiptLines] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_StockCostLayers_StockCostLayers_SourceCostLayerId] FOREIGN KEY ([SourceCostLayerId]) REFERENCES [maintenance].[StockCostLayers] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE TABLE [maintenance].[StockMovementLines] (
+        [Id] uniqueidentifier NOT NULL,
+        [StockMovementId] uniqueidentifier NOT NULL,
+        [InventoryItemId] uniqueidentifier NOT NULL,
+        [Quantity] decimal(18,3) NOT NULL,
+        [BaseUnitOfMeasure] int NOT NULL,
+        [CostLayerId] uniqueidentifier NULL,
+        [UnitCost] decimal(18,6) NOT NULL,
+        [TotalCost] decimal(18,2) NOT NULL,
+        [LotNumber] nvarchar(100) NULL,
+        [SerialNumber] nvarchar(100) NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        CONSTRAINT [PK_StockMovementLines] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_StockMovementLines_Values] CHECK ([Quantity] > 0 AND [UnitCost] >= 0 AND [TotalCost] >= 0),
+        CONSTRAINT [FK_StockMovementLines_InventoryItems_InventoryItemId] FOREIGN KEY ([InventoryItemId]) REFERENCES [maintenance].[InventoryItems] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_StockMovementLines_StockCostLayers_CostLayerId] FOREIGN KEY ([CostLayerId]) REFERENCES [maintenance].[StockCostLayers] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_StockMovementLines_StockMovements_StockMovementId] FOREIGN KEY ([StockMovementId]) REFERENCES [maintenance].[StockMovements] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE TABLE [maintenance].[SupplierReturnLines] (
+        [Id] uniqueidentifier NOT NULL,
+        [SupplierReturnId] uniqueidentifier NOT NULL,
+        [InventoryItemId] uniqueidentifier NOT NULL,
+        [StockCostLayerId] uniqueidentifier NOT NULL,
+        [Quantity] decimal(18,3) NOT NULL,
+        [UnitCost] decimal(18,6) NOT NULL,
+        [TotalCost] decimal(18,2) NOT NULL,
+        [Reason] nvarchar(1000) NOT NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        CONSTRAINT [PK_SupplierReturnLines] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_SupplierReturnLines_Values] CHECK ([Quantity] > 0 AND [UnitCost] >= 0 AND [TotalCost] >= 0),
+        CONSTRAINT [FK_SupplierReturnLines_InventoryItems_InventoryItemId] FOREIGN KEY ([InventoryItemId]) REFERENCES [maintenance].[InventoryItems] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_SupplierReturnLines_StockCostLayers_StockCostLayerId] FOREIGN KEY ([StockCostLayerId]) REFERENCES [maintenance].[StockCostLayers] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_SupplierReturnLines_SupplierReturns_SupplierReturnId] FOREIGN KEY ([SupplierReturnId]) REFERENCES [maintenance].[SupplierReturns] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Address', N'AllowsCompanyVehicles', N'AllowsExternalVehicles', N'AllowsPaidExternalRepairs', N'AllowsSparePartSales', N'Code', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'InventoryEnabled', N'IsDeleted', N'Latitude', N'LocationType', N'Longitude', N'NameAr', N'NameEn', N'Notes', N'OperatingCityId', N'Status', N'UpdatedAtUtc', N'UpdatedByUserId') AND [object_id] = OBJECT_ID(N'[maintenance].[MaintenanceLocations]'))
+        SET IDENTITY_INSERT [maintenance].[MaintenanceLocations] ON;
+    EXEC(N'INSERT INTO [maintenance].[MaintenanceLocations] ([Id], [Address], [AllowsCompanyVehicles], [AllowsExternalVehicles], [AllowsPaidExternalRepairs], [AllowsSparePartSales], [Code], [CreatedAtUtc], [CreatedByUserId], [DeletedAtUtc], [DeletedByUserId], [DeletionReason], [InventoryEnabled], [IsDeleted], [Latitude], [LocationType], [Longitude], [NameAr], [NameEn], [Notes], [OperatingCityId], [Status], [UpdatedAtUtc], [UpdatedByUserId])
+    VALUES (''019d77f0-0000-7000-8000-000000000001'', NULL, CAST(1 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), ''JEDDAH_WAREHOUSE'', ''2026-09-05T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(1 AS bit), CAST(0 AS bit), NULL, 3, NULL, N''مستودع جدة'', N''Jeddah Warehouse'', NULL, ''019c18d5-62e1-7000-8000-000000000003'', 1, NULL, NULL),
+    (''019d77f0-0000-7000-8000-000000000002'', NULL, CAST(1 AS bit), CAST(1 AS bit), CAST(1 AS bit), CAST(1 AS bit), ''RIYADH_WORKSHOP'', ''2026-09-05T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(1 AS bit), CAST(0 AS bit), NULL, 2, NULL, N''ورشة الرياض'', N''Riyadh Workshop'', NULL, ''019c18d5-62e1-7000-8000-000000000005'', 1, NULL, NULL)');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Address', N'AllowsCompanyVehicles', N'AllowsExternalVehicles', N'AllowsPaidExternalRepairs', N'AllowsSparePartSales', N'Code', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'InventoryEnabled', N'IsDeleted', N'Latitude', N'LocationType', N'Longitude', N'NameAr', N'NameEn', N'Notes', N'OperatingCityId', N'Status', N'UpdatedAtUtc', N'UpdatedByUserId') AND [object_id] = OBJECT_ID(N'[maintenance].[MaintenanceLocations]'))
+        SET IDENTITY_INSERT [maintenance].[MaintenanceLocations] OFF;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Category', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'DescriptionAr', N'DescriptionEn', N'DisplayOrder', N'GrantabilityRule', N'IsDeleted', N'IsDeprecated', N'IsHighTrust', N'IsSensitive', N'Key', N'NameAr', N'NameEn', N'ReplacementKey', N'RequiresClientScope', N'RequiresHousingScope', N'UpdatedAtUtc', N'UpdatedByUserId', N'Version') AND [object_id] = OBJECT_ID(N'[platform].[PermissionDefinitions]'))
+        SET IDENTITY_INSERT [platform].[PermissionDefinitions] ON;
+    EXEC(N'INSERT INTO [platform].[PermissionDefinitions] ([Id], [Category], [CreatedAtUtc], [CreatedByUserId], [DeletedAtUtc], [DeletedByUserId], [DeletionReason], [DescriptionAr], [DescriptionEn], [DisplayOrder], [GrantabilityRule], [IsDeleted], [IsDeprecated], [IsHighTrust], [IsSensitive], [Key], [NameAr], [NameEn], [ReplacementKey], [RequiresClientScope], [RequiresHousingScope], [UpdatedAtUtc], [UpdatedByUserId], [Version])
+    VALUES (''019c18d5-62e1-7000-a000-000000000093'', N''Maintenance'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''عرض مستودع جدة وورشة الرياض ونطاقات خدمتهما.'', N''View maintenance locations and their service scopes.'', 93, NULL, CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), N''maintenance.locations.read'', N''عرض مواقع الصيانة'', N''Read maintenance locations'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000094'', N''Maintenance'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''إدارة مواقع الصيانة وربطها بالمدن.'', N''Manage maintenance locations and city links.'', 94, N''HIGH_TRUST_ONLY'', CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), CAST(0 AS bit), N''maintenance.locations.manage'', N''إدارة مواقع الصيانة'', N''Manage maintenance locations'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000095'', N''Maintenance'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''عرض أوامر صيانة مركبات الشركة والخارجية.'', N''View company and external maintenance work orders.'', 95, NULL, CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), N''maintenance.work_orders.read'', N''عرض أوامر الصيانة'', N''Read maintenance work orders'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000096'', N''Maintenance'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''فتح وبدء وإكمال وإغلاق أوامر الصيانة وصرف موادها.'', N''Open, start, complete, close, and post materials to maintenance work orders.'', 96, N''SENSITIVE_DATA'', CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), N''maintenance.work_orders.manage'', N''إدارة أوامر الصيانة'', N''Manage maintenance work orders'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000097'', N''Maintenance'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''عرض عمليات وتذكيرات تغيير الزيت.'', N''View oil-change operations and reminders.'', 97, NULL, CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), N''maintenance.oil.read'', N''عرض تغيير الزيت'', N''Read oil changes'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000098'', N''Maintenance'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''ترحيل الزيت والفلتر وتحديث العداد والتذكير.'', N''Post oil/filter usage and update odometer reminders.'', 98, N''SENSITIVE_DATA'', CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), N''maintenance.oil.complete'', N''تنفيذ تغيير الزيت'', N''Complete oil changes'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000099'', N''Maintenance'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''عرض المرجع المختصر وأعمال المركبات الخارجية.'', N''View minimal external-vehicle references and jobs.'', 99, N''SENSITIVE_DATA'', CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), N''maintenance.external_jobs.read'', N''عرض صيانة المركبات الخارجية'', N''Read external maintenance jobs'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000100'', N''Maintenance'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''إدارة أوامر المركبات الخارجية في المواقع المسموحة.'', N''Manage external-vehicle jobs at eligible locations.'', 100, N''SENSITIVE_DATA'', CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), N''maintenance.external_jobs.manage'', N''إدارة صيانة المركبات الخارجية'', N''Manage external maintenance jobs'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000101'', N''Maintenance'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''بيع قطع الغيار من ورشة الرياض مع صرف FIFO.'', N''Sell spare parts from Riyadh Workshop with FIFO costing.'', 101, N''SENSITIVE_DATA'', CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), N''maintenance.part_sales.manage'', N''بيع قطع الغيار'', N''Manage spare-part sales'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000102'', N''Maintenance'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''تسجيل مصنعية الإصلاح المحملة على العميل.'', N''Record repair labor charged to the customer.'', 102, N''SENSITIVE_DATA'', CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), N''maintenance.customer_labor_charges.manage'', N''إدارة مصنعية العميل'', N''Manage customer labor charges'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000103'', N''Maintenance'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''تسجيل المبلغ الفعلي المدفوع للميكانيكي.'', N''Record actual mechanic labor payments.'', 103, N''SENSITIVE_DATA'', CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), N''maintenance.mechanic_labor_payments.manage'', N''إدارة أجرة الميكانيكي'', N''Manage mechanic labor payments'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000104'', N''Maintenance'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''عرض تكلفة FIFO والمصنعية والمكسب الحقيقي.'', N''View FIFO cost, labor margin, and true workshop profit.'', 104, N''HIGH_TRUST_ONLY'', CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), CAST(1 AS bit), N''maintenance.profit_reports.read'', N''عرض تقارير مكسب الورشة'', N''Read workshop profit reports'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000105'', N''Maintenance'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''تصدير تقارير الدخل والمصروف والمكسب.'', N''Export workshop income, expense, and profit reports.'', 105, N''HIGH_TRUST_ONLY'', CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), CAST(1 AS bit), N''maintenance.profit_reports.export'', N''تصدير تقارير مكسب الورشة'', N''Export workshop profit reports'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000106'', N''Inventory'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''عرض قطع الغيار والزيوت والإكسسوارات.'', N''View spare parts, oils, and accessories.'', 106, NULL, CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), N''inventory.items.read'', N''عرض أصناف المخزون'', N''Read inventory items'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000107'', N''Inventory'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''إدارة بيانات الأصناف ووحدات الشراء والمخزون.'', N''Manage item data and purchase/base units.'', 107, N''SENSITIVE_DATA'', CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), N''inventory.items.manage'', N''إدارة أصناف المخزون'', N''Manage inventory items'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000108'', N''Inventory'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''عرض الرصيد في مستودع جدة وورشة الرياض.'', N''View balances at Jeddah Warehouse and Riyadh Workshop.'', 108, NULL, CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), N''inventory.stock.read'', N''عرض رصيد المخزون'', N''Read stock balances'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000109'', N''Inventory'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''ترحيل النقل والصرف وعهد الرايدر بطريقة FIFO.'', N''Post transfers, usages, and rider issues using FIFO.'', 109, N''SENSITIVE_DATA'', CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), N''inventory.stock.move'', N''نقل وصرف المخزون'', N''Move inventory stock'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000110'', N''Inventory'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''عكس الاستخدامات مع استعادة طبقات التكلفة الأصلية.'', N''Reverse usage into its original cost layers.'', 110, N''HIGH_TRUST_ONLY'', CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), CAST(1 AS bit), N''inventory.stock.adjust'', N''عكس حركات المخزون'', N''Adjust inventory stock'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000111'', N''Inventory'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''عرض الأسعار والكميات المتبقية لكل دفعة FIFO.'', N''View FIFO layer prices and remaining quantities.'', 111, N''HIGH_TRUST_ONLY'', CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), CAST(1 AS bit), N''inventory.cost_layers.read'', N''عرض طبقات تكلفة المخزون'', N''Read inventory cost layers'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000112'', N''Inventory'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''ترحيل الفاتورة وملفها وطبقات التكلفة.'', N''Post purchase receipts, bill files, and cost layers.'', 112, N''SENSITIVE_DATA'', CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), N''inventory.receipts.manage'', N''إدارة فواتير الشراء'', N''Manage purchase receipts'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000113'', N''Inventory'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''إرجاع المخزون إلى المورد من طبقة التكلفة الأصلية.'', N''Return stock to the supplier from its original cost layer.'', 113, N''SENSITIVE_DATA'', CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), N''inventory.returns.manage'', N''إدارة مرتجعات المورد'', N''Manage supplier returns'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1)');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Category', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'DescriptionAr', N'DescriptionEn', N'DisplayOrder', N'GrantabilityRule', N'IsDeleted', N'IsDeprecated', N'IsHighTrust', N'IsSensitive', N'Key', N'NameAr', N'NameEn', N'ReplacementKey', N'RequiresClientScope', N'RequiresHousingScope', N'UpdatedAtUtc', N'UpdatedByUserId', N'Version') AND [object_id] = OBJECT_ID(N'[platform].[PermissionDefinitions]'))
+        SET IDENTITY_INSERT [platform].[PermissionDefinitions] OFF;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'AlertDaysBefore', N'AlertKilometersBefore', N'ChecklistJson', N'Code', N'CreatedAtUtc', N'CreatedByUserId', N'DefaultOilQuantityLiters', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'IntervalDays', N'IntervalKilometers', N'InventoryItemId', N'IsDeleted', N'MaximumAfterKilometers', N'NameAr', N'NameEn', N'ReminderAfterKilometers', N'Status', N'TriggerType', N'UpdatedAtUtc', N'UpdatedByUserId', N'VehicleModelId', N'VehicleType') AND [object_id] = OBJECT_ID(N'[maintenance].[Plans]'))
+        SET IDENTITY_INSERT [maintenance].[Plans] ON;
+    EXEC(N'INSERT INTO [maintenance].[Plans] ([Id], [AlertDaysBefore], [AlertKilometersBefore], [ChecklistJson], [Code], [CreatedAtUtc], [CreatedByUserId], [DefaultOilQuantityLiters], [DeletedAtUtc], [DeletedByUserId], [DeletionReason], [IntervalDays], [IntervalKilometers], [InventoryItemId], [IsDeleted], [MaximumAfterKilometers], [NameAr], [NameEn], [ReminderAfterKilometers], [Status], [TriggerType], [UpdatedAtUtc], [UpdatedByUserId], [VehicleModelId], [VehicleType])
+    VALUES (''019d77f0-0000-7000-8000-000000000005'', NULL, NULL, NULL, ''OIL_CHANGE_CAR'', ''2026-09-05T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, CAST(0 AS bit), CAST(5000 AS bigint), N''تغيير زيت السيارة'', N''Car oil change'', CAST(4000 AS bigint), 1, 3, NULL, NULL, NULL, 2),
+    (''019d77f0-0000-7000-8000-000000000006'', NULL, NULL, NULL, ''OIL_CHANGE_MOTORCYCLE'', ''2026-09-05T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, CAST(0 AS bit), CAST(1000 AS bigint), N''تغيير زيت الدراجة النارية'', N''Motorcycle oil change'', CAST(800 AS bigint), 1, 3, NULL, NULL, NULL, 1)');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'AlertDaysBefore', N'AlertKilometersBefore', N'ChecklistJson', N'Code', N'CreatedAtUtc', N'CreatedByUserId', N'DefaultOilQuantityLiters', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'IntervalDays', N'IntervalKilometers', N'InventoryItemId', N'IsDeleted', N'MaximumAfterKilometers', N'NameAr', N'NameEn', N'ReminderAfterKilometers', N'Status', N'TriggerType', N'UpdatedAtUtc', N'UpdatedByUserId', N'VehicleModelId', N'VehicleType') AND [object_id] = OBJECT_ID(N'[maintenance].[Plans]'))
+        SET IDENTITY_INSERT [maintenance].[Plans] OFF;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Code', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'IsDeleted', N'MaintenanceLocationId', N'NameAr', N'NameEn', N'Status', N'UpdatedAtUtc', N'UpdatedByUserId') AND [object_id] = OBJECT_ID(N'[maintenance].[InventoryLocations]'))
+        SET IDENTITY_INSERT [maintenance].[InventoryLocations] ON;
+    EXEC(N'INSERT INTO [maintenance].[InventoryLocations] ([Id], [Code], [CreatedAtUtc], [CreatedByUserId], [DeletedAtUtc], [DeletedByUserId], [DeletionReason], [IsDeleted], [MaintenanceLocationId], [NameAr], [NameEn], [Status], [UpdatedAtUtc], [UpdatedByUserId])
+    VALUES (''019d77f0-0000-7000-8000-000000000003'', ''JEDDAH_WAREHOUSE_STOCK'', ''2026-09-05T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), ''019d77f0-0000-7000-8000-000000000001'', N''مخزون مستودع جدة'', N''Jeddah Warehouse Stock'', 1, NULL, NULL),
+    (''019d77f0-0000-7000-8000-000000000004'', ''RIYADH_WORKSHOP_STOCK'', ''2026-09-05T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, CAST(0 AS bit), ''019d77f0-0000-7000-8000-000000000002'', N''مخزون ورشة الرياض'', N''Riyadh Workshop Stock'', 1, NULL, NULL)');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Code', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'IsDeleted', N'MaintenanceLocationId', N'NameAr', N'NameEn', N'Status', N'UpdatedAtUtc', N'UpdatedByUserId') AND [object_id] = OBJECT_ID(N'[maintenance].[InventoryLocations]'))
+        SET IDENTITY_INSERT [maintenance].[InventoryLocations] OFF;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_ExternalCustomerPayments_MaintenanceWorkOrderId_PaidAtUtc] ON [maintenance].[ExternalCustomerPayments] ([MaintenanceWorkOrderId], [PaidAtUtc]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_ExternalCustomerPayments_ReversalOfPaymentId] ON [maintenance].[ExternalCustomerPayments] ([ReversalOfPaymentId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_ExternalFinancialEntries_MaintenanceWorkOrderId_SourceType] ON [maintenance].[ExternalFinancialEntries] ([MaintenanceWorkOrderId], [SourceType]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_ExternalFinancialEntries_OccurredAtUtc_EntryType] ON [maintenance].[ExternalFinancialEntries] ([OccurredAtUtc], [EntryType]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_ExternalFinancialEntries_ReversalOfEntryId] ON [maintenance].[ExternalFinancialEntries] ([ReversalOfEntryId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_ExternalPartSaleLines_InventoryItemId] ON [maintenance].[ExternalPartSaleLines] ([InventoryItemId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_ExternalPartSaleLines_MaintenanceMaterialUsageId] ON [maintenance].[ExternalPartSaleLines] ([MaintenanceMaterialUsageId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_ExternalPartSaleLines_MaintenanceWorkOrderId] ON [maintenance].[ExternalPartSaleLines] ([MaintenanceWorkOrderId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE UNIQUE INDEX [IX_ExternalVehicleSnapshots_MaintenanceWorkOrderId] ON [maintenance].[ExternalVehicleSnapshots] ([MaintenanceWorkOrderId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    EXEC(N'CREATE INDEX [IX_InventoryItems_Barcode] ON [maintenance].[InventoryItems] ([Barcode]) WHERE [Barcode] IS NOT NULL AND [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_InventoryItems_IsDeleted] ON [maintenance].[InventoryItems] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_InventoryItems_NormalizedSku] ON [maintenance].[InventoryItems] ([NormalizedSku]) WHERE [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_InventoryLocations_Code] ON [maintenance].[InventoryLocations] ([Code]) WHERE [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_InventoryLocations_IsDeleted] ON [maintenance].[InventoryLocations] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_InventoryLocations_MaintenanceLocationId_Status] ON [maintenance].[InventoryLocations] ([MaintenanceLocationId], [Status]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_LaborEntries_MaintenanceWorkOrderId] ON [maintenance].[LaborEntries] ([MaintenanceWorkOrderId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_MaintenanceLocations_Code] ON [maintenance].[MaintenanceLocations] ([Code]) WHERE [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_MaintenanceLocations_IsDeleted] ON [maintenance].[MaintenanceLocations] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_MaintenanceLocations_OperatingCityId_Status] ON [maintenance].[MaintenanceLocations] ([OperatingCityId], [Status]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_MaterialUsages_InventoryItemId] ON [maintenance].[MaterialUsages] ([InventoryItemId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_MaterialUsages_InventoryLocationId] ON [maintenance].[MaterialUsages] ([InventoryLocationId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_MaterialUsages_MaintenanceWorkOrderId] ON [maintenance].[MaterialUsages] ([MaintenanceWorkOrderId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_MaterialUsages_ReversalOfUsageId] ON [maintenance].[MaterialUsages] ([ReversalOfUsageId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_MaterialUsages_RiderProfileId_UsedAtUtc] ON [maintenance].[MaterialUsages] ([RiderProfileId], [UsedAtUtc]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_MaterialUsages_RiderVehicleAssignmentId] ON [maintenance].[MaterialUsages] ([RiderVehicleAssignmentId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_MaterialUsages_StockMovementId] ON [maintenance].[MaterialUsages] ([StockMovementId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_MaterialUsages_StockMovementLineId] ON [maintenance].[MaterialUsages] ([StockMovementLineId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_MaterialUsages_VehicleId_UsedAtUtc] ON [maintenance].[MaterialUsages] ([VehicleId], [UsedAtUtc]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE UNIQUE INDEX [IX_OilChangeOperations_MaintenanceWorkOrderId] ON [maintenance].[OilChangeOperations] ([MaintenanceWorkOrderId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_OilChangeOperations_OilFilterInventoryItemId] ON [maintenance].[OilChangeOperations] ([OilFilterInventoryItemId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_OilChangeOperations_OilFilterMaterialUsageId] ON [maintenance].[OilChangeOperations] ([OilFilterMaterialUsageId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_OilChangeOperations_OilInventoryItemId] ON [maintenance].[OilChangeOperations] ([OilInventoryItemId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_OilChangeOperations_OilMaterialUsageId] ON [maintenance].[OilChangeOperations] ([OilMaterialUsageId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_OilChangeOperations_VehicleTypeSnapshot_OdometerAtChange] ON [maintenance].[OilChangeOperations] ([VehicleTypeSnapshot], [OdometerAtChange]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_Plans_Code] ON [maintenance].[Plans] ([Code]) WHERE [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_Plans_InventoryItemId] ON [maintenance].[Plans] ([InventoryItemId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_Plans_IsDeleted] ON [maintenance].[Plans] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_Plans_VehicleModelId] ON [maintenance].[Plans] ([VehicleModelId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE UNIQUE INDEX [IX_PurchaseReceiptAttachments_PurchaseReceiptId] ON [maintenance].[PurchaseReceiptAttachments] ([PurchaseReceiptId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_PurchaseReceiptLines_InventoryItemId] ON [maintenance].[PurchaseReceiptLines] ([InventoryItemId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_PurchaseReceiptLines_PurchaseReceiptId_InventoryItemId] ON [maintenance].[PurchaseReceiptLines] ([PurchaseReceiptId], [InventoryItemId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_PurchaseReceiptLines_StockCostLayerId] ON [maintenance].[PurchaseReceiptLines] ([StockCostLayerId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_PurchaseReceiptLines_StockMovementLineId] ON [maintenance].[PurchaseReceiptLines] ([StockMovementLineId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_PurchaseReceipts_InventoryLocationId] ON [maintenance].[PurchaseReceipts] ([InventoryLocationId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_PurchaseReceipts_IsDeleted] ON [maintenance].[PurchaseReceipts] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_PurchaseReceipts_PostedMovementId] ON [maintenance].[PurchaseReceipts] ([PostedMovementId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE UNIQUE INDEX [IX_PurchaseReceipts_ReceiptNumber] ON [maintenance].[PurchaseReceipts] ([ReceiptNumber]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_PurchaseReceipts_SupplierId_SupplierInvoiceNumber] ON [maintenance].[PurchaseReceipts] ([SupplierId], [SupplierInvoiceNumber]) WHERE [SupplierInvoiceNumber] IS NOT NULL AND [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_RiderInventoryIssueLines_InventoryItemId] ON [maintenance].[RiderInventoryIssueLines] ([InventoryItemId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_RiderInventoryIssueLines_RiderInventoryIssueId] ON [maintenance].[RiderInventoryIssueLines] ([RiderInventoryIssueId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_RiderInventoryIssueLines_StockMovementLineId] ON [maintenance].[RiderInventoryIssueLines] ([StockMovementLineId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_RiderInventoryIssues_IsDeleted] ON [maintenance].[RiderInventoryIssues] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_RiderInventoryIssues_IssuedFromLocationId] ON [maintenance].[RiderInventoryIssues] ([IssuedFromLocationId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE UNIQUE INDEX [IX_RiderInventoryIssues_IssueNumber] ON [maintenance].[RiderInventoryIssues] ([IssueNumber]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_RiderInventoryIssues_PostedMovementId] ON [maintenance].[RiderInventoryIssues] ([PostedMovementId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_RiderInventoryIssues_RelatedAssignmentId] ON [maintenance].[RiderInventoryIssues] ([RelatedAssignmentId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_RiderInventoryIssues_RiderProfileId_IssuedAtUtc] ON [maintenance].[RiderInventoryIssues] ([RiderProfileId], [IssuedAtUtc]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_StockBalances_InventoryItemId_InventoryLocationId] ON [maintenance].[StockBalances] ([InventoryItemId], [InventoryLocationId]) WHERE [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_StockBalances_InventoryLocationId] ON [maintenance].[StockBalances] ([InventoryLocationId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_StockBalances_IsDeleted] ON [maintenance].[StockBalances] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_StockCostAllocations_MaintenanceMaterialUsageId] ON [maintenance].[StockCostAllocations] ([MaintenanceMaterialUsageId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_StockCostAllocations_RiderInventoryIssueLineId] ON [maintenance].[StockCostAllocations] ([RiderInventoryIssueLineId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_StockCostAllocations_StockCostLayerId] ON [maintenance].[StockCostAllocations] ([StockCostLayerId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE UNIQUE INDEX [IX_StockCostAllocations_StockMovementLineId_StockCostLayerId] ON [maintenance].[StockCostAllocations] ([StockMovementLineId], [StockCostLayerId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_StockCostLayers_InventoryItemId_InventoryLocationId_ReceivedAtUtc_OriginalSequence_Id] ON [maintenance].[StockCostLayers] ([InventoryItemId], [InventoryLocationId], [ReceivedAtUtc], [OriginalSequence], [Id]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_StockCostLayers_InventoryLocationId] ON [maintenance].[StockCostLayers] ([InventoryLocationId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_StockCostLayers_IsDeleted] ON [maintenance].[StockCostLayers] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_StockCostLayers_SourceCostLayerId] ON [maintenance].[StockCostLayers] ([SourceCostLayerId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_StockCostLayers_SourceMovementLineId] ON [maintenance].[StockCostLayers] ([SourceMovementLineId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_StockCostLayers_SourceReceiptLineId] ON [maintenance].[StockCostLayers] ([SourceReceiptLineId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_StockMovementLines_CostLayerId] ON [maintenance].[StockMovementLines] ([CostLayerId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_StockMovementLines_InventoryItemId] ON [maintenance].[StockMovementLines] ([InventoryItemId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_StockMovementLines_StockMovementId_InventoryItemId] ON [maintenance].[StockMovementLines] ([StockMovementId], [InventoryItemId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_StockMovements_DestinationLocationId_OccurredAtUtc] ON [maintenance].[StockMovements] ([DestinationLocationId], [OccurredAtUtc]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE UNIQUE INDEX [IX_StockMovements_MovementNumber] ON [maintenance].[StockMovements] ([MovementNumber]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_StockMovements_ReversalOfMovementId] ON [maintenance].[StockMovements] ([ReversalOfMovementId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_StockMovements_SourceLocationId_OccurredAtUtc] ON [maintenance].[StockMovements] ([SourceLocationId], [OccurredAtUtc]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_StockTransferLines_InventoryItemId] ON [maintenance].[StockTransferLines] ([InventoryItemId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_StockTransferLines_StockTransferId] ON [maintenance].[StockTransferLines] ([StockTransferId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_StockTransfers_DestinationLocationId] ON [maintenance].[StockTransfers] ([DestinationLocationId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_StockTransfers_DestinationMovementId] ON [maintenance].[StockTransfers] ([DestinationMovementId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_StockTransfers_IsDeleted] ON [maintenance].[StockTransfers] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_StockTransfers_SourceLocationId] ON [maintenance].[StockTransfers] ([SourceLocationId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_StockTransfers_SourceMovementId] ON [maintenance].[StockTransfers] ([SourceMovementId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE UNIQUE INDEX [IX_StockTransfers_TransferNumber] ON [maintenance].[StockTransfers] ([TransferNumber]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_SupplierReturnLines_InventoryItemId] ON [maintenance].[SupplierReturnLines] ([InventoryItemId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_SupplierReturnLines_StockCostLayerId] ON [maintenance].[SupplierReturnLines] ([StockCostLayerId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_SupplierReturnLines_SupplierReturnId] ON [maintenance].[SupplierReturnLines] ([SupplierReturnId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_SupplierReturns_InventoryLocationId] ON [maintenance].[SupplierReturns] ([InventoryLocationId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_SupplierReturns_IsDeleted] ON [maintenance].[SupplierReturns] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_SupplierReturns_PostedMovementId] ON [maintenance].[SupplierReturns] ([PostedMovementId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_SupplierReturns_PurchaseReceiptId] ON [maintenance].[SupplierReturns] ([PurchaseReceiptId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE UNIQUE INDEX [IX_SupplierReturns_ReturnNumber] ON [maintenance].[SupplierReturns] ([ReturnNumber]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_SupplierReturns_SupplierId] ON [maintenance].[SupplierReturns] ([SupplierId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_Suppliers_IsDeleted] ON [maintenance].[Suppliers] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_Suppliers_SupplierNumber] ON [maintenance].[Suppliers] ([SupplierNumber]) WHERE [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    EXEC(N'CREATE INDEX [IX_Suppliers_VatNumber] ON [maintenance].[Suppliers] ([VatNumber]) WHERE [VatNumber] IS NOT NULL AND [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_VehicleExpenses_ReversalOfExpenseId] ON [maintenance].[VehicleExpenses] ([ReversalOfExpenseId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_VehicleExpenses_RiderProfileId_OccurredOn] ON [maintenance].[VehicleExpenses] ([RiderProfileId], [OccurredOn]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_VehicleExpenses_RiderVehicleAssignmentId] ON [maintenance].[VehicleExpenses] ([RiderVehicleAssignmentId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_VehicleExpenses_VehicleId_OccurredOn] ON [maintenance].[VehicleExpenses] ([VehicleId], [OccurredOn]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_VehicleSchedules_IsDeleted] ON [maintenance].[VehicleSchedules] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_VehicleSchedules_LastCompletedWorkOrderId] ON [maintenance].[VehicleSchedules] ([LastCompletedWorkOrderId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_VehicleSchedules_MaintenancePlanId] ON [maintenance].[VehicleSchedules] ([MaintenancePlanId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_VehicleSchedules_VehicleId_MaintenancePlanId] ON [maintenance].[VehicleSchedules] ([VehicleId], [MaintenancePlanId]) WHERE [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_WorkOrders_AttributedRiderProfileId] ON [maintenance].[WorkOrders] ([AttributedRiderProfileId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_WorkOrders_IsDeleted] ON [maintenance].[WorkOrders] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_WorkOrders_MaintenanceLocationId_Status_OpenedAtUtc] ON [maintenance].[WorkOrders] ([MaintenanceLocationId], [Status], [OpenedAtUtc]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_WorkOrders_RiderVehicleAssignmentId] ON [maintenance].[WorkOrders] ([RiderVehicleAssignmentId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_WorkOrders_VehicleId_OpenedAtUtc] ON [maintenance].[WorkOrders] ([VehicleId], [OpenedAtUtc]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE INDEX [IX_WorkOrders_VehicleIssueId] ON [maintenance].[WorkOrders] ([VehicleIssueId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    CREATE UNIQUE INDEX [IX_WorkOrders_WorkOrderNumber] ON [maintenance].[WorkOrders] ([WorkOrderNumber]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    ALTER TABLE [maintenance].[ExternalPartSaleLines] ADD CONSTRAINT [FK_ExternalPartSaleLines_MaterialUsages_MaintenanceMaterialUsageId] FOREIGN KEY ([MaintenanceMaterialUsageId]) REFERENCES [maintenance].[MaterialUsages] ([Id]) ON DELETE NO ACTION;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    ALTER TABLE [maintenance].[MaterialUsages] ADD CONSTRAINT [FK_MaterialUsages_StockMovementLines_StockMovementLineId] FOREIGN KEY ([StockMovementLineId]) REFERENCES [maintenance].[StockMovementLines] ([Id]) ON DELETE NO ACTION;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    ALTER TABLE [maintenance].[PurchaseReceiptLines] ADD CONSTRAINT [FK_PurchaseReceiptLines_StockCostLayers_StockCostLayerId] FOREIGN KEY ([StockCostLayerId]) REFERENCES [maintenance].[StockCostLayers] ([Id]) ON DELETE NO ACTION;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    ALTER TABLE [maintenance].[PurchaseReceiptLines] ADD CONSTRAINT [FK_PurchaseReceiptLines_StockMovementLines_StockMovementLineId] FOREIGN KEY ([StockMovementLineId]) REFERENCES [maintenance].[StockMovementLines] ([Id]) ON DELETE NO ACTION;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    ALTER TABLE [maintenance].[RiderInventoryIssueLines] ADD CONSTRAINT [FK_RiderInventoryIssueLines_StockMovementLines_StockMovementLineId] FOREIGN KEY ([StockMovementLineId]) REFERENCES [maintenance].[StockMovementLines] ([Id]) ON DELETE NO ACTION;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    ALTER TABLE [maintenance].[StockCostAllocations] ADD CONSTRAINT [FK_StockCostAllocations_StockCostLayers_StockCostLayerId] FOREIGN KEY ([StockCostLayerId]) REFERENCES [maintenance].[StockCostLayers] ([Id]) ON DELETE NO ACTION;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    ALTER TABLE [maintenance].[StockCostAllocations] ADD CONSTRAINT [FK_StockCostAllocations_StockMovementLines_StockMovementLineId] FOREIGN KEY ([StockMovementLineId]) REFERENCES [maintenance].[StockMovementLines] ([Id]) ON DELETE NO ACTION;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    ALTER TABLE [maintenance].[StockCostLayers] ADD CONSTRAINT [FK_StockCostLayers_StockMovementLines_SourceMovementLineId] FOREIGN KEY ([SourceMovementLineId]) REFERENCES [maintenance].[StockMovementLines] ([Id]) ON DELETE NO ACTION;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905093819_AddMaintenanceInventoryAndWorkshop'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260905093819_AddMaintenanceInventoryAndWorkshop', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905094742_AddOilBarrelControls'
+)
+BEGIN
+    ALTER TABLE [maintenance].[StockMovements] DROP CONSTRAINT [CK_StockMovements_Type];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905094742_AddOilBarrelControls'
+)
+BEGIN
+    CREATE TABLE [maintenance].[OilBarrels] (
+        [Id] uniqueidentifier NOT NULL,
+        [BarrelNumber] varchar(64) NOT NULL,
+        [PurchaseReceiptLineId] uniqueidentifier NOT NULL,
+        [InventoryItemId] uniqueidentifier NOT NULL,
+        [InventoryLocationId] uniqueidentifier NOT NULL,
+        [StockCostLayerId] uniqueidentifier NOT NULL,
+        [PackageSequence] int NOT NULL,
+        [NominalCapacityLiters] decimal(18,3) NOT NULL,
+        [RemainingLiters] decimal(18,3) NOT NULL,
+        [MaximumAllowedLossLiters] decimal(18,3) NOT NULL,
+        [RecordedLossLiters] decimal(18,3) NOT NULL,
+        [Status] int NOT NULL,
+        [OpenedAtUtc] datetimeoffset NULL,
+        [OpenedByUserId] uniqueidentifier NULL,
+        [DepletedAtUtc] datetimeoffset NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_OilBarrels] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_OilBarrels_Quantities] CHECK ([NominalCapacityLiters] > 0 AND [RemainingLiters] >= 0 AND [RemainingLiters] <= [NominalCapacityLiters] AND [MaximumAllowedLossLiters] = ROUND([NominalCapacityLiters] * 0.025, 3) AND [RecordedLossLiters] >= 0 AND [RecordedLossLiters] <= [MaximumAllowedLossLiters]),
+        CONSTRAINT [CK_OilBarrels_Status] CHECK (([Status] = 1 AND [OpenedAtUtc] IS NULL AND [RemainingLiters] > 0) OR ([Status] = 2 AND [OpenedAtUtc] IS NOT NULL AND [RemainingLiters] > 0) OR ([Status] = 3 AND [OpenedAtUtc] IS NOT NULL AND [RemainingLiters] = 0) OR [Status] = 4),
+        CONSTRAINT [FK_OilBarrels_InventoryItems_InventoryItemId] FOREIGN KEY ([InventoryItemId]) REFERENCES [maintenance].[InventoryItems] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_OilBarrels_InventoryLocations_InventoryLocationId] FOREIGN KEY ([InventoryLocationId]) REFERENCES [maintenance].[InventoryLocations] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_OilBarrels_PurchaseReceiptLines_PurchaseReceiptLineId] FOREIGN KEY ([PurchaseReceiptLineId]) REFERENCES [maintenance].[PurchaseReceiptLines] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_OilBarrels_StockCostLayers_StockCostLayerId] FOREIGN KEY ([StockCostLayerId]) REFERENCES [maintenance].[StockCostLayers] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905094742_AddOilBarrelControls'
+)
+BEGIN
+    CREATE TABLE [maintenance].[OilBarrelLosses] (
+        [Id] uniqueidentifier NOT NULL,
+        [OilBarrelId] uniqueidentifier NOT NULL,
+        [OccurredAtUtc] datetimeoffset NOT NULL,
+        [QuantityLiters] decimal(18,3) NOT NULL,
+        [CostAmount] decimal(18,2) NOT NULL,
+        [Reason] nvarchar(1000) NOT NULL,
+        [StockMovementId] uniqueidentifier NOT NULL,
+        [StockMovementLineId] uniqueidentifier NOT NULL,
+        [RecordedByUserId] uniqueidentifier NOT NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        CONSTRAINT [PK_OilBarrelLosses] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_OilBarrelLosses_Values] CHECK ([QuantityLiters] > 0 AND [CostAmount] >= 0),
+        CONSTRAINT [FK_OilBarrelLosses_OilBarrels_OilBarrelId] FOREIGN KEY ([OilBarrelId]) REFERENCES [maintenance].[OilBarrels] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_OilBarrelLosses_StockMovementLines_StockMovementLineId] FOREIGN KEY ([StockMovementLineId]) REFERENCES [maintenance].[StockMovementLines] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_OilBarrelLosses_StockMovements_StockMovementId] FOREIGN KEY ([StockMovementId]) REFERENCES [maintenance].[StockMovements] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905094742_AddOilBarrelControls'
+)
+BEGIN
+    CREATE TABLE [maintenance].[OilBarrelUsageAllocations] (
+        [Id] uniqueidentifier NOT NULL,
+        [MaintenanceMaterialUsageId] uniqueidentifier NOT NULL,
+        [OilBarrelId] uniqueidentifier NOT NULL,
+        [QuantityLiters] decimal(18,3) NOT NULL,
+        [Direction] int NOT NULL,
+        [ReversalOfAllocationId] uniqueidentifier NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        CONSTRAINT [PK_OilBarrelUsageAllocations] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_OilBarrelUsageAllocations_Values] CHECK ([QuantityLiters] > 0 AND ([Direction] = 1 AND [ReversalOfAllocationId] IS NULL OR [Direction] = 2 AND [ReversalOfAllocationId] IS NOT NULL)),
+        CONSTRAINT [FK_OilBarrelUsageAllocations_MaterialUsages_MaintenanceMaterialUsageId] FOREIGN KEY ([MaintenanceMaterialUsageId]) REFERENCES [maintenance].[MaterialUsages] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_OilBarrelUsageAllocations_OilBarrelUsageAllocations_ReversalOfAllocationId] FOREIGN KEY ([ReversalOfAllocationId]) REFERENCES [maintenance].[OilBarrelUsageAllocations] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_OilBarrelUsageAllocations_OilBarrels_OilBarrelId] FOREIGN KEY ([OilBarrelId]) REFERENCES [maintenance].[OilBarrels] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905094742_AddOilBarrelControls'
+)
+BEGIN
+    EXEC(N'ALTER TABLE [maintenance].[StockMovements] ADD CONSTRAINT [CK_StockMovements_Type] CHECK ([MovementType] BETWEEN 1 AND 9)');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905094742_AddOilBarrelControls'
+)
+BEGIN
+    CREATE INDEX [IX_OilBarrelLosses_OilBarrelId_OccurredAtUtc] ON [maintenance].[OilBarrelLosses] ([OilBarrelId], [OccurredAtUtc]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905094742_AddOilBarrelControls'
+)
+BEGIN
+    CREATE INDEX [IX_OilBarrelLosses_StockMovementId] ON [maintenance].[OilBarrelLosses] ([StockMovementId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905094742_AddOilBarrelControls'
+)
+BEGIN
+    CREATE INDEX [IX_OilBarrelLosses_StockMovementLineId] ON [maintenance].[OilBarrelLosses] ([StockMovementLineId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905094742_AddOilBarrelControls'
+)
+BEGIN
+    CREATE UNIQUE INDEX [IX_OilBarrels_BarrelNumber] ON [maintenance].[OilBarrels] ([BarrelNumber]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905094742_AddOilBarrelControls'
+)
+BEGIN
+    CREATE INDEX [IX_OilBarrels_InventoryItemId] ON [maintenance].[OilBarrels] ([InventoryItemId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905094742_AddOilBarrelControls'
+)
+BEGIN
+    CREATE INDEX [IX_OilBarrels_InventoryLocationId_InventoryItemId_Status_OpenedAtUtc] ON [maintenance].[OilBarrels] ([InventoryLocationId], [InventoryItemId], [Status], [OpenedAtUtc]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905094742_AddOilBarrelControls'
+)
+BEGIN
+    CREATE INDEX [IX_OilBarrels_IsDeleted] ON [maintenance].[OilBarrels] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905094742_AddOilBarrelControls'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_OilBarrels_PurchaseReceiptLineId_PackageSequence] ON [maintenance].[OilBarrels] ([PurchaseReceiptLineId], [PackageSequence]) WHERE [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905094742_AddOilBarrelControls'
+)
+BEGIN
+    CREATE INDEX [IX_OilBarrels_StockCostLayerId] ON [maintenance].[OilBarrels] ([StockCostLayerId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905094742_AddOilBarrelControls'
+)
+BEGIN
+    CREATE INDEX [IX_OilBarrelUsageAllocations_MaintenanceMaterialUsageId_OilBarrelId_Direction] ON [maintenance].[OilBarrelUsageAllocations] ([MaintenanceMaterialUsageId], [OilBarrelId], [Direction]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905094742_AddOilBarrelControls'
+)
+BEGIN
+    CREATE INDEX [IX_OilBarrelUsageAllocations_OilBarrelId] ON [maintenance].[OilBarrelUsageAllocations] ([OilBarrelId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905094742_AddOilBarrelControls'
+)
+BEGIN
+    CREATE INDEX [IX_OilBarrelUsageAllocations_ReversalOfAllocationId] ON [maintenance].[OilBarrelUsageAllocations] ([ReversalOfAllocationId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905094742_AddOilBarrelControls'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260905094742_AddOilBarrelControls', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905095231_EnforceSingleOpenOilBarrel'
+)
+BEGIN
+    ALTER TABLE [maintenance].[OilBarrels] DROP CONSTRAINT [CK_OilBarrels_Quantities];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905095231_EnforceSingleOpenOilBarrel'
+)
+BEGIN
+    ALTER TABLE [maintenance].[OilBarrels] ADD [UnitCostPerLiter] decimal(18,6) NOT NULL DEFAULT 0.0;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905095231_EnforceSingleOpenOilBarrel'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_OilBarrels_InventoryLocationId_InventoryItemId] ON [maintenance].[OilBarrels] ([InventoryLocationId], [InventoryItemId]) WHERE [Status] = 2 AND [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905095231_EnforceSingleOpenOilBarrel'
+)
+BEGIN
+    EXEC(N'ALTER TABLE [maintenance].[OilBarrels] ADD CONSTRAINT [CK_OilBarrels_Quantities] CHECK ([NominalCapacityLiters] > 0 AND [RemainingLiters] >= 0 AND [RemainingLiters] <= [NominalCapacityLiters] AND [UnitCostPerLiter] >= 0 AND [MaximumAllowedLossLiters] = ROUND([NominalCapacityLiters] * 0.025, 3) AND [RecordedLossLiters] >= 0 AND [RecordedLossLiters] <= [MaximumAllowedLossLiters])');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905095231_EnforceSingleOpenOilBarrel'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260905095231_EnforceSingleOpenOilBarrel', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905095847_LinkMechanicPaymentsToEmployees'
+)
+BEGIN
+    CREATE INDEX [IX_ExternalFinancialEntries_MechanicEmployeeId] ON [maintenance].[ExternalFinancialEntries] ([MechanicEmployeeId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905095847_LinkMechanicPaymentsToEmployees'
+)
+BEGIN
+    ALTER TABLE [maintenance].[ExternalFinancialEntries] ADD CONSTRAINT [FK_ExternalFinancialEntries_Employees_MechanicEmployeeId] FOREIGN KEY ([MechanicEmployeeId]) REFERENCES [app].[Employees] ([Id]) ON DELETE NO ACTION;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905095847_LinkMechanicPaymentsToEmployees'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260905095847_LinkMechanicPaymentsToEmployees', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905140654_UpdateOilBarrelLossAllowanceToTwoPercent'
+)
+BEGIN
+    ALTER TABLE [maintenance].[OilBarrels] DROP CONSTRAINT [CK_OilBarrels_Quantities];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905140654_UpdateOilBarrelLossAllowanceToTwoPercent'
+)
+BEGIN
+    UPDATE [maintenance].[OilBarrels] SET [MaximumAllowedLossLiters] = ROUND([NominalCapacityLiters] * 0.02, 3);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905140654_UpdateOilBarrelLossAllowanceToTwoPercent'
+)
+BEGIN
+    EXEC(N'ALTER TABLE [maintenance].[OilBarrels] ADD CONSTRAINT [CK_OilBarrels_Quantities] CHECK ([NominalCapacityLiters] > 0 AND [RemainingLiters] >= 0 AND [RemainingLiters] <= [NominalCapacityLiters] AND [UnitCostPerLiter] >= 0 AND [MaximumAllowedLossLiters] = ROUND([NominalCapacityLiters] * 0.02, 3) AND [RecordedLossLiters] >= 0 AND [RecordedLossLiters] <= [MaximumAllowedLossLiters])');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260905140654_UpdateOilBarrelLossAllowanceToTwoPercent'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260905140654_UpdateOilBarrelLossAllowanceToTwoPercent', N'10.0.11');
+END;
+
+COMMIT;
+GO
+

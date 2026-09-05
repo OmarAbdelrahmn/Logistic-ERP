@@ -21,6 +21,8 @@ This stage contains domain models, EF Core configurations/migrations, Identity, 
 - Employees, relationship/status history, operational assignments, sponsors, sponsorship history, and residency permits.
 - Rider profiles, housing, supervisors, and residence history.
 - Driver licenses, rider/health cards, medical insurance, promissory notes, and their renewal history.
+- Fuel cards for Petro App and Sayara App, rider/employee assignment history, and one updatable usage record per card and month.
+- City-linked maintenance locations, maintenance work orders, FIFO spare-parts/oil inventory, oil-barrel control, vehicle/rider usage history, and Riyadh external-workshop profitability.
 - Client platforms, contracts, official platform-account ownership, encrypted credential versions, registrations, and actual rider-use history.
 - Document types, requirements, private employee document versions, and tags.
 - Roles, permissions, direct grants/denies, scoped access, sessions, temporary credentials, and support access.
@@ -29,7 +31,7 @@ This stage contains domain models, EF Core configurations/migrations, Identity, 
 - Employee status-change requests integrated with status periods.
 - Notifications, exports, saved views, dataset versions, and append-only audit entries.
 
-Vehicle, maintenance, inventory, spare-parts, and fuel models are intentionally held as an approval plan in [docs/vehicle-maintenance-v2-plan.md](docs/vehicle-maintenance-v2-plan.md) before they enter a migration.
+Maintenance, inventory, spare-parts, oil handling, and Riyadh workshop finance are implemented from [docs/vehicle-maintenance-v2-plan.md](docs/vehicle-maintenance-v2-plan.md). Fuel cards remain independent and intentionally have no relationship to the real vehicle records.
 
 ## Data rules
 
@@ -50,7 +52,7 @@ Vehicle, maintenance, inventory, spare-parts, and fuel models are intentionally 
 - Driver-license categories: light transport and motorcycle.
 - Employee document types: residency, driver license, rider card, health card, promissory note, and medical insurance (10 MB default limit).
 - Protected roles: `SYSTEM_ADMIN`, `MANAGER`, and `USER`.
-- Permission catalog: 55 granular permission definitions with minimal role baselines, direct grant/deny support, and client/housing scopes.
+- Permission catalog: 113 granular permission definitions with minimal role baselines, direct grant/deny support, and client/housing scopes.
 
 Future operating cities are ordinary `GlobalCity` + `OperatingCity` records and will be managed through CRUD when that feature is implemented. They are not hard-coded to Jeddah only.
 
@@ -95,7 +97,7 @@ After applying the Identity migrations, local Development startup creates this d
 - Username: `Omar`
 - Temporary password: `P@ssword1234`
 - Role: `SYSTEM_ADMIN`
-- Direct access: all 55 permissions with all client and housing scopes
+- Direct access: all 113 permissions with all client and housing scopes
 - Mandatory password change: enabled
 
 The database record is marked `IsDevelopmentOnly`; production login and session validation reject it even if environments accidentally share a database. The password is never reset after the first creation.
@@ -124,4 +126,7 @@ The private document root is `src/LogisticsERP.Api/wwwroot/private/employee-docu
 - [Vehicle, maintenance, inventory, and fuel V2 plan](docs/vehicle-maintenance-v2-plan.md)
 - [Leave, absence compliance, and employee status V2 plan](docs/leave-absence-status-v2-plan.md)
 - [HR form-template storage and frontend API](docs/hr-form-template-api.md)
+- [Fuel-card and monthly fuel-import API](docs/fuel-card-api.md)
+- [Maintenance, inventory, oil-barrel, and Riyadh workshop API](docs/maintenance-inventory-api.md)
+- [English frontend handoff: maintenance, inventory, oil, and Riyadh workshop](docs/maintenance-frontend-handoff-en.md)
 - [Create users with roles and permissions](docs/user-creation-authorization-api.md)

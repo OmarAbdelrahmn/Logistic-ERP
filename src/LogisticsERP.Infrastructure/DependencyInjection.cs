@@ -20,8 +20,12 @@ using LogisticsERP.Infrastructure.SystemServices;
 using LogisticsERP.Infrastructure.Telecom;
 using LogisticsERP.Infrastructure.Files;
 using LogisticsERP.Infrastructure.Fleet;
+using LogisticsERP.Infrastructure.Fuel;
+using LogisticsERP.Infrastructure.Maintenance;
 using LogisticsERP.Application.Abstractions.Files;
 using LogisticsERP.Application.Features.Fleet;
+using LogisticsERP.Application.Features.Fuel;
+using LogisticsERP.Application.Features.Maintenance;
 using LogisticsERP.Application.Features.Hr;
 using LogisticsERP.Application.Features.Telecom;
 using System.Security.Cryptography;
@@ -81,6 +85,8 @@ public static class DependencyInjection
         services.AddScoped<FleetServiceSupport>();
         services.AddScoped<IFleetService, FleetService>();
         services.AddScoped<IVehicleDailyDistanceService, VehicleDailyDistanceService>();
+        services.AddScoped<IFuelCardService, FuelCardService>();
+        services.AddScoped<IMaintenanceService, MaintenanceService>();
         services.AddScoped<IVehiclePlatformAccountAssignmentService, VehiclePlatformAccountAssignmentService>();
         services.AddScoped<IVehicleFileService, VehicleFileService>();
         services.AddOptions<PdfGenerationOptions>()

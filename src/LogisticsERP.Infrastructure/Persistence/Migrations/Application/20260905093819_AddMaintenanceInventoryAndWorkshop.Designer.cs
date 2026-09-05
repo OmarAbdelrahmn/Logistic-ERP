@@ -4,6 +4,7 @@ using LogisticsERP.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260905093819_AddMaintenanceInventoryAndWorkshop")]
+    partial class AddMaintenanceInventoryAndWorkshop
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -4568,8 +4571,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MechanicEmployeeId");
-
                     b.HasIndex("ReversalOfEntryId");
 
                     b.HasIndex("MaintenanceWorkOrderId", "SourceType");
@@ -5620,218 +5621,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         });
                 });
 
-            modelBuilder.Entity("LogisticsERP.Domain.Entities.Maintenance.OilBarrel", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("BarrelNumber")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(64)");
-
-                    b.Property<DateTimeOffset>("CreatedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid?>("CreatedByUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset?>("DeletedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid?>("DeletedByUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("DeletionReason")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<DateTimeOffset?>("DepletedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid>("InventoryItemId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("InventoryLocationId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<decimal>("MaximumAllowedLossLiters")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)");
-
-                    b.Property<decimal>("NominalCapacityLiters")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)");
-
-                    b.Property<DateTimeOffset?>("OpenedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid?>("OpenedByUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("PackageSequence")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("PurchaseReceiptLineId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("RecordedLossLiters")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)");
-
-                    b.Property<decimal>("RemainingLiters")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("StockCostLayerId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("UnitCostPerLiter")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("decimal(18,6)");
-
-                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid?>("UpdatedByUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BarrelNumber")
-                        .IsUnique();
-
-                    b.HasIndex("InventoryItemId");
-
-                    b.HasIndex("IsDeleted");
-
-                    b.HasIndex("StockCostLayerId");
-
-                    b.HasIndex("InventoryLocationId", "InventoryItemId")
-                        .IsUnique()
-                        .HasFilter("[Status] = 2 AND [IsDeleted] = 0");
-
-                    b.HasIndex("PurchaseReceiptLineId", "PackageSequence")
-                        .IsUnique()
-                        .HasFilter("[IsDeleted] = 0");
-
-                    b.HasIndex("InventoryLocationId", "InventoryItemId", "Status", "OpenedAtUtc");
-
-                    b.ToTable("OilBarrels", "maintenance", t =>
-                        {
-                            t.HasCheckConstraint("CK_OilBarrels_Quantities", "[NominalCapacityLiters] > 0 AND [RemainingLiters] >= 0 AND [RemainingLiters] <= [NominalCapacityLiters] AND [UnitCostPerLiter] >= 0 AND [MaximumAllowedLossLiters] = ROUND([NominalCapacityLiters] * 0.02, 3) AND [RecordedLossLiters] >= 0 AND [RecordedLossLiters] <= [MaximumAllowedLossLiters]");
-
-                            t.HasCheckConstraint("CK_OilBarrels_Status", "([Status] = 1 AND [OpenedAtUtc] IS NULL AND [RemainingLiters] > 0) OR ([Status] = 2 AND [OpenedAtUtc] IS NOT NULL AND [RemainingLiters] > 0) OR ([Status] = 3 AND [OpenedAtUtc] IS NOT NULL AND [RemainingLiters] = 0) OR [Status] = 4");
-                        });
-                });
-
-            modelBuilder.Entity("LogisticsERP.Domain.Entities.Maintenance.OilBarrelLoss", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("CostAmount")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTimeOffset>("CreatedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid?>("CreatedByUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset>("OccurredAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid>("OilBarrelId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("QuantityLiters")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)");
-
-                    b.Property<string>("Reason")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<Guid>("RecordedByUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("StockMovementId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("StockMovementLineId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("StockMovementId");
-
-                    b.HasIndex("StockMovementLineId");
-
-                    b.HasIndex("OilBarrelId", "OccurredAtUtc");
-
-                    b.ToTable("OilBarrelLosses", "maintenance", t =>
-                        {
-                            t.HasCheckConstraint("CK_OilBarrelLosses_Values", "[QuantityLiters] > 0 AND [CostAmount] >= 0");
-                        });
-                });
-
-            modelBuilder.Entity("LogisticsERP.Domain.Entities.Maintenance.OilBarrelUsageAllocation", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset>("CreatedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid?>("CreatedByUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Direction")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("MaintenanceMaterialUsageId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("OilBarrelId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("QuantityLiters")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)");
-
-                    b.Property<Guid?>("ReversalOfAllocationId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OilBarrelId");
-
-                    b.HasIndex("ReversalOfAllocationId");
-
-                    b.HasIndex("MaintenanceMaterialUsageId", "OilBarrelId", "Direction");
-
-                    b.ToTable("OilBarrelUsageAllocations", "maintenance", t =>
-                        {
-                            t.HasCheckConstraint("CK_OilBarrelUsageAllocations_Values", "[QuantityLiters] > 0 AND ([Direction] = 1 AND [ReversalOfAllocationId] IS NULL OR [Direction] = 2 AND [ReversalOfAllocationId] IS NOT NULL)");
-                        });
-                });
-
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Maintenance.OilChangeOperation", b =>
                 {
                     b.Property<Guid>("Id")
@@ -6618,7 +6407,7 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.ToTable("StockMovements", "maintenance", t =>
                         {
-                            t.HasCheckConstraint("CK_StockMovements_Type", "[MovementType] BETWEEN 1 AND 9");
+                            t.HasCheckConstraint("CK_StockMovements_Type", "[MovementType] BETWEEN 1 AND 8");
                         });
                 });
 
@@ -14899,11 +14688,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.Employee", null)
-                        .WithMany()
-                        .HasForeignKey("MechanicEmployeeId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("LogisticsERP.Domain.Entities.Maintenance.ExternalMaintenanceFinancialEntry", null)
                         .WithMany()
                         .HasForeignKey("ReversalOfEntryId")
@@ -15059,74 +14843,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.HasOne("LogisticsERP.Domain.Entities.Fleet.VehicleIssue", null)
                         .WithMany()
                         .HasForeignKey("VehicleIssueId")
-                        .OnDelete(DeleteBehavior.Restrict);
-                });
-
-            modelBuilder.Entity("LogisticsERP.Domain.Entities.Maintenance.OilBarrel", b =>
-                {
-                    b.HasOne("LogisticsERP.Domain.Entities.Maintenance.InventoryItem", null)
-                        .WithMany()
-                        .HasForeignKey("InventoryItemId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("LogisticsERP.Domain.Entities.Maintenance.InventoryLocation", null)
-                        .WithMany()
-                        .HasForeignKey("InventoryLocationId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("LogisticsERP.Domain.Entities.Maintenance.PurchaseReceiptLine", null)
-                        .WithMany()
-                        .HasForeignKey("PurchaseReceiptLineId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("LogisticsERP.Domain.Entities.Maintenance.StockCostLayer", null)
-                        .WithMany()
-                        .HasForeignKey("StockCostLayerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("LogisticsERP.Domain.Entities.Maintenance.OilBarrelLoss", b =>
-                {
-                    b.HasOne("LogisticsERP.Domain.Entities.Maintenance.OilBarrel", null)
-                        .WithMany()
-                        .HasForeignKey("OilBarrelId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("LogisticsERP.Domain.Entities.Maintenance.StockMovement", null)
-                        .WithMany()
-                        .HasForeignKey("StockMovementId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("LogisticsERP.Domain.Entities.Maintenance.StockMovementLine", null)
-                        .WithMany()
-                        .HasForeignKey("StockMovementLineId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("LogisticsERP.Domain.Entities.Maintenance.OilBarrelUsageAllocation", b =>
-                {
-                    b.HasOne("LogisticsERP.Domain.Entities.Maintenance.MaintenanceMaterialUsage", null)
-                        .WithMany()
-                        .HasForeignKey("MaintenanceMaterialUsageId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("LogisticsERP.Domain.Entities.Maintenance.OilBarrel", null)
-                        .WithMany()
-                        .HasForeignKey("OilBarrelId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("LogisticsERP.Domain.Entities.Maintenance.OilBarrelUsageAllocation", null)
-                        .WithMany()
-                        .HasForeignKey("ReversalOfAllocationId")
                         .OnDelete(DeleteBehavior.Restrict);
                 });
 
