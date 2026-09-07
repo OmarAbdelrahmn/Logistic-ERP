@@ -93,6 +93,14 @@ public sealed class MaintenanceInventoryController(IMaintenanceService service) 
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 
+    [HttpGet("receipts")]
+    [RequirePermission(PermissionKeys.Inventory.ReceiptsManage)]
+    public async Task<IActionResult> GetReceipts(CancellationToken cancellationToken)
+    {
+        var result = await service.GetPurchaseReceiptsAsync(cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
     [HttpGet("receipts/{id:guid}")]
     [RequirePermission(PermissionKeys.Inventory.ReceiptsManage)]
     public async Task<IActionResult> GetReceipt(Guid id, CancellationToken cancellationToken)
@@ -155,6 +163,64 @@ public sealed class MaintenanceInventoryController(IMaintenanceService service) 
     public async Task<IActionResult> PostRiderIssue([FromBody] PostRiderInventoryIssueRequest request, CancellationToken cancellationToken)
     {
         var result = await service.PostRiderIssueAsync(request, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpPost("rider-supply-requests")]
+    [RequirePermission(PermissionKeys.Inventory.SupplyRequestsSubmit)]
+    public async Task<IActionResult> CreateRiderSupplyRequest([FromBody] CreateRiderSupplyRequest request, CancellationToken cancellationToken)
+    {
+        var result = await service.CreateRiderSupplyRequestAsync(request, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpGet("my-supply-requests/{id:guid}")]
+    [RequirePermission(PermissionKeys.Inventory.SupplyRequestsSubmit)]
+    public async Task<IActionResult> GetOwnSupplyRequest(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await service.GetOwnSupplyRequestAsync(id, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpGet("supply-requests")]
+    [RequirePermission(PermissionKeys.Inventory.SupplyRequestsRead)]
+    public async Task<IActionResult> GetSupplyRequests([FromQuery] Guid? inventoryLocationId, [FromQuery] Guid? vehicleId,
+        [FromQuery] Guid? riderProfileId, [FromQuery] string? status, CancellationToken cancellationToken)
+    {
+        var result = await service.GetSupplyRequestsAsync(inventoryLocationId, vehicleId, riderProfileId, status, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpGet("supply-requests/{id:guid}")]
+    [RequirePermission(PermissionKeys.Inventory.SupplyRequestsRead)]
+    public async Task<IActionResult> GetSupplyRequest(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await service.GetSupplyRequestAsync(id, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpPost("supply-requests/{id:guid}/approve-and-issue")]
+    [RequirePermission(PermissionKeys.Inventory.SupplyRequestsApprove)]
+    [RequirePermission(PermissionKeys.Inventory.StockMove)]
+    public async Task<IActionResult> ApproveAndIssueSupplyRequest(Guid id, [FromBody] InventorySupplyDecisionRequest request, CancellationToken cancellationToken)
+    {
+        var result = await service.ApproveAndIssueSupplyRequestAsync(id, request, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpPost("supply-requests/{id:guid}/reject")]
+    [RequirePermission(PermissionKeys.Inventory.SupplyRequestsApprove)]
+    public async Task<IActionResult> RejectSupplyRequest(Guid id, [FromBody] InventorySupplyDecisionRequest request, CancellationToken cancellationToken)
+    {
+        var result = await service.RejectSupplyRequestAsync(id, request, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpPost("supply-requests/{id:guid}/cancel")]
+    [RequirePermission(PermissionKeys.Inventory.SupplyRequestsSubmit)]
+    public async Task<IActionResult> CancelSupplyRequest(Guid id, [FromBody] InventorySupplyDecisionRequest request, CancellationToken cancellationToken)
+    {
+        var result = await service.CancelSupplyRequestAsync(id, request, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 }

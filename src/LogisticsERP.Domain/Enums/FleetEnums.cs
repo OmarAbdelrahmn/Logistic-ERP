@@ -64,5 +64,14 @@ public enum VehicleIssueStatus { Open = 1, UnderReview = 2, Resolved = 3, Closed
 public enum VehicleIssueEventType { Reported = 1, ReviewStarted = 2, Resolved = 3, Closed = 4, Rejected = 5, Corrected = 6 }
 public enum VehicleAccidentStatus { Reported = 1, Finalized = 2, Closed = 3 }
 public enum VehicleAccidentSeverity { Minor = 1, Moderate = 2, Serious = 3, Critical = 4 }
-public enum VehicleAccidentEventType { Reported = 1, EvidenceAdded = 2, Finalized = 3, Corrected = 4, Closed = 5 }
-public enum VehicleAccidentEvidenceType { Image = 1, UploadedReport = 2, Other = 3 }
+public enum VehicleAccidentEventType { Reported = 1, EvidenceAdded = 2, Finalized = 3, Corrected = 4, Closed = 5, WorkflowAction = 6, InstallmentAdded = 7 }
+public enum VehicleAccidentEvidenceType
+{
+    Image = 1, UploadedReport = 2, Other = 3, NajmReport = 4, DamagePhoto = 5,
+    DamagePromissoryNote = 6, ClaimOpeningFeeReceipt = 7, ClaimSubmissionReport = 8,
+    AssessmentReceipt = 9, InsuranceDecision = 10, PaymentReceipt = 11,
+    TransferReceipt = 12, RepairDirection = 13, RepairCompletion = 14,
+    ReinspectionReport = 15, TotalLossConfirmation = 16, VehicleCollectionReceipt = 17,
+    ValuationReceipt = 18, TowingReceipt = 19, InstallmentReceipt = 20,
+    InstallmentRefundRequest = 21, InstallmentRefundReceipt = 22
+}

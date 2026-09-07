@@ -333,6 +333,35 @@ Response is the updated work order. Expected flow is Open → InProgress → Com
 
 ### Material usage, reversal, and audit history
 
+### Batch spare-part usage
+
+`POST /api/SparePart/spare-parts?date=2026-09-06T10:00:00`
+
+```json
+{
+  "usages": [
+    { "sparePartId": "inventory-item-guid", "vehicleNumber": "VH-1001", "quantityUsed": 2 },
+    { "sparePartId": "inventory-item-guid", "vehicleNumber": "VH-1002", "quantityUsed": 1 }
+  ]
+}
+```
+
+`usages` must be non-empty. Each line is processed independently, so the endpoint returns HTTP 200 with a per-line result even when one or more lines fail:
+
+```json
+{
+  "totalProcessed": 2,
+  "successCount": 1,
+  "failureCount": 1,
+  "details": [
+    { "success": true, "itemName": "Oil Filter", "targetIdentifier": "VH-1001", "message": "Usage recorded successfully" },
+    { "success": false, "itemName": "Brake Pad", "targetIdentifier": "VH-1002", "message": "Insufficient quantity available" }
+  ]
+}
+```
+
+The ERP uses GUID inventory-item IDs, so `sparePartId` is the GUID returned by the inventory-items API, not a legacy numeric ID. The vehicle number resolves to its most recently opened or in-progress maintenance work order. That work order must have exactly one active inventory location; otherwise only that line fails and the remaining lines continue.
+
 `POST /api/maintenance-work-orders/{workOrderId}/materials`
 
 ```json

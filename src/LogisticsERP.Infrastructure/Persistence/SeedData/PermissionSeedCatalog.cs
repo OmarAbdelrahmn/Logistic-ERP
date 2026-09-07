@@ -142,7 +142,10 @@ internal static class PermissionSeedCatalog
         Create(110, PermissionKeys.Inventory.StockAdjust, "Inventory", "عكس حركات المخزون", "Adjust inventory stock", "عكس الاستخدامات مع استعادة طبقات التكلفة الأصلية.", "Reverse usage into its original cost layers.", sensitive: true, highTrust: true),
         Create(111, PermissionKeys.Inventory.CostLayersRead, "Inventory", "عرض طبقات تكلفة المخزون", "Read inventory cost layers", "عرض الأسعار والكميات المتبقية لكل دفعة FIFO.", "View FIFO layer prices and remaining quantities.", sensitive: true, highTrust: true),
         Create(112, PermissionKeys.Inventory.ReceiptsManage, "Inventory", "إدارة فواتير الشراء", "Manage purchase receipts", "ترحيل الفاتورة وملفها وطبقات التكلفة.", "Post purchase receipts, bill files, and cost layers.", sensitive: true),
-        Create(113, PermissionKeys.Inventory.ReturnsManage, "Inventory", "إدارة مرتجعات المورد", "Manage supplier returns", "إرجاع المخزون إلى المورد من طبقة التكلفة الأصلية.", "Return stock to the supplier from its original cost layer.", sensitive: true)
+        Create(113, PermissionKeys.Inventory.ReturnsManage, "Inventory", "إدارة مرتجعات المورد", "Manage supplier returns", "إرجاع المخزون إلى المورد من طبقة التكلفة الأصلية.", "Return stock to the supplier from its original cost layer.", sensitive: true),
+        Create(114, PermissionKeys.Inventory.SupplyRequestsSubmit, "Inventory", "إرسال طلبات الصرف", "Submit supply requests", "إرسال طلب موحد لقطع صيانة مركبة أو عهدة رايدر دون خصم المخزون.", "Submit a vehicle-maintenance or rider supply request without deducting stock."),
+        Create(115, PermissionKeys.Inventory.SupplyRequestsRead, "Inventory", "عرض طلبات الصرف", "Read supply requests", "عرض طابور طلبات الصرف وحالة الموافقة والمركبة أو الرايدر المرتبط.", "View the supply-request queue, approval state, and related vehicle or rider."),
+        Create(116, PermissionKeys.Inventory.SupplyRequestsApprove, "Inventory", "اعتماد وتسليم طلبات الصرف", "Approve and issue supply requests", "اعتماد الطلب وتسليم الأصناف فعليًا وترحيل خصم FIFO في عملية واحدة.", "Approve a request, physically issue its items, and post FIFO stock deduction atomically.", sensitive: true, highTrust: true)
     ];
 
     private static PermissionSeed Create(

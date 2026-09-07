@@ -24,7 +24,7 @@ internal sealed class GlobalExceptionHandler(
         }
 
         var system = ResolveSystem(httpContext.Request.Path);
-        var includeExceptionDetails = IsFleetPath(httpContext.Request.Path);
+        var includeExceptionDetails = IsFleetPath(httpContext.Request.Path) || IsPurchaseReceiptPath(httpContext.Request.Path);
         var (status, title, detail, type, errorCode) = exception switch
         {
             DbUpdateConcurrencyException => (
@@ -109,5 +109,11 @@ internal sealed class GlobalExceptionHandler(
         return value.StartsWith("/api/vehicle", StringComparison.OrdinalIgnoreCase)
             || value.Contains("/vehicle-timeline", StringComparison.OrdinalIgnoreCase)
             || value.Contains("/promissory-files", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsPurchaseReceiptPath(PathString path)
+    {
+        var value = path.Value ?? string.Empty;
+        return value.StartsWith("/api/maintenance-inventory/receipts", StringComparison.OrdinalIgnoreCase);
     }
 }

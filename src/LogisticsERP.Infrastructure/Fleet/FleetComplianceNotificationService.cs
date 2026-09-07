@@ -89,6 +89,7 @@ internal sealed class FleetComplianceNotificationService(
                 SourceEntityId = sourceId,
                 DeepLink = $"/fleet/vehicles/{sourceId}",
                 ScopeSnapshotJson = "{}",
+                AudiencePermissionKeysJson = System.Text.Json.JsonSerializer.Serialize(new[] { permission }),
                 DeduplicationKey = key,
                 VisibleAtUtc = now
             });

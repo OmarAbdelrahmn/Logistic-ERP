@@ -461,6 +461,54 @@ internal sealed class RiderInventoryIssueLineConfiguration : IEntityTypeConfigur
     }
 }
 
+internal sealed class InventorySupplyRequestConfiguration : IEntityTypeConfiguration<InventorySupplyRequest>
+{
+    public void Configure(EntityTypeBuilder<InventorySupplyRequest> builder)
+    {
+        builder.ConfigureOperational("SupplyRequests", "maintenance");
+        builder.Property(x => x.RequestNumber).HasMaxLength(64).IsUnicode(false).IsRequired();
+        builder.Property(x => x.DecisionNotes).HasMaxLength(2000);
+        builder.Property(x => x.Notes).HasMaxLength(2000);
+        builder.Property(x => x.TotalIssuedCost).HasPrecision(18, 2);
+        builder.HasOne<InventoryLocation>().WithMany().HasForeignKey(x => x.InventoryLocationId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<MaintenanceWorkOrder>().WithMany().HasForeignKey(x => x.MaintenanceWorkOrderId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<Vehicle>().WithMany().HasForeignKey(x => x.VehicleId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<RiderProfile>().WithMany().HasForeignKey(x => x.RiderProfileId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<RiderInventoryIssue>().WithMany().HasForeignKey(x => x.RiderInventoryIssueId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(x => x.RequestNumber).IsUnique();
+        builder.HasIndex(x => new { x.InventoryLocationId, x.Status, x.RequestedAtUtc });
+        builder.HasIndex(x => x.MaintenanceWorkOrderId).IsUnique().HasFilter("[MaintenanceWorkOrderId] IS NOT NULL AND [IsDeleted] = 0");
+        builder.HasIndex(x => new { x.RiderProfileId, x.RequestedAtUtc });
+        builder.ToTable(table =>
+        {
+            table.HasCheckConstraint("CK_InventorySupplyRequests_Subject", "([SubjectType] = 1 AND [MaintenanceWorkOrderId] IS NOT NULL AND [VehicleId] IS NOT NULL AND [RiderProfileId] IS NULL) OR ([SubjectType] = 2 AND [MaintenanceWorkOrderId] IS NULL AND [VehicleId] IS NULL AND [RiderProfileId] IS NOT NULL)");
+            table.HasCheckConstraint("CK_InventorySupplyRequests_Status", "[Status] BETWEEN 1 AND 4");
+            table.HasCheckConstraint("CK_InventorySupplyRequests_Cost", "[TotalIssuedCost] >= 0");
+            table.HasCheckConstraint("CK_InventorySupplyRequests_Issuance", "([Status] = 2 AND [DecidedAtUtc] IS NOT NULL AND [DecidedByUserId] IS NOT NULL AND [IssuedAtUtc] IS NOT NULL AND [IssuedByUserId] IS NOT NULL) OR ([Status] <> 2 AND [IssuedAtUtc] IS NULL AND [IssuedByUserId] IS NULL)");
+        });
+    }
+}
+
+internal sealed class InventorySupplyRequestLineConfiguration : IEntityTypeConfiguration<InventorySupplyRequestLine>
+{
+    public void Configure(EntityTypeBuilder<InventorySupplyRequestLine> builder)
+    {
+        builder.ConfigureOperational("SupplyRequestLines", "maintenance");
+        builder.Property(x => x.RequestedQuantity).HasPrecision(18, 3);
+        builder.Property(x => x.IssuedQuantity).HasPrecision(18, 3);
+        builder.Property(x => x.IssuedCost).HasPrecision(18, 2);
+        builder.Property(x => x.Notes).HasMaxLength(1000);
+        builder.HasOne<InventorySupplyRequest>().WithMany().HasForeignKey(x => x.InventorySupplyRequestId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<InventoryItem>().WithMany().HasForeignKey(x => x.InventoryItemId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<MaintenanceMaterialUsage>().WithMany().HasForeignKey(x => x.MaintenanceMaterialUsageId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<RiderInventoryIssueLine>().WithMany().HasForeignKey(x => x.RiderInventoryIssueLineId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(x => new { x.InventorySupplyRequestId, x.InventoryItemId }).IsUnique().HasFilter("[IsDeleted] = 0");
+        builder.ToTable(table => table.HasCheckConstraint(
+            "CK_InventorySupplyRequestLines_Values",
+            "[RequestedQuantity] > 0 AND [IssuedQuantity] >= 0 AND [IssuedQuantity] <= [RequestedQuantity] AND [IssuedCost] >= 0"));
+    }
+}
+
 internal sealed class MaintenanceWorkOrderConfiguration : IEntityTypeConfiguration<MaintenanceWorkOrder>
 {
     public void Configure(EntityTypeBuilder<MaintenanceWorkOrder> builder)
@@ -484,6 +532,10 @@ internal sealed class MaintenanceWorkOrderConfiguration : IEntityTypeConfigurati
         builder.HasIndex(x => x.WorkOrderNumber).IsUnique();
         builder.HasIndex(x => new { x.MaintenanceLocationId, x.Status, x.OpenedAtUtc });
         builder.HasIndex(x => new { x.VehicleId, x.OpenedAtUtc });
+        builder.HasIndex(x => x.VehicleId)
+            .IsUnique()
+            .HasDatabaseName("UX_MaintenanceWorkOrders_ActiveVehicle")
+            .HasFilter("[VehicleId] IS NOT NULL AND [Status] IN (1, 2, 3) AND [IsDeleted] = 0");
         builder.ToTable(table =>
         {
             table.HasCheckConstraint("CK_MaintenanceWorkOrders_Subject", "([ServiceSubjectType] = 1 AND [VehicleId] IS NOT NULL) OR ([ServiceSubjectType] = 2 AND [VehicleId] IS NULL AND [VehicleIssueId] IS NULL)");

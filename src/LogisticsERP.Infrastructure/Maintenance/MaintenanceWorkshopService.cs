@@ -5,11 +5,85 @@ using LogisticsERP.Domain.Entities.Maintenance;
 using LogisticsERP.Domain.Enums;
 using LogisticsERP.Domain.Maintenance;
 using Microsoft.EntityFrameworkCore;
+using System.Text;
 
 namespace LogisticsERP.Infrastructure.Maintenance;
 
 internal sealed partial class MaintenanceService
 {
+    public async Task<Result<BatchSparePartUsageResponse>> PostBatchSparePartUsageAsync(DateTimeOffset usedAtUtc, BatchSparePartUsageRequest request, CancellationToken cancellationToken = default)
+    {
+        if (usedAtUtc == default || request.Usages is null || request.Usages.Count == 0)
+            return Result.Failure<BatchSparePartUsageResponse>(MaintenanceErrors.InvalidRequest);
+
+        var details = new List<BatchSparePartUsageDetailResponse>(request.Usages.Count);
+        foreach (var usage in request.Usages)
+        {
+            var targetIdentifier = usage.VehicleNumber?.Trim() ?? string.Empty;
+            var itemName = await dbContext.InventoryItems.AsNoTracking()
+                .Where(x => x.Id == usage.SparePartId)
+                .Select(x => x.NameEn != string.Empty ? x.NameEn : x.NameAr)
+                .SingleOrDefaultAsync(cancellationToken) ?? "Unknown spare part";
+
+            if (usage.SparePartId == Guid.Empty || string.IsNullOrWhiteSpace(targetIdentifier) || usage.QuantityUsed <= 0)
+            {
+                details.Add(new(false, itemName, targetIdentifier, "Spare part, vehicle number, and quantity used must be provided."));
+                continue;
+            }
+
+            var normalizedVehicleNumber = NormalizeVehicleNumber(targetIdentifier);
+            var vehicleId = await dbContext.Vehicles.AsNoTracking()
+                .Where(x => x.NormalizedAssetNumber == normalizedVehicleNumber)
+                .Select(x => (Guid?)x.Id)
+                .SingleOrDefaultAsync(cancellationToken);
+            if (!vehicleId.HasValue)
+            {
+                details.Add(new(false, itemName, targetIdentifier, "Vehicle was not found."));
+                continue;
+            }
+
+            var workOrder = await dbContext.MaintenanceWorkOrders.AsNoTracking()
+                .Where(x => x.VehicleId == vehicleId.Value
+                    && (x.Status == MaintenanceWorkOrderStatus.Open || x.Status == MaintenanceWorkOrderStatus.InProgress))
+                .OrderByDescending(x => x.OpenedAtUtc)
+                .Select(x => new { x.Id, x.MaintenanceLocationId })
+                .FirstOrDefaultAsync(cancellationToken);
+            if (workOrder is null)
+            {
+                details.Add(new(false, itemName, targetIdentifier, "No active maintenance work order was found for this vehicle."));
+                continue;
+            }
+
+            var inventoryLocations = await dbContext.InventoryLocations.AsNoTracking()
+                .Where(x => x.MaintenanceLocationId == workOrder.MaintenanceLocationId && x.Status == CatalogStatus.Active)
+                .Select(x => x.Id)
+                .Take(2)
+                .ToArrayAsync(cancellationToken);
+            if (inventoryLocations.Length != 1)
+            {
+                details.Add(new(false, itemName, targetIdentifier, "The work order must have exactly one active inventory location."));
+                continue;
+            }
+
+            var result = await PostMaterialUsageAsync(
+                workOrder.Id,
+                new PostMaterialUsageRequest(usage.SparePartId, inventoryLocations[0], usage.QuantityUsed, MaintenanceUsageType.SparePart, usedAtUtc, null),
+                cancellationToken);
+
+            // A failed item rolls back its transaction. Clear any entities EF may still be tracking
+            // so they cannot leak into the next independently processed item.
+            if (result.IsFailure)
+                dbContext.ChangeTracker.Clear();
+
+            details.Add(result.IsSuccess
+                ? new BatchSparePartUsageDetailResponse(true, itemName, targetIdentifier, "Usage recorded successfully")
+                : new BatchSparePartUsageDetailResponse(false, itemName, targetIdentifier, BatchUsageMessage(result.Error.Code)));
+        }
+
+        var successCount = details.Count(x => x.Success);
+        return Result.Success(new BatchSparePartUsageResponse(details.Count, successCount, details.Count - successCount, details));
+    }
+
     public async Task<Result<MaintenanceMaterialUsageResponse>> PostMaterialUsageAsync(Guid workOrderId, PostMaterialUsageRequest request, CancellationToken cancellationToken = default)
     {
         var actor = currentUser.UserId;
@@ -25,6 +99,8 @@ internal sealed partial class MaintenanceService
                 await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
                 var workOrder = await dbContext.MaintenanceWorkOrders.SingleOrDefaultAsync(x => x.Id == workOrderId, cancellationToken);
                 if (workOrder is null) return Result.Failure<Guid>(MaintenanceErrors.NotFound);
+                if (await dbContext.InventorySupplyRequests.AsNoTracking().AnyAsync(x => x.MaintenanceWorkOrderId == workOrderId, cancellationToken))
+                    return Result.Failure<Guid>(MaintenanceErrors.SupplyApprovalRequired);
                 var posting = await PostUsageTrackedAsync(workOrder, usageId, request.InventoryItemId, request.InventoryLocationId, request.Quantity, request.UsageType, request.UsedAtUtc, TrimOrNull(request.Notes), actor.Value, StockMovementType.MaintenanceUsage, cancellationToken);
                 if (posting.IsFailure) return Result.Failure<Guid>(posting.Error);
                 await dbContext.SaveChangesAsync(cancellationToken);
@@ -101,7 +177,9 @@ internal sealed partial class MaintenanceService
                 var balance = await GetOrCreateBalanceAsync(original.InventoryItemId, original.InventoryLocationId, cancellationToken);
                 AddToBalance(balance, original.Quantity, original.TotalCost, request.ReversedAtUtc);
                 workOrder.ActualMaterialCost -= original.TotalCost;
-                workOrder.ActualTotalCost = workOrder.ActualMaterialCost + workOrder.ActualLaborCost + workOrder.ActualOtherCost;
+                workOrder.ActualTotalCost = workOrder.ServiceSubjectType == MaintenanceServiceSubjectType.CompanyVehicle
+                    ? workOrder.ActualMaterialCost
+                    : workOrder.ActualMaterialCost + workOrder.ActualLaborCost + workOrder.ActualOtherCost;
                 if (workOrder.ServiceSubjectType == MaintenanceServiceSubjectType.ExternalVehicle)
                 {
                     var originalEntryId = await dbContext.ExternalMaintenanceFinancialEntries.AsNoTracking()
@@ -160,6 +238,10 @@ internal sealed partial class MaintenanceService
                 if (!MatchesRowVersion(workOrder.RowVersion, request.WorkOrderRowVersion)) return Result.Failure(MaintenanceErrors.ConcurrencyConflict);
                 if (workOrder.MaintenanceType != MaintenanceType.OilChange || workOrder.Status is MaintenanceWorkOrderStatus.Completed or MaintenanceWorkOrderStatus.Closed or MaintenanceWorkOrderStatus.Cancelled)
                     return Result.Failure(MaintenanceErrors.InvalidState);
+                if (workOrder.ServiceSubjectType == MaintenanceServiceSubjectType.CompanyVehicle && request.LaborCost > 0)
+                    return Result.Failure(MaintenanceErrors.LaborCostExternalVehiclesOnly);
+                if (workOrder.ServiceSubjectType == MaintenanceServiceSubjectType.CompanyVehicle)
+                    return Result.Failure(MaintenanceErrors.OilChangeWarehouseApprovalRequired);
                 if (await dbContext.OilChangeOperations.AsNoTracking().AnyAsync(x => x.MaintenanceWorkOrderId == workOrderId, cancellationToken))
                     return Result.Failure(MaintenanceErrors.InvalidState);
 
@@ -434,13 +516,41 @@ internal sealed partial class MaintenanceService
         workOrder.Status = MaintenanceWorkOrderStatus.InProgress;
         workOrder.StartedAtUtc ??= usedAtUtc;
         workOrder.ActualMaterialCost += total;
-        workOrder.ActualTotalCost = workOrder.ActualMaterialCost + workOrder.ActualLaborCost + workOrder.ActualOtherCost;
+        workOrder.ActualTotalCost = workOrder.ServiceSubjectType == MaintenanceServiceSubjectType.CompanyVehicle
+            ? workOrder.ActualMaterialCost
+            : workOrder.ActualMaterialCost + workOrder.ActualLaborCost + workOrder.ActualOtherCost;
         if (workOrder.ServiceSubjectType == MaintenanceServiceSubjectType.ExternalVehicle)
             AddExternalFinancialEntry(workOrder.Id, ExternalFinancialEntryType.Expense, ExternalFinancialSourceType.InventoryCost, usageId, usedAtUtc, total, 0, $"FIFO inventory cost: {item.Sku}", actor);
         else if (workOrder.VehicleId.HasValue)
             AddVehicleExpense(usage, usageId, usedAtUtc, total, $"Maintenance material: {item.Sku}", null);
         return Result.Success(new UsagePosting(usage, total));
     }
+
+    private static string NormalizeVehicleNumber(string value)
+    {
+        var normalized = value.Trim().Normalize(NormalizationForm.FormKC);
+        var builder = new StringBuilder(normalized.Length);
+        foreach (var character in normalized)
+        {
+            if (char.IsWhiteSpace(character) || character is '-' or '_' or '/') continue;
+            builder.Append(character switch
+            {
+                '\u0660' => '0', '\u0661' => '1', '\u0662' => '2', '\u0663' => '3', '\u0664' => '4',
+                '\u0665' => '5', '\u0666' => '6', '\u0667' => '7', '\u0668' => '8', '\u0669' => '9',
+                _ => char.ToUpperInvariant(character)
+            });
+        }
+        return builder.ToString();
+    }
+
+    private static string BatchUsageMessage(string errorCode) => errorCode switch
+    {
+        "maintenance.insufficient_stock" => "Insufficient quantity available",
+        "maintenance.invalid_inventory_item" => "Spare part was not found or is inactive",
+        "maintenance.invalid_location" => "The inventory location is not valid for this work order",
+        "maintenance.invalid_state" => "The maintenance work order is no longer active",
+        _ => "Usage could not be recorded"
+    };
 
     private async Task<Result<ExternalFinancialEntryResponse>> PostExternalFinancialAsync(Guid workOrderId, ExternalFinancialEntryType entryType, ExternalFinancialSourceType sourceType, decimal amountBeforeTax, decimal taxAmount, DateTimeOffset occurredAt, string description, Guid? mechanicEmployeeId, string? externalMechanicName, CancellationToken cancellationToken)
     {

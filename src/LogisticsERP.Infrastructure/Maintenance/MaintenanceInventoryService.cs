@@ -56,8 +56,13 @@ internal sealed partial class MaintenanceService
         if (!IsBillDocument(billFile)) return Result.Failure<PurchaseReceiptResponse>(MaintenanceErrors.InvalidBillFile);
         if (!await dbContext.MaintenanceSuppliers.AsNoTracking().AnyAsync(x => x.Id == request.SupplierId && x.Status == CatalogStatus.Active, cancellationToken))
             return Result.Failure<PurchaseReceiptResponse>(MaintenanceErrors.NotFound);
-        var location = await GetActiveInventoryLocationAsync(request.InventoryLocationId, cancellationToken);
+        // The receipt form presents maintenance sites (for example, "Jeddah Warehouse")
+        // while stock is posted to their child inventory locations.  Accept the site ID only
+        // when it identifies exactly one active inventory location; this preserves the
+        // unambiguous inventory-location contract for sites with more than one stock area.
+        var location = await ResolveReceiptInventoryLocationAsync(request.InventoryLocationId, cancellationToken);
         if (location is null) return Result.Failure<PurchaseReceiptResponse>(MaintenanceErrors.InvalidLocation);
+        request = request with { InventoryLocationId = location.Id };
         if (!string.IsNullOrWhiteSpace(request.SupplierInvoiceNumber)
             && await dbContext.PurchaseReceipts.AsNoTracking().AnyAsync(x => x.SupplierId == request.SupplierId && x.SupplierInvoiceNumber == request.SupplierInvoiceNumber.Trim(), cancellationToken))
             return Result.Failure<PurchaseReceiptResponse>(MaintenanceErrors.Duplicate);
@@ -77,6 +82,7 @@ internal sealed partial class MaintenanceService
             var postResult = await strategy.ExecuteAsync(async () =>
             {
                 await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+                var costLayerSourceLinks = new List<(StockCostLayer Layer, Guid ReceiptLineId, Guid MovementLineId)>();
                 var movementId = Guid.CreateVersion7();
                 var movement = new StockMovement
                 {
@@ -129,13 +135,14 @@ internal sealed partial class MaintenanceService
                         TotalCost = valuation,
                         LotNumber = TrimOrNull(requestLine.LotNumber)
                     });
-                    dbContext.StockCostLayers.Add(new StockCostLayer
+                    var costLayer = new StockCostLayer
                     {
                         Id = layerId,
                         InventoryItemId = item.Id,
                         InventoryLocationId = request.InventoryLocationId,
-                        SourceReceiptLineId = lineId,
-                        SourceMovementLineId = movementLineId,
+                        // Both source links are optional.  Populate them after the first save:
+                        // the receipt line and movement line already reference this layer,
+                        // so setting them here would create a circular insert dependency.
                         ReceivedAtUtc = request.ReceivedAtUtc,
                         OriginalSequence = request.ReceivedAtUtc.UtcTicks + index,
                         OriginalQuantity = baseQuantity,
@@ -145,7 +152,9 @@ internal sealed partial class MaintenanceService
                         OriginalTotalCost = valuation,
                         LotNumber = TrimOrNull(requestLine.LotNumber),
                         ExpiryDate = requestLine.ExpiryDate
-                    });
+                    };
+                    dbContext.StockCostLayers.Add(costLayer);
+                    costLayerSourceLinks.Add((costLayer, lineId, movementLineId));
                     dbContext.PurchaseReceiptLines.Add(new PurchaseReceiptLine
                     {
                         Id = lineId,
@@ -214,6 +223,13 @@ internal sealed partial class MaintenanceService
                     UploadedAtUtc = UtcNow
                 });
                 await dbContext.SaveChangesAsync(cancellationToken);
+
+                foreach (var (layer, receiptLineId, movementLineId) in costLayerSourceLinks)
+                {
+                    layer.SourceReceiptLineId = receiptLineId;
+                    layer.SourceMovementLineId = movementLineId;
+                }
+                await dbContext.SaveChangesAsync(cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
                 return Result.Success(receiptId);
             });
@@ -241,6 +257,26 @@ internal sealed partial class MaintenanceService
         }
 
         return await GetPurchaseReceiptAsync(receiptId, cancellationToken);
+    }
+
+    public async Task<Result<IReadOnlyList<PurchaseReceiptResponse>>> GetPurchaseReceiptsAsync(CancellationToken cancellationToken = default)
+    {
+        var receiptIds = await dbContext.PurchaseReceipts.AsNoTracking()
+            .OrderByDescending(x => x.ReceivedAtUtc)
+            .ThenByDescending(x => x.CreatedAtUtc)
+            .Take(500)
+            .Select(x => x.Id)
+            .ToArrayAsync(cancellationToken);
+
+        var receipts = new List<PurchaseReceiptResponse>(receiptIds.Length);
+        foreach (var receiptId in receiptIds)
+        {
+            var result = await GetPurchaseReceiptAsync(receiptId, cancellationToken);
+            if (result.IsFailure) return Result.Failure<IReadOnlyList<PurchaseReceiptResponse>>(result.Error);
+            receipts.Add(result.Value!);
+        }
+
+        return Result.Success<IReadOnlyList<PurchaseReceiptResponse>>(receipts);
     }
 
     public async Task<Result<PurchaseReceiptResponse>> GetPurchaseReceiptAsync(Guid id, CancellationToken cancellationToken = default)
@@ -468,6 +504,24 @@ internal sealed partial class MaintenanceService
                       join maintenance in dbContext.MaintenanceLocations.AsNoTracking() on inventory.MaintenanceLocationId equals maintenance.Id
                       where inventory.Id == id && inventory.Status == CatalogStatus.Active && maintenance.Status == CatalogStatus.Active && maintenance.InventoryEnabled
                       select inventory).SingleOrDefaultAsync(cancellationToken);
+    }
+
+    private async Task<InventoryLocation?> ResolveReceiptInventoryLocationAsync(Guid selectedLocationId, CancellationToken cancellationToken)
+    {
+        var inventoryLocation = await GetActiveInventoryLocationAsync(selectedLocationId, cancellationToken);
+        if (inventoryLocation is not null) return inventoryLocation;
+
+        var matchingLocations = await (from inventory in dbContext.InventoryLocations.AsNoTracking()
+                                       join maintenance in dbContext.MaintenanceLocations.AsNoTracking() on inventory.MaintenanceLocationId equals maintenance.Id
+                                       where maintenance.Id == selectedLocationId
+                                           && inventory.Status == CatalogStatus.Active
+                                           && maintenance.Status == CatalogStatus.Active
+                                           && maintenance.InventoryEnabled
+                                       select inventory)
+            .Take(2)
+            .ToArrayAsync(cancellationToken);
+
+        return matchingLocations.Length == 1 ? matchingLocations[0] : null;
     }
 
     private async Task<StockBalance> GetOrCreateBalanceAsync(Guid itemId, Guid locationId, CancellationToken cancellationToken)

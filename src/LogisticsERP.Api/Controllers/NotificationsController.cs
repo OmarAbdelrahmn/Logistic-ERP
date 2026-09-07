@@ -13,18 +13,28 @@ public sealed class NotificationsController(INotificationService service) : Cont
     [HttpGet]
     [RequirePermission(PermissionKeys.Reporting.NotificationsRead)]
     public async Task<IActionResult> GetMine([FromQuery] bool unreadOnly = false, [FromQuery] int pageSize = 50,
-        [FromQuery] string? cursor = null, CancellationToken cancellationToken = default)
+        [FromQuery] string? cursor = null, [FromQuery] string[]? permissions = null, CancellationToken cancellationToken = default)
     {
-        var result = await service.GetMineAsync(unreadOnly, pageSize, cursor, cancellationToken);
+        var requested = Request.Query.ContainsKey("permissions") ? permissions ?? [] : null;
+        var result = await service.GetMineAsync(unreadOnly, pageSize, cursor, requested, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 
     [HttpGet("unread-count")]
     [RequirePermission(PermissionKeys.Reporting.NotificationsRead)]
-    public async Task<IActionResult> UnreadCount(CancellationToken cancellationToken)
+    public async Task<IActionResult> UnreadCount([FromQuery] string[]? permissions = null, CancellationToken cancellationToken = default)
     {
-        var result = await service.GetUnreadCountAsync(cancellationToken);
+        var requested = Request.Query.ContainsKey("permissions") ? permissions ?? [] : null;
+        var result = await service.GetUnreadCountAsync(requested, cancellationToken);
         return result.IsSuccess ? Ok(new { Count = result.Value }) : result.ToProblem(HttpContext);
+    }
+
+    [HttpPost("query")]
+    [RequirePermission(PermissionKeys.Reporting.NotificationsRead)]
+    public async Task<IActionResult> Query([FromBody] NotificationQueryRequest request, CancellationToken cancellationToken)
+    {
+        var result = await service.QueryAsync(request, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 
     [HttpPost]
@@ -43,4 +53,3 @@ public sealed class NotificationsController(INotificationService service) : Cont
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 }
-

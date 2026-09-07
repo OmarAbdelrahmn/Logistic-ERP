@@ -96,6 +96,8 @@ public static class DependencyInjection
             .ValidateOnStart();
         services.AddSingleton<IAccidentPdfGenerator, AccidentPdfGenerator>();
         services.AddScoped<IVehicleAccidentService, VehicleAccidentService>();
+        services.AddScoped<IAccidentWorkflowService, VehicleAccidentService>();
+        services.AddScoped<IAccidentNotificationService, AccidentNotificationService>();
         services.AddScoped<IFleetComplianceNotificationService, FleetComplianceNotificationService>();
         services.AddSingleton<ISensitiveValueProtector>(provider => new SensitiveValueProtector(
             ResolveSensitiveDataKey(configuration, provider.GetRequiredService<Microsoft.Extensions.Hosting.IHostEnvironment>().IsDevelopment())));

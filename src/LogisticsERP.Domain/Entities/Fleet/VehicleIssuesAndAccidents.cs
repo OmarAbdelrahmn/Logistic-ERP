@@ -96,6 +96,11 @@ public sealed class VehicleAccidentEvent : HistoryEntity
 
 public sealed class VehicleAccidentAttachment : AuditableEntity
 {
+    public string? Description { get; set; }
+    public string? FromLocation { get; set; }
+    public string? ToLocation { get; set; }
+    public DateTimeOffset? TransportedAtUtc { get; set; }
+    public decimal? Amount { get; set; }
     public Guid VehicleAccidentId { get; set; }
     public VehicleAccidentEvidenceType EvidenceType { get; set; }
     public string OriginalFileName { get; set; } = string.Empty;

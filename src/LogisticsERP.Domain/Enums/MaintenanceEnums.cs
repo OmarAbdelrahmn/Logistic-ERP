@@ -19,6 +19,8 @@ public enum StockMovementType
     OilLoss = 9
 }
 public enum InventoryDocumentStatus { Posted = 1, Reversed = 2 }
+public enum InventorySupplyRequestSubjectType { VehicleMaintenance = 1, Rider = 2 }
+public enum InventorySupplyRequestStatus { PendingWarehouseApproval = 1, ApprovedAndIssued = 2, Rejected = 3, Cancelled = 4 }
 public enum MaintenanceUsageType { SparePart = 1, Oil = 2, OilFilter = 3, Consumable = 4, ExternalPartSale = 5 }
 public enum MaintenanceUsageDirection { Issue = 1, Reversal = 2 }
 public enum InventoryAttributionStatus { AssignedRider = 1, Unassigned = 2, ExternalVehicle = 3 }

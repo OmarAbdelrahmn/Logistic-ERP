@@ -20,7 +20,8 @@ public sealed record NotificationResponse(
     DateTimeOffset? ReadAtUtc,
     DateTimeOffset? AcknowledgedAtUtc,
     DateTimeOffset? ArchivedAtUtc,
-    string RowVersion);
+    string RowVersion,
+    IReadOnlyList<string>? PermissionKeys = null);
 
 public sealed record CreateNotificationRequest(
     Guid RecipientUserId,
@@ -36,14 +37,18 @@ public sealed record CreateNotificationRequest(
     string? ScopeSnapshotJson,
     string DeduplicationKey,
     DateTimeOffset? VisibleAtUtc,
-    DateTimeOffset? ExpiresAtUtc);
+    DateTimeOffset? ExpiresAtUtc,
+    IReadOnlyList<string>? PermissionKeys = null);
 
 public sealed record NotificationStateRequest(string Action, string RowVersion);
+public sealed record NotificationQueryRequest(IReadOnlyList<string>? Permissions = null, bool UnreadOnly = false, int PageSize = 50, string? Cursor = null);
+public sealed record NotificationFeedResponse(IReadOnlyList<NotificationResponse> Items, string? NextCursor, int UnreadCount, IReadOnlyList<string> EffectivePermissions);
 
 public interface INotificationService
 {
-    Task<Result<PageResponse<NotificationResponse>>> GetMineAsync(bool unreadOnly, int pageSize, string? cursor, CancellationToken cancellationToken = default);
-    Task<Result<int>> GetUnreadCountAsync(CancellationToken cancellationToken = default);
+    Task<Result<PageResponse<NotificationResponse>>> GetMineAsync(bool unreadOnly, int pageSize, string? cursor, IReadOnlyList<string>? permissions = null, CancellationToken cancellationToken = default);
+    Task<Result<int>> GetUnreadCountAsync(IReadOnlyList<string>? permissions = null, CancellationToken cancellationToken = default);
+    Task<Result<NotificationFeedResponse>> QueryAsync(NotificationQueryRequest request, CancellationToken cancellationToken = default);
     Task<Result<NotificationResponse>> CreateAsync(CreateNotificationRequest request, CancellationToken cancellationToken = default);
     Task<Result<NotificationResponse>> ChangeStateAsync(Guid id, NotificationStateRequest request, CancellationToken cancellationToken = default);
 }
@@ -154,4 +159,3 @@ public interface IDatasetVersionService
     Task<Result<IReadOnlyList<DatasetVersionResponse>>> GetAsync(string? moduleKey, CancellationToken cancellationToken = default);
     Task<long> IncrementAsync(string moduleKey, CancellationToken cancellationToken = default);
 }
-

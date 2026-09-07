@@ -17,6 +17,8 @@ internal sealed class NotificationConfiguration : IEntityTypeConfiguration<Notif
         builder.Property(entity => entity.SourceEntityType).HasMaxLength(100);
         builder.Property(entity => entity.DeepLink).HasMaxLength(1000);
         builder.Property(entity => entity.ScopeSnapshotJson).HasColumnType("nvarchar(max)");
+        builder.Property(entity => entity.AudiencePermissionKeysJson).HasColumnType("nvarchar(max)");
+        builder.ToTable(t => t.HasCheckConstraint("CK_Notifications_AudiencePermissions", "[AudiencePermissionKeysJson] IS NULL OR ISJSON([AudiencePermissionKeysJson]) = 1"));
         builder.Property(entity => entity.DeduplicationKey).HasMaxLength(200).IsRequired();
         builder.HasIndex(entity => new { entity.RecipientUserId, entity.DeduplicationKey }).IsUnique();
         builder.HasIndex(entity => new { entity.RecipientUserId, entity.ReadAtUtc, entity.VisibleAtUtc });

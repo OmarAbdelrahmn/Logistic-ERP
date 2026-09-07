@@ -16,6 +16,7 @@ public sealed class Notification : AuditableEntity
     public Guid? SourceEntityId { get; set; }
     public string? DeepLink { get; set; }
     public string? ScopeSnapshotJson { get; set; }
+    public string? AudiencePermissionKeysJson { get; set; }
     public string DeduplicationKey { get; set; } = string.Empty;
     public DateTimeOffset VisibleAtUtc { get; set; }
     public DateTimeOffset? ExpiresAtUtc { get; set; }

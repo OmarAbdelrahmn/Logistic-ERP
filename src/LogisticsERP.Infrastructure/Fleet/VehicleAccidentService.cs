@@ -10,11 +10,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LogisticsERP.Infrastructure.Fleet;
 
-internal sealed class VehicleAccidentService(
+internal sealed partial class VehicleAccidentService(
     ApplicationDbContext dbContext,
     FleetServiceSupport support,
     IPrivateFileStorage fileStorage,
-    IAccidentPdfGenerator pdfGenerator) : IVehicleAccidentService
+    IAccidentPdfGenerator pdfGenerator,
+    IAccidentNotificationService notifications) : IVehicleAccidentService, IAccidentWorkflowService
 {
     private const long MaximumEvidenceSize = 10 * 1024 * 1024;
     private const long MaximumGeneratedPdfSize = 25 * 1024 * 1024;
@@ -48,6 +49,9 @@ internal sealed class VehicleAccidentService(
     public async Task<Result<VehicleAccidentDetailResponse>> CreateAsync(CreateVehicleAccidentRequest request, string idempotencyKey, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(idempotencyKey)) return Result.Failure<VehicleAccidentDetailResponse>(FleetErrors.IdempotencyRequired);
+        idempotencyKey = idempotencyKey.Trim();
+        var initialAccess = await GetVehicleAsync(request.VehicleId, PermissionKeys.Fleet.AccidentsReport, cancellationToken);
+        if (initialAccess.IsFailure) return Result.Failure<VehicleAccidentDetailResponse>(initialAccess.Error);
         var hash = FleetServiceSupport.HashRequest(request);
         var receipt = await dbContext.FleetCommandReceipts.AsNoTracking().SingleOrDefaultAsync(x => x.CommandName == "create-accident" && x.IdempotencyKey == idempotencyKey, cancellationToken);
         if (receipt is not null)
@@ -58,7 +62,9 @@ internal sealed class VehicleAccidentService(
         }
         var vehicleResult = await GetVehicleAsync(request.VehicleId, PermissionKeys.Fleet.AccidentsReport, cancellationToken, tracking: true);
         if (vehicleResult.IsFailure) return Result.Failure<VehicleAccidentDetailResponse>(vehicleResult.Error);
-        if (string.IsNullOrWhiteSpace(request.LocationDescription) || string.IsNullOrWhiteSpace(request.DamageDescription) || string.IsNullOrWhiteSpace(request.Narrative)
+        if (string.IsNullOrWhiteSpace(request.PoliceReportNumber) || request.PoliceReportNumber.Length > 150
+            || !Enum.IsDefined(request.Severity) || request.OccurredAtUtc > support.UtcNow || request.OccurredAtUtc == default
+            || string.IsNullOrWhiteSpace(request.LocationDescription) || string.IsNullOrWhiteSpace(request.DamageDescription) || string.IsNullOrWhiteSpace(request.Narrative)
             || request.Latitude is < -90 or > 90 || request.Longitude is < -180 or > 180 || request.HasInjuries && string.IsNullOrWhiteSpace(request.InjuryDetails)) return Result.Failure<VehicleAccidentDetailResponse>(FleetErrors.InvalidRequest);
         var assignment = await dbContext.RiderVehicleAssignments.SingleOrDefaultAsync(x => x.VehicleId == request.VehicleId && x.RiderProfileId == request.RiderProfileId
             && x.StartedAtUtc <= request.OccurredAtUtc && (x.EndedAtUtc == null || x.EndedAtUtc >= request.OccurredAtUtc), cancellationToken);
@@ -79,7 +85,7 @@ internal sealed class VehicleAccidentService(
         };
         var accident = new VehicleAccident
         {
-            Id = accidentId, AccidentNumber = FleetServiceSupport.NewNumber("ACC", support.UtcNow, accidentId), VehicleId = vehicle.Id,
+            Id = accidentId, AccidentNumber = $"ACC-{support.UtcNow:yyyyMMdd}-{accidentId.ToString("N")[^16..]}".ToUpperInvariant(), VehicleId = vehicle.Id,
             RiderProfileId = assignment.RiderProfileId, EmployeeId = employeeId, RiderVehicleAssignmentId = assignment.Id, VehicleIssueId = issue.Id,
             VehicleInsurancePolicyId = insurance?.Id, OccurredAtUtc = request.OccurredAtUtc, ReportedAtUtc = support.UtcNow,
             LocationDescription = request.LocationDescription.Trim(), Latitude = request.Latitude, Longitude = request.Longitude,
@@ -91,6 +97,8 @@ internal sealed class VehicleAccidentService(
         dbContext.VehicleIssues.Add(issue);
         dbContext.VehicleIssueEvents.Add(new VehicleIssueEvent { VehicleIssueId = issue.Id, EventType = VehicleIssueEventType.Reported, ToStatus = VehicleIssueStatus.Open, OccurredAtUtc = support.UtcNow, ActorUserId = actor.Value, Reason = request.DamageDescription.Trim() });
         dbContext.VehicleAccidents.Add(accident);
+        dbContext.VehicleAccidentCases.Add(new VehicleAccidentCase { VehicleAccidentId = accident.Id });
+        await notifications.QueueAsync(accident.Id, vehicle.Id, accident.AccidentNumber, "reported", "تم تسجيل حادث للمركبة / Vehicle accident reported", cancellationToken);
         dbContext.VehicleAccidentEvents.Add(new VehicleAccidentEvent { VehicleAccidentId = accident.Id, EventType = VehicleAccidentEventType.Reported, OccurredAtUtc = support.UtcNow, ActorUserId = actor.Value, Reason = request.Narrative.Trim() });
         if (!request.IsDrivable && assignment.EndedAtUtc is null && vehicle.CurrentAssignmentId == assignment.Id)
         {
@@ -108,20 +116,7 @@ internal sealed class VehicleAccidentService(
 
     public async Task<Result<VehicleAccidentAttachmentResponse>> UploadEvidenceAsync(Guid accidentId, VehicleAccidentEvidenceType evidenceType, PrivateFileUpload file, CancellationToken cancellationToken = default)
     {
-        var accident = await dbContext.VehicleAccidents.SingleOrDefaultAsync(x => x.Id == accidentId, cancellationToken);
-        if (accident is null) return Result.Failure<VehicleAccidentAttachmentResponse>(FleetErrors.NotFound);
-        var access = await GetVehicleAsync(accident.VehicleId, PermissionKeys.Fleet.AccidentsReport, cancellationToken);
-        if (access.IsFailure) return Result.Failure<VehicleAccidentAttachmentResponse>(access.Error);
-        if (await dbContext.VehicleAccidentAttachments.CountAsync(x => x.VehicleAccidentId == accidentId, cancellationToken) >= 5) return Result.Failure<VehicleAccidentAttachmentResponse>(FleetErrors.FileLimit);
-        var id = Guid.CreateVersion7();
-        var stored = await fileStorage.StoreAsync($"vehicle-accidents/{accidentId:N}/evidence/{id:N}", file, MaximumEvidenceSize, cancellationToken);
-        if (stored.IsFailure) return Result.Failure<VehicleAccidentAttachmentResponse>(FleetErrors.InvalidFile);
-        var attachment = new VehicleAccidentAttachment { Id = id, VehicleAccidentId = accidentId, EvidenceType = evidenceType, OriginalFileName = stored.Value!.OriginalFileName, StoredFileName = stored.Value.StoredFileName, ContentType = stored.Value.ContentType, FileSizeBytes = stored.Value.Length, Sha256Checksum = stored.Value.Sha256Checksum, StoragePath = stored.Value.StoragePath, UploadedByUserId = support.UserId!.Value, UploadedAtUtc = support.UtcNow };
-        dbContext.VehicleAccidentAttachments.Add(attachment);
-        dbContext.VehicleAccidentEvents.Add(new VehicleAccidentEvent { VehicleAccidentId = accident.Id, EventType = VehicleAccidentEventType.EvidenceAdded, OccurredAtUtc = support.UtcNow, ActorUserId = support.UserId.Value, Reason = stored.Value.OriginalFileName });
-        try { await dbContext.SaveChangesAsync(cancellationToken); }
-        catch { fileStorage.DeleteBestEffort(stored.Value.StoragePath); throw; }
-        return Result.Success(MapAttachment(attachment));
+        return await UploadWorkflowAttachmentAsync(accidentId, evidenceType, new AccidentAttachmentMetadata(), file, cancellationToken);
     }
 
     public async Task<Result<PrivateFileDownload>> DownloadEvidenceAsync(Guid accidentId, Guid attachmentId, CancellationToken cancellationToken = default)
@@ -158,6 +153,12 @@ internal sealed class VehicleAccidentService(
         if (access.IsFailure) return Result.Failure<VehicleAccidentReportVersionResponse>(access.Error);
         if (accident.Status != VehicleAccidentStatus.Finalized || !FleetServiceSupport.MatchesRowVersion(accident.RowVersion, request.RowVersion) || string.IsNullOrWhiteSpace(request.CorrectionReason)
             || string.IsNullOrWhiteSpace(request.LocationDescription) || string.IsNullOrWhiteSpace(request.DamageDescription) || string.IsNullOrWhiteSpace(request.Narrative)) return Result.Failure<VehicleAccidentReportVersionResponse>(FleetErrors.InvalidRequest);
+        var workflow = await dbContext.VehicleAccidentCases.AsNoTracking().SingleOrDefaultAsync(x => x.VehicleAccidentId == accidentId, cancellationToken);
+        if (string.IsNullOrWhiteSpace(request.PoliceReportNumber) || !Enum.IsDefined(request.Severity)
+            || workflow is not null && workflow.Stage != AccidentCaseStage.AwaitingNajm
+                && (request.Severity != accident.Severity || request.IsDrivable != accident.IsDrivable
+                    || request.PoliceReportNumber.Trim() != accident.PoliceReportNumber || request.InsuranceClaimNumber != accident.InsuranceClaimNumber))
+            return Result.Failure<VehicleAccidentReportVersionResponse>(FleetErrors.InvalidState);
         ApplyCorrection(accident, request);
         dbContext.VehicleAccidentEvents.Add(new VehicleAccidentEvent { VehicleAccidentId = accident.Id, EventType = VehicleAccidentEventType.Corrected, OccurredAtUtc = support.UtcNow, ActorUserId = support.UserId!.Value, Reason = request.CorrectionReason.Trim(), SnapshotJson = JsonSerializer.Serialize(request) });
         var report = await GenerateReportAsync(accident, accident.CurrentReportVersionId, request.CorrectionReason, cancellationToken);
@@ -173,6 +174,10 @@ internal sealed class VehicleAccidentService(
         var access = await GetVehicleAsync(accident.VehicleId, PermissionKeys.Fleet.AccidentsFinalize, cancellationToken);
         if (access.IsFailure) return Result.Failure<VehicleAccidentDetailResponse>(access.Error);
         if (accident.Status != VehicleAccidentStatus.Finalized || !FleetServiceSupport.MatchesRowVersion(accident.RowVersion, request.RowVersion) || string.IsNullOrWhiteSpace(request.Reason)) return Result.Failure<VehicleAccidentDetailResponse>(FleetErrors.InvalidState);
+        var workflow = await dbContext.VehicleAccidentCases.AsNoTracking().SingleOrDefaultAsync(x => x.VehicleAccidentId == accidentId, cancellationToken);
+        if (workflow is null || workflow.Stage != AccidentCaseStage.Completed
+            || workflow.RequestedClaimType.HasValue && workflow.RefundStatus is not (AccidentRefundStatus.Received or AccidentRefundStatus.Rejected or AccidentRefundStatus.NotApplicable))
+            return Result.Failure<VehicleAccidentDetailResponse>(WorkflowError("Complete the accident workflow and resolve its installment refund before closing."));
         accident.Status = VehicleAccidentStatus.Closed; accident.ClosedAtUtc = support.UtcNow; accident.ClosedByUserId = support.UserId;
         dbContext.VehicleAccidentEvents.Add(new VehicleAccidentEvent { VehicleAccidentId = accident.Id, EventType = VehicleAccidentEventType.Closed, OccurredAtUtc = support.UtcNow, ActorUserId = support.UserId!.Value, Reason = request.Reason.Trim() });
         await dbContext.SaveChangesAsync(cancellationToken);
@@ -250,6 +255,7 @@ internal sealed class VehicleAccidentService(
 
     private async Task SetAccidentHoldAsync(Vehicle vehicle, VehicleAccident accident, Guid actor, CancellationToken cancellationToken)
     {
+        if (vehicle.CurrentOperationalStatus is not (VehicleOperationalStatus.Available or VehicleOperationalStatus.Assigned or VehicleOperationalStatus.AccidentHold)) return;
         var status = await dbContext.VehicleOperationalStatusPeriods.SingleOrDefaultAsync(x => x.VehicleId == vehicle.Id && x.EffectiveToUtc == null, cancellationToken);
         if (status is not null) status.EffectiveToUtc = support.UtcNow;
         vehicle.CurrentOperationalStatus = VehicleOperationalStatus.AccidentHold;
@@ -282,6 +288,7 @@ internal sealed class VehicleAccidentService(
 
     private static VehicleIssueSeverity ToIssueSeverity(VehicleAccidentSeverity value) => value switch { VehicleAccidentSeverity.Minor => VehicleIssueSeverity.Low, VehicleAccidentSeverity.Moderate => VehicleIssueSeverity.Medium, VehicleAccidentSeverity.Serious => VehicleIssueSeverity.High, _ => VehicleIssueSeverity.Critical };
     private static VehicleAccidentSummaryResponse MapSummary(VehicleAccident x) => new(x.Id, x.AccidentNumber, x.VehicleId, x.RiderProfileId, x.RiderVehicleAssignmentId, x.VehicleIssueId, x.OccurredAtUtc, x.Severity, x.IsDrivable, x.Status, x.LocationDescription, FleetServiceSupport.EncodeRowVersion(x.RowVersion));
-    private static VehicleAccidentAttachmentResponse MapAttachment(VehicleAccidentAttachment x) => new(x.Id, x.EvidenceType, x.OriginalFileName, x.ContentType, x.FileSizeBytes, x.Sha256Checksum, x.UploadedAtUtc, FleetServiceSupport.EncodeRowVersion(x.RowVersion));
+    private static VehicleAccidentAttachmentResponse MapAttachment(VehicleAccidentAttachment x) => new(x.Id, x.EvidenceType, x.OriginalFileName, x.ContentType, x.FileSizeBytes, x.Sha256Checksum, x.UploadedAtUtc, FleetServiceSupport.EncodeRowVersion(x.RowVersion),
+        $"/api/vehicle-accidents/{x.VehicleAccidentId}/evidence/{x.Id}/download", x.Description, x.FromLocation, x.ToLocation, x.TransportedAtUtc, x.Amount);
     private static VehicleAccidentReportVersionResponse MapReport(VehicleAccidentReportVersion x) => new(x.Id, x.VersionNumber, x.ReportNumber, x.FileSizeBytes, x.Sha256Checksum, x.GeneratedAtUtc, x.SupersedesReportVersionId, x.CorrectionReason);
 }

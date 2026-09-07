@@ -26,4 +26,22 @@ public static class MaintenanceErrors
     public static readonly OperationError OilTransferRequiresWholeBarrels = new("maintenance.oil_transfer_requires_whole_barrels", "نقل الزيت يجب أن يشمل براميل كاملة دون تقسيم محتوى البرميل.", ErrorType.Validation, "quantity");
     public static readonly OperationError OilBarrelNotNextFifo = new("maintenance.oil_barrel_not_next_fifo", "البرميل المختار ليس من أقدم طبقة تكلفة متاحة وفق FIFO.", ErrorType.Conflict, "oilBarrelId");
     public static readonly OperationError OpenOilBarrelRequired = new("maintenance.open_oil_barrel_required", "يجب فتح برميل زيت أولاً، أو اختيار البرميل التالي إذا كانت العملية ستستنفد البرميل المفتوح.", ErrorType.Conflict, "nextOilBarrelId");
+    public static readonly OperationError SupplyRequestRequired = new("maintenance.supply_request_required", "يجب إرسال صنف واحد على الأقل في طلب الصرف.", ErrorType.Validation, "lines");
+    public static OperationError SupplyRequestLocationMismatch(Guid inventoryLocationId, Guid maintenanceLocationId) => new(
+        "maintenance.supply_request_location_mismatch",
+        "موقع المستودع أو الصيانة المحدد غير مصرح به أو لا يطابق موقع العمل المختار.",
+        ErrorType.Validation,
+        "supplyRequest.inventoryLocationId",
+        new Dictionary<string, object?>
+        {
+            ["inventoryLocationId"] = inventoryLocationId,
+            ["maintenanceLocationId"] = maintenanceLocationId
+        });
+    public static readonly OperationError SupplyRequestNotPending = new("maintenance.supply_request_not_pending", "تمت معالجة طلب الصرف مسبقًا؛ أعد تحميل حالته.", ErrorType.Conflict);
+    public static readonly OperationError SupplyRequestOwnership = new("maintenance.supply_request_ownership", "لا يمكن إلغاء طلب صرف أنشأه مستخدم آخر.", ErrorType.Forbidden);
+    public static readonly OperationError SupplyApprovalRequired = new("maintenance.supply_approval_required", "يجب أن يعتمد المستودع طلب الصرف ويسلم الأصناف قبل بدء الصيانة أو صرف مواد إضافية.", ErrorType.Conflict);
+    public static readonly OperationError ActiveVehicleWorkOrderExists = new("maintenance.active_vehicle_work_order_exists", "يوجد أمر صيانة قائم لهذه المركبة. يجب إغلاقه أو إلغاؤه قبل إنشاء أمر جديد.", ErrorType.Conflict, "vehicleId");
+    public static readonly OperationError OilChangeRequestRequired = new("maintenance.oil_change_request_required", "يجب إرسال بيانات الزيت وحالة تغيير الفلتر مع طلب تغيير الزيت.", ErrorType.Validation, "oilChange");
+    public static readonly OperationError OilChangeWarehouseApprovalRequired = new("maintenance.oil_change_warehouse_approval_required", "تغيير زيت مركبة الشركة يتم من طلب واحد ثم يعتمد المستودع الصرف وبيانات البرميل.", ErrorType.Conflict);
+    public static readonly OperationError LaborCostExternalVehiclesOnly = new("maintenance.labor_cost_external_vehicles_only", "تكلفة أجور اليد والعمالة مخصصة للمركبات الخارجية فقط.", ErrorType.Validation, "laborCost");
 }

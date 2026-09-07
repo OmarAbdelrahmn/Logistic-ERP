@@ -4,6 +4,7 @@ using LogisticsERP.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260906103032_AddNotificationPermissionAudience")]
+    partial class AddNotificationPermissionAudience
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -5243,220 +5246,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         });
                 });
 
-            modelBuilder.Entity("LogisticsERP.Domain.Entities.Maintenance.InventorySupplyRequest", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset>("CreatedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid?>("CreatedByUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset?>("DecidedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid?>("DecidedByUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("DecisionNotes")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<DateTimeOffset?>("DeletedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid?>("DeletedByUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("DeletionReason")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<Guid>("InventoryLocationId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTimeOffset?>("IssuedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid?>("IssuedByUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("MaintenanceWorkOrderId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Notes")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<string>("RequestNumber")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(64)");
-
-                    b.Property<DateTimeOffset>("RequestedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid>("RequestedByUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("RiderInventoryIssueId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("RiderProfileId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SubjectType")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("TotalIssuedCost")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid?>("UpdatedByUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("VehicleId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("IsDeleted");
-
-                    b.HasIndex("MaintenanceWorkOrderId")
-                        .IsUnique()
-                        .HasFilter("[MaintenanceWorkOrderId] IS NOT NULL AND [IsDeleted] = 0");
-
-                    b.HasIndex("RequestNumber")
-                        .IsUnique();
-
-                    b.HasIndex("RiderInventoryIssueId");
-
-                    b.HasIndex("VehicleId");
-
-                    b.HasIndex("RiderProfileId", "RequestedAtUtc");
-
-                    b.HasIndex("InventoryLocationId", "Status", "RequestedAtUtc");
-
-                    b.ToTable("SupplyRequests", "maintenance", t =>
-                        {
-                            t.HasCheckConstraint("CK_InventorySupplyRequests_Cost", "[TotalIssuedCost] >= 0");
-
-                            t.HasCheckConstraint("CK_InventorySupplyRequests_Issuance", "([Status] = 2 AND [DecidedAtUtc] IS NOT NULL AND [DecidedByUserId] IS NOT NULL AND [IssuedAtUtc] IS NOT NULL AND [IssuedByUserId] IS NOT NULL) OR ([Status] <> 2 AND [IssuedAtUtc] IS NULL AND [IssuedByUserId] IS NULL)");
-
-                            t.HasCheckConstraint("CK_InventorySupplyRequests_Status", "[Status] BETWEEN 1 AND 4");
-
-                            t.HasCheckConstraint("CK_InventorySupplyRequests_Subject", "([SubjectType] = 1 AND [MaintenanceWorkOrderId] IS NOT NULL AND [VehicleId] IS NOT NULL AND [RiderProfileId] IS NULL) OR ([SubjectType] = 2 AND [MaintenanceWorkOrderId] IS NULL AND [VehicleId] IS NULL AND [RiderProfileId] IS NOT NULL)");
-                        });
-                });
-
-            modelBuilder.Entity("LogisticsERP.Domain.Entities.Maintenance.InventorySupplyRequestLine", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset>("CreatedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid?>("CreatedByUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset?>("DeletedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid?>("DeletedByUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("DeletionReason")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("ExpectedReturn")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid>("InventoryItemId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("InventorySupplyRequestId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<decimal>("IssuedCost")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("IssuedQuantity")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)");
-
-                    b.Property<Guid?>("MaintenanceMaterialUsageId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int?>("MaintenanceUsageType")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Notes")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<decimal>("RequestedQuantity")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)");
-
-                    b.Property<Guid?>("RiderInventoryIssueLineId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid?>("UpdatedByUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("InventoryItemId");
-
-                    b.HasIndex("IsDeleted");
-
-                    b.HasIndex("MaintenanceMaterialUsageId");
-
-                    b.HasIndex("RiderInventoryIssueLineId");
-
-                    b.HasIndex("InventorySupplyRequestId", "InventoryItemId")
-                        .IsUnique()
-                        .HasFilter("[IsDeleted] = 0");
-
-                    b.ToTable("SupplyRequestLines", "maintenance", t =>
-                        {
-                            t.HasCheckConstraint("CK_InventorySupplyRequestLines_Values", "[RequestedQuantity] > 0 AND [IssuedQuantity] >= 0 AND [IssuedQuantity] <= [RequestedQuantity] AND [IssuedCost] >= 0");
-                        });
-                });
-
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Maintenance.MaintenanceLaborEntry", b =>
                 {
                     b.Property<Guid>("Id")
@@ -6148,11 +5937,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.HasIndex("IsDeleted");
 
                     b.HasIndex("RiderVehicleAssignmentId");
-
-                    b.HasIndex("VehicleId")
-                        .IsUnique()
-                        .HasDatabaseName("UX_MaintenanceWorkOrders_ActiveVehicle")
-                        .HasFilter("[VehicleId] IS NOT NULL AND [Status] IN (1, 2, 3) AND [IsDeleted] = 0");
 
                     b.HasIndex("VehicleIssueId");
 
@@ -10530,67 +10314,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                             Key = "inventory.returns.manage",
                             NameAr = "إدارة مرتجعات المورد",
                             NameEn = "Manage supplier returns",
-                            RequiresClientScope = false,
-                            RequiresHousingScope = false,
-                            RowVersion = new byte[0],
-                            Version = 1
-                        },
-                        new
-                        {
-                            Id = new Guid("019c18d5-62e1-7000-a000-000000000114"),
-                            Category = "Inventory",
-                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            DescriptionAr = "إرسال طلب موحد لقطع صيانة مركبة أو عهدة رايدر دون خصم المخزون.",
-                            DescriptionEn = "Submit a vehicle-maintenance or rider supply request without deducting stock.",
-                            DisplayOrder = 114,
-                            IsDeleted = false,
-                            IsDeprecated = false,
-                            IsHighTrust = false,
-                            IsSensitive = false,
-                            Key = "inventory.supply_requests.submit",
-                            NameAr = "إرسال طلبات الصرف",
-                            NameEn = "Submit supply requests",
-                            RequiresClientScope = false,
-                            RequiresHousingScope = false,
-                            RowVersion = new byte[0],
-                            Version = 1
-                        },
-                        new
-                        {
-                            Id = new Guid("019c18d5-62e1-7000-a000-000000000115"),
-                            Category = "Inventory",
-                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            DescriptionAr = "عرض طابور طلبات الصرف وحالة الموافقة والمركبة أو الرايدر المرتبط.",
-                            DescriptionEn = "View the supply-request queue, approval state, and related vehicle or rider.",
-                            DisplayOrder = 115,
-                            IsDeleted = false,
-                            IsDeprecated = false,
-                            IsHighTrust = false,
-                            IsSensitive = false,
-                            Key = "inventory.supply_requests.read",
-                            NameAr = "عرض طلبات الصرف",
-                            NameEn = "Read supply requests",
-                            RequiresClientScope = false,
-                            RequiresHousingScope = false,
-                            RowVersion = new byte[0],
-                            Version = 1
-                        },
-                        new
-                        {
-                            Id = new Guid("019c18d5-62e1-7000-a000-000000000116"),
-                            Category = "Inventory",
-                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            DescriptionAr = "اعتماد الطلب وتسليم الأصناف فعليًا وترحيل خصم FIFO في عملية واحدة.",
-                            DescriptionEn = "Approve a request, physically issue its items, and post FIFO stock deduction atomically.",
-                            DisplayOrder = 116,
-                            GrantabilityRule = "HIGH_TRUST_ONLY",
-                            IsDeleted = false,
-                            IsDeprecated = false,
-                            IsHighTrust = true,
-                            IsSensitive = true,
-                            Key = "inventory.supply_requests.approve",
-                            NameAr = "اعتماد وتسليم طلبات الصرف",
-                            NameEn = "Approve and issue supply requests",
                             RequiresClientScope = false,
                             RequiresHousingScope = false,
                             RowVersion = new byte[0],
@@ -15641,60 +15364,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .HasForeignKey("MaintenanceLocationId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("LogisticsERP.Domain.Entities.Maintenance.InventorySupplyRequest", b =>
-                {
-                    b.HasOne("LogisticsERP.Domain.Entities.Maintenance.InventoryLocation", null)
-                        .WithMany()
-                        .HasForeignKey("InventoryLocationId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("LogisticsERP.Domain.Entities.Maintenance.MaintenanceWorkOrder", null)
-                        .WithMany()
-                        .HasForeignKey("MaintenanceWorkOrderId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("LogisticsERP.Domain.Entities.Maintenance.RiderInventoryIssue", null)
-                        .WithMany()
-                        .HasForeignKey("RiderInventoryIssueId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.RiderProfile", null)
-                        .WithMany()
-                        .HasForeignKey("RiderProfileId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.Vehicle", null)
-                        .WithMany()
-                        .HasForeignKey("VehicleId")
-                        .OnDelete(DeleteBehavior.Restrict);
-                });
-
-            modelBuilder.Entity("LogisticsERP.Domain.Entities.Maintenance.InventorySupplyRequestLine", b =>
-                {
-                    b.HasOne("LogisticsERP.Domain.Entities.Maintenance.InventoryItem", null)
-                        .WithMany()
-                        .HasForeignKey("InventoryItemId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("LogisticsERP.Domain.Entities.Maintenance.InventorySupplyRequest", null)
-                        .WithMany()
-                        .HasForeignKey("InventorySupplyRequestId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("LogisticsERP.Domain.Entities.Maintenance.MaintenanceMaterialUsage", null)
-                        .WithMany()
-                        .HasForeignKey("MaintenanceMaterialUsageId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("LogisticsERP.Domain.Entities.Maintenance.RiderInventoryIssueLine", null)
-                        .WithMany()
-                        .HasForeignKey("RiderInventoryIssueLineId")
-                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Maintenance.MaintenanceLaborEntry", b =>

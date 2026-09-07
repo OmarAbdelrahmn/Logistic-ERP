@@ -208,7 +208,7 @@ internal sealed partial class MaintenanceService : IMaintenanceService
     {
         var actor = currentUser.UserId;
         if (!actor.HasValue) return Result.Failure<MaintenanceWorkOrderResponse>(MaintenanceErrors.CurrentUserUnavailable);
-        if (request.OpenedAtUtc == default || request.EstimatedCost < 0 || !Enum.IsDefined(request.ServiceSubjectType) || !Enum.IsDefined(request.MaintenanceType))
+        if (request.OpenedAtUtc == default || !Enum.IsDefined(request.ServiceSubjectType) || !Enum.IsDefined(request.MaintenanceType))
             return Result.Failure<MaintenanceWorkOrderResponse>(MaintenanceErrors.InvalidRequest);
 
         var location = await dbContext.MaintenanceLocations.AsNoTracking().SingleOrDefaultAsync(x => x.Id == request.MaintenanceLocationId && x.Status == CatalogStatus.Active, cancellationToken);
@@ -226,6 +226,14 @@ internal sealed partial class MaintenanceService : IMaintenanceService
                 return Result.Failure<MaintenanceWorkOrderResponse>(MaintenanceErrors.InvalidSubject);
             var vehicleExists = await dbContext.Vehicles.AsNoTracking().AnyAsync(x => x.Id == request.VehicleId.Value, cancellationToken);
             if (!vehicleExists) return Result.Failure<MaintenanceWorkOrderResponse>(MaintenanceErrors.NotFound);
+            var hasActiveWorkOrder = await dbContext.MaintenanceWorkOrders.AsNoTracking().AnyAsync(
+                x => x.VehicleId == request.VehicleId.Value
+                    && (x.Status == MaintenanceWorkOrderStatus.Open
+                        || x.Status == MaintenanceWorkOrderStatus.InProgress
+                        || x.Status == MaintenanceWorkOrderStatus.Completed),
+                cancellationToken);
+            if (hasActiveWorkOrder)
+                return Result.Failure<MaintenanceWorkOrderResponse>(MaintenanceErrors.ActiveVehicleWorkOrderExists);
             if (request.VehicleIssueId.HasValue && !await dbContext.VehicleIssues.AsNoTracking().AnyAsync(x => x.Id == request.VehicleIssueId.Value && x.VehicleId == request.VehicleId.Value, cancellationToken))
                 return Result.Failure<MaintenanceWorkOrderResponse>(MaintenanceErrors.InvalidSubject);
             var assignment = await dbContext.RiderVehicleAssignments.AsNoTracking()
@@ -239,7 +247,16 @@ internal sealed partial class MaintenanceService : IMaintenanceService
         {
             if (request.VehicleId.HasValue || request.VehicleIssueId.HasValue || request.ExternalVehicle is null || !HasExternalReference(request.ExternalVehicle))
                 return Result.Failure<MaintenanceWorkOrderResponse>(MaintenanceErrors.InvalidSubject);
+            if (request.SupplyRequest is not null || request.OilChange is not null)
+                return Result.Failure<MaintenanceWorkOrderResponse>(MaintenanceErrors.InvalidRequest);
         }
+
+        if (request.ServiceSubjectType == MaintenanceServiceSubjectType.CompanyVehicle
+            && request.MaintenanceType == MaintenanceType.OilChange
+            && (request.OilChange is null || request.SupplyRequest is not null || !request.OdometerAtOpen.HasValue))
+            return Result.Failure<MaintenanceWorkOrderResponse>(MaintenanceErrors.OilChangeRequestRequired);
+        if (request.MaintenanceType != MaintenanceType.OilChange && request.OilChange is not null)
+            return Result.Failure<MaintenanceWorkOrderResponse>(MaintenanceErrors.InvalidRequest);
 
         var id = Guid.CreateVersion7();
         var item = new MaintenanceWorkOrder
@@ -258,7 +275,7 @@ internal sealed partial class MaintenanceService : IMaintenanceService
             OpenedByUserId = actor.Value,
             RiderVehicleAssignmentId = assignmentId,
             AttributedRiderProfileId = riderId,
-            EstimatedCost = request.EstimatedCost,
+            EstimatedCost = 0,
             Notes = TrimOrNull(request.Notes)
         };
         dbContext.MaintenanceWorkOrders.Add(item);
@@ -274,9 +291,31 @@ internal sealed partial class MaintenanceService : IMaintenanceService
                 Notes = TrimOrNull(request.ExternalVehicle.Notes)
             });
         }
+        if (request.SupplyRequest is not null)
+        {
+            var supplyRequest = await BuildMaintenanceSupplyRequestAsync(item, request.SupplyRequest, actor.Value, cancellationToken);
+            if (supplyRequest.IsFailure)
+                return Result.Failure<MaintenanceWorkOrderResponse>(supplyRequest.Error);
+        }
+        else if (request.OilChange is not null)
+        {
+            var oilRequest = await BuildOilChangeSupplyRequestAsync(item, request.OilChange, actor.Value, cancellationToken);
+            if (oilRequest.IsFailure)
+                return Result.Failure<MaintenanceWorkOrderResponse>(oilRequest.Error);
+        }
 
         try { await dbContext.SaveChangesAsync(cancellationToken); }
-        catch (DbUpdateException) { return Result.Failure<MaintenanceWorkOrderResponse>(MaintenanceErrors.InvalidRequest); }
+        catch (DbUpdateException)
+        {
+            if (request.VehicleId.HasValue && await dbContext.MaintenanceWorkOrders.AsNoTracking().AnyAsync(
+                    x => x.VehicleId == request.VehicleId.Value
+                        && (x.Status == MaintenanceWorkOrderStatus.Open
+                            || x.Status == MaintenanceWorkOrderStatus.InProgress
+                            || x.Status == MaintenanceWorkOrderStatus.Completed),
+                    cancellationToken))
+                return Result.Failure<MaintenanceWorkOrderResponse>(MaintenanceErrors.ActiveVehicleWorkOrderExists);
+            return Result.Failure<MaintenanceWorkOrderResponse>(MaintenanceErrors.InvalidRequest);
+        }
         return await GetWorkOrderAsync(id, cancellationToken);
     }
 
@@ -287,9 +326,12 @@ internal sealed partial class MaintenanceService : IMaintenanceService
         return Result.Success(await MapWorkOrderAsync(item, cancellationToken));
     }
 
-    public async Task<Result<IReadOnlyList<MaintenanceWorkOrderResponse>>> GetWorkOrdersAsync(Guid? maintenanceLocationId, Guid? vehicleId, string? status, CancellationToken cancellationToken = default)
+    public async Task<Result<IReadOnlyList<MaintenanceWorkOrderResponse>>> GetWorkOrdersAsync(MaintenanceServiceSubjectType serviceSubjectType, Guid? maintenanceLocationId, Guid? vehicleId, string? status, CancellationToken cancellationToken = default)
     {
-        var query = dbContext.MaintenanceWorkOrders.AsNoTracking();
+        if (!Enum.IsDefined(serviceSubjectType)
+            || serviceSubjectType == MaintenanceServiceSubjectType.ExternalVehicle && vehicleId.HasValue)
+            return Result.Failure<IReadOnlyList<MaintenanceWorkOrderResponse>>(MaintenanceErrors.InvalidRequest);
+        var query = dbContext.MaintenanceWorkOrders.AsNoTracking().Where(x => x.ServiceSubjectType == serviceSubjectType);
         if (maintenanceLocationId.HasValue) query = query.Where(x => x.MaintenanceLocationId == maintenanceLocationId.Value);
         if (vehicleId.HasValue) query = query.Where(x => x.VehicleId == vehicleId.Value);
         if (!string.IsNullOrWhiteSpace(status))
@@ -311,6 +353,10 @@ internal sealed partial class MaintenanceService : IMaintenanceService
         var item = await dbContext.MaintenanceWorkOrders.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (item is null) return Result.Failure<MaintenanceWorkOrderResponse>(MaintenanceErrors.NotFound);
         if (!MatchesRowVersion(item.RowVersion, request.RowVersion)) return Result.Failure<MaintenanceWorkOrderResponse>(MaintenanceErrors.ConcurrencyConflict);
+        if (action.Trim().Equals("start", StringComparison.OrdinalIgnoreCase)
+            && await dbContext.InventorySupplyRequests.AsNoTracking().AnyAsync(x => x.MaintenanceWorkOrderId == id
+                && x.Status != InventorySupplyRequestStatus.ApprovedAndIssued, cancellationToken))
+            return Result.Failure<MaintenanceWorkOrderResponse>(MaintenanceErrors.SupplyApprovalRequired);
 
         switch (action.Trim().ToLowerInvariant())
         {
@@ -402,14 +448,19 @@ internal sealed partial class MaintenanceService : IMaintenanceService
             ? await dbContext.Vehicles.AsNoTracking().Where(x => x.Id == item.VehicleId.Value).Select(x => x.AssetNumber).SingleOrDefaultAsync(cancellationToken)
             : null;
         var external = await dbContext.ExternalVehicleSnapshots.AsNoTracking().SingleOrDefaultAsync(x => x.MaintenanceWorkOrderId == item.Id, cancellationToken);
+        var supplyEntity = await dbContext.InventorySupplyRequests.AsNoTracking()
+            .SingleOrDefaultAsync(x => x.MaintenanceWorkOrderId == item.Id, cancellationToken);
+        var supplyRequest = supplyEntity is null ? null : await MapSupplyRequestAsync(supplyEntity, cancellationToken);
         return new MaintenanceWorkOrderResponse(
             item.Id, item.WorkOrderNumber, item.ServiceSubjectType, item.VehicleId, assetNumber, item.VehicleIssueId,
             item.MaintenanceLocationId, locationName, item.MaintenanceType, item.Status, item.OpenedAtUtc,
             item.ScheduledAtUtc, item.StartedAtUtc, item.CompletedAtUtc, item.OdometerAtOpen, item.OdometerAtCompletion,
             item.RiderVehicleAssignmentId, item.AttributedRiderProfileId, item.EstimatedCost, item.ActualMaterialCost,
-            item.ActualLaborCost, item.ActualOtherCost, item.ActualTotalCost,
+            item.ServiceSubjectType == MaintenanceServiceSubjectType.ExternalVehicle ? item.ActualLaborCost : null,
+            item.ActualOtherCost,
+            item.ServiceSubjectType == MaintenanceServiceSubjectType.CompanyVehicle ? item.ActualMaterialCost : item.ActualTotalCost,
             external is null ? null : new ExternalVehicleSnapshotResponse(external.PlateOrReference, external.VehicleType, external.CustomerName, external.CustomerPhone, external.Notes),
-            item.Notes, EncodeRowVersion(item.RowVersion));
+            item.Notes, EncodeRowVersion(item.RowVersion), supplyRequest);
     }
 
     private static MaintenanceLocationResponse MapLocation(MaintenanceLocation item, string cityNameAr) => new(

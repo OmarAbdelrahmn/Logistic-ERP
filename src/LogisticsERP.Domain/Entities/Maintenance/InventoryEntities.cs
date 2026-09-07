@@ -302,3 +302,38 @@ public sealed class RiderInventoryIssueLine : HistoryEntity
     public bool ExpectedReturn { get; set; }
     public decimal ReturnedQuantity { get; set; }
 }
+
+public sealed class InventorySupplyRequest : AuditableEntity
+{
+    public string RequestNumber { get; set; } = string.Empty;
+    public InventorySupplyRequestSubjectType SubjectType { get; set; }
+    public InventorySupplyRequestStatus Status { get; set; } = InventorySupplyRequestStatus.PendingWarehouseApproval;
+    public Guid InventoryLocationId { get; set; }
+    public Guid? MaintenanceWorkOrderId { get; set; }
+    public Guid? VehicleId { get; set; }
+    public Guid? RiderProfileId { get; set; }
+    public Guid? RiderInventoryIssueId { get; set; }
+    public DateTimeOffset RequestedAtUtc { get; set; }
+    public Guid RequestedByUserId { get; set; }
+    public DateTimeOffset? DecidedAtUtc { get; set; }
+    public Guid? DecidedByUserId { get; set; }
+    public DateTimeOffset? IssuedAtUtc { get; set; }
+    public Guid? IssuedByUserId { get; set; }
+    public string? DecisionNotes { get; set; }
+    public string? Notes { get; set; }
+    public decimal TotalIssuedCost { get; set; }
+}
+
+public sealed class InventorySupplyRequestLine : AuditableEntity
+{
+    public Guid InventorySupplyRequestId { get; set; }
+    public Guid InventoryItemId { get; set; }
+    public decimal RequestedQuantity { get; set; }
+    public decimal IssuedQuantity { get; set; }
+    public MaintenanceUsageType? MaintenanceUsageType { get; set; }
+    public bool ExpectedReturn { get; set; }
+    public Guid? MaintenanceMaterialUsageId { get; set; }
+    public Guid? RiderInventoryIssueLineId { get; set; }
+    public decimal IssuedCost { get; set; }
+    public string? Notes { get; set; }
+}

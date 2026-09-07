@@ -96,6 +96,7 @@ internal sealed class EmployeeExpiryComplianceService(
                     SourceEntityId = item.SourceId,
                     DeepLink = $"/employees/{item.EmployeeId}",
                     ScopeSnapshotJson = "{}",
+                    AudiencePermissionKeysJson = System.Text.Json.JsonSerializer.Serialize(new[] { PermissionKeys.Workforce.EmployeesRead }),
                     DeduplicationKey = deduplicationKey,
                     VisibleAtUtc = now
                 });

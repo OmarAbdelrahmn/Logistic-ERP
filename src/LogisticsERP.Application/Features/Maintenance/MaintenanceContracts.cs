@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using LogisticsERP.Domain.Enums;
 
 namespace LogisticsERP.Application.Features.Maintenance;
@@ -256,6 +257,79 @@ public sealed record RiderInventoryIssueLineRequest(Guid InventoryItemId, decima
 public sealed record PostRiderInventoryIssueRequest(Guid RiderProfileId, Guid InventoryLocationId, DateTimeOffset IssuedAtUtc, string? Notes, IReadOnlyList<RiderInventoryIssueLineRequest> Lines);
 public sealed record RiderInventoryIssueResponse(Guid Id, string IssueNumber, Guid RiderProfileId, Guid? RelatedAssignmentId, Guid InventoryLocationId, DateTimeOffset IssuedAtUtc, decimal TotalCost, InventoryDocumentStatus Status, string RowVersion);
 
+public sealed record InventorySupplyRequestLineInput(
+    Guid InventoryItemId,
+    decimal Quantity,
+    MaintenanceUsageType? MaintenanceUsageType = null,
+    bool ExpectedReturn = false,
+    string? Notes = null);
+
+public sealed record MaintenanceSupplyRequestInput(
+    Guid InventoryLocationId,
+    IReadOnlyList<InventorySupplyRequestLineInput> Lines,
+    string? Notes = null);
+
+public sealed record OilChangeSupplyRequestInput(
+    Guid InventoryLocationId,
+    Guid OilInventoryItemId,
+    bool OilFilterChanged,
+    Guid? OilFilterInventoryItemId,
+    string? Notes = null);
+
+public sealed record CreateRiderSupplyRequest(
+    Guid RiderProfileId,
+    Guid InventoryLocationId,
+    DateTimeOffset RequestedAtUtc,
+    IReadOnlyList<InventorySupplyRequestLineInput> Lines,
+    string? Notes = null);
+
+public sealed record InventorySupplyDecisionRequest(
+    DateTimeOffset OccurredAtUtc,
+    string RowVersion,
+    string? Notes = null,
+    Guid? NextOilBarrelId = null);
+
+public sealed record InventorySupplyRequestLineResponse(
+    Guid Id,
+    Guid InventoryItemId,
+    string Sku,
+    string ItemNameAr,
+    InventoryItemType ItemType,
+    InventoryUnitOfMeasure UnitOfMeasure,
+    decimal RequestedQuantity,
+    decimal IssuedQuantity,
+    MaintenanceUsageType? MaintenanceUsageType,
+    bool ExpectedReturn,
+    decimal IssuedCost,
+    string? Notes);
+
+public sealed record InventorySupplyRequestResponse(
+    Guid Id,
+    string RequestNumber,
+    InventorySupplyRequestSubjectType SubjectType,
+    InventorySupplyRequestStatus Status,
+    Guid InventoryLocationId,
+    string InventoryLocationNameAr,
+    Guid? MaintenanceWorkOrderId,
+    string? MaintenanceWorkOrderNumber,
+    Guid? VehicleId,
+    string? VehicleAssetNumber,
+    string? VehiclePlateNumber,
+    Guid? RiderProfileId,
+    string? RiderNameAr,
+    Guid? RiderInventoryIssueId,
+    DateTimeOffset RequestedAtUtc,
+    Guid RequestedByUserId,
+    DateTimeOffset? DecidedAtUtc,
+    Guid? DecidedByUserId,
+    DateTimeOffset? IssuedAtUtc,
+    Guid? IssuedByUserId,
+    string? DecisionNotes,
+    string? Notes,
+    decimal TotalIssuedCost,
+    IReadOnlyList<InventorySupplyRequestLineResponse> Lines,
+    string RowVersion);
+
 public sealed record ExternalVehicleSnapshotRequest(
     string? PlateOrReference,
     VehicleType? VehicleType,
@@ -272,10 +346,11 @@ public sealed record CreateMaintenanceWorkOrderRequest(
     DateTimeOffset OpenedAtUtc,
     DateTimeOffset? ScheduledAtUtc,
     long? OdometerAtOpen,
-    decimal EstimatedCost,
     string? Diagnosis,
     string? Notes,
-    ExternalVehicleSnapshotRequest? ExternalVehicle);
+    ExternalVehicleSnapshotRequest? ExternalVehicle,
+    MaintenanceSupplyRequestInput? SupplyRequest = null,
+    OilChangeSupplyRequestInput? OilChange = null);
 
 public sealed record MaintenanceWorkOrderActionRequest(DateTimeOffset OccurredAtUtc, string? WorkPerformed, string? QualityCheckNotes, string? Notes, string RowVersion);
 
@@ -307,14 +382,19 @@ public sealed record MaintenanceWorkOrderResponse(
     Guid? AttributedRiderProfileId,
     decimal EstimatedCost,
     decimal ActualMaterialCost,
-    decimal ActualLaborCost,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] decimal? ActualLaborCost,
     decimal ActualOtherCost,
     decimal ActualTotalCost,
     ExternalVehicleSnapshotResponse? ExternalVehicle,
     string? Notes,
-    string RowVersion);
+    string RowVersion,
+    InventorySupplyRequestResponse? SupplyRequest = null);
 
 public sealed record PostMaterialUsageRequest(Guid InventoryItemId, Guid InventoryLocationId, decimal Quantity, MaintenanceUsageType UsageType, DateTimeOffset UsedAtUtc, string? Notes);
+public sealed record BatchSparePartUsageRequest(IReadOnlyList<BatchSparePartUsageLineRequest> Usages);
+public sealed record BatchSparePartUsageLineRequest(Guid SparePartId, string VehicleNumber, decimal QuantityUsed);
+public sealed record BatchSparePartUsageDetailResponse(bool Success, string ItemName, string TargetIdentifier, string Message);
+public sealed record BatchSparePartUsageResponse(int TotalProcessed, int SuccessCount, int FailureCount, IReadOnlyList<BatchSparePartUsageDetailResponse> Details);
 public sealed record StockCostAllocationResponse(Guid StockCostLayerId, decimal Quantity, decimal UnitCost, decimal Cost);
 public sealed record MaintenanceMaterialUsageResponse(
     Guid Id,

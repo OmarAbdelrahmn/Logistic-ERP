@@ -15,7 +15,15 @@ public sealed class MaintenanceWorkOrdersController(IMaintenanceService service)
     [RequirePermission(PermissionKeys.Maintenance.WorkOrdersRead)]
     public async Task<IActionResult> Get([FromQuery] Guid? maintenanceLocationId, [FromQuery] Guid? vehicleId, [FromQuery] string? status, CancellationToken cancellationToken)
     {
-        var result = await service.GetWorkOrdersAsync(maintenanceLocationId, vehicleId, status, cancellationToken);
+        var result = await service.GetWorkOrdersAsync(MaintenanceServiceSubjectType.CompanyVehicle, maintenanceLocationId, vehicleId, status, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpGet("external")]
+    [RequirePermission(PermissionKeys.Maintenance.ExternalJobsRead)]
+    public async Task<IActionResult> GetExternal([FromQuery] Guid? maintenanceLocationId, [FromQuery] string? status, CancellationToken cancellationToken)
+    {
+        var result = await service.GetWorkOrdersAsync(MaintenanceServiceSubjectType.ExternalVehicle, maintenanceLocationId, null, status, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 

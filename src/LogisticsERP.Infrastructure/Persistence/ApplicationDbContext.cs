@@ -115,6 +115,8 @@ public sealed class ApplicationDbContext(
     public DbSet<VehicleIssueEvidence> VehicleIssueEvidenceFiles => Set<VehicleIssueEvidence>();
     public DbSet<VehicleIssueEvent> VehicleIssueEvents => Set<VehicleIssueEvent>();
     public DbSet<VehicleAccident> VehicleAccidents => Set<VehicleAccident>();
+    public DbSet<VehicleAccidentCase> VehicleAccidentCases => Set<VehicleAccidentCase>();
+    public DbSet<VehicleAccidentInstallment> VehicleAccidentInstallments => Set<VehicleAccidentInstallment>();
     public DbSet<VehicleAccidentEvent> VehicleAccidentEvents => Set<VehicleAccidentEvent>();
     public DbSet<VehicleAccidentAttachment> VehicleAccidentAttachments => Set<VehicleAccidentAttachment>();
     public DbSet<VehicleAccidentReportVersion> VehicleAccidentReportVersions => Set<VehicleAccidentReportVersion>();
@@ -143,6 +145,8 @@ public sealed class ApplicationDbContext(
     public DbSet<SupplierReturnLine> SupplierReturnLines => Set<SupplierReturnLine>();
     public DbSet<RiderInventoryIssue> RiderInventoryIssues => Set<RiderInventoryIssue>();
     public DbSet<RiderInventoryIssueLine> RiderInventoryIssueLines => Set<RiderInventoryIssueLine>();
+    public DbSet<InventorySupplyRequest> InventorySupplyRequests => Set<InventorySupplyRequest>();
+    public DbSet<InventorySupplyRequestLine> InventorySupplyRequestLines => Set<InventorySupplyRequestLine>();
     public DbSet<MaintenanceWorkOrder> MaintenanceWorkOrders => Set<MaintenanceWorkOrder>();
     public DbSet<ExternalVehicleSnapshot> ExternalVehicleSnapshots => Set<ExternalVehicleSnapshot>();
     public DbSet<MaintenanceMaterialUsage> MaintenanceMaterialUsages => Set<MaintenanceMaterialUsage>();

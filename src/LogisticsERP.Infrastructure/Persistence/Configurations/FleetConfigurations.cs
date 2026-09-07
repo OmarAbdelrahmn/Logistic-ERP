@@ -648,6 +648,10 @@ internal sealed class VehicleAccidentAttachmentConfiguration : IEntityTypeConfig
     public void Configure(EntityTypeBuilder<VehicleAccidentAttachment> builder)
     {
         builder.ConfigureOperational("VehicleAccidentAttachments");
+        builder.Property(x => x.Description).HasMaxLength(1000);
+        builder.Property(x => x.FromLocation).HasMaxLength(1000);
+        builder.Property(x => x.ToLocation).HasMaxLength(1000);
+        builder.Property(x => x.Amount).HasPrecision(18, 2);
         VehicleAttachmentVersionConfiguration.ConfigureFile(builder);
         builder.HasOne<VehicleAccident>().WithMany().HasForeignKey(x => x.VehicleAccidentId).OnDelete(DeleteBehavior.Restrict);
         builder.HasIndex(x => new { x.VehicleAccidentId, x.IsDeleted });

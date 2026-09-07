@@ -149,6 +149,9 @@ public static class PermissionKeys
         public const string CostLayersRead = "inventory.cost_layers.read";
         public const string ReceiptsManage = "inventory.receipts.manage";
         public const string ReturnsManage = "inventory.returns.manage";
+        public const string SupplyRequestsSubmit = "inventory.supply_requests.submit";
+        public const string SupplyRequestsRead = "inventory.supply_requests.read";
+        public const string SupplyRequestsApprove = "inventory.supply_requests.approve";
     }
 
     public static class Workflows
@@ -274,6 +277,9 @@ public static class PermissionKeys
         Inventory.CostLayersRead,
         Inventory.ReceiptsManage,
         Inventory.ReturnsManage,
+        Inventory.SupplyRequestsSubmit,
+        Inventory.SupplyRequestsRead,
+        Inventory.SupplyRequestsApprove,
         Workflows.LeaveRequestsRead,
         Workflows.LeaveRequestsManage,
         Workflows.LeaveRequestsApprove,

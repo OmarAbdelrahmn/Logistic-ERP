@@ -1,8 +1,11 @@
 using System.Reflection;
+using System.Text.Json.Serialization;
 using LogisticsERP.Api.Authorization;
 using LogisticsERP.Api.Controllers;
 using LogisticsERP.Application.Authorization;
+using LogisticsERP.Application.Features.Maintenance;
 using LogisticsERP.Domain.Entities.Maintenance;
+using LogisticsERP.Domain.Enums;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Xunit;
@@ -52,6 +55,7 @@ public sealed class MaintenanceApiSurfaceTests
     [Fact]
     public void ExternalWorkshopEndpointsHaveDedicatedFinancialPermissions()
     {
+        AssertEndpointPermission(nameof(MaintenanceWorkOrdersController.GetExternal), PermissionKeys.Maintenance.ExternalJobsRead, typeof(MaintenanceWorkOrdersController));
         AssertEndpointPermission(nameof(MaintenanceWorkOrdersController.PostPartSale), PermissionKeys.Maintenance.PartSalesManage, typeof(MaintenanceWorkOrdersController));
         AssertEndpointPermission(nameof(MaintenanceWorkOrdersController.PostCustomerLaborCharge), PermissionKeys.Maintenance.CustomerLaborChargesManage, typeof(MaintenanceWorkOrdersController));
         AssertEndpointPermission(nameof(MaintenanceWorkOrdersController.PostMechanicLaborPayment), PermissionKeys.Maintenance.MechanicLaborPaymentsManage, typeof(MaintenanceWorkOrdersController));
@@ -66,6 +70,61 @@ public sealed class MaintenanceApiSurfaceTests
         Assert.Contains(PermissionKeys.Maintenance.ProfitReportsRead, permissions);
         Assert.Contains(PermissionKeys.Inventory.CostLayersRead, permissions);
         Assert.Contains(PermissionKeys.Inventory.ReceiptsManage, permissions);
+        Assert.Contains(PermissionKeys.Inventory.SupplyRequestsSubmit, permissions);
+        Assert.Contains(PermissionKeys.Inventory.SupplyRequestsRead, permissions);
+        Assert.Contains(PermissionKeys.Inventory.SupplyRequestsApprove, permissions);
+    }
+
+    [Fact]
+    public void SupplyRequestWorkflowSeparatesSubmissionFromWarehouseIssuance()
+    {
+        AssertEndpointPermission(nameof(MaintenanceInventoryController.CreateRiderSupplyRequest), PermissionKeys.Inventory.SupplyRequestsSubmit, typeof(MaintenanceInventoryController));
+        AssertEndpointPermission(nameof(MaintenanceInventoryController.GetOwnSupplyRequest), PermissionKeys.Inventory.SupplyRequestsSubmit, typeof(MaintenanceInventoryController));
+        AssertEndpointPermission(nameof(MaintenanceInventoryController.GetSupplyRequests), PermissionKeys.Inventory.SupplyRequestsRead, typeof(MaintenanceInventoryController));
+        AssertEndpointPermission(nameof(MaintenanceInventoryController.ApproveAndIssueSupplyRequest), PermissionKeys.Inventory.SupplyRequestsApprove, typeof(MaintenanceInventoryController));
+        AssertEndpointPermission(nameof(MaintenanceInventoryController.ApproveAndIssueSupplyRequest), PermissionKeys.Inventory.StockMove, typeof(MaintenanceInventoryController));
+        AssertEndpointPermission(nameof(MaintenanceInventoryController.RejectSupplyRequest), PermissionKeys.Inventory.SupplyRequestsApprove, typeof(MaintenanceInventoryController));
+        Assert.Equal("supply-requests/{id:guid}/approve-and-issue", Assert.Single(typeof(MaintenanceInventoryController)
+            .GetMethod(nameof(MaintenanceInventoryController.ApproveAndIssueSupplyRequest))!.GetCustomAttributes<HttpPostAttribute>()).Template);
+    }
+
+    [Fact]
+    public void MaintenanceWorkOrderCanCarryOneDetailedSupplyRequest()
+    {
+        Assert.Equal(typeof(MaintenanceSupplyRequestInput), typeof(CreateMaintenanceWorkOrderRequest)
+            .GetProperty(nameof(CreateMaintenanceWorkOrderRequest.SupplyRequest))!.PropertyType);
+        Assert.Equal(typeof(IReadOnlyList<InventorySupplyRequestLineInput>), typeof(MaintenanceSupplyRequestInput)
+            .GetProperty(nameof(MaintenanceSupplyRequestInput.Lines))!.PropertyType);
+        Assert.NotNull(typeof(InventorySupplyRequest).GetProperty(nameof(InventorySupplyRequest.VehicleId)));
+        Assert.NotNull(typeof(InventorySupplyRequest).GetProperty(nameof(InventorySupplyRequest.RiderProfileId)));
+        Assert.Equal(InventorySupplyRequestStatus.PendingWarehouseApproval, new InventorySupplyRequest().Status);
+    }
+
+    [Fact]
+    public void WorkOrderCreationDoesNotAcceptUserEnteredCostAndSupportsOneStepOilRequest()
+    {
+        Assert.Null(typeof(CreateMaintenanceWorkOrderRequest).GetProperty("EstimatedCost"));
+        Assert.Equal(typeof(OilChangeSupplyRequestInput), typeof(CreateMaintenanceWorkOrderRequest)
+            .GetProperty(nameof(CreateMaintenanceWorkOrderRequest.OilChange))!.PropertyType);
+        Assert.NotNull(typeof(InventorySupplyDecisionRequest).GetProperty(nameof(InventorySupplyDecisionRequest.NextOilBarrelId)));
+        var laborCost = typeof(MaintenanceWorkOrderResponse).GetProperty(nameof(MaintenanceWorkOrderResponse.ActualLaborCost))!;
+        Assert.Equal(typeof(decimal?), laborCost.PropertyType);
+        Assert.Equal(JsonIgnoreCondition.WhenWritingNull, laborCost.GetCustomAttribute<JsonIgnoreAttribute>()!.Condition);
+    }
+
+    [Fact]
+    public void BatchSparePartUsageEndpointUsesTheRequestedRouteAndStockPermissions()
+    {
+        var method = typeof(SparePartController).GetMethod(nameof(SparePartController.PostUsages));
+
+        Assert.NotNull(method);
+        Assert.Equal("spare-parts", Assert.Single(method!.GetCustomAttributes<HttpPostAttribute>()).Template);
+        Assert.Equal("api/[controller]", Assert.Single(typeof(SparePartController).GetCustomAttributes<RouteAttribute>()).Template);
+        Assert.Contains(method.GetCustomAttributes<RequirePermissionAttribute>(), attribute =>
+            attribute.Policy?.EndsWith(PermissionKeys.Maintenance.WorkOrdersManage, StringComparison.Ordinal) == true);
+        Assert.Contains(method.GetCustomAttributes<RequirePermissionAttribute>(), attribute =>
+            attribute.Policy?.EndsWith(PermissionKeys.Inventory.StockMove, StringComparison.Ordinal) == true);
+        Assert.Equal(typeof(IReadOnlyList<BatchSparePartUsageLineRequest>), typeof(BatchSparePartUsageRequest).GetProperty(nameof(BatchSparePartUsageRequest.Usages))!.PropertyType);
     }
 
     private static void AssertEndpointPermission(string methodName, string permission, Type controllerType)
