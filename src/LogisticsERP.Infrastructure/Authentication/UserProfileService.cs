@@ -1,4 +1,5 @@
 using LogisticsERP.Application.Abstractions.Authentication;
+using LogisticsERP.Application.Authorization;
 using LogisticsERP.Application.Common.Results;
 using LogisticsERP.Application.Features.UserProfiles;
 using LogisticsERP.Domain.Enums;
@@ -13,6 +14,7 @@ internal sealed class UserProfileService(
     IdentityDbContext identityDbContext,
     ApplicationDbContext applicationDbContext,
     ICurrentUser currentUser,
+    IPermissionChecker permissionChecker,
     TimeProvider timeProvider,
     IHostEnvironment hostEnvironment) : IUserProfileService
 {
@@ -255,23 +257,103 @@ internal sealed class UserProfileService(
             .Distinct(StringComparer.Ordinal)
             .Order(StringComparer.Ordinal)
             .ToArray();
-        var deniedSet = deniedKeys.ToHashSet(StringComparer.Ordinal);
-        var effectiveKeys = roles
+        var candidateKeys = roles
             .SelectMany(role => role.Permissions)
             .Concat(directRows
                 .Where(row => row.Effect == PermissionEffect.Grant)
                 .Select(row => row.PermissionKey))
-            .Where(key => !deniedSet.Contains(key))
             .Distinct(StringComparer.Ordinal)
             .Order(StringComparer.Ordinal)
             .ToArray();
+        var definitions = await applicationDbContext.PermissionDefinitions
+            .AsNoTracking()
+            .Where(definition => candidateKeys.Contains(definition.Key) && !definition.IsDeprecated)
+            .Select(definition => new
+            {
+                definition.Key,
+                definition.RequiresHousingScope,
+                definition.RequiresClientScope
+            })
+            .ToDictionaryAsync(definition => definition.Key, StringComparer.Ordinal, cancellationToken);
+        var effectiveKeys = new List<string>(candidateKeys.Length);
+        foreach (var key in candidateKeys)
+        {
+            if (!definitions.TryGetValue(key, out var definition))
+            {
+                continue;
+            }
+
+            var candidateScopes = GetCandidateScopes(
+                key,
+                definition.RequiresHousingScope,
+                definition.RequiresClientScope,
+                roles,
+                directPermissions);
+            foreach (var scope in candidateScopes)
+            {
+                if (await permissionChecker.HasPermissionAsync(
+                    userId,
+                    authorizationVersion.Value,
+                    key,
+                    scope,
+                    cancellationToken))
+                {
+                    effectiveKeys.Add(key);
+                    break;
+                }
+            }
+        }
 
         return Result.Success(new UserAuthorizationResponse(
             authorizationVersion.Value,
             roles,
             directPermissions,
-            effectiveKeys,
+            effectiveKeys.ToArray(),
             deniedKeys));
+    }
+
+    private static PermissionScope?[] GetCandidateScopes(
+        string permissionKey,
+        bool requiresHousingScope,
+        bool requiresClientScope,
+        IReadOnlyList<UserRoleAuthorizationResponse> roles,
+        IReadOnlyList<DirectPermissionAuthorizationResponse> directPermissions)
+    {
+        if (!requiresHousingScope && !requiresClientScope)
+        {
+            return [null];
+        }
+
+        var applicableRoles = roles.Where(role => role.Permissions.Contains(permissionKey, StringComparer.Ordinal));
+        var applicableDirect = directPermissions.Where(permission =>
+            string.Equals(permission.PermissionKey, permissionKey, StringComparison.Ordinal));
+        if (requiresHousingScope
+            && (applicableRoles.Any(role => role.IsAllHousingScope)
+                || applicableDirect.Any(permission => permission.IsAllHousingScope)))
+        {
+            return [null];
+        }
+        if (requiresClientScope
+            && (applicableRoles.Any(role => role.IsAllClientScope)
+                || applicableDirect.Any(permission => permission.IsAllClientScope)))
+        {
+            return [null];
+        }
+
+        var allowedTypes = requiresHousingScope
+            ? new[] { AccessScopeType.Housing }
+            : new[] { AccessScopeType.ClientPlatform, AccessScopeType.ClientContract };
+        return applicableRoles
+            .SelectMany(role => role.Scopes)
+            .Concat(applicableDirect.SelectMany(permission => permission.Scopes))
+            .Where(scope => Enum.TryParse<AccessScopeType>(scope.Type, true, out var type)
+                && allowedTypes.Contains(type))
+            .Select(scope => new PermissionScope(
+                Enum.Parse<AccessScopeType>(scope.Type, true),
+                scope.TargetId))
+            .Distinct()
+            .Cast<PermissionScope?>()
+            .ToArray();
     }
 
     private async Task<UserProfileResponse> CreateResponseAsync(

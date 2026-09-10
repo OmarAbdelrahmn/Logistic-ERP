@@ -1,7 +1,10 @@
 using LogisticsERP.Api.ErrorHandling;
+using LogisticsERP.Api.Authorization;
 using LogisticsERP.Application.Abstractions.Files;
+using LogisticsERP.Application.Authorization;
 using LogisticsERP.Application.Features.Fleet;
 using LogisticsERP.Domain.Enums;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LogisticsERP.Api.Controllers;
@@ -11,6 +14,7 @@ namespace LogisticsERP.Api.Controllers;
 public sealed class VehiclesController(IFleetService service) : ControllerBase
 {
     [HttpGet]
+    [RequirePermission(PermissionKeys.Fleet.VehiclesRead)]
     public async Task<IActionResult> GetAll([FromQuery] string? search, [FromQuery] string? status, [FromQuery] Guid? operatingCityId, [FromQuery] int page = 1, [FromQuery] int pageSize = 50, CancellationToken cancellationToken = default)
     {
         var result = await service.GetVehiclesAsync(search, status, operatingCityId, page, pageSize, cancellationToken);
@@ -18,6 +22,7 @@ public sealed class VehiclesController(IFleetService service) : ControllerBase
     }
 
     [HttpGet("lookup")]
+    [RequirePermission(PermissionKeys.Fleet.VehiclesRead)]
     public async Task<IActionResult> Lookup([FromQuery] string? search, CancellationToken cancellationToken)
     {
         var result = await service.LookupVehiclesAsync(search, cancellationToken);
@@ -25,6 +30,7 @@ public sealed class VehiclesController(IFleetService service) : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
+    [RequirePermission(PermissionKeys.Fleet.VehiclesRead)]
     public async Task<IActionResult> Get(Guid id, CancellationToken cancellationToken)
     {
         var result = await service.GetVehicleAsync(id, cancellationToken);
@@ -32,6 +38,7 @@ public sealed class VehiclesController(IFleetService service) : ControllerBase
     }
 
     [HttpPost]
+    [RequirePermission(PermissionKeys.Fleet.VehiclesManage)]
     public async Task<IActionResult> Create([FromBody] VehicleUpsertRequest request, CancellationToken cancellationToken)
     {
         var result = await service.UpsertVehicleAsync(null, request, cancellationToken);
@@ -39,6 +46,7 @@ public sealed class VehiclesController(IFleetService service) : ControllerBase
     }
 
     [HttpPut("{id:guid}")]
+    [RequirePermission(PermissionKeys.Fleet.VehiclesManage)]
     public async Task<IActionResult> Update(Guid id, [FromBody] VehicleUpsertRequest request, CancellationToken cancellationToken)
     {
         var result = await service.UpsertVehicleAsync(id, request, cancellationToken);
@@ -46,6 +54,7 @@ public sealed class VehiclesController(IFleetService service) : ControllerBase
     }
 
     [HttpPatch("{id:guid}/archive")]
+    [RequirePermission(PermissionKeys.Fleet.VehiclesArchive)]
     public async Task<IActionResult> Archive(Guid id, [FromBody] ArchiveFleetRequest request, CancellationToken cancellationToken)
     {
         var result = await service.ArchiveVehicleAsync(id, request, cancellationToken);
@@ -53,6 +62,7 @@ public sealed class VehiclesController(IFleetService service) : ControllerBase
     }
 
     [HttpPatch("{id:guid}/restore")]
+    [RequirePermission(PermissionKeys.Fleet.VehiclesArchive)]
     public async Task<IActionResult> Restore(Guid id, [FromBody] RowVersionRequest request, CancellationToken cancellationToken)
     {
         var result = await service.RestoreVehicleAsync(id, request.RowVersion, cancellationToken);
@@ -60,6 +70,7 @@ public sealed class VehiclesController(IFleetService service) : ControllerBase
     }
 
     [HttpPost("{id:guid}/{statusAction:regex(^(stolen|recover|out-of-service|restore|decommission)$)}")]
+    [Authorize]
     public async Task<IActionResult> Status(Guid id, string statusAction, [FromBody] VehicleStatusCommandRequest request, CancellationToken cancellationToken)
     {
         var result = await service.ChangeAdministrativeStatusAsync(id, statusAction, request, cancellationToken);
@@ -67,6 +78,7 @@ public sealed class VehiclesController(IFleetService service) : ControllerBase
     }
 
     [HttpGet("{id:guid}/status-history")]
+    [RequirePermission(PermissionKeys.Fleet.VehiclesRead)]
     public async Task<IActionResult> StatusHistory(Guid id, CancellationToken cancellationToken)
     {
         var result = await service.GetStatusHistoryAsync(id, cancellationToken);
@@ -74,6 +86,7 @@ public sealed class VehiclesController(IFleetService service) : ControllerBase
     }
 
     [HttpGet("{id:guid}/odometer")]
+    [RequirePermission(PermissionKeys.Fleet.VehiclesRead)]
     public async Task<IActionResult> OdometerHistory(Guid id, CancellationToken cancellationToken)
     {
         var result = await service.GetOdometerHistoryAsync(id, cancellationToken);
@@ -81,6 +94,7 @@ public sealed class VehiclesController(IFleetService service) : ControllerBase
     }
 
     [HttpPost("{id:guid}/odometer")]
+    [Authorize]
     public async Task<IActionResult> Odometer(Guid id, [FromBody] OdometerReadingRequest request, CancellationToken cancellationToken)
     {
         var result = await service.RecordOdometerAsync(id, request, cancellationToken);
@@ -88,6 +102,7 @@ public sealed class VehiclesController(IFleetService service) : ControllerBase
     }
 
     [HttpGet("{id:guid}/rider-timeline")]
+    [RequirePermission(PermissionKeys.Fleet.AssignmentsRead)]
     public async Task<IActionResult> RiderTimeline(Guid id, CancellationToken cancellationToken)
     {
         var result = await service.GetVehicleTimelineAsync(id, cancellationToken);
@@ -95,6 +110,7 @@ public sealed class VehiclesController(IFleetService service) : ControllerBase
     }
 
     [HttpGet("{id:guid}/readiness")]
+    [RequirePermission(PermissionKeys.Fleet.VehiclesRead)]
     public async Task<IActionResult> Readiness(Guid id, CancellationToken cancellationToken)
     {
         var result = await service.GetReadinessAsync(id, cancellationToken);
@@ -102,6 +118,7 @@ public sealed class VehiclesController(IFleetService service) : ControllerBase
     }
 
     [HttpPost("{id:guid}/identity-corrections")]
+    [RequirePermission(PermissionKeys.Fleet.CorrectionsManage)]
     public async Task<IActionResult> CorrectIdentity(Guid id, [FromBody] VehicleIdentityCorrectionRequest request, CancellationToken cancellationToken)
     {
         var result = await service.CorrectIdentityAsync(id, request, cancellationToken);
@@ -109,6 +126,7 @@ public sealed class VehiclesController(IFleetService service) : ControllerBase
     }
 
     [HttpGet("{id:guid}/identity-corrections")]
+    [RequirePermission(PermissionKeys.Fleet.VehiclesRead)]
     public async Task<IActionResult> IdentityCorrections(Guid id, CancellationToken cancellationToken)
     {
         var result = await service.GetIdentityCorrectionHistoryAsync(id, cancellationToken);
@@ -116,6 +134,7 @@ public sealed class VehiclesController(IFleetService service) : ControllerBase
     }
 
     [HttpPost("{id:guid}/registration-transitions/private-to-public")]
+    [RequirePermission(PermissionKeys.Fleet.RegistrationTransitionsManage)]
     [Consumes("multipart/form-data")]
     [RequestSizeLimit(22 * 1024 * 1024)]
     public async Task<IActionResult> TransitionToPublic(Guid id, [FromForm] VehicleRegistrationTransitionForm form, CancellationToken cancellationToken)
@@ -131,6 +150,7 @@ public sealed class VehiclesController(IFleetService service) : ControllerBase
     }
 
     [HttpGet("{id:guid}/registration-transitions")]
+    [RequirePermission(PermissionKeys.Fleet.VehiclesRead)]
     public async Task<IActionResult> RegistrationTransitions(Guid id, CancellationToken cancellationToken)
     {
         var result = await service.GetRegistrationTransitionHistoryAsync(id, cancellationToken);
@@ -146,6 +166,7 @@ public sealed record RowVersionRequest(string RowVersion);
 public sealed class VehicleFilesController(IVehicleFileService service) : ControllerBase
 {
     [HttpGet]
+    [RequirePermission(PermissionKeys.Fleet.FilesRead)]
     public async Task<IActionResult> Get(Guid vehicleId, CancellationToken cancellationToken)
     {
         var result = await service.GetAsync(vehicleId, cancellationToken);
@@ -153,6 +174,7 @@ public sealed class VehicleFilesController(IVehicleFileService service) : Contro
     }
 
     [HttpPut("{kind}")]
+    [RequirePermission(PermissionKeys.Fleet.FilesUpload)]
     public async Task<IActionResult> Upload(Guid vehicleId, VehicleFileKind kind, [FromForm] VehicleFileUploadForm form, CancellationToken cancellationToken)
     {
         if (form.File is null || form.File.Length == 0) return BadRequest();
@@ -162,6 +184,7 @@ public sealed class VehicleFilesController(IVehicleFileService service) : Contro
     }
 
     [HttpGet("{attachmentId:guid}/versions")]
+    [RequirePermission(PermissionKeys.Fleet.FilesRead)]
     public async Task<IActionResult> Versions(Guid vehicleId, Guid attachmentId, CancellationToken cancellationToken)
     {
         var result = await service.GetVersionsAsync(vehicleId, attachmentId, cancellationToken);
@@ -169,6 +192,7 @@ public sealed class VehicleFilesController(IVehicleFileService service) : Contro
     }
 
     [HttpGet("{attachmentId:guid}/download")]
+    [RequirePermission(PermissionKeys.Fleet.FilesDownload)]
     public async Task<IActionResult> Download(Guid vehicleId, Guid attachmentId, [FromQuery] Guid? versionId, CancellationToken cancellationToken)
     {
         var result = await service.DownloadAsync(vehicleId, attachmentId, versionId, cancellationToken);

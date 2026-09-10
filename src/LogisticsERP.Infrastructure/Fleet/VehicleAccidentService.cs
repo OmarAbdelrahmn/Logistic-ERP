@@ -62,10 +62,11 @@ internal sealed partial class VehicleAccidentService(
         }
         var vehicleResult = await GetVehicleAsync(request.VehicleId, PermissionKeys.Fleet.AccidentsReport, cancellationToken, tracking: true);
         if (vehicleResult.IsFailure) return Result.Failure<VehicleAccidentDetailResponse>(vehicleResult.Error);
-        if (string.IsNullOrWhiteSpace(request.PoliceReportNumber) || request.PoliceReportNumber.Length > 150
-            || !Enum.IsDefined(request.Severity) || request.OccurredAtUtc > support.UtcNow || request.OccurredAtUtc == default
-            || string.IsNullOrWhiteSpace(request.LocationDescription) || string.IsNullOrWhiteSpace(request.DamageDescription) || string.IsNullOrWhiteSpace(request.Narrative)
-            || request.Latitude is < -90 or > 90 || request.Longitude is < -180 or > 180 || request.HasInjuries && string.IsNullOrWhiteSpace(request.InjuryDetails)) return Result.Failure<VehicleAccidentDetailResponse>(FleetErrors.InvalidRequest);
+        if (!IsValidCreateRequest(request, support.UtcNow))
+            return Result.Failure<VehicleAccidentDetailResponse>(FleetErrors.InvalidRequest);
+        var accidentNumber = request.AccidentNumber.Trim();
+        if (await dbContext.VehicleAccidents.AnyAsync(x => x.AccidentNumber == accidentNumber, cancellationToken))
+            return Result.Failure<VehicleAccidentDetailResponse>(FleetErrors.Duplicate);
         var assignment = await dbContext.RiderVehicleAssignments.SingleOrDefaultAsync(x => x.VehicleId == request.VehicleId && x.RiderProfileId == request.RiderProfileId
             && x.StartedAtUtc <= request.OccurredAtUtc && (x.EndedAtUtc == null || x.EndedAtUtc >= request.OccurredAtUtc), cancellationToken);
         if (assignment is null) return Result.Failure<VehicleAccidentDetailResponse>(FleetErrors.AccidentAssignmentMismatch);
@@ -76,30 +77,34 @@ internal sealed partial class VehicleAccidentService(
         var employeeId = await dbContext.RiderProfiles.AsNoTracking().Where(x => x.Id == assignment.RiderProfileId).Select(x => x.EmployeeId).SingleAsync(cancellationToken);
         var issueId = Guid.CreateVersion7();
         var accidentId = Guid.CreateVersion7();
+        var locationDescription = FleetServiceSupport.TrimOrNull(request.LocationDescription);
+        var damageDescription = FleetServiceSupport.TrimOrNull(request.DamageDescription);
+        var narrative = FleetServiceSupport.TrimOrNull(request.Narrative);
+        const string defaultEventReason = "Accident reported / تم تسجيل حادث";
         var issue = new VehicleIssue
         {
             Id = issueId, IssueNumber = FleetServiceSupport.NewIssueNumber(issueId), VehicleId = vehicle.Id,
-            Category = VehicleIssueCategory.Accident, Severity = ToIssueSeverity(request.Severity), Description = request.DamageDescription.Trim(),
-            ReportedAtUtc = support.UtcNow, LocationDescription = request.LocationDescription.Trim(), OdometerAtReport = vehicle.CurrentOdometer,
+            Category = VehicleIssueCategory.Accident, Severity = ToIssueSeverity(request.Severity), Description = damageDescription ?? defaultEventReason,
+            ReportedAtUtc = support.UtcNow, LocationDescription = locationDescription, OdometerAtReport = vehicle.CurrentOdometer,
             RelatedAssignmentId = assignment.Id, BlocksOperation = !request.IsDrivable, ReportedByUserId = actor.Value
         };
         var accident = new VehicleAccident
         {
-            Id = accidentId, AccidentNumber = $"ACC-{support.UtcNow:yyyyMMdd}-{accidentId.ToString("N")[^16..]}".ToUpperInvariant(), VehicleId = vehicle.Id,
+            Id = accidentId, AccidentNumber = accidentNumber, VehicleId = vehicle.Id,
             RiderProfileId = assignment.RiderProfileId, EmployeeId = employeeId, RiderVehicleAssignmentId = assignment.Id, VehicleIssueId = issue.Id,
             VehicleInsurancePolicyId = insurance?.Id, OccurredAtUtc = request.OccurredAtUtc, ReportedAtUtc = support.UtcNow,
-            LocationDescription = request.LocationDescription.Trim(), Latitude = request.Latitude, Longitude = request.Longitude,
+            LocationDescription = locationDescription ?? string.Empty, Latitude = request.Latitude, Longitude = request.Longitude,
             PoliceReportNumber = FleetServiceSupport.TrimOrNull(request.PoliceReportNumber), InsuranceClaimNumber = FleetServiceSupport.TrimOrNull(request.InsuranceClaimNumber),
             Severity = request.Severity, IsDrivable = request.IsDrivable, HasInjuries = request.HasInjuries, InjuryDetails = FleetServiceSupport.TrimOrNull(request.InjuryDetails),
-            ThirdPartyDetails = FleetServiceSupport.TrimOrNull(request.ThirdPartyDetails), DamageDescription = request.DamageDescription.Trim(),
-            FaultAssessment = FleetServiceSupport.TrimOrNull(request.FaultAssessment), Narrative = request.Narrative.Trim(), ReportedByUserId = actor.Value
+            ThirdPartyDetails = FleetServiceSupport.TrimOrNull(request.ThirdPartyDetails), DamageDescription = damageDescription ?? string.Empty,
+            FaultAssessment = FleetServiceSupport.TrimOrNull(request.FaultAssessment), Narrative = narrative ?? string.Empty, ReportedByUserId = actor.Value
         };
         dbContext.VehicleIssues.Add(issue);
-        dbContext.VehicleIssueEvents.Add(new VehicleIssueEvent { VehicleIssueId = issue.Id, EventType = VehicleIssueEventType.Reported, ToStatus = VehicleIssueStatus.Open, OccurredAtUtc = support.UtcNow, ActorUserId = actor.Value, Reason = request.DamageDescription.Trim() });
+        dbContext.VehicleIssueEvents.Add(new VehicleIssueEvent { VehicleIssueId = issue.Id, EventType = VehicleIssueEventType.Reported, ToStatus = VehicleIssueStatus.Open, OccurredAtUtc = support.UtcNow, ActorUserId = actor.Value, Reason = damageDescription ?? defaultEventReason });
         dbContext.VehicleAccidents.Add(accident);
         dbContext.VehicleAccidentCases.Add(new VehicleAccidentCase { VehicleAccidentId = accident.Id });
         await notifications.QueueAsync(accident.Id, vehicle.Id, accident.AccidentNumber, "reported", "تم تسجيل حادث للمركبة / Vehicle accident reported", cancellationToken);
-        dbContext.VehicleAccidentEvents.Add(new VehicleAccidentEvent { VehicleAccidentId = accident.Id, EventType = VehicleAccidentEventType.Reported, OccurredAtUtc = support.UtcNow, ActorUserId = actor.Value, Reason = request.Narrative.Trim() });
+        dbContext.VehicleAccidentEvents.Add(new VehicleAccidentEvent { VehicleAccidentId = accident.Id, EventType = VehicleAccidentEventType.Reported, OccurredAtUtc = support.UtcNow, ActorUserId = actor.Value, Reason = narrative ?? defaultEventReason });
         if (!request.IsDrivable && assignment.EndedAtUtc is null && vehicle.CurrentAssignmentId == assignment.Id)
         {
             assignment.EndedAtUtc = support.UtcNow; assignment.EndLocationSnapshot = assignment.StartLocationSnapshot; assignment.EndOdometer = vehicle.CurrentOdometer;
@@ -113,6 +118,29 @@ internal sealed partial class VehicleAccidentService(
         catch (DbUpdateException) { return Result.Failure<VehicleAccidentDetailResponse>(FleetErrors.Conflict); }
         return Result.Success(await BuildDetailAsync(accident, cancellationToken));
     }
+
+    internal static bool IsValidCreateRequest(CreateVehicleAccidentRequest request, DateTimeOffset now)
+    {
+        return !string.IsNullOrWhiteSpace(request.AccidentNumber)
+            && request.AccidentNumber.Length <= 64
+            && !string.IsNullOrWhiteSpace(request.PoliceReportNumber)
+            && request.PoliceReportNumber.Length <= 150
+            && WithinLimit(request.InsuranceClaimNumber, 150)
+            && Enum.IsDefined(request.Severity)
+            && request.OccurredAtUtc != default
+            && request.OccurredAtUtc <= now
+            && WithinLimit(request.LocationDescription, 1000)
+            && WithinLimit(request.DamageDescription, 4000)
+            && WithinLimit(request.Narrative, 8000)
+            && WithinLimit(request.InjuryDetails, 4000)
+            && WithinLimit(request.ThirdPartyDetails, 4000)
+            && WithinLimit(request.FaultAssessment, 2000)
+            && request.Latitude is not (< -90 or > 90)
+            && request.Longitude is not (< -180 or > 180)
+            && (!request.HasInjuries || !string.IsNullOrWhiteSpace(request.InjuryDetails));
+    }
+
+    private static bool WithinLimit(string? value, int maximumLength) => value is null || value.Length <= maximumLength;
 
     public async Task<Result<VehicleAccidentAttachmentResponse>> UploadEvidenceAsync(Guid accidentId, VehicleAccidentEvidenceType evidenceType, PrivateFileUpload file, CancellationToken cancellationToken = default)
     {

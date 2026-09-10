@@ -1,6 +1,8 @@
 using LogisticsERP.Api.ErrorHandling;
+using LogisticsERP.Api.Authorization;
 using System.Text.Json;
 using LogisticsERP.Application.Abstractions.Files;
+using LogisticsERP.Application.Authorization;
 using LogisticsERP.Application.Common.Results;
 using LogisticsERP.Application.Features.Fleet;
 using Microsoft.AspNetCore.Mvc;
@@ -21,6 +23,7 @@ public sealed class VehicleAssignmentsController(
             "Vehicle assignment command failed. CorrelationId: {CorrelationId}");
 
     [HttpGet]
+    [RequirePermission(PermissionKeys.Fleet.AssignmentsRead)]
     public async Task<IActionResult> Get(
         [FromQuery] Guid? vehicleId,
         [FromQuery] Guid? riderProfileId,
@@ -32,6 +35,7 @@ public sealed class VehicleAssignmentsController(
     }
 
     [HttpPost("take")]
+    [RequirePermission(PermissionKeys.Fleet.AssignmentsManage)]
     [Consumes("multipart/form-data")]
     [RequestSizeLimit(32 * 1024 * 1024)]
     public async Task<IActionResult> Take([FromForm] VehicleAssignmentMultipartForm form, [FromHeader(Name = "Idempotency-Key")] string? idempotencyKey, CancellationToken cancellationToken)
@@ -44,6 +48,7 @@ public sealed class VehicleAssignmentsController(
     }
 
     [HttpPost("return")]
+    [RequirePermission(PermissionKeys.Fleet.AssignmentsManage)]
     [Consumes("application/json")]
     public async Task<IActionResult> Return([FromBody] ReturnVehicleRequest request, [FromHeader(Name = "Idempotency-Key")] string? idempotencyKey, CancellationToken cancellationToken)
     {
@@ -55,6 +60,7 @@ public sealed class VehicleAssignmentsController(
     }
 
     [HttpPost("return-with-condition-report")]
+    [RequirePermission(PermissionKeys.Fleet.AssignmentsManage)]
     [Consumes("multipart/form-data")]
     [RequestSizeLimit(22 * 1024 * 1024)]
     public async Task<IActionResult> ReturnWithConditionReport([FromForm] VehicleReturnMultipartForm form, [FromHeader(Name = "Idempotency-Key")] string? idempotencyKey, CancellationToken cancellationToken)
@@ -68,6 +74,7 @@ public sealed class VehicleAssignmentsController(
     }
 
     [HttpPost("switch")]
+    [RequirePermission(PermissionKeys.Fleet.AssignmentsManage)]
     [Consumes("multipart/form-data")]
     [RequestSizeLimit(54 * 1024 * 1024)]
     public async Task<IActionResult> Switch([FromForm] VehicleSwitchMultipartForm form, [FromHeader(Name = "Idempotency-Key")] string? idempotencyKey, CancellationToken cancellationToken)
@@ -83,6 +90,7 @@ public sealed class VehicleAssignmentsController(
     }
 
     [HttpPost("{assignmentId:guid}/renew-permission")]
+    [RequirePermission(PermissionKeys.Fleet.AssignmentsManage)]
     public async Task<IActionResult> Renew(Guid assignmentId, [FromBody] RenewVehiclePermissionRequest request, [FromHeader(Name = "Idempotency-Key")] string? idempotencyKey, CancellationToken cancellationToken)
     {
         return await ExecuteAssignmentAsync(async () =>
@@ -202,6 +210,7 @@ public sealed class VehicleReturnMultipartForm
 public sealed class RiderVehicleTimelineController(IFleetService service) : ControllerBase
 {
     [HttpGet]
+    [RequirePermission(PermissionKeys.Fleet.AssignmentsRead)]
     public async Task<IActionResult> Get(Guid riderProfileId, CancellationToken cancellationToken)
     {
         var result = await service.GetRiderTimelineAsync(riderProfileId, cancellationToken);
@@ -214,6 +223,7 @@ public sealed class RiderVehicleTimelineController(IFleetService service) : Cont
 public sealed class RiderPromissoryFilesController(IVehicleFileService service) : ControllerBase
 {
     [HttpGet]
+    [RequirePermission(PermissionKeys.Fleet.AssignmentsRead)]
     public async Task<IActionResult> Get(Guid riderProfileId, CancellationToken cancellationToken)
     {
         var result = await service.GetRiderPromissoryFilesAsync(riderProfileId, cancellationToken);
@@ -221,6 +231,7 @@ public sealed class RiderPromissoryFilesController(IVehicleFileService service) 
     }
 
     [HttpGet("{fileId:guid}/download")]
+    [RequirePermission(PermissionKeys.Fleet.FilesDownload)]
     public async Task<IActionResult> Download(Guid riderProfileId, Guid fileId, [FromQuery] Guid? versionId, CancellationToken cancellationToken)
     {
         var result = await service.DownloadRiderPromissoryFileAsync(riderProfileId, fileId, versionId, cancellationToken);

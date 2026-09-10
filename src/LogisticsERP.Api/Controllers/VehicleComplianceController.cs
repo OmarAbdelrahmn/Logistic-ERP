@@ -1,4 +1,6 @@
 using LogisticsERP.Api.ErrorHandling;
+using LogisticsERP.Api.Authorization;
+using LogisticsERP.Application.Authorization;
 using LogisticsERP.Application.Features.Fleet;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,6 +11,7 @@ namespace LogisticsERP.Api.Controllers;
 public sealed class VehicleComplianceController(IFleetService service) : ControllerBase
 {
     [HttpGet("{type:regex(^(registrations|insurance-policies|inspections|operation-cards)$)}")]
+    [RequirePermission(PermissionKeys.Fleet.ComplianceRead)]
     public async Task<IActionResult> Get(Guid vehicleId, string type, CancellationToken cancellationToken)
     {
         var result = await service.GetComplianceAsync(vehicleId, type, cancellationToken);
@@ -16,6 +19,7 @@ public sealed class VehicleComplianceController(IFleetService service) : Control
     }
 
     [HttpPost("registrations")]
+    [RequirePermission(PermissionKeys.Fleet.ComplianceManage)]
     public async Task<IActionResult> Registration(Guid vehicleId, [FromBody] VehicleRegistrationRequest request, CancellationToken cancellationToken)
     {
         var result = await service.RenewRegistrationAsync(vehicleId, request, cancellationToken);
@@ -23,6 +27,7 @@ public sealed class VehicleComplianceController(IFleetService service) : Control
     }
 
     [HttpPost("insurance-policies")]
+    [RequirePermission(PermissionKeys.Fleet.ComplianceManage)]
     public async Task<IActionResult> Insurance(Guid vehicleId, [FromBody] VehicleInsuranceRequest request, CancellationToken cancellationToken)
     {
         var result = await service.RenewInsuranceAsync(vehicleId, request, cancellationToken);
@@ -30,6 +35,7 @@ public sealed class VehicleComplianceController(IFleetService service) : Control
     }
 
     [HttpPost("inspections")]
+    [RequirePermission(PermissionKeys.Fleet.ComplianceManage)]
     public async Task<IActionResult> Inspection(Guid vehicleId, [FromBody] VehicleInspectionRequest request, CancellationToken cancellationToken)
     {
         var result = await service.RenewInspectionAsync(vehicleId, request, cancellationToken);
@@ -37,6 +43,7 @@ public sealed class VehicleComplianceController(IFleetService service) : Control
     }
 
     [HttpPost("operation-cards")]
+    [RequirePermission(PermissionKeys.Fleet.ComplianceManage)]
     public async Task<IActionResult> OperationCard(Guid vehicleId, [FromBody] VehicleOperationCardRequest request, CancellationToken cancellationToken)
     {
         var result = await service.RenewOperationCardAsync(vehicleId, request, cancellationToken);
@@ -49,6 +56,7 @@ public sealed class VehicleComplianceController(IFleetService service) : Control
 public sealed class VehicleComplianceDueController(IFleetService service) : ControllerBase
 {
     [HttpGet("due")]
+    [RequirePermission(PermissionKeys.Fleet.ComplianceRead)]
     public async Task<IActionResult> Due([FromQuery] DateOnly? checkDate, CancellationToken cancellationToken)
     {
         var result = await service.GetComplianceDueAsync(checkDate ?? DateOnly.FromDateTime(DateTime.UtcNow.AddHours(3)), cancellationToken);

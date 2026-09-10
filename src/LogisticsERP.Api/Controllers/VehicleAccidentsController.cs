@@ -1,5 +1,7 @@
 using LogisticsERP.Api.ErrorHandling;
+using LogisticsERP.Api.Authorization;
 using LogisticsERP.Application.Abstractions.Files;
+using LogisticsERP.Application.Authorization;
 using LogisticsERP.Application.Features.Fleet;
 using LogisticsERP.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
@@ -11,6 +13,7 @@ namespace LogisticsERP.Api.Controllers;
 public sealed class VehicleAccidentsController(IVehicleAccidentService service) : ControllerBase
 {
     [HttpGet]
+    [RequirePermission(PermissionKeys.Fleet.AccidentsRead)]
     public async Task<IActionResult> GetAll([FromQuery] Guid? vehicleId, [FromQuery] Guid? riderProfileId, [FromQuery] int page = 1, [FromQuery] int pageSize = 50, CancellationToken cancellationToken = default)
     {
         var result = await service.GetAsync(vehicleId, riderProfileId, page, pageSize, cancellationToken);
@@ -18,6 +21,7 @@ public sealed class VehicleAccidentsController(IVehicleAccidentService service) 
     }
 
     [HttpGet("{id:guid}")]
+    [RequirePermission(PermissionKeys.Fleet.AccidentsRead)]
     public async Task<IActionResult> Get(Guid id, CancellationToken cancellationToken)
     {
         var result = await service.GetAsync(id, cancellationToken);
@@ -25,6 +29,7 @@ public sealed class VehicleAccidentsController(IVehicleAccidentService service) 
     }
 
     [HttpPost]
+    [RequirePermission(PermissionKeys.Fleet.AccidentsReport)]
     public async Task<IActionResult> Create([FromBody] CreateVehicleAccidentRequest request, [FromHeader(Name = "Idempotency-Key")] string? idempotencyKey, CancellationToken cancellationToken)
     {
         var result = await service.CreateAsync(request, idempotencyKey ?? string.Empty, cancellationToken);
@@ -32,6 +37,7 @@ public sealed class VehicleAccidentsController(IVehicleAccidentService service) 
     }
 
     [HttpPost("{id:guid}/evidence")]
+    [RequirePermission(PermissionKeys.Fleet.AccidentsReport)]
     [RequestSizeLimit(11 * 1024 * 1024)]
     public async Task<IActionResult> Evidence(Guid id, [FromForm] AccidentEvidenceForm form, CancellationToken cancellationToken)
     {
@@ -42,6 +48,7 @@ public sealed class VehicleAccidentsController(IVehicleAccidentService service) 
     }
 
     [HttpGet("{id:guid}/evidence/{attachmentId:guid}/download")]
+    [RequirePermission(PermissionKeys.Fleet.AccidentsDownload)]
     public async Task<IActionResult> DownloadEvidence(Guid id, Guid attachmentId, CancellationToken cancellationToken)
     {
         var result = await service.DownloadEvidenceAsync(id, attachmentId, cancellationToken);
@@ -49,6 +56,7 @@ public sealed class VehicleAccidentsController(IVehicleAccidentService service) 
     }
 
     [HttpPost("{id:guid}/finalize")]
+    [RequirePermission(PermissionKeys.Fleet.AccidentsFinalize)]
     public async Task<IActionResult> Finalize(Guid id, [FromBody] AccidentActionRequest request, CancellationToken cancellationToken)
     {
         var result = await service.FinalizeAsync(id, request, cancellationToken);
@@ -56,6 +64,7 @@ public sealed class VehicleAccidentsController(IVehicleAccidentService service) 
     }
 
     [HttpPost("{id:guid}/correct")]
+    [RequirePermission(PermissionKeys.Fleet.AccidentsFinalize)]
     public async Task<IActionResult> Correct(Guid id, [FromBody] CorrectVehicleAccidentRequest request, CancellationToken cancellationToken)
     {
         var result = await service.CorrectAsync(id, request, cancellationToken);
@@ -63,6 +72,7 @@ public sealed class VehicleAccidentsController(IVehicleAccidentService service) 
     }
 
     [HttpPost("{id:guid}/close")]
+    [RequirePermission(PermissionKeys.Fleet.AccidentsFinalize)]
     public async Task<IActionResult> Close(Guid id, [FromBody] AccidentActionRequest request, CancellationToken cancellationToken)
     {
         var result = await service.CloseAsync(id, request, cancellationToken);
@@ -70,6 +80,7 @@ public sealed class VehicleAccidentsController(IVehicleAccidentService service) 
     }
 
     [HttpGet("{id:guid}/pdf")]
+    [RequirePermission(PermissionKeys.Fleet.AccidentsDownload)]
     public async Task<IActionResult> Pdf(Guid id, [FromQuery] Guid? reportVersionId, CancellationToken cancellationToken)
     {
         var result = await service.DownloadReportAsync(id, reportVersionId, cancellationToken);

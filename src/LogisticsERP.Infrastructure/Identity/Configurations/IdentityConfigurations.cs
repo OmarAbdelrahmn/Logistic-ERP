@@ -154,7 +154,9 @@ internal sealed class RolePermissionGrantConfiguration : IEntityTypeConfiguratio
         builder.ConfigureAuditableEntity("RolePermissions");
         builder.Property(entity => entity.PermissionKey).HasMaxLength(150).IsRequired();
         builder.HasOne<ApplicationRole>().WithMany().HasForeignKey(entity => entity.RoleId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasIndex(entity => new { entity.RoleId, entity.PermissionKey }).IsUnique();
+        builder.HasIndex(entity => new { entity.RoleId, entity.PermissionKey })
+            .IsUnique()
+            .HasFilter("[IsDeleted] = 0");
         builder.HasIndex(entity => entity.PermissionKey);
 
         var seededAt = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);

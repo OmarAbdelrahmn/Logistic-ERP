@@ -1,6 +1,7 @@
 using LogisticsERP.Api.ErrorHandling;
+using LogisticsERP.Api.Authorization;
+using LogisticsERP.Application.Authorization;
 using LogisticsERP.Application.Features.Hr;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LogisticsERP.Api.Controllers;
@@ -8,16 +9,18 @@ namespace LogisticsERP.Api.Controllers;
 [ApiController]
 [Route("api/import")]
 [RequestSizeLimit(20 * 1024 * 1024)]
-[AllowAnonymous]
 public sealed class ImportController(IHrExcelImportService service) : ControllerBase
 {
     [HttpPost("employees-riders/validate")]
     [Consumes("multipart/form-data")]
+    [RequirePermission(PermissionKeys.Workforce.EmployeesRead)]
     public Task<IActionResult> Validate([FromForm] HrExcelImportForm request, CancellationToken cancellationToken) =>
         Execute(request.File, validateOnly: true, cancellationToken);
 
     [HttpPost("employees-riders")]
     [Consumes("multipart/form-data")]
+    [RequirePermission(PermissionKeys.Workforce.EmployeesCreate)]
+    [RequirePermission(PermissionKeys.Workforce.EmployeesUpdate)]
     public Task<IActionResult> Import([FromForm] HrExcelImportForm request, CancellationToken cancellationToken) =>
         Execute(request.File, validateOnly: false, cancellationToken);
 

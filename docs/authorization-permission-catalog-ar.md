@@ -74,10 +74,10 @@
 | `platform_accounts.manage` | إدارة تسجيل وملكية الحسابات | Client Scope | — |
 | `platform_assignments.read` | عرض تاريخ الاستخدام الفعلي | Client Scope | M |
 | `platform_assignments.manage` | إدارة تكليفات الاستخدام | Client Scope | — |
-| `housing.read` | عرض السكن وفترات الإقامة | Housing Scope | M |
-| `housing.manage` | إدارة السكن والمشرفين والفترات | Housing Scope | — |
+| `housing.read` | عرض السكن وفترات الإقامة | Module | M |
+| `housing.manage` | إدارة السكن والمشرفين والفترات | Module | — |
 
-وجود الصلاحيات الثلاث Scoped داخل دور المدير لا يمنحه بيانات كل المنصات أو كل المساكن. يجب أن يحمل `UserRoleAssignment` قيمة All مناسبة أو سجلات `AccessScope` محددة.
+وجود صلاحيات العميل Scoped داخل دور المدير لا يمنحه بيانات كل المنصات. يجب أن يحمل `UserRoleAssignment` قيمة `IsAllClientScope` أو سجلات `AccessScope` محددة. صلاحيات السكن أعلاه تعمل على مستوى الوحدة كاملة بمجرد منح المفتاح.
 
 ## التقارير وسير العمل
 

@@ -734,30 +734,24 @@ Response: `VehicleAccidentDetailResponse`.
 
 ### `POST /api/vehicle-accidents`
 
-Creates an accident. Requires `Idempotency-Key`, accident-report permission, an existing vehicle, and a rider who held that vehicle at the reported time. The service creates or associates the relevant issue/assignment records and places the vehicle into accident handling as applicable.
+Creates an accident. Requires `Idempotency-Key`, accident-report permission, an existing vehicle, and a rider who held that vehicle at the reported time. Only the core accident facts are required; descriptive details can be omitted and supplied later. The service creates or associates the relevant issue/assignment records and places the vehicle into accident handling as applicable.
 
 Request (`CreateVehicleAccidentRequest`):
 
 ```json
 {
+  "accidentNumber": "ACC-2026-000123",
   "vehicleId": "00000000-0000-0000-0000-000000000000",
   "riderProfileId": "00000000-0000-0000-0000-000000000000",
   "occurredAtUtc": "2026-08-26T14:30:00Z",
-  "locationDescription": "King Fahd Road",
-  "latitude": 24.7136,
-  "longitude": 46.6753,
   "policeReportNumber": "POL-123",
-  "insuranceClaimNumber": "CLM-123",
   "severity": 2,
   "isDrivable": true,
-  "hasInjuries": false,
-  "injuryDetails": null,
-  "thirdPartyDetails": null,
-  "damageDescription": "Front bumper damage",
-  "faultAssessment": null,
-  "narrative": "The vehicle was hit from behind."
+  "hasInjuries": false
 }
 ```
+
+`accidentNumber` is the first field, is entered by the user, must be unique, and has a maximum length of 64 characters. It is separate from `policeReportNumber`. Optional fields: `locationDescription`, `latitude`, `longitude`, `insuranceClaimNumber`, `injuryDetails` when there are no injuries, `thirdPartyDetails`, `damageDescription`, `faultAssessment`, and `narrative`. When `hasInjuries` is `true`, `injuryDetails` is required.
 
 Response: `200 OK`, `VehicleAccidentDetailResponse`.
 

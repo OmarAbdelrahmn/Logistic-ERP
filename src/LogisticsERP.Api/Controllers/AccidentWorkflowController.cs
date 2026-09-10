@@ -1,5 +1,7 @@
 using LogisticsERP.Api.ErrorHandling;
+using LogisticsERP.Api.Authorization;
 using LogisticsERP.Application.Abstractions.Files;
+using LogisticsERP.Application.Authorization;
 using LogisticsERP.Application.Features.Fleet;
 using LogisticsERP.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
@@ -11,6 +13,7 @@ namespace LogisticsERP.Api.Controllers;
 public sealed class AccidentWorkflowController(IAccidentWorkflowService service) : ControllerBase
 {
     [HttpGet("/api/vehicle-accidents/workflows")]
+    [RequirePermission(PermissionKeys.Fleet.AccidentsRead)]
     public async Task<IActionResult> Queue([FromQuery] Guid? vehicleId, [FromQuery] Guid? riderProfileId,
         [FromQuery] AccidentCaseStage? stage, [FromQuery] bool overdueOnly = false, [FromQuery] int page = 1,
         [FromQuery] int pageSize = 50, CancellationToken cancellationToken = default)
@@ -20,6 +23,7 @@ public sealed class AccidentWorkflowController(IAccidentWorkflowService service)
     }
 
     [HttpGet]
+    [RequirePermission(PermissionKeys.Fleet.AccidentsRead)]
     public async Task<IActionResult> Get(Guid accidentId, CancellationToken cancellationToken)
     {
         var result = await service.GetWorkflowAsync(accidentId, cancellationToken);
@@ -27,6 +31,7 @@ public sealed class AccidentWorkflowController(IAccidentWorkflowService service)
     }
 
     [HttpPost("actions")]
+    [RequirePermission(PermissionKeys.Fleet.AccidentsFinalize)]
     public async Task<IActionResult> Action(Guid accidentId, [FromBody] AccidentWorkflowRequest request, CancellationToken cancellationToken)
     {
         var result = await service.ExecuteWorkflowAsync(accidentId, request, cancellationToken);
@@ -34,6 +39,7 @@ public sealed class AccidentWorkflowController(IAccidentWorkflowService service)
     }
 
     [HttpPost("attachments")]
+    [RequirePermission(PermissionKeys.Fleet.AccidentsReport)]
     [RequestSizeLimit(11 * 1024 * 1024)]
     public async Task<IActionResult> Upload(Guid accidentId, [FromForm] AccidentWorkflowAttachmentForm form, CancellationToken cancellationToken)
     {
@@ -46,6 +52,7 @@ public sealed class AccidentWorkflowController(IAccidentWorkflowService service)
     }
 
     [HttpPost("installments")]
+    [RequirePermission(PermissionKeys.Fleet.AccidentsFinalize)]
     public async Task<IActionResult> Installment(Guid accidentId, [FromBody] AccidentInstallmentRequest request, CancellationToken cancellationToken)
     {
         var result = await service.AddInstallmentAsync(accidentId, request, cancellationToken);
@@ -53,6 +60,7 @@ public sealed class AccidentWorkflowController(IAccidentWorkflowService service)
     }
 
     [HttpGet("documents/{kind}/download")]
+    [RequirePermission(PermissionKeys.Fleet.AccidentsFinalize)]
     public async Task<IActionResult> Document(Guid accidentId, string kind, CancellationToken cancellationToken)
     {
         var result = await service.DownloadSourceDocumentAsync(accidentId, kind, cancellationToken);

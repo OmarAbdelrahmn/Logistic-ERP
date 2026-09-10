@@ -2,6 +2,7 @@ using LogisticsERP.Api.Authorization;
 using LogisticsERP.Api.ErrorHandling;
 using LogisticsERP.Application.Authorization;
 using LogisticsERP.Application.Features.SupportAccess;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LogisticsERP.Api.Controllers;
@@ -19,6 +20,7 @@ public sealed class SupportAccessController(ISupportAccessService service) : Con
     }
 
     [HttpPost]
+    [Authorize]
     public async Task<IActionResult> RequestAccess([FromBody] RequestSupportAccessRequest request, CancellationToken cancellationToken)
     {
         var result = await service.RequestAsync(request, cancellationToken);
@@ -34,6 +36,7 @@ public sealed class SupportAccessController(ISupportAccessService service) : Con
     }
 
     [HttpPost("{id:guid}/revoke")]
+    [Authorize]
     public async Task<IActionResult> Revoke(Guid id, [FromBody] RevokeSupportAccessRequest request, CancellationToken cancellationToken)
     {
         var result = await service.RevokeAsync(id, request, cancellationToken);

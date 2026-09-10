@@ -1,10 +1,12 @@
 using LogisticsERP.Api.ErrorHandling;
 using LogisticsERP.Application.Features.System;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LogisticsERP.Api.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/saved-views")]
 public sealed class SavedViewsController(ISavedViewService service) : ControllerBase
 {
@@ -36,4 +38,3 @@ public sealed class SavedViewsController(ISavedViewService service) : Controller
         return result.IsSuccess ? NoContent() : result.ToProblem(HttpContext);
     }
 }
-

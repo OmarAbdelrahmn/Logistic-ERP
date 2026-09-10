@@ -571,7 +571,8 @@ internal sealed class UserManagementService(
         ReplaceRolePermissionsRequest request,
         CancellationToken cancellationToken = default)
     {
-        if (!TryGetActor(out _)
+        if (!TryGetActor(out var actorId)
+            || request.PermissionKeys is null
             || request.PermissionKeys.Any(key => !PermissionKeys.All.Contains(key))
             || request.PermissionKeys.Distinct(StringComparer.Ordinal).Count() != request.PermissionKeys.Count)
         {
@@ -595,8 +596,12 @@ internal sealed class UserManagementService(
         var current = await identityDbContext.RolePermissionGrants
             .Where(item => item.RoleId == roleId)
             .ToListAsync(cancellationToken);
-        identityDbContext.RolePermissionGrants.RemoveRange(current);
-        foreach (var key in request.PermissionKeys)
+        var requestedKeys = request.PermissionKeys.ToHashSet(StringComparer.Ordinal);
+        var currentKeys = current.Select(grant => grant.PermissionKey).ToHashSet(StringComparer.Ordinal);
+        var removed = current.Where(grant => !requestedKeys.Contains(grant.PermissionKey)).ToArray();
+        var added = requestedKeys.Where(key => !currentKeys.Contains(key)).ToArray();
+        identityDbContext.RolePermissionGrants.RemoveRange(removed);
+        foreach (var key in added)
         {
             identityDbContext.RolePermissionGrants.Add(new RolePermissionGrant
             {
@@ -604,8 +609,41 @@ internal sealed class UserManagementService(
                 PermissionKey = key
             });
         }
+
+        var authorizationChanged = removed.Length > 0 || added.Length > 0;
+        var affectedUserIds = authorizationChanged
+            ? await identityDbContext.UserRoleAssignments
+                .Where(assignment => assignment.RoleId == roleId)
+                .Select(assignment => assignment.UserId)
+                .Distinct()
+                .ToArrayAsync(cancellationToken)
+            : [];
+        var affectedUsers = affectedUserIds.Length == 0
+            ? []
+            : await identityDbContext.Users
+                .Where(user => affectedUserIds.Contains(user.Id))
+                .ToListAsync(cancellationToken);
+        if (authorizationChanged)
+        {
+            var now = timeProvider.GetUtcNow();
+            foreach (var user in affectedUsers)
+            {
+                await RevokeSessionsAndIncrementAuthorizationAsync(
+                    user,
+                    actorId,
+                    "Permissions for an assigned role changed.",
+                    now,
+                    cancellationToken,
+                    saveChanges: false);
+            }
+        }
+
         role.ConcurrencyStamp = Guid.NewGuid().ToString();
         await identityDbContext.SaveChangesAsync(cancellationToken);
+        foreach (var user in affectedUsers)
+        {
+            sessionValidator.InvalidateUser(user.Id);
+        }
         return Result.Success(await BuildRoleResponseAsync(role.Id, cancellationToken));
     }
 

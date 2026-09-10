@@ -139,20 +139,21 @@ internal sealed partial class VehicleAccidentService
     private static string? ValidateAction(VehicleAccident accident, VehicleAccidentCase item, AccidentWorkflowRequest r,
         IReadOnlyList<VehicleAccidentAttachment> files, IReadOnlyList<SourceFile> documents)
     {
-        bool Has(VehicleAccidentEvidenceType type) => files.Any(x => x.Id == r.AttachmentId && x.EvidenceType == type && x.ContentType == "application/pdf");
+        bool Has(VehicleAccidentEvidenceType type) => files.Any(x => x.Id == r.AttachmentId
+            && x.EvidenceType == type && IsAllowedEvidenceContentType(type, x.ContentType));
         switch (r.Action)
         {
             case AccidentWorkflowAction.AssessFault:
                 if (!Has(VehicleAccidentEvidenceType.NajmReport) || !r.RiderFaultPercentage.HasValue || r.OtherParties is null
                     || r.OtherParties.Any(x => x is null || string.IsNullOrWhiteSpace(x.Name) || x.Name.Length > 300 || x.VehiclePlate?.Length > 100 || x.InsuranceCompany?.Length > 300)
                     || !AccidentWorkflowRules.ValidFaultShares(r.RiderFaultPercentage.Value, r.OtherParties.Select(x => x.FaultPercentage)))
-                    return "Attach the Najm PDF and enter each party's fault share; shares must total exactly 100%.";
+                    return "Attach the Najm file and enter each party's fault share; shares must total exactly 100%.";
                 break;
             case AccidentWorkflowAction.StartLocalRepair:
                 if (item.RiderFaultPercentage != 100 || accident.Severity != VehicleAccidentSeverity.Minor
                     || !ValidMoney(r.Amount) || !Has(VehicleAccidentEvidenceType.DamagePromissoryNote)
                     || files.Count(x => x.EvidenceType == VehicleAccidentEvidenceType.DamagePhoto && x.ContentType.StartsWith("image/", StringComparison.Ordinal)) < 2)
-                    return "Local repair requires a minor accident, 100% rider fault, at least two damage photos, an estimated cost and its promissory note PDF. Notes describe the assessed damage.";
+                    return "Local repair requires a minor accident, 100% rider fault, at least two damage photos, an estimated cost and its promissory-note file. Notes describe the assessed damage.";
                 break;
             case AccidentWorkflowAction.OpenClaim:
                 if (!item.RiderFaultPercentage.HasValue || !r.ClaimType.HasValue || !Enum.IsDefined(r.ClaimType.Value)) return "Choose Repair or Compensation as the requested claim type.";
@@ -160,50 +161,50 @@ internal sealed partial class VehicleAccidentService
                     return "A minor accident with 100% rider fault follows local repair.";
                 if (AccidentWorkflowRules.RequiresOpeningFee(item.RiderFaultPercentage.Value, accident.Severity)
                     && (r.Amount != 2500 || !Has(VehicleAccidentEvidenceType.ClaimOpeningFeeReceipt)))
-                    return "A non-minor accident with 100% rider fault requires a paid SAR 2500 opening fee and its PDF receipt.";
+                    return "A non-minor accident with 100% rider fault requires a paid SAR 2500 opening fee and its receipt file.";
                 break;
             case AccidentWorkflowAction.SubmitClaim:
                 if (string.IsNullOrWhiteSpace(r.Reference) || !Has(VehicleAccidentEvidenceType.ClaimSubmissionReport) || documents.Any(x => x.VersionId is null))
-                    return "Submission requires the external claim number, submission PDF, and the driver's iqama, license and vehicle registration from the system.";
+                    return "Submission requires the external claim number, submission file, and the driver's iqama, license and vehicle registration from the system.";
                 break;
             case AccidentWorkflowAction.ReceiveCompensationOffer:
-                if (!ValidMoney(r.Amount) || !Has(VehicleAccidentEvidenceType.AssessmentReceipt)) return "Provide the compensation amount and assessment receipt PDF.";
+                if (!ValidMoney(r.Amount) || !Has(VehicleAccidentEvidenceType.AssessmentReceipt)) return "Provide the compensation amount and assessment receipt file.";
                 break;
             case AccidentWorkflowAction.ApproveInsurance:
-                if (!Has(VehicleAccidentEvidenceType.PaymentReceipt)) return "Attach the approved payment receipt PDF.";
+                if (!Has(VehicleAccidentEvidenceType.PaymentReceipt)) return "Attach the approved payment receipt file.";
                 break;
             case AccidentWorkflowAction.RejectInsurance:
-                if (!Has(VehicleAccidentEvidenceType.InsuranceDecision)) return "Attach the rejection PDF and record the reason in notes.";
+                if (!Has(VehicleAccidentEvidenceType.InsuranceDecision)) return "Attach the rejection file and record the reason in notes.";
                 break;
             case AccidentWorkflowAction.SubmitToSupplier:
-                if (!item.SupplierId.HasValue || !Has(VehicleAccidentEvidenceType.ClaimSubmissionReport)) return "Supplier handoff requires a supplier and proof-of-submission PDF.";
+                if (!item.SupplierId.HasValue || !Has(VehicleAccidentEvidenceType.ClaimSubmissionReport)) return "Supplier handoff requires a supplier and proof-of-submission file.";
                 break;
             case AccidentWorkflowAction.ConfirmTransfer:
-                if (!ValidMoney(r.Amount) || !Has(VehicleAccidentEvidenceType.TransferReceipt)) return "Record the actual amount received by our company and the transfer receipt PDF.";
+                if (!ValidMoney(r.Amount) || !Has(VehicleAccidentEvidenceType.TransferReceipt)) return "Record the actual amount received by our company and the transfer receipt file.";
                 if (r.Amount != item.SettlementAmount) return "The received transfer must settle the assessed amount; record partial payments as follow-ups until fully received.";
                 break;
             case AccidentWorkflowAction.ReceiveRepairDirection:
-                if (string.IsNullOrWhiteSpace(r.Location) || string.IsNullOrWhiteSpace(r.Contact) || !Has(VehicleAccidentEvidenceType.RepairDirection)) return "Provide the repair location, contact and direction PDF.";
+                if (string.IsNullOrWhiteSpace(r.Location) || string.IsNullOrWhiteSpace(r.Contact) || !Has(VehicleAccidentEvidenceType.RepairDirection)) return "Provide the repair location, contact and direction file.";
                 break;
             case AccidentWorkflowAction.CompleteRepair:
             case AccidentWorkflowAction.CompleteLocalRepair:
-                if (!Has(VehicleAccidentEvidenceType.RepairCompletion)) return "Attach the repair completion PDF.";
+                if (!Has(VehicleAccidentEvidenceType.RepairCompletion)) return "Attach the repair completion file.";
                 break;
             case AccidentWorkflowAction.ProposeTotalLoss:
-                if (!Has(VehicleAccidentEvidenceType.AssessmentReceipt)) return "Attach the total-loss assessment PDF.";
+                if (!Has(VehicleAccidentEvidenceType.AssessmentReceipt)) return "Attach the total-loss assessment file.";
                 break;
             case AccidentWorkflowAction.RequestReinspection:
                 if (string.IsNullOrWhiteSpace(r.Location) || !r.AppointmentAtUtc.HasValue || r.AppointmentAtUtc < r.OccurredAtUtc)
                     return "Provide the reinspection location and appointment time.";
                 break;
             case AccidentWorkflowAction.ConfirmTotalLoss:
-                if (!Has(VehicleAccidentEvidenceType.TotalLossConfirmation)) return "Attach the final total-loss confirmation PDF.";
+                if (!Has(VehicleAccidentEvidenceType.TotalLossConfirmation)) return "Attach the final total-loss confirmation file.";
                 break;
             case AccidentWorkflowAction.RecordVehicleCollection:
-                if (!Has(VehicleAccidentEvidenceType.VehicleCollectionReceipt)) return "Attach the vehicle collection receipt PDF.";
+                if (!Has(VehicleAccidentEvidenceType.VehicleCollectionReceipt)) return "Attach the vehicle collection receipt file.";
                 break;
             case AccidentWorkflowAction.RecordValuation:
-                if (!ValidMoney(r.Amount) || !Has(VehicleAccidentEvidenceType.ValuationReceipt)) return "Provide the final vehicle valuation and its PDF receipt.";
+                if (!ValidMoney(r.Amount) || !Has(VehicleAccidentEvidenceType.ValuationReceipt)) return "Provide the final vehicle valuation and its receipt file.";
                 break;
             case AccidentWorkflowAction.FollowUp:
             case AccidentWorkflowAction.RepairProgress:
@@ -213,15 +214,15 @@ internal sealed partial class VehicleAccidentService
                 if (!item.RequestedClaimType.HasValue || !item.IncidentEndedAtUtc.HasValue
                     || item.RefundStatus is not (AccidentRefundStatus.NotSubmitted or AccidentRefundStatus.Rejected)
                     || string.IsNullOrWhiteSpace(r.Reference) || !ValidMoney(r.Amount) || !Has(VehicleAccidentEvidenceType.InstallmentRefundRequest))
-                    return "An ended claim, refund reference, amount and request PDF are required; a pending or received refund cannot be resubmitted.";
+                    return "An ended claim, refund reference, amount and request file are required; a pending or received refund cannot be resubmitted.";
                 break;
             case AccidentWorkflowAction.ReceiveInstallmentRefund:
                 if (item.RefundStatus != AccidentRefundStatus.Submitted || !ValidMoney(r.Amount)
                     || r.Amount > item.RefundRequestedAmount || !Has(VehicleAccidentEvidenceType.InstallmentRefundReceipt))
-                    return "A pending refund and its receipt PDF are required; record an amount up to the requested amount and explain any shortfall in notes.";
+                    return "A pending refund and its receipt file are required; record an amount up to the requested amount and explain any shortfall in notes.";
                 break;
             case AccidentWorkflowAction.RejectInstallmentRefund:
-                if (item.RefundStatus != AccidentRefundStatus.Submitted || !Has(VehicleAccidentEvidenceType.InsuranceDecision)) return "A pending refund, rejection PDF and reason are required.";
+                if (item.RefundStatus != AccidentRefundStatus.Submitted || !Has(VehicleAccidentEvidenceType.InsuranceDecision)) return "A pending refund, rejection file and reason are required.";
                 break;
         }
         return null;
@@ -293,9 +294,8 @@ internal sealed partial class VehicleAccidentService
         var access = await GetVehicleAsync(accident.VehicleId, PermissionKeys.Fleet.AccidentsReport, cancellationToken);
         if (access.IsFailure) return Result.Failure<VehicleAccidentAttachmentResponse>(access.Error);
         if (accident.Status == VehicleAccidentStatus.Closed) return Result.Failure<VehicleAccidentAttachmentResponse>(FleetErrors.InvalidState);
-        var isImage = type is VehicleAccidentEvidenceType.Image or VehicleAccidentEvidenceType.DamagePhoto;
-        if (!Enum.IsDefined(type) || isImage && !file.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase)
-            || !isImage && type != VehicleAccidentEvidenceType.Other && !string.Equals(file.ContentType, "application/pdf", StringComparison.OrdinalIgnoreCase)
+        file = NormalizeEvidenceContentType(file);
+        if (!Enum.IsDefined(type) || !IsAllowedEvidenceContentType(type, file.ContentType)
             || metadata.Description?.Length > 1000 || metadata.FromLocation?.Length > 1000 || metadata.ToLocation?.Length > 1000
             || metadata.Amount.HasValue && !ValidMoney(metadata.Amount))
             return Result.Failure<VehicleAccidentAttachmentResponse>(FleetErrors.InvalidFile);
@@ -325,6 +325,43 @@ internal sealed partial class VehicleAccidentService
         catch (DbUpdateException) { fileStorage.DeleteBestEffort(s.StoragePath); return Result.Failure<VehicleAccidentAttachmentResponse>(FleetErrors.Conflict); }
         catch { fileStorage.DeleteBestEffort(s.StoragePath); throw; }
         return Result.Success(MapAttachment(attachment));
+    }
+
+    internal static PrivateFileUpload NormalizeEvidenceContentType(PrivateFileUpload file)
+    {
+        var contentType = file.ContentType?.Split(';', 2)[0].Trim() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(contentType)
+            || contentType.Equals("application/octet-stream", StringComparison.OrdinalIgnoreCase)
+            || contentType.Equals("binary/octet-stream", StringComparison.OrdinalIgnoreCase)
+            || contentType.Equals("application/x-pdf", StringComparison.OrdinalIgnoreCase))
+        {
+            contentType = Path.GetExtension(file.OriginalFileName).ToLowerInvariant() switch
+            {
+                ".pdf" => "application/pdf",
+                ".jpg" or ".jpeg" => "image/jpeg",
+                ".png" => "image/png",
+                ".webp" => "image/webp",
+                ".gif" => "image/gif",
+                ".bmp" or ".dib" => "image/bmp",
+                _ => contentType
+            };
+        }
+
+        return contentType.Equals(file.ContentType, StringComparison.OrdinalIgnoreCase)
+            ? file
+            : file with { ContentType = contentType };
+    }
+
+    internal static bool IsAllowedEvidenceContentType(VehicleAccidentEvidenceType type, string contentType)
+    {
+        var isImage = contentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase);
+        var isPdf = contentType.Equals("application/pdf", StringComparison.OrdinalIgnoreCase);
+        return type switch
+        {
+            VehicleAccidentEvidenceType.Image or VehicleAccidentEvidenceType.DamagePhoto => isImage,
+            VehicleAccidentEvidenceType.Other => true,
+            _ => isPdf || isImage
+        };
     }
 
     public async Task<Result<AccidentWorkflowResponse>> AddInstallmentAsync(Guid accidentId, AccidentInstallmentRequest request, CancellationToken cancellationToken = default)

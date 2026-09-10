@@ -194,7 +194,7 @@ public sealed class AccidentWorkflowSqlTests
             vehicle.CurrentAssignmentId = assignment.Id;
             db.AddRange(employee, rider, vehicle, assignment);
             await db.SaveChangesAsync();
-            var result = await Service.CreateAsync(new(vehicle.Id, rider.Id, DateTimeOffset.Parse("2026-08-01T10:00:00Z", global::System.Globalization.CultureInfo.InvariantCulture), "Riyadh", null, null,
+            var result = await Service.CreateAsync(new("ACC-" + asset, vehicle.Id, rider.Id, DateTimeOffset.Parse("2026-08-01T10:00:00Z", global::System.Globalization.CultureInfo.InvariantCulture), "Riyadh", null, null,
                 "TRAFFIC-" + asset, null, severity, false, false, null, null, "Damage", null, "Accident narrative"), asset);
             Assert.True(result.IsSuccess, result.Error.Description);
             return result.Value!.Summary.Id;

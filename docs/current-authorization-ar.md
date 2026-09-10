@@ -62,10 +62,10 @@
 - يجب أن يكون الدور والتكليف وفترة المنح نشطين في وقت الطلب.
 - `Deny` مباشر قابل للتطبيق يتغلب على Grant مباشر وعلى أي Grant آتٍ من دور.
 - `Deny` لصلاحية Scoped من دون نطاق محدد يُعامل كمنع شامل لتجنب تسريب الصلاحية بسبب إعداد ناقص.
-- صلاحيات السكن تحتاج `IsAllHousingScope` أو `AccessScopeType.Housing` مطابقًا.
+- صلاحيات السكن `housing.read` و`housing.manage` صلاحيات على مستوى وحدة السكن كاملة؛ يكفي منح المفتاح مباشرة أو عبر أي دور نشط، ولا يعتمد الوصول على اسم الدور.
 - صلاحيات العميل تحتاج `IsAllClientScope` أو نطاق منصة/عقد مطابقًا. يمكن لنطاق منصة أن يشمل عقودها المستقبلية فقط عند تفعيل `IncludesFuturePlatformContracts`.
 - الـAuthorization Handler الديناميكي يستخدم Policy باسم `permission:<key>`. ويستخدم الـController مستقبلًا `[RequirePermission(PermissionKeys.Workforce.EmployeesRead)]` بدل فحص اسم الدور.
-- عند Permission ذات نطاق، يسمح الـAttribute العام فقط لمن يحمل All Scope. الـEndpoint الذي يستهدف سكنًا أو منصة أو عقدًا محددًا يجب أن يستدعي `IPermissionChecker` مع `PermissionScope` للهدف؛ لا يكفي فحص المفتاح خارج سياق المورد.
+- عند Permission ذات نطاق عميل، يسمح الـAttribute العام فقط لمن يحمل All Scope. الـEndpoint الذي يستهدف منصة أو عقدًا محددًا يجب أن يستدعي `IPermissionChecker` مع `PermissionScope` للهدف؛ لا يكفي فحص المفتاح خارج سياق المورد.
 - `AuthorizationVersion` جزء من مفتاح Cache ومن الجلسة؛ أي تغيير تفويض يجب أن يزيده ويبطل جلسات/Cache المستخدم عبر Service إدارة الصلاحيات عند تنفيذها.
 
 ## DeviceLabel في Login
