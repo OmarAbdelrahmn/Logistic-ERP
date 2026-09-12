@@ -90,6 +90,7 @@ public sealed class ApplicationDbContext(
     public DbSet<Vehicle> Vehicles => Set<Vehicle>();
     public DbSet<VehicleIdentityCorrection> VehicleIdentityCorrections => Set<VehicleIdentityCorrection>();
     public DbSet<VehicleRegistrationTransition> VehicleRegistrationTransitions => Set<VehicleRegistrationTransition>();
+    public DbSet<VehicleRegistrationTransitionSnapshot> VehicleRegistrationTransitionSnapshots => Set<VehicleRegistrationTransitionSnapshot>();
     public DbSet<VehicleOperationalStatusPeriod> VehicleOperationalStatusPeriods => Set<VehicleOperationalStatusPeriod>();
     public DbSet<VehicleOdometerReading> VehicleOdometerReadings => Set<VehicleOdometerReading>();
     public DbSet<VehicleDailyDistance> VehicleDailyDistances => Set<VehicleDailyDistance>();

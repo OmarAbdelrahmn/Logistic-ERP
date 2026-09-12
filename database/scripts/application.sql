@@ -12610,3 +12610,871 @@ END;
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906100157_AddAccidentClaimWorkflow'
+)
+BEGIN
+    ALTER TABLE [app].[VehicleAccidentAttachments] ADD [Amount] decimal(18,2) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906100157_AddAccidentClaimWorkflow'
+)
+BEGIN
+    ALTER TABLE [app].[VehicleAccidentAttachments] ADD [Description] nvarchar(1000) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906100157_AddAccidentClaimWorkflow'
+)
+BEGIN
+    ALTER TABLE [app].[VehicleAccidentAttachments] ADD [FromLocation] nvarchar(1000) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906100157_AddAccidentClaimWorkflow'
+)
+BEGIN
+    ALTER TABLE [app].[VehicleAccidentAttachments] ADD [ToLocation] nvarchar(1000) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906100157_AddAccidentClaimWorkflow'
+)
+BEGIN
+    ALTER TABLE [app].[VehicleAccidentAttachments] ADD [TransportedAtUtc] datetimeoffset NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906100157_AddAccidentClaimWorkflow'
+)
+BEGIN
+    CREATE TABLE [app].[VehicleAccidentCases] (
+        [Id] uniqueidentifier NOT NULL,
+        [VehicleAccidentId] uniqueidentifier NOT NULL,
+        [Stage] int NOT NULL,
+        [RiderFaultPercentage] decimal(5,2) NULL,
+        [OtherPartiesJson] nvarchar(max) NOT NULL,
+        [NajmAttachmentId] uniqueidentifier NULL,
+        [DamageAssessment] nvarchar(4000) NULL,
+        [EstimatedRepairCost] decimal(18,2) NULL,
+        [DamagePromissoryNoteAttachmentId] uniqueidentifier NULL,
+        [OpeningFeeAmount] decimal(18,2) NULL,
+        [OpeningFeeAttachmentId] uniqueidentifier NULL,
+        [OpeningFeePaidAtUtc] datetimeoffset NULL,
+        [RequestedClaimType] int NULL,
+        [Outcome] int NULL,
+        [SupplierId] uniqueidentifier NULL,
+        [ClaimNumber] nvarchar(150) NULL,
+        [ClaimSubmittedAtUtc] datetimeoffset NULL,
+        [ClaimSubmissionAttachmentId] uniqueidentifier NULL,
+        [IqamaVersionId] uniqueidentifier NULL,
+        [LicenseVersionId] uniqueidentifier NULL,
+        [RegistrationVersionId] uniqueidentifier NULL,
+        [SettlementAmount] decimal(18,2) NULL,
+        [AssessmentReceiptAttachmentId] uniqueidentifier NULL,
+        [InsuranceSubmittedAtUtc] datetimeoffset NULL,
+        [InsuranceDueAtUtc] datetimeoffset NULL,
+        [InsuranceRespondedAtUtc] datetimeoffset NULL,
+        [InsuranceRejectionReason] nvarchar(1000) NULL,
+        [PaymentReceiptAttachmentId] uniqueidentifier NULL,
+        [SupplierSubmittedAtUtc] datetimeoffset NULL,
+        [SupplierTransferDueAtUtc] datetimeoffset NULL,
+        [TransferReceivedAtUtc] datetimeoffset NULL,
+        [TransferReceivedAmount] decimal(18,2) NULL,
+        [RepairLocation] nvarchar(1000) NULL,
+        [RepairContact] nvarchar(300) NULL,
+        [RepairStartedAtUtc] datetimeoffset NULL,
+        [RepairCompletedAtUtc] datetimeoffset NULL,
+        [ReinspectionLocation] nvarchar(1000) NULL,
+        [ReinspectionAppointmentAtUtc] datetimeoffset NULL,
+        [TotalLossConfirmedAtUtc] datetimeoffset NULL,
+        [VehicleCollectedAtUtc] datetimeoffset NULL,
+        [IncidentEndedAtUtc] datetimeoffset NULL,
+        [LastActionAtUtc] datetimeoffset NULL,
+        [RefundStatus] int NOT NULL,
+        [RefundReference] nvarchar(150) NULL,
+        [RefundRequestedAmount] decimal(18,2) NULL,
+        [RefundReceivedAmount] decimal(18,2) NULL,
+        [RefundSubmittedAtUtc] datetimeoffset NULL,
+        [RefundReceivedAtUtc] datetimeoffset NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_VehicleAccidentCases] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_AccidentCase_Fault] CHECK ([RiderFaultPercentage] IS NULL OR [RiderFaultPercentage] BETWEEN 0 AND 100),
+        CONSTRAINT [CK_AccidentCase_OpeningFee] CHECK ([OpeningFeeAmount] IS NULL OR [OpeningFeeAmount] = 2500),
+        CONSTRAINT [CK_AccidentCase_Parties] CHECK (ISJSON([OtherPartiesJson]) = 1),
+        CONSTRAINT [FK_VehicleAccidentCases_EmployeeDocumentVersions_IqamaVersionId] FOREIGN KEY ([IqamaVersionId]) REFERENCES [app].[EmployeeDocumentVersions] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_VehicleAccidentCases_EmployeeDocumentVersions_LicenseVersionId] FOREIGN KEY ([LicenseVersionId]) REFERENCES [app].[EmployeeDocumentVersions] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_VehicleAccidentCases_VehicleAccidentAttachments_AssessmentReceiptAttachmentId] FOREIGN KEY ([AssessmentReceiptAttachmentId]) REFERENCES [app].[VehicleAccidentAttachments] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_VehicleAccidentCases_VehicleAccidentAttachments_ClaimSubmissionAttachmentId] FOREIGN KEY ([ClaimSubmissionAttachmentId]) REFERENCES [app].[VehicleAccidentAttachments] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_VehicleAccidentCases_VehicleAccidentAttachments_DamagePromissoryNoteAttachmentId] FOREIGN KEY ([DamagePromissoryNoteAttachmentId]) REFERENCES [app].[VehicleAccidentAttachments] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_VehicleAccidentCases_VehicleAccidentAttachments_NajmAttachmentId] FOREIGN KEY ([NajmAttachmentId]) REFERENCES [app].[VehicleAccidentAttachments] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_VehicleAccidentCases_VehicleAccidentAttachments_OpeningFeeAttachmentId] FOREIGN KEY ([OpeningFeeAttachmentId]) REFERENCES [app].[VehicleAccidentAttachments] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_VehicleAccidentCases_VehicleAccidentAttachments_PaymentReceiptAttachmentId] FOREIGN KEY ([PaymentReceiptAttachmentId]) REFERENCES [app].[VehicleAccidentAttachments] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_VehicleAccidentCases_VehicleAccidents_VehicleAccidentId] FOREIGN KEY ([VehicleAccidentId]) REFERENCES [app].[VehicleAccidents] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_VehicleAccidentCases_VehicleAttachmentVersions_RegistrationVersionId] FOREIGN KEY ([RegistrationVersionId]) REFERENCES [app].[VehicleAttachmentVersions] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_VehicleAccidentCases_VehicleSuppliers_SupplierId] FOREIGN KEY ([SupplierId]) REFERENCES [app].[VehicleSuppliers] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906100157_AddAccidentClaimWorkflow'
+)
+BEGIN
+    CREATE TABLE [app].[VehicleAccidentInstallments] (
+        [Id] uniqueidentifier NOT NULL,
+        [VehicleAccidentId] uniqueidentifier NOT NULL,
+        [PeriodFrom] date NOT NULL,
+        [PeriodTo] date NOT NULL,
+        [PaidOn] date NOT NULL,
+        [Amount] decimal(18,2) NOT NULL,
+        [RefundEligibleAmount] decimal(18,2) NOT NULL,
+        [ReceiptAttachmentId] uniqueidentifier NOT NULL,
+        [Notes] nvarchar(1000) NOT NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_VehicleAccidentInstallments] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_AccidentInstallment_Amount] CHECK ([Amount] > 0 AND [RefundEligibleAmount] > 0 AND [RefundEligibleAmount] <= [Amount]),
+        CONSTRAINT [CK_AccidentInstallment_Dates] CHECK ([PeriodTo] >= [PeriodFrom]),
+        CONSTRAINT [FK_VehicleAccidentInstallments_VehicleAccidentAttachments_ReceiptAttachmentId] FOREIGN KEY ([ReceiptAttachmentId]) REFERENCES [app].[VehicleAccidentAttachments] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_VehicleAccidentInstallments_VehicleAccidents_VehicleAccidentId] FOREIGN KEY ([VehicleAccidentId]) REFERENCES [app].[VehicleAccidents] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906100157_AddAccidentClaimWorkflow'
+)
+BEGIN
+    CREATE INDEX [IX_VehicleAccidentCases_AssessmentReceiptAttachmentId] ON [app].[VehicleAccidentCases] ([AssessmentReceiptAttachmentId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906100157_AddAccidentClaimWorkflow'
+)
+BEGIN
+    CREATE INDEX [IX_VehicleAccidentCases_ClaimSubmissionAttachmentId] ON [app].[VehicleAccidentCases] ([ClaimSubmissionAttachmentId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906100157_AddAccidentClaimWorkflow'
+)
+BEGIN
+    CREATE INDEX [IX_VehicleAccidentCases_DamagePromissoryNoteAttachmentId] ON [app].[VehicleAccidentCases] ([DamagePromissoryNoteAttachmentId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906100157_AddAccidentClaimWorkflow'
+)
+BEGIN
+    CREATE INDEX [IX_VehicleAccidentCases_IqamaVersionId] ON [app].[VehicleAccidentCases] ([IqamaVersionId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906100157_AddAccidentClaimWorkflow'
+)
+BEGIN
+    CREATE INDEX [IX_VehicleAccidentCases_IsDeleted] ON [app].[VehicleAccidentCases] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906100157_AddAccidentClaimWorkflow'
+)
+BEGIN
+    CREATE INDEX [IX_VehicleAccidentCases_LicenseVersionId] ON [app].[VehicleAccidentCases] ([LicenseVersionId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906100157_AddAccidentClaimWorkflow'
+)
+BEGIN
+    CREATE INDEX [IX_VehicleAccidentCases_NajmAttachmentId] ON [app].[VehicleAccidentCases] ([NajmAttachmentId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906100157_AddAccidentClaimWorkflow'
+)
+BEGIN
+    CREATE INDEX [IX_VehicleAccidentCases_OpeningFeeAttachmentId] ON [app].[VehicleAccidentCases] ([OpeningFeeAttachmentId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906100157_AddAccidentClaimWorkflow'
+)
+BEGIN
+    CREATE INDEX [IX_VehicleAccidentCases_PaymentReceiptAttachmentId] ON [app].[VehicleAccidentCases] ([PaymentReceiptAttachmentId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906100157_AddAccidentClaimWorkflow'
+)
+BEGIN
+    CREATE INDEX [IX_VehicleAccidentCases_RegistrationVersionId] ON [app].[VehicleAccidentCases] ([RegistrationVersionId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906100157_AddAccidentClaimWorkflow'
+)
+BEGIN
+    CREATE INDEX [IX_VehicleAccidentCases_Stage_InsuranceDueAtUtc] ON [app].[VehicleAccidentCases] ([Stage], [InsuranceDueAtUtc]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906100157_AddAccidentClaimWorkflow'
+)
+BEGIN
+    CREATE INDEX [IX_VehicleAccidentCases_Stage_SupplierTransferDueAtUtc] ON [app].[VehicleAccidentCases] ([Stage], [SupplierTransferDueAtUtc]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906100157_AddAccidentClaimWorkflow'
+)
+BEGIN
+    CREATE INDEX [IX_VehicleAccidentCases_SupplierId] ON [app].[VehicleAccidentCases] ([SupplierId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906100157_AddAccidentClaimWorkflow'
+)
+BEGIN
+    CREATE UNIQUE INDEX [IX_VehicleAccidentCases_VehicleAccidentId] ON [app].[VehicleAccidentCases] ([VehicleAccidentId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906100157_AddAccidentClaimWorkflow'
+)
+BEGIN
+    CREATE INDEX [IX_VehicleAccidentInstallments_IsDeleted] ON [app].[VehicleAccidentInstallments] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906100157_AddAccidentClaimWorkflow'
+)
+BEGIN
+    CREATE INDEX [IX_VehicleAccidentInstallments_ReceiptAttachmentId] ON [app].[VehicleAccidentInstallments] ([ReceiptAttachmentId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906100157_AddAccidentClaimWorkflow'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_VehicleAccidentInstallments_VehicleAccidentId_ReceiptAttachmentId] ON [app].[VehicleAccidentInstallments] ([VehicleAccidentId], [ReceiptAttachmentId]) WHERE [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906100157_AddAccidentClaimWorkflow'
+)
+BEGIN
+    INSERT INTO [app].[VehicleAccidentCases]
+        ([Id], [VehicleAccidentId], [Stage], [OtherPartiesJson], [RefundStatus], [IncidentEndedAtUtc], [CreatedAtUtc], [IsDeleted])
+    SELECT NEWID(), [Id], CASE WHEN [Status] = 3 THEN 18 ELSE 1 END, N'[]', 1,
+        CASE WHEN [Status] = 3 THEN [ClosedAtUtc] ELSE NULL END, SYSUTCDATETIME(), 0
+    FROM [app].[VehicleAccidents] WHERE [IsDeleted] = 0;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906100157_AddAccidentClaimWorkflow'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260906100157_AddAccidentClaimWorkflow', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906103032_AddNotificationPermissionAudience'
+)
+BEGIN
+    ALTER TABLE [app].[Notifications] ADD [AudiencePermissionKeysJson] nvarchar(max) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906103032_AddNotificationPermissionAudience'
+)
+BEGIN
+    UPDATE [app].[Notifications]
+    SET [AudiencePermissionKeysJson] = N'["fleet.accidents.read","fleet.vehicles.read","platform_assignments.read","maintenance.work_orders.read"]'
+    WHERE [EventType] LIKE N'fleet.accident.%';
+
+    UPDATE [app].[Notifications]
+    SET [AudiencePermissionKeysJson] = N'["fleet.compliance.read"]'
+    WHERE [EventType] LIKE N'fleet.registration.%' OR [EventType] LIKE N'fleet.insurance.%'
+       OR [EventType] LIKE N'fleet.inspection.%' OR [EventType] LIKE N'fleet.permit.%'
+       OR [EventType] LIKE N'fleet.operation-card.%';
+
+    UPDATE [app].[Notifications]
+    SET [AudiencePermissionKeysJson] = N'["employees.read"]'
+    WHERE [EventType] LIKE N'employee.compliance.%';
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906103032_AddNotificationPermissionAudience'
+)
+BEGIN
+    EXEC(N'ALTER TABLE [app].[Notifications] ADD CONSTRAINT [CK_Notifications_AudiencePermissions] CHECK ([AudiencePermissionKeysJson] IS NULL OR ISJSON([AudiencePermissionKeysJson]) = 1)');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906103032_AddNotificationPermissionAudience'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260906103032_AddNotificationPermissionAudience', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906104127_AddInventorySupplyRequestWorkflow'
+)
+BEGIN
+    CREATE TABLE [maintenance].[SupplyRequests] (
+        [Id] uniqueidentifier NOT NULL,
+        [RequestNumber] varchar(64) NOT NULL,
+        [SubjectType] int NOT NULL,
+        [Status] int NOT NULL,
+        [InventoryLocationId] uniqueidentifier NOT NULL,
+        [MaintenanceWorkOrderId] uniqueidentifier NULL,
+        [VehicleId] uniqueidentifier NULL,
+        [RiderProfileId] uniqueidentifier NULL,
+        [RiderInventoryIssueId] uniqueidentifier NULL,
+        [RequestedAtUtc] datetimeoffset NOT NULL,
+        [RequestedByUserId] uniqueidentifier NOT NULL,
+        [DecidedAtUtc] datetimeoffset NULL,
+        [DecidedByUserId] uniqueidentifier NULL,
+        [IssuedAtUtc] datetimeoffset NULL,
+        [IssuedByUserId] uniqueidentifier NULL,
+        [DecisionNotes] nvarchar(2000) NULL,
+        [Notes] nvarchar(2000) NULL,
+        [TotalIssuedCost] decimal(18,2) NOT NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_SupplyRequests] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_InventorySupplyRequests_Cost] CHECK ([TotalIssuedCost] >= 0),
+        CONSTRAINT [CK_InventorySupplyRequests_Issuance] CHECK (([Status] = 2 AND [DecidedAtUtc] IS NOT NULL AND [DecidedByUserId] IS NOT NULL AND [IssuedAtUtc] IS NOT NULL AND [IssuedByUserId] IS NOT NULL) OR ([Status] <> 2 AND [IssuedAtUtc] IS NULL AND [IssuedByUserId] IS NULL)),
+        CONSTRAINT [CK_InventorySupplyRequests_Status] CHECK ([Status] BETWEEN 1 AND 4),
+        CONSTRAINT [CK_InventorySupplyRequests_Subject] CHECK (([SubjectType] = 1 AND [MaintenanceWorkOrderId] IS NOT NULL AND [VehicleId] IS NOT NULL AND [RiderProfileId] IS NULL) OR ([SubjectType] = 2 AND [MaintenanceWorkOrderId] IS NULL AND [VehicleId] IS NULL AND [RiderProfileId] IS NOT NULL)),
+        CONSTRAINT [FK_SupplyRequests_InventoryLocations_InventoryLocationId] FOREIGN KEY ([InventoryLocationId]) REFERENCES [maintenance].[InventoryLocations] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_SupplyRequests_RiderInventoryIssues_RiderInventoryIssueId] FOREIGN KEY ([RiderInventoryIssueId]) REFERENCES [maintenance].[RiderInventoryIssues] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_SupplyRequests_RiderProfiles_RiderProfileId] FOREIGN KEY ([RiderProfileId]) REFERENCES [app].[RiderProfiles] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_SupplyRequests_Vehicles_VehicleId] FOREIGN KEY ([VehicleId]) REFERENCES [app].[Vehicles] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_SupplyRequests_WorkOrders_MaintenanceWorkOrderId] FOREIGN KEY ([MaintenanceWorkOrderId]) REFERENCES [maintenance].[WorkOrders] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906104127_AddInventorySupplyRequestWorkflow'
+)
+BEGIN
+    CREATE TABLE [maintenance].[SupplyRequestLines] (
+        [Id] uniqueidentifier NOT NULL,
+        [InventorySupplyRequestId] uniqueidentifier NOT NULL,
+        [InventoryItemId] uniqueidentifier NOT NULL,
+        [RequestedQuantity] decimal(18,3) NOT NULL,
+        [IssuedQuantity] decimal(18,3) NOT NULL,
+        [MaintenanceUsageType] int NULL,
+        [ExpectedReturn] bit NOT NULL,
+        [MaintenanceMaterialUsageId] uniqueidentifier NULL,
+        [RiderInventoryIssueLineId] uniqueidentifier NULL,
+        [IssuedCost] decimal(18,2) NOT NULL,
+        [Notes] nvarchar(1000) NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_SupplyRequestLines] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_InventorySupplyRequestLines_Values] CHECK ([RequestedQuantity] > 0 AND [IssuedQuantity] >= 0 AND [IssuedQuantity] <= [RequestedQuantity] AND [IssuedCost] >= 0),
+        CONSTRAINT [FK_SupplyRequestLines_InventoryItems_InventoryItemId] FOREIGN KEY ([InventoryItemId]) REFERENCES [maintenance].[InventoryItems] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_SupplyRequestLines_MaterialUsages_MaintenanceMaterialUsageId] FOREIGN KEY ([MaintenanceMaterialUsageId]) REFERENCES [maintenance].[MaterialUsages] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_SupplyRequestLines_RiderInventoryIssueLines_RiderInventoryIssueLineId] FOREIGN KEY ([RiderInventoryIssueLineId]) REFERENCES [maintenance].[RiderInventoryIssueLines] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_SupplyRequestLines_SupplyRequests_InventorySupplyRequestId] FOREIGN KEY ([InventorySupplyRequestId]) REFERENCES [maintenance].[SupplyRequests] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906104127_AddInventorySupplyRequestWorkflow'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Category', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'DescriptionAr', N'DescriptionEn', N'DisplayOrder', N'GrantabilityRule', N'IsDeleted', N'IsDeprecated', N'IsHighTrust', N'IsSensitive', N'Key', N'NameAr', N'NameEn', N'ReplacementKey', N'RequiresClientScope', N'RequiresHousingScope', N'UpdatedAtUtc', N'UpdatedByUserId', N'Version') AND [object_id] = OBJECT_ID(N'[platform].[PermissionDefinitions]'))
+        SET IDENTITY_INSERT [platform].[PermissionDefinitions] ON;
+    EXEC(N'INSERT INTO [platform].[PermissionDefinitions] ([Id], [Category], [CreatedAtUtc], [CreatedByUserId], [DeletedAtUtc], [DeletedByUserId], [DeletionReason], [DescriptionAr], [DescriptionEn], [DisplayOrder], [GrantabilityRule], [IsDeleted], [IsDeprecated], [IsHighTrust], [IsSensitive], [Key], [NameAr], [NameEn], [ReplacementKey], [RequiresClientScope], [RequiresHousingScope], [UpdatedAtUtc], [UpdatedByUserId], [Version])
+    VALUES (''019c18d5-62e1-7000-a000-000000000114'', N''Inventory'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''إرسال طلب موحد لقطع صيانة مركبة أو عهدة رايدر دون خصم المخزون.'', N''Submit a vehicle-maintenance or rider supply request without deducting stock.'', 114, NULL, CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), N''inventory.supply_requests.submit'', N''إرسال طلبات الصرف'', N''Submit supply requests'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000115'', N''Inventory'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''عرض طابور طلبات الصرف وحالة الموافقة والمركبة أو الرايدر المرتبط.'', N''View the supply-request queue, approval state, and related vehicle or rider.'', 115, NULL, CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), N''inventory.supply_requests.read'', N''عرض طلبات الصرف'', N''Read supply requests'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000116'', N''Inventory'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''اعتماد الطلب وتسليم الأصناف فعليًا وترحيل خصم FIFO في عملية واحدة.'', N''Approve a request, physically issue its items, and post FIFO stock deduction atomically.'', 116, N''HIGH_TRUST_ONLY'', CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), CAST(1 AS bit), N''inventory.supply_requests.approve'', N''اعتماد وتسليم طلبات الصرف'', N''Approve and issue supply requests'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1)');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Category', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'DescriptionAr', N'DescriptionEn', N'DisplayOrder', N'GrantabilityRule', N'IsDeleted', N'IsDeprecated', N'IsHighTrust', N'IsSensitive', N'Key', N'NameAr', N'NameEn', N'ReplacementKey', N'RequiresClientScope', N'RequiresHousingScope', N'UpdatedAtUtc', N'UpdatedByUserId', N'Version') AND [object_id] = OBJECT_ID(N'[platform].[PermissionDefinitions]'))
+        SET IDENTITY_INSERT [platform].[PermissionDefinitions] OFF;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906104127_AddInventorySupplyRequestWorkflow'
+)
+BEGIN
+    CREATE INDEX [IX_SupplyRequestLines_InventoryItemId] ON [maintenance].[SupplyRequestLines] ([InventoryItemId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906104127_AddInventorySupplyRequestWorkflow'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_SupplyRequestLines_InventorySupplyRequestId_InventoryItemId] ON [maintenance].[SupplyRequestLines] ([InventorySupplyRequestId], [InventoryItemId]) WHERE [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906104127_AddInventorySupplyRequestWorkflow'
+)
+BEGIN
+    CREATE INDEX [IX_SupplyRequestLines_IsDeleted] ON [maintenance].[SupplyRequestLines] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906104127_AddInventorySupplyRequestWorkflow'
+)
+BEGIN
+    CREATE INDEX [IX_SupplyRequestLines_MaintenanceMaterialUsageId] ON [maintenance].[SupplyRequestLines] ([MaintenanceMaterialUsageId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906104127_AddInventorySupplyRequestWorkflow'
+)
+BEGIN
+    CREATE INDEX [IX_SupplyRequestLines_RiderInventoryIssueLineId] ON [maintenance].[SupplyRequestLines] ([RiderInventoryIssueLineId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906104127_AddInventorySupplyRequestWorkflow'
+)
+BEGIN
+    CREATE INDEX [IX_SupplyRequests_InventoryLocationId_Status_RequestedAtUtc] ON [maintenance].[SupplyRequests] ([InventoryLocationId], [Status], [RequestedAtUtc]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906104127_AddInventorySupplyRequestWorkflow'
+)
+BEGIN
+    CREATE INDEX [IX_SupplyRequests_IsDeleted] ON [maintenance].[SupplyRequests] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906104127_AddInventorySupplyRequestWorkflow'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_SupplyRequests_MaintenanceWorkOrderId] ON [maintenance].[SupplyRequests] ([MaintenanceWorkOrderId]) WHERE [MaintenanceWorkOrderId] IS NOT NULL AND [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906104127_AddInventorySupplyRequestWorkflow'
+)
+BEGIN
+    CREATE UNIQUE INDEX [IX_SupplyRequests_RequestNumber] ON [maintenance].[SupplyRequests] ([RequestNumber]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906104127_AddInventorySupplyRequestWorkflow'
+)
+BEGIN
+    CREATE INDEX [IX_SupplyRequests_RiderInventoryIssueId] ON [maintenance].[SupplyRequests] ([RiderInventoryIssueId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906104127_AddInventorySupplyRequestWorkflow'
+)
+BEGIN
+    CREATE INDEX [IX_SupplyRequests_RiderProfileId_RequestedAtUtc] ON [maintenance].[SupplyRequests] ([RiderProfileId], [RequestedAtUtc]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906104127_AddInventorySupplyRequestWorkflow'
+)
+BEGIN
+    CREATE INDEX [IX_SupplyRequests_VehicleId] ON [maintenance].[SupplyRequests] ([VehicleId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260906104127_AddInventorySupplyRequestWorkflow'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260906104127_AddInventorySupplyRequestWorkflow', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260907094009_EnforceSingleActiveVehicleWorkOrder'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [UX_MaintenanceWorkOrders_ActiveVehicle] ON [maintenance].[WorkOrders] ([VehicleId]) WHERE [VehicleId] IS NOT NULL AND [Status] IN (1, 2, 3) AND [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260907094009_EnforceSingleActiveVehicleWorkOrder'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260907094009_EnforceSingleActiveVehicleWorkOrder', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260910072531_MakeHousingPermissionsModuleScoped'
+)
+BEGIN
+    EXEC(N'UPDATE [platform].[PermissionDefinitions] SET [DescriptionAr] = N''عرض السكن وفترات الإقامة.'', [DescriptionEn] = N''View housing and residence periods.'', [RequiresHousingScope] = CAST(0 AS bit)
+    WHERE [Id] = ''019c18d5-62e1-7000-a000-000000000042'';
+    SELECT @@ROWCOUNT');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260910072531_MakeHousingPermissionsModuleScoped'
+)
+BEGIN
+    EXEC(N'UPDATE [platform].[PermissionDefinitions] SET [DescriptionAr] = N''إدارة السكن والمشرفين وفترات الإقامة.'', [DescriptionEn] = N''Manage housing, supervisors, and residence periods.'', [RequiresHousingScope] = CAST(0 AS bit)
+    WHERE [Id] = ''019c18d5-62e1-7000-a000-000000000043'';
+    SELECT @@ROWCOUNT');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260910072531_MakeHousingPermissionsModuleScoped'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260910072531_MakeHousingPermissionsModuleScoped', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260910164617_AddVehicleRegisteredOwnerSupplier'
+)
+BEGIN
+    ALTER TABLE [app].[Vehicles] ADD [RegisteredOwnerSupplierId] uniqueidentifier NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260910164617_AddVehicleRegisteredOwnerSupplier'
+)
+BEGIN
+    CREATE INDEX [IX_Vehicles_RegisteredOwnerSupplierId] ON [app].[Vehicles] ([RegisteredOwnerSupplierId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260910164617_AddVehicleRegisteredOwnerSupplier'
+)
+BEGIN
+    ALTER TABLE [app].[Vehicles] ADD CONSTRAINT [FK_Vehicles_VehicleSuppliers_RegisteredOwnerSupplierId] FOREIGN KEY ([RegisteredOwnerSupplierId]) REFERENCES [app].[VehicleSuppliers] ([Id]) ON DELETE NO ACTION;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260910164617_AddVehicleRegisteredOwnerSupplier'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260910164617_AddVehicleRegisteredOwnerSupplier', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260912081300_AddHrDashboardReportingIndexes'
+)
+BEGIN
+    DROP INDEX [IX_Employees_SponsorId] ON [app].[Employees];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260912081300_AddHrDashboardReportingIndexes'
+)
+BEGIN
+    CREATE INDEX [IX_Employees_SponsorId_Status_IsEmployee] ON [app].[Employees] ([SponsorId], [Status], [IsEmployee]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260912081300_AddHrDashboardReportingIndexes'
+)
+BEGIN
+    CREATE INDEX [IX_Employees_Status_IsEmployee] ON [app].[Employees] ([Status], [IsEmployee]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260912081300_AddHrDashboardReportingIndexes'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260912081300_AddHrDashboardReportingIndexes', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260912104229_AddVehicleRegistrationTransitionSnapshots'
+)
+BEGIN
+    CREATE TABLE [app].[VehicleRegistrationTransitionSnapshots] (
+        [Id] uniqueidentifier NOT NULL,
+        [VehicleRegistrationTransitionId] uniqueidentifier NOT NULL,
+        [OldVehicleDetailsJson] nvarchar(max) NOT NULL,
+        [NewVehicleDetailsJson] nvarchar(max) NOT NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        CONSTRAINT [PK_VehicleRegistrationTransitionSnapshots] PRIMARY KEY ([Id]),
+        CONSTRAINT [FK_VehicleRegistrationTransitionSnapshots_VehicleRegistrationTransitions_VehicleRegistrationTransitionId] FOREIGN KEY ([VehicleRegistrationTransitionId]) REFERENCES [app].[VehicleRegistrationTransitions] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260912104229_AddVehicleRegistrationTransitionSnapshots'
+)
+BEGIN
+    CREATE UNIQUE INDEX [IX_VehicleRegistrationTransitionSnapshots_VehicleRegistrationTransitionId] ON [app].[VehicleRegistrationTransitionSnapshots] ([VehicleRegistrationTransitionId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260912104229_AddVehicleRegistrationTransitionSnapshots'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260912104229_AddVehicleRegistrationTransitionSnapshots', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260912133335_ImportLegacyReferenceCatalogData'
+)
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM [platform].[ClientPlatforms] WHERE [Id] = '01A02A0D-845D-7535-AC25-1E1F0C8E5808' OR [Code] = N'SHIFTZ')
+        INSERT INTO [platform].[ClientPlatforms] ([Id], [Code], [NameAr], [NameEn], [Status], [Notes], [CreatedAtUtc], [UpdatedAtUtc], [IsDeleted], [SupportedPaymentModels])
+        VALUES ('01A02A0D-845D-7535-AC25-1E1F0C8E5808', N'SHIFTZ', N'شفز', N'Shiftz', 1, N'Created by the HR Excel import.', '2026-08-22T15:18:49.3852253+00:00', '2026-08-25T11:47:59.2735725+00:00', 0, 1);
+
+    IF NOT EXISTS (SELECT 1 FROM [platform].[ClientPlatforms] WHERE [Id] = '01A02A0D-845C-7E0B-AA0C-3CD6246785D2' OR [Code] = N'JAHEZ')
+        INSERT INTO [platform].[ClientPlatforms] ([Id], [Code], [NameAr], [NameEn], [Status], [Notes], [CreatedAtUtc], [IsDeleted], [SupportedPaymentModels])
+        VALUES ('01A02A0D-845C-7E0B-AA0C-3CD6246785D2', N'JAHEZ', N'جاهز', N'Jahez', 1, N'Created by the HR Excel import.', '2026-08-22T15:18:49.3852253+00:00', 0, 1);
+
+    IF NOT EXISTS (SELECT 1 FROM [platform].[ClientPlatforms] WHERE [Id] = '01A02A0D-845C-7C77-881F-5286903B7311' OR [Code] = N'HUNGER')
+        INSERT INTO [platform].[ClientPlatforms] ([Id], [Code], [NameAr], [NameEn], [Status], [Notes], [CreatedAtUtc], [IsDeleted], [SupportedPaymentModels])
+        VALUES ('01A02A0D-845C-7C77-881F-5286903B7311', N'HUNGER', N'هنقرستيشن', N'HungerStation', 1, N'Created by the HR Excel import.', '2026-08-22T15:18:49.3852253+00:00', 0, 3);
+
+    IF NOT EXISTS (SELECT 1 FROM [platform].[ClientPlatforms] WHERE [Id] = '01A02A0D-845D-7BD6-B829-84CAF8BADC7F' OR [Code] = N'NINJA')
+        INSERT INTO [platform].[ClientPlatforms] ([Id], [Code], [NameAr], [NameEn], [Status], [Notes], [CreatedAtUtc], [IsDeleted], [SupportedPaymentModels])
+        VALUES ('01A02A0D-845D-7BD6-B829-84CAF8BADC7F', N'NINJA', N'نينجا', N'Ninja', 1, N'Created by the HR Excel import.', '2026-08-22T15:18:49.3852253+00:00', 0, 3);
+
+    IF NOT EXISTS (SELECT 1 FROM [platform].[ClientPlatforms] WHERE [Id] = '01A02A0D-845C-7C44-BB8E-9FDF4D1AEC2B' OR [Code] = N'AMAZON')
+        INSERT INTO [platform].[ClientPlatforms] ([Id], [Code], [NameAr], [NameEn], [Status], [Notes], [CreatedAtUtc], [UpdatedAtUtc], [IsDeleted], [SupportedPaymentModels])
+        VALUES ('01A02A0D-845C-7C44-BB8E-9FDF4D1AEC2B', N'AMAZON', N'أمازون', N'Amazon', 1, N'Created by the HR Excel import.', '2026-08-22T15:18:49.3852253+00:00', '2026-08-25T11:47:52.6413745+00:00', 0, 2);
+
+    IF NOT EXISTS (SELECT 1 FROM [platform].[ClientPlatforms] WHERE [Id] = '01A02A0D-83F6-77A0-9165-E430B588044D' OR [Code] = N'KEETA')
+        INSERT INTO [platform].[ClientPlatforms] ([Id], [Code], [NameAr], [NameEn], [Status], [Notes], [CreatedAtUtc], [IsDeleted], [SupportedPaymentModels])
+        VALUES ('01A02A0D-83F6-77A0-9165-E430B588044D', N'KEETA', N'كيتا', N'Keeta', 1, N'Created by the HR Excel import.', '2026-08-22T15:18:49.3852253+00:00', 0, 3);
+
+    IF NOT EXISTS (SELECT 1 FROM [app].[JobTitles] WHERE [Id] = '01A02A0D-888A-7E06-A2F5-216AE238C339' OR [Code] = N'JOB_BA433520879CF9196E54')
+        INSERT INTO [app].[JobTitles] ([Id], [Code], [NameAr], [NameEn], [DescriptionAr], [Status], [CreatedAtUtc], [IsDeleted])
+        VALUES ('01A02A0D-888A-7E06-A2F5-216AE238C339', N'JOB_BA433520879CF9196E54', N'إداري', N'إداري', N'تم إنشاؤه من ملف الموارد البشرية.', 1, '2026-08-22T15:18:49.3852253+00:00', 0);
+
+    IF NOT EXISTS (SELECT 1 FROM [app].[JobTitles] WHERE [Id] = '01A02A0D-8983-7B7D-BE63-5C3060D542AA' OR [Code] = N'JOB_C3AB5217E58EB8B77DE9')
+        INSERT INTO [app].[JobTitles] ([Id], [Code], [NameAr], [NameEn], [DescriptionAr], [Status], [CreatedAtUtc], [IsDeleted])
+        VALUES ('01A02A0D-8983-7B7D-BE63-5C3060D542AA', N'JOB_C3AB5217E58EB8B77DE9', N'مندوب توصيل', N'مندوب توصيل', N'تم إنشاؤه من ملف الموارد البشرية.', 1, '2026-08-22T15:18:49.3852253+00:00', 0);
+
+    IF NOT EXISTS (SELECT 1 FROM [app].[JobTitles] WHERE [Id] = '01A02A0D-863A-735A-BD7F-D6F7873D8BE9' OR [Code] = N'JOB_9D811768B30D7E09EC45')
+        INSERT INTO [app].[JobTitles] ([Id], [Code], [NameAr], [NameEn], [DescriptionAr], [Status], [CreatedAtUtc], [IsDeleted])
+        VALUES ('01A02A0D-863A-735A-BD7F-D6F7873D8BE9', N'JOB_9D811768B30D7E09EC45', N'ميكانيكي', N'ميكانيكي', N'تم إنشاؤه من ملف الموارد البشرية.', 1, '2026-08-22T15:18:49.3852253+00:00', 0);
+
+    IF NOT EXISTS (SELECT 1 FROM [app].[ResidencyProfessions] WHERE [Id] = '01A02A0D-8ED2-721D-AE7E-634458011594' OR [Code] = N'PROF_B1834C1F4570CD367BD5')
+        INSERT INTO [app].[ResidencyProfessions] ([Id], [Code], [NameAr], [NameEn], [Status], [CreatedAtUtc], [IsDeleted]) VALUES ('01A02A0D-8ED2-721D-AE7E-634458011594', N'PROF_B1834C1F4570CD367BD5', N'المهن', N'المهن', 1, '2026-08-22T15:18:49.3852253+00:00', 0);
+    IF NOT EXISTS (SELECT 1 FROM [app].[ResidencyProfessions] WHERE [Id] = '01A02A0D-8EC1-7580-BA0B-7210C2373102' OR [Code] = N'PROF_73B9E11CE09EDBA373D8')
+        INSERT INTO [app].[ResidencyProfessions] ([Id], [Code], [NameAr], [NameEn], [Status], [CreatedAtUtc], [IsDeleted]) VALUES ('01A02A0D-8EC1-7580-BA0B-7210C2373102', N'PROF_73B9E11CE09EDBA373D8', N'عامل تحميل و تنزيل', N'عامل تحميل و تنزيل', 1, '2026-08-22T15:18:49.3852253+00:00', 0);
+    IF NOT EXISTS (SELECT 1 FROM [app].[ResidencyProfessions] WHERE [Id] = '01A02A0D-9600-7567-BC93-7D447BC5367E' OR [Code] = N'PROF_16E323F5D2EE30B31307')
+        INSERT INTO [app].[ResidencyProfessions] ([Id], [Code], [NameAr], [NameEn], [Status], [CreatedAtUtc], [IsDeleted]) VALUES ('01A02A0D-9600-7567-BC93-7D447BC5367E', N'PROF_16E323F5D2EE30B31307', N'محاسب', N'محاسب', 1, '2026-08-22T15:18:49.3852253+00:00', 0);
+    IF NOT EXISTS (SELECT 1 FROM [app].[ResidencyProfessions] WHERE [Id] = '01A02A0D-9370-7C10-B15A-A48E7331FDAD' OR [Code] = N'PROF_79FF5E40B8407138DAB7')
+        INSERT INTO [app].[ResidencyProfessions] ([Id], [Code], [NameAr], [NameEn], [Status], [CreatedAtUtc], [IsDeleted]) VALUES ('01A02A0D-9370-7C10-B15A-A48E7331FDAD', N'PROF_79FF5E40B8407138DAB7', N'سائق سيارة', N'سائق سيارة', 1, '2026-08-22T15:18:49.3852253+00:00', 0);
+    IF NOT EXISTS (SELECT 1 FROM [app].[ResidencyProfessions] WHERE [Id] = '01A02A0D-94DD-7D99-AF14-E0707CB50270' OR [Code] = N'PROF_E3C6BB6C8F78713507EE')
+        INSERT INTO [app].[ResidencyProfessions] ([Id], [Code], [NameAr], [NameEn], [Status], [CreatedAtUtc], [IsDeleted]) VALUES ('01A02A0D-94DD-7D99-AF14-E0707CB50270', N'PROF_E3C6BB6C8F78713507EE', N'عامل تعبئة و تغليف', N'عامل تعبئة و تغليف', 1, '2026-08-22T15:18:49.3852253+00:00', 0);
+    IF NOT EXISTS (SELECT 1 FROM [app].[ResidencyProfessions] WHERE [Id] = '01A02A0D-8651-79D7-9572-E793753D465C' OR [Code] = N'PROF_0FDC58004D87A557DC25')
+        INSERT INTO [app].[ResidencyProfessions] ([Id], [Code], [NameAr], [NameEn], [Status], [CreatedAtUtc], [IsDeleted]) VALUES ('01A02A0D-8651-79D7-9572-E793753D465C', N'PROF_0FDC58004D87A557DC25', N'سائق شاحنة صغيرة', N'سائق شاحنة صغيرة', 1, '2026-08-22T15:18:49.3852253+00:00', 0);
+    IF NOT EXISTS (SELECT 1 FROM [app].[ResidencyProfessions] WHERE [Id] = '01A02A0D-966E-7774-A996-ED71D4EFBBA4' OR [Code] = N'PROF_888C45534C849455214B')
+        INSERT INTO [app].[ResidencyProfessions] ([Id], [Code], [NameAr], [NameEn], [Status], [CreatedAtUtc], [IsDeleted]) VALUES ('01A02A0D-966E-7774-A996-ED71D4EFBBA4', N'PROF_888C45534C849455214B', N'عامل تعبئة رفوف', N'عامل تعبئة رفوف', 1, '2026-08-22T15:18:49.3852253+00:00', 0);
+    IF NOT EXISTS (SELECT 1 FROM [app].[ResidencyProfessions] WHERE [Id] = '01A02A0D-8E3C-7120-B94C-FC28187020F4' OR [Code] = N'PROF_58945EEED17B18BE5ACB')
+        INSERT INTO [app].[ResidencyProfessions] ([Id], [Code], [NameAr], [NameEn], [Status], [CreatedAtUtc], [IsDeleted]) VALUES ('01A02A0D-8E3C-7120-B94C-FC28187020F4', N'PROF_58945EEED17B18BE5ACB', N'سائق دراجة نارية', N'سائق دراجة نارية', 1, '2026-08-22T15:18:49.3852253+00:00', 0);
+    IF NOT EXISTS (SELECT 1 FROM [app].[ResidencyProfessions] WHERE [Id] = '01A02A0D-94D5-719C-AB81-FD7228C56C96' OR [Code] = N'PROF_CE34B17AB5FA4E19C208')
+        INSERT INTO [app].[ResidencyProfessions] ([Id], [Code], [NameAr], [NameEn], [Status], [CreatedAtUtc], [IsDeleted]) VALUES ('01A02A0D-94D5-719C-AB81-FD7228C56C96', N'PROF_CE34B17AB5FA4E19C208', N'منظف واجهات مباني', N'منظف واجهات مباني', 1, '2026-08-22T15:18:49.3852253+00:00', 0);
+
+    INSERT INTO [app].[JobTitleOperationalWorkTypes] ([Id], [JobTitleId], [OperationalWorkTypeId], [CreatedAtUtc], [IsDeleted])
+    SELECT '01A02A0D-8A68-78A9-80D6-3712036FDF13', job.[Id], workType.[Id], '2026-08-22T15:18:49.3852253+00:00', 0
+    FROM [app].[JobTitles] job CROSS JOIN [app].[OperationalWorkTypes] workType
+    WHERE job.[Code] = N'JOB_C3AB5217E58EB8B77DE9' AND workType.[Code] = N'MOTORCYCLE'
+      AND NOT EXISTS (SELECT 1 FROM [app].[JobTitleOperationalWorkTypes] x WHERE x.[JobTitleId] = job.[Id] AND x.[OperationalWorkTypeId] = workType.[Id] AND x.[IsDeleted] = 0);
+    INSERT INTO [app].[JobTitleOperationalWorkTypes] ([Id], [JobTitleId], [OperationalWorkTypeId], [CreatedAtUtc], [IsDeleted])
+    SELECT '01A02A0D-8B07-7569-A1E5-3C294A9012C4', job.[Id], workType.[Id], '2026-08-22T15:18:49.3852253+00:00', 0
+    FROM [app].[JobTitles] job CROSS JOIN [app].[OperationalWorkTypes] workType
+    WHERE job.[Code] = N'JOB_BA433520879CF9196E54' AND workType.[Code] = N'CAR'
+      AND NOT EXISTS (SELECT 1 FROM [app].[JobTitleOperationalWorkTypes] x WHERE x.[JobTitleId] = job.[Id] AND x.[OperationalWorkTypeId] = workType.[Id] AND x.[IsDeleted] = 0);
+    INSERT INTO [app].[JobTitleOperationalWorkTypes] ([Id], [JobTitleId], [OperationalWorkTypeId], [CreatedAtUtc], [IsDeleted])
+    SELECT '01A02A0D-89F1-7976-B9A8-4020229CFB60', job.[Id], workType.[Id], '2026-08-22T15:18:49.3852253+00:00', 0
+    FROM [app].[JobTitles] job CROSS JOIN [app].[OperationalWorkTypes] workType
+    WHERE job.[Code] = N'JOB_C3AB5217E58EB8B77DE9' AND workType.[Code] = N'CAR'
+      AND NOT EXISTS (SELECT 1 FROM [app].[JobTitleOperationalWorkTypes] x WHERE x.[JobTitleId] = job.[Id] AND x.[OperationalWorkTypeId] = workType.[Id] AND x.[IsDeleted] = 0);
+    INSERT INTO [app].[JobTitleOperationalWorkTypes] ([Id], [JobTitleId], [OperationalWorkTypeId], [CreatedAtUtc], [IsDeleted])
+    SELECT '01A02A0D-896D-73C0-9F05-F419E274ED73', job.[Id], workType.[Id], '2026-08-22T15:18:49.3852253+00:00', 0
+    FROM [app].[JobTitles] job CROSS JOIN [app].[OperationalWorkTypes] workType
+    WHERE job.[Code] = N'JOB_BA433520879CF9196E54' AND workType.[Code] = N'ADMIN'
+      AND NOT EXISTS (SELECT 1 FROM [app].[JobTitleOperationalWorkTypes] x WHERE x.[JobTitleId] = job.[Id] AND x.[OperationalWorkTypeId] = workType.[Id] AND x.[IsDeleted] = 0);
+    INSERT INTO [app].[JobTitleOperationalWorkTypes] ([Id], [JobTitleId], [OperationalWorkTypeId], [CreatedAtUtc], [IsDeleted])
+    SELECT '01A02A0D-8791-79C7-90CC-F8D5697C5DBE', job.[Id], workType.[Id], '2026-08-22T15:18:49.3852253+00:00', 0
+    FROM [app].[JobTitles] job CROSS JOIN [app].[OperationalWorkTypes] workType
+    WHERE job.[Code] = N'JOB_9D811768B30D7E09EC45' AND workType.[Code] = N'ADMIN'
+      AND NOT EXISTS (SELECT 1 FROM [app].[JobTitleOperationalWorkTypes] x WHERE x.[JobTitleId] = job.[Id] AND x.[OperationalWorkTypeId] = workType.[Id] AND x.[IsDeleted] = 0);
+
+    IF NOT EXISTS (SELECT 1 FROM [app].[InsuranceCompanies] WHERE [Id] = '01A032F7-BD2E-7245-A094-880C3B67DFE3' OR [Code] = N'MYTU')
+        INSERT INTO [app].[InsuranceCompanies] ([Id], [Code], [NameAr], [Status], [CreatedAtUtc], [IsDeleted])
+        VALUES ('01A032F7-BD2E-7245-A094-880C3B67DFE3', N'MYTU', N'taminin', 2, '2026-08-24T08:51:31.7896543+00:00', 0);
+
+    IF NOT EXISTS (SELECT 1 FROM [app].[InsurancePlanLevels] WHERE [Id] = '01A032F8-20F8-7D71-867A-846C76F9DA31' OR [Code] = N'STANDER')
+        INSERT INTO [app].[InsurancePlanLevels] ([Id], [InsuranceCompanyId], [Code], [NameAr], [Rank], [EffectiveFrom], [Status], [CreatedAtUtc], [IsDeleted])
+        SELECT '01A032F8-20F8-7D71-867A-846C76F9DA31', company.[Id], N'STANDER', N'standers', 1, '2026-08-11', 2, '2026-08-24T08:51:57.3398561+00:00', 0
+        FROM [app].[InsuranceCompanies] company WHERE company.[Code] = N'MYTU';
+
+    IF NOT EXISTS (SELECT 1 FROM [app].[VehicleManufacturers] WHERE [Id] = '01A0421B-D4B9-788F-B73E-DAABF2650C25' OR [Code] = N'KIA')
+        INSERT INTO [app].[VehicleManufacturers] ([Id], [Code], [NameAr], [NameEn], [Status], [DisplayOrder], [CreatedAtUtc], [IsDeleted])
+        VALUES ('01A0421B-D4B9-788F-B73E-DAABF2650C25', N'KIA', N'KIA', N'KIA', 1, 1, '2026-08-27T07:25:15.4049220+00:00', 0);
+
+    IF NOT EXISTS (SELECT 1 FROM [app].[VehicleModels] WHERE [Id] = '01A0421C-5885-7648-A758-205624D28FBB' OR [Code] = N'K10')
+        INSERT INTO [app].[VehicleModels] ([Id], [VehicleManufacturerId], [Code], [NameAr], [NameEn], [VehicleType], [DefaultFuelType], [Status], [CreatedAtUtc], [IsDeleted])
+        SELECT '01A0421C-5885-7648-A758-205624D28FBB', manufacturer.[Id], N'K10', N'KI10', N'K10', 2, 1, 1, '2026-08-27T07:25:49.0872285+00:00', 0
+        FROM [app].[VehicleManufacturers] manufacturer WHERE manufacturer.[Code] = N'KIA';
+
+    IF NOT EXISTS (SELECT 1 FROM [app].[VehicleSuppliers] WHERE [Id] = '01A0421C-BA0C-7C04-9D51-95FD16FCD2D8' OR [Code] = N'SIB')
+        INSERT INTO [app].[VehicleSuppliers] ([Id], [Code], [NameAr], [NameEn], [Status], [CreatedAtUtc], [IsDeleted])
+        VALUES ('01A0421C-BA0C-7C04-9D51-95FD16FCD2D8', N'SIB', N'cib bank', N'cib bank', 1, '2026-08-27T07:26:14.0599531+00:00', 0);
+
+    IF NOT EXISTS (SELECT 1 FROM [app].[DriverLicenseCategories] WHERE [Id] = '01A0334C-C508-79D6-8585-5B90DE0DE3EE' OR [Code] = N'PRIVATE')
+        INSERT INTO [app].[DriverLicenseCategories] ([Id], [Code], [NameAr], [NameEn], [Status], [CreatedAtUtc], [IsDeleted])
+        VALUES ('01A0334C-C508-79D6-8585-5B90DE0DE3EE', N'PRIVATE', N'خصوصي', N'خصوصي', 1, '2026-08-24T10:24:24.3554319+00:00', 0);
+
+    IF NOT EXISTS (SELECT 1 FROM [app].[DocumentRequirements] WHERE [Id] = '01A02EDB-BB48-7D82-AD02-0EAD9A1E3D7F' OR ([DocumentTypeId] = '019C18D5-62E1-7000-8000-000000000030' AND [RelationshipType] = 1 AND [EffectiveFrom] = '2026-08-19'))
+        INSERT INTO [app].[DocumentRequirements] ([Id], [DocumentTypeId], [RelationshipType], [AppliesToRiderProfile], [IsRequired], [ReminderOffsetsDays], [EffectiveFrom], [Status], [CreatedAtUtc], [UpdatedAtUtc], [IsDeleted])
+        VALUES ('01A02EDB-BB48-7D82-AD02-0EAD9A1E3D7F', '019C18D5-62E1-7000-8000-000000000030', 1, 1, 1, N'30', '2026-08-19', 1, '2026-08-23T13:42:27.4618033+00:00', '2026-08-31T08:36:05.2581391+00:00', 0);
+
+    IF NOT EXISTS (SELECT 1 FROM [app].[DocumentRequirements] WHERE [Id] = '01A02EDC-155B-731E-9F40-2BE822BE840F' OR ([DocumentTypeId] = '019C18D5-62E1-7000-8000-000000000033' AND [RelationshipType] = 1 AND [EffectiveFrom] = '2026-08-23'))
+        INSERT INTO [app].[DocumentRequirements] ([Id], [DocumentTypeId], [RelationshipType], [AppliesToRiderProfile], [IsRequired], [ReminderOffsetsDays], [EffectiveFrom], [Status], [CreatedAtUtc], [IsDeleted])
+        VALUES ('01A02EDC-155B-731E-9F40-2BE822BE840F', '019C18D5-62E1-7000-8000-000000000033', 1, 1, 1, N'30', '2026-08-23', 1, '2026-08-23T13:42:50.4726889+00:00', 0);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260912133335_ImportLegacyReferenceCatalogData'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260912133335_ImportLegacyReferenceCatalogData', N'10.0.11');
+END;
+
+COMMIT;
+GO
+

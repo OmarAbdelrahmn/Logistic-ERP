@@ -172,6 +172,41 @@ public sealed class FleetModelTests
     }
 
     [Fact]
+    public void VehicleRegisteredOwnerUsesAnOptionalRestrictedSupplierRelationship()
+    {
+        using var context = CreateContext();
+        var entity = context.GetService<IDesignTimeModel>().Model.FindEntityType(typeof(Vehicle))!;
+        var property = entity.FindProperty(nameof(Vehicle.RegisteredOwnerSupplierId))!;
+        var foreignKey = Assert.Single(entity.GetForeignKeys(), candidate =>
+            candidate.Properties.Select(item => item.Name)
+                .SequenceEqual([nameof(Vehicle.RegisteredOwnerSupplierId)]));
+
+        Assert.True(property.IsNullable);
+        Assert.Equal(typeof(VehicleSupplier), foreignKey.PrincipalEntityType.ClrType);
+        Assert.Equal(DeleteBehavior.Restrict, foreignKey.DeleteBehavior);
+    }
+
+    [Fact]
+    public void RegistrationTransitionSnapshotsPreserveOneImmutableBeforeAndAfterPayloadPerTransition()
+    {
+        using var context = CreateContext();
+        var entity = context.GetService<IDesignTimeModel>().Model
+            .FindEntityType(typeof(VehicleRegistrationTransitionSnapshot))!;
+        var foreignKey = Assert.Single(entity.GetForeignKeys());
+        var transitionIndex = Assert.Single(entity.GetIndexes(), index => index.IsUnique);
+
+        Assert.Equal(typeof(VehicleRegistrationTransition), foreignKey.PrincipalEntityType.ClrType);
+        Assert.Equal(
+            [nameof(VehicleRegistrationTransitionSnapshot.VehicleRegistrationTransitionId)],
+            foreignKey.Properties.Select(property => property.Name));
+        Assert.Equal(
+            [nameof(VehicleRegistrationTransitionSnapshot.VehicleRegistrationTransitionId)],
+            transitionIndex.Properties.Select(property => property.Name));
+        Assert.Equal("nvarchar(max)", entity.FindProperty(nameof(VehicleRegistrationTransitionSnapshot.OldVehicleDetailsJson))!.GetColumnType());
+        Assert.Equal("nvarchar(max)", entity.FindProperty(nameof(VehicleRegistrationTransitionSnapshot.NewVehicleDetailsJson))!.GetColumnType());
+    }
+
+    [Fact]
     public void SaudiRegistrationTypesHaveStableMoiOrder()
     {
         Assert.Equal(

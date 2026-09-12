@@ -117,11 +117,14 @@ internal interface IPlatformCredentialProtector
 
 internal sealed class PlatformCredentialProtector : IPlatformCredentialProtector
 {
-    private readonly byte[] encryptionKey;
+    private readonly Lazy<byte[]> encryptionKey;
 
-    public PlatformCredentialProtector(byte[] masterKey)
+    public PlatformCredentialProtector(Func<byte[]> masterKeyFactory)
     {
-        encryptionKey = HMACSHA256.HashData(masterKey, "LogisticsERP.PlatformCredential.v1"u8.ToArray());
+        ArgumentNullException.ThrowIfNull(masterKeyFactory);
+        encryptionKey = new Lazy<byte[]>(
+            () => HMACSHA256.HashData(masterKeyFactory(), "LogisticsERP.PlatformCredential.v1"u8.ToArray()),
+            LazyThreadSafetyMode.ExecutionAndPublication);
     }
 
     public ProtectedPlatformCredential Protect(string value)
@@ -130,7 +133,7 @@ internal sealed class PlatformCredentialProtector : IPlatformCredentialProtector
         var nonce = RandomNumberGenerator.GetBytes(AesGcm.NonceByteSizes.MaxSize);
         var tag = new byte[AesGcm.TagByteSizes.MaxSize];
         var ciphertext = new byte[plaintext.Length];
-        using var aes = new AesGcm(encryptionKey, tag.Length);
+        using var aes = new AesGcm(encryptionKey.Value, tag.Length);
         aes.Encrypt(nonce, plaintext, ciphertext, tag);
         CryptographicOperations.ZeroMemory(plaintext);
         return new ProtectedPlatformCredential(ciphertext, nonce, tag);

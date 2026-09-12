@@ -42,6 +42,8 @@ internal sealed class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
         builder.HasIndex(entity => entity.FullNameEn);
         builder.HasIndex(entity => entity.PrimaryPhone);
         builder.HasIndex(entity => new { entity.IsEmployee, entity.EngagementType, entity.Status });
+        builder.HasIndex(entity => new { entity.Status, entity.IsEmployee });
+        builder.HasIndex(entity => new { entity.SponsorId, entity.Status, entity.IsEmployee });
 
         builder.ToTable(table =>
         {

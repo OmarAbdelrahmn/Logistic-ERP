@@ -4,6 +4,7 @@ using LogisticsERP.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260910164617_AddVehicleRegisteredOwnerSupplier")]
+    partial class AddVehicleRegisteredOwnerSupplier
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -4110,36 +4113,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.HasIndex("VehicleId", "EffectiveAtUtc");
 
                     b.ToTable("VehicleRegistrationTransitions", "app");
-                });
-
-            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehicleRegistrationTransitionSnapshot", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset>("CreatedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid?>("CreatedByUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("NewVehicleDetailsJson")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("OldVehicleDetailsJson")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("VehicleRegistrationTransitionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("VehicleRegistrationTransitionId")
-                        .IsUnique();
-
-                    b.ToTable("VehicleRegistrationTransitionSnapshots", "app");
                 });
 
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehicleSupplier", b =>
@@ -11926,11 +11899,9 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.HasIndex("ProfilePhotoDocumentId");
 
-                    b.HasIndex("Status", "IsEmployee");
+                    b.HasIndex("SponsorId");
 
                     b.HasIndex("IsEmployee", "EngagementType", "Status");
-
-                    b.HasIndex("SponsorId", "Status", "IsEmployee");
 
                     b.ToTable("Employees", "app", t =>
                         {
@@ -15427,15 +15398,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.HasOne("LogisticsERP.Domain.Entities.Fleet.Vehicle", null)
                         .WithMany()
                         .HasForeignKey("VehicleId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehicleRegistrationTransitionSnapshot", b =>
-                {
-                    b.HasOne("LogisticsERP.Domain.Entities.Fleet.VehicleRegistrationTransition", null)
-                        .WithOne()
-                        .HasForeignKey("LogisticsERP.Domain.Entities.Fleet.VehicleRegistrationTransitionSnapshot", "VehicleRegistrationTransitionId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });

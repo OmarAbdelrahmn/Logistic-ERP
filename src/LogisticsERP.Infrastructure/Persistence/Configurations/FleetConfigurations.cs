@@ -88,6 +88,7 @@ internal sealed class VehicleConfiguration : IEntityTypeConfiguration<Vehicle>
         builder.HasOne<Sponsor>().WithMany().HasForeignKey(x => x.SponsorId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<OperatingCity>().WithMany().HasForeignKey(x => x.OperatingCityId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<VehicleSupplier>().WithMany().HasForeignKey(x => x.PurchasedFromSupplierId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<VehicleSupplier>().WithMany().HasForeignKey(x => x.RegisteredOwnerSupplierId).OnDelete(DeleteBehavior.Restrict);
         builder.HasIndex(x => x.NormalizedAssetNumber).IsUnique();
         builder.HasIndex(x => x.NormalizedSerialNumber).IsUnique().HasFilter("[NormalizedSerialNumber] IS NOT NULL AND [IsDeleted] = 0");
         builder.HasIndex(x => x.NormalizedChassisNumber).IsUnique().HasFilter("[NormalizedChassisNumber] IS NOT NULL AND [IsDeleted] = 0");
@@ -140,6 +141,20 @@ internal sealed class VehicleRegistrationTransitionConfiguration : IEntityTypeCo
         builder.HasOne<VehicleAttachmentVersion>().WithMany().HasForeignKey(x => x.IstimaraVersionId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<VehicleAttachmentVersion>().WithMany().HasForeignKey(x => x.OperationCardVersionId).OnDelete(DeleteBehavior.Restrict);
         builder.HasIndex(x => new { x.VehicleId, x.EffectiveAtUtc });
+    }
+}
+
+internal sealed class VehicleRegistrationTransitionSnapshotConfiguration : IEntityTypeConfiguration<VehicleRegistrationTransitionSnapshot>
+{
+    public void Configure(EntityTypeBuilder<VehicleRegistrationTransitionSnapshot> builder)
+    {
+        builder.ConfigureHistory("VehicleRegistrationTransitionSnapshots");
+        builder.Property(x => x.OldVehicleDetailsJson).HasColumnType("nvarchar(max)").IsRequired();
+        builder.Property(x => x.NewVehicleDetailsJson).HasColumnType("nvarchar(max)").IsRequired();
+        builder.HasOne<VehicleRegistrationTransition>().WithOne()
+            .HasForeignKey<VehicleRegistrationTransitionSnapshot>(x => x.VehicleRegistrationTransitionId)
+            .OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(x => x.VehicleRegistrationTransitionId).IsUnique();
     }
 }
 

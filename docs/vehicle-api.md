@@ -344,7 +344,7 @@ Returns a lightweight list for selectors and autocomplete. The service asks for 
 
 ### `GET /api/vehicles/{id}`
 
-Returns the full vehicle detail including the summary, identity, ownership, registration type, catalog references, acquisition, lease, decommissioning, and notes.
+Returns the full vehicle detail including the summary, identity, ownership, registration type, catalog references, acquisition, lease, decommissioning, and notes. `registeredOwnerSupplierId` and `registeredOwnerSupplier` identify the bank or financing company currently shown as the registered owner. When `registeredOwnerSupplierId` is `null`, the vehicle sponsor is the registered owner.
 
 Response: `200 OK`, `VehicleDetailResponse`.
 
@@ -375,6 +375,7 @@ Updates a vehicle using the same request shape. `assetNumber` remains required f
   "sponsorId": null,
   "operatingCityId": null,
   "purchasedFromSupplierId": null,
+  "registeredOwnerSupplierId": null,
   "registrationType": 2,
   "vehicleManufacturerId": "00000000-0000-0000-0000-000000000000",
   "vehicleModelId": "00000000-0000-0000-0000-000000000000",
@@ -393,6 +394,8 @@ Updates a vehicle using the same request shape. `assetNumber` remains required f
   "rowVersion": null
 }
 ```
+
+`purchasedFromSupplierId` remains the original purchase source. Do not change it when financing completes. Set `registeredOwnerSupplierId` to the financing company's supplier ID while it is the legal owner, then set it to `null` after ownership transfers to the sponsor. Because `PUT` is a full replacement, clients must echo the current `registeredOwnerSupplierId` on every update; omitting it is equivalent to sending `null`.
 
 ### `PATCH /api/vehicles/{id}/archive`
 
@@ -490,7 +493,7 @@ The controller limits this request to 22 MiB and rejects missing or empty docume
 
 ### `GET /api/vehicles/{id}/registration-transitions`
 
-Returns the immutable registration transition history, including old/new plate values, from/to registration types, effective date, reason, document version IDs, actor, and creation time.
+Returns the immutable registration transition history, including old/new plate values, from/to registration types, effective date, reason, document version IDs, actor, and creation time. Each new conversion also includes `vehicleDetailsSnapshot`, which contains the complete serialized `oldVehicleDetailsJson` and `newVehicleDetailsJson` payloads captured at the moment of conversion. Older transition records created before this feature return `vehicleDetailsSnapshot: null`.
 
 ## Vehicle file endpoints
 

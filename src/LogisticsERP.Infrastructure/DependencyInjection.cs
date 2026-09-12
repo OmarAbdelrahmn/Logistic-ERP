@@ -22,12 +22,14 @@ using LogisticsERP.Infrastructure.Files;
 using LogisticsERP.Infrastructure.Fleet;
 using LogisticsERP.Infrastructure.Fuel;
 using LogisticsERP.Infrastructure.Maintenance;
+using LogisticsERP.Infrastructure.Reporting;
 using LogisticsERP.Application.Abstractions.Files;
 using LogisticsERP.Application.Features.Fleet;
 using LogisticsERP.Application.Features.Fuel;
 using LogisticsERP.Application.Features.Maintenance;
 using LogisticsERP.Application.Features.Hr;
 using LogisticsERP.Application.Features.Telecom;
+using LogisticsERP.Application.Features.Reporting;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
@@ -79,6 +81,7 @@ public static class DependencyInjection
         services.AddScoped<IAuditQueryService, AuditQueryService>();
         services.AddScoped<ISavedViewService, SavedViewService>();
         services.AddScoped<IExportService, ExportService>();
+        services.AddScoped<IReportingService, ReportingService>();
         services.AddScoped<IDatasetVersionService, DatasetVersionService>();
         services.AddScoped<IPhoneSimService, PhoneSimService>();
         services.AddScoped<IPrivateFileStorage, PrivateFileStorage>();
@@ -101,8 +104,11 @@ public static class DependencyInjection
         services.AddScoped<IFleetComplianceNotificationService, FleetComplianceNotificationService>();
         services.AddSingleton<ISensitiveValueProtector>(provider => new SensitiveValueProtector(
             ResolveSensitiveDataKey(configuration, provider.GetRequiredService<Microsoft.Extensions.Hosting.IHostEnvironment>().IsDevelopment())));
-        services.AddSingleton<IPlatformCredentialProtector>(provider => new PlatformCredentialProtector(
-            ResolveSensitiveDataKey(configuration, provider.GetRequiredService<Microsoft.Extensions.Hosting.IHostEnvironment>().IsDevelopment())));
+        services.AddSingleton<IPlatformCredentialProtector>(provider =>
+        {
+            var isDevelopment = provider.GetRequiredService<IHostEnvironment>().IsDevelopment();
+            return new PlatformCredentialProtector(() => ResolveSensitiveDataKey(configuration, isDevelopment));
+        });
 
         services.AddDbContext<ApplicationDbContext>((provider, options) =>
         {

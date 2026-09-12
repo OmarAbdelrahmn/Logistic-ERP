@@ -28,6 +28,7 @@ public sealed record VehicleUpsertRequest(
     Guid? SponsorId,
     Guid? OperatingCityId,
     Guid? PurchasedFromSupplierId,
+    Guid? RegisteredOwnerSupplierId,
     VehicleRegistrationType? RegistrationType,
     Guid VehicleManufacturerId,
     Guid VehicleModelId,
@@ -90,6 +91,8 @@ public sealed record VehicleDetailResponse(
     Guid? OperatingCityId,
     Guid? PurchasedFromSupplierId,
     string? PurchasedFromSupplier,
+    Guid? RegisteredOwnerSupplierId,
+    string? RegisteredOwnerSupplier,
     VehicleRegistrationType? RegistrationType,
     Guid VehicleManufacturerId,
     Guid VehicleModelId,
@@ -111,7 +114,8 @@ public sealed record VehicleReadinessResponse(Guid VehicleId, IReadOnlyList<stri
 public sealed record VehicleIdentityCorrectionRequest(string AssetNumber, string SerialNumber, string ChassisNumber, string? Vin, string PlateNumberAr, string PlateNumberEn, string? PlateLettersAr, string? PlateLettersEn, string? PlateDigits, Guid SponsorId, Guid OperatingCityId, Guid? PurchasedFromSupplierId, VehicleRegistrationType RegistrationType, string Reason, DateTimeOffset EffectiveAtUtc, IReadOnlyList<Guid>? DocumentVersionReferences, string RowVersion);
 public sealed record VehicleIdentityCorrectionResponse(Guid Id, Guid VehicleId, string BeforeJson, string AfterJson, string? DocumentVersionReferencesJson, string Reason, DateTimeOffset EffectiveAtUtc, Guid ActorUserId, DateTimeOffset CreatedAtUtc);
 public sealed record VehicleRegistrationTransitionRequest(string PlateNumberAr, string PlateNumberEn, string? PlateLettersAr, string? PlateLettersEn, string? PlateDigits, DateTimeOffset EffectiveAtUtc, string Reason, string RowVersion);
-public sealed record VehicleRegistrationTransitionResponse(Guid Id, Guid VehicleId, VehicleRegistrationType FromType, VehicleRegistrationType ToType, string OldPlateNumberAr, string OldPlateNumberEn, string NewPlateNumberAr, string NewPlateNumberEn, DateTimeOffset EffectiveAtUtc, string Reason, Guid IstimaraVersionId, Guid OperationCardVersionId, Guid ActorUserId, DateTimeOffset CreatedAtUtc);
+public sealed record VehicleRegistrationTransitionSnapshotResponse(Guid Id, Guid VehicleRegistrationTransitionId, string OldVehicleDetailsJson, string NewVehicleDetailsJson, DateTimeOffset CreatedAtUtc);
+public sealed record VehicleRegistrationTransitionResponse(Guid Id, Guid VehicleId, VehicleRegistrationType FromType, VehicleRegistrationType ToType, string OldPlateNumberAr, string OldPlateNumberEn, string NewPlateNumberAr, string NewPlateNumberEn, DateTimeOffset EffectiveAtUtc, string Reason, Guid IstimaraVersionId, Guid OperationCardVersionId, Guid ActorUserId, DateTimeOffset CreatedAtUtc, VehicleRegistrationTransitionSnapshotResponse? VehicleDetailsSnapshot);
 public sealed record ArchiveFleetRequest(string Reason, string RowVersion);
 public sealed record VehicleStatusCommandRequest(DateTimeOffset EffectiveAtUtc, string Reason, string RowVersion);
 public sealed record OdometerReadingRequest(long Reading, DateTimeOffset RecordedAtUtc, string? Notes, bool IsCorrection, string? CorrectionReason, string RowVersion);

@@ -56,6 +56,7 @@ public sealed class Vehicle : AuditableEntity
     public Guid? SponsorId { get; set; }
     public Guid? OperatingCityId { get; set; }
     public Guid? PurchasedFromSupplierId { get; set; }
+    public Guid? RegisteredOwnerSupplierId { get; set; }
     public VehicleRegistrationType? RegistrationType { get; set; }
     public Guid VehicleManufacturerId { get; set; }
     public Guid VehicleModelId { get; set; }
@@ -110,4 +111,16 @@ public sealed class VehicleRegistrationTransition : HistoryEntity
     public Guid IstimaraVersionId { get; set; }
     public Guid OperationCardVersionId { get; set; }
     public Guid ActorUserId { get; set; }
+}
+
+/// <summary>
+/// Immutable full vehicle state captured immediately before and after a registration conversion.
+/// The transition keeps the registration-specific fields while this record preserves the entire
+/// vehicle payload for audit and historical reporting.
+/// </summary>
+public sealed class VehicleRegistrationTransitionSnapshot : HistoryEntity
+{
+    public Guid VehicleRegistrationTransitionId { get; set; }
+    public string OldVehicleDetailsJson { get; set; } = string.Empty;
+    public string NewVehicleDetailsJson { get; set; } = string.Empty;
 }
