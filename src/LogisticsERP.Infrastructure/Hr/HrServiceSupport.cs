@@ -143,13 +143,18 @@ internal sealed class PlatformCredentialProtector : IPlatformCredentialProtector
 internal sealed class SensitiveValueProtector : ISensitiveValueProtector
 {
     private const byte FormatVersion = 1;
-    private readonly byte[] encryptionKey;
-    private readonly byte[] lookupKey;
+    private readonly Lazy<SensitiveKeys> keys;
 
-    public SensitiveValueProtector(byte[] masterKey)
+    public SensitiveValueProtector(Func<byte[]> masterKeyFactory)
     {
-        encryptionKey = HMACSHA256.HashData(masterKey, "LogisticsERP.FieldEncryption.v1"u8.ToArray());
-        lookupKey = HMACSHA256.HashData(masterKey, "LogisticsERP.LookupHash.v1"u8.ToArray());
+        ArgumentNullException.ThrowIfNull(masterKeyFactory);
+        keys = new Lazy<SensitiveKeys>(() =>
+        {
+            var masterKey = masterKeyFactory();
+            return new SensitiveKeys(
+                HMACSHA256.HashData(masterKey, "LogisticsERP.FieldEncryption.v1"u8.ToArray()),
+                HMACSHA256.HashData(masterKey, "LogisticsERP.LookupHash.v1"u8.ToArray()));
+        }, LazyThreadSafetyMode.ExecutionAndPublication);
     }
 
     public byte[] Protect(string value)
@@ -158,7 +163,7 @@ internal sealed class SensitiveValueProtector : ISensitiveValueProtector
         var nonce = RandomNumberGenerator.GetBytes(AesGcm.NonceByteSizes.MaxSize);
         var tag = new byte[AesGcm.TagByteSizes.MaxSize];
         var ciphertext = new byte[plaintext.Length];
-        using var aes = new AesGcm(encryptionKey, tag.Length);
+        using var aes = new AesGcm(keys.Value.EncryptionKey, tag.Length);
         aes.Encrypt(nonce, plaintext, ciphertext, tag);
 
         var payload = new byte[1 + nonce.Length + tag.Length + ciphertext.Length];
@@ -173,7 +178,7 @@ internal sealed class SensitiveValueProtector : ISensitiveValueProtector
     public string CreateLookupHash(string value)
     {
         var normalized = Encoding.UTF8.GetBytes(HrServiceSupport.NormalizeIdentifier(value));
-        var hash = HMACSHA256.HashData(lookupKey, normalized);
+        var hash = HMACSHA256.HashData(keys.Value.LookupKey, normalized);
         CryptographicOperations.ZeroMemory(normalized);
         return Convert.ToHexString(hash);
     }
@@ -188,7 +193,7 @@ internal sealed class SensitiveValueProtector : ISensitiveValueProtector
         var tagLength = AesGcm.TagByteSizes.MaxSize;
         var ciphertextLength = value.Length - 1 - nonceLength - tagLength;
         var plaintext = new byte[ciphertextLength];
-        using var aes = new AesGcm(encryptionKey, tagLength);
+        using var aes = new AesGcm(keys.Value.EncryptionKey, tagLength);
         aes.Decrypt(value.AsSpan(1, nonceLength), value.AsSpan(1 + nonceLength, tagLength), value.AsSpan(1 + nonceLength + tagLength), plaintext);
         try
         {
@@ -199,4 +204,6 @@ internal sealed class SensitiveValueProtector : ISensitiveValueProtector
             CryptographicOperations.ZeroMemory(plaintext);
         }
     }
+
+    private sealed record SensitiveKeys(byte[] EncryptionKey, byte[] LookupKey);
 }

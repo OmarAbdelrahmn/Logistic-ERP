@@ -102,7 +102,7 @@ public static class DependencyInjection
         services.AddScoped<IAccidentWorkflowService, VehicleAccidentService>();
         services.AddScoped<IAccidentNotificationService, AccidentNotificationService>();
         services.AddScoped<IFleetComplianceNotificationService, FleetComplianceNotificationService>();
-        services.AddSingleton<ISensitiveValueProtector>(provider => new SensitiveValueProtector(
+        services.AddSingleton<ISensitiveValueProtector>(provider => new SensitiveValueProtector(() =>
             ResolveSensitiveDataKey(configuration, provider.GetRequiredService<Microsoft.Extensions.Hosting.IHostEnvironment>().IsDevelopment())));
         services.AddSingleton<IPlatformCredentialProtector>(provider =>
         {

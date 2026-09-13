@@ -3,24 +3,28 @@ using LogisticsERP.Api.Authorization;
 using LogisticsERP.Application.Authorization;
 using LogisticsERP.Application.Features.Hr;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace LogisticsERP.Api.Controllers;
 
 [ApiController]
 [Route("api/import")]
 [RequestSizeLimit(20 * 1024 * 1024)]
+
 public sealed class ImportController(IHrExcelImportService service) : ControllerBase
 {
     [HttpPost("employees-riders/validate")]
     [Consumes("multipart/form-data")]
-    [RequirePermission(PermissionKeys.Workforce.EmployeesRead)]
+    //[RequirePermission(PermissionKeys.Workforce.EmployeesRead)]
+    [AllowAnonymous]
     public Task<IActionResult> Validate([FromForm] HrExcelImportForm request, CancellationToken cancellationToken) =>
         Execute(request.File, validateOnly: true, cancellationToken);
 
     [HttpPost("employees-riders")]
     [Consumes("multipart/form-data")]
-    [RequirePermission(PermissionKeys.Workforce.EmployeesCreate)]
-    [RequirePermission(PermissionKeys.Workforce.EmployeesUpdate)]
+    //[RequirePermission(PermissionKeys.Workforce.EmployeesCreate)]
+    //[RequirePermission(PermissionKeys.Workforce.EmployeesUpdate)]
+    [AllowAnonymous]
     public Task<IActionResult> Import([FromForm] HrExcelImportForm request, CancellationToken cancellationToken) =>
         Execute(request.File, validateOnly: false, cancellationToken);
 
