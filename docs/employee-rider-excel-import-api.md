@@ -10,7 +10,7 @@ This API validates and imports employee and rider records from an `.xlsx` workbo
 
 - Content type: `multipart/form-data`
 - Form field: `file`
-- Permission: `employees.read`
+- Access: anonymous
 - File rules: non-empty `.xlsx`, maximum 20 MB, maximum 5,000 data rows
 - This endpoint performs no database writes.
 
@@ -20,12 +20,23 @@ This API validates and imports employee and rider records from an `.xlsx` workbo
 
 - Content type: `multipart/form-data`
 - Form field: `file`
-- Permissions: `employees.create` and `employees.update`
+- Access: anonymous
 - The import repeats validation on the server.
 - If any row has an `Error`, the entire import is rolled back and `imported` is `false`.
 - `Warning` issues do not block the import. Unsupported values are reported and ignored.
 
 The recommended frontend flow is to call the validation endpoint, show the issues and planned counts, and enable the import action only when `canImport` is `true`.
+
+## Employee and rider phone-number update
+
+Two anonymous endpoints accept a simple two-column `.xlsx` workbook and match every row to the shared employee/rider record by Iqama:
+
+- `POST /api/import/employees-riders/phone-numbers/validate` checks the entire workbook without writing.
+- `POST /api/import/employees-riders/phone-numbers` repeats the checks and updates `Employee.PrimaryPhone` atomically.
+
+Both endpoints use `multipart/form-data` with a `file` field. Column A must contain the 10-digit Iqama number and column B must contain the phone number. A recognized Arabic or English header row is optional. Arabic and Persian digits are supported, and valid phone numbers are stored in canonical E.164 form (for example, `0555 123 456` becomes `+966555123456`).
+
+An invalid row, duplicate Iqama, or Iqama that does not match a current employee/rider blocks the whole update. The response reports `canUpdate`, `updated`, matched employee/rider counts, changed and unchanged counts, and row-level issues.
 
 ## Required columns
 

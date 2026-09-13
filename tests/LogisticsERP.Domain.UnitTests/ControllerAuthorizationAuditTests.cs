@@ -24,7 +24,7 @@ public sealed class ControllerAuthorizationAuditTests
     }
 
     [Fact]
-    public void OnlyLoginAndRefreshAreAnonymous()
+    public void OnlyExplicitPublicEntryPointsAreAnonymous()
     {
         var anonymousActions = GetControllerActions()
             .Where(action => action.Action.GetCustomAttribute<AllowAnonymousAttribute>(true) is not null
@@ -34,7 +34,14 @@ public sealed class ControllerAuthorizationAuditTests
             .ToArray();
 
         Assert.Equal(
-            ["AuthController.Login", "AuthController.Refresh"],
+            [
+                "AuthController.Login",
+                "AuthController.Refresh",
+                "ImportController.Import",
+                "ImportController.UpdatePhoneNumbers",
+                "ImportController.Validate",
+                "ImportController.ValidatePhoneNumbers"
+            ],
             anonymousActions);
     }
 

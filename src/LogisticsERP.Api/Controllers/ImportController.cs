@@ -28,6 +28,22 @@ public sealed class ImportController(IHrExcelImportService service) : Controller
     public Task<IActionResult> Import([FromForm] HrExcelImportForm request, CancellationToken cancellationToken) =>
         Execute(request.File, validateOnly: false, cancellationToken);
 
+    [HttpPost("employees-riders/phone-numbers/validate")]
+    [Consumes("multipart/form-data")]
+    [AllowAnonymous]
+    public Task<IActionResult> ValidatePhoneNumbers(
+        [FromForm] HrExcelImportForm request,
+        CancellationToken cancellationToken) =>
+        ExecutePhoneNumberUpdate(request.File, validateOnly: true, cancellationToken);
+
+    [HttpPost("employees-riders/phone-numbers")]
+    [Consumes("multipart/form-data")]
+    [AllowAnonymous]
+    public Task<IActionResult> UpdatePhoneNumbers(
+        [FromForm] HrExcelImportForm request,
+        CancellationToken cancellationToken) =>
+        ExecutePhoneNumberUpdate(request.File, validateOnly: false, cancellationToken);
+
     private async Task<IActionResult> Execute(IFormFile? file, bool validateOnly, CancellationToken cancellationToken)
     {
         if (file is null || file.Length == 0 || file.Length > 20 * 1024 * 1024
@@ -38,6 +54,26 @@ public sealed class ImportController(IHrExcelImportService service) : Controller
 
         await using var stream = file.OpenReadStream();
         var result = await service.ImportAsync(stream, Path.GetFileName(file.FileName), validateOnly, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    private async Task<IActionResult> ExecutePhoneNumberUpdate(
+        IFormFile? file,
+        bool validateOnly,
+        CancellationToken cancellationToken)
+    {
+        if (file is null || file.Length == 0 || file.Length > 20 * 1024 * 1024
+            || !string.Equals(Path.GetExtension(file.FileName), ".xlsx", StringComparison.OrdinalIgnoreCase))
+        {
+            return BadRequest(new { error = "A non-empty .xlsx file up to 20 MB is required." });
+        }
+
+        await using var stream = file.OpenReadStream();
+        var result = await service.UpdatePhoneNumbersAsync(
+            stream,
+            Path.GetFileName(file.FileName),
+            validateOnly,
+            cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 }

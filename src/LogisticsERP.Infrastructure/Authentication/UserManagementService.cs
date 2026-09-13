@@ -452,7 +452,11 @@ internal sealed class UserManagementService(
 
     public async Task<Result> ArchiveUserAsync(Guid userId, ArchiveManagedUserRequest request, CancellationToken cancellationToken = default)
     {
-        if (!TryGetActor(out var actorId) || string.IsNullOrWhiteSpace(request.Reason))
+        if (!TryGetActor(out var actorId))
+        {
+            return Result.Failure(UserManagementErrors.CurrentUserUnavailable);
+        }
+        if (string.IsNullOrWhiteSpace(request.Reason) || request.Reason.Trim().Length > 500)
         {
             return Result.Failure(UserManagementErrors.InvalidRequest);
         }
@@ -475,10 +479,16 @@ internal sealed class UserManagementService(
         }
 
         var now = timeProvider.GetUtcNow();
+        var reason = request.Reason.Trim();
         user.Status = UserAccountStatus.Archived;
-        await RevokeSessionsAndIncrementAuthorizationAsync(user, actorId, request.Reason.Trim(), now, cancellationToken, saveChanges: false);
-        user.DeletionReason = request.Reason.Trim();
-        identityDbContext.Users.Remove(user);
+        await RevokeSessionsAndIncrementAuthorizationAsync(user, actorId, reason, now, cancellationToken, saveChanges: false);
+        // Archive explicitly instead of calling Remove: the archive operation has already loaded
+        // UserSessions for revocation, and deleting the principal makes EF sever their required FK
+        // before the persistence interceptor can convert the delete into a soft delete.
+        user.IsDeleted = true;
+        user.DeletedAtUtc = now;
+        user.DeletedByUserId = actorId;
+        user.DeletionReason = reason;
         await identityDbContext.SaveChangesAsync(cancellationToken);
         sessionValidator.InvalidateUser(user.Id);
         return Result.Success();
