@@ -344,7 +344,7 @@ Returns a lightweight list for selectors and autocomplete. The service asks for 
 
 ### `GET /api/vehicles/{id}`
 
-Returns the full vehicle detail including the summary, identity, ownership, registration type, catalog references, acquisition, lease, decommissioning, and notes. `registeredOwnerSupplierId` and `registeredOwnerSupplier` identify the bank or financing company currently shown as the registered owner. When `registeredOwnerSupplierId` is `null`, the vehicle sponsor is the registered owner.
+Returns the full vehicle detail including the summary, identity, ownership, registration type, catalog references, acquisition, lease, decommissioning, and notes. The legacy-named `registeredOwnerSupplierId` request/response field may identify either an active vehicle supplier or a sponsor. `registeredOwnerSupplier` contains the resolved Arabic name, and `registeredOwnerType` is `Supplier` or `Sponsor`. When `registeredOwnerSupplierId` is `null`, no explicit owner is stored and the vehicle sponsor is the registered owner.
 
 Response: `200 OK`, `VehicleDetailResponse`.
 
@@ -395,7 +395,7 @@ Updates a vehicle using the same request shape. `assetNumber` remains required f
 }
 ```
 
-`purchasedFromSupplierId` remains the original purchase source. Do not change it when financing completes. Set `registeredOwnerSupplierId` to the financing company's supplier ID while it is the legal owner, then set it to `null` after ownership transfers to the sponsor. Because `PUT` is a full replacement, clients must echo the current `registeredOwnerSupplierId` on every update; omitting it is equivalent to sending `null`.
+`purchasedFromSupplierId` remains the original purchase source. Do not change it when the registered owner changes. Set `registeredOwnerSupplierId` to either the active supplier ID or sponsor ID that represents the explicit registered owner. The operating `sponsorId` and the registered-owner sponsor may be the same or different. Set `registeredOwnerSupplierId` to `null` to use the operating sponsor as the implicit owner. Because `PUT` is a full replacement, clients must echo the current `registeredOwnerSupplierId` on every update; omitting it is equivalent to sending `null`.
 
 ### `PATCH /api/vehicles/{id}/archive`
 
@@ -804,7 +804,7 @@ Downloads the current generated accident PDF, or the requested report version wh
 | `isReadyForAssignment` | Current readiness decision |
 | `rowVersion` | Concurrency token |
 
-`VehicleDetailResponse` contains `summary` plus `serialNumber`, `vin`, `chassisNumber`, `engineNumber`, sponsor/city/supplier IDs and supplier name, registration type, manufacturer/model IDs, model year, fuel/transmission, colors, ownership, owner name, acquisition date, lease reference, decommissioning data, and notes.
+`VehicleDetailResponse` contains `summary` plus `serialNumber`, `vin`, `chassisNumber`, `engineNumber`, sponsor/city/supplier IDs and supplier name, the explicit registered-owner ID/name/type, registration type, manufacturer/model IDs, model year, fuel/transmission, colors, ownership, owner name, acquisition date, lease reference, decommissioning data, and notes. `registeredOwnerType` is `Supplier`, `Sponsor`, or `null` when the operating sponsor fallback applies.
 
 ### Assignment response
 

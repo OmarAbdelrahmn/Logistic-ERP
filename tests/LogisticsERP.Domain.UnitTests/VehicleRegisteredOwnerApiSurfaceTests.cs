@@ -1,4 +1,5 @@
 using LogisticsERP.Application.Features.Fleet;
+using LogisticsERP.Domain.Entities.Fleet;
 using Xunit;
 
 namespace LogisticsERP.Domain.UnitTests;
@@ -15,5 +16,10 @@ public sealed class VehicleRegisteredOwnerApiSurfaceTests
         Assert.Equal(typeof(string), Nullable.GetUnderlyingType(typeof(VehicleDetailResponse)
             .GetProperty(nameof(VehicleDetailResponse.RegisteredOwnerSupplier))!.PropertyType)
             ?? typeof(VehicleDetailResponse).GetProperty(nameof(VehicleDetailResponse.RegisteredOwnerSupplier))!.PropertyType);
+        Assert.Equal(typeof(string), Nullable.GetUnderlyingType(typeof(VehicleDetailResponse)
+            .GetProperty(nameof(VehicleDetailResponse.RegisteredOwnerType))!.PropertyType)
+            ?? typeof(VehicleDetailResponse).GetProperty(nameof(VehicleDetailResponse.RegisteredOwnerType))!.PropertyType);
+        Assert.Equal(typeof(Guid?), typeof(Vehicle)
+            .GetProperty(nameof(Vehicle.RegisteredOwnerSponsorId))!.PropertyType);
     }
 }

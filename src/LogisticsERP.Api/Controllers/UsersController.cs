@@ -18,6 +18,14 @@ public sealed class UsersController(IUserManagementService service) : Controller
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 
+    [HttpGet("archived")]
+    [RequirePermission(PermissionKeys.Security.UsersRead)]
+    public async Task<IActionResult> GetArchived([FromQuery] string? search, CancellationToken cancellationToken)
+    {
+        var result = await service.GetArchivedUsersAsync(search, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
     [HttpGet("{userId:guid}")]
     [RequirePermission(PermissionKeys.Security.UsersRead)]
     public async Task<IActionResult> Get(Guid userId, CancellationToken cancellationToken)
@@ -99,6 +107,14 @@ public sealed class UsersController(IUserManagementService service) : Controller
     {
         var result = await service.ArchiveUserAsync(userId, request, cancellationToken);
         return result.IsSuccess ? NoContent() : result.ToProblem(HttpContext);
+    }
+
+    [HttpPatch("{userId:guid}/restore")]
+    [RequirePermission(PermissionKeys.Security.UsersArchive)]
+    public async Task<IActionResult> Restore(Guid userId, [FromBody] RestoreManagedUserRequest request, CancellationToken cancellationToken)
+    {
+        var result = await service.RestoreUserAsync(userId, request, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 
     [HttpGet("roles")]

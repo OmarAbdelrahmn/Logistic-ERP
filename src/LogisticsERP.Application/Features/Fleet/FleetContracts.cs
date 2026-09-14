@@ -93,6 +93,7 @@ public sealed record VehicleDetailResponse(
     string? PurchasedFromSupplier,
     Guid? RegisteredOwnerSupplierId,
     string? RegisteredOwnerSupplier,
+    string? RegisteredOwnerType,
     VehicleRegistrationType? RegistrationType,
     Guid VehicleManufacturerId,
     Guid VehicleModelId,

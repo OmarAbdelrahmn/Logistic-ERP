@@ -89,6 +89,7 @@ internal sealed class VehicleConfiguration : IEntityTypeConfiguration<Vehicle>
         builder.HasOne<OperatingCity>().WithMany().HasForeignKey(x => x.OperatingCityId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<VehicleSupplier>().WithMany().HasForeignKey(x => x.PurchasedFromSupplierId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<VehicleSupplier>().WithMany().HasForeignKey(x => x.RegisteredOwnerSupplierId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<Sponsor>().WithMany().HasForeignKey(x => x.RegisteredOwnerSponsorId).OnDelete(DeleteBehavior.Restrict);
         builder.HasIndex(x => x.NormalizedAssetNumber).IsUnique();
         builder.HasIndex(x => x.NormalizedSerialNumber).IsUnique().HasFilter("[NormalizedSerialNumber] IS NOT NULL AND [IsDeleted] = 0");
         builder.HasIndex(x => x.NormalizedChassisNumber).IsUnique().HasFilter("[NormalizedChassisNumber] IS NOT NULL AND [IsDeleted] = 0");
@@ -103,6 +104,7 @@ internal sealed class VehicleConfiguration : IEntityTypeConfiguration<Vehicle>
             table.HasCheckConstraint("CK_Vehicles_TrackedDistanceKm", "[TrackedDistanceKm] >= 0");
             table.HasCheckConstraint("CK_Vehicles_ModelYear", "[ModelYear] IS NULL OR ([ModelYear] >= 1950 AND [ModelYear] <= 2200)");
             table.HasCheckConstraint("CK_Vehicles_RegistrationType", "[RegistrationType] IS NULL OR [RegistrationType] BETWEEN 1 AND 8");
+            table.HasCheckConstraint("CK_Vehicles_RegisteredOwner", "[RegisteredOwnerSupplierId] IS NULL OR [RegisteredOwnerSponsorId] IS NULL");
         });
     }
 }

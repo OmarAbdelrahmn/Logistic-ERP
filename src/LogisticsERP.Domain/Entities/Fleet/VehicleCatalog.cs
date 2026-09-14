@@ -57,6 +57,7 @@ public sealed class Vehicle : AuditableEntity
     public Guid? OperatingCityId { get; set; }
     public Guid? PurchasedFromSupplierId { get; set; }
     public Guid? RegisteredOwnerSupplierId { get; set; }
+    public Guid? RegisteredOwnerSponsorId { get; set; }
     public VehicleRegistrationType? RegistrationType { get; set; }
     public Guid VehicleManufacturerId { get; set; }
     public Guid VehicleModelId { get; set; }

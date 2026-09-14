@@ -41,6 +41,33 @@ internal sealed class UserManagementService(
         return Result.Success<IReadOnlyList<ManagedUserResponse>>(users.Select(ToResponse).ToArray());
     }
 
+    public async Task<Result<IReadOnlyList<ManagedUserResponse>>> GetArchivedUsersAsync(
+        string? search,
+        CancellationToken cancellationToken = default)
+    {
+        var query = identityDbContext.Users
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .Where(user => user.IsDeleted);
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var term = search.Trim();
+            var normalized = userManager.NormalizeName(term);
+            query = query.Where(user => user.NormalizedUserName!.Contains(normalized)
+                || user.DisplayNameAr.Contains(term)
+                || user.DisplayNameEn.Contains(term)
+                || (user.Email != null && user.Email.Contains(term)));
+        }
+
+        var users = await query
+            .OrderByDescending(user => user.DeletedAtUtc)
+            .ThenBy(user => user.DisplayNameAr)
+            .ThenBy(user => user.UserName)
+            .Take(500)
+            .ToListAsync(cancellationToken);
+        return Result.Success<IReadOnlyList<ManagedUserResponse>>(users.Select(ToResponse).ToArray());
+    }
+
     public async Task<Result<ManagedUserResponse>> GetUserAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         var user = await FindUserAsync(userId, cancellationToken);
@@ -492,6 +519,44 @@ internal sealed class UserManagementService(
         await identityDbContext.SaveChangesAsync(cancellationToken);
         sessionValidator.InvalidateUser(user.Id);
         return Result.Success();
+    }
+
+    public async Task<Result<ManagedUserResponse>> RestoreUserAsync(
+        Guid userId,
+        RestoreManagedUserRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        if (!TryGetActor(out _))
+        {
+            return Result.Failure<ManagedUserResponse>(UserManagementErrors.CurrentUserUnavailable);
+        }
+
+        var user = await identityDbContext.Users
+            .IgnoreQueryFilters()
+            .SingleOrDefaultAsync(item => item.Id == userId && item.IsDeleted, cancellationToken);
+        if (user is null)
+        {
+            return Result.Failure<ManagedUserResponse>(UserManagementErrors.NotFound);
+        }
+        if (user.IsDevelopmentOnly)
+        {
+            return Result.Failure<ManagedUserResponse>(UserManagementErrors.ProtectedAccount);
+        }
+        if (!MatchesRowVersion(user.RowVersion, request.RowVersion))
+        {
+            return Result.Failure<ManagedUserResponse>(UserManagementErrors.ConcurrencyConflict);
+        }
+
+        user.IsDeleted = false;
+        user.DeletedAtUtc = null;
+        user.DeletedByUserId = null;
+        user.DeletionReason = null;
+        user.Status = UserAccountStatus.Active;
+        user.LockoutEnd = null;
+        user.AuthorizationVersion++;
+        await identityDbContext.SaveChangesAsync(cancellationToken);
+        sessionValidator.InvalidateUser(user.Id);
+        return Result.Success(ToResponse(user));
     }
 
     public async Task<Result<IReadOnlyList<ManagedRoleResponse>>> GetRolesAsync(CancellationToken cancellationToken = default)

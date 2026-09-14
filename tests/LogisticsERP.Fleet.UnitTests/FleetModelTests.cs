@@ -172,18 +172,27 @@ public sealed class FleetModelTests
     }
 
     [Fact]
-    public void VehicleRegisteredOwnerUsesAnOptionalRestrictedSupplierRelationship()
+    public void VehicleRegisteredOwnerUsesOptionalRestrictedSupplierOrSponsorRelationships()
     {
         using var context = CreateContext();
         var entity = context.GetService<IDesignTimeModel>().Model.FindEntityType(typeof(Vehicle))!;
-        var property = entity.FindProperty(nameof(Vehicle.RegisteredOwnerSupplierId))!;
-        var foreignKey = Assert.Single(entity.GetForeignKeys(), candidate =>
+        var supplierProperty = entity.FindProperty(nameof(Vehicle.RegisteredOwnerSupplierId))!;
+        var sponsorProperty = entity.FindProperty(nameof(Vehicle.RegisteredOwnerSponsorId))!;
+        var supplierForeignKey = Assert.Single(entity.GetForeignKeys(), candidate =>
             candidate.Properties.Select(item => item.Name)
                 .SequenceEqual([nameof(Vehicle.RegisteredOwnerSupplierId)]));
+        var sponsorForeignKey = Assert.Single(entity.GetForeignKeys(), candidate =>
+            candidate.Properties.Select(item => item.Name)
+                .SequenceEqual([nameof(Vehicle.RegisteredOwnerSponsorId)]));
 
-        Assert.True(property.IsNullable);
-        Assert.Equal(typeof(VehicleSupplier), foreignKey.PrincipalEntityType.ClrType);
-        Assert.Equal(DeleteBehavior.Restrict, foreignKey.DeleteBehavior);
+        Assert.True(supplierProperty.IsNullable);
+        Assert.True(sponsorProperty.IsNullable);
+        Assert.Equal(typeof(VehicleSupplier), supplierForeignKey.PrincipalEntityType.ClrType);
+        Assert.Equal(typeof(Sponsor), sponsorForeignKey.PrincipalEntityType.ClrType);
+        Assert.Equal(DeleteBehavior.Restrict, supplierForeignKey.DeleteBehavior);
+        Assert.Equal(DeleteBehavior.Restrict, sponsorForeignKey.DeleteBehavior);
+        Assert.Contains(entity.GetCheckConstraints(), constraint =>
+            constraint.Name == "CK_Vehicles_RegisteredOwner");
     }
 
     [Fact]

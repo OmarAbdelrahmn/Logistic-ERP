@@ -171,8 +171,18 @@ internal sealed class FleetService(
         var sponsorValid = request.SponsorId.HasValue && await dbContext.Sponsors.AnyAsync(x => x.Id == request.SponsorId, cancellationToken);
         var cityValid = request.OperatingCityId.HasValue && await dbContext.OperatingCities.AnyAsync(x => x.Id == request.OperatingCityId, cancellationToken);
         var supplierValid = !request.PurchasedFromSupplierId.HasValue || await dbContext.VehicleSuppliers.AnyAsync(x => x.Id == request.PurchasedFromSupplierId && x.Status == VehicleCatalogStatus.Active, cancellationToken);
-        var registeredOwnerSupplierValid = !request.RegisteredOwnerSupplierId.HasValue || await dbContext.VehicleSuppliers.AnyAsync(x => x.Id == request.RegisteredOwnerSupplierId && x.Status == VehicleCatalogStatus.Active, cancellationToken);
-        if (!modelValid || !sponsorValid || !cityValid || !supplierValid || !registeredOwnerSupplierValid) return Result.Failure<VehicleDetailResponse>(FleetErrors.NotFound);
+        Guid? registeredOwnerSupplierId = null;
+        Guid? registeredOwnerSponsorId = null;
+        if (request.RegisteredOwnerSupplierId.HasValue)
+        {
+            if (await dbContext.VehicleSuppliers.AnyAsync(x => x.Id == request.RegisteredOwnerSupplierId && x.Status == VehicleCatalogStatus.Active, cancellationToken))
+                registeredOwnerSupplierId = request.RegisteredOwnerSupplierId;
+            else if (await dbContext.Sponsors.AnyAsync(x => x.Id == request.RegisteredOwnerSupplierId, cancellationToken))
+                registeredOwnerSponsorId = request.RegisteredOwnerSupplierId;
+            else
+                return Result.Failure<VehicleDetailResponse>(FleetErrors.NotFound);
+        }
+        if (!modelValid || !sponsorValid || !cityValid || !supplierValid) return Result.Failure<VehicleDetailResponse>(FleetErrors.NotFound);
         if (request.OwnershipType == VehicleOwnershipType.Owned && !request.PurchasedFromSupplierId.HasValue || request.RegistrationType.HasValue && !Enum.IsDefined(request.RegistrationType.Value)) return Result.Failure<VehicleDetailResponse>(FleetErrors.InvalidRequest);
         var normalizedAsset = FleetServiceSupport.NormalizeIdentifier(assetNumber);
         var normalizedSerial = string.IsNullOrWhiteSpace(request.SerialNumber) ? null : FleetServiceSupport.NormalizeIdentifier(request.SerialNumber);
@@ -199,7 +209,7 @@ internal sealed class FleetService(
         if (!actor.HasValue) return Result.Failure<VehicleDetailResponse>(FleetErrors.CurrentUserUnavailable);
         var isNew = vehicle is null;
         vehicle ??= new Vehicle();
-        ApplyVehicle(vehicle, request with { AssetNumber = assetNumber }, normalizedAsset, normalizedSerial, normalizedChassis, normalizedAr, normalizedEn);
+        ApplyVehicle(vehicle, request with { AssetNumber = assetNumber }, registeredOwnerSupplierId, registeredOwnerSponsorId, normalizedAsset, normalizedSerial, normalizedChassis, normalizedAr, normalizedEn);
         if (isNew)
         {
             vehicle.TrackedDistanceKm = request.CurrentOdometer;
@@ -1158,14 +1168,15 @@ internal sealed class FleetService(
         var summary = (await BuildSummariesAsync([vehicle], cancellationToken))[0];
         var supplier = vehicle.PurchasedFromSupplierId.HasValue ? await dbContext.VehicleSuppliers.IgnoreQueryFilters().AsNoTracking().Where(x => x.Id == vehicle.PurchasedFromSupplierId).Select(x => x.NameAr).SingleOrDefaultAsync(cancellationToken) : null;
         var registeredOwnerSupplier = vehicle.RegisteredOwnerSupplierId.HasValue ? await dbContext.VehicleSuppliers.IgnoreQueryFilters().AsNoTracking().Where(x => x.Id == vehicle.RegisteredOwnerSupplierId).Select(x => x.NameAr).SingleOrDefaultAsync(cancellationToken) : null;
-        return new VehicleDetailResponse(summary, vehicle.SerialNumber, vehicle.Vin, vehicle.ChassisNumber, vehicle.EngineNumber, vehicle.SponsorId, vehicle.OperatingCityId, vehicle.PurchasedFromSupplierId, supplier, vehicle.RegisteredOwnerSupplierId, registeredOwnerSupplier, vehicle.RegistrationType, vehicle.VehicleManufacturerId, vehicle.VehicleModelId, vehicle.ModelYear, vehicle.FuelType, vehicle.TransmissionType, vehicle.ColorAr, vehicle.ColorEn, vehicle.OwnershipType, vehicle.OwnerName, vehicle.AcquisitionDate, vehicle.LeaseReference, vehicle.DecommissionedAtUtc, vehicle.DecommissionReason, vehicle.Notes);
+        var registeredOwnerSponsor = vehicle.RegisteredOwnerSponsorId.HasValue ? await dbContext.Sponsors.IgnoreQueryFilters().AsNoTracking().Where(x => x.Id == vehicle.RegisteredOwnerSponsorId).Select(x => x.RegistryNameAr).SingleOrDefaultAsync(cancellationToken) : null;
+        return new VehicleDetailResponse(summary, vehicle.SerialNumber, vehicle.Vin, vehicle.ChassisNumber, vehicle.EngineNumber, vehicle.SponsorId, vehicle.OperatingCityId, vehicle.PurchasedFromSupplierId, supplier, vehicle.RegisteredOwnerSupplierId ?? vehicle.RegisteredOwnerSponsorId, registeredOwnerSupplier ?? registeredOwnerSponsor, vehicle.RegisteredOwnerSupplierId.HasValue ? "Supplier" : vehicle.RegisteredOwnerSponsorId.HasValue ? "Sponsor" : null, vehicle.RegistrationType, vehicle.VehicleManufacturerId, vehicle.VehicleModelId, vehicle.ModelYear, vehicle.FuelType, vehicle.TransmissionType, vehicle.ColorAr, vehicle.ColorEn, vehicle.OwnershipType, vehicle.OwnerName, vehicle.AcquisitionDate, vehicle.LeaseReference, vehicle.DecommissionedAtUtc, vehicle.DecommissionReason, vehicle.Notes);
     }
 
-    private static void ApplyVehicle(Vehicle v, VehicleUpsertRequest r, string normalizedAsset, string? normalizedSerial, string? normalizedChassis, string? normalizedAr, string? normalizedEn)
+    private static void ApplyVehicle(Vehicle v, VehicleUpsertRequest r, Guid? registeredOwnerSupplierId, Guid? registeredOwnerSponsorId, string normalizedAsset, string? normalizedSerial, string? normalizedChassis, string? normalizedAr, string? normalizedEn)
     {
         v.AssetNumber = r.AssetNumber!.Trim(); v.NormalizedAssetNumber = normalizedAsset; v.SerialNumber = FleetServiceSupport.TrimOrNull(r.SerialNumber); v.NormalizedSerialNumber = normalizedSerial; v.PlateNumberAr = FleetServiceSupport.TrimOrNull(r.PlateNumberAr); v.NormalizedPlateNumberAr = normalizedAr; v.PlateNumberEn = FleetServiceSupport.TrimOrNull(r.PlateNumberEn); v.NormalizedPlateNumberEn = normalizedEn;
         v.PlateLettersAr = FleetServiceSupport.TrimOrNull(r.PlateLettersAr); v.PlateLettersEn = FleetServiceSupport.TrimOrNull(r.PlateLettersEn); v.PlateDigits = FleetServiceSupport.TrimOrNull(r.PlateDigits); v.Vin = FleetServiceSupport.TrimOrNull(r.Vin)?.ToUpperInvariant(); v.ChassisNumber = FleetServiceSupport.TrimOrNull(r.ChassisNumber); v.NormalizedChassisNumber = normalizedChassis; v.EngineNumber = FleetServiceSupport.TrimOrNull(r.EngineNumber);
-        v.SponsorId = r.SponsorId; v.OperatingCityId = r.OperatingCityId; v.PurchasedFromSupplierId = r.PurchasedFromSupplierId; v.RegisteredOwnerSupplierId = r.RegisteredOwnerSupplierId; v.RegistrationType = r.RegistrationType;
+        v.SponsorId = r.SponsorId; v.OperatingCityId = r.OperatingCityId; v.PurchasedFromSupplierId = r.PurchasedFromSupplierId; v.RegisteredOwnerSupplierId = registeredOwnerSupplierId; v.RegisteredOwnerSponsorId = registeredOwnerSponsorId; v.RegistrationType = r.RegistrationType;
         v.VehicleManufacturerId = r.VehicleManufacturerId; v.VehicleModelId = r.VehicleModelId; v.ModelYear = r.ModelYear; v.VehicleType = r.VehicleType; v.FuelType = r.FuelType; v.TransmissionType = r.TransmissionType; v.ColorAr = FleetServiceSupport.TrimOrNull(r.ColorAr); v.ColorEn = FleetServiceSupport.TrimOrNull(r.ColorEn); v.OwnershipType = r.OwnershipType; v.OwnerName = FleetServiceSupport.TrimOrNull(r.OwnerName); v.AcquisitionDate = r.AcquisitionDate; v.LeaseReference = FleetServiceSupport.TrimOrNull(r.LeaseReference); v.CurrentOdometer = r.CurrentOdometer; v.Notes = FleetServiceSupport.TrimOrNull(r.Notes);
     }
 
@@ -1275,7 +1286,7 @@ internal sealed class FleetService(
         vehicle.PlateNumberAr, vehicle.NormalizedPlateNumberAr, vehicle.PlateNumberEn, vehicle.NormalizedPlateNumberEn,
         vehicle.PlateLettersAr, vehicle.PlateLettersEn, vehicle.PlateDigits, vehicle.Vin, vehicle.ChassisNumber,
         vehicle.NormalizedChassisNumber, vehicle.EngineNumber, vehicle.SponsorId, vehicle.OperatingCityId,
-        vehicle.PurchasedFromSupplierId, vehicle.RegisteredOwnerSupplierId, vehicle.RegistrationType,
+        vehicle.PurchasedFromSupplierId, vehicle.RegisteredOwnerSupplierId, vehicle.RegisteredOwnerSponsorId, vehicle.RegistrationType,
         vehicle.VehicleManufacturerId, vehicle.VehicleModelId, vehicle.ModelYear, vehicle.VehicleType, vehicle.FuelType,
         vehicle.TransmissionType, vehicle.ColorAr, vehicle.ColorEn, vehicle.OwnershipType, vehicle.OwnerName,
         vehicle.AcquisitionDate, vehicle.LeaseReference, vehicle.CurrentOdometer, vehicle.TrackedDistanceKm,
@@ -1412,7 +1423,7 @@ internal sealed class FleetService(
         string? PlateNumberAr, string? NormalizedPlateNumberAr, string? PlateNumberEn, string? NormalizedPlateNumberEn,
         string? PlateLettersAr, string? PlateLettersEn, string? PlateDigits, string? Vin, string? ChassisNumber,
         string? NormalizedChassisNumber, string? EngineNumber, Guid? SponsorId, Guid? OperatingCityId,
-        Guid? PurchasedFromSupplierId, Guid? RegisteredOwnerSupplierId, VehicleRegistrationType? RegistrationType,
+        Guid? PurchasedFromSupplierId, Guid? RegisteredOwnerSupplierId, Guid? RegisteredOwnerSponsorId, VehicleRegistrationType? RegistrationType,
         Guid VehicleManufacturerId, Guid VehicleModelId, int? ModelYear, VehicleType VehicleType,
         VehicleFuelType FuelType, VehicleTransmissionType TransmissionType, string? ColorAr, string? ColorEn,
         VehicleOwnershipType OwnershipType, string? OwnerName, DateOnly? AcquisitionDate, string? LeaseReference,

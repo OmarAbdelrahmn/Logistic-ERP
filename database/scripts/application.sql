@@ -13478,3 +13478,48 @@ END;
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260914104300_AddVehicleRegisteredOwnerSponsor'
+)
+BEGIN
+    ALTER TABLE [app].[Vehicles] ADD [RegisteredOwnerSponsorId] uniqueidentifier NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260914104300_AddVehicleRegisteredOwnerSponsor'
+)
+BEGIN
+    CREATE INDEX [IX_Vehicles_RegisteredOwnerSponsorId] ON [app].[Vehicles] ([RegisteredOwnerSponsorId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260914104300_AddVehicleRegisteredOwnerSponsor'
+)
+BEGIN
+    EXEC(N'ALTER TABLE [app].[Vehicles] ADD CONSTRAINT [CK_Vehicles_RegisteredOwner] CHECK ([RegisteredOwnerSupplierId] IS NULL OR [RegisteredOwnerSponsorId] IS NULL)');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260914104300_AddVehicleRegisteredOwnerSponsor'
+)
+BEGIN
+    ALTER TABLE [app].[Vehicles] ADD CONSTRAINT [FK_Vehicles_Sponsors_RegisteredOwnerSponsorId] FOREIGN KEY ([RegisteredOwnerSponsorId]) REFERENCES [app].[Sponsors] ([Id]) ON DELETE NO ACTION;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260914104300_AddVehicleRegisteredOwnerSponsor'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260914104300_AddVehicleRegisteredOwnerSponsor', N'10.0.11');
+END;
+
+COMMIT;
+GO
+

@@ -63,6 +63,8 @@ public sealed record RevokeTemporaryCredentialRequest(string Reason);
 
 public sealed record ArchiveManagedUserRequest(string Reason, string RowVersion);
 
+public sealed record RestoreManagedUserRequest(string RowVersion);
+
 public sealed record ManagedRoleResponse(
     Guid Id,
     string Code,
@@ -159,6 +161,7 @@ public sealed record ManagedUserAuthorizationResponse(
 public interface IUserManagementService
 {
     Task<Result<IReadOnlyList<ManagedUserResponse>>> GetUsersAsync(string? search, CancellationToken cancellationToken = default);
+    Task<Result<IReadOnlyList<ManagedUserResponse>>> GetArchivedUsersAsync(string? search, CancellationToken cancellationToken = default);
     Task<Result<ManagedUserResponse>> GetUserAsync(Guid userId, CancellationToken cancellationToken = default);
     Task<Result<CreatedManagedUserResponse>> CreateUserAsync(CreateManagedUserRequest request, CancellationToken cancellationToken = default);
     Task<Result<ManagedUserResponse>> UpdateUserAsync(Guid userId, UpdateManagedUserRequest request, CancellationToken cancellationToken = default);
@@ -168,6 +171,7 @@ public interface IUserManagementService
     Task<Result> RevokeTemporaryCredentialAsync(Guid userId, Guid credentialId, RevokeTemporaryCredentialRequest request, CancellationToken cancellationToken = default);
     Task<Result> RevokeSessionsAsync(Guid userId, string? reason, CancellationToken cancellationToken = default);
     Task<Result> ArchiveUserAsync(Guid userId, ArchiveManagedUserRequest request, CancellationToken cancellationToken = default);
+    Task<Result<ManagedUserResponse>> RestoreUserAsync(Guid userId, RestoreManagedUserRequest request, CancellationToken cancellationToken = default);
     Task<Result<IReadOnlyList<ManagedRoleResponse>>> GetRolesAsync(CancellationToken cancellationToken = default);
     Task<Result<ManagedRoleResponse>> UpsertRoleAsync(Guid? roleId, ManagedRoleUpsertRequest request, CancellationToken cancellationToken = default);
     Task<Result<ManagedRoleResponse>> ReplaceRolePermissionsAsync(Guid roleId, ReplaceRolePermissionsRequest request, CancellationToken cancellationToken = default);
