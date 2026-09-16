@@ -23,10 +23,27 @@ internal sealed class HousingConfiguration : IEntityTypeConfiguration<Housing>
         builder.HasOne<GlobalCity>().WithMany().HasForeignKey(entity => entity.CityId).OnDelete(DeleteBehavior.Restrict);
         builder.HasIndex(entity => entity.Code).IsUnique();
         builder.HasIndex(entity => new { entity.Status, entity.CityId });
+        builder.ToTable(table => table.HasCheckConstraint(
+            "CK_Housing_DateRange",
+            "[ClosedDate] IS NULL OR [OpenedDate] IS NULL OR [ClosedDate] >= [OpenedDate]"));
+    }
+}
+
+internal sealed class HousingRoomConfiguration : IEntityTypeConfiguration<HousingRoom>
+{
+    public void Configure(EntityTypeBuilder<HousingRoom> builder)
+    {
+        builder.ConfigureOperational("HousingRooms");
+        builder.Property(entity => entity.Name).HasMaxLength(100).IsRequired();
+        builder.HasOne<Housing>().WithMany().HasForeignKey(entity => entity.HousingId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(entity => new { entity.HousingId, entity.Name })
+            .IsUnique()
+            .HasFilter("[IsDeleted] = 0");
+        builder.HasIndex(entity => new { entity.HousingId, entity.IsDeleted });
         builder.ToTable(table =>
         {
-            table.HasCheckConstraint("CK_Housing_TotalCapacity", "[TotalCapacity] > 0");
-            table.HasCheckConstraint("CK_Housing_DateRange", "[ClosedDate] IS NULL OR [OpenedDate] IS NULL OR [ClosedDate] >= [OpenedDate]");
+            table.HasCheckConstraint("CK_HousingRooms_Capacity", "[Capacity] > 0");
+            table.HasCheckConstraint("CK_HousingRooms_CurrentOccupancy", "[CurrentOccupancy] >= 0 AND [CurrentOccupancy] <= [Capacity]");
         });
     }
 }
@@ -58,9 +75,9 @@ internal sealed class HousingResidencePeriodConfiguration : IEntityTypeConfigura
         builder.Property(entity => entity.DestinationReference).HasMaxLength(200);
         builder.Property(entity => entity.CapacityOverrideReason).HasMaxLength(1000);
         builder.HasOne<Employee>().WithMany().HasForeignKey(entity => entity.EmployeeId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasOne<Housing>().WithMany().HasForeignKey(entity => entity.HousingId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<HousingRoom>().WithMany().HasForeignKey(entity => entity.RoomId).OnDelete(DeleteBehavior.Restrict);
         builder.HasIndex(entity => new { entity.EmployeeId, entity.EffectiveFrom });
-        builder.HasIndex(entity => new { entity.HousingId, entity.EffectiveFrom });
+        builder.HasIndex(entity => new { entity.RoomId, entity.EffectiveFrom });
         builder.HasIndex(entity => entity.EmployeeId)
             .IsUnique()
             .HasFilter("[EffectiveTo] IS NULL");

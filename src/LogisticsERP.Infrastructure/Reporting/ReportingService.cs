@@ -294,14 +294,16 @@ internal sealed class ReportingService(
                 group.Count(item => item.Status == PlatformRiderAccountStatus.Assigned)))
             .SingleOrDefaultAsync(cancellationToken)
             ?? new PlatformAccountProjection(0, 0);
-        var housing = await dbContext.Housing.AsNoTracking()
+        var activeHousingIds = dbContext.Housing.AsNoTracking()
             .Where(item => item.Status == HousingStatus.Active)
-            .GroupBy(_ => 1)
-            .Select(group => new HousingProjection(group.Count(), group.Sum(item => item.TotalCapacity)))
-            .SingleOrDefaultAsync(cancellationToken)
-            ?? new HousingProjection(0, 0);
-        var residents = await dbContext.HousingResidencePeriods.AsNoTracking()
-            .CountAsync(item => item.EffectiveTo == null, cancellationToken);
+            .Select(item => item.Id);
+        var activeHousingLocations = await activeHousingIds.CountAsync(cancellationToken);
+        var totalActiveHousingCapacity = await dbContext.HousingRooms.AsNoTracking()
+            .Where(item => activeHousingIds.Contains(item.HousingId))
+            .SumAsync(item => (int?)item.Capacity, cancellationToken) ?? 0;
+        var residents = await dbContext.HousingRooms.AsNoTracking()
+            .Where(item => activeHousingIds.Contains(item.HousingId))
+            .SumAsync(item => (int?)item.CurrentOccupancy, cancellationToken) ?? 0;
         var phoneSims = await dbContext.PhoneSimCards.AsNoTracking()
             .GroupBy(_ => 1)
             .Select(group => new PhoneSimProjection(
@@ -322,8 +324,8 @@ internal sealed class ReportingService(
             activePlatforms,
             accounts.OperationalAccountCount,
             accounts.AssignedAccountCount,
-            housing.ActiveHousingLocations,
-            housing.TotalActiveHousingCapacity,
+            activeHousingLocations,
+            totalActiveHousingCapacity,
             residents,
             phoneSims.TotalPhoneSims,
             phoneSims.AvailablePhoneSims,
@@ -407,7 +409,6 @@ internal sealed class ReportingService(
     private sealed record LicenseProjection(int ActiveLicenses, int ExpiredLicenses);
     private sealed record LeaveProjection(int PendingLeaveRequests, int ActiveLeaveRequests);
     private sealed record PlatformAccountProjection(int OperationalAccountCount, int AssignedAccountCount);
-    private sealed record HousingProjection(int ActiveHousingLocations, int TotalActiveHousingCapacity);
     private sealed record PhoneSimProjection(int TotalPhoneSims, int AvailablePhoneSims, int AssignedPhoneSims, int PhoneSimsNeedingAttention);
     private sealed record StockProjection(int StockBalanceRecords, decimal InventoryValue);
     private sealed record WorkOrderProjection(int OpenWorkOrders, int InProgressWorkOrders);

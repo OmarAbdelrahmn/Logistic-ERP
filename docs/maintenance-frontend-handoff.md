@@ -226,7 +226,7 @@ await api.post("/api/maintenance-inventory/receipts", form);
   "nominalCapacityLiters":208, "consumedLiters":200, "remainingLiters":8,
   "unitCostPerLiter":4.807692, "remainingInventoryValue":38.461536,
   "maximumAllowedLossLiters":4.16, "recordedLossLiters":0,
-  "remainingLossAllowanceLiters":5.2, "status":2,
+  "remainingLossAllowanceLiters":4.16, "status":2,
   "openedAtUtc":"2026-09-05T07:00:00+00:00", "depletedAtUtc":null,
   "rowVersion":"base64"
 }

@@ -64,7 +64,8 @@ internal sealed class WorkforceService(
                                          operatingCity.DisabledAt, HrServiceSupport.EncodeRowVersion(operatingCity.RowVersion)))
             .ToDictionaryAsync(item => item.Id, cancellationToken);
         var housingNames = (await (from residence in dbContext.HousingResidencePeriods.AsNoTracking()
-                                   join housing in dbContext.Housing.AsNoTracking() on residence.HousingId equals housing.Id
+                                   join room in dbContext.HousingRooms.AsNoTracking() on residence.RoomId equals room.Id
+                                   join housing in dbContext.Housing.AsNoTracking() on room.HousingId equals housing.Id
                                    where employeeIds.Contains(residence.EmployeeId) && residence.EffectiveTo == null
                                    orderby residence.EffectiveFrom descending
                                    select new EmployeeHousingNameProjection(residence.EmployeeId, housing.NameAr)).ToArrayAsync(cancellationToken))
@@ -584,11 +585,15 @@ internal sealed class WorkforceService(
     private async Task<HousingResponse?> BuildCurrentHousingAsync(Guid employeeId, CancellationToken cancellationToken)
     {
         var row = await (from residence in dbContext.HousingResidencePeriods.AsNoTracking()
-                         join housing in dbContext.Housing.AsNoTracking() on residence.HousingId equals housing.Id
+                         join room in dbContext.HousingRooms.AsNoTracking() on residence.RoomId equals room.Id
+                         join housing in dbContext.Housing.AsNoTracking() on room.HousingId equals housing.Id
                          join city in dbContext.GlobalCities.AsNoTracking() on housing.CityId equals city.Id
                          where residence.EmployeeId == employeeId && residence.EffectiveTo == null
-                         let currentResidents = dbContext.HousingResidencePeriods.Count(item => item.HousingId == housing.Id && item.EffectiveTo == null)
-                         select new EmployeeHousingProjection(housing, city.NameAr, currentResidents))
+                         let totalCapacity = dbContext.HousingRooms.Where(item => item.HousingId == housing.Id)
+                             .Sum(item => (int?)item.Capacity) ?? 0
+                         let currentResidents = dbContext.HousingRooms.Where(item => item.HousingId == housing.Id)
+                             .Sum(item => (int?)item.CurrentOccupancy) ?? 0
+                         select new EmployeeHousingProjection(housing, city.NameAr, totalCapacity, currentResidents))
             .SingleOrDefaultAsync(cancellationToken);
 
         return row is null ? null : ToHousing(row);
@@ -634,7 +639,7 @@ internal sealed class WorkforceService(
     private static HousingResponse ToHousing(EmployeeHousingProjection row) => new(
         row.Housing.Id, row.Housing.Code, row.Housing.NameAr, row.Housing.NameEn, row.Housing.CityId, row.CityNameAr,
         HrServiceSupport.ToAddressResponse(row.Housing.Address), row.Housing.Latitude, row.Housing.Longitude,
-        row.Housing.TotalCapacity, row.CurrentResidents, Math.Max(0, row.Housing.TotalCapacity - row.CurrentResidents),
+        row.TotalCapacity, row.CurrentResidents, Math.Max(0, row.TotalCapacity - row.CurrentResidents),
         row.Housing.ContactPhone, row.Housing.OpenedDate, row.Housing.ClosedDate, row.Housing.Status.ToString(),
         row.Housing.StatusReason, row.Housing.Notes, HrServiceSupport.EncodeRowVersion(row.Housing.RowVersion));
 
@@ -682,7 +687,11 @@ internal sealed class WorkforceService(
     private sealed record ValidatedEmployeeRequest(Gender? Gender, MaritalStatus? MaritalStatus,
         EmployeeRelationshipType EngagementType, EmployeeStatus Status);
 
-    private sealed record EmployeeHousingProjection(Domain.Entities.Housing.Housing Housing, string CityNameAr, int CurrentResidents);
+    private sealed record EmployeeHousingProjection(
+        Domain.Entities.Housing.Housing Housing,
+        string CityNameAr,
+        int TotalCapacity,
+        int CurrentResidents);
     private sealed record EmployeeHousingNameProjection(Guid EmployeeId, string HousingNameAr);
     private sealed record RiderCurrentWorkPlatformProjection(
         Guid RiderProfileId,

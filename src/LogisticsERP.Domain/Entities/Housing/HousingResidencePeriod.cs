@@ -5,7 +5,7 @@ namespace LogisticsERP.Domain.Entities.Housing;
 public sealed class HousingResidencePeriod : TemporalPeriodEntity
 {
     public Guid EmployeeId { get; set; }
-    public Guid HousingId { get; set; }
+    public Guid RoomId { get; set; }
     public string? MoveInReason { get; set; }
     public string? MoveOutReason { get; set; }
     public string? SourceReference { get; set; }

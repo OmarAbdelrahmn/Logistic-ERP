@@ -146,9 +146,20 @@ internal sealed partial class ExportJobProcessor(
             }
             case "housing":
             {
-                var rows = await dbContext.Housing.AsNoTracking().OrderBy(item => item.NameAr).ToArrayAsync(cancellationToken);
+                var rows = await dbContext.Housing.AsNoTracking()
+                    .OrderBy(item => item.NameAr)
+                    .Select(item => new
+                    {
+                        item.Code,
+                        item.NameAr,
+                        item.NameEn,
+                        Capacity = dbContext.HousingRooms.Where(room => room.HousingId == item.Id)
+                            .Sum(room => (int?)room.Capacity) ?? 0,
+                        item.Status
+                    })
+                    .ToArrayAsync(cancellationToken);
                 return Prepend(["Code", "NameAr", "NameEn", "Capacity", "Status"],
-                    rows.Select(item => new[] { item.Code, item.NameAr, item.NameEn, item.TotalCapacity.ToString(CultureInfo.InvariantCulture), item.Status.ToString() }));
+                    rows.Select(item => new[] { item.Code, item.NameAr, item.NameEn, item.Capacity.ToString(CultureInfo.InvariantCulture), item.Status.ToString() }));
             }
             case "platform-accounts":
             {

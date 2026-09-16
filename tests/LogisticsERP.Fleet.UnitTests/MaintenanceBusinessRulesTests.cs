@@ -39,10 +39,10 @@ public sealed class MaintenanceBusinessRulesTests
     }
 
     [Fact]
-    public void StandardBarrelHasTwoPointFivePercentLossAllowance()
+    public void StandardBarrelHasTwoPercentLossAllowance()
     {
-        Assert.Equal(0.025m, MaintenanceBusinessRules.OilBarrelLossRate);
-        Assert.Equal(5.2m, MaintenanceBusinessRules.CalculateOilBarrelLossAllowance(208m));
+        Assert.Equal(0.02m, MaintenanceBusinessRules.OilBarrelLossRate);
+        Assert.Equal(4.16m, MaintenanceBusinessRules.CalculateOilBarrelLossAllowance(208m));
     }
 
     [Fact]

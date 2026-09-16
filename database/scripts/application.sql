@@ -13523,3 +13523,211 @@ END;
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260915141607_UpgradeHousingToRoomAssignments'
+)
+BEGIN
+    ALTER TABLE [app].[HousingResidencePeriods] DROP CONSTRAINT [FK_HousingResidencePeriods_Housing_HousingId];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260915141607_UpgradeHousingToRoomAssignments'
+)
+BEGIN
+    ALTER TABLE [app].[HousingResidencePeriods] ADD [RoomId] uniqueidentifier NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260915141607_UpgradeHousingToRoomAssignments'
+)
+BEGIN
+    CREATE TABLE [app].[HousingRooms] (
+        [Id] uniqueidentifier NOT NULL,
+        [HousingId] uniqueidentifier NOT NULL,
+        [Name] nvarchar(100) NOT NULL,
+        [Capacity] int NOT NULL,
+        [CurrentOccupancy] int NOT NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_HousingRooms] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_HousingRooms_Capacity] CHECK ([Capacity] > 0),
+        CONSTRAINT [CK_HousingRooms_CurrentOccupancy] CHECK ([CurrentOccupancy] >= 0 AND [CurrentOccupancy] <= [Capacity]),
+        CONSTRAINT [FK_HousingRooms_Housing_HousingId] FOREIGN KEY ([HousingId]) REFERENCES [app].[Housing] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260915141607_UpgradeHousingToRoomAssignments'
+)
+BEGIN
+    INSERT INTO [app].[HousingRooms]
+        ([Id], [HousingId], [Name], [Capacity], [CurrentOccupancy],
+         [CreatedAtUtc], [CreatedByUserId], [UpdatedAtUtc], [UpdatedByUserId],
+         [IsDeleted], [DeletedAtUtc], [DeletedByUserId], [DeletionReason])
+    SELECT
+        NEWID(),
+        housing.[Id],
+        N'Migrated room',
+        CASE
+            WHEN housing.[TotalCapacity] > occupancy.[CurrentOccupancy]
+                THEN housing.[TotalCapacity]
+            WHEN occupancy.[CurrentOccupancy] > 0
+                THEN occupancy.[CurrentOccupancy]
+            ELSE 1
+        END,
+        occupancy.[CurrentOccupancy],
+        SYSUTCDATETIME(),
+        NULL,
+        NULL,
+        NULL,
+        0,
+        NULL,
+        NULL,
+        NULL
+    FROM [app].[Housing] AS housing
+    CROSS APPLY
+    (
+        SELECT COUNT(*) AS [CurrentOccupancy]
+        FROM [app].[HousingResidencePeriods] AS residence
+        WHERE residence.[HousingId] = housing.[Id]
+          AND residence.[EffectiveTo] IS NULL
+    ) AS occupancy;
+
+    UPDATE residence
+    SET residence.[RoomId] = room.[Id]
+    FROM [app].[HousingResidencePeriods] AS residence
+    INNER JOIN [app].[HousingRooms] AS room
+        ON room.[HousingId] = residence.[HousingId]
+       AND room.[Name] = N'Migrated room';
+
+    IF EXISTS
+    (
+        SELECT 1
+        FROM [app].[HousingResidencePeriods]
+        WHERE [RoomId] IS NULL
+    )
+        THROW 51000, 'Housing room migration aborted: a residence period was not mapped to a room.', 1;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260915141607_UpgradeHousingToRoomAssignments'
+)
+BEGIN
+    DECLARE @var35 nvarchar(max);
+    SELECT @var35 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[app].[HousingResidencePeriods]') AND [c].[name] = N'RoomId');
+    IF @var35 IS NOT NULL EXEC(N'ALTER TABLE [app].[HousingResidencePeriods] DROP CONSTRAINT ' + @var35 + ';');
+    ALTER TABLE [app].[HousingResidencePeriods] ALTER COLUMN [RoomId] uniqueidentifier NOT NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260915141607_UpgradeHousingToRoomAssignments'
+)
+BEGIN
+    DROP INDEX [IX_HousingResidencePeriods_HousingId_EffectiveFrom] ON [app].[HousingResidencePeriods];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260915141607_UpgradeHousingToRoomAssignments'
+)
+BEGIN
+    DECLARE @var36 nvarchar(max);
+    SELECT @var36 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[app].[HousingResidencePeriods]') AND [c].[name] = N'HousingId');
+    IF @var36 IS NOT NULL EXEC(N'ALTER TABLE [app].[HousingResidencePeriods] DROP CONSTRAINT ' + @var36 + ';');
+    ALTER TABLE [app].[HousingResidencePeriods] DROP COLUMN [HousingId];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260915141607_UpgradeHousingToRoomAssignments'
+)
+BEGIN
+    ALTER TABLE [app].[Housing] DROP CONSTRAINT [CK_Housing_TotalCapacity];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260915141607_UpgradeHousingToRoomAssignments'
+)
+BEGIN
+    DECLARE @var37 nvarchar(max);
+    SELECT @var37 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[app].[Housing]') AND [c].[name] = N'TotalCapacity');
+    IF @var37 IS NOT NULL EXEC(N'ALTER TABLE [app].[Housing] DROP CONSTRAINT ' + @var37 + ';');
+    ALTER TABLE [app].[Housing] DROP COLUMN [TotalCapacity];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260915141607_UpgradeHousingToRoomAssignments'
+)
+BEGIN
+    CREATE INDEX [IX_HousingResidencePeriods_RoomId_EffectiveFrom] ON [app].[HousingResidencePeriods] ([RoomId], [EffectiveFrom]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260915141607_UpgradeHousingToRoomAssignments'
+)
+BEGIN
+    CREATE INDEX [IX_HousingRooms_HousingId_IsDeleted] ON [app].[HousingRooms] ([HousingId], [IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260915141607_UpgradeHousingToRoomAssignments'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_HousingRooms_HousingId_Name] ON [app].[HousingRooms] ([HousingId], [Name]) WHERE [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260915141607_UpgradeHousingToRoomAssignments'
+)
+BEGIN
+    CREATE INDEX [IX_HousingRooms_IsDeleted] ON [app].[HousingRooms] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260915141607_UpgradeHousingToRoomAssignments'
+)
+BEGIN
+    ALTER TABLE [app].[HousingResidencePeriods] ADD CONSTRAINT [FK_HousingResidencePeriods_HousingRooms_RoomId] FOREIGN KEY ([RoomId]) REFERENCES [app].[HousingRooms] ([Id]) ON DELETE NO ACTION;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260915141607_UpgradeHousingToRoomAssignments'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260915141607_UpgradeHousingToRoomAssignments', N'10.0.11');
+END;
+
+COMMIT;
+GO
+

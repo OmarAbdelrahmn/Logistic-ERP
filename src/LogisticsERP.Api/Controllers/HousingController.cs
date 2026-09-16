@@ -42,6 +42,27 @@ public sealed class HousingController(IHousingService service) : ControllerBase
         return result.IsSuccess ? NoContent() : result.ToProblem(HttpContext);
     }
 
+    [HttpGet("{id:guid}/rooms")]
+    [RequirePermission(PermissionKeys.Operations.HousingRead)]
+    public async Task<IActionResult> GetRooms(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await service.GetRoomsAsync(id, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpPost("{id:guid}/rooms")]
+    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    public async Task<IActionResult> CreateRoom(
+        Guid id,
+        [FromBody] HousingRoomUpsertRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await service.UpsertRoomAsync(id, null, request, cancellationToken);
+        return result.IsSuccess
+            ? Created($"/api/rooms/{result.Value!.Id}", result.Value)
+            : result.ToProblem(HttpContext);
+    }
+
     [HttpGet("{id:guid}/residents")]
     [RequirePermission(PermissionKeys.Operations.HousingRead)]
     public async Task<IActionResult> Residents(Guid id, [FromQuery] bool currentOnly = false, CancellationToken cancellationToken = default)
@@ -96,4 +117,3 @@ public sealed class HousingController(IHousingService service) : ControllerBase
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 }
-

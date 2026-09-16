@@ -14,6 +14,7 @@ using LogisticsERP.Domain.Entities.Workforce;
 using Microsoft.EntityFrameworkCore;
 using HousingEntity = LogisticsERP.Domain.Entities.Housing.Housing;
 using HousingResidencePeriod = LogisticsERP.Domain.Entities.Housing.HousingResidencePeriod;
+using HousingRoom = LogisticsERP.Domain.Entities.Housing.HousingRoom;
 using HousingSupervisorPeriod = LogisticsERP.Domain.Entities.Housing.HousingSupervisorPeriod;
 
 namespace LogisticsERP.Infrastructure.Persistence;
@@ -62,6 +63,7 @@ public sealed class ApplicationDbContext(
     public DbSet<EmployeeAbsenceComplianceCaseEvent> EmployeeAbsenceComplianceCaseEvents => Set<EmployeeAbsenceComplianceCaseEvent>();
     public DbSet<EmployeeStatusChangeRequest> EmployeeStatusChangeRequests => Set<EmployeeStatusChangeRequest>();
     public DbSet<HousingEntity> Housing => Set<HousingEntity>();
+    public DbSet<HousingRoom> HousingRooms => Set<HousingRoom>();
     public DbSet<HousingSupervisorPeriod> HousingSupervisorPeriods => Set<HousingSupervisorPeriod>();
     public DbSet<HousingResidencePeriod> HousingResidencePeriods => Set<HousingResidencePeriod>();
     public DbSet<ClientContract> ClientContracts => Set<ClientContract>();

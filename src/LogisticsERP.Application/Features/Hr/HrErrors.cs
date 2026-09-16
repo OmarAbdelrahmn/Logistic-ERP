@@ -20,8 +20,26 @@ public static class HrErrors
     public static readonly OperationError HousingNotActive = new(
         "housing.not_active", "تعذر تنفيذ العملية المطلوبة.", ErrorType.Conflict, "id");
 
+    public static readonly OperationError RoomNotFound = new(
+        "housing.room_not_found", "تعذر تنفيذ العملية المطلوبة.", ErrorType.NotFound, "roomId");
+
+    public static readonly OperationError RoomNotInHousing = new(
+        "housing.room_not_in_housing", "تعذر تنفيذ العملية المطلوبة.", ErrorType.Validation, "roomId");
+
+    public static readonly OperationError RoomOccupied = new(
+        "housing.room_occupied", "تعذر تنفيذ العملية المطلوبة.", ErrorType.Conflict, "roomId");
+
+    public static readonly OperationError RoomNameDuplicate = new(
+        "housing.room_name_duplicate", "تعذر تنفيذ العملية المطلوبة.", ErrorType.Conflict, "name");
+
     public static readonly OperationError EmployeeNotFound = new(
         "housing.employee_not_found", "تعذر تنفيذ العملية المطلوبة.", ErrorType.NotFound, "employeeId");
+
+    public static readonly OperationError RiderNotFound = new(
+        "housing.rider_not_found", "تعذر تنفيذ العملية المطلوبة.", ErrorType.NotFound, "riderProfileId");
+
+    public static readonly OperationError PersonAlreadyAssigned = new(
+        "housing.person_already_assigned", "تعذر تنفيذ العملية المطلوبة.", ErrorType.Conflict, "employeeId");
 
     public static readonly OperationError ResidencePeriodNotFound = new(
         "housing.residence_period_not_found", "تعذر تنفيذ العملية المطلوبة.", ErrorType.NotFound, "periodId");

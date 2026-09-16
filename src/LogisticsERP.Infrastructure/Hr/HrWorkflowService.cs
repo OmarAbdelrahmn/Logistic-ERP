@@ -621,8 +621,12 @@ internal sealed class HrWorkflowService(
 
     private async Task<PermissionScope?> ResolveScope(LeaveRequest request, LeaveApprovalScopeSource source, CancellationToken cancellationToken) => source switch
     {
-        LeaveApprovalScopeSource.EmployeeHousing => await dbContext.HousingResidencePeriods.Where(item => item.EmployeeId == request.EmployeeId && item.EffectiveTo == null)
-            .Select(item => new PermissionScope(AccessScopeType.Housing, item.HousingId)).SingleOrDefaultAsync(cancellationToken),
+        LeaveApprovalScopeSource.EmployeeHousing => await (
+                from residence in dbContext.HousingResidencePeriods
+                join room in dbContext.HousingRooms on residence.RoomId equals room.Id
+                where residence.EmployeeId == request.EmployeeId && residence.EffectiveTo == null
+                select new PermissionScope(AccessScopeType.Housing, room.HousingId))
+            .SingleOrDefaultAsync(cancellationToken),
         LeaveApprovalScopeSource.ActiveClientContract when request.RelatedClientContractId is not null => new PermissionScope(AccessScopeType.ClientContract, request.RelatedClientContractId.Value),
         LeaveApprovalScopeSource.ActiveClientPlatform => await (from assignment in dbContext.RiderClientAssignments
             join rider in dbContext.RiderProfiles on assignment.RiderProfileId equals rider.Id

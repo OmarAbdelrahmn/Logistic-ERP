@@ -12,7 +12,6 @@ public sealed class Housing : AuditableEntity
     public Address Address { get; set; } = new();
     public decimal? Latitude { get; set; }
     public decimal? Longitude { get; set; }
-    public int TotalCapacity { get; set; }
     public string? ContactPhone { get; set; }
     public DateOnly? OpenedDate { get; set; }
     public DateOnly? ClosedDate { get; set; }
