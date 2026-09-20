@@ -30,7 +30,7 @@ internal sealed class VehicleFileService(
         if (vehicle is null) return Result.Failure<VehicleAttachmentResponse>(FleetErrors.NotFound);
         if (!await support.HasVehiclePermissionAsync(vehicle, PermissionKeys.Fleet.FilesUpload, cancellationToken)) return Result.Failure<VehicleAttachmentResponse>(FleetErrors.Forbidden);
         if (kind == VehicleFileKind.Legacy || !Enum.IsDefined(kind) || IsImage(kind) != file.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase) && IsImage(kind)) return Result.Failure<VehicleAttachmentResponse>(FleetErrors.InvalidFile);
-        if (kind == VehicleFileKind.OperationCard && vehicle.RegistrationType != VehicleRegistrationType.PublicTransport) return Result.Failure<VehicleAttachmentResponse>(FleetErrors.InvalidState);
+        if (kind == VehicleFileKind.OperationCard && !FleetBusinessRules.SupportsOperationCard(vehicle)) return Result.Failure<VehicleAttachmentResponse>(FleetErrors.InvalidState);
         var attachment = await dbContext.VehicleAttachments.SingleOrDefaultAsync(x => x.VehicleId == vehicleId && x.Kind == kind, cancellationToken)
             ?? new VehicleAttachment { VehicleId = vehicleId, Kind = kind, DisplayName = DisplayName(kind) };
         var isNew = dbContext.Entry(attachment).State == EntityState.Detached;

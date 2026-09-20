@@ -70,11 +70,21 @@ public sealed class FleetBusinessRulesTests
     }
 
     [Fact]
-    public void VehicleAssetNumberDoesNotContainTheDate()
+    public void VehicleAssetNumberUsesTheRandomGuidSuffix()
     {
-        var number = FleetServiceSupport.NewVehicleAssetNumber(Guid.Parse("01a04223-0000-7000-8000-000000000000"));
+        var number = FleetServiceSupport.NewVehicleAssetNumber(Guid.Parse("01a04223-0000-7000-8000-1234567890ab"));
 
-        Assert.Equal("VEH-01A04223", number);
+        Assert.Equal("VEH-1234567890AB", number);
+    }
+
+    [Fact]
+    public void RapidlyGeneratedVehicleAssetNumbersAreUnique()
+    {
+        var numbers = Enumerable.Range(0, 1_000)
+            .Select(_ => FleetServiceSupport.NewVehicleAssetNumber(Guid.CreateVersion7()))
+            .ToArray();
+
+        Assert.Equal(numbers.Length, numbers.Distinct(StringComparer.Ordinal).Count());
     }
 
     [Fact]
@@ -124,13 +134,13 @@ public sealed class FleetBusinessRulesTests
     }
 
     [Fact]
-    public void OwnedVehicleNeedsSupplierButLeasedVehicleDoesNot()
+    public void PurchaseSupplierIsOptionalForOwnedAndLeasedVehicles()
     {
         var vehicle = CompleteVehicle();
         vehicle.OwnershipType = VehicleOwnershipType.Owned;
         vehicle.PurchasedFromSupplierId = null;
 
-        Assert.False(FleetBusinessRules.IsCoreIdentityReady(vehicle));
+        Assert.True(FleetBusinessRules.IsCoreIdentityReady(vehicle));
 
         vehicle.PurchasedFromSupplierId = Guid.CreateVersion7();
         Assert.True(FleetBusinessRules.IsCoreIdentityReady(vehicle));
@@ -161,6 +171,17 @@ public sealed class FleetBusinessRulesTests
 
         Assert.Empty(documents);
     }
+
+    [Theory]
+    [InlineData(VehicleType.Motorcycle, VehicleRegistrationType.Motorcycle, true)]
+    [InlineData(VehicleType.Motorcycle, VehicleRegistrationType.Private, true)]
+    [InlineData(VehicleType.Car, VehicleRegistrationType.PublicTransport, true)]
+    [InlineData(VehicleType.Car, VehicleRegistrationType.Private, false)]
+    public void OperationCardSupportIncludesMotorcycles(
+        VehicleType vehicleType,
+        VehicleRegistrationType registrationType,
+        bool expected) =>
+        Assert.Equal(expected, FleetBusinessRules.SupportsOperationCard(vehicleType, registrationType));
 
     private static Vehicle CompleteVehicle() => new()
     {

@@ -145,7 +145,10 @@ internal static class PermissionSeedCatalog
         Create(113, PermissionKeys.Inventory.ReturnsManage, "Inventory", "إدارة مرتجعات المورد", "Manage supplier returns", "إرجاع المخزون إلى المورد من طبقة التكلفة الأصلية.", "Return stock to the supplier from its original cost layer.", sensitive: true),
         Create(114, PermissionKeys.Inventory.SupplyRequestsSubmit, "Inventory", "إرسال طلبات الصرف", "Submit supply requests", "إرسال طلب موحد لقطع صيانة مركبة أو عهدة رايدر دون خصم المخزون.", "Submit a vehicle-maintenance or rider supply request without deducting stock."),
         Create(115, PermissionKeys.Inventory.SupplyRequestsRead, "Inventory", "عرض طلبات الصرف", "Read supply requests", "عرض طابور طلبات الصرف وحالة الموافقة والمركبة أو الرايدر المرتبط.", "View the supply-request queue, approval state, and related vehicle or rider."),
-        Create(116, PermissionKeys.Inventory.SupplyRequestsApprove, "Inventory", "اعتماد وتسليم طلبات الصرف", "Approve and issue supply requests", "اعتماد الطلب وتسليم الأصناف فعليًا وترحيل خصم FIFO في عملية واحدة.", "Approve a request, physically issue its items, and post FIFO stock deduction atomically.", sensitive: true, highTrust: true)
+        Create(116, PermissionKeys.Inventory.SupplyRequestsApprove, "Inventory", "اعتماد وتسليم طلبات الصرف", "Approve and issue supply requests", "اعتماد الطلب وتسليم الأصناف فعليًا وترحيل خصم FIFO في عملية واحدة.", "Approve a request, physically issue its items, and post FIFO stock deduction atomically.", sensitive: true, highTrust: true),
+        Create(117, PermissionKeys.Workflows.LegalCasesRead, "Workflows", "عرض القضايا القانونية", "Read legal cases", "عرض قضايا الموارد البشرية والجلسات وسجل التغييرات.", "View HR legal cases, hearings, and immutable change history.", sensitive: true),
+        Create(118, PermissionKeys.Workflows.LegalCasesManage, "Workflows", "إدارة القضايا القانونية", "Manage legal cases", "إنشاء وتعديل وأرشفة القضايا والجلسات ورفع الملفات.", "Create, update, and archive legal cases and hearings, and upload files.", sensitive: true),
+        Create(119, PermissionKeys.Workflows.LegalCaseFilesDownload, "Workflows", "تنزيل ملفات القضايا", "Download legal case files", "تنزيل ملفات جلسات القضايا الخاصة.", "Download private legal-case hearing files.", sensitive: true, highTrust: true)
     ];
 
     private static PermissionSeed Create(

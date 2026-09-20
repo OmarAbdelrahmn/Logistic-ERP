@@ -71,7 +71,10 @@ internal static class AuthorizationSeedCatalog
         PermissionKeys.Inventory.StockAdjust,
         PermissionKeys.Inventory.CostLayersRead,
         PermissionKeys.Inventory.ReceiptsManage,
-        PermissionKeys.Inventory.ReturnsManage
+        PermissionKeys.Inventory.ReturnsManage,
+        PermissionKeys.Workflows.LegalCasesRead,
+        PermissionKeys.Workflows.LegalCasesManage,
+        PermissionKeys.Workflows.LegalCaseFilesDownload
     ];
 
     public static IReadOnlyList<string> ManagerPermissions { get; } =
@@ -119,7 +122,10 @@ internal static class AuthorizationSeedCatalog
         PermissionKeys.Inventory.StockRead,
         PermissionKeys.Inventory.StockMove,
         PermissionKeys.Inventory.ReceiptsManage,
-        PermissionKeys.Inventory.ReturnsManage
+        PermissionKeys.Inventory.ReturnsManage,
+        PermissionKeys.Workflows.LegalCasesRead,
+        PermissionKeys.Workflows.LegalCasesManage,
+        PermissionKeys.Workflows.LegalCaseFilesDownload
     ];
 
     public static IReadOnlyList<RolePermissionSeed> RolePermissions { get; } =
@@ -166,14 +172,16 @@ internal static class AuthorizationSeedCatalog
                 && !key.StartsWith("phone_sims.", StringComparison.Ordinal)
                 && !key.StartsWith("fuel.", StringComparison.Ordinal)
                 && !key.StartsWith("maintenance.", StringComparison.Ordinal)
-                && !key.StartsWith("inventory.", StringComparison.Ordinal)), ref sequence);
+                && !key.StartsWith("inventory.", StringComparison.Ordinal)
+                && !key.StartsWith("legal_cases.", StringComparison.Ordinal)), ref sequence);
         AddRolePermissions(seeds, SystemRoles.ManagerId,
             ManagerPermissions.Except(legacyManagerPermissions).Where(key =>
                 !key.StartsWith("fleet.", StringComparison.Ordinal)
                 && !key.StartsWith("phone_sims.", StringComparison.Ordinal)
                 && !key.StartsWith("fuel.", StringComparison.Ordinal)
                 && !key.StartsWith("maintenance.", StringComparison.Ordinal)
-                && !key.StartsWith("inventory.", StringComparison.Ordinal)), ref sequence);
+                && !key.StartsWith("inventory.", StringComparison.Ordinal)
+                && !key.StartsWith("legal_cases.", StringComparison.Ordinal)), ref sequence);
         AddRolePermissions(seeds, SystemRoles.SystemAdminId,
             SystemAdminPermissions.Where(key => key.StartsWith("fleet.", StringComparison.Ordinal) && key != PermissionKeys.Fleet.RegistrationTransitionsManage), ref sequence);
         AddRolePermissions(seeds, SystemRoles.ManagerId,
@@ -193,6 +201,10 @@ internal static class AuthorizationSeedCatalog
             SystemAdminPermissions.Where(key => key.StartsWith("maintenance.", StringComparison.Ordinal) || key.StartsWith("inventory.", StringComparison.Ordinal)), ref sequence);
         AddRolePermissions(seeds, SystemRoles.ManagerId,
             ManagerPermissions.Where(key => key.StartsWith("maintenance.", StringComparison.Ordinal) || key.StartsWith("inventory.", StringComparison.Ordinal)), ref sequence);
+        AddRolePermissions(seeds, SystemRoles.SystemAdminId,
+            [PermissionKeys.Workflows.LegalCasesRead, PermissionKeys.Workflows.LegalCasesManage, PermissionKeys.Workflows.LegalCaseFilesDownload], ref sequence);
+        AddRolePermissions(seeds, SystemRoles.ManagerId,
+            [PermissionKeys.Workflows.LegalCasesRead, PermissionKeys.Workflows.LegalCasesManage, PermissionKeys.Workflows.LegalCaseFilesDownload], ref sequence);
 
         return seeds;
     }

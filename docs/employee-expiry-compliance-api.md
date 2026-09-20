@@ -23,7 +23,7 @@ Fleet, vehicles, vehicle assignments, maintenance, platform assignments, contrac
 | `Upcoming` | 1 to 30 days remain | `1` to `30` |
 | `DueToday` | Expiry is the check date | `0` |
 | `Expired` | Expiry is before the check date | Negative integer |
-| `Missing` | An active document type requires an expiry date but has none | `null` |
+| `Missing` | A required applicable document has not been uploaded, or an active document type requires an expiry date but has none | `null` |
 
 ## Sources and precedence
 
@@ -112,7 +112,7 @@ Authorization: Bearer <access-token>
 }
 ```
 
-The summary is calculated across all matching rows before paging. `referenceMasked` is always masked where a protected licence, card, or insurance number is available. `employeeDocumentId` is `null` when the source is not linked to an employee document.
+The summary is calculated across all matching rows before paging. `referenceMasked` is always masked where a protected licence, card, or insurance number is available. `employeeDocumentId` is `null` when the source is not linked to an employee document. A required document that has not yet been uploaded is returned as an `EmployeeDocument` item with `sourceStatus: "Missing"`, `expiryDate: null`, and `employeeDocumentId: null`; its `sourceId` is the document-type ID, providing a stable identifier until a document is uploaded.
 
 ## GET /api/employees/{employeeId}/compliance-expiries
 

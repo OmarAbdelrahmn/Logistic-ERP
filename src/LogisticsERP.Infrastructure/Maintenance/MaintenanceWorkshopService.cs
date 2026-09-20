@@ -3,6 +3,7 @@ using LogisticsERP.Application.Features.Maintenance;
 using LogisticsERP.Domain.Entities.Fleet;
 using LogisticsERP.Domain.Entities.Maintenance;
 using LogisticsERP.Domain.Enums;
+using LogisticsERP.Domain.Fleet;
 using LogisticsERP.Domain.Maintenance;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
@@ -251,8 +252,7 @@ internal sealed partial class MaintenanceService
                     var vehicle = await dbContext.Vehicles.SingleAsync(x => x.Id == workOrder.VehicleId.Value, cancellationToken);
                     vehicleType = vehicle.VehicleType;
                     if (request.OdometerAtChange < vehicle.CurrentOdometer) return Result.Failure(MaintenanceErrors.InvalidOdometer);
-                    vehicle.CurrentOdometer = request.OdometerAtChange;
-                    vehicle.LastOdometerAtUtc = request.PerformedAtUtc;
+                    VehicleMileageRules.ApplyVerifiedReading(vehicle, request.OdometerAtChange, request.PerformedAtUtc);
                     dbContext.VehicleOdometerReadings.Add(new VehicleOdometerReading { VehicleId = vehicle.Id, Reading = request.OdometerAtChange, RecordedAtUtc = request.PerformedAtUtc, SourceType = VehicleOdometerSourceType.Maintenance, SourceEntityId = operationId, Notes = "Oil change" });
                 }
                 else

@@ -44,7 +44,8 @@ public sealed record VehicleUpsertRequest(
     string? LeaseReference,
     long CurrentOdometer,
     string? Notes,
-    string? RowVersion);
+    string? RowVersion,
+    VehicleOperationalStatus? CurrentOperationalStatus = null);
 
 public sealed record VehicleSummaryResponse(
     Guid Id,
@@ -79,7 +80,9 @@ public sealed record VehicleSummaryResponse(
     DateOnly? OperationCardExpiryDate,
     VehicleComplianceDueStatus OperationCardStatus,
     bool IsReadyForAssignment,
-    string RowVersion);
+    string RowVersion,
+    bool RegistrationFileUploaded = false,
+    bool OperationCardFileUploaded = false);
 
 public sealed record VehicleDetailResponse(
     VehicleSummaryResponse Summary,
@@ -125,9 +128,9 @@ public sealed record VehicleOdometerReadingResponse(Guid Id, long Reading, DateT
 
 public sealed record RealRiderRequest(string Name, string IqamaNo, string RelationshipToAssignedRider);
 public sealed record RealRiderResponse(Guid Id, string Name, string IqamaNo, string RelationshipToAssignedRider);
-public sealed record TakeVehicleRequest(Guid RiderProfileId, bool IsRealRider, RealRiderRequest? RealRider, Guid VehicleId, DateTimeOffset StartedAtUtc, long StartOdometer, VehicleCondition StartCondition, byte? StartFuelLevelPercentage, string PermissionReference, string Reason, string? Notes);
+public sealed record TakeVehicleRequest(Guid RiderProfileId, bool IsRealRider, RealRiderRequest? RealRider, Guid VehicleId, DateTimeOffset StartedAtUtc, long StartOdometer, VehicleCondition StartCondition, byte? StartFuelLevelPercentage, string PermissionReference, string? Reason, string? Notes);
 public sealed record VehicleConditionReportRequest(VehicleIssueCategory Category, VehicleIssueSeverity Severity, string ProblemDescription, bool IsRiderResponsible, decimal EstimatedRepairCost);
-public sealed record ReturnVehicleRequest(Guid AssignmentId, DateTimeOffset EndedAtUtc, long EndOdometer, VehicleCondition EndCondition, byte? EndFuelLevelPercentage, string Reason, string RowVersion, VehicleConditionReportRequest? ConditionReport = null);
+public sealed record ReturnVehicleRequest(Guid AssignmentId, DateTimeOffset EndedAtUtc, long EndOdometer, VehicleCondition EndCondition, byte? EndFuelLevelPercentage, string? Reason, string RowVersion, VehicleConditionReportRequest? ConditionReport = null);
 public sealed record SwitchVehicleRequest(Guid CurrentAssignmentId, Guid NewVehicleId, DateTimeOffset SwitchedAtUtc, long OldVehicleOdometer, long NewVehicleOdometer, VehicleCondition OldVehicleCondition, VehicleCondition NewVehicleCondition, byte? OldFuelLevelPercentage, byte? NewFuelLevelPercentage, string PermissionReference, string Reason, string RowVersion, VehicleConditionReportRequest? ConditionReport = null);
 public sealed record RenewVehiclePermissionRequest(DateOnly PermissionStartsOn, string PermissionReference, string Reason, string RowVersion);
 public sealed record RiderPromissoryFileResponse(Guid Id, Guid RiderProfileId, Guid CurrentVersionId, int VersionNumber, string OriginalFileName, string ContentType, long FileSizeBytes, string Sha256Checksum, DateTimeOffset UploadedAtUtc, string RowVersion);
@@ -139,7 +142,19 @@ public sealed record VehicleInsuranceRequest(string ProviderName, string PolicyN
 public sealed record VehicleInspectionRequest(string InspectionNumber, string StationName, DateOnly InspectionDate, DateOnly ExpiryDate, VehicleInspectionResult Result, long? Odometer, string? FailureNotes, string? Notes);
 public sealed record VehicleOperationCardRequest(string CardNumber, string IssuingAuthority, DateOnly IssueDate, DateOnly ExpiryDate, string? Notes);
 public sealed record VehicleComplianceResponse(Guid Id, Guid VehicleId, string Type, string Number, string Issuer, DateOnly EffectiveFrom, DateOnly ExpiryDate, VehicleComplianceDueStatus DueStatus, bool IsCurrent, Guid? PreviousRecordId, string RowVersion);
-public sealed record VehicleComplianceDueResponse(Guid VehicleId, string AssetNumber, string Type, Guid? RecordId, DateOnly? ExpiryDate, VehicleComplianceDueStatus Status, int? DaysRemaining);
+public sealed record VehicleComplianceUploadedFileResponse(Guid AttachmentId, Guid VersionId, string OriginalFileName, string ContentType, long FileSizeBytes, DateTimeOffset UploadedAtUtc);
+public sealed record VehicleComplianceDueResponse(
+    Guid VehicleId,
+    string AssetNumber,
+    string Type,
+    Guid? RecordId,
+    DateOnly? EffectiveFrom,
+    DateOnly? ExpiryDate,
+    VehicleComplianceDueStatus DateStatus,
+    VehicleComplianceDueStatus Status,
+    int? DaysRemaining,
+    bool HasUploadedFile,
+    VehicleComplianceUploadedFileResponse? UploadedFile);
 
 public sealed record VehicleAttachmentResponse(Guid Id, Guid VehicleId, VehicleFileKind Kind, string DisplayName, Guid? CurrentVersionId, int? CurrentVersionNumber, string? OriginalFileName, string? ContentType, long? FileSizeBytes, bool IsLegacy, string RowVersion);
 public sealed record VehicleAttachmentVersionResponse(Guid Id, Guid VehicleAttachmentId, int VersionNumber, string OriginalFileName, string ContentType, long FileSizeBytes, string Sha256Checksum, DateTimeOffset UploadedAtUtc);

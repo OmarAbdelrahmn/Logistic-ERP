@@ -629,7 +629,7 @@ Returns compliance history. `type` must be one of:
 - `registrations`
 - `insurance-policies`
 - `inspections`
-- `operation-cards` — available only when the vehicle's registration type is `PublicTransport`.
+- `operation-cards` — available when `vehicleType = Motorcycle`, `registrationType = Motorcycle`, or `registrationType = PublicTransport`.
 
 Response: `VehicleComplianceResponse[]`, ordered by expiry date descending. Invalid types return `400`.
 
@@ -659,15 +659,28 @@ Request (`VehicleInspectionRequest`): `inspectionNumber`, `stationName`, `inspec
 
 ### `POST /api/vehicles/{vehicleId}/operation-cards`
 
-Adds and makes current an operation-card record for a public-transport vehicle. Previous current cards are superseded. The vehicle must have `registrationType` set to `PublicTransport`.
+Adds and makes current an operation-card record for a supported vehicle. Operation cards are supported when the vehicle is a motorcycle (`vehicleType = Motorcycle`), its registration type is `Motorcycle`, or its registration type is `PublicTransport`. Previous current cards are retained in history and superseded, so exactly one non-deleted card remains current.
 
 Request (`VehicleOperationCardRequest`): `cardNumber`, `issuingAuthority`, `issueDate`, `expiryDate`, `notes`.
 
-`expiryDate` cannot be earlier than `issueDate`. Response: `VehicleComplianceResponse`.
+`expiryDate` cannot be earlier than `issueDate`. A renewal may reuse the same `cardNumber`; the number is not unique because the historical and renewed records can represent the same physical card number. Response: `VehicleComplianceResponse`.
+
+Frontend handling:
+
+- Show the operation-card tab, upload slot, and create/renew action when `vehicleType === 1`, `registrationType === 7`, or `registrationType === 5`.
+- Do not reject a card number because it already exists for the vehicle. Renewals intentionally reuse card numbers.
+- After a successful POST, treat the returned record as current and refresh `GET /api/vehicles/{vehicleId}/operation-cards` to retain the superseded records in the history view.
+- Validate required `cardNumber` and `issuingAuthority` values and require `expiryDate >= issueDate` before submission.
 
 ### `GET /api/vehicle-compliance/due?checkDate=YYYY-MM-DD`
 
-Returns all non-valid compliance items for the requested date. If `checkDate` is omitted, the service uses the current local business date (`UTC+3`). Results include registration, insurance, inspection, active-assignment permit, and (for public-transport vehicles) operation-card entries whose status is not `Valid`, ordered by expiry date.
+Returns all non-valid compliance items for the requested date. If `checkDate` is omitted, the service uses the current local business date (`UTC+3`). Results include registration, insurance, inspection, active-assignment permit, and (for motorcycles and public-transport vehicles) operation-card entries whose status is not `Valid`, ordered by expiry date.
+
+The response keeps file state and date state separate:
+
+- `effectiveFrom`, `expiryDate`, and `dateStatus` describe the dated compliance record. When no dates were entered, `dateStatus` is `Missing`.
+- `hasUploadedFile` and `uploadedFile` describe the current uploaded Istimara or operation-card file independently. `uploadedFile` contains the attachment/version IDs, original filename, content type, size, and upload time.
+- `status` is the combined display status. An uploaded file without a dated compliance record is `UploadedWithoutDates` instead of `Missing`.
 
 Response: `VehicleComplianceDueResponse[]`.
 
@@ -795,12 +808,15 @@ Downloads the current generated accident PDF, or the requested report version wh
 | `manufacturer`, `model` | Display names |
 | `vehicleType`, `registrationType`, `status` | Classification and operational state |
 | `sponsorId`, `sponsorName`, `operatingCityId`, `operatingCity` | Scope and ownership relationships |
-| `currentOdometer` | Latest odometer reading |
+| `currentOdometer` | Whole-kilometre projection of the current effective mileage; synchronized by GPS, manual daily mileage, assignments, maintenance, and explicit readings |
+| `trackedDistanceKm` | Exact current effective mileage including GPS decimal kilometres; use this as the primary displayed vehicle mileage |
 | `currentAssignmentId`, `currentRiderProfileId`, `currentRiderName` | Active selected-rider assignment, if any |
 | `isRealRider`, `realRider` | Actual-rider details for the active assignment. `realRider` is populated only when the selected rider is not the actual rider. |
 | `registrationExpiryDate`, `registrationStatus` | Registration compliance |
+| `registrationFileUploaded` | Whether a current Istimara file version exists, independently of registration dates |
 | `insuranceExpiryDate`, `insuranceStatus` | Insurance compliance |
 | `inspectionExpiryDate`, `inspectionStatus` | Inspection compliance |
+| `operationCardExpiryDate`, `operationCardStatus`, `operationCardFileUploaded` | Public-transport operation-card dates/status and independent current-file state |
 | `isReadyForAssignment` | Current readiness decision |
 | `rowVersion` | Concurrency token |
 
@@ -833,7 +849,7 @@ The API contracts use numeric enum values by default. The names below are the ca
 | `VehicleOperationalStatus` | `Available=1`, `Assigned=2`, `ProblemHold=3`, `AccidentHold=4`, `Stolen=5`, `OutOfService=6`, `Decommissioned=7` |
 | `VehicleCondition` | `Unknown=1`, `Good=2`, `Fair=3`, `Damaged=4`, `Unsafe=5` |
 | `VehicleInspectionResult` | `Passed=1`, `Conditional=2`, `Failed=3` |
-| `VehicleComplianceDueStatus` | `Valid=1`, `Upcoming=2`, `DueToday=3`, `Expired=4`, `Missing=5` |
+| `VehicleComplianceDueStatus` | `Valid=1`, `Upcoming=2`, `DueToday=3`, `Expired=4`, `Missing=5`, `UploadedWithoutDates=6` |
 | `VehicleFileKind` | `Istimara=1`, `OperationCard=2`, `FrontImage=3`, `RearImage=4`, `LeftImage=5`, `RightImage=6`, `Legacy=99` |
 | `RiderVehicleAssignmentStatus` | `Active=1`, `Completed=2`, `Cancelled=3`, `Corrected=4` |
 | `VehicleIssueCategory` | `Problem=1`, `Accident=2`, `Theft=3`, `Damage=4`, `Administrative=5` |

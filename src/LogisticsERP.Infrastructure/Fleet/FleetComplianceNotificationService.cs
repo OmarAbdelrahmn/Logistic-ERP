@@ -38,7 +38,7 @@ internal sealed class FleetComplianceNotificationService(
             from operationCard in operationCards.DefaultIfEmpty()
             join assignment in dbContext.RiderVehicleAssignments.AsNoTracking().Where(x => x.EndedAtUtc == null) on vehicle.Id equals assignment.VehicleId into assignments
             from assignment in assignments.DefaultIfEmpty()
-            select new { vehicle.Id, vehicle.AssetNumber, vehicle.RegistrationType, RegistrationId = registration == null ? (Guid?)null : registration.Id, RegistrationExpiry = registration == null ? null : (DateOnly?)registration.ExpiryDate, InsuranceId = insurance == null ? (Guid?)null : insurance.Id, InsuranceExpiry = insurance == null ? null : (DateOnly?)insurance.ExpiryDate, InspectionId = inspection == null ? (Guid?)null : inspection.Id, InspectionExpiry = inspection == null ? null : (DateOnly?)inspection.ExpiryDate, OperationCardId = operationCard == null ? (Guid?)null : operationCard.Id, OperationCardExpiry = operationCard == null ? null : (DateOnly?)operationCard.ExpiryDate, AssignmentId = assignment == null ? (Guid?)null : assignment.Id, PermitEndDate = assignment == null ? null : assignment.PermissionEndsOn })
+            select new { vehicle.Id, vehicle.AssetNumber, vehicle.VehicleType, vehicle.RegistrationType, RegistrationId = registration == null ? (Guid?)null : registration.Id, RegistrationExpiry = registration == null ? null : (DateOnly?)registration.ExpiryDate, InsuranceId = insurance == null ? (Guid?)null : insurance.Id, InsuranceExpiry = insurance == null ? null : (DateOnly?)insurance.ExpiryDate, InspectionId = inspection == null ? (Guid?)null : inspection.Id, InspectionExpiry = inspection == null ? null : (DateOnly?)inspection.ExpiryDate, OperationCardId = operationCard == null ? (Guid?)null : operationCard.Id, OperationCardExpiry = operationCard == null ? null : (DateOnly?)operationCard.ExpiryDate, AssignmentId = assignment == null ? (Guid?)null : assignment.Id, PermitEndDate = assignment == null ? null : assignment.PermissionEndsOn })
             .ToArrayAsync(cancellationToken);
 
         foreach (var item in compliance)
@@ -47,7 +47,7 @@ internal sealed class FleetComplianceNotificationService(
             await NotifyAsync(users, PermissionKeys.Fleet.ComplianceRead, "insurance", item.InsuranceId, item.Id, item.AssetNumber, item.InsuranceExpiry, checkDate, now, cancellationToken);
             await NotifyAsync(users, PermissionKeys.Fleet.ComplianceRead, "inspection", item.InspectionId, item.Id, item.AssetNumber, item.InspectionExpiry, checkDate, now, cancellationToken);
             await NotifyAsync(users, PermissionKeys.Fleet.ComplianceRead, "permit", item.AssignmentId, item.Id, item.AssetNumber, item.PermitEndDate, checkDate, now, cancellationToken);
-            if (item.RegistrationType == VehicleRegistrationType.PublicTransport)
+            if (FleetBusinessRules.SupportsOperationCard(item.VehicleType, item.RegistrationType))
                 await NotifyAsync(users, PermissionKeys.Fleet.ComplianceRead, "operation-card", item.OperationCardId, item.Id, item.AssetNumber, item.OperationCardExpiry, checkDate, now, cancellationToken);
         }
 

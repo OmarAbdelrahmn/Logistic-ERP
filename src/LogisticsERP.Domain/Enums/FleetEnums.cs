@@ -27,7 +27,7 @@ public enum VehicleOperationalStatus
     Decommissioned = 7
 }
 public enum VehicleStatusSourceType { Vehicle = 1, Assignment = 2, Issue = 3, Accident = 4, Administrative = 5 }
-public enum VehicleOdometerSourceType { Manual = 1, AssignmentTake = 2, AssignmentReturn = 3, Accident = 4, Correction = 5, Maintenance = 6 }
+public enum VehicleOdometerSourceType { Manual = 1, AssignmentTake = 2, AssignmentReturn = 3, Accident = 4, Correction = 5, Maintenance = 6, Gps = 7 }
 public enum VehicleDailyDistanceSource { None = 0, Manual = 1, Gps = 2 }
 public enum RiderVehicleAssignmentStatus { Active = 1, Completed = 2, Cancelled = 3, Corrected = 4 }
 public enum VehiclePlatformAccountAssignmentStatus { Active = 1, Ended = 2 }
@@ -47,7 +47,15 @@ public enum RiderVehicleAssignmentEventType
 public enum VehicleCondition { Unknown = 1, Good = 2, Fair = 3, Damaged = 4, Unsafe = 5 }
 public enum ComplianceRecordStatus { Active = 1, Superseded = 2, Cancelled = 3 }
 public enum VehicleInspectionResult { Passed = 1, Conditional = 2, Failed = 3 }
-public enum VehicleComplianceDueStatus { Valid = 1, Upcoming = 2, DueToday = 3, Expired = 4, Missing = 5 }
+public enum VehicleComplianceDueStatus
+{
+    Valid = 1,
+    Upcoming = 2,
+    DueToday = 3,
+    Expired = 4,
+    Missing = 5,
+    UploadedWithoutDates = 6
+}
 public enum VehicleFileKind
 {
     Istimara = 1,

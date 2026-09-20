@@ -2,6 +2,7 @@ using System.Text.Json;
 using LogisticsERP.Application.Abstractions.Authentication;
 using LogisticsERP.Domain.Common;
 using LogisticsERP.Domain.Entities.System;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -10,7 +11,8 @@ namespace LogisticsERP.Infrastructure.Persistence.Interceptors;
 
 internal sealed class ApplicationPersistenceInterceptor(
     ICurrentUser currentUser,
-    TimeProvider timeProvider) : SaveChangesInterceptor
+    TimeProvider timeProvider,
+    IHttpContextAccessor? httpContextAccessor = null) : SaveChangesInterceptor
 {
     private static readonly HashSet<string> TemporalClosureProperties = new(StringComparer.Ordinal)
     {
@@ -176,6 +178,8 @@ internal sealed class ApplicationPersistenceInterceptor(
         IEnumerable<EntityEntry<Entity>> entries,
         DateTimeOffset now)
     {
+        var httpContext = httpContextAccessor?.HttpContext;
+        var userAgent = httpContext?.Request.Headers.UserAgent.ToString();
         foreach (var entry in entries)
         {
             var action = GetAction(entry);
@@ -201,12 +205,16 @@ internal sealed class ApplicationPersistenceInterceptor(
                 EventId = Guid.CreateVersion7(),
                 ActorUserId = currentUser.UserId,
                 ActorType = currentUser.UserId.HasValue ? "User" : "System",
+                SessionId = currentUser.SessionId,
                 Action = action,
                 Category = "Persistence",
                 EntityType = entry.Metadata.ClrType.Name,
                 EntityId = entry.Entity.Id,
                 OccurredAtUtc = now,
                 CorrelationId = currentUser.CorrelationId ?? Guid.CreateVersion7().ToString(),
+                TraceId = TrimTo(httpContext?.TraceIdentifier, 100),
+                IpAddress = TrimTo(httpContext?.Connection.RemoteIpAddress?.ToString(), 64),
+                UserAgent = TrimTo(userAgent, 1000),
                 Reason = (entry.Entity as AuditableEntity)?.DeletionReason,
                 BeforeJson = before.Count == 0 ? null : JsonSerializer.Serialize(before),
                 AfterJson = after.Count == 0 ? null : JsonSerializer.Serialize(after),
@@ -243,4 +251,7 @@ internal sealed class ApplicationPersistenceInterceptor(
         || propertyName.EndsWith("Ciphertext", StringComparison.OrdinalIgnoreCase)
         || propertyName.EndsWith("LookupHash", StringComparison.OrdinalIgnoreCase)
         || propertyName.EndsWith("LastFour", StringComparison.OrdinalIgnoreCase);
+
+    private static string? TrimTo(string? value, int maxLength) =>
+        string.IsNullOrWhiteSpace(value) ? null : value[..Math.Min(value.Length, maxLength)];
 }

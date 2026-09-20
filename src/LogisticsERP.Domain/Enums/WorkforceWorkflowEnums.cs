@@ -23,3 +23,7 @@ public enum AbsenceCasePath { ReportedToAuthorities = 1, ExitOrSystemOutage = 2 
 public enum AbsenceCaseStatus { Open = 1, UnderReview = 2, DeadlineApproaching = 3, Overdue = 4, Resolved = 5, Cancelled = 6, Closed = 7 }
 public enum AbsenceCaseEventType { Opened = 1, PathChanged = 2, NotesUpdated = 3, DeadlineChanged = 4, Resolved = 5, Cancelled = 6, Closed = 7, Corrected = 8 }
 public enum EmployeeStatusChangeRequestStatus { Pending = 1, Approved = 2, Rejected = 3, Cancelled = 4 }
+public enum LegalCasePersonType { Employee = 1, Rider = 2, External = 3 }
+public enum LegalCasePartyRole { Claimant = 1, Defendant = 2 }
+public enum LegalCaseStatus { Open = 1, InProgress = 2, Suspended = 3, Closed = 4 }
+public enum LegalCaseHearingStatus { Scheduled = 1, Completed = 2, Postponed = 3, Cancelled = 4 }

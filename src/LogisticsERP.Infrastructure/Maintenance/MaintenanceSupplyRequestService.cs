@@ -4,6 +4,7 @@ using LogisticsERP.Domain.Entities.Fleet;
 using LogisticsERP.Domain.Entities.Maintenance;
 using LogisticsERP.Domain.Entities.System;
 using LogisticsERP.Domain.Enums;
+using LogisticsERP.Domain.Fleet;
 using Microsoft.EntityFrameworkCore;
 
 namespace LogisticsERP.Infrastructure.Maintenance;
@@ -301,8 +302,7 @@ internal sealed partial class MaintenanceService
             filterLine.MaintenanceMaterialUsageId = filterUsageId;
         }
 
-        vehicle.CurrentOdometer = workOrder.OdometerAtOpen.Value;
-        vehicle.LastOdometerAtUtc = issuedAtUtc;
+        VehicleMileageRules.ApplyVerifiedReading(vehicle, workOrder.OdometerAtOpen.Value, issuedAtUtc);
         dbContext.VehicleOdometerReadings.Add(new VehicleOdometerReading
         {
             VehicleId = vehicle.Id,

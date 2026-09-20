@@ -16,7 +16,11 @@ internal sealed class WorkforceService(
 
     public async Task<Result<IReadOnlyList<EmployeeListItemResponse>>> GetEmployeesAsync(CancellationToken cancellationToken = default)
     {
-        var employees = await dbContext.Employees.AsNoTracking().OrderBy(item => item.FullNameAr).ToArrayAsync(cancellationToken);
+        var employees = await dbContext.Employees
+            .AsNoTracking()
+            .Where(item => item.EngagementType != EmployeeRelationshipType.OutsideRider)
+            .OrderBy(item => item.FullNameAr)
+            .ToArrayAsync(cancellationToken);
         var employeeIds = employees.Select(item => item.Id).ToArray();
         var riderIds = await dbContext.RiderProfiles.AsNoTracking().Where(item => employeeIds.Contains(item.EmployeeId))
             .ToDictionaryAsync(item => item.EmployeeId, item => item.Id, cancellationToken);

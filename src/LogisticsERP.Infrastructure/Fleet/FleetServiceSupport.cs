@@ -66,7 +66,14 @@ internal sealed class FleetServiceSupport(
     public static VehicleComplianceDueStatus DueStatus(DateOnly? expiry, DateOnly checkDate, int alertDays = 30) =>
         VehicleComplianceStatusCalculator.Calculate(expiry, checkDate, alertDays);
 
-    public static string NewVehicleAssetNumber(Guid id) => $"VEH-{id:N}"[..12].ToUpperInvariant();
+    public static VehicleComplianceDueStatus DueStatus(DateOnly? expiry, DateOnly checkDate, bool hasUploadedFile, int alertDays = 30) =>
+        VehicleComplianceStatusCalculator.Calculate(expiry, checkDate, hasUploadedFile, alertDays);
+
+    public static string NewVehicleAssetNumber(Guid id)
+    {
+        var value = id.ToString("N");
+        return $"VEH-{value[^12..]}".ToUpperInvariant();
+    }
 
     public static string NewIssueNumber(Guid id) => $"ISS-{id.ToString("N")[^16..]}".ToUpperInvariant();
 

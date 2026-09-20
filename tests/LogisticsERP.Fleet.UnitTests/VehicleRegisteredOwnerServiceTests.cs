@@ -68,6 +68,89 @@ public sealed class VehicleRegisteredOwnerServiceTests
         Assert.Equal(FleetErrors.NotFound.Code, result.Error.Code);
     }
 
+    [Fact]
+    public async Task OwnedVehicleWithoutPurchaseSupplierIsAllowedAndReadyForAssignment()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        await using var fixture = await Fixture.CreateAsync(cancellationToken);
+        var request = fixture.CreateRequest(fixture.OwnerSponsor.Id) with
+        {
+            OwnershipType = VehicleOwnershipType.Owned,
+            PurchasedFromSupplierId = null
+        };
+
+        var created = await fixture.Service.UpsertVehicleAsync(null, request, cancellationToken);
+
+        Assert.True(created.IsSuccess, created.Error.Description);
+        Assert.Null(created.Value!.PurchasedFromSupplierId);
+        Assert.True(created.Value.Summary.IsReadyForAssignment);
+
+        var readiness = await fixture.Service.GetReadinessAsync(created.Value.Summary.Id, cancellationToken);
+
+        Assert.True(readiness.IsSuccess, readiness.Error.Description);
+        Assert.True(readiness.Value!.IsEligibleForAssignment);
+        Assert.DoesNotContain(nameof(Vehicle.PurchasedFromSupplierId), readiness.Value.MissingCoreIdentityFields);
+    }
+
+    [Fact]
+    public async Task UpdateCanChangeAndClearOperationalStatusThroughNullableProperty()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        await using var fixture = await Fixture.CreateAsync(cancellationToken);
+        var request = fixture.CreateRequest(fixture.OwnerSponsor.Id);
+        var created = await fixture.Service.UpsertVehicleAsync(null, request, cancellationToken);
+        Assert.True(created.IsSuccess, created.Error.Description);
+
+        var decommissioned = await fixture.Service.UpsertVehicleAsync(
+            created.Value!.Summary.Id,
+            request with
+            {
+                RowVersion = created.Value.Summary.RowVersion,
+                CurrentOperationalStatus = VehicleOperationalStatus.Decommissioned
+            },
+            cancellationToken);
+
+        Assert.True(decommissioned.IsSuccess, decommissioned.Error.Description);
+        Assert.Equal(VehicleOperationalStatus.Decommissioned, decommissioned.Value!.Summary.Status);
+        Assert.NotNull(decommissioned.Value.DecommissionedAtUtc);
+
+        var restored = await fixture.Service.UpsertVehicleAsync(
+            created.Value.Summary.Id,
+            request with
+            {
+                RowVersion = decommissioned.Value.Summary.RowVersion,
+                CurrentOperationalStatus = VehicleOperationalStatus.Available
+            },
+            cancellationToken);
+
+        Assert.True(restored.IsSuccess, restored.Error.Description);
+        Assert.Equal(VehicleOperationalStatus.Available, restored.Value!.Summary.Status);
+        Assert.Null(restored.Value.DecommissionedAtUtc);
+        Assert.Equal(3, await fixture.Db.VehicleOperationalStatusPeriods.CountAsync(cancellationToken));
+    }
+
+    [Fact]
+    public async Task UpdateCannotSetAssignedWithoutAnActiveAssignment()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        await using var fixture = await Fixture.CreateAsync(cancellationToken);
+        var request = fixture.CreateRequest(fixture.OwnerSponsor.Id);
+        var created = await fixture.Service.UpsertVehicleAsync(null, request, cancellationToken);
+        Assert.True(created.IsSuccess, created.Error.Description);
+
+        var result = await fixture.Service.UpsertVehicleAsync(
+            created.Value!.Summary.Id,
+            request with
+            {
+                RowVersion = created.Value.Summary.RowVersion,
+                CurrentOperationalStatus = VehicleOperationalStatus.Assigned
+            },
+            cancellationToken);
+
+        Assert.True(result.IsFailure);
+        Assert.Equal(FleetErrors.InvalidState.Code, result.Error.Code);
+    }
+
     private sealed class Fixture : IAsyncDisposable
     {
         private Fixture(ApplicationDbContext db, Sponsor vehicleSponsor, Sponsor ownerSponsor, VehicleSupplier ownerSupplier)

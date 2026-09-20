@@ -166,7 +166,7 @@ internal sealed class VehicleOperationalStatusPeriodConfiguration : IEntityTypeC
     {
         builder.ConfigureOperational("VehicleOperationalStatusPeriods");
         builder.Property(x => x.ReasonCode).HasMaxLength(100);
-        builder.Property(x => x.Reason).HasMaxLength(1000).IsRequired();
+        builder.Property(x => x.Reason).HasMaxLength(1000).HasDefaultValue("Not provided.").IsRequired();
         builder.HasOne<Vehicle>().WithMany().HasForeignKey(x => x.VehicleId).OnDelete(DeleteBehavior.Restrict);
         builder.HasIndex(x => new { x.VehicleId, x.EffectiveFromUtc });
         builder.HasIndex(x => x.VehicleId).IsUnique().HasFilter("[EffectiveToUtc] IS NULL AND [IsDeleted] = 0");
@@ -197,8 +197,10 @@ internal sealed class VehicleDailyDistanceConfiguration : IEntityTypeConfigurati
     {
         builder.ConfigureOperational("VehicleDailyDistances");
         builder.Property(x => x.GpsDistanceKm).HasPrecision(18, 2);
+        builder.Property(x => x.ManualBaselineOdometerReading).HasPrecision(18, 2);
         builder.Property(x => x.ManualDistanceKm).HasPrecision(18, 2);
         builder.Property(x => x.AppliedDistanceKm).HasPrecision(18, 2);
+        builder.Property(x => x.EffectiveOdometerAfterKm).HasPrecision(18, 2);
         builder.Property(x => x.GpsPlateNumber).HasMaxLength(64);
         builder.Property(x => x.ManualNotes).HasMaxLength(1000);
         builder.HasOne<Vehicle>().WithMany().HasForeignKey(x => x.VehicleId).OnDelete(DeleteBehavior.Restrict);
@@ -210,6 +212,7 @@ internal sealed class VehicleDailyDistanceConfiguration : IEntityTypeConfigurati
             table.HasCheckConstraint("CK_VehicleDailyDistances_GpsDistance", "[GpsDistanceKm] IS NULL OR [GpsDistanceKm] >= 0");
             table.HasCheckConstraint("CK_VehicleDailyDistances_ManualDistance", "[ManualDistanceKm] IS NULL OR [ManualDistanceKm] >= 0");
             table.HasCheckConstraint("CK_VehicleDailyDistances_AppliedDistance", "[AppliedDistanceKm] >= 0");
+            table.HasCheckConstraint("CK_VehicleDailyDistances_EffectiveOdometer", "[EffectiveOdometerAfterKm] >= 0");
             table.HasCheckConstraint("CK_VehicleDailyDistances_Source", "[AppliedSource] BETWEEN 0 AND 2");
             table.HasCheckConstraint("CK_VehicleDailyDistances_ManualOdometer", "[ManualOdometerReading] IS NULL OR ([ManualBaselineOdometerReading] IS NOT NULL AND [ManualOdometerReading] >= [ManualBaselineOdometerReading])");
         });
@@ -239,7 +242,7 @@ internal sealed class RiderVehicleAssignmentConfiguration : IEntityTypeConfigura
         builder.ConfigureOperational("RiderVehicleAssignments");
         builder.Property(x => x.IsRealRider).HasDefaultValue(true);
         builder.Property(x => x.PermissionReference).HasMaxLength(200);
-        builder.Property(x => x.AssignmentReason).HasMaxLength(1000).IsRequired();
+        builder.Property(x => x.AssignmentReason).HasMaxLength(1000).HasDefaultValue("Not provided.").IsRequired();
         builder.Property(x => x.StartLocationSnapshot).HasMaxLength(400);
         builder.Property(x => x.EndLocationSnapshot).HasMaxLength(400);
         builder.Property(x => x.CompletionReason).HasMaxLength(1000);
@@ -406,7 +409,7 @@ internal sealed class RiderVehicleAssignmentEventConfiguration : IEntityTypeConf
     public void Configure(EntityTypeBuilder<RiderVehicleAssignmentEvent> builder)
     {
         builder.ConfigureHistory("RiderVehicleAssignmentEvents");
-        builder.Property(x => x.Reason).HasMaxLength(1000).IsRequired();
+        builder.Property(x => x.Reason).HasMaxLength(1000).HasDefaultValue("Not provided.").IsRequired();
         builder.Property(x => x.ChangeSnapshotJson).HasColumnType("nvarchar(max)");
         builder.Property(x => x.CorrelationId).HasMaxLength(100);
         builder.HasOne<RiderVehicleAssignment>().WithMany().HasForeignKey(x => x.RiderVehicleAssignmentId).OnDelete(DeleteBehavior.Restrict);
@@ -497,7 +500,6 @@ internal sealed class VehicleOperationCardConfiguration : IEntityTypeConfigurati
         builder.Property(x => x.Notes).HasMaxLength(4000);
         builder.HasOne<Vehicle>().WithMany().HasForeignKey(x => x.VehicleId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<VehicleOperationCard>().WithMany().HasForeignKey(x => x.PreviousRecordId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasIndex(x => new { x.VehicleId, x.CardNumber }).IsUnique();
         builder.HasIndex(x => x.VehicleId).IsUnique().HasFilter("[IsCurrent] = 1 AND [IsDeleted] = 0");
         builder.HasIndex(x => new { x.ExpiryDate, x.IsCurrent });
         builder.ToTable(t => t.HasCheckConstraint("CK_VehicleOperationCards_DateRange", "[ExpiryDate] >= [IssueDate]"));
