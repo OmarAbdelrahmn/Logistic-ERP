@@ -13,6 +13,13 @@ internal static class FleetBusinessRules
 
     public static DateOnly PermitEnd(DateOnly start) => start.AddYears(1).AddDays(-1);
 
+    public static bool SupportsOperationCard(Vehicle vehicle) =>
+        SupportsOperationCard(vehicle.VehicleType, vehicle.RegistrationType);
+
+    public static bool SupportsOperationCard(VehicleType vehicleType, VehicleRegistrationType? registrationType) =>
+        vehicleType == VehicleType.Motorcycle
+        || registrationType is VehicleRegistrationType.Motorcycle or VehicleRegistrationType.PublicTransport;
+
     public static bool RequiresReturnConditionReport(VehicleCondition condition) =>
         condition != VehicleCondition.Good;
 
@@ -48,15 +55,14 @@ internal static class FleetBusinessRules
         && !string.IsNullOrWhiteSpace(vehicle.PlateNumberEn)
         && vehicle.SponsorId.HasValue
         && vehicle.OperatingCityId.HasValue
-        && vehicle.RegistrationType.HasValue
-        && (vehicle.OwnershipType != VehicleOwnershipType.Owned || vehicle.PurchasedFromSupplierId.HasValue);
+        && vehicle.RegistrationType.HasValue;
 
     public static (VehicleFileKind[] MissingPhotos, VehicleFileKind[] MissingDocuments) MissingFiles(
         VehicleRegistrationType? registrationType,
         IReadOnlyCollection<VehicleFileKind> present)
     {
         var missingPhotos = PhotoSlots.Where(slot => !present.Contains(slot)).ToArray();
-        var documents = registrationType == VehicleRegistrationType.PublicTransport
+        var documents = registrationType is VehicleRegistrationType.Motorcycle or VehicleRegistrationType.PublicTransport
             ? new[] { VehicleFileKind.Istimara, VehicleFileKind.OperationCard }
             : new[] { VehicleFileKind.Istimara };
         return (missingPhotos, documents.Where(slot => !present.Contains(slot)).ToArray());

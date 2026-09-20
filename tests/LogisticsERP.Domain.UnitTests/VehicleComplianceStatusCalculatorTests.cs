@@ -12,6 +12,18 @@ public sealed class VehicleComplianceStatusCalculatorTests
     public void CalculateReturnsMissingWhenExpiryIsAbsent() =>
         Assert.Equal(VehicleComplianceDueStatus.Missing, VehicleComplianceStatusCalculator.Calculate(null, CheckDate));
 
+    [Fact]
+    public void CalculateReturnsUploadedWithoutDatesWhenFileExistsAndExpiryIsAbsent() =>
+        Assert.Equal(
+            VehicleComplianceDueStatus.UploadedWithoutDates,
+            VehicleComplianceStatusCalculator.Calculate(null, CheckDate, hasUploadedFile: true));
+
+    [Fact]
+    public void CalculateUsesExpiryWhenFileAndDatesBothExist() =>
+        Assert.Equal(
+            VehicleComplianceDueStatus.Expired,
+            VehicleComplianceStatusCalculator.Calculate(CheckDate.AddDays(-1), CheckDate, hasUploadedFile: true));
+
     [Theory]
     [InlineData(-1, VehicleComplianceDueStatus.Expired)]
     [InlineData(0, VehicleComplianceDueStatus.DueToday)]

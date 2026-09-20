@@ -13731,3 +13731,380 @@ END;
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260919110051_AddHrLegalCases'
+)
+BEGIN
+    CREATE TABLE [app].[HrLegalCases] (
+        [Id] uniqueidentifier NOT NULL,
+        [CaseNumber] nvarchar(100) NOT NULL,
+        [PersonName] nvarchar(250) NOT NULL,
+        [PersonType] int NOT NULL,
+        [EmployeeId] uniqueidentifier NULL,
+        [RiderProfileId] uniqueidentifier NULL,
+        [SponsorId] uniqueidentifier NOT NULL,
+        [SponsorPartyRole] int NOT NULL,
+        [CaseDate] date NOT NULL,
+        [CaseTime] time NOT NULL,
+        [Status] int NOT NULL,
+        [Details] nvarchar(max) NOT NULL,
+        [Notes] nvarchar(4000) NULL,
+        [ResponsibleUserId] uniqueidentifier NOT NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_HrLegalCases] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_HrLegalCases_PersonReference] CHECK (([PersonType] = 1 AND [EmployeeId] IS NOT NULL AND [RiderProfileId] IS NULL) OR ([PersonType] = 2 AND [EmployeeId] IS NULL AND [RiderProfileId] IS NOT NULL) OR ([PersonType] = 3 AND [EmployeeId] IS NULL AND [RiderProfileId] IS NULL)),
+        CONSTRAINT [FK_HrLegalCases_Employees_EmployeeId] FOREIGN KEY ([EmployeeId]) REFERENCES [app].[Employees] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_HrLegalCases_RiderProfiles_RiderProfileId] FOREIGN KEY ([RiderProfileId]) REFERENCES [app].[RiderProfiles] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_HrLegalCases_Sponsors_SponsorId] FOREIGN KEY ([SponsorId]) REFERENCES [app].[Sponsors] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260919110051_AddHrLegalCases'
+)
+BEGIN
+    CREATE TABLE [app].[HrLegalCaseHearings] (
+        [Id] uniqueidentifier NOT NULL,
+        [LegalCaseId] uniqueidentifier NOT NULL,
+        [HearingNumber] int NOT NULL,
+        [HearingDate] date NOT NULL,
+        [HearingTime] time NOT NULL,
+        [Status] int NOT NULL,
+        [Details] nvarchar(max) NOT NULL,
+        [Notes] nvarchar(4000) NULL,
+        [Location] nvarchar(500) NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_HrLegalCaseHearings] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_HrLegalCaseHearings_Number] CHECK ([HearingNumber] > 0),
+        CONSTRAINT [FK_HrLegalCaseHearings_HrLegalCases_LegalCaseId] FOREIGN KEY ([LegalCaseId]) REFERENCES [app].[HrLegalCases] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260919110051_AddHrLegalCases'
+)
+BEGIN
+    CREATE TABLE [app].[HrLegalCaseHearingFiles] (
+        [Id] uniqueidentifier NOT NULL,
+        [HearingId] uniqueidentifier NOT NULL,
+        [OriginalFileName] nvarchar(255) NOT NULL,
+        [StoredFileName] nvarchar(255) NOT NULL,
+        [StoragePath] nvarchar(1000) NOT NULL,
+        [ContentType] nvarchar(100) NOT NULL,
+        [FileSizeBytes] bigint NOT NULL,
+        [Sha256Checksum] nchar(64) NOT NULL,
+        [Description] nvarchar(1000) NULL,
+        [UploadedByUserId] uniqueidentifier NOT NULL,
+        [UploadedAtUtc] datetimeoffset NOT NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_HrLegalCaseHearingFiles] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_HrLegalCaseHearingFiles_Size] CHECK ([FileSizeBytes] > 0),
+        CONSTRAINT [FK_HrLegalCaseHearingFiles_HrLegalCaseHearings_HearingId] FOREIGN KEY ([HearingId]) REFERENCES [app].[HrLegalCaseHearings] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260919110051_AddHrLegalCases'
+)
+BEGIN
+    CREATE TABLE [app].[HrLegalCaseHistory] (
+        [Id] uniqueidentifier NOT NULL,
+        [LegalCaseId] uniqueidentifier NOT NULL,
+        [HearingId] uniqueidentifier NULL,
+        [ChangeType] nvarchar(100) NOT NULL,
+        [ChangedFieldsJson] nvarchar(max) NOT NULL,
+        [BeforeJson] nvarchar(max) NULL,
+        [AfterJson] nvarchar(max) NOT NULL,
+        [ChangeReason] nvarchar(1000) NOT NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        CONSTRAINT [PK_HrLegalCaseHistory] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_HrLegalCaseHistory_After] CHECK (ISJSON([AfterJson]) = 1),
+        CONSTRAINT [CK_HrLegalCaseHistory_Before] CHECK ([BeforeJson] IS NULL OR ISJSON([BeforeJson]) = 1),
+        CONSTRAINT [CK_HrLegalCaseHistory_ChangedFields] CHECK (ISJSON([ChangedFieldsJson]) = 1),
+        CONSTRAINT [FK_HrLegalCaseHistory_HrLegalCaseHearings_HearingId] FOREIGN KEY ([HearingId]) REFERENCES [app].[HrLegalCaseHearings] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_HrLegalCaseHistory_HrLegalCases_LegalCaseId] FOREIGN KEY ([LegalCaseId]) REFERENCES [app].[HrLegalCases] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260919110051_AddHrLegalCases'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Category', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'DescriptionAr', N'DescriptionEn', N'DisplayOrder', N'GrantabilityRule', N'IsDeleted', N'IsDeprecated', N'IsHighTrust', N'IsSensitive', N'Key', N'NameAr', N'NameEn', N'ReplacementKey', N'RequiresClientScope', N'RequiresHousingScope', N'UpdatedAtUtc', N'UpdatedByUserId', N'Version') AND [object_id] = OBJECT_ID(N'[platform].[PermissionDefinitions]'))
+        SET IDENTITY_INSERT [platform].[PermissionDefinitions] ON;
+    EXEC(N'INSERT INTO [platform].[PermissionDefinitions] ([Id], [Category], [CreatedAtUtc], [CreatedByUserId], [DeletedAtUtc], [DeletedByUserId], [DeletionReason], [DescriptionAr], [DescriptionEn], [DisplayOrder], [GrantabilityRule], [IsDeleted], [IsDeprecated], [IsHighTrust], [IsSensitive], [Key], [NameAr], [NameEn], [ReplacementKey], [RequiresClientScope], [RequiresHousingScope], [UpdatedAtUtc], [UpdatedByUserId], [Version])
+    VALUES (''019c18d5-62e1-7000-a000-000000000117'', N''Workflows'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''عرض قضايا الموارد البشرية والجلسات وسجل التغييرات.'', N''View HR legal cases, hearings, and immutable change history.'', 117, N''SENSITIVE_DATA'', CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), N''legal_cases.read'', N''عرض القضايا القانونية'', N''Read legal cases'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000118'', N''Workflows'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''إنشاء وتعديل وأرشفة القضايا والجلسات ورفع الملفات.'', N''Create, update, and archive legal cases and hearings, and upload files.'', 118, N''SENSITIVE_DATA'', CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), N''legal_cases.manage'', N''إدارة القضايا القانونية'', N''Manage legal cases'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000119'', N''Workflows'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''تنزيل ملفات جلسات القضايا الخاصة.'', N''Download private legal-case hearing files.'', 119, N''HIGH_TRUST_ONLY'', CAST(0 AS bit), CAST(0 AS bit), CAST(1 AS bit), CAST(1 AS bit), N''legal_cases.files.download'', N''تنزيل ملفات القضايا'', N''Download legal case files'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1)');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Category', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'DescriptionAr', N'DescriptionEn', N'DisplayOrder', N'GrantabilityRule', N'IsDeleted', N'IsDeprecated', N'IsHighTrust', N'IsSensitive', N'Key', N'NameAr', N'NameEn', N'ReplacementKey', N'RequiresClientScope', N'RequiresHousingScope', N'UpdatedAtUtc', N'UpdatedByUserId', N'Version') AND [object_id] = OBJECT_ID(N'[platform].[PermissionDefinitions]'))
+        SET IDENTITY_INSERT [platform].[PermissionDefinitions] OFF;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260919110051_AddHrLegalCases'
+)
+BEGIN
+    CREATE INDEX [IX_HrLegalCaseHearingFiles_HearingId_UploadedAtUtc] ON [app].[HrLegalCaseHearingFiles] ([HearingId], [UploadedAtUtc]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260919110051_AddHrLegalCases'
+)
+BEGIN
+    CREATE INDEX [IX_HrLegalCaseHearingFiles_IsDeleted] ON [app].[HrLegalCaseHearingFiles] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260919110051_AddHrLegalCases'
+)
+BEGIN
+    CREATE INDEX [IX_HrLegalCaseHearings_IsDeleted] ON [app].[HrLegalCaseHearings] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260919110051_AddHrLegalCases'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_HrLegalCaseHearings_LegalCaseId_HearingNumber] ON [app].[HrLegalCaseHearings] ([LegalCaseId], [HearingNumber]) WHERE [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260919110051_AddHrLegalCases'
+)
+BEGIN
+    CREATE INDEX [IX_HrLegalCaseHearings_Status_HearingDate_HearingTime] ON [app].[HrLegalCaseHearings] ([Status], [HearingDate], [HearingTime]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260919110051_AddHrLegalCases'
+)
+BEGIN
+    CREATE INDEX [IX_HrLegalCaseHistory_HearingId] ON [app].[HrLegalCaseHistory] ([HearingId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260919110051_AddHrLegalCases'
+)
+BEGIN
+    CREATE INDEX [IX_HrLegalCaseHistory_LegalCaseId_CreatedAtUtc] ON [app].[HrLegalCaseHistory] ([LegalCaseId], [CreatedAtUtc]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260919110051_AddHrLegalCases'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_HrLegalCases_CaseNumber] ON [app].[HrLegalCases] ([CaseNumber]) WHERE [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260919110051_AddHrLegalCases'
+)
+BEGIN
+    CREATE INDEX [IX_HrLegalCases_EmployeeId] ON [app].[HrLegalCases] ([EmployeeId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260919110051_AddHrLegalCases'
+)
+BEGIN
+    CREATE INDEX [IX_HrLegalCases_IsDeleted] ON [app].[HrLegalCases] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260919110051_AddHrLegalCases'
+)
+BEGIN
+    CREATE INDEX [IX_HrLegalCases_ResponsibleUserId] ON [app].[HrLegalCases] ([ResponsibleUserId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260919110051_AddHrLegalCases'
+)
+BEGIN
+    CREATE INDEX [IX_HrLegalCases_RiderProfileId] ON [app].[HrLegalCases] ([RiderProfileId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260919110051_AddHrLegalCases'
+)
+BEGIN
+    CREATE INDEX [IX_HrLegalCases_SponsorId] ON [app].[HrLegalCases] ([SponsorId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260919110051_AddHrLegalCases'
+)
+BEGIN
+    CREATE INDEX [IX_HrLegalCases_Status_CaseDate_CaseTime] ON [app].[HrLegalCases] ([Status], [CaseDate], [CaseTime]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260919110051_AddHrLegalCases'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260919110051_AddHrLegalCases', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260919145503_IntegrateVehicleDailyMileage'
+)
+BEGIN
+    ALTER TABLE [app].[VehicleDailyDistances] DROP CONSTRAINT [CK_VehicleDailyDistances_ManualOdometer];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260919145503_IntegrateVehicleDailyMileage'
+)
+BEGIN
+    DECLARE @var38 nvarchar(max);
+    SELECT @var38 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[app].[VehicleDailyDistances]') AND [c].[name] = N'ManualBaselineOdometerReading');
+    IF @var38 IS NOT NULL EXEC(N'ALTER TABLE [app].[VehicleDailyDistances] DROP CONSTRAINT ' + @var38 + ';');
+    ALTER TABLE [app].[VehicleDailyDistances] ALTER COLUMN [ManualBaselineOdometerReading] decimal(18,2) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260919145503_IntegrateVehicleDailyMileage'
+)
+BEGIN
+    ALTER TABLE [app].[VehicleDailyDistances] ADD [EffectiveOdometerAfterKm] decimal(18,2) NOT NULL DEFAULT 0.0;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260919145503_IntegrateVehicleDailyMileage'
+)
+BEGIN
+    UPDATE [app].[Vehicles]
+    SET [TrackedDistanceKm] = CONVERT(decimal(18,2), [CurrentOdometer])
+    WHERE [TrackedDistanceKm] < CONVERT(decimal(18,2), [CurrentOdometer]);
+
+    WITH [Mileage] AS
+    (
+        SELECT
+            [d].[Id],
+            [v].[TrackedDistanceKm]
+                - SUM([d].[AppliedDistanceKm]) OVER (PARTITION BY [d].[VehicleId])
+                + SUM([d].[AppliedDistanceKm]) OVER (
+                    PARTITION BY [d].[VehicleId]
+                    ORDER BY [d].[WorkDate], [d].[Id]
+                    ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS [EffectiveOdometerAfterKm]
+        FROM [app].[VehicleDailyDistances] AS [d]
+        INNER JOIN [app].[Vehicles] AS [v] ON [v].[Id] = [d].[VehicleId]
+        WHERE [d].[IsDeleted] = 0
+    )
+    UPDATE [d]
+    SET [EffectiveOdometerAfterKm] =
+        CASE WHEN [m].[EffectiveOdometerAfterKm] < 0 THEN 0 ELSE [m].[EffectiveOdometerAfterKm] END
+    FROM [app].[VehicleDailyDistances] AS [d]
+    INNER JOIN [Mileage] AS [m] ON [m].[Id] = [d].[Id];
+
+    UPDATE [app].[Vehicles]
+    SET [CurrentOdometer] = CONVERT(bigint, FLOOR([TrackedDistanceKm]));
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260919145503_IntegrateVehicleDailyMileage'
+)
+BEGIN
+    EXEC(N'ALTER TABLE [app].[VehicleDailyDistances] ADD CONSTRAINT [CK_VehicleDailyDistances_EffectiveOdometer] CHECK ([EffectiveOdometerAfterKm] >= 0)');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260919145503_IntegrateVehicleDailyMileage'
+)
+BEGIN
+    EXEC(N'ALTER TABLE [app].[VehicleDailyDistances] ADD CONSTRAINT [CK_VehicleDailyDistances_ManualOdometer] CHECK ([ManualOdometerReading] IS NULL OR ([ManualBaselineOdometerReading] IS NOT NULL AND [ManualOdometerReading] >= [ManualBaselineOdometerReading]))');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260919145503_IntegrateVehicleDailyMileage'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260919145503_IntegrateVehicleDailyMileage', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260919204145_AllowMotorcycleOperationCardsAndRepeatedNumbers'
+)
+BEGIN
+    DROP INDEX [IX_VehicleOperationCards_VehicleId_CardNumber] ON [app].[VehicleOperationCards];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260919204145_AllowMotorcycleOperationCardsAndRepeatedNumbers'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260919204145_AllowMotorcycleOperationCardsAndRepeatedNumbers', N'10.0.11');
+END;
+
+COMMIT;
+GO
+

@@ -68,7 +68,41 @@ public sealed record AuditEntryResponse(
     string? BeforeJson,
     string? AfterJson,
     string Source,
-    int SchemaVersion);
+    int SchemaVersion,
+    AuditActorResponse? Actor = null,
+    AuditRecordResponse? Record = null,
+    IReadOnlyList<AuditFieldChangeResponse>? Changes = null,
+    AuditRequestDetailsResponse? Request = null);
+
+/// <summary>Safe identity details for the person or system that performed an audited action.</summary>
+public sealed record AuditActorResponse(
+    Guid? UserId,
+    string ActorType,
+    string? UserName,
+    string? DisplayNameAr,
+    string? DisplayNameEn,
+    Guid? EmployeeId,
+    string? Status);
+
+/// <summary>The business record affected by an audit event.</summary>
+public sealed record AuditRecordResponse(
+    string EntityType,
+    Guid? EntityId,
+    string? DisplayLabel,
+    string? DisplayCode);
+
+/// <summary>A single non-sensitive property change, including its before and after values.</summary>
+public sealed record AuditFieldChangeResponse(string Field, object? Before, object? After);
+
+/// <summary>Technical request context retained with an audit event when available.</summary>
+public sealed record AuditRequestDetailsResponse(
+    Guid? SessionId,
+    Guid? SupportAccessGrantId,
+    string CorrelationId,
+    string? TraceId,
+    string? IpAddress,
+    string? UserAgent,
+    string Source);
 
 public sealed record AuditQuery(
     Guid? ActorUserId,

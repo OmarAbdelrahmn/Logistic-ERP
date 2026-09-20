@@ -125,7 +125,7 @@ internal sealed class EmployeeExpiryComplianceService(
         if (query.OperatingCityId.HasValue) employees = employees.Where(item => item.OperatingCityId == query.OperatingCityId.Value);
         if (query.SponsorId.HasValue) employees = employees.Where(item => item.SponsorId == query.SponsorId.Value);
 
-        var employeeRows = await employees.Select(item => new EmployeeProjection(item.Id, item.FullNameAr, item.Status)).ToArrayAsync(cancellationToken);
+        var employeeRows = await employees.Select(item => new EmployeeProjection(item.Id, item.FullNameAr, item.Status, item.EngagementType)).ToArrayAsync(cancellationToken);
         if (employeeRows.Length == 0) return [];
 
         var employeeById = employeeRows.ToDictionary(item => item.Id);
@@ -162,6 +162,50 @@ internal sealed class EmployeeExpiryComplianceService(
             candidates.Add(NewCandidate(employeeById[row.document.EmployeeId], riderByEmployeeId.GetValueOrDefault(row.document.EmployeeId),
                 EmployeeExpiryComplianceSourceType.EmployeeDocument, row.document.Id, row.type.Code, row.type.NameAr, row.type.NameEn,
                 MaskReference(row.document.DocumentNumber), row.document.Status.ToString(), row.document.ExpiryDate, row.document.Id));
+        }
+
+        var activeDocumentTypeIdsByEmployee = await dbContext.EmployeeDocuments.AsNoTracking()
+            .Where(item => employeeIds.Contains(item.EmployeeId) && item.Status == DocumentStatus.Active)
+            .Select(item => new { item.EmployeeId, item.DocumentTypeId })
+            .ToArrayAsync(cancellationToken);
+        var activeDocumentTypesByEmployee = activeDocumentTypeIdsByEmployee
+            .GroupBy(item => item.EmployeeId)
+            .ToDictionary(group => group.Key, group => group.Select(item => item.DocumentTypeId).ToHashSet());
+
+        var requiredDocumentTypes = await (from requirement in dbContext.DocumentRequirements.AsNoTracking()
+                                           join type in dbContext.DocumentTypes.AsNoTracking() on requirement.DocumentTypeId equals type.Id
+                                           where requirement.Status == CatalogStatus.Active
+                                               && type.Status == CatalogStatus.Active
+                                               && requirement.IsRequired
+                                               && requirement.EffectiveFrom <= checkDate
+                                               && (requirement.EffectiveTo == null || requirement.EffectiveTo >= checkDate)
+                                           select new RequiredDocumentTypeProjection(
+                                               type.Id,
+                                               type.Code,
+                                               type.NameAr,
+                                               type.NameEn,
+                                               type.AppliesToSponsoredInternal,
+                                               type.AppliesToOutsideRider,
+                                               type.AppliesToRiderProfile,
+                                               requirement.RelationshipType,
+                                               requirement.AppliesToRiderProfile))
+            .ToArrayAsync(cancellationToken);
+
+        foreach (var employee in employeeRows)
+        {
+            var riderProfileId = riderByEmployeeId.GetValueOrDefault(employee.Id);
+            var activeDocumentTypeIds = activeDocumentTypesByEmployee.GetValueOrDefault(employee.Id) ?? [];
+            foreach (var type in requiredDocumentTypes
+                         .Where(type => IsRequiredDocumentApplicable(type, employee.EngagementType, riderProfileId.HasValue))
+                         .GroupBy(type => type.Id)
+                         .Select(group => group.First())
+                         .Where(type => !activeDocumentTypeIds.Contains(type.Id)))
+            {
+                // No source document exists yet, so use the document type as a stable source identity.
+                candidates.Add(NewCandidate(employee, riderProfileId,
+                    EmployeeExpiryComplianceSourceType.EmployeeDocument, type.Id, type.Code, type.NameAr, type.NameEn,
+                    null, "Missing", null, null));
+            }
         }
 
         var licenses = await (from license in dbContext.EmployeeDriverLicenses.AsNoTracking()
@@ -277,13 +321,13 @@ internal sealed class EmployeeExpiryComplianceService(
     };
 
     private static string MessageAr(EmployeeExpiryComplianceItemResponse item, bool missing, bool expired) => missing
-        ? $"لا يوجد تاريخ انتهاء مطلوب لـ {item.CategoryNameAr} للموظف {item.EmployeeNameAr}."
+        ? $"الوثيقة المطلوبة أو تاريخ انتهائها غير متوفر لـ {item.CategoryNameAr} للموظف {item.EmployeeNameAr}."
         : expired
             ? $"انتهى {item.CategoryNameAr} للموظف {item.EmployeeNameAr} بتاريخ {item.ExpiryDate:yyyy-MM-dd}."
             : $"ينتهي {item.CategoryNameAr} للموظف {item.EmployeeNameAr} خلال {item.DaysRemaining} يوم/أيام.";
 
     private static string MessageEn(EmployeeExpiryComplianceItemResponse item, bool missing, bool expired) => missing
-        ? $"A required expiry date is missing for {item.CategoryNameEn} of {item.EmployeeNameAr}."
+        ? $"A required document or expiry date is missing for {item.CategoryNameEn} of {item.EmployeeNameAr}."
         : expired
             ? $"{item.CategoryNameEn} for {item.EmployeeNameAr} expired on {item.ExpiryDate:yyyy-MM-dd}."
             : $"{item.CategoryNameEn} for {item.EmployeeNameAr} expires in {item.DaysRemaining} day(s).";
@@ -298,8 +342,28 @@ internal sealed class EmployeeExpiryComplianceService(
         _ => ("بطاقة رايدر", "Rider card")
     };
 
-    private sealed record EmployeeProjection(Guid Id, string FullNameAr, EmployeeStatus Status);
+    private static bool IsRequiredDocumentApplicable(
+        RequiredDocumentTypeProjection type,
+        EmployeeRelationshipType relationshipType,
+        bool hasRiderProfile) =>
+        (type.RelationshipType is null || type.RelationshipType == relationshipType)
+        && (!type.RequirementAppliesToRiderProfile || hasRiderProfile)
+        && (relationshipType == EmployeeRelationshipType.SponsoredInternal && type.AppliesToSponsoredInternal
+            || relationshipType == EmployeeRelationshipType.OutsideRider && type.AppliesToOutsideRider
+            || hasRiderProfile && type.AppliesToRiderProfile);
+
+    private sealed record EmployeeProjection(Guid Id, string FullNameAr, EmployeeStatus Status, EmployeeRelationshipType EngagementType);
     private sealed record RiderProjection(Guid Id, Guid EmployeeId);
+    private sealed record RequiredDocumentTypeProjection(
+        Guid Id,
+        string Code,
+        string NameAr,
+        string NameEn,
+        bool AppliesToSponsoredInternal,
+        bool AppliesToOutsideRider,
+        bool AppliesToRiderProfile,
+        EmployeeRelationshipType? RelationshipType,
+        bool RequirementAppliesToRiderProfile);
     private sealed record NotificationRecipient(Guid Id, long AuthorizationVersion);
     private sealed record ExpiryCandidate(Guid EmployeeId, Guid? RiderProfileId, string EmployeeNameAr, string EmployeeStatus,
         EmployeeExpiryComplianceSourceType SourceType, Guid SourceId, string CategoryCode, string CategoryNameAr, string CategoryNameEn,

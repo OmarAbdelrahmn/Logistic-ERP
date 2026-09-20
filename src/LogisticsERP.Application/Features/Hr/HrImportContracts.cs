@@ -15,6 +15,12 @@ public interface IHrExcelImportService
         string fileName,
         bool validateOnly,
         CancellationToken cancellationToken = default);
+
+    Task<Result<HrEmployeeStatusImportResponse>> UpdateStatusesAsync(
+        Stream content,
+        string fileName,
+        bool validateOnly,
+        CancellationToken cancellationToken = default);
 }
 
 public sealed record HrExcelImportResponse(
@@ -53,6 +59,19 @@ public sealed record HrPhoneNumberImportResponse(
     int UnchangedPhoneNumbers,
     IReadOnlyList<HrExcelImportIssue> Issues);
 
+public sealed record HrEmployeeStatusImportResponse(
+    bool ValidateOnly,
+    bool CanUpdate,
+    bool Updated,
+    string Worksheet,
+    int TotalRows,
+    int ValidRows,
+    int MatchedEmployees,
+    int MatchedRiders,
+    int ChangedStatuses,
+    int UnchangedStatuses,
+    IReadOnlyList<HrExcelImportIssue> Issues);
+
 public static class HrImportErrors
 {
     public static readonly OperationError InvalidWorkbook = new(
@@ -73,5 +92,15 @@ public static class HrImportErrors
     public static readonly OperationError PhoneNumberUpdateFailed = new(
         "hr_phone_import.failed",
         "The employee and rider phone numbers could not be updated. No partial database changes were committed.",
+        ErrorType.Conflict);
+
+    public static readonly OperationError InvalidEmployeeStatusWorkbook = new(
+        "hr_status_import.invalid_workbook",
+        "The uploaded workbook is invalid or does not contain Iqama and numeric employee-status rows in its first two columns.",
+        ErrorType.Validation);
+
+    public static readonly OperationError EmployeeStatusUpdateFailed = new(
+        "hr_status_import.failed",
+        "The employee and rider statuses could not be updated. No partial database changes were committed.",
         ErrorType.Conflict);
 }

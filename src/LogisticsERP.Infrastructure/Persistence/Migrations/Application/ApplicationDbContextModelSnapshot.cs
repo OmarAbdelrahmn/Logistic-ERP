@@ -2711,6 +2711,10 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<decimal>("EffectiveOdometerAfterKm")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<decimal?>("GpsDistanceKm")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
@@ -2731,8 +2735,9 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<Guid?>("LastGpsImportId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<long?>("ManualBaselineOdometerReading")
-                        .HasColumnType("bigint");
+                    b.Property<decimal?>("ManualBaselineOdometerReading")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal?>("ManualDistanceKm")
                         .HasPrecision(18, 2)
@@ -2784,6 +2789,8 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.ToTable("VehicleDailyDistances", "app", t =>
                         {
                             t.HasCheckConstraint("CK_VehicleDailyDistances_AppliedDistance", "[AppliedDistanceKm] >= 0");
+
+                            t.HasCheckConstraint("CK_VehicleDailyDistances_EffectiveOdometer", "[EffectiveOdometerAfterKm] >= 0");
 
                             t.HasCheckConstraint("CK_VehicleDailyDistances_GpsDistance", "[GpsDistanceKm] IS NULL OR [GpsDistanceKm] >= 0");
 
@@ -3539,9 +3546,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .HasFilter("[IsCurrent] = 1 AND [IsDeleted] = 0");
 
                     b.HasIndex("ExpiryDate", "IsCurrent");
-
-                    b.HasIndex("VehicleId", "CardNumber")
-                        .IsUnique();
 
                     b.ToTable("VehicleOperationCards", "app", t =>
                         {
@@ -10700,6 +10704,69 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                             RequiresHousingScope = false,
                             RowVersion = new byte[0],
                             Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000117"),
+                            Category = "Workflows",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "عرض قضايا الموارد البشرية والجلسات وسجل التغييرات.",
+                            DescriptionEn = "View HR legal cases, hearings, and immutable change history.",
+                            DisplayOrder = 117,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "legal_cases.read",
+                            NameAr = "عرض القضايا القانونية",
+                            NameEn = "Read legal cases",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000118"),
+                            Category = "Workflows",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "إنشاء وتعديل وأرشفة القضايا والجلسات ورفع الملفات.",
+                            DescriptionEn = "Create, update, and archive legal cases and hearings, and upload files.",
+                            DisplayOrder = 118,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "legal_cases.manage",
+                            NameAr = "إدارة القضايا القانونية",
+                            NameEn = "Manage legal cases",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000119"),
+                            Category = "Workflows",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "تنزيل ملفات جلسات القضايا الخاصة.",
+                            DescriptionEn = "Download private legal-case hearing files.",
+                            DisplayOrder = 119,
+                            GrantabilityRule = "HIGH_TRUST_ONLY",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = true,
+                            IsSensitive = true,
+                            Key = "legal_cases.files.download",
+                            NameAr = "تنزيل ملفات القضايا",
+                            NameEn = "Download legal case files",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
                         });
                 });
 
@@ -12797,6 +12864,336 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.ToTable("HrFormTemplateVersions", "app", t =>
                         {
                             t.HasCheckConstraint("CK_HrFormTemplateVersions_VersionNumbers", "[VersionNumber] > 0 AND [DefinitionSchemaVersion] > 0");
+                        });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Workforce.HrLegalCase", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly>("CaseDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("CaseNumber")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<TimeOnly>("CaseTime")
+                        .HasColumnType("time");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Details")
+                        .IsRequired()
+                        .HasMaxLength(8000)
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("EmployeeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<string>("PersonName")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<int>("PersonType")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("ResponsibleUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("RiderProfileId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<Guid>("SponsorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("SponsorPartyRole")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CaseNumber")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.HasIndex("EmployeeId");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("ResponsibleUserId");
+
+                    b.HasIndex("RiderProfileId");
+
+                    b.HasIndex("SponsorId");
+
+                    b.HasIndex("Status", "CaseDate", "CaseTime");
+
+                    b.ToTable("HrLegalCases", "app", t =>
+                        {
+                            t.HasCheckConstraint("CK_HrLegalCases_PersonReference", "([PersonType] = 1 AND [EmployeeId] IS NOT NULL AND [RiderProfileId] IS NULL) OR ([PersonType] = 2 AND [EmployeeId] IS NULL AND [RiderProfileId] IS NOT NULL) OR ([PersonType] = 3 AND [EmployeeId] IS NULL AND [RiderProfileId] IS NULL)");
+                        });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Workforce.HrLegalCaseHearing", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Details")
+                        .IsRequired()
+                        .HasMaxLength(8000)
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateOnly>("HearingDate")
+                        .HasColumnType("date");
+
+                    b.Property<int>("HearingNumber")
+                        .HasColumnType("int");
+
+                    b.Property<TimeOnly>("HearingTime")
+                        .HasColumnType("time");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("LegalCaseId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Location")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("LegalCaseId", "HearingNumber")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.HasIndex("Status", "HearingDate", "HearingTime");
+
+                    b.ToTable("HrLegalCaseHearings", "app", t =>
+                        {
+                            t.HasCheckConstraint("CK_HrLegalCaseHearings_Number", "[HearingNumber] > 0");
+                        });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Workforce.HrLegalCaseHearingFile", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<long>("FileSizeBytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<Guid>("HearingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("OriginalFileName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<string>("Sha256Checksum")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nchar(64)")
+                        .IsFixedLength();
+
+                    b.Property<string>("StoragePath")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("StoredFileName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("UploadedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("UploadedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("HearingId", "UploadedAtUtc");
+
+                    b.ToTable("HrLegalCaseHearingFiles", "app", t =>
+                        {
+                            t.HasCheckConstraint("CK_HrLegalCaseHearingFiles_Size", "[FileSizeBytes] > 0");
+                        });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Workforce.HrLegalCaseHistory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AfterJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("BeforeJson")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ChangeReason")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("ChangeType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("ChangedFieldsJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("HearingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("LegalCaseId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HearingId");
+
+                    b.HasIndex("LegalCaseId", "CreatedAtUtc");
+
+                    b.ToTable("HrLegalCaseHistory", "app", t =>
+                        {
+                            t.HasCheckConstraint("CK_HrLegalCaseHistory_After", "ISJSON([AfterJson]) = 1");
+
+                            t.HasCheckConstraint("CK_HrLegalCaseHistory_Before", "[BeforeJson] IS NULL OR ISJSON([BeforeJson]) = 1");
+
+                            t.HasCheckConstraint("CK_HrLegalCaseHistory_ChangedFields", "ISJSON([ChangedFieldsJson]) = 1");
                         });
                 });
 
@@ -16760,6 +17157,57 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.HasOne("LogisticsERP.Domain.Entities.Workforce.HrFormTemplate", null)
                         .WithMany()
                         .HasForeignKey("HrFormTemplateId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Workforce.HrLegalCase", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.Employee", null)
+                        .WithMany()
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.RiderProfile", null)
+                        .WithMany()
+                        .HasForeignKey("RiderProfileId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.Sponsor", null)
+                        .WithMany()
+                        .HasForeignKey("SponsorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Workforce.HrLegalCaseHearing", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.HrLegalCase", null)
+                        .WithMany()
+                        .HasForeignKey("LegalCaseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Workforce.HrLegalCaseHearingFile", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.HrLegalCaseHearing", null)
+                        .WithMany()
+                        .HasForeignKey("HearingId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Workforce.HrLegalCaseHistory", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.HrLegalCaseHearing", null)
+                        .WithMany()
+                        .HasForeignKey("HearingId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.HrLegalCase", null)
+                        .WithMany()
+                        .HasForeignKey("LegalCaseId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });

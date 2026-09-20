@@ -79,7 +79,9 @@ public sealed record VehicleSummaryResponse(
     DateOnly? OperationCardExpiryDate,
     VehicleComplianceDueStatus OperationCardStatus,
     bool IsReadyForAssignment,
-    string RowVersion);
+    string RowVersion,
+    bool RegistrationFileUploaded = false,
+    bool OperationCardFileUploaded = false);
 
 public sealed record VehicleDetailResponse(
     VehicleSummaryResponse Summary,
@@ -139,7 +141,19 @@ public sealed record VehicleInsuranceRequest(string ProviderName, string PolicyN
 public sealed record VehicleInspectionRequest(string InspectionNumber, string StationName, DateOnly InspectionDate, DateOnly ExpiryDate, VehicleInspectionResult Result, long? Odometer, string? FailureNotes, string? Notes);
 public sealed record VehicleOperationCardRequest(string CardNumber, string IssuingAuthority, DateOnly IssueDate, DateOnly ExpiryDate, string? Notes);
 public sealed record VehicleComplianceResponse(Guid Id, Guid VehicleId, string Type, string Number, string Issuer, DateOnly EffectiveFrom, DateOnly ExpiryDate, VehicleComplianceDueStatus DueStatus, bool IsCurrent, Guid? PreviousRecordId, string RowVersion);
-public sealed record VehicleComplianceDueResponse(Guid VehicleId, string AssetNumber, string Type, Guid? RecordId, DateOnly? ExpiryDate, VehicleComplianceDueStatus Status, int? DaysRemaining);
+public sealed record VehicleComplianceUploadedFileResponse(Guid AttachmentId, Guid VersionId, string OriginalFileName, string ContentType, long FileSizeBytes, DateTimeOffset UploadedAtUtc);
+public sealed record VehicleComplianceDueResponse(
+    Guid VehicleId,
+    string AssetNumber,
+    string Type,
+    Guid? RecordId,
+    DateOnly? EffectiveFrom,
+    DateOnly? ExpiryDate,
+    VehicleComplianceDueStatus DateStatus,
+    VehicleComplianceDueStatus Status,
+    int? DaysRemaining,
+    bool HasUploadedFile,
+    VehicleComplianceUploadedFileResponse? UploadedFile);
 
 public sealed record VehicleAttachmentResponse(Guid Id, Guid VehicleId, VehicleFileKind Kind, string DisplayName, Guid? CurrentVersionId, int? CurrentVersionNumber, string? OriginalFileName, string? ContentType, long? FileSizeBytes, bool IsLegacy, string RowVersion);
 public sealed record VehicleAttachmentVersionResponse(Guid Id, Guid VehicleAttachmentId, int VersionNumber, string OriginalFileName, string ContentType, long FileSizeBytes, string Sha256Checksum, DateTimeOffset UploadedAtUtc);

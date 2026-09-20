@@ -121,10 +121,6 @@ internal sealed class VehicleDailyDistanceService(
             return Result.Failure<VehicleDailyDistanceResponse>(FleetErrors.NotFound);
         }
 
-        var manualRecords = await dbContext.VehicleDailyDistances
-            .Where(x => x.VehicleId == vehicleId && x.ManualOdometerReading != null)
-            .OrderBy(x => x.WorkDate)
-            .ToListAsync(cancellationToken);
         var current = await dbContext.VehicleDailyDistances
             .SingleOrDefaultAsync(x => x.VehicleId == vehicleId && x.WorkDate == workDate, cancellationToken);
 
@@ -133,74 +129,50 @@ internal sealed class VehicleDailyDistanceService(
             return Result.Failure<VehicleDailyDistanceResponse>(FleetErrors.ConcurrencyConflict);
         }
 
-        var previousManual = manualRecords.LastOrDefault(x => x.WorkDate < workDate);
-        var nextManual = manualRecords.FirstOrDefault(x => x.WorkDate > workDate);
-        var baseline = previousManual?.ManualOdometerReading
-            ?? await ResolveInitialBaselineAsync(vehicle, workDate, request.BaselineOdometerReading, cancellationToken);
-
-        if (!baseline.HasValue)
-        {
-            return Result.Failure<VehicleDailyDistanceResponse>(FleetErrors.ManualBaselineRequired);
-        }
-
-        if (request.OdometerReading < baseline.Value
-            || nextManual?.ManualOdometerReading is { } nextReading && nextReading < request.OdometerReading)
-        {
-            return Result.Failure<VehicleDailyDistanceResponse>(FleetErrors.InvalidManualOdometer);
-        }
-
         var isNew = current is null;
         current ??= new VehicleDailyDistance
         {
+            Id = Guid.CreateVersion7(),
             VehicleId = vehicleId,
             WorkDate = workDate
         };
 
         current.ManualOdometerReading = request.OdometerReading;
-        current.ManualBaselineOdometerReading = baseline.Value;
-        current.ManualDistanceKm = VehicleDailyDistanceRules.CalculateManualDistance(baseline.Value, request.OdometerReading);
         current.ManualEnteredAtUtc = support.UtcNow;
         current.ManualEnteredByUserId = actor.Value;
         current.ManualNotes = FleetServiceSupport.TrimOrNull(request.Notes);
-        ApplyEffectiveDistance(vehicle, current);
 
         if (isNew)
         {
             dbContext.VehicleDailyDistances.Add(current);
-            manualRecords.Add(current);
         }
 
-        var followingRecords = manualRecords
-            .Where(x => x.WorkDate > workDate)
-            .OrderBy(x => x.WorkDate)
-            .ToArray();
-        var runningBaseline = request.OdometerReading;
-        foreach (var following in followingRecords)
+        var hasEarlierDailyRecord = await dbContext.VehicleDailyDistances
+            .AnyAsync(x => x.VehicleId == vehicleId && x.WorkDate < workDate, cancellationToken);
+        var explicitBaseline = hasEarlierDailyRecord ? null : request.BaselineOdometerReading;
+        if (!hasEarlierDailyRecord
+            && !explicitBaseline.HasValue
+            && !await HasBaselineBeforeAsync(vehicle, workDate, cancellationToken))
         {
-            following.ManualBaselineOdometerReading = runningBaseline;
-            following.ManualDistanceKm = VehicleDailyDistanceRules.CalculateManualDistance(
-                runningBaseline,
-                following.ManualOdometerReading!.Value);
-            runningBaseline = following.ManualOdometerReading.Value;
-            ApplyEffectiveDistance(vehicle, following);
+            return Result.Failure<VehicleDailyDistanceResponse>(FleetErrors.ManualBaselineRequired);
+        }
+
+        var recalculation = await RecalculateMileageAsync(vehicle, workDate, explicitBaseline, cancellationToken);
+        if (recalculation.IsFailure)
+        {
+            return Result.Failure<VehicleDailyDistanceResponse>(recalculation.Error);
         }
 
         var recordedAt = EndOfWorkDateUtc(workDate);
-        if (request.OdometerReading > vehicle.CurrentOdometer
-            && (!vehicle.LastOdometerAtUtc.HasValue || recordedAt >= vehicle.LastOdometerAtUtc.Value))
+        dbContext.VehicleOdometerReadings.Add(new VehicleOdometerReading
         {
-            vehicle.CurrentOdometer = request.OdometerReading;
-            vehicle.LastOdometerAtUtc = recordedAt;
-            dbContext.VehicleOdometerReadings.Add(new VehicleOdometerReading
-            {
-                VehicleId = vehicle.Id,
-                Reading = request.OdometerReading,
-                RecordedAtUtc = recordedAt,
-                SourceType = VehicleOdometerSourceType.Manual,
-                SourceEntityId = current.Id,
-                Notes = $"قراءة العداد اليدوية للمسافة اليومية بتاريخ {workDate:yyyy-MM-dd}."
-            });
-        }
+            VehicleId = vehicle.Id,
+            Reading = request.OdometerReading,
+            RecordedAtUtc = recordedAt,
+            SourceType = VehicleOdometerSourceType.Manual,
+            SourceEntityId = current.Id,
+            Notes = $"قراءة العداد اليدوية للمسافة اليومية بتاريخ {workDate:yyyy-MM-dd}."
+        });
 
         try
         {
@@ -281,6 +253,7 @@ internal sealed class VehicleDailyDistanceService(
             .ToDictionaryAsync(x => x.VehicleId, cancellationToken);
         var import = new VehicleDailyDistanceImport
         {
+            Id = Guid.CreateVersion7(),
             WorkDate = report.WorkDate,
             PeriodStartUtc = report.PeriodStartUtc,
             PeriodEndUtc = report.PeriodEndUtc,
@@ -294,6 +267,7 @@ internal sealed class VehicleDailyDistanceService(
         };
         var errors = new List<GpsDistanceImportRowError>();
         var seenPlates = new HashSet<string>(StringComparer.Ordinal);
+        var affectedVehicles = new Dictionary<Guid, Vehicle>();
 
         foreach (var row in report.Rows)
         {
@@ -340,6 +314,7 @@ internal sealed class VehicleDailyDistanceService(
             var isNew = !existingRecords.TryGetValue(vehicle.Id, out var distance);
             distance ??= new VehicleDailyDistance
             {
+                Id = Guid.CreateVersion7(),
                 VehicleId = vehicle.Id,
                 WorkDate = report.WorkDate
             };
@@ -348,7 +323,7 @@ internal sealed class VehicleDailyDistanceService(
             distance.LastGpsImportId = import.Id;
             distance.GpsImportedAtUtc = support.UtcNow;
             distance.GpsImportedByUserId = actor.Value;
-            ApplyEffectiveDistance(vehicle, distance);
+            affectedVehicles[vehicle.Id] = vehicle;
 
             if (isNew)
             {
@@ -362,6 +337,27 @@ internal sealed class VehicleDailyDistanceService(
             }
 
             import.MatchedRows++;
+        }
+
+        foreach (var vehicle in affectedVehicles.Values)
+        {
+            var recalculation = await RecalculateMileageAsync(vehicle, report.WorkDate, null, cancellationToken);
+            if (recalculation.IsFailure)
+            {
+                return Result.Failure<GpsDistanceImportResponse>(recalculation.Error);
+            }
+
+            var distance = existingRecords[vehicle.Id];
+            var recordedAt = report.PeriodEndUtc ?? EndOfWorkDateUtc(report.WorkDate);
+            dbContext.VehicleOdometerReadings.Add(new VehicleOdometerReading
+            {
+                VehicleId = vehicle.Id,
+                Reading = ToWholeOdometer(distance.EffectiveOdometerAfterKm),
+                RecordedAtUtc = recordedAt,
+                SourceType = VehicleOdometerSourceType.Gps,
+                SourceEntityId = distance.Id,
+                Notes = $"مسافة GPS المعتمدة بتاريخ {report.WorkDate:yyyy-MM-dd}: {distance.AppliedDistanceKm:0.00} كم."
+            });
         }
 
         import.RowErrorsJson = JsonSerializer.Serialize(errors);
@@ -430,42 +426,62 @@ internal sealed class VehicleDailyDistanceService(
         return Result.Success<IReadOnlyList<GpsDistanceImportHistoryResponse>>(imports);
     }
 
-    private async Task<long?> ResolveInitialBaselineAsync(
+    private async Task<bool> HasBaselineBeforeAsync(
         Vehicle vehicle,
         DateOnly workDate,
-        long? requestedBaseline,
         CancellationToken cancellationToken)
     {
-        if (requestedBaseline.HasValue)
-        {
-            return requestedBaseline.Value;
-        }
-
         var startUtc = StartOfWorkDateUtc(workDate);
-        var historicalReading = await dbContext.VehicleOdometerReadings
+        var hasHistoricalReading = await dbContext.VehicleOdometerReadings
             .AsNoTracking()
             .Where(x => x.VehicleId == vehicle.Id && x.RecordedAtUtc < startUtc)
-            .OrderByDescending(x => x.RecordedAtUtc)
-            .Select(x => (long?)x.Reading)
-            .FirstOrDefaultAsync(cancellationToken);
-        if (historicalReading.HasValue)
+            .AnyAsync(cancellationToken);
+
+        return hasHistoricalReading
+            || !vehicle.LastOdometerAtUtc.HasValue
+            || vehicle.LastOdometerAtUtc.Value < startUtc;
+    }
+
+    private async Task<Result> RecalculateMileageAsync(
+        Vehicle vehicle,
+        DateOnly fromWorkDate,
+        decimal? explicitBaseline,
+        CancellationToken cancellationToken)
+    {
+        var persisted = await dbContext.VehicleDailyDistances
+            .Where(x => x.VehicleId == vehicle.Id && x.WorkDate >= fromWorkDate)
+            .OrderBy(x => x.WorkDate)
+            .ToListAsync(cancellationToken);
+        var added = dbContext.ChangeTracker.Entries<VehicleDailyDistance>()
+            .Where(x => x.State == EntityState.Added
+                && x.Entity.VehicleId == vehicle.Id
+                && x.Entity.WorkDate >= fromWorkDate)
+            .Select(x => x.Entity);
+        var affected = persisted
+            .Concat(added)
+            .DistinctBy(x => x.Id)
+            .OrderBy(x => x.WorkDate)
+            .ToArray();
+
+        var previousAffectedTotal = affected.Sum(x => x.AppliedDistanceKm);
+        var runningOdometer = explicitBaseline
+            ?? Math.Max(0m, vehicle.TrackedDistanceKm - previousAffectedTotal);
+
+        if (!VehicleDailyDistanceRules.TryRecalculate(affected, runningOdometer, out runningOdometer))
         {
-            return historicalReading.Value;
+            return Result.Failure(FleetErrors.InvalidManualOdometer);
         }
 
-        return !vehicle.LastOdometerAtUtc.HasValue || vehicle.LastOdometerAtUtc.Value < startUtc
-            ? vehicle.CurrentOdometer
-            : null;
+        if (affected.Length > 0)
+        {
+            var latestRecordedAt = EndOfWorkDateUtc(affected[^1].WorkDate);
+            VehicleMileageRules.ApplyEffectiveMileage(vehicle, runningOdometer, latestRecordedAt);
+        }
+
+        return Result.Success();
     }
 
-    private static void ApplyEffectiveDistance(Vehicle vehicle, VehicleDailyDistance distance)
-    {
-        var previousApplied = distance.AppliedDistanceKm;
-        var selected = VehicleDailyDistanceRules.SelectAppliedDistance(distance.GpsDistanceKm, distance.ManualDistanceKm);
-        distance.AppliedDistanceKm = selected.DistanceKm;
-        distance.AppliedSource = selected.Source;
-        vehicle.TrackedDistanceKm += VehicleDailyDistanceRules.CalculateTotalAdjustment(previousApplied, selected.DistanceKm);
-    }
+    private static long ToWholeOdometer(decimal value) => decimal.ToInt64(decimal.Floor(value));
 
     private static VehicleDailyDistanceResponse Map(Vehicle vehicle, VehicleDailyDistance? distance, DateOnly workDate) =>
         new(
@@ -483,8 +499,12 @@ internal sealed class VehicleDailyDistanceService(
             distance?.ManualDistanceKm,
             distance?.AppliedDistanceKm ?? 0m,
             distance?.AppliedSource ?? VehicleDailyDistanceSource.None,
+            distance?.EffectiveOdometerAfterKm ?? vehicle.TrackedDistanceKm,
             distance?.GpsImportedAtUtc,
+            distance?.LastGpsImportId,
+            distance?.GpsImportedByUserId,
             distance?.ManualEnteredAtUtc,
+            distance?.ManualEnteredByUserId,
             distance?.ManualNotes,
             distance is null ? null : FleetServiceSupport.EncodeRowVersion(distance.RowVersion));
 

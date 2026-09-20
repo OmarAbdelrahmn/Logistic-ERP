@@ -35,6 +35,17 @@ public sealed class HrImportApiSurfaceTests
     }
 
     [Fact]
+    public void ControllerExposesAnonymousStatusCheckerAndHandlerEndpoints()
+    {
+        AssertAnonymousPostRoute(
+            nameof(ImportController.ValidateStatuses),
+            "employees-riders/statuses/validate");
+        AssertAnonymousPostRoute(
+            nameof(ImportController.UpdateStatuses),
+            "employees-riders/statuses");
+    }
+
+    [Fact]
     public void ResponseReportsValidationCommitAndExpiryOutcomes()
     {
         var properties = typeof(HrExcelImportResponse).GetProperties()

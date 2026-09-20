@@ -4,7 +4,7 @@ namespace LogisticsERP.Application.Features.Fleet;
 
 public sealed record UpsertManualVehicleDistanceRequest(
     long OdometerReading,
-    long? BaselineOdometerReading,
+    decimal? BaselineOdometerReading,
     string? Notes,
     string? RowVersion);
 
@@ -19,12 +19,16 @@ public sealed record VehicleDailyDistanceResponse(
     decimal VehicleTrackedDistanceKm,
     decimal? GpsDistanceKm,
     long? ManualOdometerReading,
-    long? ManualBaselineOdometerReading,
+    decimal? ManualBaselineOdometerReading,
     decimal? ManualDistanceKm,
     decimal AppliedDistanceKm,
     VehicleDailyDistanceSource AppliedSource,
+    decimal EffectiveOdometerAfterKm,
     DateTimeOffset? GpsImportedAtUtc,
+    Guid? LastGpsImportId,
+    Guid? GpsImportedByUserId,
     DateTimeOffset? ManualEnteredAtUtc,
+    Guid? ManualEnteredByUserId,
     string? ManualNotes,
     string? RowVersion);
 

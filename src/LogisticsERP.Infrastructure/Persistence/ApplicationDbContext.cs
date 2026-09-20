@@ -62,6 +62,10 @@ public sealed class ApplicationDbContext(
     public DbSet<EmployeeAbsenceComplianceCase> EmployeeAbsenceComplianceCases => Set<EmployeeAbsenceComplianceCase>();
     public DbSet<EmployeeAbsenceComplianceCaseEvent> EmployeeAbsenceComplianceCaseEvents => Set<EmployeeAbsenceComplianceCaseEvent>();
     public DbSet<EmployeeStatusChangeRequest> EmployeeStatusChangeRequests => Set<EmployeeStatusChangeRequest>();
+    public DbSet<HrLegalCase> HrLegalCases => Set<HrLegalCase>();
+    public DbSet<HrLegalCaseHearing> HrLegalCaseHearings => Set<HrLegalCaseHearing>();
+    public DbSet<HrLegalCaseHearingFile> HrLegalCaseHearingFiles => Set<HrLegalCaseHearingFile>();
+    public DbSet<HrLegalCaseHistory> HrLegalCaseHistory => Set<HrLegalCaseHistory>();
     public DbSet<HousingEntity> Housing => Set<HousingEntity>();
     public DbSet<HousingRoom> HousingRooms => Set<HousingRoom>();
     public DbSet<HousingSupervisorPeriod> HousingSupervisorPeriods => Set<HousingSupervisorPeriod>();

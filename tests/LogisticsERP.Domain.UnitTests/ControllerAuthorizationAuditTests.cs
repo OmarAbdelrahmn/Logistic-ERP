@@ -38,9 +38,15 @@ public sealed class ControllerAuthorizationAuditTests
                 "AuthController.Login",
                 "AuthController.Refresh",
                 "ImportController.Import",
+                "ImportController.ImportPurchaseSuppliers",
+                "ImportController.ImportVehicles",
                 "ImportController.UpdatePhoneNumbers",
+                "ImportController.UpdateStatuses",
                 "ImportController.Validate",
-                "ImportController.ValidatePhoneNumbers"
+                "ImportController.ValidatePhoneNumbers",
+                "ImportController.ValidatePurchaseSuppliers",
+                "ImportController.ValidateStatuses",
+                "ImportController.ValidateVehicles"
             ],
             anonymousActions);
     }

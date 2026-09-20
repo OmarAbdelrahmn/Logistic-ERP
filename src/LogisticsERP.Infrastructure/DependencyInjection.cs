@@ -72,6 +72,7 @@ public static class DependencyInjection
         services.AddScoped<IPlatformOperationsService, PlatformOperationsService>();
         services.AddScoped<ISimplePlatformService, SimplePlatformService>();
         services.AddScoped<IHrWorkflowService, HrWorkflowService>();
+        services.AddScoped<ILegalCaseService, LegalCaseService>();
         services.AddScoped<IHrExcelImportService, HrExcelImportService>();
         services.AddScoped<ILeaveDocumentService, LeaveDocumentService>();
         services.AddScoped<IHrFormTemplateService, HrFormTemplateService>();
@@ -87,6 +88,11 @@ public static class DependencyInjection
         services.AddScoped<IPrivateFileStorage, PrivateFileStorage>();
         services.AddScoped<FleetServiceSupport>();
         services.AddScoped<IFleetService, FleetService>();
+        services.AddScoped<VehicleImportProcessor>();
+        services.AddScoped<IVehicleImportValidationService, VehicleImportValidationService>();
+        services.AddScoped<IVehicleImportService, VehicleImportService>();
+        services.AddScoped<IVehiclePurchaseSupplierImportService, VehiclePurchaseSupplierImportService>();
+        services.AddScoped<IVehicleRiderAssignmentImportService, VehicleRiderAssignmentImportService>();
         services.AddScoped<IVehicleDailyDistanceService, VehicleDailyDistanceService>();
         services.AddScoped<IFuelCardService, FuelCardService>();
         services.AddScoped<IMaintenanceService, MaintenanceService>();

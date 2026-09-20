@@ -68,6 +68,30 @@ public sealed class VehicleRegisteredOwnerServiceTests
         Assert.Equal(FleetErrors.NotFound.Code, result.Error.Code);
     }
 
+    [Fact]
+    public async Task OwnedVehicleWithoutPurchaseSupplierIsAllowedAndReadyForAssignment()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        await using var fixture = await Fixture.CreateAsync(cancellationToken);
+        var request = fixture.CreateRequest(fixture.OwnerSponsor.Id) with
+        {
+            OwnershipType = VehicleOwnershipType.Owned,
+            PurchasedFromSupplierId = null
+        };
+
+        var created = await fixture.Service.UpsertVehicleAsync(null, request, cancellationToken);
+
+        Assert.True(created.IsSuccess, created.Error.Description);
+        Assert.Null(created.Value!.PurchasedFromSupplierId);
+        Assert.True(created.Value.Summary.IsReadyForAssignment);
+
+        var readiness = await fixture.Service.GetReadinessAsync(created.Value.Summary.Id, cancellationToken);
+
+        Assert.True(readiness.IsSuccess, readiness.Error.Description);
+        Assert.True(readiness.Value!.IsEligibleForAssignment);
+        Assert.DoesNotContain(nameof(Vehicle.PurchasedFromSupplierId), readiness.Value.MissingCoreIdentityFields);
+    }
+
     private sealed class Fixture : IAsyncDisposable
     {
         private Fixture(ApplicationDbContext db, Sponsor vehicleSponsor, Sponsor ownerSponsor, VehicleSupplier ownerSupplier)

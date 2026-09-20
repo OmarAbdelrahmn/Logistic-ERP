@@ -164,6 +164,9 @@ public static class PermissionKeys
         public const string EmployeeStatusChangesRead = "employee_status_changes.read";
         public const string EmployeeStatusChangesManage = "employee_status_changes.manage";
         public const string EmployeeStatusChangesApprove = "employee_status_changes.approve";
+        public const string LegalCasesRead = "legal_cases.read";
+        public const string LegalCasesManage = "legal_cases.manage";
+        public const string LegalCaseFilesDownload = "legal_cases.files.download";
     }
 
     public static class HrForms
@@ -288,6 +291,9 @@ public static class PermissionKeys
         Workflows.EmployeeStatusChangesRead,
         Workflows.EmployeeStatusChangesManage,
         Workflows.EmployeeStatusChangesApprove,
+        Workflows.LegalCasesRead,
+        Workflows.LegalCasesManage,
+        Workflows.LegalCaseFilesDownload,
         HrForms.TemplatesRead,
         HrForms.TemplatesManage
     }.ToFrozenSet(StringComparer.Ordinal);

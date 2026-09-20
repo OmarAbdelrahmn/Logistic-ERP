@@ -32,9 +32,13 @@ public sealed class FleetModelTests
         Assert.Equal("[IsDeleted] = 0", dailyIndex.GetFilter());
         Assert.Equal(18, distance.FindProperty(nameof(VehicleDailyDistance.GpsDistanceKm))!.GetPrecision());
         Assert.Equal(2, distance.FindProperty(nameof(VehicleDailyDistance.GpsDistanceKm))!.GetScale());
+        Assert.Equal(18, distance.FindProperty(nameof(VehicleDailyDistance.EffectiveOdometerAfterKm))!.GetPrecision());
+        Assert.Equal(2, distance.FindProperty(nameof(VehicleDailyDistance.EffectiveOdometerAfterKm))!.GetScale());
         Assert.Equal(18, vehicle.FindProperty(nameof(Vehicle.TrackedDistanceKm))!.GetPrecision());
         Assert.Contains(distance.GetCheckConstraints(), constraint =>
             constraint.Name == "CK_VehicleDailyDistances_ManualOdometer");
+        Assert.Contains(distance.GetCheckConstraints(), constraint =>
+            constraint.Name == "CK_VehicleDailyDistances_EffectiveOdometer");
     }
 
     [Fact]
@@ -284,6 +288,9 @@ public sealed class FleetModelTests
             && candidate.Properties.Select(property => property.Name).SequenceEqual([nameof(VehicleOperationCard.VehicleId)]));
 
         Assert.Equal("[IsCurrent] = 1 AND [IsDeleted] = 0", index.GetFilter());
+        Assert.DoesNotContain(entity.GetIndexes(), candidate =>
+            candidate.Properties.Select(property => property.Name).SequenceEqual(
+                [nameof(VehicleOperationCard.VehicleId), nameof(VehicleOperationCard.CardNumber)]));
         Assert.Contains(entity.GetCheckConstraints(), constraint =>
             constraint.Name == "CK_VehicleOperationCards_DateRange"
             && constraint.Sql.Contains("[ExpiryDate] >= [IssueDate]", StringComparison.Ordinal));

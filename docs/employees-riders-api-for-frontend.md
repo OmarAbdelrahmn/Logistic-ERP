@@ -48,9 +48,9 @@ Frontend integration reference for the current workforce API.
 
 Permission: `employees.read`
 
-English: Returns all non-deleted employee records with the main role, engagement, sponsor, and rider-profile summary.
+English: Returns all non-deleted administrative employees and sponsored riders with the main role, engagement, sponsor, and rider-profile summary. External riders are returned only by `GET /api/external-riders`, so clients can combine both lists without duplicate people.
 
-العربية: يعيد جميع سجلات الموظفين غير المؤرشفة مع ملخص الدور والارتباط والكفيل وملف الرايدر.
+العربية: يعيد جميع الموظفين الإداريين والمناديب المكفولين غير المؤرشفين مع ملخص الدور والارتباط والكفيل وملف الرايدر. المناديب الخارجيون متاحون فقط من `GET /api/external-riders` حتى يمكن دمج القائمتين من دون تكرار الأشخاص.
 
 Response `200 OK`:
 
@@ -553,6 +553,6 @@ Returns the same item and summary shape for one non-archived employee.
 - `Upcoming`: 1 to 30 days remain.
 - `DueToday`: the expiry date is today in Riyadh.
 - `Expired`: the expiry date has passed.
-- `Missing`: an active employee document type requires an expiry date but none exists.
+- `Missing`: a required applicable document has not been uploaded, or an active employee document type requires an expiry date but none exists. A not-yet-uploaded document is returned as an `EmployeeDocument` item with `sourceStatus: "Missing"`, `expiryDate: null`, and `employeeDocumentId: null`; its `sourceId` is the document-type ID.
 
 The worker creates in-app reminders for users with `employees.read` at 30, 7, 1, and 0 days before expiry, once after expiry, and once for missing required expiry dates. A linked specialised license/card/insurance record takes precedence over its employee-document entry, preventing duplicate dashboard rows and reminders.

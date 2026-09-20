@@ -13,13 +13,14 @@ public sealed class VehicleDailyDistance : AuditableEntity
     public DateTimeOffset? GpsImportedAtUtc { get; set; }
     public Guid? GpsImportedByUserId { get; set; }
     public long? ManualOdometerReading { get; set; }
-    public long? ManualBaselineOdometerReading { get; set; }
+    public decimal? ManualBaselineOdometerReading { get; set; }
     public decimal? ManualDistanceKm { get; set; }
     public DateTimeOffset? ManualEnteredAtUtc { get; set; }
     public Guid? ManualEnteredByUserId { get; set; }
     public string? ManualNotes { get; set; }
     public decimal AppliedDistanceKm { get; set; }
     public VehicleDailyDistanceSource AppliedSource { get; set; }
+    public decimal EffectiveOdometerAfterKm { get; set; }
 }
 
 public sealed class VehicleDailyDistanceImport : HistoryEntity

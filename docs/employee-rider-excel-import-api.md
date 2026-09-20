@@ -38,6 +38,30 @@ Both endpoints use `multipart/form-data` with a `file` field. Column A must cont
 
 An invalid row, duplicate Iqama, or Iqama that does not match a current employee/rider blocks the whole update. The response reports `canUpdate`, `updated`, matched employee/rider counts, changed and unchanged counts, and row-level issues.
 
+## Employee and rider status update
+
+Two anonymous endpoints accept a two-column `.xlsx` workbook and match each row to the shared employee/rider record by Iqama:
+
+- `POST /api/import/employees-riders/statuses/validate` checks the workbook without writing.
+- `POST /api/import/employees-riders/statuses` repeats all checks and updates `Employee.Status` atomically.
+
+Column A must contain the 10-digit Iqama number. Column B must contain the numeric `EmployeeStatus` value. A recognized Arabic or English header row is optional, and Arabic and Persian digits are supported.
+
+| Number | Employee status |
+|---:|---|
+| 1 | `Draft` |
+| 2 | `Onboarding` |
+| 3 | `Active` |
+| 4 | `Suspended` |
+| 5 | `OnLeave` |
+| 6 | `Terminated` |
+| 7 | `Archived` |
+| 8 | `Fleeing` |
+| 9 | `Accident` |
+| 10 | `Sick` |
+
+The whole update is blocked when any row is invalid, duplicated, unmatched, attempts to archive a rider with an active platform or vehicle assignment, or attempts to activate a record that does not meet the normal activation requirements. The response reports `canUpdate`, `updated`, matched employee/rider counts, changed and unchanged status counts, and row-level issues.
+
 ## Required columns
 
 | Excel column | System field |
