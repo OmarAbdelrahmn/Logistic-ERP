@@ -135,6 +135,7 @@ internal sealed partial class VehicleRiderAssignmentImportService(
         }
 
         // Row errors do not block the rest of the workbook. CanImport means that
+
         // at least one row is valid and can be committed.
         var canImport = plans.Count > 0;
         var imported = false;
