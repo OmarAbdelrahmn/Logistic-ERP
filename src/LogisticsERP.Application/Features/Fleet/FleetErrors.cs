@@ -10,6 +10,7 @@ public static class FleetErrors
     public static readonly OperationError Conflict = new("fleet.conflict", "تتعارض العملية مع الحالة الحالية للمركبة أو السائق.", ErrorType.Conflict);
     public static readonly OperationError VehicleUnavailable = new("fleet.vehicle_unavailable", "المركبة غير متاحة للتخصيص.", ErrorType.Conflict);
     public static readonly OperationError RiderUnavailable = new("fleet.rider_unavailable", "السائق غير نشط أو لديه مركبة نشطة بالفعل.", ErrorType.Conflict);
+    public static readonly OperationError RiderAlreadyHasVehicle = new("fleet.rider_already_has_vehicle", "لا يمكن تخصيص مركبة أخرى لأن السائق لديه مركبة نشطة بالفعل.", ErrorType.Conflict);
     public static readonly OperationError ConcurrencyConflict = new("fleet.concurrency_conflict", "تغير السجل بعد تحميله. أعد تحميله وحاول مرة أخرى.", ErrorType.Conflict);
     public static readonly OperationError IdempotencyConflict = new("fleet.idempotency_conflict", "تم استخدام مفتاح عدم التكرار مسبقًا لطلب مختلف.", ErrorType.Conflict);
     public static readonly OperationError IdempotencyRequired = new("fleet.idempotency_required", "مطلوب وجود ترويسة Idempotency-Key.", ErrorType.Validation);

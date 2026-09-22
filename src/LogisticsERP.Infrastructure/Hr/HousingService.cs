@@ -90,6 +90,18 @@ internal sealed class HousingService(
         entity.Status = status;
         entity.StatusReason = HrServiceSupport.TrimOrNull(request.StatusReason);
         entity.Notes = HrServiceSupport.TrimOrNull(request.Notes);
+
+        if (id is null)
+        {
+            dbContext.HousingWarehouses.Add(new HousingWarehouse
+            {
+                HousingId = entity.Id,
+                NameAr = "المستودع الافتراضي",
+                NameEn = "Default warehouse",
+                IsDefault = true
+            });
+        }
+
         await dbContext.SaveChangesAsync(cancellationToken);
         return await GetAsync(entity.Id, cancellationToken);
     }

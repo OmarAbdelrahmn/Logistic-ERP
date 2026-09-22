@@ -4,6 +4,7 @@ using LogisticsERP.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260922092933_AddHousingDefaultWarehouses")]
+    partial class AddHousingDefaultWarehouses
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -4977,6 +4980,14 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<int>("Condition")
+                        .HasColumnType("int");
+
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .HasColumnType("datetimeoffset");
 
@@ -5001,15 +5012,29 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<string>("NameEn")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
                     b.Property<string>("Notes")
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
+
+                    b.Property<decimal>("Quantity")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .IsRequired()
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("rowversion");
+
+                    b.Property<string>("Unit")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<DateTimeOffset?>("UpdatedAtUtc")
                         .HasColumnType("datetimeoffset");
@@ -5024,72 +5049,17 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.HasIndex("IsDeleted");
 
-                    b.HasIndex("WarehouseId", "NameAr")
+                    b.HasIndex("WarehouseId", "Code")
                         .IsUnique()
                         .HasFilter("[IsDeleted] = 0");
 
-                    b.ToTable("HousingWarehouseItems", "app");
-                });
+                    b.HasIndex("WarehouseId", "Condition");
 
-            modelBuilder.Entity("LogisticsERP.Domain.Entities.Housing.HousingWarehouseItemBalance", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset>("CreatedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid?>("CreatedByUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset?>("DeletedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid?>("DeletedByUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("DeletionReason")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid>("ItemId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("Quantity")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid?>("UpdatedByUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("IsDeleted");
-
-                    b.HasIndex("ItemId", "Status")
-                        .IsUnique()
-                        .HasFilter("[IsDeleted] = 0");
-
-                    b.ToTable("HousingWarehouseItemBalances", "app", t =>
+                    b.ToTable("HousingWarehouseItems", "app", t =>
                         {
-                            t.HasCheckConstraint("CK_HousingWarehouseItemBalances_Quantity", "[Quantity] >= 0");
+                            t.HasCheckConstraint("CK_HousingWarehouseItems_Condition", "[Condition] IN (1, 2, 3)");
 
-                            t.HasCheckConstraint("CK_HousingWarehouseItemBalances_Status", "[Status] IN (1, 2, 3)");
+                            t.HasCheckConstraint("CK_HousingWarehouseItems_Quantity", "[Quantity] >= 0");
                         });
                 });
 
@@ -16310,15 +16280,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.HasOne("LogisticsERP.Domain.Entities.Housing.HousingWarehouse", null)
                         .WithMany()
                         .HasForeignKey("WarehouseId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("LogisticsERP.Domain.Entities.Housing.HousingWarehouseItemBalance", b =>
-                {
-                    b.HasOne("LogisticsERP.Domain.Entities.Housing.HousingWarehouseItem", null)
-                        .WithMany()
-                        .HasForeignKey("ItemId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });

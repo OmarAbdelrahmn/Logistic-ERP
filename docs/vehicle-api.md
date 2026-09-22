@@ -472,7 +472,7 @@ Returns the correction audit history. Each item contains `beforeJson`, `afterJso
 
 ### `POST /api/vehicles/{id}/registration-transitions/private-to-public`
 
-Converts a vehicle from private transport registration to public transport registration. The request is `multipart/form-data` and must contain both registration documents and transition metadata.
+Converts a vehicle from its current registration type to public transport registration. Any current registration type is accepted, including vehicles with an active assignment. The active assignment remains unchanged. The request is `multipart/form-data` and must contain both registration documents and transition metadata.
 
 Form fields:
 

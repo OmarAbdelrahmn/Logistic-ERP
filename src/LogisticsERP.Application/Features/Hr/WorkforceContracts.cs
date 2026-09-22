@@ -150,7 +150,9 @@ public sealed record UpdateExternalRiderRequest(
     string FullNameAr,
     string? Nationality,
     string? Iban,
+    string PrimaryPhone,
     AddressRequest? Address,
+    Guid OperationalWorkTypeId,
     string RowVersion);
 
 public sealed record ExternalRiderResponse(

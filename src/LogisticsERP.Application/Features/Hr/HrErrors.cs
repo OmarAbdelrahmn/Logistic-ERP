@@ -32,6 +32,18 @@ public static class HrErrors
     public static readonly OperationError RoomNameDuplicate = new(
         "housing.room_name_duplicate", "تعذر تنفيذ العملية المطلوبة.", ErrorType.Conflict, "name");
 
+    public static readonly OperationError WarehouseNotFound = new(
+        "housing.warehouse_not_found", "تعذر تنفيذ العملية المطلوبة.", ErrorType.NotFound, "housingId");
+
+    public static readonly OperationError WarehouseItemNotFound = new(
+        "housing.warehouse_item_not_found", "تعذر تنفيذ العملية المطلوبة.", ErrorType.NotFound, "itemId");
+
+    public static readonly OperationError WarehouseItemNameDuplicate = new(
+        "housing.warehouse_item_name_duplicate", "تعذر تنفيذ العملية المطلوبة.", ErrorType.Conflict, "nameAr");
+
+    public static readonly OperationError WarehouseItemInsufficientQuantity = new(
+        "housing.warehouse_item_insufficient_quantity", "تعذر تنفيذ العملية المطلوبة.", ErrorType.Conflict, "quantity");
+
     public static readonly OperationError EmployeeNotFound = new(
         "housing.employee_not_found", "تعذر تنفيذ العملية المطلوبة.", ErrorType.NotFound, "employeeId");
 

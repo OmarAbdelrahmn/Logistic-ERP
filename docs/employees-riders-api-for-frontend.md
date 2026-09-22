@@ -479,12 +479,14 @@ Send the latest `rowVersion` returned by a create, get, or update request:
 {
   "iqamaNo": "1234567890",
   "fullNameAr": "أحمد محمد المحدث",
+  "primaryPhone": "0500000000",
   "address": null,
+  "operationalWorkTypeId": "00000000-0000-0000-0000-000000000004",
   "rowVersion": "AAAAAAAAAAA="
 }
 ```
 
-The update accepts the Iqama number, Arabic full name, nationality, IBAN, and optional address. Sending `address: null` clears the address. Response: `200 OK` with a refreshed `rowVersion`.
+The update accepts the Iqama number, Arabic full name, nationality, IBAN, required primary phone number, optional address, and required operational work type ID. `primaryPhone` must not be blank or exceed 32 characters. `operationalWorkTypeId` must reference an existing value from `GET /api/hr-catalogs/operational-work-types`. Sending `address: null` clears the address. Response: `200 OK` with a refreshed `rowVersion`.
 
 ## Frontend workflow
 

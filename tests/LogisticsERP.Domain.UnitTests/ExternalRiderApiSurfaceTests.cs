@@ -56,7 +56,7 @@ public sealed class ExternalRiderApiSurfaceTests
             .Select(property => property.Name)
             .ToArray();
 
-        Assert.Equal(["IqamaNo", "FullNameAr", "Nationality", "Iban", "Address", "RowVersion"], properties);
+        Assert.Equal(["IqamaNo", "FullNameAr", "Nationality", "Iban", "PrimaryPhone", "Address", "OperationalWorkTypeId", "RowVersion"], properties);
     }
 
     [Fact]

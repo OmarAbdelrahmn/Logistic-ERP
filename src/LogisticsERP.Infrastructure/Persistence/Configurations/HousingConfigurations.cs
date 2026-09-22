@@ -48,6 +48,55 @@ internal sealed class HousingRoomConfiguration : IEntityTypeConfiguration<Housin
     }
 }
 
+internal sealed class HousingWarehouseConfiguration : IEntityTypeConfiguration<HousingWarehouse>
+{
+    public void Configure(EntityTypeBuilder<HousingWarehouse> builder)
+    {
+        builder.ConfigureOperational("HousingWarehouses");
+        builder.Property(entity => entity.NameAr).HasMaxLength(200).IsRequired();
+        builder.Property(entity => entity.NameEn).HasMaxLength(200).IsRequired();
+        builder.HasOne<Housing>().WithMany().HasForeignKey(entity => entity.HousingId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(entity => entity.HousingId)
+            .IsUnique()
+            .HasFilter("[IsDeleted] = 0");
+        builder.ToTable(table => table.HasCheckConstraint(
+            "CK_HousingWarehouses_Default",
+            "[IsDefault] = 1"));
+    }
+}
+
+internal sealed class HousingWarehouseItemConfiguration : IEntityTypeConfiguration<HousingWarehouseItem>
+{
+    public void Configure(EntityTypeBuilder<HousingWarehouseItem> builder)
+    {
+        builder.ConfigureOperational("HousingWarehouseItems");
+        builder.Property(entity => entity.NameAr).HasMaxLength(200).IsRequired();
+        builder.Property(entity => entity.Notes).HasMaxLength(2000);
+        builder.HasOne<HousingWarehouse>().WithMany().HasForeignKey(entity => entity.WarehouseId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(entity => new { entity.WarehouseId, entity.NameAr })
+            .IsUnique()
+            .HasFilter("[IsDeleted] = 0");
+    }
+}
+
+internal sealed class HousingWarehouseItemBalanceConfiguration : IEntityTypeConfiguration<HousingWarehouseItemBalance>
+{
+    public void Configure(EntityTypeBuilder<HousingWarehouseItemBalance> builder)
+    {
+        builder.ConfigureOperational("HousingWarehouseItemBalances");
+        builder.Property(entity => entity.Quantity).HasPrecision(18, 3);
+        builder.HasOne<HousingWarehouseItem>().WithMany().HasForeignKey(entity => entity.ItemId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(entity => new { entity.ItemId, entity.Status })
+            .IsUnique()
+            .HasFilter("[IsDeleted] = 0");
+        builder.ToTable(table =>
+        {
+            table.HasCheckConstraint("CK_HousingWarehouseItemBalances_Quantity", "[Quantity] >= 0");
+            table.HasCheckConstraint("CK_HousingWarehouseItemBalances_Status", "[Status] IN (1, 2, 3)");
+        });
+    }
+}
+
 internal sealed class HousingSupervisorPeriodConfiguration : IEntityTypeConfiguration<HousingSupervisorPeriod>
 {
     public void Configure(EntityTypeBuilder<HousingSupervisorPeriod> builder)

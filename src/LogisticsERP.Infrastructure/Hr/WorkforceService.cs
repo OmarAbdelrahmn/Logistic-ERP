@@ -361,6 +361,8 @@ internal sealed class WorkforceService(
         CancellationToken cancellationToken = default)
     {
         if (!TryValidateExternalRider(request.IqamaNo, request.FullNameAr, out var iqamaNo, out var fullNameAr)
+            || !HrServiceSupport.HasText(request.PrimaryPhone)
+            || request.PrimaryPhone.Trim().Length > 32
             || !IsValidOptionalText(request.Nationality, 100)
             || !IsValidOptionalIban(request.Iban))
             return Result.Failure<ExternalRiderResponse>(HrErrors.InvalidRequest);
@@ -376,6 +378,8 @@ internal sealed class WorkforceService(
             return Result.Failure<ExternalRiderResponse>(HrErrors.ConcurrencyConflict);
         if (await dbContext.Employees.AnyAsync(item => item.Id != employeeId && item.IqamaNo == iqamaNo, cancellationToken))
             return Result.Failure<ExternalRiderResponse>(HrErrors.Duplicate);
+        if (!await dbContext.OperationalWorkTypes.AnyAsync(item => item.Id == request.OperationalWorkTypeId, cancellationToken))
+            return Result.Failure<ExternalRiderResponse>(HrErrors.NotFound);
 
         var rider = await dbContext.RiderProfiles.SingleOrDefaultAsync(item => item.EmployeeId == employeeId, cancellationToken);
         if (rider is null)
@@ -385,7 +389,10 @@ internal sealed class WorkforceService(
         employee.FullNameAr = fullNameAr;
         if (request.Nationality is not null) employee.Nationality = HrServiceSupport.TrimOrNull(request.Nationality);
         if (request.Iban is not null) employee.Iban = NormalizeIban(request.Iban);
+        employee.PrimaryPhone = request.PrimaryPhone.Trim();
         employee.Address = HrServiceSupport.ToNullableAddress(request.Address);
+        Track(employee.Id, EmployeeWorkChangeType.OperationalWorkType, employee.OperationalWorkTypeId?.ToString(), request.OperationalWorkTypeId.ToString(), DateOnly.FromDateTime(DateTime.UtcNow), "External rider record updated.", ActorId);
+        employee.OperationalWorkTypeId = request.OperationalWorkTypeId;
         await dbContext.SaveChangesAsync(cancellationToken);
         return Result.Success(ToExternalRider(rider, employee));
     }

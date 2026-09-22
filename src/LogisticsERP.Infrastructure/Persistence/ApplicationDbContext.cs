@@ -16,6 +16,9 @@ using HousingEntity = LogisticsERP.Domain.Entities.Housing.Housing;
 using HousingResidencePeriod = LogisticsERP.Domain.Entities.Housing.HousingResidencePeriod;
 using HousingRoom = LogisticsERP.Domain.Entities.Housing.HousingRoom;
 using HousingSupervisorPeriod = LogisticsERP.Domain.Entities.Housing.HousingSupervisorPeriod;
+using HousingWarehouse = LogisticsERP.Domain.Entities.Housing.HousingWarehouse;
+using HousingWarehouseItem = LogisticsERP.Domain.Entities.Housing.HousingWarehouseItem;
+using HousingWarehouseItemBalance = LogisticsERP.Domain.Entities.Housing.HousingWarehouseItemBalance;
 
 namespace LogisticsERP.Infrastructure.Persistence;
 
@@ -68,6 +71,9 @@ public sealed class ApplicationDbContext(
     public DbSet<HrLegalCaseHistory> HrLegalCaseHistory => Set<HrLegalCaseHistory>();
     public DbSet<HousingEntity> Housing => Set<HousingEntity>();
     public DbSet<HousingRoom> HousingRooms => Set<HousingRoom>();
+    public DbSet<HousingWarehouse> HousingWarehouses => Set<HousingWarehouse>();
+    public DbSet<HousingWarehouseItem> HousingWarehouseItems => Set<HousingWarehouseItem>();
+    public DbSet<HousingWarehouseItemBalance> HousingWarehouseItemBalances => Set<HousingWarehouseItemBalance>();
     public DbSet<HousingSupervisorPeriod> HousingSupervisorPeriods => Set<HousingSupervisorPeriod>();
     public DbSet<HousingResidencePeriod> HousingResidencePeriods => Set<HousingResidencePeriod>();
     public DbSet<ClientContract> ClientContracts => Set<ClientContract>();
