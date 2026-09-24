@@ -2,7 +2,7 @@
 
 ### `POST /api/vehicle-assignments/switch`
 
-Atomically ends the current vehicle assignment and starts a new vehicle assignment for the same rider. Uses multipart form like `take`.
+Atomically ends the current vehicle assignment and starts a new vehicle assignment for the same rider. Uses multipart form like `take`. `promissoryFiles` is optional, including when the rider has no existing promissory files.
 
 `metadata` JSON shape (`SwitchVehicleRequest`):
 
@@ -357,6 +357,8 @@ Response: `200 OK`, `VehicleDetailResponse`.
 ### `PUT /api/vehicles/{id}`
 
 Updates a vehicle using the same request shape. `assetNumber` remains required for updates; automatic generation applies only when creating a new vehicle. Include the current `rowVersion`; stale writes return `409`.
+Serial number, chassis number, plate fields, and registration type must match the stored identity on this endpoint. Surrounding whitespace and empty optional plate fields are treated as unchanged; the stored identity is preserved. An actual identity change returns `409 fleet.vehicle_identity_correction_required` and must use the identity-correction endpoint. A lower odometer reading returns `409 fleet.odometer_decreased`.
+`purchasedFromSupplierId` is optional. An unchanged supplier or registered-owner supplier may remain linked after that supplier is archived; newly selected suppliers must be active.
 
 ### Vehicle upsert request
 
@@ -395,7 +397,7 @@ Updates a vehicle using the same request shape. `assetNumber` remains required f
 }
 ```
 
-`purchasedFromSupplierId` remains the original purchase source. Do not change it when the registered owner changes. Set `registeredOwnerSupplierId` to either the active supplier ID or sponsor ID that represents the explicit registered owner. The operating `sponsorId` and the registered-owner sponsor may be the same or different. Set `registeredOwnerSupplierId` to `null` to use the operating sponsor as the implicit owner. Because `PUT` is a full replacement, clients must echo the current `registeredOwnerSupplierId` on every update; omitting it is equivalent to sending `null`.
+`purchasedFromSupplierId` is optional and identifies the original purchase supplier. On vehicle updates and identity corrections, omitting it keeps the stored supplier; sending `null` clears it. Do not change it when the registered owner changes. Set `registeredOwnerSupplierId` to either the active supplier ID or sponsor ID that represents the explicit registered owner. The operating `sponsorId` and the registered-owner sponsor may be the same or different. Set `registeredOwnerSupplierId` to `null` to use the operating sponsor as the implicit owner. Because `PUT` is a full replacement for the other fields, clients must echo the current `registeredOwnerSupplierId` on every update; omitting it is equivalent to sending `null`.
 
 ### `PATCH /api/vehicles/{id}/archive`
 
@@ -462,7 +464,7 @@ Evaluates whether a vehicle can be assigned. The response identifies missing cor
 
 ### `POST /api/vehicles/{id}/identity-corrections`
 
-Applies a high-trust correction to vehicle identity. The request requires complete corrected identity values, sponsor/city, registration type, a reason, effective timestamp, current row version, and optionally document version references. The service records before/after JSON for auditability.
+Applies a high-trust correction to vehicle identity. The request requires complete corrected identity values, sponsor/city, registration type, a reason, effective timestamp, current row version, and optionally document version references. `purchasedFromSupplierId` may be omitted to keep the original purchase supplier, or sent as `null` to clear it. The service records before/after JSON for auditability.
 
 Response: `200 OK`, `VehicleDetailResponse`.
 
@@ -489,7 +491,7 @@ Form fields:
 | `istimara` | file | yes | New registration document |
 | `operationCard` | file | yes | New operation card |
 
-The controller limits this request to 22 MiB and rejects missing or empty documents with `400 Bad Request`. Response: `200 OK`, `VehicleRegistrationTransitionResponse`.
+The controller limits this request to 22 MiB. Each document must be a nonempty PDF or image of at most 10 MiB. The existing plate may be blank in older vehicle records, and the new plate text may be the same as the old text; changing the registration type is the transition. Plate numbers must be unique across other vehicles. Validation failures return Problem Details with a specific Arabic `detail`, `errorCode`, and `field`; clients should show `detail` and associate `field` with the form input. Response: `200 OK`, `VehicleRegistrationTransitionResponse`.
 
 ### `GET /api/vehicles/{id}/registration-transitions`
 
@@ -529,11 +531,21 @@ Optional query parameters:
 - `riderProfileId`
 - `activeOnly` — set to `true` to return only assignments not yet returned.
 
+### `GET /api/vehicle-assignments/{assignmentId}`
+
+Returns one assignment with its current row version and linked promissory-file version IDs. Requires `fleet.assignments.read` and access to the assignment's vehicle.
+
+### `POST /api/vehicle-assignments/{assignmentId}/promissory-files`
+
+Adds promissory notes to the **current active assignment** after vehicle handover. Requires `fleet.assignments.manage` and access to its vehicle. Send `multipart/form-data` with `rowVersion` from the assignment detail response and one to three repeated `promissoryFiles` fields. Each file must be a supported PDF or image of at most 10 MiB. The rider may have at most three active promissory notes in total, including previously uploaded notes. The request limit is 32 MiB.
+
+Send a unique `Idempotency-Key` header for each upload attempt; reuse it when retrying the same files and row version. A successful response is the updated `RiderVehicleAssignmentResponse`, including the newly linked version IDs. An ended or replaced assignment returns `fleet.assignment_not_active`; a stale row version returns `fleet.concurrency_conflict`.
+
 ### `POST /api/vehicle-assignments/take`
 
-Starts an assignment. This is `multipart/form-data` because promissory-note files may be uploaded with the command. The JSON command is sent as a string in the `metadata` form field, and files are sent as one or more `promissoryFiles` fields.
+Starts an assignment. This is `multipart/form-data` because promissory-note files may be uploaded with the command. The JSON command is sent as a string in the `metadata` form field. The `promissoryFiles` form fields are optional.
 
-The assignment links the rider's existing active promissory-note files and any newly uploaded files. At least one active or newly uploaded file is required, and the combined total cannot exceed three.
+The assignment links any existing active promissory-note files and newly uploaded files. A rider with no promissory files can take a vehicle without uploading one. The combined total cannot exceed three.
 
 Required header: `Idempotency-Key`.
 

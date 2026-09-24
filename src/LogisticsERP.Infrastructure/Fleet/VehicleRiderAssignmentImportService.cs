@@ -130,7 +130,8 @@ internal sealed partial class VehicleRiderAssignmentImportService(
             plannedVehicles.Add(vehicle.Id);
             plannedRiders.Add(rider.RiderProfileId);
             previews.Add(new(row.RowNumber, vehicle.Id, vehicle.SerialNumber ?? row.SerialNumber,
-                vehicle.AssetNumber, rider.RiderProfileId, rider.IqamaNo, rider.Name, row.PermissionStartsOn));
+                vehicle.AssetNumber, rider.RiderProfileId, rider.IqamaNo, rider.Name,
+                row.PermissionReference, row.PermissionStartsOn));
             plans.Add(new(row, vehicle, rider, previousAssignment));
         }
 
@@ -180,7 +181,7 @@ internal sealed partial class VehicleRiderAssignmentImportService(
                     StartedAtUtc = startedAt,
                     StartOdometer = plan.Vehicle.CurrentOdometer,
                     StartVehicleCondition = VehicleCondition.Good,
-                    PermissionReference = $"Tamm:{plan.Row.IqamaNo}",
+                    PermissionReference = plan.Row.PermissionReference,
                     PermissionStartsOn = plan.Row.PermissionStartsOn,
                     PermissionEndsOn = FleetBusinessRules.PermitEnd(plan.Row.PermissionStartsOn),
                     AssignmentReason = ImportReason,
@@ -285,7 +286,7 @@ internal sealed partial class VehicleRiderAssignmentImportService(
 }
 
 internal sealed record ParsedVehicleRiderAssignmentRow(int RowNumber, string SerialNumber,
-    string NormalizedSerialNumber, string IqamaNo, DateOnly PermissionStartsOn);
+    string NormalizedSerialNumber, string IqamaNo, string PermissionReference, DateOnly PermissionStartsOn);
 internal sealed record ParsedVehicleRiderAssignmentWorkbook(string Worksheet, int TotalRows,
     IReadOnlyList<ParsedVehicleRiderAssignmentRow> Rows, IReadOnlyList<VehicleRiderAssignmentImportIssue> Issues);
 
@@ -293,15 +294,19 @@ internal static class VehicleRiderAssignmentSpreadsheetParser
 {
     private const string Serial = "serialNumber";
     private const string Iqama = "riderIqamaNo";
+    private const string Reference = "permissionReference";
     private const string StartDate = "permissionStartsOn";
     private static readonly Dictionary<string, string> HeaderAliases = new(StringComparer.Ordinal)
     {
         [Normalize("الرقم التسلسلي")] = Serial,
         [Normalize("هوية المفوض في تم")] = Iqama,
         [Normalize("هوية المفوض في تَم")] = Iqama,
+        [Normalize("رقم التفويض")] = Reference,
         [Normalize("تاريخ بداية التفويض")] = StartDate,
+        [Normalize("تاريخ بداية التفويض (أو 1 سبتمبر)")] = StartDate,
         [Normalize("Serial Number")] = Serial,
         [Normalize("Tamm Authorized Person ID")] = Iqama,
+        [Normalize("Authorization Number")] = Reference,
         [Normalize("Authorization Start Date")] = StartDate
     };
 
@@ -317,6 +322,7 @@ internal static class VehicleRiderAssignmentSpreadsheetParser
         if (!headers.TryGetValue(Serial, out var serialColumn) || !headers.TryGetValue(Iqama, out var iqamaColumn)
             || !headers.TryGetValue(StartDate, out var dateColumn))
             throw new InvalidDataException("Required columns are missing.");
+        var hasReference = headers.TryGetValue(Reference, out var referenceColumn);
 
         var rows = new List<ParsedVehicleRiderAssignmentRow>();
         var issues = new List<VehicleRiderAssignmentImportIssue>();
@@ -324,20 +330,25 @@ internal static class VehicleRiderAssignmentSpreadsheetParser
         foreach (var row in sheet.Rows(header.RowNumber() + 1, range.LastRow().RowNumber()))
         {
             var serial = Text(row.Cell(serialColumn)); var iqama = Digits(Text(row.Cell(iqamaColumn)));
+            var referenceText = hasReference ? Text(row.Cell(referenceColumn)) : null;
             var dateText = Text(row.Cell(dateColumn));
-            if (string.IsNullOrWhiteSpace(serial) && string.IsNullOrWhiteSpace(iqama) && string.IsNullOrWhiteSpace(dateText)) continue;
+            if (string.IsNullOrWhiteSpace(serial) && string.IsNullOrWhiteSpace(iqama)
+                && string.IsNullOrWhiteSpace(referenceText) && string.IsNullOrWhiteSpace(dateText)) continue;
             total++;
             if (string.IsNullOrWhiteSpace(serial)) issues.Add(new(row.RowNumber(), null, "Error", Serial, "الرقم التسلسلي مطلوب."));
             if (iqama.Length != 10 || !iqama.All(char.IsAsciiDigit)) issues.Add(new(row.RowNumber(), serial, "Error", Iqama, "هوية المفوض يجب أن تتكون من 10 أرقام."));
+            var reference = hasReference ? Digits(referenceText!) : $"Tamm:{iqama}";
+            if (hasReference && (reference.Length == 0 || reference.Length != referenceText!.Length))
+                issues.Add(new(row.RowNumber(), serial, "Error", Reference, "رقم التفويض يجب أن يحتوي على أرقام فقط."));
             if (!TryDate(row.Cell(dateColumn), out var date)) issues.Add(new(row.RowNumber(), serial, "Error", StartDate, "تاريخ بداية التفويض غير صالح."));
             if (issues.Any(x => x.RowNumber == row.RowNumber())) continue;
-            rows.Add(new(row.RowNumber(), serial.Trim(), NormalizeLookup(serial), iqama, date));
+            rows.Add(new(row.RowNumber(), serial.Trim(), NormalizeLookup(serial), iqama, reference, date));
         }
         if (total == 0) throw new InvalidDataException("Worksheet has no data rows.");
         return new(sheet.Name, total, rows, issues);
     }
 
-    private static bool TryDate(IXLCell cell, out DateOnly date)
+    internal static bool TryDate(IXLCell cell, out DateOnly date)
     {
         if (cell.TryGetValue<DateTime>(out var value)) { date = DateOnly.FromDateTime(value); return true; }
         var text = Text(cell);
@@ -347,10 +358,10 @@ internal static class VehicleRiderAssignmentSpreadsheetParser
         date = default; return false;
     }
 
-    private static string Text(IXLCell cell) => cell.GetFormattedString(CultureInfo.InvariantCulture).Trim();
-    private static string Digits(string value) => new(value.Select(c => c switch
+    internal static string Text(IXLCell cell) => cell.GetFormattedString(CultureInfo.InvariantCulture).Trim();
+    internal static string Digits(string value) => new(value.Select(c => c switch
     { '\u0660' or '\u06F0' => '0', '\u0661' or '\u06F1' => '1', '\u0662' or '\u06F2' => '2', '\u0663' or '\u06F3' => '3', '\u0664' or '\u06F4' => '4', '\u0665' or '\u06F5' => '5', '\u0666' or '\u06F6' => '6', '\u0667' or '\u06F7' => '7', '\u0668' or '\u06F8' => '8', '\u0669' or '\u06F9' => '9', _ => c }).Where(char.IsAsciiDigit).ToArray());
-    private static string NormalizeLookup(string value)
+    internal static string NormalizeLookup(string value)
     {
         var normalized = value.Normalize(NormalizationForm.FormKC);
         var builder = new StringBuilder(normalized.Length);

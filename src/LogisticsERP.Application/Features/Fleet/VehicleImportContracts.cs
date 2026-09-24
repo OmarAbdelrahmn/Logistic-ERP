@@ -36,6 +36,23 @@ public interface IVehicleRiderAssignmentImportService
         CancellationToken cancellationToken = default);
 }
 
+public interface IVehicleRiderHistoryImportService
+{
+    Task<Result<VehicleRiderHistoryImportResponse>> ImportAsync(
+        Stream content, string fileName, bool validateOnly, CancellationToken cancellationToken = default);
+}
+
+public sealed record VehicleRiderHistoryImportResponse(
+    bool ValidateOnly, bool CanImport, bool Imported, string Worksheet, int TotalRows,
+    int ValidRows, int CreatedAssignments, int AlreadyImported,
+    IReadOnlyList<VehicleRiderHistoryImportRow> Rows,
+    IReadOnlyList<VehicleRiderAssignmentImportIssue> Issues);
+
+public sealed record VehicleRiderHistoryImportRow(
+    int RowNumber, Guid VehicleId, string SerialNumber, Guid RiderProfileId,
+    string RiderIqamaNo, string PermissionReference, DateOnly StartsOn, DateOnly EndsOn,
+    string Action);
+
 public sealed record VehicleRiderAssignmentImportResponse(
     bool ValidateOnly,
     bool CanImport,
@@ -55,6 +72,7 @@ public sealed record VehicleRiderAssignmentImportRowPreview(
     Guid RiderProfileId,
     string RiderIqamaNo,
     string RiderName,
+    string PermissionReference,
     DateOnly PermissionStartsOn);
 
 public sealed record VehicleRiderAssignmentImportIssue(
@@ -166,6 +184,18 @@ public static class VehicleImportErrors
     public static readonly OperationError RiderAssignmentImportFailed = new(
         "fleet.vehicle_rider_assignment_import.failed",
         "تعذر استيراد إسنادات المركبات ولم يتم حفظ أي جزء من الملف.",
+        ErrorType.Conflict,
+        "file");
+
+    public static readonly OperationError InvalidRiderHistoryWorkbook = new(
+        "fleet.vehicle_rider_history_import.invalid_workbook",
+        "ملف سجل تفويضات المركبات غير صالح أو لا يحتوي على الأعمدة المطلوبة.",
+        ErrorType.Validation,
+        "file");
+
+    public static readonly OperationError RiderHistoryImportFailed = new(
+        "fleet.vehicle_rider_history_import.failed",
+        "تعذر استيراد سجل تفويضات المركبات ولم يتم حفظ أي جزء من الملف.",
         ErrorType.Conflict,
         "file");
 }

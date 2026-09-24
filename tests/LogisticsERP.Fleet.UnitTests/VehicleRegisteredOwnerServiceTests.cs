@@ -93,6 +93,93 @@ public sealed class VehicleRegisteredOwnerServiceTests
     }
 
     [Fact]
+    public async Task UpdateKeepsOmittedPurchaseSupplierAndClearsExplicitNull()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        await using var fixture = await Fixture.CreateAsync(cancellationToken);
+        var request = fixture.CreateRequest(fixture.OwnerSponsor.Id) with
+        {
+            PurchasedFromSupplierId = fixture.OwnerSupplier.Id
+        };
+        var created = await fixture.Service.UpsertVehicleAsync(null, request, cancellationToken);
+        Assert.True(created.IsSuccess, created.Error.Description);
+
+        var withoutSupplier = fixture.CreateRequest(fixture.OwnerSponsor.Id) with
+        {
+            RowVersion = created.Value!.Summary.RowVersion
+        };
+        var updated = await fixture.Service.UpsertVehicleAsync(created.Value.Summary.Id, withoutSupplier, cancellationToken);
+        Assert.True(updated.IsSuccess, updated.Error.Description);
+        Assert.Equal(fixture.OwnerSupplier.Id, updated.Value!.PurchasedFromSupplierId);
+
+        var cleared = await fixture.Service.UpsertVehicleAsync(created.Value.Summary.Id,
+            withoutSupplier with
+            {
+                PurchasedFromSupplierId = null,
+                RowVersion = updated.Value.Summary.RowVersion
+            }, cancellationToken);
+        Assert.True(cleared.IsSuccess, cleared.Error.Description);
+        Assert.Null(cleared.Value!.PurchasedFromSupplierId);
+    }
+
+    [Fact]
+    public async Task UpdatePreservesHistoricalSuppliersAfterTheyAreArchived()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        await using var fixture = await Fixture.CreateAsync(cancellationToken);
+        var request = fixture.CreateRequest(fixture.OwnerSupplier.Id) with
+        {
+            PurchasedFromSupplierId = fixture.OwnerSupplier.Id
+        };
+        var created = await fixture.Service.UpsertVehicleAsync(null, request, cancellationToken);
+        Assert.True(created.IsSuccess, created.Error.Description);
+
+        fixture.OwnerSupplier.Status = VehicleCatalogStatus.Archived;
+        await fixture.Db.SaveChangesAsync(cancellationToken);
+
+        var updated = await fixture.Service.UpsertVehicleAsync(created.Value!.Summary.Id,
+            request with { Notes = "Updated after supplier archive", RowVersion = created.Value.Summary.RowVersion },
+            cancellationToken);
+
+        Assert.True(updated.IsSuccess, updated.Error.Description);
+        Assert.Equal(fixture.OwnerSupplier.Id, updated.Value!.PurchasedFromSupplierId);
+        Assert.Equal(fixture.OwnerSupplier.Id, updated.Value.RegisteredOwnerSupplierId);
+        Assert.Equal("Updated after supplier archive", updated.Value.Notes);
+    }
+
+    [Fact]
+    public async Task IdentityCorrectionKeepsOmittedPurchaseSupplierAndClearsExplicitNull()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        await using var fixture = await Fixture.CreateAsync(cancellationToken);
+        var request = fixture.CreateRequest(fixture.OwnerSponsor.Id) with
+        {
+            PurchasedFromSupplierId = fixture.OwnerSupplier.Id
+        };
+        var created = await fixture.Service.UpsertVehicleAsync(null, request, cancellationToken);
+        Assert.True(created.IsSuccess, created.Error.Description);
+
+        var correction = new VehicleIdentityCorrectionRequest(
+            request.AssetNumber!, request.SerialNumber!, request.ChassisNumber!, request.Vin,
+            request.PlateNumberAr!, request.PlateNumberEn!, request.PlateLettersAr,
+            request.PlateLettersEn, request.PlateDigits, request.SponsorId!.Value,
+            request.OperatingCityId!.Value, request.RegistrationType!.Value,
+            "Correct identity", DateTimeOffset.UtcNow, null, created.Value!.Summary.RowVersion);
+        var unchanged = await fixture.Service.CorrectIdentityAsync(created.Value.Summary.Id, correction, cancellationToken);
+        Assert.True(unchanged.IsSuccess, unchanged.Error.Description);
+        Assert.Equal(fixture.OwnerSupplier.Id, unchanged.Value!.PurchasedFromSupplierId);
+
+        var cleared = await fixture.Service.CorrectIdentityAsync(created.Value.Summary.Id,
+            correction with
+            {
+                PurchasedFromSupplierId = null,
+                RowVersion = unchanged.Value.Summary.RowVersion
+            }, cancellationToken);
+        Assert.True(cleared.IsSuccess, cleared.Error.Description);
+        Assert.Null(cleared.Value!.PurchasedFromSupplierId);
+    }
+
+    [Fact]
     public async Task UpdateCanChangeAndClearOperationalStatusThroughNullableProperty()
     {
         var cancellationToken = TestContext.Current.CancellationToken;
@@ -149,6 +236,60 @@ public sealed class VehicleRegisteredOwnerServiceTests
 
         Assert.True(result.IsFailure);
         Assert.Equal(FleetErrors.InvalidState.Code, result.Error.Code);
+    }
+
+    [Fact]
+    public async Task UpdateImportedVehicleAcceptsUnchangedIdentityFormattingAndPreservesIt()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        await using var fixture = await Fixture.CreateAsync(cancellationToken);
+        var request = fixture.CreateRequest(fixture.OwnerSupplier.Id) with
+        {
+            PurchasedFromSupplierId = null
+        };
+        var created = await fixture.Service.UpsertVehicleAsync(null, request, cancellationToken);
+        Assert.True(created.IsSuccess, created.Error.Description);
+
+        var vehicle = await fixture.Db.Vehicles.SingleAsync(x => x.Id == created.Value!.Summary.Id, cancellationToken);
+        vehicle.SerialNumber = $" {request.SerialNumber} ";
+        vehicle.PlateLettersAr = "";
+        await fixture.Db.SaveChangesAsync(cancellationToken);
+
+        var updated = await fixture.Service.UpsertVehicleAsync(vehicle.Id,
+            request with
+            {
+                SerialNumber = request.SerialNumber,
+                PlateLettersAr = null,
+                CurrentOperationalStatus = VehicleOperationalStatus.ProblemHold,
+                RowVersion = FleetServiceSupport.EncodeRowVersion(vehicle.RowVersion)
+            }, cancellationToken);
+
+        Assert.True(updated.IsSuccess, updated.Error.Description);
+        Assert.Equal(VehicleOperationalStatus.ProblemHold, updated.Value!.Summary.Status);
+        Assert.Null(updated.Value.PurchasedFromSupplierId);
+        Assert.Equal(fixture.OwnerSupplier.Id, updated.Value.RegisteredOwnerSupplierId);
+        Assert.Equal($" {request.SerialNumber} ", vehicle.SerialNumber);
+        Assert.Equal("", vehicle.PlateLettersAr);
+    }
+
+    [Fact]
+    public async Task UpdateRejectsActualIdentityChangeWithSpecificError()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        await using var fixture = await Fixture.CreateAsync(cancellationToken);
+        var request = fixture.CreateRequest(fixture.OwnerSupplier.Id);
+        var created = await fixture.Service.UpsertVehicleAsync(null, request, cancellationToken);
+        Assert.True(created.IsSuccess, created.Error.Description);
+
+        var changed = await fixture.Service.UpsertVehicleAsync(created.Value!.Summary.Id,
+            request with
+            {
+                PlateNumberEn = "XYZ 1000",
+                RowVersion = created.Value.Summary.RowVersion
+            }, cancellationToken);
+
+        Assert.True(changed.IsFailure);
+        Assert.Equal(FleetErrors.VehicleIdentityCorrectionRequired.Code, changed.Error.Code);
     }
 
     private sealed class Fixture : IAsyncDisposable
@@ -249,7 +390,6 @@ public sealed class VehicleRegisteredOwnerServiceTests
             "ENGINE-OWNER-TEST",
             VehicleSponsor.Id,
             City.Id,
-            null,
             registeredOwnerId,
             VehicleRegistrationType.Private,
             Manufacturer.Id,

@@ -33,9 +33,13 @@ public interface IFleetService
     Task<Result<RiderVehicleAssignmentResponse>> ReturnAsync(ReturnVehicleRequest request, IReadOnlyList<PrivateFileUpload> evidenceFiles, string idempotencyKey, CancellationToken cancellationToken = default);
     Task<Result<RiderVehicleAssignmentResponse>> SwitchAsync(SwitchVehicleRequest request, IReadOnlyList<PrivateFileUpload> promissoryFiles, IReadOnlyList<PrivateFileUpload> evidenceFiles, string idempotencyKey, CancellationToken cancellationToken = default);
     Task<Result<RiderVehicleAssignmentResponse>> RenewPermissionAsync(Guid assignmentId, RenewVehiclePermissionRequest request, string idempotencyKey, CancellationToken cancellationToken = default);
+    Task<Result<RiderVehicleAssignmentResponse>> GetAssignmentAsync(Guid assignmentId, CancellationToken cancellationToken = default);
+    Task<Result<RiderVehicleAssignmentResponse>> AttachPromissoryFilesAsync(Guid assignmentId, string rowVersion, IReadOnlyList<PrivateFileUpload> promissoryFiles, string idempotencyKey, CancellationToken cancellationToken = default);
     Task<Result<IReadOnlyList<RiderVehicleAssignmentResponse>>> GetAssignmentsAsync(Guid? vehicleId, Guid? riderProfileId, bool activeOnly, CancellationToken cancellationToken = default);
     Task<Result<IReadOnlyList<RiderVehicleTimelineResponse>>> GetVehicleTimelineAsync(Guid vehicleId, CancellationToken cancellationToken = default);
     Task<Result<IReadOnlyList<RiderVehicleTimelineResponse>>> GetRiderTimelineAsync(Guid riderProfileId, CancellationToken cancellationToken = default);
+    Task<Result<CompleteHistoryResponse>> GetCompleteVehicleHistoryAsync(Guid vehicleId, CancellationToken cancellationToken = default);
+    Task<Result<CompleteHistoryResponse>> GetCompleteRiderHistoryAsync(Guid riderProfileId, CancellationToken cancellationToken = default);
     Task<Result<IReadOnlyList<VehicleComplianceResponse>>> GetComplianceAsync(Guid vehicleId, string type, CancellationToken cancellationToken = default);
     Task<Result<VehicleComplianceResponse>> RenewRegistrationAsync(Guid vehicleId, VehicleRegistrationRequest request, CancellationToken cancellationToken = default);
     Task<Result<VehicleComplianceResponse>> RenewInsuranceAsync(Guid vehicleId, VehicleInsuranceRequest request, CancellationToken cancellationToken = default);

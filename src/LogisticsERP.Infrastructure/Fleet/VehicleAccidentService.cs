@@ -149,9 +149,10 @@ internal sealed partial class VehicleAccidentService(
 
     public async Task<Result<PrivateFileDownload>> DownloadEvidenceAsync(Guid accidentId, Guid attachmentId, CancellationToken cancellationToken = default)
     {
-        var attachment = await dbContext.VehicleAccidentAttachments.AsNoTracking().SingleOrDefaultAsync(x => x.Id == attachmentId && x.VehicleAccidentId == accidentId, cancellationToken);
+        var attachment = await dbContext.VehicleAccidentAttachments.IgnoreQueryFilters().AsNoTracking().SingleOrDefaultAsync(x => x.Id == attachmentId && x.VehicleAccidentId == accidentId, cancellationToken);
         if (attachment is null) return Result.Failure<PrivateFileDownload>(FleetErrors.NotFound);
-        var accident = await dbContext.VehicleAccidents.AsNoTracking().SingleAsync(x => x.Id == accidentId, cancellationToken);
+        var accident = await dbContext.VehicleAccidents.IgnoreQueryFilters().AsNoTracking().SingleOrDefaultAsync(x => x.Id == accidentId, cancellationToken);
+        if (accident is null) return Result.Failure<PrivateFileDownload>(FleetErrors.NotFound);
         var access = await GetVehicleAsync(accident.VehicleId, PermissionKeys.Fleet.AccidentsDownload, cancellationToken);
         if (access.IsFailure) return Result.Failure<PrivateFileDownload>(access.Error);
         var file = await fileStorage.OpenReadAsync(attachment.StoragePath, attachment.ContentType, attachment.OriginalFileName, attachment.FileSizeBytes, cancellationToken);

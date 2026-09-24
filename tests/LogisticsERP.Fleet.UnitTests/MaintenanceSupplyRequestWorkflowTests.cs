@@ -215,6 +215,120 @@ public sealed class MaintenanceSupplyRequestWorkflowTests
     }
 
     [Fact]
+    public async Task DirectOilChangePostsInventoryExpenseAndNextReminderWithoutWorkOrder()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString(), x => x.EnableNullChecks(false))
+            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
+            .AddInterceptors(new TestRowVersionInterceptor()).Options;
+        await using var db = new ApplicationDbContext(options);
+        var service = new MaintenanceService(db, new TestUser(), new TestTime(), new UnusedFileStorage());
+        var now = DateTimeOffset.Parse("2026-09-06T10:00:00Z", global::System.Globalization.CultureInfo.InvariantCulture);
+        var site = new MaintenanceLocation
+        {
+            Code = "DIRECT", NameAr = "موقع الصيانة", NameEn = "Workshop",
+            OperatingCityId = Guid.NewGuid(), AllowsCompanyVehicles = true, InventoryEnabled = true
+        };
+        var location = new InventoryLocation
+        {
+            Code = "DIRECT-STOCK", NameAr = "مخزون الزيت", NameEn = "Oil stock",
+            MaintenanceLocationId = site.Id
+        };
+        var vehicle = new Vehicle
+        {
+            AssetNumber = "DIRECT-OIL", NormalizedAssetNumber = "DIRECTOIL",
+            VehicleManufacturerId = Guid.NewGuid(), VehicleModelId = Guid.NewGuid(),
+            VehicleType = VehicleType.Car, CurrentOdometer = 1900
+        };
+        var oil = new InventoryItem
+        {
+            Sku = "DIRECT-OIL", NormalizedSku = "DIRECT-OIL", NameAr = "زيت", NameEn = "Oil",
+            ItemType = InventoryItemType.Oil, BaseUnitOfMeasure = InventoryUnitOfMeasure.Liter,
+            PurchaseUnitOfMeasure = InventoryUnitOfMeasure.Barrel
+        };
+        var filter = new InventoryItem
+        {
+            Sku = "DIRECT-FILTER", NormalizedSku = "DIRECT-FILTER", NameAr = "فلتر", NameEn = "Filter",
+            ItemType = InventoryItemType.SparePart, BaseUnitOfMeasure = InventoryUnitOfMeasure.Piece,
+            PurchaseUnitOfMeasure = InventoryUnitOfMeasure.Piece
+        };
+        var plan = new MaintenancePlan
+        {
+            Code = "DIRECT-CAR-OIL", NameAr = "تغيير الزيت", NameEn = "Oil change",
+            VehicleType = VehicleType.Car, TriggerType = MaintenanceTriggerType.OdometerWindow,
+            ReminderAfterKilometers = 4000, MaximumAfterKilometers = 5000
+        };
+        var oilLayer = new StockCostLayer
+        {
+            InventoryItemId = oil.Id, InventoryLocationId = location.Id,
+            ReceivedAtUtc = now.AddDays(-2), OriginalSequence = 1, OriginalQuantity = 10,
+            RemainingQuantity = 10, BaseUnitOfMeasure = InventoryUnitOfMeasure.Liter,
+            UnitCost = 10, OriginalTotalCost = 100
+        };
+        db.AddRange(site, location, vehicle, oil, filter, plan,
+            new StockBalance { InventoryItemId = oil.Id, InventoryLocationId = location.Id, QuantityOnHand = 10, ReportingAverageUnitCost = 10 },
+            new StockBalance { InventoryItemId = filter.Id, InventoryLocationId = location.Id, QuantityOnHand = 2, ReportingAverageUnitCost = 25 },
+            oilLayer,
+            new StockCostLayer
+            {
+                InventoryItemId = filter.Id, InventoryLocationId = location.Id,
+                ReceivedAtUtc = now.AddDays(-1), OriginalSequence = 2, OriginalQuantity = 2,
+                RemainingQuantity = 2, BaseUnitOfMeasure = InventoryUnitOfMeasure.Piece,
+                UnitCost = 25, OriginalTotalCost = 50
+            },
+            new OilBarrel
+            {
+                BarrelNumber = "DIRECT-OB-1", PurchaseReceiptLineId = Guid.NewGuid(),
+                InventoryItemId = oil.Id, InventoryLocationId = location.Id, StockCostLayerId = oilLayer.Id,
+                PackageSequence = 1, NominalCapacityLiters = 10, RemainingLiters = 10,
+                UnitCostPerLiter = 10, MaximumAllowedLossLiters = 0.2m,
+                Status = OilBarrelStatus.Open, OpenedAtUtc = now.AddDays(-1)
+            });
+        await db.SaveChangesAsync(ct);
+        var request = new DirectOilChangeRequest(now, 2000, location.Id, oil.Id, null,
+            true, filter.Id, null, 5, "Routine service", Convert.ToBase64String(vehicle.RowVersion));
+        var eligibleLocations = await service.GetDirectOilInventoryLocationsAsync(ct);
+        Assert.Equal(location.Id, Assert.Single(eligibleLocations.Value!).InventoryLocationId);
+        var eligibleBarrels = await service.GetDirectOilBarrelsAsync(location.Id, oil.Id, ct);
+        Assert.Equal(10, Assert.Single(eligibleBarrels.Value!).RemainingLiters);
+
+        var stale = await service.CompleteDirectOilChangeAsync(vehicle.Id,
+            request with { VehicleRowVersion = "stale" }, "direct-stale", ct);
+        Assert.Equal(MaintenanceErrors.ConcurrencyConflict.Code, stale.Error.Code);
+
+        var completed = await service.CompleteDirectOilChangeAsync(vehicle.Id, request, "direct-oil-1", ct);
+        Assert.True(completed.IsSuccess, completed.Error.Description);
+        Assert.Null(completed.Value!.MaintenanceWorkOrderId);
+        Assert.Equal(4, completed.Value.OilQuantityLiters);
+        Assert.Equal(70, completed.Value.TotalCost);
+        Assert.Empty(db.MaintenanceWorkOrders);
+        Assert.Empty(db.InventorySupplyRequests);
+        Assert.Equal(2, await db.MaintenanceMaterialUsages.CountAsync(ct));
+        Assert.Equal(6, (await db.StockBalances.SingleAsync(x => x.InventoryItemId == oil.Id, ct)).QuantityOnHand);
+        Assert.Equal(1, (await db.StockBalances.SingleAsync(x => x.InventoryItemId == filter.Id, ct)).QuantityOnHand);
+        Assert.Equal(6, (await db.OilBarrels.SingleAsync(ct)).RemainingLiters);
+        Assert.Equal(70, await db.VehicleExpenses.SumAsync(x => x.TotalAmount, ct));
+        Assert.Equal(2000, vehicle.CurrentOdometer);
+        Assert.Contains(db.VehicleOdometerReadings, x => x.SourceEntityId == completed.Value.Id && x.Reading == 2000);
+        var schedule = await db.VehicleMaintenanceSchedules.SingleAsync(ct);
+        Assert.Null(schedule.LastCompletedWorkOrderId);
+        Assert.Equal(6000, schedule.ReminderFromOdometer);
+        Assert.Equal(7000, schedule.MaximumDueOdometer);
+        var reminders = await service.GetOilRemindersAsync(ct);
+        Assert.Equal(2000, Assert.Single(reminders.Value!).LastOilChangeOdometer);
+        var report = await service.GetOilChangesAsync(vehicle.Id, ct);
+        Assert.Equal(completed.Value.Id, Assert.Single(report.Value!).Id);
+
+        var replay = await service.CompleteDirectOilChangeAsync(vehicle.Id, request, "direct-oil-1", ct);
+        Assert.True(replay.IsSuccess);
+        Assert.Equal(completed.Value.Id, replay.Value!.Id);
+        Assert.Single(db.OilChangeOperations);
+        var conflict = await service.CompleteDirectOilChangeAsync(vehicle.Id, request with { OtherCost = 6 }, "direct-oil-1", ct);
+        Assert.Equal(MaintenanceErrors.OilChangeIdempotencyConflict.Code, conflict.Error.Code);
+    }
+
+    [Fact]
     public async Task WorkOrderListsSeparateCompanyVehiclesFromOutsideVehicles()
     {
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()

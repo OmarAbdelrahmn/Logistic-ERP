@@ -49,6 +49,7 @@ public sealed class VehicleRiderAssignmentImportServiceTests
         Assert.Equal(rider.Id, assignment.RiderProfileId);
         Assert.Equal(vehicle.Id, assignment.VehicleId);
         Assert.True(assignment.IsRealRider);
+        Assert.Equal("Tamm:2525914756", assignment.PermissionReference);
         Assert.Equal(new DateOnly(2026, 9, 18), assignment.PermissionStartsOn);
         Assert.Empty(await dbContext.RealRiders.ToArrayAsync(cancellationToken));
         Assert.Equal(assignment.Id, vehicle.CurrentAssignmentId);
@@ -66,6 +67,56 @@ public sealed class VehicleRiderAssignmentImportServiceTests
         Assert.Equal("549694220", row.SerialNumber);
         Assert.Equal("2618245001", row.IqamaNo);
         Assert.Equal(new DateOnly(2026, 9, 18), row.PermissionStartsOn);
+    }
+
+    [Fact]
+    public async Task ValidateAndImportFourColumnAuthorizationWorkbook()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        await using var dbContext = CreateContext("FourColumnAuthorization");
+        var employee = new Employee
+        {
+            IqamaNo = "2540916943", FullNameAr = "سائق التفويض",
+            IsEmployee = false, Status = EmployeeStatus.Active
+        };
+        var rider = new RiderProfile { EmployeeId = employee.Id };
+        var vehicle = Vehicle("215304220", "VEH-215");
+        dbContext.AddRange(employee, rider, vehicle);
+        await dbContext.SaveChangesAsync(cancellationToken);
+        var service = Service(dbContext);
+
+        using (var stream = AuthorizationWorkbook([215304220L, 2540916943L, 101448001868409L, "2026-09-01"]))
+        {
+            var validation = await service.ImportAsync(stream, "authorizations.xlsx", true, cancellationToken);
+            Assert.True(validation.IsSuccess, validation.Error.Description);
+            Assert.True(validation.Value!.CanImport);
+            Assert.False(validation.Value.Imported);
+            var preview = Assert.Single(validation.Value.Rows);
+            Assert.Equal("101448001868409", preview.PermissionReference);
+            Assert.Equal(new DateOnly(2026, 9, 1), preview.PermissionStartsOn);
+            Assert.Empty(await dbContext.RiderVehicleAssignments.ToArrayAsync(cancellationToken));
+        }
+
+        using (var stream = AuthorizationWorkbook([215304220L, 2540916943L, 101448001868409L, "2026-09-01"]))
+        {
+            var result = await service.ImportAsync(stream, "authorizations.xlsx", false, cancellationToken);
+            Assert.True(result.IsSuccess, result.Error.Description);
+            Assert.True(result.Value!.Imported);
+            var assignment = await dbContext.RiderVehicleAssignments.SingleAsync(cancellationToken);
+            Assert.Equal("101448001868409", assignment.PermissionReference);
+            Assert.Equal(new DateOnly(2026, 9, 1), assignment.PermissionStartsOn);
+        }
+    }
+
+    [Fact]
+    public void FourColumnParserReportsMissingAuthorizationNumber()
+    {
+        using var stream = AuthorizationWorkbook(["215304220", "2540916943", "", "2026-09-01"]);
+
+        var parsed = VehicleRiderAssignmentSpreadsheetParser.Parse(stream);
+
+        Assert.Empty(parsed.Rows);
+        Assert.Single(parsed.Issues, issue => issue.Field == "permissionReference" && issue.RowNumber == 2);
     }
 
     [Fact]
@@ -218,6 +269,24 @@ public sealed class VehicleRiderAssignmentImportServiceTests
                 sheet.Cell(row + 2, column + 1).Value =
                     XLCellValue.FromObject(rows[row][column], CultureInfo.InvariantCulture);
         }
+        var stream = new MemoryStream();
+        workbook.SaveAs(stream);
+        stream.Position = 0;
+        return stream;
+    }
+
+    private static MemoryStream AuthorizationWorkbook(params object[][] rows)
+    {
+        using var workbook = new XLWorkbook();
+        var sheet = workbook.AddWorksheet("التفويضات");
+        sheet.Cell(1, 1).Value = "الرقم التسلسلي";
+        sheet.Cell(1, 2).Value = "هوية المفوض في تم";
+        sheet.Cell(1, 3).Value = "رقم التفويض";
+        sheet.Cell(1, 4).Value = "تاريخ بداية التفويض (أو   1 سبتمبر)";
+        for (var row = 0; row < rows.Length; row++)
+            for (var column = 0; column < rows[row].Length; column++)
+                sheet.Cell(row + 2, column + 1).Value =
+                    XLCellValue.FromObject(rows[row][column], CultureInfo.InvariantCulture);
         var stream = new MemoryStream();
         workbook.SaveAs(stream);
         stream.Position = 0;

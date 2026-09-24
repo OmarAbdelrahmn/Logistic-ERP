@@ -95,6 +95,7 @@ public static class DependencyInjection
         services.AddScoped<IVehicleImportService, VehicleImportService>();
         services.AddScoped<IVehiclePurchaseSupplierImportService, VehiclePurchaseSupplierImportService>();
         services.AddScoped<IVehicleRiderAssignmentImportService, VehicleRiderAssignmentImportService>();
+        services.AddScoped<IVehicleRiderHistoryImportService, VehicleRiderHistoryImportService>();
         services.AddScoped<IVehicleDailyDistanceService, VehicleDailyDistanceService>();
         services.AddScoped<IFuelCardService, FuelCardService>();
         services.AddScoped<IMaintenanceService, MaintenanceService>();

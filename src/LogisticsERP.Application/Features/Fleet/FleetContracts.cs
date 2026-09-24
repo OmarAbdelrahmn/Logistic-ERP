@@ -1,5 +1,7 @@
 using LogisticsERP.Application.Abstractions.Files;
+using System.Text.Json;
 using LogisticsERP.Domain.Enums;
+using System.Text.Json.Serialization;
 
 namespace LogisticsERP.Application.Features.Fleet;
 
@@ -27,7 +29,6 @@ public sealed record VehicleUpsertRequest(
     string? EngineNumber,
     Guid? SponsorId,
     Guid? OperatingCityId,
-    Guid? PurchasedFromSupplierId,
     Guid? RegisteredOwnerSupplierId,
     VehicleRegistrationType? RegistrationType,
     Guid VehicleManufacturerId,
@@ -45,7 +46,23 @@ public sealed record VehicleUpsertRequest(
     long CurrentOdometer,
     string? Notes,
     string? RowVersion,
-    VehicleOperationalStatus? CurrentOperationalStatus = null);
+    VehicleOperationalStatus? CurrentOperationalStatus = null)
+{
+    private Guid? purchasedFromSupplierId;
+
+    public Guid? PurchasedFromSupplierId
+    {
+        get => purchasedFromSupplierId;
+        init
+        {
+            purchasedFromSupplierId = value;
+            IsPurchasedFromSupplierIdSpecified = true;
+        }
+    }
+
+    [JsonIgnore]
+    public bool IsPurchasedFromSupplierIdSpecified { get; private init; }
+}
 
 public sealed record VehicleSummaryResponse(
     Guid Id,
@@ -115,7 +132,23 @@ public sealed record VehicleDetailResponse(
 
 public sealed record VehicleLookupResponse(Guid Id, string AssetNumber, string? PlateNumberAr, string? PlateNumberEn, VehicleOperationalStatus Status);
 public sealed record VehicleReadinessResponse(Guid VehicleId, IReadOnlyList<string> MissingCoreIdentityFields, IReadOnlyList<VehicleFileKind> MissingPhotoSides, IReadOnlyList<VehicleFileKind> MissingDocuments, IReadOnlyList<string> Warnings, bool IsEligibleForAssignment);
-public sealed record VehicleIdentityCorrectionRequest(string AssetNumber, string SerialNumber, string ChassisNumber, string? Vin, string PlateNumberAr, string PlateNumberEn, string? PlateLettersAr, string? PlateLettersEn, string? PlateDigits, Guid SponsorId, Guid OperatingCityId, Guid? PurchasedFromSupplierId, VehicleRegistrationType RegistrationType, string Reason, DateTimeOffset EffectiveAtUtc, IReadOnlyList<Guid>? DocumentVersionReferences, string RowVersion);
+public sealed record VehicleIdentityCorrectionRequest(string AssetNumber, string SerialNumber, string ChassisNumber, string? Vin, string PlateNumberAr, string PlateNumberEn, string? PlateLettersAr, string? PlateLettersEn, string? PlateDigits, Guid SponsorId, Guid OperatingCityId, VehicleRegistrationType RegistrationType, string Reason, DateTimeOffset EffectiveAtUtc, IReadOnlyList<Guid>? DocumentVersionReferences, string RowVersion)
+{
+    private Guid? purchasedFromSupplierId;
+
+    public Guid? PurchasedFromSupplierId
+    {
+        get => purchasedFromSupplierId;
+        init
+        {
+            purchasedFromSupplierId = value;
+            IsPurchasedFromSupplierIdSpecified = true;
+        }
+    }
+
+    [JsonIgnore]
+    public bool IsPurchasedFromSupplierIdSpecified { get; private init; }
+}
 public sealed record VehicleIdentityCorrectionResponse(Guid Id, Guid VehicleId, string BeforeJson, string AfterJson, string? DocumentVersionReferencesJson, string Reason, DateTimeOffset EffectiveAtUtc, Guid ActorUserId, DateTimeOffset CreatedAtUtc);
 public sealed record VehicleRegistrationTransitionRequest(string PlateNumberAr, string PlateNumberEn, string? PlateLettersAr, string? PlateLettersEn, string? PlateDigits, DateTimeOffset EffectiveAtUtc, string Reason, string RowVersion);
 public sealed record VehicleRegistrationTransitionSnapshotResponse(Guid Id, Guid VehicleRegistrationTransitionId, string OldVehicleDetailsJson, string NewVehicleDetailsJson, DateTimeOffset CreatedAtUtc);
@@ -134,7 +167,7 @@ public sealed record ReturnVehicleRequest(Guid AssignmentId, DateTimeOffset Ende
 public sealed record SwitchVehicleRequest(Guid CurrentAssignmentId, Guid NewVehicleId, DateTimeOffset SwitchedAtUtc, long OldVehicleOdometer, long NewVehicleOdometer, VehicleCondition OldVehicleCondition, VehicleCondition NewVehicleCondition, byte? OldFuelLevelPercentage, byte? NewFuelLevelPercentage, string PermissionReference, string Reason, string RowVersion, VehicleConditionReportRequest? ConditionReport = null);
 public sealed record RenewVehiclePermissionRequest(DateOnly PermissionStartsOn, string PermissionReference, string Reason, string RowVersion);
 public sealed record RiderPromissoryFileResponse(Guid Id, Guid RiderProfileId, Guid CurrentVersionId, int VersionNumber, string OriginalFileName, string ContentType, long FileSizeBytes, string Sha256Checksum, DateTimeOffset UploadedAtUtc, string RowVersion);
-public sealed record RiderVehicleAssignmentResponse(Guid Id, Guid RiderProfileId, Guid EmployeeId, bool IsRealRider, RealRiderResponse? RealRider, Guid VehicleId, string AssetNumber, string RiderName, DateTimeOffset StartedAtUtc, DateTimeOffset? EndedAtUtc, string? StartLocationSnapshot, string? EndLocationSnapshot, long StartOdometer, long? EndOdometer, string? PermissionReference, DateOnly? PermissionStartsOn, DateOnly? PermissionEndsOn, RiderVehicleAssignmentStatus Status, string AssignmentReason, string? CompletionReason, Guid OperationId, IReadOnlyList<Guid> PromissoryFileVersionIds, string RowVersion);
+public sealed record RiderVehicleAssignmentResponse(Guid Id, Guid RiderProfileId, Guid EmployeeId, bool IsRealRider, RealRiderResponse? RealRider, Guid VehicleId, string AssetNumber, string RiderName, string? RiderIqamaNo, Guid? VehicleOperatingCityId, string? VehicleOperatingCityNameAr, DateTimeOffset StartedAtUtc, DateTimeOffset? EndedAtUtc, string? StartLocationSnapshot, string? EndLocationSnapshot, long StartOdometer, long? EndOdometer, string? PermissionReference, DateOnly? PermissionStartsOn, DateOnly? PermissionEndsOn, RiderVehicleAssignmentStatus Status, string AssignmentReason, string? CompletionReason, Guid OperationId, IReadOnlyList<Guid> PromissoryFileVersionIds, string RowVersion);
 public sealed record RiderVehicleTimelineResponse(RiderVehicleAssignmentResponse Assignment, IReadOnlyList<VehicleIssueSummaryResponse> Issues, IReadOnlyList<VehicleAccidentSummaryResponse> Accidents);
 
 public sealed record VehicleRegistrationRequest(string RegistrationNumber, string IssuingAuthority, DateOnly IssueDate, DateOnly ExpiryDate, string? Notes);
@@ -187,3 +220,30 @@ public interface IFleetComplianceNotificationService
 {
     Task RunDueNotificationsAsync(CancellationToken cancellationToken = default);
 }
+
+public sealed record CompleteHistoryResponse(
+    Guid SubjectId,
+    string SubjectType,
+    string? SubjectName,
+    DateTimeOffset GeneratedAtUtc,
+    int TotalEvents,
+    IReadOnlyList<CompleteHistoryEventResponse> Events);
+
+public sealed record CompleteHistoryEventResponse(
+    DateTimeOffset OccurredAtUtc,
+    string Category,
+    string Action,
+    Guid EntityId,
+    Guid? VehicleId,
+    Guid? RiderProfileId,
+    Guid? AssignmentId,
+    string Summary,
+    JsonElement Details,
+    IReadOnlyList<CompleteHistoryFileResponse> Files);
+
+public sealed record CompleteHistoryFileResponse(
+    Guid Id,
+    string FileName,
+    string ContentType,
+    long FileSizeBytes,
+    string DownloadPath);

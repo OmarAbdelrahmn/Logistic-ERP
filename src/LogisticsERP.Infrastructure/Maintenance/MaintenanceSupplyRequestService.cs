@@ -317,6 +317,7 @@ internal sealed partial class MaintenanceService
         {
             Id = operationId,
             MaintenanceWorkOrderId = workOrder.Id,
+            VehicleId = vehicle.Id,
             PerformedAtUtc = issuedAtUtc,
             OdometerAtChange = workOrder.OdometerAtOpen.Value,
             VehicleTypeSnapshot = vehicle.VehicleType,
@@ -339,7 +340,7 @@ internal sealed partial class MaintenanceService
         workOrder.CompletedAtUtc = issuedAtUtc;
         workOrder.Status = MaintenanceWorkOrderStatus.Completed;
         workOrder.WorkPerformed = "Oil change approved and issued by warehouse";
-        await UpdateOilScheduleAsync(workOrder, operation, vehicle.VehicleType, cancellationToken);
+        await UpdateOilScheduleAsync(vehicle.Id, workOrder.Id, operation, vehicle.VehicleType, cancellationToken);
         return Result.Success(operation.TotalCost);
     }
 

@@ -42,6 +42,39 @@ public sealed class MaintenanceController(IMaintenanceService service) : Control
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 
+    [HttpGet("oil-changes")]
+    [RequirePermission(PermissionKeys.Maintenance.OilRead)]
+    public async Task<IActionResult> GetOilChanges([FromQuery] Guid? vehicleId, CancellationToken cancellationToken)
+    {
+        var result = await service.GetOilChangesAsync(vehicleId, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpPost("vehicles/{vehicleId:guid}/oil-changes")]
+    [RequirePermission(PermissionKeys.Maintenance.OilComplete)]
+    [RequirePermission(PermissionKeys.Inventory.StockMove)]
+    public async Task<IActionResult> CompleteDirectOilChange(Guid vehicleId, [FromBody] DirectOilChangeRequest request, [FromHeader(Name = "Idempotency-Key")] string? idempotencyKey, CancellationToken cancellationToken)
+    {
+        var result = await service.CompleteDirectOilChangeAsync(vehicleId, request, idempotencyKey ?? string.Empty, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpGet("oil-inventory-locations")]
+    [RequirePermission(PermissionKeys.Maintenance.OilRead)]
+    public async Task<IActionResult> GetDirectOilInventoryLocations(CancellationToken cancellationToken)
+    {
+        var result = await service.GetDirectOilInventoryLocationsAsync(cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpGet("oil-barrels")]
+    [RequirePermission(PermissionKeys.Maintenance.OilRead)]
+    public async Task<IActionResult> GetDirectOilBarrels([FromQuery] Guid inventoryLocationId, [FromQuery] Guid inventoryItemId, CancellationToken cancellationToken)
+    {
+        var result = await service.GetDirectOilBarrelsAsync(inventoryLocationId, inventoryItemId, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
     [HttpGet("vehicles/{vehicleId:guid}/material-history")]
     [RequirePermission(PermissionKeys.Maintenance.WorkOrdersRead)]
     public async Task<IActionResult> GetVehicleMaterialHistory(Guid vehicleId, CancellationToken cancellationToken)

@@ -34,6 +34,27 @@ public sealed class VehicleAssignmentsController(
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 
+    [HttpGet("{assignmentId:guid}")]
+    [RequirePermission(PermissionKeys.Fleet.AssignmentsRead)]
+    public async Task<IActionResult> GetAssignment(Guid assignmentId, CancellationToken cancellationToken)
+    {
+        var result = await service.GetAssignmentAsync(assignmentId, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpPost("{assignmentId:guid}/promissory-files")]
+    [RequirePermission(PermissionKeys.Fleet.AssignmentsManage)]
+    [Consumes("multipart/form-data")]
+    [RequestSizeLimit(32 * 1024 * 1024)]
+    public Task<IActionResult> AttachPromissoryFiles(
+        Guid assignmentId,
+        [FromForm] AssignmentPromissoryFilesForm form,
+        [FromHeader(Name = "Idempotency-Key")] string? idempotencyKey,
+        CancellationToken cancellationToken) =>
+        ExecuteAssignmentAsync(
+            () => WithUploadsAsync(form.PromissoryFiles, uploads => service.AttachPromissoryFilesAsync(assignmentId, form.RowVersion, uploads, idempotencyKey ?? string.Empty, cancellationToken)),
+            cancellationToken);
+
     [HttpPost("take")]
     [RequirePermission(PermissionKeys.Fleet.AssignmentsManage)]
     [Consumes("multipart/form-data")]
@@ -192,6 +213,12 @@ public sealed class VehicleAssignmentMultipartForm
     public List<IFormFile> PromissoryFiles { get; init; } = [];
 }
 
+public sealed class AssignmentPromissoryFilesForm
+{
+    public string RowVersion { get; init; } = string.Empty;
+    public List<IFormFile> PromissoryFiles { get; init; } = [];
+}
+
 public sealed class VehicleSwitchMultipartForm
 {
     public string Metadata { get; init; } = string.Empty;
@@ -209,6 +236,17 @@ public sealed class VehicleReturnMultipartForm
 [Route("api/riders/{riderProfileId:guid}/vehicle-timeline")]
 public sealed class RiderVehicleTimelineController(IFleetService service) : ControllerBase
 {
+    [HttpGet("/api/riders/{riderProfileId:guid}/complete-history")]
+    [RequirePermission(PermissionKeys.Fleet.AssignmentsRead)]
+    [RequirePermission(PermissionKeys.Fleet.IssuesRead)]
+    [RequirePermission(PermissionKeys.Fleet.AccidentsRead)]
+    [RequirePermission(PermissionKeys.Maintenance.WorkOrdersRead)]
+    [RequirePermission(PermissionKeys.Inventory.StockRead)]
+    public async Task<IActionResult> CompleteHistory(Guid riderProfileId, CancellationToken cancellationToken)
+    {
+        var result = await service.GetCompleteRiderHistoryAsync(riderProfileId, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
     [HttpGet]
     [RequirePermission(PermissionKeys.Fleet.AssignmentsRead)]
     public async Task<IActionResult> Get(Guid riderProfileId, CancellationToken cancellationToken)

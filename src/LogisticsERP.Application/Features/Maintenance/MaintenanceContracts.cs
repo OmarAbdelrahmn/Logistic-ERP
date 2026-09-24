@@ -398,7 +398,7 @@ public sealed record BatchSparePartUsageResponse(int TotalProcessed, int Success
 public sealed record StockCostAllocationResponse(Guid StockCostLayerId, decimal Quantity, decimal UnitCost, decimal Cost);
 public sealed record MaintenanceMaterialUsageResponse(
     Guid Id,
-    Guid MaintenanceWorkOrderId,
+    Guid? MaintenanceWorkOrderId,
     Guid InventoryItemId,
     string Sku,
     string ItemNameAr,
@@ -466,9 +466,36 @@ public sealed record CompleteOilChangeRequest(
     string? Notes,
     string WorkOrderRowVersion);
 
+public sealed record DirectOilChangeRequest(
+    DateTimeOffset PerformedAtUtc,
+    long OdometerAtChange,
+    Guid InventoryLocationId,
+    Guid OilInventoryItemId,
+    Guid? NextOilBarrelId,
+    bool OilFilterChanged,
+    Guid? OilFilterInventoryItemId,
+    decimal? ConfiguredOilQuantityLiters,
+    decimal OtherCost,
+    string? Notes,
+    string VehicleRowVersion);
+
+public sealed record DirectOilInventoryLocationResponse(
+    Guid InventoryLocationId,
+    Guid MaintenanceLocationId,
+    string InventoryLocationNameAr,
+    string MaintenanceLocationNameAr);
+
+public sealed record DirectOilBarrelResponse(
+    Guid Id,
+    string BarrelNumber,
+    Guid InventoryLocationId,
+    Guid InventoryItemId,
+    OilBarrelStatus Status,
+    decimal RemainingLiters);
+
 public sealed record OilChangeResponse(
     Guid Id,
-    Guid MaintenanceWorkOrderId,
+    Guid? MaintenanceWorkOrderId,
     DateTimeOffset PerformedAtUtc,
     long OdometerAtChange,
     VehicleType VehicleType,
@@ -481,6 +508,14 @@ public sealed record OilChangeResponse(
     decimal TotalCost,
     Guid? VehicleId,
     Guid? RiderProfileId);
+
+public sealed record OilChangeReportResponse(
+    Guid Id, Guid? MaintenanceWorkOrderId, Guid? VehicleId, string? VehicleAssetNumber,
+    DateTimeOffset PerformedAtUtc, long OdometerAtChange, VehicleType VehicleType,
+    Guid OilInventoryItemId, decimal OilQuantityLiters, decimal OilCost,
+    bool OilFilterChanged, Guid? OilFilterInventoryItemId, decimal OilFilterCost,
+    decimal LaborCost, decimal OtherCost, decimal TotalCost,
+    Guid OilMaterialUsageId, Guid? OilFilterMaterialUsageId, Guid PerformedByUserId, string? Notes);
 
 public sealed record OilReminderResponse(
     Guid VehicleId,

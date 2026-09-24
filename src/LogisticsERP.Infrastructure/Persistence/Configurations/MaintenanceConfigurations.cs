@@ -673,12 +673,17 @@ internal sealed class OilChangeOperationConfiguration : IEntityTypeConfiguration
         builder.Property(x => x.OtherCost).HasPrecision(18, 2);
         builder.Property(x => x.TotalCost).HasPrecision(18, 2);
         builder.Property(x => x.Notes).HasMaxLength(2000);
+        builder.Property(x => x.IdempotencyKey).HasMaxLength(200);
+        builder.Property(x => x.RequestHash).HasMaxLength(64);
         builder.HasOne<MaintenanceWorkOrder>().WithMany().HasForeignKey(x => x.MaintenanceWorkOrderId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<Vehicle>().WithMany().HasForeignKey(x => x.VehicleId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<InventoryItem>().WithMany().HasForeignKey(x => x.OilInventoryItemId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<InventoryItem>().WithMany().HasForeignKey(x => x.OilFilterInventoryItemId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<MaintenanceMaterialUsage>().WithMany().HasForeignKey(x => x.OilMaterialUsageId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<MaintenanceMaterialUsage>().WithMany().HasForeignKey(x => x.OilFilterMaterialUsageId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasIndex(x => x.MaintenanceWorkOrderId).IsUnique();
+        builder.HasIndex(x => x.MaintenanceWorkOrderId).IsUnique().HasFilter("[MaintenanceWorkOrderId] IS NOT NULL");
+        builder.HasIndex(x => x.IdempotencyKey).IsUnique().HasFilter("[IdempotencyKey] IS NOT NULL");
+        builder.HasIndex(x => new { x.VehicleId, x.PerformedAtUtc });
         builder.HasIndex(x => new { x.VehicleTypeSnapshot, x.OdometerAtChange });
         builder.ToTable(table =>
         {

@@ -43,6 +43,10 @@ public interface IMaintenanceService
     Task<Result<IReadOnlyList<MaintenancePlanResponse>>> GetPlansAsync(CancellationToken cancellationToken = default);
     Task<Result<MaintenancePlanResponse>> UpsertPlanAsync(Guid? id, MaintenancePlanRequest request, CancellationToken cancellationToken = default);
     Task<Result<OilChangeResponse>> CompleteOilChangeAsync(Guid workOrderId, CompleteOilChangeRequest request, CancellationToken cancellationToken = default);
+    Task<Result<OilChangeResponse>> CompleteDirectOilChangeAsync(Guid vehicleId, DirectOilChangeRequest request, string idempotencyKey, CancellationToken cancellationToken = default);
+    Task<Result<IReadOnlyList<DirectOilInventoryLocationResponse>>> GetDirectOilInventoryLocationsAsync(CancellationToken cancellationToken = default);
+    Task<Result<IReadOnlyList<DirectOilBarrelResponse>>> GetDirectOilBarrelsAsync(Guid inventoryLocationId, Guid inventoryItemId, CancellationToken cancellationToken = default);
+    Task<Result<IReadOnlyList<OilChangeReportResponse>>> GetOilChangesAsync(Guid? vehicleId, CancellationToken cancellationToken = default);
     Task<Result<IReadOnlyList<OilReminderResponse>>> GetOilRemindersAsync(CancellationToken cancellationToken = default);
     Task<Result<ExternalPartSaleResponse>> PostExternalPartSaleAsync(Guid workOrderId, ExternalPartSaleRequest request, CancellationToken cancellationToken = default);
     Task<Result<ExternalFinancialEntryResponse>> PostCustomerLaborChargeAsync(Guid workOrderId, ExternalFinancialEntryRequest request, CancellationToken cancellationToken = default);

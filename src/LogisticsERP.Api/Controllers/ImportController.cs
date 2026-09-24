@@ -19,7 +19,8 @@ public sealed class ImportController(
     IVehicleImportValidationService vehicleValidationService,
     IVehicleImportService vehicleImportService,
     IVehiclePurchaseSupplierImportService vehiclePurchaseSupplierImportService,
-    IVehicleRiderAssignmentImportService vehicleRiderAssignmentImportService) : ControllerBase
+    IVehicleRiderAssignmentImportService vehicleRiderAssignmentImportService,
+    IVehicleRiderHistoryImportService vehicleRiderHistoryImportService) : ControllerBase
 {
     [HttpPost("employees-riders/validate")]
     [Consumes("multipart/form-data")]
@@ -131,6 +132,22 @@ public sealed class ImportController(
         [FromForm] HrExcelImportForm request,
         CancellationToken cancellationToken) =>
         ExecuteVehicleRiderAssignmentImport(request.File, validateOnly: false, cancellationToken);
+
+    [HttpPost("vehicle-rider-history/validate")]
+    [Consumes("multipart/form-data")]
+    [AllowAnonymous]
+    public Task<IActionResult> ValidateVehicleRiderHistory(
+        [FromForm] HrExcelImportForm request,
+        CancellationToken cancellationToken) =>
+        ExecuteVehicleRiderHistoryImport(request.File, validateOnly: true, cancellationToken);
+
+    [HttpPost("vehicle-rider-history")]
+    [Consumes("multipart/form-data")]
+    [AllowAnonymous]
+    public Task<IActionResult> ImportVehicleRiderHistory(
+        [FromForm] HrExcelImportForm request,
+        CancellationToken cancellationToken) =>
+        ExecuteVehicleRiderHistoryImport(request.File, validateOnly: false, cancellationToken);
 
     private async Task<IActionResult> Execute(IFormFile? file, bool validateOnly, CancellationToken cancellationToken)
     {
@@ -258,6 +275,19 @@ public sealed class ImportController(
             Path.GetFileName(file.FileName),
             validateOnly,
             cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    private async Task<IActionResult> ExecuteVehicleRiderHistoryImport(
+        IFormFile? file, bool validateOnly, CancellationToken cancellationToken)
+    {
+        if (file is null || file.Length == 0 || file.Length > 20 * 1024 * 1024
+            || !string.Equals(Path.GetExtension(file.FileName), ".xlsx", StringComparison.OrdinalIgnoreCase))
+            return BadRequest(new { error = "A non-empty .xlsx file up to 20 MB is required." });
+
+        await using var stream = file.OpenReadStream();
+        var result = await vehicleRiderHistoryImportService.ImportAsync(
+            stream, Path.GetFileName(file.FileName), validateOnly, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 }

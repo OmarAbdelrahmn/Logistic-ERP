@@ -2,6 +2,7 @@ using LogisticsERP.Api.ErrorHandling;
 using LogisticsERP.Api.Authorization;
 using LogisticsERP.Application.Abstractions.Files;
 using LogisticsERP.Application.Authorization;
+using LogisticsERP.Application.Common.Results;
 using LogisticsERP.Application.Features.Fleet;
 using LogisticsERP.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
@@ -13,6 +14,18 @@ namespace LogisticsERP.Api.Controllers;
 [Route("api/vehicles")]
 public sealed class VehiclesController(IFleetService service) : ControllerBase
 {
+    [HttpGet("{id:guid}/complete-history")]
+    [RequirePermission(PermissionKeys.Fleet.VehiclesRead)]
+    [RequirePermission(PermissionKeys.Fleet.AssignmentsRead)]
+    [RequirePermission(PermissionKeys.Fleet.IssuesRead)]
+    [RequirePermission(PermissionKeys.Fleet.AccidentsRead)]
+    [RequirePermission(PermissionKeys.Maintenance.WorkOrdersRead)]
+    [RequirePermission(PermissionKeys.Inventory.StockRead)]
+    public async Task<IActionResult> CompleteHistory(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await service.GetCompleteVehicleHistoryAsync(id, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
     [HttpGet]
     [RequirePermission(PermissionKeys.Fleet.VehiclesRead)]
     public async Task<IActionResult> GetAll([FromQuery] string? search, [FromQuery] string? status, [FromQuery] Guid? operatingCityId, [FromQuery] int page = 1, [FromQuery] int pageSize = 50, CancellationToken cancellationToken = default)
@@ -139,10 +152,16 @@ public sealed class VehiclesController(IFleetService service) : ControllerBase
     [RequestSizeLimit(22 * 1024 * 1024)]
     public async Task<IActionResult> TransitionToPublic(Guid id, [FromForm] VehicleRegistrationTransitionForm form, CancellationToken cancellationToken)
     {
-        if (form.Istimara is null || form.OperationCard is null || form.Istimara.Length == 0 || form.OperationCard.Length == 0) return BadRequest();
+        if (string.IsNullOrWhiteSpace(form.PlateNumberAr)) return Result.Failure(FleetErrors.TransitionPlateNumberArInvalid).ToProblem(HttpContext);
+        if (string.IsNullOrWhiteSpace(form.PlateNumberEn)) return Result.Failure(FleetErrors.TransitionPlateNumberEnInvalid).ToProblem(HttpContext);
+        if (form.EffectiveAtUtc is null) return Result.Failure(FleetErrors.TransitionEffectiveDateRequired).ToProblem(HttpContext);
+        if (string.IsNullOrWhiteSpace(form.Reason)) return Result.Failure(FleetErrors.TransitionReasonInvalid).ToProblem(HttpContext);
+        if (string.IsNullOrWhiteSpace(form.RowVersion)) return Result.Failure(FleetErrors.TransitionRowVersionRequired).ToProblem(HttpContext);
+        if (form.Istimara is null || form.Istimara.Length == 0) return Result.Failure(FleetErrors.TransitionIstimaraInvalid).ToProblem(HttpContext);
+        if (form.OperationCard is null || form.OperationCard.Length == 0) return Result.Failure(FleetErrors.TransitionOperationCardInvalid).ToProblem(HttpContext);
         await using var istimara = form.Istimara.OpenReadStream();
         await using var operationCard = form.OperationCard.OpenReadStream();
-        var request = new VehicleRegistrationTransitionRequest(form.PlateNumberAr, form.PlateNumberEn, form.PlateLettersAr, form.PlateLettersEn, form.PlateDigits, form.EffectiveAtUtc, form.Reason, form.RowVersion);
+        var request = new VehicleRegistrationTransitionRequest(form.PlateNumberAr, form.PlateNumberEn, form.PlateLettersAr, form.PlateLettersEn, form.PlateDigits, form.EffectiveAtUtc.Value, form.Reason, form.RowVersion);
         var result = await service.TransitionToPublicTransportAsync(id, request,
             new PrivateFileUpload(istimara, form.Istimara.FileName, form.Istimara.ContentType, form.Istimara.Length),
             new PrivateFileUpload(operationCard, form.OperationCard.FileName, form.OperationCard.ContentType, form.OperationCard.Length), cancellationToken);
@@ -208,14 +227,14 @@ public sealed class VehicleFileUploadForm
 
 public sealed class VehicleRegistrationTransitionForm
 {
-    public string PlateNumberAr { get; init; } = string.Empty;
-    public string PlateNumberEn { get; init; } = string.Empty;
+    public string? PlateNumberAr { get; init; }
+    public string? PlateNumberEn { get; init; }
     public string? PlateLettersAr { get; init; }
     public string? PlateLettersEn { get; init; }
     public string? PlateDigits { get; init; }
-    public DateTimeOffset EffectiveAtUtc { get; init; }
-    public string Reason { get; init; } = string.Empty;
-    public string RowVersion { get; init; } = string.Empty;
-    public IFormFile Istimara { get; init; } = null!;
-    public IFormFile OperationCard { get; init; } = null!;
+    public DateTimeOffset? EffectiveAtUtc { get; init; }
+    public string? Reason { get; init; }
+    public string? RowVersion { get; init; }
+    public IFormFile? Istimara { get; init; }
+    public IFormFile? OperationCard { get; init; }
 }

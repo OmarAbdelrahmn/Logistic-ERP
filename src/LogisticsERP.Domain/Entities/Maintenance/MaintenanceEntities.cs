@@ -48,7 +48,7 @@ public sealed class ExternalVehicleSnapshot : HistoryEntity
 
 public sealed class MaintenanceMaterialUsage : HistoryEntity
 {
-    public Guid MaintenanceWorkOrderId { get; set; }
+    public Guid? MaintenanceWorkOrderId { get; set; }
     public Guid InventoryItemId { get; set; }
     public Guid InventoryLocationId { get; set; }
     public MaintenanceUsageType UsageType { get; set; }
@@ -120,7 +120,10 @@ public sealed class VehicleMaintenanceSchedule : AuditableEntity
 
 public sealed class OilChangeOperation : HistoryEntity
 {
-    public Guid MaintenanceWorkOrderId { get; set; }
+    public Guid? MaintenanceWorkOrderId { get; set; }
+    public Guid? VehicleId { get; set; }
+    public string? IdempotencyKey { get; set; }
+    public string? RequestHash { get; set; }
     public DateTimeOffset PerformedAtUtc { get; set; }
     public long OdometerAtChange { get; set; }
     public VehicleType VehicleTypeSnapshot { get; set; }
