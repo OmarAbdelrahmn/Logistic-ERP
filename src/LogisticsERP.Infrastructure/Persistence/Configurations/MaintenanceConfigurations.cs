@@ -121,6 +121,7 @@ internal sealed class InventoryItemConfiguration : IEntityTypeConfiguration<Inve
         builder.Property(x => x.DefaultPackageQuantity).HasPrecision(18, 3);
         builder.Property(x => x.MinimumStockLevel).HasPrecision(18, 3);
         builder.Property(x => x.ReorderQuantity).HasPrecision(18, 3);
+        builder.Property(x => x.CompatibleVehicleTypesMask).HasDefaultValue(31);
         builder.HasIndex(x => x.NormalizedSku).IsUnique().HasFilter("[IsDeleted] = 0");
         builder.HasIndex(x => x.Barcode).HasFilter("[Barcode] IS NOT NULL AND [IsDeleted] = 0");
         builder.ToTable(table =>
@@ -130,6 +131,7 @@ internal sealed class InventoryItemConfiguration : IEntityTypeConfiguration<Inve
             table.HasCheckConstraint("CK_InventoryItems_OilUnit", "[ItemType] <> 3 OR [BaseUnitOfMeasure] = 2");
             table.HasCheckConstraint("CK_InventoryItems_Quantities", "([DefaultPackageQuantity] IS NULL OR [DefaultPackageQuantity] > 0) AND [MinimumStockLevel] >= 0 AND [ReorderQuantity] >= 0");
             table.HasCheckConstraint("CK_InventoryItems_Status", "[Status] BETWEEN 1 AND 3");
+            table.HasCheckConstraint("CK_InventoryItems_CompatibleVehicleTypesMask", "[CompatibleVehicleTypesMask] BETWEEN 1 AND 31");
         });
     }
 }

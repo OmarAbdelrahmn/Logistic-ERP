@@ -16,6 +16,36 @@ internal sealed partial class VehicleAccidentService
     private static OperationError WorkflowError(string message) => new("Fleet.AccidentWorkflow", message, ErrorType.Validation);
     private static bool ValidMoney(decimal? value) => value is > 0 and <= 9999999999999999.99m && decimal.Round(value.Value, 2) == value;
 
+    private static string ArabicNotificationAction(AccidentWorkflowAction action) => action switch
+    {
+        AccidentWorkflowAction.AssessFault => "تم تقييم المسؤولية عن الحادث",
+        AccidentWorkflowAction.StartLocalRepair => "بدأ إصلاح المركبة محليًا",
+        AccidentWorkflowAction.CompleteLocalRepair => "اكتمل إصلاح المركبة محليًا",
+        AccidentWorkflowAction.OpenClaim => "فُتحت مطالبة للحادث",
+        AccidentWorkflowAction.SubmitClaim => "قُدمت مطالبة الحادث",
+        AccidentWorkflowAction.ReceiveCompensationOffer => "استُلم عرض التعويض",
+        AccidentWorkflowAction.SubmitToInsurance => "أُرسلت مطالبة الحادث إلى شركة التأمين",
+        AccidentWorkflowAction.ApproveInsurance => "وافقت شركة التأمين على المطالبة",
+        AccidentWorkflowAction.RejectInsurance => "رفضت شركة التأمين المطالبة",
+        AccidentWorkflowAction.SubmitToSupplier => "أُرسلت مطالبة الحادث إلى المورد",
+        AccidentWorkflowAction.ConfirmTransfer => "تأكد استلام التحويل المالي",
+        AccidentWorkflowAction.ReceiveRepairDirection => "استُلم توجيه إصلاح المركبة",
+        AccidentWorkflowAction.StartRepair => "بدأ إصلاح المركبة",
+        AccidentWorkflowAction.RepairProgress => "تم تحديث تقدم إصلاح المركبة",
+        AccidentWorkflowAction.CompleteRepair => "اكتمل إصلاح المركبة",
+        AccidentWorkflowAction.ProposeTotalLoss => "اقتُرح اعتبار المركبة خسارة كلية",
+        AccidentWorkflowAction.RequestReinspection => "طُلبت إعادة فحص المركبة",
+        AccidentWorkflowAction.ConfirmTotalLoss => "تأكد اعتبار المركبة خسارة كلية",
+        AccidentWorkflowAction.RecordVehicleCollection => "تم استلام المركبة بعد اعتبارها خسارة كلية",
+        AccidentWorkflowAction.RecordValuation => "سُجل تقييم المركبة",
+        AccidentWorkflowAction.FollowUp => "تم تحديث متابعة الحادث",
+        AccidentWorkflowAction.SubmitInstallmentRefund => "قُدم طلب استرداد الأقساط",
+        AccidentWorkflowAction.ReceiveInstallmentRefund => "استُلم مبلغ استرداد الأقساط",
+        AccidentWorkflowAction.RejectInstallmentRefund => "رُفض طلب استرداد الأقساط",
+        AccidentWorkflowAction.MarkNoInstallments => "سُجل عدم وجود أقساط للاسترداد",
+        _ => "تم تحديث إجراءات الحادث"
+    };
+
     public async Task<Result<PagedResponse<AccidentWorkflowSummary>>> GetWorkflowQueueAsync(Guid? vehicleId, Guid? riderProfileId,
         AccidentCaseStage? stage, bool overdueOnly, int page, int pageSize, CancellationToken cancellationToken = default)
     {
@@ -130,7 +160,8 @@ internal sealed partial class VehicleAccidentService
             ActorUserId = support.UserId!.Value, OccurredAtUtc = request.OccurredAtUtc, Reason = request.Notes.Trim(),
             SnapshotJson = JsonSerializer.Serialize(new { FromStage = fromStage, ToStage = item.Stage, Request = request })
         });
-        await notifications.QueueAsync(accident.Id, accident.VehicleId, accident.AccidentNumber, $"action:{eventId:N}", $"{request.Action}: {item.Stage}", cancellationToken);
+        await notifications.QueueAsync(accident.Id, accident.VehicleId, accident.AccidentNumber, $"action:{eventId:N}",
+            $"{ArabicNotificationAction(request.Action)} للحادث رقم {accident.AccidentNumber}.", cancellationToken);
         try { await dbContext.SaveChangesAsync(cancellationToken); }
         catch (DbUpdateException) { return Result.Failure<AccidentWorkflowResponse>(FleetErrors.Conflict); }
         return Result.Success(await BuildWorkflowAsync(accident, item, cancellationToken));

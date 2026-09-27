@@ -8,7 +8,7 @@ public interface IMaintenanceService
 {
     Task<Result<IReadOnlyList<MaintenanceLocationResponse>>> GetLocationsAsync(CancellationToken cancellationToken = default);
     Task<Result<MaintenanceLocationResponse>> UpsertLocationAsync(Guid? id, MaintenanceLocationRequest request, CancellationToken cancellationToken = default);
-    Task<Result<IReadOnlyList<InventoryItemResponse>>> GetItemsAsync(string? search, CancellationToken cancellationToken = default);
+    Task<Result<IReadOnlyList<InventoryItemResponse>>> GetItemsAsync(string? search, VehicleType? vehicleType, CancellationToken cancellationToken = default);
     Task<Result<InventoryItemResponse>> UpsertItemAsync(Guid? id, InventoryItemRequest request, CancellationToken cancellationToken = default);
     Task<Result<IReadOnlyList<MaintenanceSupplierResponse>>> GetSuppliersAsync(CancellationToken cancellationToken = default);
     Task<Result<MaintenanceSupplierResponse>> UpsertSupplierAsync(Guid? id, MaintenanceSupplierRequest request, CancellationToken cancellationToken = default);

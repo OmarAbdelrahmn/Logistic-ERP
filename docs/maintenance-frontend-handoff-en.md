@@ -96,7 +96,7 @@ Create via `POST /api/maintenance-locations`, update via `PUT /api/maintenance-l
 
 | Operation | Endpoint |
 |---|---|
-|Search/list|`GET /api/maintenance-inventory/items?search=oil`|
+|Search/list|`GET /api/maintenance-inventory/items?search=oil&vehicleType=2` (`vehicleType` optional)|
 |Create|`POST /api/maintenance-inventory/items`|
 |Update|`PUT /api/maintenance-inventory/items/{id}`|
 
@@ -107,11 +107,12 @@ Create via `POST /api/maintenance-locations`, update via `PUT /api/maintenance-l
   "descriptionAr":null, "descriptionEn":null,
   "baseUnitOfMeasure":2, "purchaseUnitOfMeasure":3,
   "defaultPackageQuantity":208, "minimumStockLevel":20, "reorderQuantity":208,
-  "isSerialized":false, "isLotTracked":true, "rowVersion":null
+  "isSerialized":false, "isLotTracked":true,
+  "compatibleVehicleTypes":[1,2], "rowVersion":null
 }
 ```
 
-The item response is this request plus `id` and `status`.
+`compatibleVehicleTypes` accepts motorcycle (1), car (2), van (3), truck (4), and other (5). Send one or more values for a restricted item; send all five to allow every type. Omitting the field on create allows every type; omitting it on update keeps the current compatibility. An empty array or unknown value is invalid. The item response includes `compatibleVehicleTypes`, `id`, and `status`. The optional list filter returns items compatible with the selected vehicle type. Posting a restricted item to a work order for another type returns `maintenance.incompatible_vehicle_type`; an external work order without a vehicle type can use only an item allowed for all types.
 
 For barrel oil, always use `itemType: 3`, `baseUnitOfMeasure: 2` (liter), and `purchaseUnitOfMeasure: 3` (barrel). Do not keep a fixed item cost: each receipt creates its own cost layer and barrels, with its own capacity and liter cost.
 

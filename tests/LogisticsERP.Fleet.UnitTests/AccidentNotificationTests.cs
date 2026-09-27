@@ -1,3 +1,4 @@
+using System.Text.Json;
 using LogisticsERP.Application.Abstractions.Authentication;
 using LogisticsERP.Application.Authorization;
 using LogisticsERP.Application.Features.System;
@@ -38,12 +39,12 @@ public sealed class AccidentNotificationTests
         var workflow = new VehicleAccidentCase { VehicleAccidentId = accident.Id, Stage = AccidentCaseStage.AwaitingInsurance, InsuranceDueAtUtc = clock.GetUtcNow().AddSeconds(-1) };
         db.AddRange(accident, workflow);
         await db.SaveChangesAsync(ct);
-        await notifier.QueueAsync(accident.Id, accident.VehicleId, accident.AccidentNumber, "reported", "Reported", ct);
-        await notifier.QueueAsync(accident.Id, accident.VehicleId, accident.AccidentNumber, "reported", "Reported", ct);
+        await notifier.QueueAsync(accident.Id, accident.VehicleId, accident.AccidentNumber, "reported", "تم تسجيل الحادث.", ct);
+        await notifier.QueueAsync(accident.Id, accident.VehicleId, accident.AccidentNumber, "reported", "تم تسجيل الحادث.", ct);
         await db.SaveChangesAsync(ct);
-        await notifier.QueueAsync(accident.Id, accident.VehicleId, accident.AccidentNumber, "reported", "Reported", ct);
-        await notifier.QueueAsync(accident.Id, accident.VehicleId, accident.AccidentNumber, "changed-1", "Changed", ct);
-        await notifier.QueueAsync(accident.Id, accident.VehicleId, accident.AccidentNumber, "changed-2", "Changed", ct);
+        await notifier.QueueAsync(accident.Id, accident.VehicleId, accident.AccidentNumber, "reported", "تم تسجيل الحادث.", ct);
+        await notifier.QueueAsync(accident.Id, accident.VehicleId, accident.AccidentNumber, "changed-1", "تم تحديث الحادث.", ct);
+        await notifier.QueueAsync(accident.Id, accident.VehicleId, accident.AccidentNumber, "changed-2", "تم تحديث الحادث.", ct);
         await db.SaveChangesAsync(ct);
         Assert.Equal(3, await db.Notifications.CountAsync(x => x.RecipientUserId == fleetUser.UserId, ct));
         Assert.Equal(3, await db.Notifications.CountAsync(x => x.RecipientUserId == operationsUser.UserId, ct));
@@ -59,6 +60,13 @@ public sealed class AccidentNotificationTests
             all.AddRange(page.Value!.Items); cursor = page.Value.NextCursor;
         } while (cursor is not null);
         Assert.Equal(3, all.Select(x => x.Id).Distinct().Count());
+        Assert.StartsWith("متابعة الحادث", all[0].Title);
+        Assert.Equal("تم تحديث الحادث.", all[0].Body);
+        var responseJson = JsonSerializer.Serialize(all[0], JsonSerializerOptions.Web);
+        Assert.Contains("\"title\"", responseJson, StringComparison.Ordinal);
+        Assert.Contains("\"body\"", responseJson, StringComparison.Ordinal);
+        Assert.DoesNotContain("\"titleEn\"", responseJson, StringComparison.Ordinal);
+        Assert.DoesNotContain("\"bodyEn\"", responseJson, StringComparison.Ordinal);
         var read = await service.ChangeStateAsync(all[0].Id, new("read", all[0].RowVersion), ct);
         Assert.True(read.IsSuccess);
         Assert.NotNull(read.Value!.ReadAtUtc);

@@ -9,6 +9,12 @@
 
 يمكن قراءة المواقع من `GET /api/maintenance-locations`. لا تستقبل أوامر الصيانة أي `HousingId`.
 
+## توافق أصناف المخزون مع المركبات
+
+تستقبل واجهات `POST /api/maintenance-inventory/items` و`PUT /api/maintenance-inventory/items/{id}` الحقل الاختياري `compatibleVehicleTypes` كمصفوفة: دراجة نارية `1`، سيارة `2`، فان `3`، شاحنة `4`، وأخرى `5`. مثال قطعة سيارة فقط: `"compatibleVehicleTypes": [2]`، وقطعة تناسب السيارة والدراجة: `[1, 2]`. عند الإنشاء بدون الحقل، يناسب الصنف جميع الأنواع؛ وعند التحديث بدون الحقل، يبقى الاختيار الحالي. المصفوفة الفارغة والقيم غير المعروفة مرفوضة.
+
+يعيد `GET /api/maintenance-inventory/items` الأنواع المتوافقة مع كل صنف، ويقبل `vehicleType` اختياريًا لتصفية النتائج. تمنع خدمة الصيانة صرف الصنف غير المتوافق مع مركبة أمر العمل، بما فيها أوامر الصرف وتغيير الزيت والبيع للمركبات الخارجية، برمز `maintenance.incompatible_vehicle_type`.
+
 ## إدخال فاتورة شراء مع الملف
 
 `POST /api/maintenance-inventory/receipts` يستخدم `multipart/form-data` ويشترط جزأين:

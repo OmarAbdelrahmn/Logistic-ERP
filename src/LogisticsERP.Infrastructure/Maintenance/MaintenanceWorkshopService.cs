@@ -493,6 +493,16 @@ internal sealed partial class MaintenanceService
         if (!locationMatch) return Result.Failure<UsagePosting>(MaintenanceErrors.InvalidLocation);
         var item = await dbContext.InventoryItems.AsNoTracking().SingleOrDefaultAsync(x => x.Id == itemId && x.Status == CatalogStatus.Active, cancellationToken);
         if (item is null || !UsageMatchesItem(usageType, item)) return Result.Failure<UsagePosting>(MaintenanceErrors.InvalidInventoryItem);
+        if (item.CompatibleVehicleTypesMask != InventoryItemVehicleCompatibility.AllVehicleTypesMask)
+        {
+            VehicleType? vehicleType = vehicleId.HasValue
+                ? await dbContext.Vehicles.AsNoTracking().Where(x => x.Id == vehicleId.Value).Select(x => (VehicleType?)x.VehicleType).SingleOrDefaultAsync(cancellationToken)
+                : workOrder is not null
+                    ? await dbContext.ExternalVehicleSnapshots.AsNoTracking().Where(x => x.MaintenanceWorkOrderId == workOrder.Id).Select(x => x.VehicleType).SingleOrDefaultAsync(cancellationToken)
+                    : null;
+            if (!InventoryItemVehicleCompatibility.Allows(item.CompatibleVehicleTypesMask, vehicleType))
+                return Result.Failure<UsagePosting>(MaintenanceErrors.IncompatibleVehicleType);
+        }
         var allocationResult = await AllocateTrackedLayersAsync(item.Id, inventoryLocationId, quantity, usedAtUtc, cancellationToken);
         if (allocationResult.IsFailure) return Result.Failure<UsagePosting>(allocationResult.Error);
         var allocations = allocationResult.Value!;
@@ -563,6 +573,7 @@ internal sealed partial class MaintenanceService
     {
         "maintenance.insufficient_stock" => "Insufficient quantity available",
         "maintenance.invalid_inventory_item" => "Spare part was not found or is inactive",
+        "maintenance.incompatible_vehicle_type" => "Spare part is not compatible with this vehicle type",
         "maintenance.invalid_location" => "The inventory location is not valid for this work order",
         "maintenance.invalid_state" => "The maintenance work order is no longer active",
         _ => "Usage could not be recorded"

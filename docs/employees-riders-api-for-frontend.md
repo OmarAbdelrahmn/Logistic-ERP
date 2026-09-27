@@ -48,9 +48,9 @@ Frontend integration reference for the current workforce API.
 
 Permission: `employees.read`
 
-English: Returns all non-deleted administrative employees and sponsored riders with the main role, engagement, sponsor, and rider-profile summary. External riders are returned only by `GET /api/external-riders`, so clients can combine both lists without duplicate people.
+English: Returns all non-deleted administrative employees, sponsored riders, and external riders with the main role, engagement, sponsor, and rider-profile summary. An external rider appears here with `isEmployee: false` and `engagementType: "OutsideRider"`. The dedicated `GET /api/external-riders` endpoint still returns external riders in its specialized response shape, so clients combining both lists should deduplicate by employee ID.
 
-العربية: يعيد جميع الموظفين الإداريين والمناديب المكفولين غير المؤرشفين مع ملخص الدور والارتباط والكفيل وملف الرايدر. المناديب الخارجيون متاحون فقط من `GET /api/external-riders` حتى يمكن دمج القائمتين من دون تكرار الأشخاص.
+العربية: يعيد جميع الموظفين الإداريين والمناديب المكفولين والخارجيين غير المؤرشفين مع ملخص الدور والارتباط والكفيل وملف الرايدر. يظهر المندوب الخارجي بقيمة `isEmployee: false` و`engagementType: "OutsideRider"`. تظل واجهة `GET /api/external-riders` متاحة ببياناتها المتخصصة؛ وعند دمج القائمتين يجب إزالة التكرار بمعرف الموظف.
 
 Response `200 OK`:
 

@@ -128,7 +128,10 @@ public sealed record VehicleDetailResponse(
     string? LeaseReference,
     DateTimeOffset? DecommissionedAtUtc,
     string? DecommissionReason,
-    string? Notes);
+    string? Notes,
+    string? PlateLettersAr,
+    string? PlateLettersEn,
+    string? PlateDigits);
 
 public sealed record VehicleLookupResponse(Guid Id, string AssetNumber, string? PlateNumberAr, string? PlateNumberEn, VehicleOperationalStatus Status);
 public sealed record VehicleReadinessResponse(Guid VehicleId, IReadOnlyList<string> MissingCoreIdentityFields, IReadOnlyList<VehicleFileKind> MissingPhotoSides, IReadOnlyList<VehicleFileKind> MissingDocuments, IReadOnlyList<string> Warnings, bool IsEligibleForAssignment);

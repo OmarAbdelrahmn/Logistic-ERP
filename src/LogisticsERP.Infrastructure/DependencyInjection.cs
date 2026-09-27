@@ -90,15 +90,19 @@ public static class DependencyInjection
         services.AddScoped<IPrivateFileStorage, PrivateFileStorage>();
         services.AddScoped<FleetServiceSupport>();
         services.AddScoped<IFleetService, FleetService>();
+        services.AddScoped<IVehicleRiderPeriodReportService, VehicleRiderPeriodReportService>();
         services.AddScoped<VehicleImportProcessor>();
         services.AddScoped<IVehicleImportValidationService, VehicleImportValidationService>();
         services.AddScoped<IVehicleImportService, VehicleImportService>();
+        services.AddScoped<IVehicleOdometerImportService, VehicleOdometerImportService>();
+        services.AddScoped<IVehicleStatusImportService, VehicleStatusImportService>();
         services.AddScoped<IVehiclePurchaseSupplierImportService, VehiclePurchaseSupplierImportService>();
         services.AddScoped<IVehicleRiderAssignmentImportService, VehicleRiderAssignmentImportService>();
         services.AddScoped<IVehicleRiderHistoryImportService, VehicleRiderHistoryImportService>();
         services.AddScoped<IVehicleDailyDistanceService, VehicleDailyDistanceService>();
         services.AddScoped<IFuelCardService, FuelCardService>();
         services.AddScoped<IMaintenanceService, MaintenanceService>();
+        services.AddScoped<ISparePartCatalogImportService, SparePartCatalogImportService>();
         services.AddScoped<IVehiclePlatformAccountAssignmentService, VehiclePlatformAccountAssignmentService>();
         services.AddScoped<IVehicleFileService, VehicleFileService>();
         services.AddOptions<PdfGenerationOptions>()

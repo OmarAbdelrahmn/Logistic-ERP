@@ -5,6 +5,7 @@ using LogisticsERP.Domain.Entities.Maintenance;
 using LogisticsERP.Domain.Entities.System;
 using LogisticsERP.Domain.Enums;
 using LogisticsERP.Domain.Fleet;
+using LogisticsERP.Domain.Maintenance;
 using Microsoft.EntityFrameworkCore;
 
 namespace LogisticsERP.Infrastructure.Maintenance;
@@ -447,7 +448,13 @@ internal sealed partial class MaintenanceService
         var inventoryLocation = await GetActiveInventoryLocationAsync(input.InventoryLocationId, cancellationToken);
         if (inventoryLocation is null || inventoryLocation.MaintenanceLocationId != workOrder.MaintenanceLocationId)
             return Result.Failure<InventorySupplyRequest>(MaintenanceErrors.SupplyRequestLocationMismatch(input.InventoryLocationId, workOrder.MaintenanceLocationId));
-        var validation = await ValidateSupplyItemsAsync(input.Lines, InventorySupplyRequestSubjectType.VehicleMaintenance, cancellationToken);
+        var vehicleType = await dbContext.Vehicles.AsNoTracking()
+            .Where(x => x.Id == workOrder.VehicleId.Value)
+            .Select(x => (VehicleType?)x.VehicleType)
+            .SingleOrDefaultAsync(cancellationToken);
+        if (!vehicleType.HasValue)
+            return Result.Failure<InventorySupplyRequest>(MaintenanceErrors.NotFound);
+        var validation = await ValidateSupplyItemsAsync(input.Lines, InventorySupplyRequestSubjectType.VehicleMaintenance, cancellationToken, vehicleType: vehicleType);
         if (validation.IsFailure)
             return Result.Failure<InventorySupplyRequest>(validation.Error);
 
@@ -504,7 +511,7 @@ internal sealed partial class MaintenanceService
             lines.Add(new InventorySupplyRequestLineInput(input.OilFilterInventoryItemId!.Value, 1,
                 MaintenanceUsageType.OilFilter, Notes: input.Notes));
 
-        var validation = await ValidateSupplyItemsAsync(lines, InventorySupplyRequestSubjectType.VehicleMaintenance, cancellationToken, allowOil: true);
+        var validation = await ValidateSupplyItemsAsync(lines, InventorySupplyRequestSubjectType.VehicleMaintenance, cancellationToken, allowOil: true, vehicleType: vehicle.VehicleType);
         if (validation.IsFailure)
             return Result.Failure<InventorySupplyRequest>(validation.Error);
 
@@ -581,7 +588,8 @@ internal sealed partial class MaintenanceService
         IReadOnlyList<InventorySupplyRequestLineInput> lines,
         InventorySupplyRequestSubjectType subjectType,
         CancellationToken cancellationToken,
-        bool allowOil = false)
+        bool allowOil = false,
+        VehicleType? vehicleType = null)
     {
         var ids = lines.Select(x => x.InventoryItemId).Distinct().ToArray();
         var items = await dbContext.InventoryItems.AsNoTracking()
@@ -610,6 +618,8 @@ internal sealed partial class MaintenanceService
                 || item.ItemType == InventoryItemType.Consumable && usageType == MaintenanceUsageType.Consumable;
             if (!valid || line.ExpectedReturn)
                 return Result.Failure<IReadOnlyDictionary<Guid, InventoryItem>>(MaintenanceErrors.InvalidInventoryItem);
+            if (!InventoryItemVehicleCompatibility.Allows(item.CompatibleVehicleTypesMask, vehicleType))
+                return Result.Failure<IReadOnlyDictionary<Guid, InventoryItem>>(MaintenanceErrors.IncompatibleVehicleType);
         }
         return Result.Success<IReadOnlyDictionary<Guid, InventoryItem>>(items);
     }

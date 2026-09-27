@@ -7,6 +7,7 @@ using LogisticsERP.Domain.Entities.Fleet;
 using LogisticsERP.Domain.Entities.Maintenance;
 using LogisticsERP.Domain.Entities.Workforce;
 using LogisticsERP.Domain.Enums;
+using LogisticsERP.Domain.Maintenance;
 using LogisticsERP.Infrastructure.Maintenance;
 using LogisticsERP.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +18,84 @@ namespace LogisticsERP.Fleet.UnitTests;
 
 public sealed class MaintenanceSupplyRequestWorkflowTests
 {
+    [Fact]
+    public async Task CarOnlySparePartIsFilteredAndCannotBeIssuedToMotorcycle()
+    {
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString(), x => x.EnableNullChecks(false))
+            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
+            .AddInterceptors(new TestRowVersionInterceptor())
+            .Options;
+        await using var db = new ApplicationDbContext(options);
+        var service = new MaintenanceService(db, new TestUser(), new TestTime(), new UnusedFileStorage());
+        var locationId = Guid.NewGuid();
+        var stockLocationId = Guid.NewGuid();
+        var carId = Guid.NewGuid();
+        var motorcycleId = Guid.NewGuid();
+        var itemId = Guid.NewGuid();
+        var now = DateTimeOffset.Parse("2026-09-06T10:00:00Z", global::System.Globalization.CultureInfo.InvariantCulture);
+        db.MaintenanceLocations.Add(new MaintenanceLocation
+        {
+            Id = locationId, Code = "TEST", NameAr = "الورشة", NameEn = "Workshop",
+            OperatingCityId = Guid.NewGuid(), AllowsCompanyVehicles = true, InventoryEnabled = true
+        });
+        db.InventoryLocations.Add(new InventoryLocation
+        {
+            Id = stockLocationId, Code = "STOCK", NameAr = "المخزون", NameEn = "Stock", MaintenanceLocationId = locationId
+        });
+        db.Vehicles.AddRange(
+            new Vehicle { Id = carId, AssetNumber = "CAR-1", NormalizedAssetNumber = "CAR1", VehicleManufacturerId = Guid.NewGuid(), VehicleModelId = Guid.NewGuid(), VehicleType = VehicleType.Car },
+            new Vehicle { Id = motorcycleId, AssetNumber = "MOTO-1", NormalizedAssetNumber = "MOTO1", VehicleManufacturerId = Guid.NewGuid(), VehicleModelId = Guid.NewGuid(), VehicleType = VehicleType.Motorcycle });
+        db.InventoryItems.Add(new InventoryItem
+        {
+            Id = itemId, Sku = "CAR-BRAKE", NormalizedSku = "CAR-BRAKE", NameAr = "فرامل سيارة", NameEn = "Car brake",
+            ItemType = InventoryItemType.SparePart, BaseUnitOfMeasure = InventoryUnitOfMeasure.Piece,
+            PurchaseUnitOfMeasure = InventoryUnitOfMeasure.Piece,
+            CompatibleVehicleTypesMask = InventoryItemVehicleCompatibility.For(VehicleType.Car)
+        });
+        db.StockBalances.Add(new StockBalance { Id = Guid.NewGuid(), InventoryItemId = itemId, InventoryLocationId = stockLocationId, QuantityOnHand = 2 });
+        db.StockCostLayers.Add(new StockCostLayer
+        {
+            Id = Guid.NewGuid(), InventoryItemId = itemId, InventoryLocationId = stockLocationId,
+            ReceivedAtUtc = now.AddDays(-1), OriginalSequence = 1, OriginalQuantity = 2, RemainingQuantity = 2,
+            BaseUnitOfMeasure = InventoryUnitOfMeasure.Piece, UnitCost = 10, OriginalTotalCost = 20
+        });
+        var carOrderId = Guid.NewGuid();
+        var motorcycleOrderId = Guid.NewGuid();
+        db.MaintenanceWorkOrders.AddRange(
+            new MaintenanceWorkOrder { Id = carOrderId, WorkOrderNumber = "CAR-WO", ServiceSubjectType = MaintenanceServiceSubjectType.CompanyVehicle, VehicleId = carId, MaintenanceLocationId = locationId, MaintenanceType = MaintenanceType.Corrective, OpenedAtUtc = now },
+            new MaintenanceWorkOrder { Id = motorcycleOrderId, WorkOrderNumber = "MOTO-WO", ServiceSubjectType = MaintenanceServiceSubjectType.CompanyVehicle, VehicleId = motorcycleId, MaintenanceLocationId = locationId, MaintenanceType = MaintenanceType.Corrective, OpenedAtUtc = now });
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        var carItems = await service.GetItemsAsync(null, VehicleType.Car, TestContext.Current.CancellationToken);
+        var motorcycleItems = await service.GetItemsAsync(null, VehicleType.Motorcycle, TestContext.Current.CancellationToken);
+        Assert.Single(carItems.Value!);
+        Assert.Empty(motorcycleItems.Value!);
+
+        var usage = new PostMaterialUsageRequest(itemId, stockLocationId, 1, MaintenanceUsageType.SparePart, now, null);
+        var rejected = await service.PostMaterialUsageAsync(motorcycleOrderId, usage, TestContext.Current.CancellationToken);
+        Assert.Equal(MaintenanceErrors.IncompatibleVehicleType.Code, rejected.Error.Code);
+        Assert.Equal(2, (await db.StockBalances.SingleAsync(TestContext.Current.CancellationToken)).QuantityOnHand);
+
+        var accepted = await service.PostMaterialUsageAsync(carOrderId, usage, TestContext.Current.CancellationToken);
+        Assert.True(accepted.IsSuccess, accepted.Error.Description);
+        Assert.Equal(1, (await db.StockBalances.SingleAsync(TestContext.Current.CancellationToken)).QuantityOnHand);
+
+        var item = await db.InventoryItems.SingleAsync(TestContext.Current.CancellationToken);
+        var update = new InventoryItemRequest(item.Sku, null, item.ItemType, item.NameAr, item.NameEn,
+            null, null, item.BaseUnitOfMeasure, item.PurchaseUnitOfMeasure, null, 0, 0, false, false,
+            Convert.ToBase64String(item.RowVersion));
+        var unchanged = await service.UpsertItemAsync(itemId, update, TestContext.Current.CancellationToken);
+        Assert.True(unchanged.IsSuccess, unchanged.Error.Description);
+        Assert.Equal([VehicleType.Car], unchanged.Value!.CompatibleVehicleTypes);
+
+        var changed = await service.UpsertItemAsync(itemId,
+            update with { RowVersion = unchanged.Value.RowVersion, CompatibleVehicleTypes = [VehicleType.Motorcycle] },
+            TestContext.Current.CancellationToken);
+        Assert.True(changed.IsSuccess, changed.Error.Description);
+        Assert.Equal([VehicleType.Motorcycle], changed.Value!.CompatibleVehicleTypes);
+    }
+
     [Fact]
     public async Task VehicleAdminSubmitsOnceAndWarehouseApprovalIssuesAllLinesAndCompletesWorkOrderAtomically()
     {
@@ -68,12 +147,22 @@ public sealed class MaintenanceSupplyRequestWorkflowTests
         });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
-        var created = await service.CreateWorkOrderAsync(new CreateMaintenanceWorkOrderRequest(
+        var request = new CreateMaintenanceWorkOrderRequest(
             MaintenanceServiceSubjectType.CompanyVehicle, vehicleId, null, maintenanceLocationId,
             MaintenanceType.Corrective, now, null, 12000, "Brake noise", null, null,
             new MaintenanceSupplyRequestInput(inventoryLocationId,
-                [new InventorySupplyRequestLineInput(itemId, 2, MaintenanceUsageType.SparePart)])),
-            TestContext.Current.CancellationToken);
+                [new InventorySupplyRequestLineInput(itemId, 2, MaintenanceUsageType.SparePart)]));
+        var part = await db.InventoryItems.SingleAsync(TestContext.Current.CancellationToken);
+        part.CompatibleVehicleTypesMask = InventoryItemVehicleCompatibility.For(VehicleType.Motorcycle);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+        var incompatible = await service.CreateWorkOrderAsync(request, TestContext.Current.CancellationToken);
+        Assert.Equal(MaintenanceErrors.IncompatibleVehicleType.Code, incompatible.Error.Code);
+        Assert.Empty(db.MaintenanceWorkOrders);
+        Assert.Empty(db.InventorySupplyRequests);
+
+        part.CompatibleVehicleTypesMask = InventoryItemVehicleCompatibility.For(VehicleType.Car);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+        var created = await service.CreateWorkOrderAsync(request, TestContext.Current.CancellationToken);
 
         Assert.True(created.IsSuccess, created.Error.Description);
         Assert.Equal(50, created.Value!.EstimatedCost);

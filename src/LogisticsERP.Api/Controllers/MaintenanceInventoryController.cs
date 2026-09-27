@@ -4,6 +4,7 @@ using LogisticsERP.Api.ErrorHandling;
 using LogisticsERP.Application.Abstractions.Files;
 using LogisticsERP.Application.Authorization;
 using LogisticsERP.Application.Features.Maintenance;
+using LogisticsERP.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LogisticsERP.Api.Controllers;
@@ -14,9 +15,9 @@ public sealed class MaintenanceInventoryController(IMaintenanceService service) 
 {
     [HttpGet("items")]
     [RequirePermission(PermissionKeys.Inventory.ItemsRead)]
-    public async Task<IActionResult> GetItems([FromQuery] string? search, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetItems([FromQuery] string? search, [FromQuery] VehicleType? vehicleType, CancellationToken cancellationToken)
     {
-        var result = await service.GetItemsAsync(search, cancellationToken);
+        var result = await service.GetItemsAsync(search, vehicleType, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 

@@ -346,6 +346,8 @@ Returns a lightweight list for selectors and autocomplete. The service asks for 
 
 Returns the full vehicle detail including the summary, identity, ownership, registration type, catalog references, acquisition, lease, decommissioning, and notes. The legacy-named `registeredOwnerSupplierId` request/response field may identify either an active vehicle supplier or a sponsor. `registeredOwnerSupplier` contains the resolved Arabic name, and `registeredOwnerType` is `Supplier` or `Sponsor`. When `registeredOwnerSupplierId` is `null`, no explicit owner is stored and the vehicle sponsor is the registered owner.
 
+The detail also includes `plateLettersAr`, `plateLettersEn`, and `plateDigits`. Preserve these values along with the other identity fields when sending a full `PUT` update.
+
 Response: `200 OK`, `VehicleDetailResponse`.
 
 ### `POST /api/vehicles`
@@ -415,7 +417,7 @@ Response: `200 OK`, `VehicleDetailResponse`. Requires `fleet.vehicles.archive`.
 
 ### `POST /api/vehicles/{id}/{statusAction}`
 
-Changes an administrative status. `statusAction` must be one of `stolen`, `recover`, `out-of-service`, `restore`, or `decommission`.
+Changes an administrative status. `statusAction` must be one of `stolen`, `recover`, `out-of-service`, `under-movement-responsibility`, `restore`, or `decommission`. `under-movement-responsibility` sets `UnderMovementResponsibility`; `restore` returns either that status or `OutOfService` to `Available` when no blocking issue remains.
 
 Request body: `VehicleStatusCommandRequest`.
 
@@ -858,7 +860,7 @@ The API contracts use numeric enum values by default. The names below are the ca
 | `VehicleTransmissionType` | `Manual=1`, `Automatic=2`, `Other=3` |
 | `VehicleOwnershipType` | `Owned=1`, `Leased=2`, `ThirdParty=3` |
 | `VehicleRegistrationType` | `Private=1`, `PrivateTransport=2`, `SmallBus=3`, `Taxi=4`, `PublicTransport=5`, `PublicBus=6`, `Motorcycle=7`, `PublicWorks=8` |
-| `VehicleOperationalStatus` | `Available=1`, `Assigned=2`, `ProblemHold=3`, `AccidentHold=4`, `Stolen=5`, `OutOfService=6`, `Decommissioned=7` |
+| `VehicleOperationalStatus` | `Available=1`, `Assigned=2`, `ProblemHold=3`, `AccidentHold=4`, `Stolen=5`, `OutOfService=6`, `Decommissioned=7`, `UnderMovementResponsibility=8` |
 | `VehicleCondition` | `Unknown=1`, `Good=2`, `Fair=3`, `Damaged=4`, `Unsafe=5` |
 | `VehicleInspectionResult` | `Passed=1`, `Conditional=2`, `Failed=3` |
 | `VehicleComplianceDueStatus` | `Valid=1`, `Upcoming=2`, `DueToday=3`, `Expired=4`, `Missing=5`, `UploadedWithoutDates=6` |

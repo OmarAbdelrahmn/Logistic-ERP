@@ -213,7 +213,8 @@ internal sealed class ReportingService(
                 group.Count(item => item.CurrentOperationalStatus == VehicleOperationalStatus.ProblemHold
                     || item.CurrentOperationalStatus == VehicleOperationalStatus.AccidentHold
                     || item.CurrentOperationalStatus == VehicleOperationalStatus.Stolen
-                    || item.CurrentOperationalStatus == VehicleOperationalStatus.OutOfService),
+                    || item.CurrentOperationalStatus == VehicleOperationalStatus.OutOfService
+                    || item.CurrentOperationalStatus == VehicleOperationalStatus.UnderMovementResponsibility),
                 group.Count(item => item.CurrentOperationalStatus == VehicleOperationalStatus.Decommissioned)))
             .SingleOrDefaultAsync(cancellationToken)
             ?? new FleetProjection(0, 0, 0, 0, 0);

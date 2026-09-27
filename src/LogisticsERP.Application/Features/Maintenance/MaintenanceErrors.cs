@@ -15,6 +15,7 @@ public static class MaintenanceErrors
     public static readonly OperationError InvalidState = new("maintenance.invalid_state", "حالة أمر الصيانة لا تسمح بهذه العملية.", ErrorType.Conflict);
     public static readonly OperationError InsufficientStock = new("maintenance.insufficient_stock", "رصيد المخزون غير كافٍ لإتمام العملية بطريقة FIFO.", ErrorType.Conflict);
     public static readonly OperationError InvalidInventoryItem = new("maintenance.invalid_inventory_item", "صنف المخزون أو وحدته لا يناسب العملية.", ErrorType.Validation, "inventoryItemId");
+    public static readonly OperationError IncompatibleVehicleType = new("maintenance.incompatible_vehicle_type", "صنف المخزون غير متوافق مع نوع المركبة.", ErrorType.Validation, "inventoryItemId");
     public static readonly OperationError InvalidOilQuantity = new("maintenance.invalid_oil_quantity", "كمية الزيت غير مضبوطة لهذا النوع من المركبات.", ErrorType.Validation, "configuredOilQuantityLiters");
     public static readonly OperationError InvalidOdometer = new("maintenance.invalid_odometer", "قراءة العداد أقل من القراءة الحالية للمركبة.", ErrorType.Validation, "odometerAtChange");
     public static readonly OperationError InvalidOilFilter = new("maintenance.invalid_oil_filter", "بيانات فلتر الزيت لا تطابق حالة تغيير الفلتر.", ErrorType.Validation, "oilFilterInventoryItemId");

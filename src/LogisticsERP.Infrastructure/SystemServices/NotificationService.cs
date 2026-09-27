@@ -168,7 +168,7 @@ internal sealed class NotificationService(
     }
 
     private static NotificationResponse ToResponse(Notification item) => new(
-        item.Id, item.EventType, item.Severity.ToString(), item.TitleAr, item.TitleEn, item.BodyAr, item.BodyEn,
+        item.Id, item.EventType, item.Severity.ToString(), item.TitleAr, item.BodyAr,
         item.SourceEntityType, item.SourceEntityId, item.DeepLink, item.VisibleAtUtc, item.ExpiresAtUtc,
         item.ReadAtUtc, item.AcknowledgedAtUtc, item.ArchivedAtUtc, HrServiceSupport.EncodeRowVersion(item.RowVersion),
         item.AudiencePermissionKeysJson is null ? [] : JsonSerializer.Deserialize<string[]>(item.AudiencePermissionKeysJson) ?? []);

@@ -54,8 +54,8 @@ internal sealed class AccidentNotificationService(ApplicationDbContext dbContext
         foreach (var item in due)
         {
             await QueueAsync(item.Id, item.VehicleId, item.AccidentNumber, $"due:{(int)item.Stage}:{item.Deadline!.Value.UtcTicks}",
-                item.Stage == AccidentCaseStage.AwaitingInsurance ? "انتهت مهلة متابعة التأمين (15 يومًا) / Insurance follow-up is due (15 days)."
-                    : "انتهت مهلة متابعة تحويل الشركة (10 أيام) / Supplier transfer follow-up is due (10 days).", cancellationToken);
+                item.Stage == AccidentCaseStage.AwaitingInsurance ? "انتهت مهلة متابعة التأمين البالغة 15 يومًا."
+                    : "انتهت مهلة متابعة تحويل الشركة البالغة 10 أيام.", cancellationToken);
         }
         try { await dbContext.SaveChangesAsync(cancellationToken); }
         catch (DbUpdateException)

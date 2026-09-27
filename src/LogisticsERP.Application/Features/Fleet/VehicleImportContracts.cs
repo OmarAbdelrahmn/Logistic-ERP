@@ -27,6 +27,44 @@ public interface IVehiclePurchaseSupplierImportService
         CancellationToken cancellationToken = default);
 }
 
+public interface IVehicleOdometerImportService
+{
+    Task<Result<VehicleOdometerImportResponse>> ImportAsync(
+        Stream content,
+        string fileName,
+        bool validateOnly,
+        CancellationToken cancellationToken = default);
+}
+
+public sealed record VehicleOdometerImportResponse(
+    bool ValidateOnly,
+    bool CanUpdate,
+    bool Updated,
+    string Worksheet,
+    int TotalRows,
+    int ValidRows,
+    int MatchedVehicles,
+    int ChangedVehicles,
+    int UnchangedVehicles,
+    IReadOnlyList<VehicleOdometerImportRowPreview> Rows,
+    IReadOnlyList<VehicleOdometerImportIssue> Issues);
+
+public sealed record VehicleOdometerImportRowPreview(
+    int RowNumber,
+    Guid VehicleId,
+    string SerialNumber,
+    string AssetNumber,
+    long CurrentOdometer,
+    long ImportedOdometer,
+    bool WillChange);
+
+public sealed record VehicleOdometerImportIssue(
+    int RowNumber,
+    string? SerialNumber,
+    string Severity,
+    string Field,
+    string Message);
+
 public interface IVehicleRiderAssignmentImportService
 {
     Task<Result<VehicleRiderAssignmentImportResponse>> ImportAsync(
@@ -73,7 +111,8 @@ public sealed record VehicleRiderAssignmentImportRowPreview(
     string RiderIqamaNo,
     string RiderName,
     string PermissionReference,
-    DateOnly PermissionStartsOn);
+    DateOnly PermissionStartsOn,
+    DateOnly PermissionEndsOn);
 
 public sealed record VehicleRiderAssignmentImportIssue(
     int RowNumber,
@@ -151,6 +190,18 @@ public sealed record VehiclePurchaseSupplierImportIssue(
 
 public static class VehicleImportErrors
 {
+    public static readonly OperationError InvalidOdometerWorkbook = new(
+        "fleet.vehicle_odometer_import.invalid_workbook",
+        "ملف عدادات المركبات غير صالح أو لا يحتوي على الرقم التسلسلي والكيلومترات الحالية.",
+        ErrorType.Validation,
+        "file");
+
+    public static readonly OperationError OdometerImportFailed = new(
+        "fleet.vehicle_odometer_import.failed",
+        "تعذر تحديث عدادات المركبات ولم يتم حفظ أي جزء من الملف.",
+        ErrorType.Conflict,
+        "file");
+
     public static readonly OperationError InvalidWorkbook = new(
         "fleet.vehicle_import.invalid_workbook",
         "ملف المركبات غير صالح أو لا يحتوي على الأعمدة العربية المطلوبة.",

@@ -494,12 +494,13 @@ internal sealed partial class FleetService(
             "stolen" when vehicle.CurrentOperationalStatus != VehicleOperationalStatus.Decommissioned => VehicleOperationalStatus.Stolen,
             "recover" when vehicle.CurrentOperationalStatus == VehicleOperationalStatus.Stolen => VehicleOperationalStatus.Available,
             "out-of-service" when vehicle.CurrentOperationalStatus != VehicleOperationalStatus.Decommissioned => VehicleOperationalStatus.OutOfService,
-            "restore" when vehicle.CurrentOperationalStatus == VehicleOperationalStatus.OutOfService => VehicleOperationalStatus.Available,
+            "under-movement-responsibility" when vehicle.CurrentOperationalStatus is not (VehicleOperationalStatus.Decommissioned or VehicleOperationalStatus.UnderMovementResponsibility) => VehicleOperationalStatus.UnderMovementResponsibility,
+            "restore" when vehicle.CurrentOperationalStatus is VehicleOperationalStatus.OutOfService or VehicleOperationalStatus.UnderMovementResponsibility => VehicleOperationalStatus.Available,
             "decommission" when vehicle.CurrentOperationalStatus != VehicleOperationalStatus.Decommissioned => VehicleOperationalStatus.Decommissioned,
             _ => (VehicleOperationalStatus?)null
         };
         if (!target.HasValue) return Result.Failure<VehicleDetailResponse>(FleetErrors.InvalidState);
-        if (target is VehicleOperationalStatus.Stolen or VehicleOperationalStatus.OutOfService or VehicleOperationalStatus.Decommissioned)
+        if (target is VehicleOperationalStatus.Stolen or VehicleOperationalStatus.OutOfService or VehicleOperationalStatus.Decommissioned or VehicleOperationalStatus.UnderMovementResponsibility)
         {
             await EndActiveAssignmentForHoldAsync(vehicle, request.EffectiveAtUtc, request.Reason, actor.Value, cancellationToken);
         }
@@ -1414,7 +1415,7 @@ internal sealed partial class FleetService(
         var supplier = vehicle.PurchasedFromSupplierId.HasValue ? await dbContext.VehicleSuppliers.IgnoreQueryFilters().AsNoTracking().Where(x => x.Id == vehicle.PurchasedFromSupplierId).Select(x => x.NameAr).SingleOrDefaultAsync(cancellationToken) : null;
         var registeredOwnerSupplier = vehicle.RegisteredOwnerSupplierId.HasValue ? await dbContext.VehicleSuppliers.IgnoreQueryFilters().AsNoTracking().Where(x => x.Id == vehicle.RegisteredOwnerSupplierId).Select(x => x.NameAr).SingleOrDefaultAsync(cancellationToken) : null;
         var registeredOwnerSponsor = vehicle.RegisteredOwnerSponsorId.HasValue ? await dbContext.Sponsors.IgnoreQueryFilters().AsNoTracking().Where(x => x.Id == vehicle.RegisteredOwnerSponsorId).Select(x => x.RegistryNameAr).SingleOrDefaultAsync(cancellationToken) : null;
-        return new VehicleDetailResponse(summary, vehicle.SerialNumber, vehicle.Vin, vehicle.ChassisNumber, vehicle.EngineNumber, vehicle.SponsorId, vehicle.OperatingCityId, vehicle.PurchasedFromSupplierId, supplier, vehicle.RegisteredOwnerSupplierId ?? vehicle.RegisteredOwnerSponsorId, registeredOwnerSupplier ?? registeredOwnerSponsor, vehicle.RegisteredOwnerSupplierId.HasValue ? "Supplier" : vehicle.RegisteredOwnerSponsorId.HasValue ? "Sponsor" : null, vehicle.RegistrationType, vehicle.VehicleManufacturerId, vehicle.VehicleModelId, vehicle.ModelYear, vehicle.FuelType, vehicle.TransmissionType, vehicle.ColorAr, vehicle.ColorEn, vehicle.OwnershipType, vehicle.OwnerName, vehicle.AcquisitionDate, vehicle.LeaseReference, vehicle.DecommissionedAtUtc, vehicle.DecommissionReason, vehicle.Notes);
+        return new VehicleDetailResponse(summary, vehicle.SerialNumber, vehicle.Vin, vehicle.ChassisNumber, vehicle.EngineNumber, vehicle.SponsorId, vehicle.OperatingCityId, vehicle.PurchasedFromSupplierId, supplier, vehicle.RegisteredOwnerSupplierId ?? vehicle.RegisteredOwnerSponsorId, registeredOwnerSupplier ?? registeredOwnerSponsor, vehicle.RegisteredOwnerSupplierId.HasValue ? "Supplier" : vehicle.RegisteredOwnerSponsorId.HasValue ? "Sponsor" : null, vehicle.RegistrationType, vehicle.VehicleManufacturerId, vehicle.VehicleModelId, vehicle.ModelYear, vehicle.FuelType, vehicle.TransmissionType, vehicle.ColorAr, vehicle.ColorEn, vehicle.OwnershipType, vehicle.OwnerName, vehicle.AcquisitionDate, vehicle.LeaseReference, vehicle.DecommissionedAtUtc, vehicle.DecommissionReason, vehicle.Notes, vehicle.PlateLettersAr, vehicle.PlateLettersEn, vehicle.PlateDigits);
     }
 
     private static void ApplyVehicle(Vehicle v, VehicleUpsertRequest r, Guid? registeredOwnerSupplierId, Guid? registeredOwnerSponsorId, string normalizedAsset, string? normalizedSerial, string? normalizedChassis, string? normalizedAr, string? normalizedEn, bool isNew)
@@ -1502,7 +1503,7 @@ internal sealed partial class FleetService(
 
     private async Task RestoreAfterIssueAsync(Vehicle vehicle, Guid issueId, string reason, Guid actor, CancellationToken cancellationToken)
     {
-        if (vehicle.CurrentOperationalStatus is VehicleOperationalStatus.Stolen or VehicleOperationalStatus.OutOfService or VehicleOperationalStatus.Decommissioned) return;
+        if (vehicle.CurrentOperationalStatus is VehicleOperationalStatus.Stolen or VehicleOperationalStatus.OutOfService or VehicleOperationalStatus.Decommissioned or VehicleOperationalStatus.UnderMovementResponsibility) return;
         var target = await ResolveAvailableStatusAsync(vehicle.Id, issueId, cancellationToken);
         if (target == VehicleOperationalStatus.Available && await dbContext.RiderVehicleAssignments.AnyAsync(x => x.VehicleId == vehicle.Id && x.EndedAtUtc == null, cancellationToken)) target = VehicleOperationalStatus.Assigned;
         await SetStatusAsync(vehicle, target, support.UtcNow, reason, VehicleStatusSourceType.Issue, issueId, actor, cancellationToken);

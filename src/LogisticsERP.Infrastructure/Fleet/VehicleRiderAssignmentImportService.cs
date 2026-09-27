@@ -131,7 +131,7 @@ internal sealed partial class VehicleRiderAssignmentImportService(
             plannedRiders.Add(rider.RiderProfileId);
             previews.Add(new(row.RowNumber, vehicle.Id, vehicle.SerialNumber ?? row.SerialNumber,
                 vehicle.AssetNumber, rider.RiderProfileId, rider.IqamaNo, rider.Name,
-                row.PermissionReference, row.PermissionStartsOn));
+                row.PermissionReference, row.PermissionStartsOn, row.PermissionEndsOn));
             plans.Add(new(row, vehicle, rider, previousAssignment));
         }
 
@@ -183,7 +183,7 @@ internal sealed partial class VehicleRiderAssignmentImportService(
                     StartVehicleCondition = VehicleCondition.Good,
                     PermissionReference = plan.Row.PermissionReference,
                     PermissionStartsOn = plan.Row.PermissionStartsOn,
-                    PermissionEndsOn = FleetBusinessRules.PermitEnd(plan.Row.PermissionStartsOn),
+                    PermissionEndsOn = plan.Row.PermissionEndsOn,
                     AssignmentReason = ImportReason,
                     AssignedByUserId = SystemActorId,
                     WasBackdated = startedAt < DateTimeOffset.UtcNow.AddMinutes(-5),
@@ -286,7 +286,8 @@ internal sealed partial class VehicleRiderAssignmentImportService(
 }
 
 internal sealed record ParsedVehicleRiderAssignmentRow(int RowNumber, string SerialNumber,
-    string NormalizedSerialNumber, string IqamaNo, string PermissionReference, DateOnly PermissionStartsOn);
+    string NormalizedSerialNumber, string IqamaNo, string PermissionReference,
+    DateOnly PermissionStartsOn, DateOnly PermissionEndsOn);
 internal sealed record ParsedVehicleRiderAssignmentWorkbook(string Worksheet, int TotalRows,
     IReadOnlyList<ParsedVehicleRiderAssignmentRow> Rows, IReadOnlyList<VehicleRiderAssignmentImportIssue> Issues);
 
@@ -296,6 +297,7 @@ internal static class VehicleRiderAssignmentSpreadsheetParser
     private const string Iqama = "riderIqamaNo";
     private const string Reference = "permissionReference";
     private const string StartDate = "permissionStartsOn";
+    private const string EndDate = "permissionEndsOn";
     private static readonly Dictionary<string, string> HeaderAliases = new(StringComparer.Ordinal)
     {
         [Normalize("الرقم التسلسلي")] = Serial,
@@ -304,10 +306,12 @@ internal static class VehicleRiderAssignmentSpreadsheetParser
         [Normalize("رقم التفويض")] = Reference,
         [Normalize("تاريخ بداية التفويض")] = StartDate,
         [Normalize("تاريخ بداية التفويض (أو 1 سبتمبر)")] = StartDate,
+        [Normalize("تاريخ نهاية التفويض")] = EndDate,
         [Normalize("Serial Number")] = Serial,
         [Normalize("Tamm Authorized Person ID")] = Iqama,
         [Normalize("Authorization Number")] = Reference,
-        [Normalize("Authorization Start Date")] = StartDate
+        [Normalize("Authorization Start Date")] = StartDate,
+        [Normalize("Authorization End Date")] = EndDate
     };
 
     public static ParsedVehicleRiderAssignmentWorkbook Parse(Stream content)
@@ -323,6 +327,7 @@ internal static class VehicleRiderAssignmentSpreadsheetParser
             || !headers.TryGetValue(StartDate, out var dateColumn))
             throw new InvalidDataException("Required columns are missing.");
         var hasReference = headers.TryGetValue(Reference, out var referenceColumn);
+        var hasEndDate = headers.TryGetValue(EndDate, out var endDateColumn);
 
         var rows = new List<ParsedVehicleRiderAssignmentRow>();
         var issues = new List<VehicleRiderAssignmentImportIssue>();
@@ -332,8 +337,10 @@ internal static class VehicleRiderAssignmentSpreadsheetParser
             var serial = Text(row.Cell(serialColumn)); var iqama = Digits(Text(row.Cell(iqamaColumn)));
             var referenceText = hasReference ? Text(row.Cell(referenceColumn)) : null;
             var dateText = Text(row.Cell(dateColumn));
+            var endDateText = hasEndDate ? Text(row.Cell(endDateColumn)) : null;
             if (string.IsNullOrWhiteSpace(serial) && string.IsNullOrWhiteSpace(iqama)
-                && string.IsNullOrWhiteSpace(referenceText) && string.IsNullOrWhiteSpace(dateText)) continue;
+                && string.IsNullOrWhiteSpace(referenceText) && string.IsNullOrWhiteSpace(dateText)
+                && string.IsNullOrWhiteSpace(endDateText)) continue;
             total++;
             if (string.IsNullOrWhiteSpace(serial)) issues.Add(new(row.RowNumber(), null, "Error", Serial, "الرقم التسلسلي مطلوب."));
             if (iqama.Length != 10 || !iqama.All(char.IsAsciiDigit)) issues.Add(new(row.RowNumber(), serial, "Error", Iqama, "هوية المفوض يجب أن تتكون من 10 أرقام."));
@@ -341,8 +348,11 @@ internal static class VehicleRiderAssignmentSpreadsheetParser
             if (hasReference && (reference.Length == 0 || reference.Length != referenceText!.Length))
                 issues.Add(new(row.RowNumber(), serial, "Error", Reference, "رقم التفويض يجب أن يحتوي على أرقام فقط."));
             if (!TryDate(row.Cell(dateColumn), out var date)) issues.Add(new(row.RowNumber(), serial, "Error", StartDate, "تاريخ بداية التفويض غير صالح."));
+            var endDate = hasEndDate ? default : FleetBusinessRules.PermitEnd(date);
+            if (hasEndDate && (!TryDate(row.Cell(endDateColumn), out endDate) || endDate < date))
+                issues.Add(new(row.RowNumber(), serial, "Error", EndDate, "تاريخ نهاية التفويض غير صالح أو يسبق البداية."));
             if (issues.Any(x => x.RowNumber == row.RowNumber())) continue;
-            rows.Add(new(row.RowNumber(), serial.Trim(), NormalizeLookup(serial), iqama, reference, date));
+            rows.Add(new(row.RowNumber(), serial.Trim(), NormalizeLookup(serial), iqama, reference, date, endDate));
         }
         if (total == 0) throw new InvalidDataException("Worksheet has no data rows.");
         return new(sheet.Name, total, rows, issues);

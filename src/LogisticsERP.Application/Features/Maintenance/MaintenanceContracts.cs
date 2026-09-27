@@ -53,7 +53,8 @@ public sealed record InventoryItemRequest(
     decimal ReorderQuantity,
     bool IsSerialized,
     bool IsLotTracked,
-    string? RowVersion);
+    string? RowVersion,
+    IReadOnlyList<VehicleType>? CompatibleVehicleTypes = null);
 
 public sealed record InventoryItemResponse(
     Guid Id,
@@ -68,7 +69,8 @@ public sealed record InventoryItemResponse(
     decimal MinimumStockLevel,
     decimal ReorderQuantity,
     CatalogStatus Status,
-    string RowVersion);
+    string RowVersion,
+    IReadOnlyList<VehicleType> CompatibleVehicleTypes);
 
 public sealed record MaintenanceSupplierRequest(
     string SupplierNumber,

@@ -12,7 +12,7 @@ namespace LogisticsERP.Fleet.UnitTests;
 public sealed class WorkforceEmployeeListTests
 {
     [Fact]
-    public async Task EmployeeAndExternalRiderListsDoNotOverlap()
+    public async Task EmployeeListIncludesExternalRidersAndDedicatedListRemainsAvailable()
     {
         var cancellationToken = TestContext.Current.CancellationToken;
         await using var dbContext = CreateContext();
@@ -33,12 +33,15 @@ public sealed class WorkforceEmployeeListTests
         Assert.True(externalRiderResult.IsSuccess);
         var employees = employeeResult.Value!;
         var externalRiders = externalRiderResult.Value!;
-        Assert.Equal(2, employees.Count);
+        Assert.Equal(3, employees.Count);
         Assert.Contains(employees, item => item.Id == employee.Id);
         Assert.Contains(employees, item => item.Id == sponsoredRider.Id);
-        Assert.DoesNotContain(employees, item => item.Id == outsideRider.Id);
+        var outsideItem = Assert.Single(employees, item => item.Id == outsideRider.Id);
+        Assert.False(outsideItem.IsEmployee);
+        Assert.Equal(nameof(EmployeeRelationshipType.OutsideRider), outsideItem.EngagementType);
+        Assert.NotNull(outsideItem.RiderDetails);
         Assert.Equal(outsideRider.Id, Assert.Single(externalRiders).EmployeeId);
-        Assert.Empty(employees.Select(item => item.Id)
+        Assert.Equal([outsideRider.Id], employees.Select(item => item.Id)
             .Intersect(externalRiders.Select(item => item.EmployeeId)));
     }
 

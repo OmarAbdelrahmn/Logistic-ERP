@@ -82,7 +82,7 @@ public sealed class VehiclesController(IFleetService service) : ControllerBase
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 
-    [HttpPost("{id:guid}/{statusAction:regex(^(stolen|recover|out-of-service|restore|decommission)$)}")]
+    [HttpPost("{id:guid}/{statusAction:regex(^(stolen|recover|out-of-service|restore|decommission|under-movement-responsibility)$)}")]
     [Authorize]
     public async Task<IActionResult> Status(Guid id, string statusAction, [FromBody] VehicleStatusCommandRequest request, CancellationToken cancellationToken)
     {

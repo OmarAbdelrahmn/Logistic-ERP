@@ -1,6 +1,7 @@
 using LogisticsERP.Api.Authorization;
 using LogisticsERP.Api.ErrorHandling;
 using LogisticsERP.Application.Authorization;
+using LogisticsERP.Application.Features.Fleet;
 using LogisticsERP.Application.Features.Reporting;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,8 +9,38 @@ namespace LogisticsERP.Api.Controllers;
 
 [ApiController]
 [Route("api/reports")]
-public sealed class ReportsController(IReportingService service) : ControllerBase
+public sealed class ReportsController(
+    IReportingService service,
+    IVehicleRiderPeriodReportService vehicleRiderPeriodReportService) : ControllerBase
 {
+    [HttpGet("fleet/vehicle-assignments")]
+    [RequirePermission(PermissionKeys.Reporting.ReportsRead)]
+    [RequirePermission(PermissionKeys.Fleet.AssignmentsRead)]
+    [RequirePermission(PermissionKeys.Fleet.VehiclesRead)]
+    [RequirePermission(PermissionKeys.Workforce.RidersRead)]
+    public async Task<IActionResult> VehicleAssignments(
+        [FromQuery] DateOnly fromDate,
+        [FromQuery] DateOnly toDate,
+        CancellationToken cancellationToken)
+    {
+        var result = await vehicleRiderPeriodReportService.GetByVehicleAsync(fromDate, toDate, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpGet("fleet/rider-assignments")]
+    [RequirePermission(PermissionKeys.Reporting.ReportsRead)]
+    [RequirePermission(PermissionKeys.Fleet.AssignmentsRead)]
+    [RequirePermission(PermissionKeys.Fleet.VehiclesRead)]
+    [RequirePermission(PermissionKeys.Workforce.RidersRead)]
+    public async Task<IActionResult> RiderAssignments(
+        [FromQuery] DateOnly fromDate,
+        [FromQuery] DateOnly toDate,
+        CancellationToken cancellationToken)
+    {
+        var result = await vehicleRiderPeriodReportService.GetByRiderAsync(fromDate, toDate, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
     [HttpGet("dashboard")]
     [RequirePermission(PermissionKeys.Reporting.ReportsRead)]
     public async Task<IActionResult> Dashboard(CancellationToken cancellationToken)

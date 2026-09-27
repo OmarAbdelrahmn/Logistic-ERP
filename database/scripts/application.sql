@@ -14108,3 +14108,510 @@ END;
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260921073200_MakeVehicleTakeReturnReasonOptional'
+)
+BEGIN
+    DECLARE @var39 nvarchar(max);
+    SELECT @var39 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[app].[VehicleOperationalStatusPeriods]') AND [c].[name] = N'Reason');
+    IF @var39 IS NOT NULL EXEC(N'ALTER TABLE [app].[VehicleOperationalStatusPeriods] DROP CONSTRAINT ' + @var39 + ';');
+    ALTER TABLE [app].[VehicleOperationalStatusPeriods] ADD DEFAULT N'Not provided.' FOR [Reason];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260921073200_MakeVehicleTakeReturnReasonOptional'
+)
+BEGIN
+    DECLARE @var40 nvarchar(max);
+    SELECT @var40 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[app].[RiderVehicleAssignments]') AND [c].[name] = N'AssignmentReason');
+    IF @var40 IS NOT NULL EXEC(N'ALTER TABLE [app].[RiderVehicleAssignments] DROP CONSTRAINT ' + @var40 + ';');
+    ALTER TABLE [app].[RiderVehicleAssignments] ADD DEFAULT N'Not provided.' FOR [AssignmentReason];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260921073200_MakeVehicleTakeReturnReasonOptional'
+)
+BEGIN
+    DECLARE @var41 nvarchar(max);
+    SELECT @var41 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[app].[RiderVehicleAssignmentEvents]') AND [c].[name] = N'Reason');
+    IF @var41 IS NOT NULL EXEC(N'ALTER TABLE [app].[RiderVehicleAssignmentEvents] DROP CONSTRAINT ' + @var41 + ';');
+    ALTER TABLE [app].[RiderVehicleAssignmentEvents] ADD DEFAULT N'Not provided.' FOR [Reason];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260921073200_MakeVehicleTakeReturnReasonOptional'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260921073200_MakeVehicleTakeReturnReasonOptional', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260922092933_AddHousingDefaultWarehouses'
+)
+BEGIN
+    CREATE TABLE [app].[HousingWarehouses] (
+        [Id] uniqueidentifier NOT NULL,
+        [HousingId] uniqueidentifier NOT NULL,
+        [NameAr] nvarchar(200) NOT NULL,
+        [NameEn] nvarchar(200) NOT NULL,
+        [IsDefault] bit NOT NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_HousingWarehouses] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_HousingWarehouses_Default] CHECK ([IsDefault] = 1),
+        CONSTRAINT [FK_HousingWarehouses_Housing_HousingId] FOREIGN KEY ([HousingId]) REFERENCES [app].[Housing] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260922092933_AddHousingDefaultWarehouses'
+)
+BEGIN
+    CREATE TABLE [app].[HousingWarehouseItems] (
+        [Id] uniqueidentifier NOT NULL,
+        [WarehouseId] uniqueidentifier NOT NULL,
+        [Code] nvarchar(64) NOT NULL,
+        [NameAr] nvarchar(200) NOT NULL,
+        [NameEn] nvarchar(200) NOT NULL,
+        [Unit] nvarchar(50) NOT NULL,
+        [Quantity] decimal(18,3) NOT NULL,
+        [Condition] int NOT NULL,
+        [Notes] nvarchar(2000) NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_HousingWarehouseItems] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_HousingWarehouseItems_Condition] CHECK ([Condition] IN (1, 2, 3)),
+        CONSTRAINT [CK_HousingWarehouseItems_Quantity] CHECK ([Quantity] >= 0),
+        CONSTRAINT [FK_HousingWarehouseItems_HousingWarehouses_WarehouseId] FOREIGN KEY ([WarehouseId]) REFERENCES [app].[HousingWarehouses] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260922092933_AddHousingDefaultWarehouses'
+)
+BEGIN
+    CREATE INDEX [IX_HousingWarehouseItems_IsDeleted] ON [app].[HousingWarehouseItems] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260922092933_AddHousingDefaultWarehouses'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_HousingWarehouseItems_WarehouseId_Code] ON [app].[HousingWarehouseItems] ([WarehouseId], [Code]) WHERE [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260922092933_AddHousingDefaultWarehouses'
+)
+BEGIN
+    CREATE INDEX [IX_HousingWarehouseItems_WarehouseId_Condition] ON [app].[HousingWarehouseItems] ([WarehouseId], [Condition]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260922092933_AddHousingDefaultWarehouses'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_HousingWarehouses_HousingId] ON [app].[HousingWarehouses] ([HousingId]) WHERE [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260922092933_AddHousingDefaultWarehouses'
+)
+BEGIN
+    CREATE INDEX [IX_HousingWarehouses_IsDeleted] ON [app].[HousingWarehouses] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260922092933_AddHousingDefaultWarehouses'
+)
+BEGIN
+    INSERT INTO [app].[HousingWarehouses]
+        ([Id], [HousingId], [NameAr], [NameEn], [IsDefault], [CreatedAtUtc], [CreatedByUserId], [UpdatedAtUtc], [UpdatedByUserId], [IsDeleted], [DeletedAtUtc], [DeletedByUserId], [DeletionReason])
+    SELECT
+        NEWID(), [housing].[Id], N'المستودع الافتراضي', N'Default warehouse', 1, SYSUTCDATETIME(), NULL, NULL, NULL, 0, NULL, NULL, NULL
+    FROM [app].[Housing] AS [housing]
+    WHERE [housing].[IsDeleted] = 0
+      AND NOT EXISTS (
+          SELECT 1
+          FROM [app].[HousingWarehouses] AS [warehouse]
+          WHERE [warehouse].[HousingId] = [housing].[Id]
+            AND [warehouse].[IsDeleted] = 0);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260922092933_AddHousingDefaultWarehouses'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260922092933_AddHousingDefaultWarehouses', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260922101635_SimplifyHousingWarehouseItemsAndAddStatusBalances'
+)
+BEGIN
+    DROP INDEX [IX_HousingWarehouseItems_WarehouseId_Code] ON [app].[HousingWarehouseItems];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260922101635_SimplifyHousingWarehouseItemsAndAddStatusBalances'
+)
+BEGIN
+    DROP INDEX [IX_HousingWarehouseItems_WarehouseId_Condition] ON [app].[HousingWarehouseItems];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260922101635_SimplifyHousingWarehouseItemsAndAddStatusBalances'
+)
+BEGIN
+    ALTER TABLE [app].[HousingWarehouseItems] DROP CONSTRAINT [CK_HousingWarehouseItems_Condition];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260922101635_SimplifyHousingWarehouseItemsAndAddStatusBalances'
+)
+BEGIN
+    ALTER TABLE [app].[HousingWarehouseItems] DROP CONSTRAINT [CK_HousingWarehouseItems_Quantity];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260922101635_SimplifyHousingWarehouseItemsAndAddStatusBalances'
+)
+BEGIN
+    CREATE TABLE [app].[HousingWarehouseItemBalances] (
+        [Id] uniqueidentifier NOT NULL,
+        [ItemId] uniqueidentifier NOT NULL,
+        [Status] int NOT NULL,
+        [Quantity] decimal(18,3) NOT NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_HousingWarehouseItemBalances] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_HousingWarehouseItemBalances_Quantity] CHECK ([Quantity] >= 0),
+        CONSTRAINT [CK_HousingWarehouseItemBalances_Status] CHECK ([Status] IN (1, 2, 3)),
+        CONSTRAINT [FK_HousingWarehouseItemBalances_HousingWarehouseItems_ItemId] FOREIGN KEY ([ItemId]) REFERENCES [app].[HousingWarehouseItems] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260922101635_SimplifyHousingWarehouseItemsAndAddStatusBalances'
+)
+BEGIN
+    INSERT INTO [app].[HousingWarehouseItemBalances]
+        ([Id], [ItemId], [Status], [Quantity], [CreatedAtUtc], [CreatedByUserId], [UpdatedAtUtc], [UpdatedByUserId], [IsDeleted], [DeletedAtUtc], [DeletedByUserId], [DeletionReason])
+    SELECT
+        NEWID(), [Id], [Condition], [Quantity], [CreatedAtUtc], [CreatedByUserId], [UpdatedAtUtc], [UpdatedByUserId], [IsDeleted], [DeletedAtUtc], [DeletedByUserId], [DeletionReason]
+    FROM [app].[HousingWarehouseItems];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260922101635_SimplifyHousingWarehouseItemsAndAddStatusBalances'
+)
+BEGIN
+    DECLARE @var42 nvarchar(max);
+    SELECT @var42 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[app].[HousingWarehouseItems]') AND [c].[name] = N'Code');
+    IF @var42 IS NOT NULL EXEC(N'ALTER TABLE [app].[HousingWarehouseItems] DROP CONSTRAINT ' + @var42 + ';');
+    ALTER TABLE [app].[HousingWarehouseItems] DROP COLUMN [Code];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260922101635_SimplifyHousingWarehouseItemsAndAddStatusBalances'
+)
+BEGIN
+    DECLARE @var43 nvarchar(max);
+    SELECT @var43 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[app].[HousingWarehouseItems]') AND [c].[name] = N'Condition');
+    IF @var43 IS NOT NULL EXEC(N'ALTER TABLE [app].[HousingWarehouseItems] DROP CONSTRAINT ' + @var43 + ';');
+    ALTER TABLE [app].[HousingWarehouseItems] DROP COLUMN [Condition];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260922101635_SimplifyHousingWarehouseItemsAndAddStatusBalances'
+)
+BEGIN
+    DECLARE @var44 nvarchar(max);
+    SELECT @var44 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[app].[HousingWarehouseItems]') AND [c].[name] = N'NameEn');
+    IF @var44 IS NOT NULL EXEC(N'ALTER TABLE [app].[HousingWarehouseItems] DROP CONSTRAINT ' + @var44 + ';');
+    ALTER TABLE [app].[HousingWarehouseItems] DROP COLUMN [NameEn];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260922101635_SimplifyHousingWarehouseItemsAndAddStatusBalances'
+)
+BEGIN
+    DECLARE @var45 nvarchar(max);
+    SELECT @var45 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[app].[HousingWarehouseItems]') AND [c].[name] = N'Quantity');
+    IF @var45 IS NOT NULL EXEC(N'ALTER TABLE [app].[HousingWarehouseItems] DROP CONSTRAINT ' + @var45 + ';');
+    ALTER TABLE [app].[HousingWarehouseItems] DROP COLUMN [Quantity];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260922101635_SimplifyHousingWarehouseItemsAndAddStatusBalances'
+)
+BEGIN
+    DECLARE @var46 nvarchar(max);
+    SELECT @var46 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[app].[HousingWarehouseItems]') AND [c].[name] = N'Unit');
+    IF @var46 IS NOT NULL EXEC(N'ALTER TABLE [app].[HousingWarehouseItems] DROP CONSTRAINT ' + @var46 + ';');
+    ALTER TABLE [app].[HousingWarehouseItems] DROP COLUMN [Unit];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260922101635_SimplifyHousingWarehouseItemsAndAddStatusBalances'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_HousingWarehouseItems_WarehouseId_NameAr] ON [app].[HousingWarehouseItems] ([WarehouseId], [NameAr]) WHERE [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260922101635_SimplifyHousingWarehouseItemsAndAddStatusBalances'
+)
+BEGIN
+    CREATE INDEX [IX_HousingWarehouseItemBalances_IsDeleted] ON [app].[HousingWarehouseItemBalances] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260922101635_SimplifyHousingWarehouseItemsAndAddStatusBalances'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_HousingWarehouseItemBalances_ItemId_Status] ON [app].[HousingWarehouseItemBalances] ([ItemId], [Status]) WHERE [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260922101635_SimplifyHousingWarehouseItemsAndAddStatusBalances'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260922101635_SimplifyHousingWarehouseItemsAndAddStatusBalances', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260923220616_DirectVehicleOilChanges'
+)
+BEGIN
+    DROP INDEX [IX_OilChangeOperations_MaintenanceWorkOrderId] ON [maintenance].[OilChangeOperations];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260923220616_DirectVehicleOilChanges'
+)
+BEGIN
+    DECLARE @var47 nvarchar(max);
+    SELECT @var47 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[maintenance].[OilChangeOperations]') AND [c].[name] = N'MaintenanceWorkOrderId');
+    IF @var47 IS NOT NULL EXEC(N'ALTER TABLE [maintenance].[OilChangeOperations] DROP CONSTRAINT ' + @var47 + ';');
+    ALTER TABLE [maintenance].[OilChangeOperations] ALTER COLUMN [MaintenanceWorkOrderId] uniqueidentifier NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260923220616_DirectVehicleOilChanges'
+)
+BEGIN
+    ALTER TABLE [maintenance].[OilChangeOperations] ADD [IdempotencyKey] nvarchar(200) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260923220616_DirectVehicleOilChanges'
+)
+BEGIN
+    ALTER TABLE [maintenance].[OilChangeOperations] ADD [RequestHash] nvarchar(64) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260923220616_DirectVehicleOilChanges'
+)
+BEGIN
+    ALTER TABLE [maintenance].[OilChangeOperations] ADD [VehicleId] uniqueidentifier NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260923220616_DirectVehicleOilChanges'
+)
+BEGIN
+    UPDATE operation
+    SET operation.VehicleId = workOrder.VehicleId
+    FROM maintenance.OilChangeOperations AS operation
+    INNER JOIN maintenance.WorkOrders AS workOrder
+        ON workOrder.Id = operation.MaintenanceWorkOrderId
+    WHERE workOrder.VehicleId IS NOT NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260923220616_DirectVehicleOilChanges'
+)
+BEGIN
+    DECLARE @var48 nvarchar(max);
+    SELECT @var48 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[maintenance].[MaterialUsages]') AND [c].[name] = N'MaintenanceWorkOrderId');
+    IF @var48 IS NOT NULL EXEC(N'ALTER TABLE [maintenance].[MaterialUsages] DROP CONSTRAINT ' + @var48 + ';');
+    ALTER TABLE [maintenance].[MaterialUsages] ALTER COLUMN [MaintenanceWorkOrderId] uniqueidentifier NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260923220616_DirectVehicleOilChanges'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_OilChangeOperations_IdempotencyKey] ON [maintenance].[OilChangeOperations] ([IdempotencyKey]) WHERE [IdempotencyKey] IS NOT NULL');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260923220616_DirectVehicleOilChanges'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_OilChangeOperations_MaintenanceWorkOrderId] ON [maintenance].[OilChangeOperations] ([MaintenanceWorkOrderId]) WHERE [MaintenanceWorkOrderId] IS NOT NULL');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260923220616_DirectVehicleOilChanges'
+)
+BEGIN
+    CREATE INDEX [IX_OilChangeOperations_VehicleId_PerformedAtUtc] ON [maintenance].[OilChangeOperations] ([VehicleId], [PerformedAtUtc]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260923220616_DirectVehicleOilChanges'
+)
+BEGIN
+    ALTER TABLE [maintenance].[OilChangeOperations] ADD CONSTRAINT [FK_OilChangeOperations_Vehicles_VehicleId] FOREIGN KEY ([VehicleId]) REFERENCES [app].[Vehicles] ([Id]) ON DELETE NO ACTION;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260923220616_DirectVehicleOilChanges'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260923220616_DirectVehicleOilChanges', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260926085500_AddInventoryItemVehicleCompatibility'
+)
+BEGIN
+    ALTER TABLE [maintenance].[InventoryItems] ADD [CompatibleVehicleTypesMask] int NOT NULL DEFAULT 31;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260926085500_AddInventoryItemVehicleCompatibility'
+)
+BEGIN
+    EXEC(N'ALTER TABLE [maintenance].[InventoryItems] ADD CONSTRAINT [CK_InventoryItems_CompatibleVehicleTypesMask] CHECK ([CompatibleVehicleTypesMask] BETWEEN 1 AND 31)');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260926085500_AddInventoryItemVehicleCompatibility'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260926085500_AddInventoryItemVehicleCompatibility', N'10.0.11');
+END;
+
+COMMIT;
+GO
+

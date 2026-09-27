@@ -4,6 +4,7 @@ using LogisticsERP.Application.Authorization;
 using LogisticsERP.Application.Common.Results;
 using LogisticsERP.Application.Features.Fleet;
 using LogisticsERP.Application.Features.Hr;
+using LogisticsERP.Application.Features.Maintenance;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 
@@ -18,10 +19,31 @@ public sealed class ImportController(
     IExternalRiderImportService externalRiderImportService,
     IVehicleImportValidationService vehicleValidationService,
     IVehicleImportService vehicleImportService,
+    IVehicleOdometerImportService vehicleOdometerImportService,
+    IVehicleStatusImportService vehicleStatusImportService,
     IVehiclePurchaseSupplierImportService vehiclePurchaseSupplierImportService,
     IVehicleRiderAssignmentImportService vehicleRiderAssignmentImportService,
-    IVehicleRiderHistoryImportService vehicleRiderHistoryImportService) : ControllerBase
+    IVehicleRiderHistoryImportService vehicleRiderHistoryImportService,
+    ISparePartCatalogImportService sparePartCatalogImportService) : ControllerBase
 {
+    [HttpPost("/api/maintenance-inventory/items/import/validate")]
+    [Consumes("multipart/form-data")]
+    [RequestSizeLimit(10 * 1024 * 1024)]
+    [AllowAnonymous]
+    public Task<IActionResult> ValidateSpareParts(
+        [FromForm] HrExcelImportForm request,
+        CancellationToken cancellationToken) =>
+        ExecuteSparePartImport(request.File, validateOnly: true, cancellationToken);
+
+    [HttpPost("/api/maintenance-inventory/items/import")]
+    [Consumes("multipart/form-data")]
+    [RequestSizeLimit(10 * 1024 * 1024)]
+    [AllowAnonymous]
+    public Task<IActionResult> ImportSpareParts(
+        [FromForm] HrExcelImportForm request,
+        CancellationToken cancellationToken) =>
+        ExecuteSparePartImport(request.File, validateOnly: false, cancellationToken);
+
     [HttpPost("employees-riders/validate")]
     [Consumes("multipart/form-data")]
     //[RequirePermission(PermissionKeys.Workforce.EmployeesRead)]
@@ -100,6 +122,39 @@ public sealed class ImportController(
         [FromForm] HrExcelImportForm request,
         CancellationToken cancellationToken) =>
         ExecuteVehicleImport(request.File, vehicleImportService.ImportAsync, cancellationToken);
+
+    [HttpPost("vehicles/odometer/validate")]
+    [Consumes("multipart/form-data")]
+    [RequirePermission(PermissionKeys.Fleet.VehiclesRead)]
+    public Task<IActionResult> ValidateVehicleOdometers(
+        [FromForm] HrExcelImportForm request,
+        CancellationToken cancellationToken) =>
+        ExecuteVehicleOdometerImport(request.File, validateOnly: true, cancellationToken);
+
+    [HttpPost("vehicles/odometer")]
+    [Consumes("multipart/form-data")]
+    [RequirePermission(PermissionKeys.Fleet.VehiclesManage)]
+    [RequirePermission(PermissionKeys.Fleet.CorrectionsManage)]
+    public Task<IActionResult> ImportVehicleOdometers(
+        [FromForm] HrExcelImportForm request,
+        CancellationToken cancellationToken) =>
+        ExecuteVehicleOdometerImport(request.File, validateOnly: false, cancellationToken);
+
+    [HttpPost("vehicles/statuses/validate")]
+    [Consumes("multipart/form-data")]
+    [AllowAnonymous]
+    public Task<IActionResult> ValidateVehicleStatuses(
+        [FromForm] HrExcelImportForm request,
+        CancellationToken cancellationToken) =>
+        ExecuteVehicleStatusImport(request.File, validateOnly: true, cancellationToken);
+
+    [HttpPost("vehicles/statuses")]
+    [Consumes("multipart/form-data")]
+    [AllowAnonymous]
+    public Task<IActionResult> ImportVehicleStatuses(
+        [FromForm] HrExcelImportForm request,
+        CancellationToken cancellationToken) =>
+        ExecuteVehicleStatusImport(request.File, validateOnly: false, cancellationToken);
 
     [HttpPost("vehicles/purchase-suppliers/validate")]
     [Consumes("multipart/form-data")]
@@ -275,6 +330,54 @@ public sealed class ImportController(
             Path.GetFileName(file.FileName),
             validateOnly,
             cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    private async Task<IActionResult> ExecuteSparePartImport(
+        IFormFile? file,
+        bool validateOnly,
+        CancellationToken cancellationToken)
+    {
+        if (file is null || file.Length == 0 || file.Length > 10 * 1024 * 1024
+            || !string.Equals(Path.GetExtension(file.FileName), ".xlsx", StringComparison.OrdinalIgnoreCase))
+            return BadRequest(new { error = "A non-empty .xlsx file up to 10 MB is required." });
+
+        await using var stream = file.OpenReadStream();
+        var result = await sparePartCatalogImportService.ImportAsync(
+            stream, Path.GetFileName(file.FileName), validateOnly, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    private async Task<IActionResult> ExecuteVehicleOdometerImport(
+        IFormFile? file,
+        bool validateOnly,
+        CancellationToken cancellationToken)
+    {
+        if (file is null || file.Length == 0 || file.Length > 20 * 1024 * 1024
+            || !string.Equals(Path.GetExtension(file.FileName), ".xlsx", StringComparison.OrdinalIgnoreCase))
+        {
+            return BadRequest(new { error = "A non-empty .xlsx file up to 20 MB is required." });
+        }
+
+        await using var stream = file.OpenReadStream();
+        var result = await vehicleOdometerImportService.ImportAsync(
+            stream,
+            Path.GetFileName(file.FileName),
+            validateOnly,
+            cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    private async Task<IActionResult> ExecuteVehicleStatusImport(
+        IFormFile? file, bool validateOnly, CancellationToken cancellationToken)
+    {
+        if (file is null || file.Length == 0 || file.Length > 20 * 1024 * 1024
+            || !string.Equals(Path.GetExtension(file.FileName), ".xlsx", StringComparison.OrdinalIgnoreCase))
+            return BadRequest(new { error = "A non-empty .xlsx file up to 20 MB is required." });
+
+        await using var stream = file.OpenReadStream();
+        var result = await vehicleStatusImportService.ImportAsync(
+            stream, Path.GetFileName(file.FileName), validateOnly, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 

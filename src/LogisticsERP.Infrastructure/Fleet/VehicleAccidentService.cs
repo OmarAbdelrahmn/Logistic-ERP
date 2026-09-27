@@ -103,7 +103,7 @@ internal sealed partial class VehicleAccidentService(
         dbContext.VehicleIssueEvents.Add(new VehicleIssueEvent { VehicleIssueId = issue.Id, EventType = VehicleIssueEventType.Reported, ToStatus = VehicleIssueStatus.Open, OccurredAtUtc = support.UtcNow, ActorUserId = actor.Value, Reason = damageDescription ?? defaultEventReason });
         dbContext.VehicleAccidents.Add(accident);
         dbContext.VehicleAccidentCases.Add(new VehicleAccidentCase { VehicleAccidentId = accident.Id });
-        await notifications.QueueAsync(accident.Id, vehicle.Id, accident.AccidentNumber, "reported", "تم تسجيل حادث للمركبة / Vehicle accident reported", cancellationToken);
+        await notifications.QueueAsync(accident.Id, vehicle.Id, accident.AccidentNumber, "reported", "تم تسجيل حادث للمركبة.", cancellationToken);
         dbContext.VehicleAccidentEvents.Add(new VehicleAccidentEvent { VehicleAccidentId = accident.Id, EventType = VehicleAccidentEventType.Reported, OccurredAtUtc = support.UtcNow, ActorUserId = actor.Value, Reason = narrative ?? defaultEventReason });
         if (!request.IsDrivable && assignment.EndedAtUtc is null && vehicle.CurrentAssignmentId == assignment.Id)
         {

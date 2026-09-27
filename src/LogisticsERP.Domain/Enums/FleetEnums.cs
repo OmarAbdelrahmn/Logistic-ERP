@@ -24,7 +24,8 @@ public enum VehicleOperationalStatus
     AccidentHold = 4,
     Stolen = 5,
     OutOfService = 6,
-    Decommissioned = 7
+    Decommissioned = 7,
+    UnderMovementResponsibility = 8
 }
 public enum VehicleStatusSourceType { Vehicle = 1, Assignment = 2, Issue = 3, Accident = 4, Administrative = 5 }
 public enum VehicleOdometerSourceType { Manual = 1, AssignmentTake = 2, AssignmentReturn = 3, Accident = 4, Correction = 5, Maintenance = 6, Gps = 7 }

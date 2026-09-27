@@ -32,7 +32,7 @@ The response contains:
 }
 ```
 
-This example means the user actually holds only `fleet.vehicles.read` from the requested list and currently has no matching notifications. Actual items include the existing notification fields and an additional `permissionKeys` array describing their audience.
+This example means the user actually holds only `fleet.vehicles.read` from the requested list and currently has no matching notifications. Actual items return Arabic display text in `title` and `body`, plus a `permissionKeys` array describing their audience. The former language-specific title and body response fields are no longer returned.
 
 - Matching uses **any** granted/requested audience permission, not all of them.
 - Permission keys match exactly. Unknown keys return validation errors. Known keys the user does not hold are excluded from `effectivePermissions`.
@@ -47,7 +47,7 @@ This example means the user actually holds only `fleet.vehicles.read` from the r
 
 ## Existing GET endpoints
 
-The existing responses remain compatible. Repeat the query parameter for multiple keys:
+The GET routes use the same Arabic `title`/`body` item shape as `/query`. Repeat the query parameter for multiple keys:
 
 ```text
 GET /api/notifications?permissions=fleet.accidents.read&permissions=fleet.vehicles.read&unreadOnly=false&pageSize=50

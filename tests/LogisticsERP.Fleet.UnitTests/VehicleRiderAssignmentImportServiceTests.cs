@@ -94,6 +94,7 @@ public sealed class VehicleRiderAssignmentImportServiceTests
             var preview = Assert.Single(validation.Value.Rows);
             Assert.Equal("101448001868409", preview.PermissionReference);
             Assert.Equal(new DateOnly(2026, 9, 1), preview.PermissionStartsOn);
+            Assert.Equal(new DateOnly(2027, 8, 31), preview.PermissionEndsOn);
             Assert.Empty(await dbContext.RiderVehicleAssignments.ToArrayAsync(cancellationToken));
         }
 
@@ -105,7 +106,72 @@ public sealed class VehicleRiderAssignmentImportServiceTests
             var assignment = await dbContext.RiderVehicleAssignments.SingleAsync(cancellationToken);
             Assert.Equal("101448001868409", assignment.PermissionReference);
             Assert.Equal(new DateOnly(2026, 9, 1), assignment.PermissionStartsOn);
+            Assert.Equal(new DateOnly(2027, 8, 31), assignment.PermissionEndsOn);
         }
+    }
+
+    [Fact]
+    public async Task FiveColumnAuthorizationWorkbookUsesEachSuppliedEndDate()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        await using var dbContext = CreateContext("FiveColumnAuthorization");
+        var firstEmployee = new Employee
+        {
+            IqamaNo = "2609238106", FullNameAr = "السائق الأول",
+            IsEmployee = false, Status = EmployeeStatus.Active
+        };
+        var secondEmployee = new Employee
+        {
+            IqamaNo = "2440702369", FullNameAr = "السائق الثاني",
+            IsEmployee = false, Status = EmployeeStatus.Active
+        };
+        dbContext.AddRange(firstEmployee, secondEmployee,
+            new RiderProfile { EmployeeId = firstEmployee.Id },
+            new RiderProfile { EmployeeId = secondEmployee.Id },
+            Vehicle("738404220", "VEH-738"), Vehicle("884223220", "VEH-884"));
+        await dbContext.SaveChangesAsync(cancellationToken);
+        var service = Service(dbContext);
+
+        using (var stream = AuthorizationWorkbook(
+                   [738404220L, 2609238106L, 101448001239983L, "2026-09-01", "2027-06-30"],
+                   [884223220L, 2440702369L, 101448000483825L, "2026-09-01", "2027-05-01"]))
+        {
+            var validation = await service.ImportAsync(stream, "authorizations.xlsx", true, cancellationToken);
+            Assert.True(validation.IsSuccess, validation.Error.Description);
+            Assert.True(validation.Value!.CanImport);
+            Assert.Equal(2, validation.Value.ValidRows);
+            Assert.Collection(validation.Value.Rows,
+                row => Assert.Equal(new DateOnly(2027, 6, 30), row.PermissionEndsOn),
+                row => Assert.Equal(new DateOnly(2027, 5, 1), row.PermissionEndsOn));
+        }
+
+        using (var stream = AuthorizationWorkbook(
+                   [738404220L, 2609238106L, 101448001239983L, "2026-09-01", "2027-06-30"],
+                   [884223220L, 2440702369L, 101448000483825L, "2026-09-01", "2027-05-01"]))
+        {
+            var result = await service.ImportAsync(stream, "authorizations.xlsx", false, cancellationToken);
+            Assert.True(result.IsSuccess, result.Error.Description);
+            Assert.Equal(2, result.Value!.CreatedAssignments);
+            var assignments = await dbContext.RiderVehicleAssignments.ToDictionaryAsync(
+                assignment => assignment.PermissionReference!, cancellationToken);
+            Assert.Equal(new DateOnly(2027, 6, 30), assignments["101448001239983"].PermissionEndsOn);
+            Assert.Equal(new DateOnly(2027, 5, 1), assignments["101448000483825"].PermissionEndsOn);
+        }
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("2026-08-31")]
+    [InlineData("invalid")]
+    public void FiveColumnParserRejectsMissingInvalidOrEarlierEndDate(string endDate)
+    {
+        using var stream = AuthorizationWorkbook(
+            ["738404220", "2609238106", "101448001239983", "2026-09-01", endDate]);
+
+        var parsed = VehicleRiderAssignmentSpreadsheetParser.Parse(stream);
+
+        Assert.Empty(parsed.Rows);
+        Assert.Single(parsed.Issues, issue => issue.Field == "permissionEndsOn" && issue.RowNumber == 2);
     }
 
     [Fact]
@@ -283,6 +349,8 @@ public sealed class VehicleRiderAssignmentImportServiceTests
         sheet.Cell(1, 2).Value = "هوية المفوض في تم";
         sheet.Cell(1, 3).Value = "رقم التفويض";
         sheet.Cell(1, 4).Value = "تاريخ بداية التفويض (أو   1 سبتمبر)";
+        if (rows.Any(row => row.Length > 4))
+            sheet.Cell(1, 5).Value = "تاريخ نهاية التفويض";
         for (var row = 0; row < rows.Length; row++)
             for (var column = 0; column < rows[row].Length; column++)
                 sheet.Cell(row + 2, column + 1).Value =

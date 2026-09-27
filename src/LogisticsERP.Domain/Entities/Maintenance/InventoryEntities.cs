@@ -44,6 +44,7 @@ public sealed class InventoryItem : AuditableEntity
     public string NormalizedSku { get; set; } = string.Empty;
     public string? Barcode { get; set; }
     public InventoryItemType ItemType { get; set; }
+    public int CompatibleVehicleTypesMask { get; set; } = 31;
     public string NameAr { get; set; } = string.Empty;
     public string NameEn { get; set; } = string.Empty;
     public string? DescriptionAr { get; set; }

@@ -95,14 +95,21 @@ internal sealed partial class MaintenanceService : IMaintenanceService
         return Result.Success(MapLocation(item, cityName));
     }
 
-    public async Task<Result<IReadOnlyList<InventoryItemResponse>>> GetItemsAsync(string? search, CancellationToken cancellationToken = default)
+    public async Task<Result<IReadOnlyList<InventoryItemResponse>>> GetItemsAsync(string? search, VehicleType? vehicleType, CancellationToken cancellationToken = default)
     {
+        if (vehicleType.HasValue && !Enum.IsDefined(vehicleType.Value))
+            return Result.Failure<IReadOnlyList<InventoryItemResponse>>(MaintenanceErrors.InvalidRequest);
         var query = dbContext.InventoryItems.AsNoTracking();
         if (!string.IsNullOrWhiteSpace(search))
         {
             var term = search.Trim();
             var normalized = NormalizeCode(term);
             query = query.Where(x => x.NormalizedSku.Contains(normalized) || x.NameAr.Contains(term) || x.NameEn.Contains(term));
+        }
+        if (vehicleType.HasValue)
+        {
+            var vehicleTypeMask = InventoryItemVehicleCompatibility.For(vehicleType.Value);
+            query = query.Where(x => (x.CompatibleVehicleTypesMask & vehicleTypeMask) != 0);
         }
 
         var items = await query.OrderBy(x => x.Sku).ToArrayAsync(cancellationToken);
@@ -138,6 +145,8 @@ internal sealed partial class MaintenanceService : IMaintenanceService
         item.NormalizedSku = normalized;
         item.Barcode = TrimOrNull(request.Barcode);
         item.ItemType = request.ItemType;
+        if (request.CompatibleVehicleTypes is not null)
+            item.CompatibleVehicleTypesMask = InventoryItemVehicleCompatibility.ToMask(request.CompatibleVehicleTypes);
         item.NameAr = request.NameAr.Trim();
         item.NameEn = request.NameEn.Trim();
         item.DescriptionAr = TrimOrNull(request.DescriptionAr);
@@ -278,6 +287,19 @@ internal sealed partial class MaintenanceService : IMaintenanceService
             EstimatedCost = 0,
             Notes = TrimOrNull(request.Notes)
         };
+        if (request.SupplyRequest is not null)
+        {
+            var supplyRequest = await BuildMaintenanceSupplyRequestAsync(item, request.SupplyRequest, actor.Value, cancellationToken);
+            if (supplyRequest.IsFailure)
+                return Result.Failure<MaintenanceWorkOrderResponse>(supplyRequest.Error);
+        }
+        else if (request.OilChange is not null)
+        {
+            var oilRequest = await BuildOilChangeSupplyRequestAsync(item, request.OilChange, actor.Value, cancellationToken);
+            if (oilRequest.IsFailure)
+                return Result.Failure<MaintenanceWorkOrderResponse>(oilRequest.Error);
+        }
+
         dbContext.MaintenanceWorkOrders.Add(item);
         if (request.ExternalVehicle is not null)
         {
@@ -290,18 +312,6 @@ internal sealed partial class MaintenanceService : IMaintenanceService
                 CustomerPhone = TrimOrNull(request.ExternalVehicle.CustomerPhone),
                 Notes = TrimOrNull(request.ExternalVehicle.Notes)
             });
-        }
-        if (request.SupplyRequest is not null)
-        {
-            var supplyRequest = await BuildMaintenanceSupplyRequestAsync(item, request.SupplyRequest, actor.Value, cancellationToken);
-            if (supplyRequest.IsFailure)
-                return Result.Failure<MaintenanceWorkOrderResponse>(supplyRequest.Error);
-        }
-        else if (request.OilChange is not null)
-        {
-            var oilRequest = await BuildOilChangeSupplyRequestAsync(item, request.OilChange, actor.Value, cancellationToken);
-            if (oilRequest.IsFailure)
-                return Result.Failure<MaintenanceWorkOrderResponse>(oilRequest.Error);
         }
 
         try { await dbContext.SaveChangesAsync(cancellationToken); }
@@ -472,7 +482,7 @@ internal sealed partial class MaintenanceService : IMaintenanceService
     private static InventoryItemResponse MapItem(InventoryItem item) => new(
         item.Id, item.Sku, item.Barcode, item.ItemType, item.NameAr, item.NameEn, item.BaseUnitOfMeasure,
         item.PurchaseUnitOfMeasure, item.DefaultPackageQuantity, item.MinimumStockLevel, item.ReorderQuantity,
-        item.Status, EncodeRowVersion(item.RowVersion));
+        item.Status, EncodeRowVersion(item.RowVersion), InventoryItemVehicleCompatibility.FromMask(item.CompatibleVehicleTypesMask));
 
     private static MaintenanceSupplierResponse MapSupplier(MaintenanceSupplier item) => new(
         item.Id, item.SupplierNumber, item.LegalNameAr, item.LegalNameEn, item.VatNumber,
@@ -491,7 +501,8 @@ internal sealed partial class MaintenanceService : IMaintenanceService
         !string.IsNullOrWhiteSpace(request.Sku) && !string.IsNullOrWhiteSpace(request.NameAr) && !string.IsNullOrWhiteSpace(request.NameEn)
         && Enum.IsDefined(request.ItemType) && Enum.IsDefined(request.BaseUnitOfMeasure) && Enum.IsDefined(request.PurchaseUnitOfMeasure)
         && request.MinimumStockLevel >= 0 && request.ReorderQuantity >= 0 && request.DefaultPackageQuantity is null or > 0
-        && (request.ItemType != InventoryItemType.Oil || request.BaseUnitOfMeasure == InventoryUnitOfMeasure.Liter);
+        && (request.ItemType != InventoryItemType.Oil || request.BaseUnitOfMeasure == InventoryUnitOfMeasure.Liter)
+        && (request.CompatibleVehicleTypes is null || InventoryItemVehicleCompatibility.IsValid(request.CompatibleVehicleTypes));
 
     private static bool ValidPlan(MaintenancePlanRequest request) =>
         !string.IsNullOrWhiteSpace(request.Code) && !string.IsNullOrWhiteSpace(request.NameAr) && !string.IsNullOrWhiteSpace(request.NameEn)

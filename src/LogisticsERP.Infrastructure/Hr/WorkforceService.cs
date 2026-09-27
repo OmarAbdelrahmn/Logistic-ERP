@@ -18,7 +18,6 @@ internal sealed class WorkforceService(
     {
         var employees = await dbContext.Employees
             .AsNoTracking()
-            .Where(item => item.EngagementType != EmployeeRelationshipType.OutsideRider)
             .OrderBy(item => item.FullNameAr)
             .ToArrayAsync(cancellationToken);
         var employeeIds = employees.Select(item => item.Id).ToArray();
