@@ -19,6 +19,11 @@ public interface IFuelCardService
         CreateFuelCardRequest request,
         CancellationToken cancellationToken = default);
 
+    Task<Result<FuelCardResponse>> SetSponsorAsync(
+        Guid id,
+        SetFuelCardSponsorRequest request,
+        CancellationToken cancellationToken = default);
+
     Task<Result<IReadOnlyList<FuelCardAssignmentResponse>>> GetAssignmentsAsync(
         Guid id,
         CancellationToken cancellationToken = default);
@@ -45,6 +50,11 @@ public interface IFuelCardService
     Task<Result<FuelImportResponse>> ImportAsync(
         PrivateFileUpload file,
         DateOnly? expectedMonth,
+        Guid sponsorId,
+        CancellationToken cancellationToken = default);
+
+    Task<Result<FuelCardNumberImportResponse>> ImportCardNumbersAsync(
+        Stream content, Guid sponsorId, bool validateOnly,
         CancellationToken cancellationToken = default);
 
     Task<Result<IReadOnlyList<FuelImportHistoryResponse>>> GetImportsAsync(

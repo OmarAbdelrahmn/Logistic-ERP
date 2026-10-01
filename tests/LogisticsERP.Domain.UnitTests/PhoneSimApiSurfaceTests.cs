@@ -65,7 +65,11 @@ public sealed class PhoneSimApiSurfaceTests
         Assert.NotNull(typeof(PhoneSimCurrentRiderResponse).GetProperty(nameof(PhoneSimCurrentRiderResponse.RiderProfileId)));
         Assert.NotNull(typeof(PhoneSimCurrentRiderResponse).GetProperty(nameof(PhoneSimCurrentRiderResponse.EmployeeId)));
         Assert.NotNull(typeof(PhoneSimResponse).GetProperty(nameof(PhoneSimResponse.ReceiptForm)));
+        Assert.NotNull(typeof(PhoneSimResponse).GetProperty(nameof(PhoneSimResponse.PlaceId)));
+        Assert.NotNull(typeof(PhoneSimResponse).GetProperty(nameof(PhoneSimResponse.PlaceName)));
+        Assert.NotNull(typeof(UpdatePhoneSimRequest).GetProperty(nameof(UpdatePhoneSimRequest.PlaceId)));
         Assert.NotNull(typeof(CreatePhoneSimForm).GetProperty(nameof(CreatePhoneSimForm.ReceiptForm)));
+        Assert.NotNull(typeof(CreatePhoneSimForm).GetProperty(nameof(CreatePhoneSimForm.PlaceId)));
     }
 
     [Fact]

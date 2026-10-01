@@ -1,5 +1,6 @@
 using LogisticsERP.Application.Common.Results;
 using LogisticsERP.Application.Features.Fleet;
+using LogisticsERP.Domain.Enums;
 using LogisticsERP.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -24,10 +25,11 @@ internal sealed class VehicleRiderPeriodReportService(
             .ThenBy(x => x.Id)
             .Select(vehicle =>
             {
-                var items = assignmentsByVehicle.GetValueOrDefault(vehicle.Id) ?? [];
+                var items = (assignmentsByVehicle.GetValueOrDefault(vehicle.Id) ?? [])
+                    .Select(x => PriceAssignment(x, vehicle.VehicleType)).ToArray();
                 return new VehicleAssignmentsPeriodRow(
                     vehicle.Id, vehicle.AssetNumber, vehicle.SerialNumber, vehicle.PlateNumberAr,
-                    items.Sum(x => x.DaysInPeriod), items);
+                    items.Sum(x => x.DaysInPeriod), TotalCost(items), items);
             }).ToArray();
         return Result.Success(new VehicleAssignmentsPeriodReport(fromDate, toDate, asOfUtc, rows));
     }
@@ -38,11 +40,13 @@ internal sealed class VehicleRiderPeriodReportService(
         if (!ValidPeriod(fromDate, toDate))
             return Result.Failure<RiderAssignmentsPeriodReport>(VehicleRiderPeriodReportErrors.InvalidPeriod);
 
-        var (asOfUtc, _, assignments) = await LoadAsync(fromDate, toDate, cancellationToken);
+        var (asOfUtc, vehicles, assignments) = await LoadAsync(fromDate, toDate, cancellationToken);
+        var vehicleById = vehicles.ToDictionary(x => x.Id);
         var rows = assignments.GroupBy(RiderKey, StringComparer.Ordinal)
             .Select(group =>
             {
-                var items = group.OrderBy(x => x.PeriodStartedAtUtc).ThenBy(x => x.AssignmentId).ToArray();
+                var items = group.OrderBy(x => x.PeriodStartedAtUtc).ThenBy(x => x.AssignmentId)
+                    .Select(x => PriceAssignment(x, vehicleById[x.VehicleId].VehicleType)).ToArray();
                 var primary = items.OrderByDescending(x => x.IsRealRider).First();
                 return new RiderAssignmentsPeriodRow(
                     group.Key,
@@ -50,6 +54,7 @@ internal sealed class VehicleRiderPeriodReportService(
                     primary.ActualRiderName,
                     primary.ActualRiderIqamaNo,
                     items.Sum(x => x.DaysInPeriod),
+                    TotalCost(items),
                     items);
             })
             .OrderBy(x => x.RiderName, StringComparer.OrdinalIgnoreCase)
@@ -67,7 +72,7 @@ internal sealed class VehicleRiderPeriodReportService(
         var reportEndUtc = StartOfDayUtc(toDate.AddDays(1));
         var vehicles = await dbContext.Vehicles.IgnoreQueryFilters().AsNoTracking()
             .Select(vehicle => new VehicleLookup(vehicle.Id, vehicle.AssetNumber,
-                vehicle.SerialNumber, vehicle.PlateNumberAr))
+                vehicle.SerialNumber, vehicle.PlateNumberAr, vehicle.VehicleType))
             .ToArrayAsync(cancellationToken);
         var vehicleById = vehicles.ToDictionary(x => x.Id);
         var assignments = await dbContext.RiderVehicleAssignments.AsNoTracking()
@@ -134,7 +139,32 @@ internal sealed class VehicleRiderPeriodReportService(
         new DateTimeOffset(date.ToDateTime(TimeOnly.MinValue), RiyadhOffset).ToUniversalTime();
 
     private static decimal Days(DateTimeOffset start, DateTimeOffset end) =>
-        Math.Round((decimal)(end - start).Ticks / TimeSpan.TicksPerDay, 4);
+        Math.Round(ElapsedDays(start, end), 4);
+
+    private static decimal ElapsedDays(DateTimeOffset start, DateTimeOffset end) =>
+        (decimal)(end - start).Ticks / TimeSpan.TicksPerDay;
+
+    private static RiderVehiclePeriodAssignment PriceAssignment(
+        VehicleRiderPeriodAssignment assignment, VehicleType vehicleType)
+    {
+        decimal? monthlyCostSar = vehicleType switch
+        {
+            VehicleType.Car => 1800m,
+            VehicleType.Motorcycle => 800m,
+            _ => null
+        };
+        var dailyCostSar = monthlyCostSar / 30m;
+        var costInPeriodSar = dailyCostSar.HasValue
+            ? Math.Round(ElapsedDays(assignment.PeriodStartedAtUtc, assignment.PeriodEndedAtUtc)
+                * dailyCostSar.Value, 2, MidpointRounding.AwayFromZero)
+            : (decimal?)null;
+        return new RiderVehiclePeriodAssignment(
+            assignment, vehicleType, monthlyCostSar, dailyCostSar, costInPeriodSar);
+    }
+
+    private static decimal? TotalCost(IReadOnlyList<RiderVehiclePeriodAssignment> assignments) =>
+        assignments.All(x => x.CostInPeriodSar.HasValue)
+            ? assignments.Sum(x => x.CostInPeriodSar!.Value) : null;
 
     private static string RiderKey(VehicleRiderPeriodAssignment assignment)
     {
@@ -145,6 +175,7 @@ internal sealed class VehicleRiderPeriodReportService(
             : $"unidentified:{assignment.AssignmentId:N}";
     }
 
-    private sealed record VehicleLookup(Guid Id, string AssetNumber, string? SerialNumber, string? PlateNumberAr);
+    private sealed record VehicleLookup(
+        Guid Id, string AssetNumber, string? SerialNumber, string? PlateNumberAr, VehicleType VehicleType);
     private sealed record AssignedRiderLookup(Guid ProfileId, Guid EmployeeId, string Name, string? IqamaNo);
 }

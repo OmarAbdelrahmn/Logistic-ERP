@@ -23,7 +23,7 @@ public sealed class HousingRoomModelTests
         Assert.Contains(room.GetIndexes(), index =>
             index.IsUnique
             && index.Properties.Select(property => property.Name)
-                .SequenceEqual([nameof(HousingRoom.HousingId), nameof(HousingRoom.Name)]));
+                .SequenceEqual([nameof(HousingRoom.FloorId), nameof(HousingRoom.Name)]));
         Assert.Contains(period.GetForeignKeys(), foreignKey =>
             foreignKey.Properties.Select(property => property.Name).SequenceEqual([nameof(HousingResidencePeriod.RoomId)])
             && foreignKey.PrincipalEntityType.ClrType == typeof(HousingRoom));

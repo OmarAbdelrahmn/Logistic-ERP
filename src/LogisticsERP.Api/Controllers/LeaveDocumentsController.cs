@@ -23,7 +23,7 @@ public sealed class LeaveDocumentsController(ILeaveDocumentService service) : Co
     [RequirePermission(PermissionKeys.Documents.Upload)]
     public async Task<IActionResult> Upload(Guid leaveRequestId, [FromForm] LeaveDocumentUploadForm request, CancellationToken cancellationToken)
     {
-        if (request.File is null) return BadRequest();
+        if (request.File is null) return ApiProblemDetails.BadRequest(HttpContext, "اختر ملف مستند الإجازة.");
         await using var stream = request.File.OpenReadStream();
         var file = new FileUploadContent(stream, request.File.FileName, request.File.ContentType, request.File.Length);
         var result = await service.UploadAsync(leaveRequestId, request.ToMetadata(), file, cancellationToken);
@@ -35,7 +35,7 @@ public sealed class LeaveDocumentsController(ILeaveDocumentService service) : Co
     [RequirePermission(PermissionKeys.Documents.Upload)]
     public async Task<IActionResult> UploadVersion(Guid leaveRequestId, Guid documentId, [FromForm] DocumentVersionUploadForm request, CancellationToken cancellationToken)
     {
-        if (request.File is null) return BadRequest();
+        if (request.File is null) return ApiProblemDetails.BadRequest(HttpContext, "اختر ملف النسخة الجديدة من مستند الإجازة.");
         await using var stream = request.File.OpenReadStream();
         var file = new FileUploadContent(stream, request.File.FileName, request.File.ContentType, request.File.Length);
         var result = await service.UploadNewVersionAsync(leaveRequestId, documentId, file, cancellationToken);
@@ -90,4 +90,3 @@ public sealed class LeaveDocumentUploadForm
 }
 
 public sealed record UpdateLeaveDocumentRequest(LeaveDocumentMetadataRequest Metadata, string RowVersion);
-

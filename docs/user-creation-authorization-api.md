@@ -133,8 +133,8 @@ Supported scope types are `Housing`, `ClientPlatform`, and `ClientContract`. Do 
 
 - `400 UserManagement.InvalidRequest`: malformed role, permission, effect, time window, or scope.
 - `400 UserManagement.PasswordRejected`: initial password fails the configured policy.
-- `404 UserManagement.NotFound`: a selected role or scope target does not exist or is inactive.
-- `409 UserManagement.Duplicate`: username, email, or employee is already assigned.
+- `404 UserManagement.NotFound`: a selected role or scope target does not exist or is inactive, or the selected employee does not exist. An unknown employee returns `field: "employeeId"`.
+- `409 UserManagement.Duplicate`: username, email, or employee is already assigned, including to an archived account. The response identifies the conflicting input in `field` (`userName`, `email`, or `employeeId`) and provides an Arabic explanation in `detail`. For an archived account, restore or edit the existing account instead of retrying the same values.
 - `401/403`: the caller is unauthenticated or lacks one of the three required management permissions.
 
 If any database write fails, the user and all authorization assignments are rolled back together.

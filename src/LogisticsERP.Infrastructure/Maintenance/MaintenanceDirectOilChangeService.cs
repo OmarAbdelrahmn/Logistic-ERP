@@ -26,16 +26,20 @@ internal sealed partial class MaintenanceService
         return Result.Success<IReadOnlyList<DirectOilInventoryLocationResponse>>(locations);
     }
 
-    public async Task<Result<IReadOnlyList<DirectOilBarrelResponse>>> GetDirectOilBarrelsAsync(Guid inventoryLocationId, Guid inventoryItemId, CancellationToken cancellationToken = default)
+    public async Task<Result<IReadOnlyList<DirectOilBarrelResponse>>> GetDirectOilBarrelsAsync(Guid inventoryLocationId, Guid inventoryItemId, VehicleType? vehicleType = null, CancellationToken cancellationToken = default)
     {
         if (inventoryLocationId == Guid.Empty || inventoryItemId == Guid.Empty)
             return Result.Failure<IReadOnlyList<DirectOilBarrelResponse>>(MaintenanceErrors.InvalidRequest);
+        if (vehicleType.HasValue && !IsOilBarrelVehicleType(vehicleType))
+            return Result.Failure<IReadOnlyList<DirectOilBarrelResponse>>(MaintenanceErrors.InvalidOilBarrelVehicleType);
         var barrels = await dbContext.OilBarrels.AsNoTracking()
             .Where(x => x.InventoryLocationId == inventoryLocationId && x.InventoryItemId == inventoryItemId &&
-                (x.Status == OilBarrelStatus.Open || x.Status == OilBarrelStatus.Sealed))
+                (x.Status == OilBarrelStatus.Open || x.Status == OilBarrelStatus.Sealed)
+                && (!vehicleType.HasValue || x.AllowedVehicleType == vehicleType
+                    || x.Status == OilBarrelStatus.Sealed && x.AllowedVehicleType == null))
             .OrderBy(x => x.PackageSequence)
             .Select(x => new DirectOilBarrelResponse(x.Id, x.BarrelNumber, x.InventoryLocationId,
-                x.InventoryItemId, x.Status, x.RemainingLiters))
+                x.InventoryItemId, x.Status, x.RemainingLiters, x.AllowedVehicleType))
             .ToArrayAsync(cancellationToken);
         return Result.Success<IReadOnlyList<DirectOilBarrelResponse>>(barrels);
     }

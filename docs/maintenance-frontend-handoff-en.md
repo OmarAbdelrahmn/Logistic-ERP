@@ -216,7 +216,7 @@ Full oil barrel response:
   "nominalCapacityLiters":208, "consumedLiters":200, "remainingLiters":8,
   "unitCostPerLiter":4.807692, "remainingInventoryValue":38.461536,
   "maximumAllowedLossLiters":4.16, "recordedLossLiters":0, "remainingLossAllowanceLiters":4.16,
-  "status":2, "openedAtUtc":"…", "depletedAtUtc":null, "rowVersion":"base64"
+  "status":2, "openedAtUtc":"…", "depletedAtUtc":null, "rowVersion":"base64", "allowedVehicleType":2
 }
 ```
 
@@ -227,7 +227,7 @@ This lets the frontend show five barrels, identify the currently open barrel, it
 `POST /api/maintenance-inventory/oil-barrels/{barrelId}/open`
 
 ```json
-{ "openedAtUtc":"2026-09-05T10:00:00+03:00", "rowVersion":"latest-barrel-rowVersion" }
+{ "openedAtUtc":"2026-09-05T10:00:00+03:00", "rowVersion":"latest-barrel-rowVersion", "allowedVehicleType":2 }
 ```
 
 The response is always an object of this shape:
@@ -243,7 +243,9 @@ The response is always an object of this shape:
 }
 ```
 
-`opened: false` is an intentional successful response, not an HTTP error. Show an unavoidable warning and keep the newly selected barrel sealed. Only one barrel for an oil item/location can be open. It must also be the oldest available FIFO cost layer.
+Require a Cars (`2`) or Motorcycles (`1`) choice in the opening dialog. The choice is locked after opening. `opened: false` is an intentional successful response, not an HTTP error. Keep the newly selected barrel sealed and show the warning. Only one barrel for an oil item/location/vehicle type can be open; cars and motorcycles can have separate open barrels together. FIFO applies among sealed barrels eligible for the chosen type.
+
+For the per-vehicle usage endpoint, picker filtering and existing open barrels, see [Oil barrel frontend handoff](oil-barrel-vehicle-types-frontend-handoff.md).
 
 ### Oil loss / depreciation
 

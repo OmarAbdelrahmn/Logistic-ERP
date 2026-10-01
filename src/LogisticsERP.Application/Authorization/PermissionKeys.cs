@@ -37,6 +37,8 @@ public static class PermissionKeys
         public const string EmployeesSensitiveRead = "employees.sensitive.read";
         public const string RidersRead = "riders.read";
         public const string RidersManage = "riders.manage";
+        public const string ExternalRidersRead = "external_riders.read";
+        public const string ExternalRidersManage = "external_riders.manage";
         public const string SponsorsRead = "sponsors.read";
         public const string SponsorsManage = "sponsors.manage";
     }
@@ -200,6 +202,8 @@ public static class PermissionKeys
         Workforce.EmployeesSensitiveRead,
         Workforce.RidersRead,
         Workforce.RidersManage,
+        Workforce.ExternalRidersRead,
+        Workforce.ExternalRidersManage,
         Workforce.SponsorsRead,
         Workforce.SponsorsManage,
         Compliance.ResidencyRead,

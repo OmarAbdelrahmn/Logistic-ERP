@@ -2,6 +2,7 @@ using LogisticsERP.Api.ErrorHandling;
 using LogisticsERP.Api.Authorization;
 using LogisticsERP.Application.Abstractions.Files;
 using LogisticsERP.Application.Authorization;
+using LogisticsERP.Application.Common.Results;
 using LogisticsERP.Application.Features.Fleet;
 using LogisticsERP.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
@@ -41,7 +42,7 @@ public sealed class VehicleAccidentsController(IVehicleAccidentService service) 
     [RequestSizeLimit(11 * 1024 * 1024)]
     public async Task<IActionResult> Evidence(Guid id, [FromForm] AccidentEvidenceForm form, CancellationToken cancellationToken)
     {
-        if (form.File is null || form.File.Length == 0) return BadRequest();
+        if (form.File is null || form.File.Length == 0) return Result.Failure(FleetErrors.FileRequired).ToProblem(HttpContext);
         await using var stream = form.File.OpenReadStream();
         var result = await service.UploadEvidenceAsync(id, form.EvidenceType, new PrivateFileUpload(stream, form.File.FileName, form.File.ContentType, form.File.Length), cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);

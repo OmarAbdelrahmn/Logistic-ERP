@@ -4,8 +4,12 @@ using LogisticsERP.Api.Controllers;
 using LogisticsERP.Application.Authorization;
 using LogisticsERP.Application.Features.Hr;
 using LogisticsERP.Domain.Entities.Housing;
+using LogisticsERP.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Xunit;
 
 namespace LogisticsERP.Domain.UnitTests;
@@ -22,7 +26,22 @@ public sealed class HousingRoomApiSurfaceTests
         { typeof(RoomsController), nameof(RoomsController.AssignEmployee), typeof(HttpPostAttribute), "{id:guid}/occupants/employees", PermissionKeys.Operations.HousingManage },
         { typeof(RoomsController), nameof(RoomsController.AssignRider), typeof(HttpPostAttribute), "{id:guid}/occupants/riders", PermissionKeys.Operations.HousingManage },
         { typeof(RoomsController), nameof(RoomsController.MoveOccupant), typeof(HttpPostAttribute), "occupants/{occupancyPeriodId:guid}/move", PermissionKeys.Operations.HousingManage },
-        { typeof(RoomsController), nameof(RoomsController.RemoveOccupant), typeof(HttpPostAttribute), "occupants/{occupancyPeriodId:guid}/remove", PermissionKeys.Operations.HousingManage }
+        { typeof(RoomsController), nameof(RoomsController.RemoveOccupant), typeof(HttpPostAttribute), "occupants/{occupancyPeriodId:guid}/remove", PermissionKeys.Operations.HousingManage },
+        { typeof(HousingController), nameof(HousingController.GetFloors), typeof(HttpGetAttribute), "{id:guid}/floors", PermissionKeys.Operations.HousingRead },
+        { typeof(HousingController), nameof(HousingController.CreateFloor), typeof(HttpPostAttribute), "{id:guid}/floors", PermissionKeys.Operations.HousingManage },
+        { typeof(HousingController), nameof(HousingController.UpdateFloor), typeof(HttpPutAttribute), "{id:guid}/floors/{floorId:guid}", PermissionKeys.Operations.HousingManage },
+        { typeof(HousingController), nameof(HousingController.DeleteFloor), typeof(HttpDeleteAttribute), "floors/{floorId:guid}", PermissionKeys.Operations.HousingManage },
+        { typeof(HousingController), nameof(HousingController.CreateFloorEquipment), typeof(HttpPostAttribute), "floors/{floorId:guid}/equipment", PermissionKeys.Operations.HousingManage },
+        { typeof(RoomsController), nameof(RoomsController.CreateEquipment), typeof(HttpPostAttribute), "{id:guid}/equipment", PermissionKeys.Operations.HousingManage },
+        { typeof(RoomsController), nameof(RoomsController.CreateExternalOccupant), typeof(HttpPostAttribute), "{id:guid}/occupants/external", PermissionKeys.Operations.HousingManage },
+        { typeof(RoomsController), nameof(RoomsController.AssignByIqama), typeof(HttpPostAttribute), "{id:guid}/occupants/iqama", PermissionKeys.Operations.HousingManage },
+        { typeof(RoomsController), nameof(RoomsController.ResolvePendingOccupant), typeof(HttpPostAttribute), "occupants/pending/{pendingId:guid}/resolve", PermissionKeys.Operations.HousingManage },
+        { typeof(RoomsController), nameof(RoomsController.DeletePendingOccupant), typeof(HttpDeleteAttribute), "occupants/pending/{pendingId:guid}", PermissionKeys.Operations.HousingManage },
+        { typeof(RoomsController), nameof(RoomsController.UpdateEquipment), typeof(HttpPutAttribute), "{id:guid}/equipment/{equipmentId:guid}", PermissionKeys.Operations.HousingManage },
+        { typeof(HousingController), nameof(HousingController.UpdateFloorEquipment), typeof(HttpPutAttribute), "floors/{floorId:guid}/equipment/{equipmentId:guid}", PermissionKeys.Operations.HousingManage },
+        { typeof(HousingController), nameof(HousingController.DeleteEquipment), typeof(HttpDeleteAttribute), "equipment/{equipmentId:guid}", PermissionKeys.Operations.HousingManage },
+        { typeof(RoomsController), nameof(RoomsController.UpdateExternalOccupant), typeof(HttpPutAttribute), "occupants/external/{occupantId:guid}", PermissionKeys.Operations.HousingManage },
+        { typeof(RoomsController), nameof(RoomsController.DeleteExternalOccupant), typeof(HttpDeleteAttribute), "occupants/external/{occupantId:guid}", PermissionKeys.Operations.HousingManage }
     };
 
     [Theory]
@@ -58,5 +77,24 @@ public sealed class HousingRoomApiSurfaceTests
         Assert.NotNull(typeof(AssignRoomEmployeeRequest).GetProperty(nameof(AssignRoomEmployeeRequest.EmployeeId)));
         Assert.NotNull(typeof(AssignRoomRiderRequest).GetProperty(nameof(AssignRoomRiderRequest.RiderProfileId)));
         Assert.NotNull(typeof(AssignHousingResidentRequest).GetProperty(nameof(AssignHousingResidentRequest.RoomId)));
+    }
+
+    [Fact]
+    public void FloorEquipmentAndPendingOccupantsHaveDatabaseRelationships()
+    {
+        using var db = new ApplicationDbContext(new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=HousingModelTest;Trusted_Connection=True")
+            .Options);
+        var model = db.GetService<IDesignTimeModel>().Model;
+        var room = model.FindEntityType(typeof(HousingRoom))!;
+        var equipment = model.FindEntityType(typeof(HousingEquipment))!;
+        var pending = model.FindEntityType(typeof(HousingPendingOccupant))!;
+
+        Assert.Contains(room.GetIndexes(), index => index.IsUnique &&
+            index.Properties.Select(property => property.Name)
+                .SequenceEqual([nameof(HousingRoom.FloorId), nameof(HousingRoom.Name)]));
+        Assert.Contains(equipment.GetCheckConstraints(), constraint => constraint.Name == "CK_HousingEquipment_Scope");
+        Assert.Contains(pending.GetIndexes(), index => index.IsUnique &&
+            index.Properties.Select(property => property.Name).SequenceEqual([nameof(HousingPendingOccupant.IqamaNo)]));
     }
 }

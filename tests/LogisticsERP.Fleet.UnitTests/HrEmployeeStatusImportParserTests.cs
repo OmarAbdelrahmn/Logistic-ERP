@@ -62,8 +62,8 @@ public sealed class HrEmployeeStatusImportParserTests
         Assert.Single(parsed.Rows);
         Assert.Equal(2, parsed.Issues.Count);
         Assert.All(parsed.Issues, issue => Assert.Equal("Error", issue.Severity));
-        Assert.Contains(parsed.Issues, issue => issue.Message.Contains("Duplicate", StringComparison.Ordinal));
-        Assert.Contains(parsed.Issues, issue => issue.Message.Contains("1 through 10", StringComparison.Ordinal));
+        Assert.Contains(parsed.Issues, issue => issue.Message.Contains("مكرر", StringComparison.Ordinal));
+        Assert.Contains(parsed.Issues, issue => issue.Message.Contains("1 إلى 10", StringComparison.Ordinal));
     }
 
     private static MemoryStream Save(XLWorkbook workbook)

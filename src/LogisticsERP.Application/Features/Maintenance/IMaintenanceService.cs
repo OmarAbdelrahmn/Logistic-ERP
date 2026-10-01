@@ -18,8 +18,10 @@ public interface IMaintenanceService
     Task<Result<IReadOnlyList<PurchaseReceiptResponse>>> GetPurchaseReceiptsAsync(CancellationToken cancellationToken = default);
     Task<Result<PurchaseReceiptResponse>> GetPurchaseReceiptAsync(Guid id, CancellationToken cancellationToken = default);
     Task<Result<PrivateFileDownload>> DownloadPurchaseReceiptAttachmentAsync(Guid id, CancellationToken cancellationToken = default);
-    Task<Result<IReadOnlyList<OilBarrelResponse>>> GetOilBarrelsAsync(Guid? inventoryLocationId, Guid? inventoryItemId, string? status, CancellationToken cancellationToken = default);
+    Task<Result<IReadOnlyList<OilBarrelResponse>>> GetOilBarrelsAsync(Guid? inventoryLocationId, Guid? inventoryItemId, string? status, VehicleType? vehicleType = null, CancellationToken cancellationToken = default);
     Task<Result<OpenOilBarrelResponse>> OpenOilBarrelAsync(Guid id, OpenOilBarrelRequest request, CancellationToken cancellationToken = default);
+    Task<Result<OilBarrelResponse>> SetOilBarrelVehicleTypeAsync(Guid id, SetOilBarrelVehicleTypeRequest request, CancellationToken cancellationToken = default);
+    Task<Result<OilBarrelUsageResponse>> GetOilBarrelUsageAsync(Guid id, int page, int pageSize, CancellationToken cancellationToken = default);
     Task<Result<OilBarrelLossResponse>> RecordOilBarrelLossAsync(Guid id, RecordOilBarrelLossRequest request, CancellationToken cancellationToken = default);
     Task<Result<StockTransferResponse>> PostTransferAsync(PostStockTransferRequest request, CancellationToken cancellationToken = default);
     Task<Result<SupplierReturnResponse>> PostSupplierReturnAsync(PostSupplierReturnRequest request, CancellationToken cancellationToken = default);
@@ -45,7 +47,7 @@ public interface IMaintenanceService
     Task<Result<OilChangeResponse>> CompleteOilChangeAsync(Guid workOrderId, CompleteOilChangeRequest request, CancellationToken cancellationToken = default);
     Task<Result<OilChangeResponse>> CompleteDirectOilChangeAsync(Guid vehicleId, DirectOilChangeRequest request, string idempotencyKey, CancellationToken cancellationToken = default);
     Task<Result<IReadOnlyList<DirectOilInventoryLocationResponse>>> GetDirectOilInventoryLocationsAsync(CancellationToken cancellationToken = default);
-    Task<Result<IReadOnlyList<DirectOilBarrelResponse>>> GetDirectOilBarrelsAsync(Guid inventoryLocationId, Guid inventoryItemId, CancellationToken cancellationToken = default);
+    Task<Result<IReadOnlyList<DirectOilBarrelResponse>>> GetDirectOilBarrelsAsync(Guid inventoryLocationId, Guid inventoryItemId, VehicleType? vehicleType = null, CancellationToken cancellationToken = default);
     Task<Result<IReadOnlyList<OilChangeReportResponse>>> GetOilChangesAsync(Guid? vehicleId, CancellationToken cancellationToken = default);
     Task<Result<IReadOnlyList<OilReminderResponse>>> GetOilRemindersAsync(CancellationToken cancellationToken = default);
     Task<Result<ExternalPartSaleResponse>> PostExternalPartSaleAsync(Guid workOrderId, ExternalPartSaleRequest request, CancellationToken cancellationToken = default);

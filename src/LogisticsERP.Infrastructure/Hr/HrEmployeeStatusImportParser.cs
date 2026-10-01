@@ -81,12 +81,12 @@ internal static class HrEmployeeStatusImportParser
 
             if (iqama.Length != 10 || !iqama.All(char.IsAsciiDigit))
             {
-                issues.Add(new(rowNumber, NullIfEmpty(iqama), "Error", "The first column must contain a 10-digit Iqama number."));
+                issues.Add(new(rowNumber, NullIfEmpty(iqama), "Error", "يجب أن يحتوي العمود الأول على رقم إقامة مكوّن من 10 أرقام."));
                 rowHasError = true;
             }
             else if (!iqamas.Add(iqama))
             {
-                issues.Add(new(rowNumber, iqama, "Error", "Duplicate Iqama number in the workbook."));
+                issues.Add(new(rowNumber, iqama, "Error", "رقم الإقامة مكرر داخل الملف."));
                 rowHasError = true;
             }
 
@@ -97,7 +97,7 @@ internal static class HrEmployeeStatusImportParser
                     rowNumber,
                     NullIfEmpty(iqama),
                     "Error",
-                    "The second column must contain an EmployeeStatus number from 1 through 10."));
+                    "يجب أن يحتوي العمود الثاني على رمز حالة الموظف من 1 إلى 10."));
                 rowHasError = true;
             }
 

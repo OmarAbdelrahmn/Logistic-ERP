@@ -39,7 +39,7 @@ public sealed record MaintenanceLocationResponse(
     string RowVersion);
 
 public sealed record InventoryItemRequest(
-    string Sku,
+    string? Sku,
     string? Barcode,
     InventoryItemType ItemType,
     string NameAr,
@@ -203,7 +203,7 @@ public sealed record PurchaseReceiptResponse(
 public sealed record OilBarrelResponse(
     Guid Id,
     string BarrelNumber,
-    Guid PurchaseReceiptLineId,
+    Guid? PurchaseReceiptLineId,
     Guid InventoryItemId,
     Guid InventoryLocationId,
     Guid StockCostLayerId,
@@ -219,9 +219,23 @@ public sealed record OilBarrelResponse(
     OilBarrelStatus Status,
     DateTimeOffset? OpenedAtUtc,
     DateTimeOffset? DepletedAtUtc,
-    string RowVersion);
+    string RowVersion,
+    VehicleType? AllowedVehicleType = null);
 
-public sealed record OpenOilBarrelRequest(DateTimeOffset OpenedAtUtc, string RowVersion);
+public sealed record OpenOilBarrelRequest(DateTimeOffset OpenedAtUtc, string RowVersion, VehicleType AllowedVehicleType);
+
+public sealed record SetOilBarrelVehicleTypeRequest(VehicleType AllowedVehicleType, string RowVersion);
+
+public sealed record OilBarrelVehicleUsageResponse(
+    Guid? VehicleId, Guid? ExternalWorkOrderId, string? AssetNumber,
+    string? PlateNumberAr, string? PlateNumberEn, string? ExternalPlateOrReference,
+    VehicleType? VehicleType, decimal IssuedLiters, decimal ReversedLiters,
+    decimal NetUsedLiters, int IssueCount, DateTimeOffset LastUsedAtUtc);
+
+public sealed record OilBarrelUsageResponse(
+    OilBarrelResponse Barrel, decimal TotalIssuedLiters, decimal TotalReversedLiters,
+    decimal NetUsedLiters, IReadOnlyList<OilBarrelVehicleUsageResponse> Vehicles,
+    int Page, int PageSize, int TotalCount);
 
 public sealed record OpenOilBarrelResponse(
     OilBarrelResponse Barrel,
@@ -493,7 +507,8 @@ public sealed record DirectOilBarrelResponse(
     Guid InventoryLocationId,
     Guid InventoryItemId,
     OilBarrelStatus Status,
-    decimal RemainingLiters);
+    decimal RemainingLiters,
+    VehicleType? AllowedVehicleType = null);
 
 public sealed record OilChangeResponse(
     Guid Id,

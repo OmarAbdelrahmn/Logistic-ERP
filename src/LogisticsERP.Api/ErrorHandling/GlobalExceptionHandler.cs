@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace LogisticsERP.Api.ErrorHandling;
@@ -24,54 +23,27 @@ internal sealed class GlobalExceptionHandler(
         }
 
         var system = ResolveSystem(httpContext.Request.Path);
-        var includeExceptionDetails = IsFleetPath(httpContext.Request.Path) || IsPurchaseReceiptPath(httpContext.Request.Path);
-        var (status, title, detail, type, errorCode) = exception switch
+        var (status, errorCode) = exception switch
         {
             DbUpdateConcurrencyException => (
                 StatusCodes.Status409Conflict,
-                "The record was changed by another operation.",
-                "Reload the latest data and retry the operation.",
-                "https://httpstatuses.io/409",
                 $"{system}.concurrency_conflict"),
+            BadHttpRequestException badRequest when badRequest.StatusCode == StatusCodes.Status413PayloadTooLarge => (
+                StatusCodes.Status413PayloadTooLarge,
+                $"{system}.request_too_large"),
             BadHttpRequestException => (
                 StatusCodes.Status400BadRequest,
-                "The request is invalid.",
-                "Check the request path, query parameters, and body, then try again.",
-                "https://httpstatuses.io/400",
                 $"{system}.invalid_request"),
             _ => (
                 StatusCodes.Status500InternalServerError,
-                $"An unexpected error occurred in the {ToDisplayName(system)} system.",
-                "The request could not be completed. Contact support with the correlationId so the server log can be located.",
-                "https://httpstatuses.io/500",
                 $"{system}.unexpected_error")
         };
 
         LogUnhandledException(logger, status, httpContext.TraceIdentifier, exception);
 
         httpContext.Response.StatusCode = status;
-        var problem = new ProblemDetails
-        {
-            Status = status,
-            Title = title,
-            Detail = includeExceptionDetails && status == StatusCodes.Status500InternalServerError
-                ? exception.Message
-                : detail,
-            Type = type,
-            Instance = httpContext.Request.Path,
-            Extensions =
-            {
-                ["errorCode"] = errorCode,
-                ["system"] = system,
-                ["correlationId"] = httpContext.TraceIdentifier
-            }
-        };
-        if (includeExceptionDetails && status == StatusCodes.Status500InternalServerError)
-        {
-            problem.Extensions["exceptionType"] = exception.GetType().FullName;
-            problem.Extensions["exception"] = exception.ToString();
-            problem.Extensions["innerException"] = exception.InnerException?.ToString();
-        }
+        var problem = ApiProblemDetails.Create(httpContext, status, errorCode: errorCode);
+        problem.Extensions["system"] = system;
 
         await httpContext.Response.WriteAsJsonAsync(problem, cancellationToken);
 
@@ -101,19 +73,4 @@ internal sealed class GlobalExceptionHandler(
             : firstRouteSegment.Replace('-', '_').ToLowerInvariant();
     }
 
-    private static string ToDisplayName(string system) => system.Replace('_', ' ');
-
-    private static bool IsFleetPath(PathString path)
-    {
-        var value = path.Value ?? string.Empty;
-        return value.StartsWith("/api/vehicle", StringComparison.OrdinalIgnoreCase)
-            || value.Contains("/vehicle-timeline", StringComparison.OrdinalIgnoreCase)
-            || value.Contains("/promissory-files", StringComparison.OrdinalIgnoreCase);
-    }
-
-    private static bool IsPurchaseReceiptPath(PathString path)
-    {
-        var value = path.Value ?? string.Empty;
-        return value.StartsWith("/api/maintenance-inventory/receipts", StringComparison.OrdinalIgnoreCase);
-    }
 }

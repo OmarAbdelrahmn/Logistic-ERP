@@ -13,9 +13,13 @@ internal sealed partial class MaintenanceService
         Guid? inventoryLocationId,
         Guid? inventoryItemId,
         string? status,
+        VehicleType? vehicleType = null,
         CancellationToken cancellationToken = default)
     {
+        if (vehicleType.HasValue && !IsOilBarrelVehicleType(vehicleType))
+            return Result.Failure<IReadOnlyList<OilBarrelResponse>>(MaintenanceErrors.InvalidOilBarrelVehicleType);
         var query = dbContext.OilBarrels.AsNoTracking();
+        if (vehicleType.HasValue) query = query.Where(x => x.AllowedVehicleType == vehicleType);
         if (inventoryLocationId.HasValue) query = query.Where(x => x.InventoryLocationId == inventoryLocationId.Value);
         if (inventoryItemId.HasValue) query = query.Where(x => x.InventoryItemId == inventoryItemId.Value);
         if (!string.IsNullOrWhiteSpace(status))
@@ -45,6 +49,8 @@ internal sealed partial class MaintenanceService
         if (!actor.HasValue) return Result.Failure<OpenOilBarrelResponse>(MaintenanceErrors.CurrentUserUnavailable);
         if (request.OpenedAtUtc == default || !MatchesRequestedRowVersion(request.RowVersion))
             return Result.Failure<OpenOilBarrelResponse>(MaintenanceErrors.InvalidRequest);
+        if (!IsOilBarrelVehicleType(request.AllowedVehicleType))
+            return Result.Failure<OpenOilBarrelResponse>(MaintenanceErrors.InvalidOilBarrelVehicleType);
 
         var barrel = await dbContext.OilBarrels.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (barrel is null) return Result.Failure<OpenOilBarrelResponse>(MaintenanceErrors.NotFound);
@@ -52,11 +58,18 @@ internal sealed partial class MaintenanceService
             return Result.Failure<OpenOilBarrelResponse>(MaintenanceErrors.ConcurrencyConflict);
         if (barrel.Status != OilBarrelStatus.Sealed || barrel.RemainingLiters <= 0)
             return Result.Failure<OpenOilBarrelResponse>(MaintenanceErrors.InvalidOilBarrel);
+        if (barrel.AllowedVehicleType.HasValue && barrel.AllowedVehicleType != request.AllowedVehicleType)
+            return Result.Failure<OpenOilBarrelResponse>(MaintenanceErrors.OilBarrelVehicleTypeMismatch);
+        var item = await dbContext.InventoryItems.AsNoTracking()
+            .SingleOrDefaultAsync(x => x.Id == barrel.InventoryItemId, cancellationToken);
+        if (item is null || !InventoryItemVehicleCompatibility.Allows(item.CompatibleVehicleTypesMask, request.AllowedVehicleType))
+            return Result.Failure<OpenOilBarrelResponse>(MaintenanceErrors.IncompatibleVehicleType);
 
         var previousRemaining = await dbContext.OilBarrels.AsNoTracking()
             .Where(x => x.Id != id
                 && x.InventoryLocationId == barrel.InventoryLocationId
                 && x.InventoryItemId == barrel.InventoryItemId
+                && (x.AllowedVehicleType == request.AllowedVehicleType || x.AllowedVehicleType == null)
                 && x.Status == OilBarrelStatus.Open
                 && x.RemainingLiters > 0)
             .SumAsync(x => x.RemainingLiters, cancellationToken);
@@ -72,19 +85,13 @@ internal sealed partial class MaintenanceService
                 WarningMessageAr: $"تنبيه: يوجد {previousRemaining:0.###} لتر متبقٍ في البرميل المفتوح. يجب استهلاكه أولاً قبل فتح البرميل المختار."));
         }
 
-        var nextFifoLayerId = await dbContext.StockCostLayers.AsNoTracking()
-            .Where(x => x.InventoryLocationId == barrel.InventoryLocationId
-                && x.InventoryItemId == barrel.InventoryItemId
-                && x.RemainingQuantity > 0)
-            .OrderBy(x => x.ReceivedAtUtc)
-            .ThenBy(x => x.OriginalSequence)
-            .ThenBy(x => x.Id)
-            .Select(x => (Guid?)x.Id)
-            .FirstOrDefaultAsync(cancellationToken);
+        var nextFifoLayerId = await GetNextOilLayerAsync(barrel.InventoryItemId,
+            barrel.InventoryLocationId, request.AllowedVehicleType, cancellationToken);
         if (!nextFifoLayerId.HasValue || nextFifoLayerId.Value != barrel.StockCostLayerId)
             return Result.Failure<OpenOilBarrelResponse>(MaintenanceErrors.OilBarrelNotNextFifo);
 
         barrel.Status = OilBarrelStatus.Open;
+        barrel.AllowedVehicleType = request.AllowedVehicleType;
         barrel.OpenedAtUtc = request.OpenedAtUtc;
         barrel.OpenedByUserId = actor.Value;
         try { await dbContext.SaveChangesAsync(cancellationToken); }
@@ -196,70 +203,109 @@ internal sealed partial class MaintenanceService
         return Result.Success(response!);
     }
 
-    private async Task<Result> AllocateOilBarrelsAsync(
+    private async Task<Result<IReadOnlyList<TrackedAllocation>>> AllocateOilBarrelsAsync(
         Guid usageId,
+        Guid inventoryItemId,
         Guid inventoryLocationId,
-        IReadOnlyList<TrackedAllocation> costAllocations,
+        decimal requestedQuantity,
+        VehicleType? vehicleType,
         DateTimeOffset usedAtUtc,
         Guid actor,
         Guid? nextOilBarrelId,
         CancellationToken cancellationToken)
     {
-        var layerIds = costAllocations.Select(x => x.Layer.Id).ToArray();
-        var inventoryItemId = costAllocations[0].Layer.InventoryItemId;
+        if (!IsOilBarrelVehicleType(vehicleType))
+            return Result.Failure<IReadOnlyList<TrackedAllocation>>(MaintenanceErrors.InvalidOilBarrelVehicleType);
         var barrels = await dbContext.OilBarrels
             .Where(x => x.InventoryLocationId == inventoryLocationId
                 && x.InventoryItemId == inventoryItemId
                 && x.RemainingLiters > 0
-                && (x.Status == OilBarrelStatus.Open || nextOilBarrelId.HasValue && x.Id == nextOilBarrelId.Value))
+                && (x.Status == OilBarrelStatus.Open && x.AllowedVehicleType == vehicleType
+                    || nextOilBarrelId.HasValue && x.Id == nextOilBarrelId.Value))
             .OrderBy(x => x.Status == OilBarrelStatus.Open ? 0 : 1)
             .ThenBy(x => x.OpenedAtUtc)
             .ThenBy(x => x.PackageSequence)
             .ThenBy(x => x.Id)
             .ToArrayAsync(cancellationToken);
         var openBarrels = barrels.Where(x => x.Status == OilBarrelStatus.Open).ToArray();
-        if (openBarrels.Length != 1) return Result.Failure(MaintenanceErrors.OpenOilBarrelRequired);
-        if (!layerIds.Contains(openBarrels[0].StockCostLayerId)) return Result.Failure(MaintenanceErrors.OilBarrelNotNextFifo);
+        if (openBarrels.Length != 1 || openBarrels[0].AllowedVehicleType != vehicleType)
+            return Result.Failure<IReadOnlyList<TrackedAllocation>>(MaintenanceErrors.OpenOilBarrelRequired);
+        OilBarrel? next = null;
         if (nextOilBarrelId.HasValue)
         {
-            var next = barrels.SingleOrDefault(x => x.Id == nextOilBarrelId.Value);
-            if (next is null || next.Status != OilBarrelStatus.Sealed || !layerIds.Contains(next.StockCostLayerId))
-                return Result.Failure(MaintenanceErrors.OilBarrelNotNextFifo);
+            next = barrels.SingleOrDefault(x => x.Id == nextOilBarrelId.Value);
+            if (next is null || next.Status != OilBarrelStatus.Sealed)
+                return Result.Failure<IReadOnlyList<TrackedAllocation>>(MaintenanceErrors.InvalidOilBarrel);
+            if (next.AllowedVehicleType.HasValue && next.AllowedVehicleType != vehicleType)
+                return Result.Failure<IReadOnlyList<TrackedAllocation>>(MaintenanceErrors.OilBarrelVehicleTypeMismatch);
+            var nextLayer = await GetNextOilLayerAsync(inventoryItemId, inventoryLocationId,
+                vehicleType!.Value, cancellationToken);
+            if (nextLayer != next.StockCostLayerId)
+                return Result.Failure<IReadOnlyList<TrackedAllocation>>(MaintenanceErrors.OilBarrelNotNextFifo);
         }
-
-        foreach (var costAllocation in costAllocations)
+        var planned = new List<(OilBarrel Barrel, decimal Quantity)>();
+        var firstQuantity = Math.Min(requestedQuantity, openBarrels[0].RemainingLiters);
+        planned.Add((openBarrels[0], firstQuantity));
+        var remaining = requestedQuantity - firstQuantity;
+        if (remaining > 0)
         {
-            var remaining = costAllocation.Quantity;
-            foreach (var barrel in barrels.Where(x => x.StockCostLayerId == costAllocation.Layer.Id && x.RemainingLiters > 0))
-            {
-                if (barrel.Status == OilBarrelStatus.Sealed)
-                {
-                    if (barrels.Any(x => x.Status == OilBarrelStatus.Open && x.RemainingLiters > 0))
-                        return Result.Failure(MaintenanceErrors.OpenOilBarrelRequired);
-                    barrel.Status = OilBarrelStatus.Open;
-                    barrel.OpenedAtUtc = usedAtUtc;
-                    barrel.OpenedByUserId = actor;
-                }
-                var quantity = Math.Min(barrel.RemainingLiters, remaining);
-                barrel.RemainingLiters -= quantity;
-                if (barrel.RemainingLiters == 0)
-                {
-                    barrel.Status = OilBarrelStatus.Depleted;
-                    barrel.DepletedAtUtc = usedAtUtc;
-                }
-                dbContext.OilBarrelUsageAllocations.Add(new OilBarrelUsageAllocation
-                {
-                    MaintenanceMaterialUsageId = usageId,
-                    OilBarrelId = barrel.Id,
-                    QuantityLiters = quantity
-                });
-                remaining -= quantity;
-                if (remaining == 0) break;
-            }
-            if (remaining > 0) return Result.Failure(MaintenanceErrors.OpenOilBarrelRequired);
+            if (next is null || next.RemainingLiters < remaining)
+                return Result.Failure<IReadOnlyList<TrackedAllocation>>(MaintenanceErrors.OpenOilBarrelRequired);
+            planned.Add((next, remaining));
         }
-        return Result.Success();
+        var layerIds = planned.Select(x => x.Barrel.StockCostLayerId).Distinct().ToArray();
+        var layers = await dbContext.StockCostLayers.Where(x => layerIds.Contains(x.Id))
+            .ToDictionaryAsync(x => x.Id, cancellationToken);
+        var tracked = new List<TrackedAllocation>();
+        foreach (var group in planned.GroupBy(x => x.Barrel.StockCostLayerId))
+        {
+            var quantity = group.Sum(x => x.Quantity);
+            if (!layers.TryGetValue(group.Key, out var layer) || layer.RemainingQuantity < quantity)
+                return Result.Failure<IReadOnlyList<TrackedAllocation>>(MaintenanceErrors.InsufficientStock);
+            tracked.Add(new TrackedAllocation(layer, quantity,
+                decimal.Round(quantity * layer.UnitCost, 2, MidpointRounding.AwayFromZero)));
+        }
+        var balance = await GetOrCreateBalanceAsync(inventoryItemId, inventoryLocationId, cancellationToken);
+        if (balance.QuantityOnHand < requestedQuantity)
+            return Result.Failure<IReadOnlyList<TrackedAllocation>>(MaintenanceErrors.InsufficientStock);
+        foreach (var (barrel, quantity) in planned)
+        {
+            if (barrel.Status == OilBarrelStatus.Sealed)
+            {
+                barrel.AllowedVehicleType = vehicleType;
+                barrel.Status = OilBarrelStatus.Open;
+                barrel.OpenedAtUtc = usedAtUtc;
+                barrel.OpenedByUserId = actor;
+            }
+            barrel.RemainingLiters -= quantity;
+            if (barrel.RemainingLiters == 0)
+            {
+                barrel.Status = OilBarrelStatus.Depleted;
+                barrel.DepletedAtUtc = usedAtUtc;
+            }
+            dbContext.OilBarrelUsageAllocations.Add(new OilBarrelUsageAllocation
+            {
+                MaintenanceMaterialUsageId = usageId, OilBarrelId = barrel.Id, QuantityLiters = quantity
+            });
+        }
+        foreach (var allocation in tracked) allocation.Layer.RemainingQuantity -= allocation.Quantity;
+        RemoveFromBalance(balance, requestedQuantity, usedAtUtc);
+        return Result.Success<IReadOnlyList<TrackedAllocation>>(tracked);
     }
+
+    private static bool IsOilBarrelVehicleType(VehicleType? vehicleType) =>
+        vehicleType is VehicleType.Car or VehicleType.Motorcycle;
+
+    private async Task<Guid?> GetNextOilLayerAsync(Guid itemId, Guid locationId,
+        VehicleType vehicleType, CancellationToken cancellationToken) =>
+        await (from barrel in dbContext.OilBarrels.AsNoTracking()
+               join layer in dbContext.StockCostLayers.AsNoTracking() on barrel.StockCostLayerId equals layer.Id
+               where barrel.InventoryItemId == itemId && barrel.InventoryLocationId == locationId
+                   && barrel.Status == OilBarrelStatus.Sealed && barrel.RemainingLiters > 0
+                   && (barrel.AllowedVehicleType == null || barrel.AllowedVehicleType == vehicleType)
+                   && layer.RemainingQuantity > 0
+               orderby layer.ReceivedAtUtc, layer.OriginalSequence, layer.Id
+               select (Guid?)layer.Id).FirstOrDefaultAsync(cancellationToken);
 
     private async Task<Result> RestoreOilBarrelsAsync(
         Guid originalUsageId,
@@ -276,6 +322,11 @@ internal sealed partial class MaintenanceService
         {
             var barrel = barrels[allocation.OilBarrelId];
             if (barrel.Status == OilBarrelStatus.Returned || barrel.RemainingLiters + allocation.QuantityLiters > barrel.NominalCapacityLiters)
+                return Result.Failure(MaintenanceErrors.InvalidState);
+            if (await dbContext.OilBarrels.AnyAsync(x => x.Id != barrel.Id
+                && x.InventoryLocationId == barrel.InventoryLocationId && x.InventoryItemId == barrel.InventoryItemId
+                && x.AllowedVehicleType == barrel.AllowedVehicleType && x.Status == OilBarrelStatus.Open,
+                cancellationToken))
                 return Result.Failure(MaintenanceErrors.InvalidState);
             barrel.RemainingLiters += allocation.QuantityLiters;
             barrel.Status = OilBarrelStatus.Open;
@@ -377,5 +428,6 @@ internal sealed partial class MaintenanceService
         barrel.Status,
         barrel.OpenedAtUtc,
         barrel.DepletedAtUtc,
-        EncodeRowVersion(barrel.RowVersion));
+        EncodeRowVersion(barrel.RowVersion),
+        barrel.AllowedVehicleType);
 }

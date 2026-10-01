@@ -15,6 +15,10 @@ using Microsoft.EntityFrameworkCore;
 using HousingEntity = LogisticsERP.Domain.Entities.Housing.Housing;
 using HousingResidencePeriod = LogisticsERP.Domain.Entities.Housing.HousingResidencePeriod;
 using HousingRoom = LogisticsERP.Domain.Entities.Housing.HousingRoom;
+using HousingFloor = LogisticsERP.Domain.Entities.Housing.HousingFloor;
+using HousingEquipment = LogisticsERP.Domain.Entities.Housing.HousingEquipment;
+using HousingExternalOccupant = LogisticsERP.Domain.Entities.Housing.HousingExternalOccupant;
+using HousingPendingOccupant = LogisticsERP.Domain.Entities.Housing.HousingPendingOccupant;
 using HousingSupervisorPeriod = LogisticsERP.Domain.Entities.Housing.HousingSupervisorPeriod;
 using HousingWarehouse = LogisticsERP.Domain.Entities.Housing.HousingWarehouse;
 using HousingWarehouseItem = LogisticsERP.Domain.Entities.Housing.HousingWarehouseItem;
@@ -71,6 +75,10 @@ public sealed class ApplicationDbContext(
     public DbSet<HrLegalCaseHistory> HrLegalCaseHistory => Set<HrLegalCaseHistory>();
     public DbSet<HousingEntity> Housing => Set<HousingEntity>();
     public DbSet<HousingRoom> HousingRooms => Set<HousingRoom>();
+    public DbSet<HousingFloor> HousingFloors => Set<HousingFloor>();
+    public DbSet<HousingEquipment> HousingEquipment => Set<HousingEquipment>();
+    public DbSet<HousingExternalOccupant> HousingExternalOccupants => Set<HousingExternalOccupant>();
+    public DbSet<HousingPendingOccupant> HousingPendingOccupants => Set<HousingPendingOccupant>();
     public DbSet<HousingWarehouse> HousingWarehouses => Set<HousingWarehouse>();
     public DbSet<HousingWarehouseItem> HousingWarehouseItems => Set<HousingWarehouseItem>();
     public DbSet<HousingWarehouseItemBalance> HousingWarehouseItemBalances => Set<HousingWarehouseItemBalance>();
@@ -172,6 +180,7 @@ public sealed class ApplicationDbContext(
     public DbSet<ExternalMaintenanceFinancialEntry> ExternalMaintenanceFinancialEntries => Set<ExternalMaintenanceFinancialEntry>();
     public DbSet<ExternalCustomerPayment> ExternalCustomerPayments => Set<ExternalCustomerPayment>();
     public DbSet<PhoneSimCard> PhoneSimCards => Set<PhoneSimCard>();
+    public DbSet<Place> Places => Set<Place>();
     public DbSet<RiderPhoneSimAssignment> RiderPhoneSimAssignments => Set<RiderPhoneSimAssignment>();
     public DbSet<PhoneSimResponsibilityChange> PhoneSimResponsibilityChanges => Set<PhoneSimResponsibilityChange>();
 

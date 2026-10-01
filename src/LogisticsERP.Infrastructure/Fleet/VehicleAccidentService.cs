@@ -206,7 +206,7 @@ internal sealed partial class VehicleAccidentService(
         var workflow = await dbContext.VehicleAccidentCases.AsNoTracking().SingleOrDefaultAsync(x => x.VehicleAccidentId == accidentId, cancellationToken);
         if (workflow is null || workflow.Stage != AccidentCaseStage.Completed
             || workflow.RequestedClaimType.HasValue && workflow.RefundStatus is not (AccidentRefundStatus.Received or AccidentRefundStatus.Rejected or AccidentRefundStatus.NotApplicable))
-            return Result.Failure<VehicleAccidentDetailResponse>(WorkflowError("Complete the accident workflow and resolve its installment refund before closing."));
+            return Result.Failure<VehicleAccidentDetailResponse>(WorkflowError("أكمل إجراءات الحادث وعالج استرداد الأقساط قبل إغلاقه."));
         accident.Status = VehicleAccidentStatus.Closed; accident.ClosedAtUtc = support.UtcNow; accident.ClosedByUserId = support.UserId;
         dbContext.VehicleAccidentEvents.Add(new VehicleAccidentEvent { VehicleAccidentId = accident.Id, EventType = VehicleAccidentEventType.Closed, OccurredAtUtc = support.UtcNow, ActorUserId = support.UserId!.Value, Reason = request.Reason.Trim() });
         await dbContext.SaveChangesAsync(cancellationToken);

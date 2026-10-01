@@ -8,6 +8,7 @@ public sealed record FuelCardPageResponse(
 
 public sealed record FuelCardResponse(
     Guid Id,
+    Guid SponsorId,
     string Provider,
     string ProviderNameAr,
     string IdentifierType,
@@ -33,7 +34,16 @@ public sealed record CreateFuelCardRequest(
     string Provider,
     string CardNumber,
     string? PlateNumberText,
-    string? Notes);
+    string? Notes,
+    Guid SponsorId);
+
+public sealed record SetFuelCardSponsorRequest(Guid SponsorId, string RowVersion);
+
+public sealed record FuelCardNumberImportIssue(int RowNumber, string? Number, string Message);
+
+public sealed record FuelCardNumberImportResponse(
+    bool ValidateOnly, bool CanImport, int TotalRows, int NewCards,
+    int ExistingCards, IReadOnlyList<FuelCardNumberImportIssue> Issues);
 
 public sealed record AssignFuelCardRiderRequest(
     Guid RiderProfileId,

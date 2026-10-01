@@ -72,7 +72,8 @@ internal sealed class PhoneSimService(
             join responsible in dbContext.Employees.AsNoTracking()
                 on sim.ResponsibleEmployeeId equals responsible.Id
             orderby sim.PhoneNumber
-            select new PhoneSimProjection(sim, responsible.FullNameAr, responsible.FullNameEn))
+            select new PhoneSimProjection(sim, responsible.FullNameAr, responsible.FullNameEn,
+                sim.Place == null ? null : sim.Place.Name))
             .Skip((normalizedPage - 1) * normalizedPageSize)
             .Take(normalizedPageSize)
             .ToArrayAsync(cancellationToken);
@@ -165,6 +166,11 @@ internal sealed class PhoneSimService(
             return Result.Failure<PhoneSimResponse>(responsibleResult.Error);
         }
 
+        if (!await PlaceExistsAsync(request.PlaceId, cancellationToken))
+        {
+            return Result.Failure<PhoneSimResponse>(PhoneSimErrors.PlaceNotFound);
+        }
+
         var duplicate = await FindDuplicateAsync(
             Guid.Empty,
             identifiers.Value!.PhoneNumber,
@@ -183,6 +189,7 @@ internal sealed class PhoneSimService(
             NormalizedIccid = identifiers.Value.Iccid,
             CarrierName = TrimOrNull(request.CarrierName),
             ResponsibleEmployeeId = request.ResponsibleEmployeeId,
+            PlaceId = request.PlaceId,
             Status = PhoneSimStatus.Available,
             StatusReason = "SIM inventory record created.",
             Notes = TrimOrNull(request.Notes)
@@ -263,6 +270,11 @@ internal sealed class PhoneSimService(
             return Result.Failure<PhoneSimResponse>(PhoneSimErrors.InvalidRequest);
         }
 
+        if (!await PlaceExistsAsync(request.PlaceId, cancellationToken))
+        {
+            return Result.Failure<PhoneSimResponse>(PhoneSimErrors.PlaceNotFound);
+        }
+
         var duplicate = await FindDuplicateAsync(
             sim.Id,
             identifiers.Value!.PhoneNumber,
@@ -278,6 +290,7 @@ internal sealed class PhoneSimService(
         sim.Iccid = identifiers.Value.Iccid;
         sim.NormalizedIccid = identifiers.Value.Iccid;
         sim.CarrierName = TrimOrNull(request.CarrierName);
+        sim.PlaceId = request.PlaceId;
         sim.Notes = TrimOrNull(request.Notes);
 
         var saveResult = await SaveAsync(cancellationToken);
@@ -631,8 +644,12 @@ internal sealed class PhoneSimService(
                join responsible in dbContext.Employees.AsNoTracking()
                    on sim.ResponsibleEmployeeId equals responsible.Id
                where sim.Id == id
-               select new PhoneSimProjection(sim, responsible.FullNameAr, responsible.FullNameEn))
+               select new PhoneSimProjection(sim, responsible.FullNameAr, responsible.FullNameEn,
+                   sim.Place == null ? null : sim.Place.Name))
             .SingleOrDefaultAsync(cancellationToken);
+
+    private Task<bool> PlaceExistsAsync(Guid placeId, CancellationToken cancellationToken) =>
+        dbContext.Places.AsNoTracking().AnyAsync(place => place.Id == placeId, cancellationToken);
 
     private async Task<Dictionary<Guid, CurrentRiderProjection>> GetCurrentRidersAsync(
         Guid[] phoneSimCardIds,
@@ -754,6 +771,8 @@ internal sealed class PhoneSimService(
         row.Sim.PhoneNumber,
         row.Sim.Iccid,
         row.Sim.CarrierName,
+        row.Sim.PlaceId,
+        row.PlaceName,
         row.Sim.Status.ToString(),
         row.Sim.StatusReason,
         row.Sim.ResponsibleEmployeeId,
@@ -826,7 +845,8 @@ internal sealed class PhoneSimService(
     private sealed record PhoneSimProjection(
         PhoneSimCard Sim,
         string ResponsibleEmployeeNameAr,
-        string? ResponsibleEmployeeNameEn);
+        string? ResponsibleEmployeeNameEn,
+        string? PlaceName);
 
     private sealed record CurrentRiderProjection(
         Guid PhoneSimCardId,

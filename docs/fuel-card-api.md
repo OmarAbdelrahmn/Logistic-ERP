@@ -21,10 +21,22 @@ All requests require the normal bearer token. JSON uses camel case. Send `DateOn
 Permissions:
 
 - `fuel.read`: cards, assignments, monthly usage, and import history.
-- `fuel.manage`: create cards, assign riders, and stop assignments.
+- `fuel.manage`: create cards, change card sponsors, assign riders, and stop assignments.
 - `fuel.import`: upload fuel-company spreadsheets.
 
 The `omar` account receives all three permissions directly through the Identity migration. `SYSTEM_ADMIN` and `MANAGER` roles also receive all three permissions.
+
+## Sponsor link: frontend implementation
+
+Every fuel card has exactly one sponsor. Add a required sponsor selector to the create-card form and show the sponsor name in the cards grid and detail view. The fuel-card response provides `sponsorId`; resolve the name from the sponsor catalog. A sponsor can be linked to any number of fuel cards.
+
+Load selector options with `GET /api/sponsors` (`sponsors.read`). It returns an array of sponsor records with `id`, `registryNameAr`, `registryNameEn`, and `status`, among other fields. Display `registryNameAr` (or `registryNameEn` where appropriate), and submit the selected `id`. The fuel-card API does not provide an embedded sponsor name. The catalog includes its records without an active-status filter; the UI may highlight the status but must still display the sponsor of an existing card even if its status changes. A user who can read fuel cards but lacks `sponsors.read` can see the stored `sponsorId` but cannot resolve a name through this endpoint.
+
+Use the same required selector on both existing fuel-card upload screens: the detailed monthly fuel spreadsheet and the one-column PetroApp card-number spreadsheet. The selected `sponsorId` is assigned only to **new** cards created by an upload. Existing cards keep their current sponsor. Do not use an upload to change a card's sponsor. The separate Import module bulk upload accepts a three-column sheet with a sponsor 70 number and fuel company on each row; see [fuel-card-bulk-import-api.md](fuel-card-bulk-import-api.md).
+
+For an existing card, provide a Change sponsor action under `fuel.manage`. Send `PUT /api/fuel-cards/{id}/sponsor` with the chosen `sponsorId` and the card's latest `rowVersion`. The response is the updated `FuelCard`; update the local card and invalidate the cards list and detail query. On `409 fuel.concurrency_conflict`, refresh the card before retrying. On `404 fuel.sponsor_not_found`, refresh the sponsor options. On `404 fuel.card_not_found`, remove or refresh the stale card detail.
+
+`sponsorId` is a GUID, not the sponsor's employer identity number. The API does not currently have a `sponsorId` query filter on `GET /api/fuel-cards`; any sponsor filter in the UI would need to filter only the loaded page or require a separate backend change.
 
 ## Plate direction and normalization
 
@@ -53,6 +65,7 @@ Use isolated bidirectional rendering for every plate/card cell so mixed Arabic l
 | `GET` | `/api/fuel-cards` | `fuel.read` | `200` card page |
 | `GET` | `/api/fuel-cards/{id}` | `fuel.read` | `200` card |
 | `POST` | `/api/fuel-cards` | `fuel.manage` | `201` card |
+| `PUT` | `/api/fuel-cards/{id}/sponsor` | `fuel.manage` | `200` updated card |
 | `GET` | `/api/fuel-cards/{id}/assignments` | `fuel.read` | `200` assignment array |
 | `POST` | `/api/fuel-cards/{id}/assignments` | `fuel.manage` | `200` assignment |
 | `POST` | `/api/fuel-cards/{id}/stop-rider` | `fuel.manage` | `200` closed assignment |
@@ -75,6 +88,7 @@ export interface FuelCardCurrentRider {
 
 export interface FuelCard {
   id: string;
+  sponsorId: string;
   provider: FuelProvider;
   providerNameAr: string;
   identifierType: FuelCardIdentifierType;
@@ -147,7 +161,8 @@ Returns `FuelCard`. Use it to refresh the detail drawer before an assignment act
   "provider": "PetroApp",
   "cardNumber": "BW203",
   "plateNumberText": null,
-  "notes": "Optional note"
+  "notes": "Optional note",
+  "sponsorId": "019c18d5-62e1-7000-8000-000000000040"
 }
 ```
 
@@ -155,9 +170,12 @@ Returns `FuelCard`. Use it to refresh the detail drawer before an assignment act
 - `cardNumber` is required, 2–100 normalized characters.
 - `plateNumberText` is optional, maximum 100 characters.
 - `notes` is optional, maximum 4,000 characters.
+- `sponsorId` is required and must identify an existing sponsor. Each card belongs to one sponsor; a sponsor may own many cards.
 - Values shaped as `BW` plus digits are classified as `InternalNumber`; all others are `PlateNumber`.
 
 Returns `201`, the created `FuelCard`, and a `Location` header. Duplicate normalized card numbers are rejected only within the same provider with `409 fuel.duplicate_card`.
+
+To change the sponsor of an existing card, send `PUT /api/fuel-cards/{id}/sponsor` with `{"sponsorId":"...","rowVersion":"..."}`. Use the card's current `rowVersion`; a stale value returns `409 fuel.concurrency_conflict`. An unknown sponsor returns `404 fuel.sponsor_not_found`.
 
 ## 4. Assignment history
 
@@ -271,6 +289,7 @@ Send `multipart/form-data`:
 
 - `File`: required `.xls` or `.xlsx`, maximum 25 MiB.
 - `ExpectedMonth`: optional `YYYY-MM-DD`; use it to prevent uploading a file for the wrong month.
+- `SponsorId`: required UUID. This sponsor is assigned to cards newly created by the import; existing card sponsors stay as they are.
 
 Do not manually set the multipart `Content-Type` boundary in browser code:
 
@@ -278,6 +297,7 @@ Do not manually set the multipart `Content-Type` boundary in browser code:
 const data = new FormData();
 data.append("File", file);
 data.append("ExpectedMonth", selectedMonth); // e.g. 2026-09-01
+data.append("SponsorId", selectedSponsorId);
 await api.post("/api/fuel-cards/imports", data);
 ```
 

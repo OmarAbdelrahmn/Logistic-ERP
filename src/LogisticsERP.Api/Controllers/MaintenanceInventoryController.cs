@@ -83,11 +83,12 @@ public sealed class MaintenanceInventoryController(IMaintenanceService service) 
     [RequirePermission(PermissionKeys.Inventory.ReceiptsManage)]
     public async Task<IActionResult> PostReceipt([FromForm] PurchaseReceiptForm form, CancellationToken cancellationToken)
     {
-        if (form.BillFile is null || form.BillFile.Length == 0 || string.IsNullOrWhiteSpace(form.ReceiptJson)) return BadRequest();
+        if (form.BillFile is null || form.BillFile.Length == 0 || string.IsNullOrWhiteSpace(form.ReceiptJson))
+            return ApiProblemDetails.BadRequest(HttpContext, "أرفق الفاتورة وأدخل بيانات إيصال الشراء.");
         PostPurchaseReceiptRequest? request;
         try { request = JsonSerializer.Deserialize<PostPurchaseReceiptRequest>(form.ReceiptJson, JsonSerializerOptions.Web); }
-        catch (JsonException) { return BadRequest(); }
-        if (request is null) return BadRequest();
+        catch (JsonException) { return ApiProblemDetails.BadRequest(HttpContext, "بيانات إيصال الشراء غير صالحة."); }
+        if (request is null) return ApiProblemDetails.BadRequest(HttpContext, "أدخل بيانات إيصال الشراء.");
         await using var stream = form.BillFile.OpenReadStream();
         var upload = new PrivateFileUpload(stream, form.BillFile.FileName, form.BillFile.ContentType, form.BillFile.Length);
         var result = await service.PostPurchaseReceiptAsync(request, upload, cancellationToken);
@@ -121,9 +122,9 @@ public sealed class MaintenanceInventoryController(IMaintenanceService service) 
     [HttpGet("oil-barrels")]
     [RequirePermission(PermissionKeys.Inventory.StockRead)]
     [RequirePermission(PermissionKeys.Inventory.CostLayersRead)]
-    public async Task<IActionResult> GetOilBarrels([FromQuery] Guid? inventoryLocationId, [FromQuery] Guid? inventoryItemId, [FromQuery] string? status, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetOilBarrels([FromQuery] Guid? inventoryLocationId, [FromQuery] Guid? inventoryItemId, [FromQuery] string? status, [FromQuery] VehicleType? vehicleType = null, CancellationToken cancellationToken = default)
     {
-        var result = await service.GetOilBarrelsAsync(inventoryLocationId, inventoryItemId, status, cancellationToken);
+        var result = await service.GetOilBarrelsAsync(inventoryLocationId, inventoryItemId, status, vehicleType, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 
@@ -132,6 +133,26 @@ public sealed class MaintenanceInventoryController(IMaintenanceService service) 
     public async Task<IActionResult> OpenOilBarrel(Guid id, [FromBody] OpenOilBarrelRequest request, CancellationToken cancellationToken)
     {
         var result = await service.OpenOilBarrelAsync(id, request, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpPatch("oil-barrels/{id:guid}/vehicle-type")]
+    [RequirePermission(PermissionKeys.Inventory.StockMove)]
+    public async Task<IActionResult> SetOilBarrelVehicleType(Guid id,
+        [FromBody] SetOilBarrelVehicleTypeRequest request, CancellationToken cancellationToken)
+    {
+        var result = await service.SetOilBarrelVehicleTypeAsync(id, request, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpGet("oil-barrels/{id:guid}/usage")]
+    [RequirePermission(PermissionKeys.Inventory.StockRead)]
+    [RequirePermission(PermissionKeys.Inventory.CostLayersRead)]
+    [RequirePermission(PermissionKeys.Maintenance.OilRead)]
+    public async Task<IActionResult> GetOilBarrelUsage(Guid id, [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 50, CancellationToken cancellationToken = default)
+    {
+        var result = await service.GetOilBarrelUsageAsync(id, page, pageSize, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 

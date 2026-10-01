@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using LogisticsERP.Application.Abstractions.Authentication;
 using LogisticsERP.Application.Abstractions.Files;
 using LogisticsERP.Application.Common.Results;
@@ -18,6 +20,40 @@ namespace LogisticsERP.Fleet.UnitTests;
 
 public sealed class MaintenanceSupplyRequestWorkflowTests
 {
+    [Fact]
+    public async Task CreatingInventoryItemWithoutSkuGeneratesUniqueCodeAndUpdatesStillRequireSku()
+    {
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString(), x => x.EnableNullChecks(false))
+            .AddInterceptors(new TestRowVersionInterceptor())
+            .Options;
+        await using var db = new ApplicationDbContext(options);
+        var service = new MaintenanceService(db, new TestUser(), new TestTime(), new UnusedFileStorage());
+        var request = new InventoryItemRequest(null, null, InventoryItemType.SparePart, "قطعة اختبار", "Test part",
+            null, null, InventoryUnitOfMeasure.Piece, InventoryUnitOfMeasure.Piece, null, 0, 0, false, false, null);
+        var payload = JsonNode.Parse(JsonSerializer.Serialize(request))!.AsObject();
+        payload.Remove(nameof(InventoryItemRequest.Sku));
+        var requestWithoutSku = JsonSerializer.Deserialize<InventoryItemRequest>(payload.ToJsonString())!;
+
+        var first = await service.UpsertItemAsync(null, requestWithoutSku, TestContext.Current.CancellationToken);
+        var second = await service.UpsertItemAsync(null, request with { Sku = " " }, TestContext.Current.CancellationToken);
+
+        Assert.True(first.IsSuccess, first.Error.Description);
+        Assert.True(second.IsSuccess, second.Error.Description);
+        Assert.Matches("^INV-[0-9A-F]{24}$", first.Value!.Sku);
+        Assert.NotEqual(first.Value.Sku, second.Value!.Sku);
+        Assert.Equal(first.Value.Sku, (await db.InventoryItems.SingleAsync(
+            x => x.Id == first.Value.Id, TestContext.Current.CancellationToken)).NormalizedSku);
+
+        var supplied = await service.UpsertItemAsync(null, request with { Sku = "custom-1" }, TestContext.Current.CancellationToken);
+        Assert.True(supplied.IsSuccess, supplied.Error.Description);
+        Assert.Equal("custom-1", supplied.Value!.Sku);
+
+        var missingOnUpdate = await service.UpsertItemAsync(first.Value.Id,
+            request with { RowVersion = first.Value.RowVersion }, TestContext.Current.CancellationToken);
+        Assert.Equal(MaintenanceErrors.InvalidRequest.Code, missingOnUpdate.Error.Code);
+    }
+
     [Fact]
     public async Task CarOnlySparePartIsFilteredAndCannotBeIssuedToMotorcycle()
     {
@@ -270,7 +306,7 @@ public sealed class MaintenanceSupplyRequestWorkflowTests
             Id = Guid.NewGuid(), BarrelNumber = "OB-1", PurchaseReceiptLineId = Guid.NewGuid(),
             InventoryItemId = oilItemId, InventoryLocationId = inventoryLocationId, StockCostLayerId = oilLayerId,
             PackageSequence = 1, NominalCapacityLiters = 10, RemainingLiters = 10, UnitCostPerLiter = 10,
-            MaximumAllowedLossLiters = 0.2m, Status = OilBarrelStatus.Open, OpenedAtUtc = now.AddDays(-1)
+            MaximumAllowedLossLiters = 0.2m, Status = OilBarrelStatus.Open, OpenedAtUtc = now.AddDays(-1), AllowedVehicleType = VehicleType.Car
         });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
@@ -372,14 +408,14 @@ public sealed class MaintenanceSupplyRequestWorkflowTests
                 InventoryItemId = oil.Id, InventoryLocationId = location.Id, StockCostLayerId = oilLayer.Id,
                 PackageSequence = 1, NominalCapacityLiters = 10, RemainingLiters = 10,
                 UnitCostPerLiter = 10, MaximumAllowedLossLiters = 0.2m,
-                Status = OilBarrelStatus.Open, OpenedAtUtc = now.AddDays(-1)
+                Status = OilBarrelStatus.Open, OpenedAtUtc = now.AddDays(-1), AllowedVehicleType = VehicleType.Car
             });
         await db.SaveChangesAsync(ct);
         var request = new DirectOilChangeRequest(now, 2000, location.Id, oil.Id, null,
             true, filter.Id, null, 5, "Routine service", Convert.ToBase64String(vehicle.RowVersion));
         var eligibleLocations = await service.GetDirectOilInventoryLocationsAsync(ct);
         Assert.Equal(location.Id, Assert.Single(eligibleLocations.Value!).InventoryLocationId);
-        var eligibleBarrels = await service.GetDirectOilBarrelsAsync(location.Id, oil.Id, ct);
+        var eligibleBarrels = await service.GetDirectOilBarrelsAsync(location.Id, oil.Id, cancellationToken: ct);
         Assert.Equal(10, Assert.Single(eligibleBarrels.Value!).RemainingLiters);
 
         var stale = await service.CompleteDirectOilChangeAsync(vehicle.Id,

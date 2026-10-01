@@ -210,7 +210,7 @@ internal sealed class StockMovementConfiguration : IEntityTypeConfiguration<Stoc
         builder.HasIndex(x => x.MovementNumber).IsUnique();
         builder.HasIndex(x => new { x.SourceLocationId, x.OccurredAtUtc });
         builder.HasIndex(x => new { x.DestinationLocationId, x.OccurredAtUtc });
-        builder.ToTable(table => table.HasCheckConstraint("CK_StockMovements_Type", "[MovementType] BETWEEN 1 AND 9"));
+        builder.ToTable(table => table.HasCheckConstraint("CK_StockMovements_Type", "[MovementType] BETWEEN 1 AND 10"));
     }
 }
 
@@ -332,12 +332,13 @@ internal sealed class OilBarrelConfiguration : IEntityTypeConfiguration<OilBarre
         builder.HasOne<StockCostLayer>().WithMany().HasForeignKey(x => x.StockCostLayerId).OnDelete(DeleteBehavior.Restrict);
         builder.HasIndex(x => x.BarrelNumber).IsUnique();
         builder.HasIndex(x => new { x.InventoryLocationId, x.InventoryItemId, x.Status, x.OpenedAtUtc });
-        builder.HasIndex(x => new { x.InventoryLocationId, x.InventoryItemId }).IsUnique().HasFilter("[Status] = 2 AND [IsDeleted] = 0");
-        builder.HasIndex(x => new { x.PurchaseReceiptLineId, x.PackageSequence }).IsUnique().HasFilter("[IsDeleted] = 0");
+        builder.HasIndex(x => new { x.InventoryLocationId, x.InventoryItemId, x.AllowedVehicleType }).IsUnique().HasFilter("[Status] = 2 AND [IsDeleted] = 0");
+        builder.HasIndex(x => new { x.PurchaseReceiptLineId, x.PackageSequence }).IsUnique().HasFilter("[PurchaseReceiptLineId] IS NOT NULL AND [IsDeleted] = 0");
         builder.ToTable(table =>
         {
             table.HasCheckConstraint("CK_OilBarrels_Quantities", "[NominalCapacityLiters] > 0 AND [RemainingLiters] >= 0 AND [RemainingLiters] <= [NominalCapacityLiters] AND [UnitCostPerLiter] >= 0 AND [MaximumAllowedLossLiters] = ROUND([NominalCapacityLiters] * 0.02, 3) AND [RecordedLossLiters] >= 0 AND [RecordedLossLiters] <= [MaximumAllowedLossLiters]");
             table.HasCheckConstraint("CK_OilBarrels_Status", "([Status] = 1 AND [OpenedAtUtc] IS NULL AND [RemainingLiters] > 0) OR ([Status] = 2 AND [OpenedAtUtc] IS NOT NULL AND [RemainingLiters] > 0) OR ([Status] = 3 AND [OpenedAtUtc] IS NOT NULL AND [RemainingLiters] = 0) OR [Status] = 4");
+            table.HasCheckConstraint("CK_OilBarrels_AllowedVehicleType", "[AllowedVehicleType] IS NULL OR [AllowedVehicleType] IN (1, 2)");
         });
     }
 }

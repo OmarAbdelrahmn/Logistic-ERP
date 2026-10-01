@@ -5,6 +5,17 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace LogisticsERP.Infrastructure.Persistence.Configurations;
 
+internal sealed class PlaceConfiguration : IEntityTypeConfiguration<Place>
+{
+    public void Configure(EntityTypeBuilder<Place> builder)
+    {
+        builder.ToTable("Places", "app");
+        builder.HasKey(place => place.Id);
+        builder.Property(place => place.Name).HasMaxLength(200).IsRequired();
+        builder.HasIndex(place => place.Name).IsUnique();
+    }
+}
+
 internal sealed class PhoneSimCardConfiguration : IEntityTypeConfiguration<PhoneSimCard>
 {
     public void Configure(EntityTypeBuilder<PhoneSimCard> builder)
@@ -24,6 +35,9 @@ internal sealed class PhoneSimCardConfiguration : IEntityTypeConfiguration<Phone
         builder.Property(entity => entity.ReceiptFormStoragePath).HasMaxLength(1000).IsUnicode(false);
         builder.HasOne<Employee>().WithMany()
             .HasForeignKey(entity => entity.ResponsibleEmployeeId)
+            .OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne(entity => entity.Place).WithMany(place => place.PhoneSims)
+            .HasForeignKey(entity => entity.PlaceId)
             .OnDelete(DeleteBehavior.Restrict);
         builder.HasIndex(entity => entity.NormalizedPhoneNumber)
             .IsUnique()

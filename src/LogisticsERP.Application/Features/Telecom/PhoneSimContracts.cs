@@ -11,6 +11,8 @@ public sealed record PhoneSimResponse(
     string PhoneNumber,
     string? Iccid,
     string? CarrierName,
+    Guid? PlaceId,
+    string? PlaceName,
     string Status,
     string? StatusReason,
     Guid ResponsibleEmployeeId,
@@ -43,12 +45,14 @@ public sealed record CreatePhoneSimRequest(
     string? Iccid,
     string? CarrierName,
     Guid ResponsibleEmployeeId,
+    Guid PlaceId,
     string? Notes);
 
 public sealed record UpdatePhoneSimRequest(
     string PhoneNumber,
     string? Iccid,
     string? CarrierName,
+    Guid PlaceId,
     string? Notes,
     string RowVersion);
 

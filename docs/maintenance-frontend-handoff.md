@@ -228,7 +228,7 @@ await api.post("/api/maintenance-inventory/receipts", form);
   "maximumAllowedLossLiters":4.16, "recordedLossLiters":0,
   "remainingLossAllowanceLiters":4.16, "status":2,
   "openedAtUtc":"2026-09-05T07:00:00+00:00", "depletedAtUtc":null,
-  "rowVersion":"base64"
+  "rowVersion":"base64", "allowedVehicleType":2
 }
 ```
 
@@ -237,7 +237,7 @@ await api.post("/api/maintenance-inventory/receipts", form);
 `POST /api/maintenance-inventory/oil-barrels/{barrelId}/open`
 
 ```json
-{ "openedAtUtc":"2026-09-05T10:00:00+03:00", "rowVersion":"base64-from-barrel" }
+{ "openedAtUtc":"2026-09-05T10:00:00+03:00", "rowVersion":"base64-from-barrel", "allowedVehicleType":2 }
 ```
 
 لا تفتح الواجهة زر فتح إلا لبرميل `sealed`، ثم اعرض الرد دائماً:
@@ -253,7 +253,9 @@ await api.post("/api/maintenance-inventory/receipts", form);
 }
 ```
 
-هذه **ليست استجابة HTTP خطأ**: إذا `opened:false`، اترك البرميل الجديد مختوماً واعرض تحذيراً بارزاً بأن المتبقي 8 لتر يجب استهلاكه أولاً. يسمح الخادم ببرميل مفتوح واحد فقط لكل صنف زيت وموقع، وبأقدم طبقة FIFO فقط.
+في نافذة فتح البرميل، يجب اختيار سيارات (`allowedVehicleType: 2`) أو دراجات نارية (`allowedVehicleType: 1`) دون قيمة افتراضية. لا يمكن تغيير النوع بعد فتحه. هذه **ليست استجابة HTTP خطأ**: إذا `opened:false`، اترك البرميل الجديد مختوماً واعرض التحذير. يسمح الخادم ببرميل مفتوح واحد لكل صنف زيت وموقع ونوع مركبة؛ يمكن فتح برميل للسيارات وآخر للدراجات معاً. يطبق FIFO بين البراميل المقفلة المؤهلة للنوع المختار.
+
+لتقرير استهلاك كل مركبة وتصفية الاختيارات ومعالجة البراميل المفتوحة القديمة، راجع [تسليم واجهة براميل الزيت](oil-barrel-vehicle-types-frontend-handoff.md).
 
 ### فاقد/إهلاك البرميل
 

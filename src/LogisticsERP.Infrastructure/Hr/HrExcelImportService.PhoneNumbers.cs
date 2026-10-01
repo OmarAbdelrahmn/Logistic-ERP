@@ -31,7 +31,7 @@ internal sealed partial class HrExcelImportService
             {
                 if (!employees.ContainsKey(row.IqamaNo))
                 {
-                    issues.Add(new(row.RowNumber, row.IqamaNo, "Error", "No employee or rider was found for this Iqama number."));
+                    issues.Add(new(row.RowNumber, row.IqamaNo, "Error", "لم يُعثر على موظف أو سائق برقم الإقامة هذا."));
                 }
             }
 

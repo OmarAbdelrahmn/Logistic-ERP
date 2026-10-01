@@ -119,8 +119,10 @@ internal sealed partial class MaintenanceService : IMaintenanceService
     public async Task<Result<InventoryItemResponse>> UpsertItemAsync(Guid? id, InventoryItemRequest request, CancellationToken cancellationToken = default)
     {
         if (currentUser.UserId is null) return Result.Failure<InventoryItemResponse>(MaintenanceErrors.CurrentUserUnavailable);
-        if (!ValidItemRequest(request)) return Result.Failure<InventoryItemResponse>(MaintenanceErrors.InvalidRequest);
-        var sku = request.Sku.Trim();
+        if (!ValidItemRequest(request, requireSku: id.HasValue)) return Result.Failure<InventoryItemResponse>(MaintenanceErrors.InvalidRequest);
+        var sku = string.IsNullOrWhiteSpace(request.Sku)
+            ? $"INV-{Convert.ToHexString(RandomNumberGenerator.GetBytes(12))}"
+            : request.Sku.Trim();
         var normalized = NormalizeCode(sku);
         if (await dbContext.InventoryItems.AsNoTracking().AnyAsync(x => x.NormalizedSku == normalized && (!id.HasValue || x.Id != id.Value), cancellationToken))
             return Result.Failure<InventoryItemResponse>(MaintenanceErrors.Duplicate);
@@ -497,8 +499,9 @@ internal sealed partial class MaintenanceService : IMaintenanceService
         !string.IsNullOrWhiteSpace(request.Code) && !string.IsNullOrWhiteSpace(request.NameAr) && !string.IsNullOrWhiteSpace(request.NameEn)
         && Enum.IsDefined(request.LocationType) && request.Latitude is >= -90 and <= 90 or null && request.Longitude is >= -180 and <= 180 or null;
 
-    private static bool ValidItemRequest(InventoryItemRequest request) =>
-        !string.IsNullOrWhiteSpace(request.Sku) && !string.IsNullOrWhiteSpace(request.NameAr) && !string.IsNullOrWhiteSpace(request.NameEn)
+    private static bool ValidItemRequest(InventoryItemRequest request, bool requireSku) =>
+        (!requireSku || !string.IsNullOrWhiteSpace(request.Sku))
+        && !string.IsNullOrWhiteSpace(request.NameAr) && !string.IsNullOrWhiteSpace(request.NameEn)
         && Enum.IsDefined(request.ItemType) && Enum.IsDefined(request.BaseUnitOfMeasure) && Enum.IsDefined(request.PurchaseUnitOfMeasure)
         && request.MinimumStockLevel >= 0 && request.ReorderQuantity >= 0 && request.DefaultPackageQuantity is null or > 0
         && (request.ItemType != InventoryItemType.Oil || request.BaseUnitOfMeasure == InventoryUnitOfMeasure.Liter)

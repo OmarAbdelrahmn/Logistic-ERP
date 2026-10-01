@@ -40,7 +40,8 @@ interface VehicleAssignmentsPeriodRow {
   serialNumber: string | null;
   plateNumberAr: string | null;
   totalDaysAssignedInPeriod: number;
-  assignments: VehicleRiderPeriodAssignment[];
+  totalAmountToCollectInPeriodSar: number | null;
+  assignments: RiderVehiclePeriodAssignment[];
 }
 
 interface RiderAssignmentsPeriodReport {
@@ -56,7 +57,15 @@ interface RiderAssignmentsPeriodRow {
   riderName: string | null;
   riderIqamaNo: string | null;
   totalDaysWithVehiclesInPeriod: number;
-  assignments: VehicleRiderPeriodAssignment[];
+  totalVehicleCostInPeriodSar: number | null;
+  assignments: RiderVehiclePeriodAssignment[];
+}
+
+interface RiderVehiclePeriodAssignment extends VehicleRiderPeriodAssignment {
+  vehicleType: number; // 1=Motorcycle, 2=Car, 3=Van, 4=Truck, 5=Other
+  monthlyCostSar: number | null;
+  dailyCostSar: number | null;
+  costInPeriodSar: number | null;
 }
 
 interface VehicleRiderPeriodAssignment {
@@ -116,8 +125,13 @@ The end timestamp is a boundary, not another full day. For example, an assignmen
       "serialNumber": "SN-100",
       "plateNumberAr": "ا ب ج 1234",
       "totalDaysAssignedInPeriod": 15,
+      "totalAmountToCollectInPeriodSar": 900,
       "assignments": [
         {
+          "vehicleType": 2,
+          "monthlyCostSar": 1800,
+          "dailyCostSar": 60,
+          "costInPeriodSar": 600,
           "assignmentId": "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
           "vehicleId": "11111111-1111-4111-8111-111111111111",
           "assetNumber": "CAR-A",
@@ -140,6 +154,10 @@ The end timestamp is a boundary, not another full day. For example, an assignmen
           "totalAssignmentDays": 10
         },
         {
+          "vehicleType": 2,
+          "monthlyCostSar": 1800,
+          "dailyCostSar": 60,
+          "costInPeriodSar": 300,
           "assignmentId": "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
           "vehicleId": "11111111-1111-4111-8111-111111111111",
           "assetNumber": "CAR-A",
@@ -169,6 +187,7 @@ The end timestamp is a boundary, not another full day. For example, an assignmen
       "serialNumber": null,
       "plateNumberAr": null,
       "totalDaysAssignedInPeriod": 0,
+      "totalAmountToCollectInPeriodSar": 0,
       "assignments": []
     }
   ]
@@ -193,8 +212,13 @@ The `vehicles` array is sorted by `assetNumber`, then vehicle ID. Assignments wi
       "riderName": "Actual Rider M",
       "riderIqamaNo": "2020202020",
       "totalDaysWithVehiclesInPeriod": 5,
+      "totalVehicleCostInPeriodSar": 300,
       "assignments": [
         {
+          "vehicleType": 2,
+          "monthlyCostSar": 1800,
+          "dailyCostSar": 60,
+          "costInPeriodSar": 300,
           "assignmentId": "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
           "vehicleId": "11111111-1111-4111-8111-111111111111",
           "assetNumber": "CAR-A",
@@ -224,8 +248,13 @@ The `vehicles` array is sorted by `assetNumber`, then vehicle ID. Assignments wi
       "riderName": "Rider A",
       "riderIqamaNo": "1010101010",
       "totalDaysWithVehiclesInPeriod": 10,
+      "totalVehicleCostInPeriodSar": 600,
       "assignments": [
         {
+          "vehicleType": 2,
+          "monthlyCostSar": 1800,
+          "dailyCostSar": 60,
+          "costInPeriodSar": 600,
           "assignmentId": "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
           "vehicleId": "11111111-1111-4111-8111-111111111111",
           "assetNumber": "CAR-A",
@@ -256,6 +285,29 @@ The `vehicles` array is sorted by `assetNumber`, then vehicle ID. Assignments wi
 The `riders` array includes only actual drivers with overlapping assignments; riders with no vehicle use in the selected period do not appear. If nobody drove in the period, `riders` is `[]`. Rows are sorted by rider name, then `riderKey`. Assignments within a rider row are sorted by their clipped period start. `totalDaysWithVehiclesInPeriod` sums the row's `daysInPeriod` values.
 
 The backend groups by `riderKey`: `iqama:<number>` when the actual driver has an Iqama, `profile:<32-hex-digit-guid>` for an assigned actual rider without an Iqama, and `unidentified:<32-hex-digit-assignment-guid>` when `isRealRider=false` but its separate real-rider record is missing. Separate `RealRider` records with the same Iqama appear in one rider row. Use `riderKey` as a key within this response, not as a permanent person ID or a display label. `riderProfileId` is present if that person also appears as an actual assigned rider in the grouped assignments; otherwise it is `null`. Do not infer the actual driver from `assignedRiderName` when `isRealRider=false`.
+
+## Vehicle amounts to collect and rider costs
+
+Both reports include the same cost fields on each assignment. All amounts are in Saudi riyals (SAR).
+
+| Field | Meaning |
+| --- | --- |
+| `vehicleType` | Current vehicle type: `1` motorcycle, `2` car, `3` van, `4` truck, `5` other. |
+| `monthlyCostSar` | SAR `1800` for a car or `800` for a motorcycle, using a fixed 30-day month. `null` for types with no specified rate. |
+| `dailyCostSar` | `monthlyCostSar / 30`, without intermediate rounding. Motorcycle rates are approximately `26.66666666666667`. `null` for types with no specified rate. |
+| `costInPeriodSar` | Exact elapsed days between the clipped period timestamps multiplied by the daily rate, rounded to two decimal places with midpoints away from zero. `null` for types with no specified rate. |
+| `totalVehicleCostInPeriodSar` | Sum of the displayed assignments' rounded `costInPeriodSar` amounts. `null` if any assignment has no specified rate. |
+| `totalAmountToCollectInPeriodSar` | Vehicle-row total to collect from its riders for the selected period: the sum of its assignments' rounded `costInPeriodSar` amounts. `0` when it has no overlapping assignments, even if its vehicle type has no rate; `null` when it has an assignment with no specified rate. |
+
+The vehicle report returns every vehicle with its assignments and `totalAmountToCollectInPeriodSar`. For a car used by rider A for 10 days and rider M for 5 days, their assignment amounts are SAR `600` and SAR `300`, so collect SAR `900` for that vehicle. Unassigned days add nothing. A vehicle without assignments returns `assignments: []` and `totalAmountToCollectInPeriodSar: 0`.
+
+Vehicle totals add the individually rounded charges rather than multiplying the combined days by a daily rate. Two separate one-day motorcycle assignments each cost SAR `26.67`, making a vehicle total of SAR `53.34`. This keeps vehicle totals consistent with the charges in the rider report for the same period and `asOfUtc`. These fields calculate the amount due from recorded use; they do not subtract payments already received.
+
+For 6 days with a car, followed by 10 days without a vehicle, then 14 days with a motorcycle, the report returns SAR `360` for the car, SAR `373.33` for the motorcycle, and `totalVehicleCostInPeriodSar: 733.33`. The 10 days without a vehicle contribute no assignment and no cost.
+
+Use the API's cost fields for display; do not recalculate costs from the rounded `daysInPeriod` or from a rounded daily rate in the browser. Fractional days are prorated, and open assignments are charged only through `asOfUtc` or the report end, whichever comes first. The divisor is always 30: a complete 31-day car assignment costs SAR `1860`, and a complete 30-day motorcycle assignment costs SAR `800`. Totals follow the same actual-driver grouping as vehicle-use days, including substitute drivers with the same Iqama.
+
+For vans, trucks, other types, or an unrecognized type, display a missing-rate label for the `null` amounts rather than zero. Known assignment costs can still be displayed even when the rider total is `null`. Vehicle totals are also `null` when an overlapping assignment has no rate. Overlapping assignments are each priced and added, just as their days are added. Rates and vehicle type come from the current report rules and vehicle record, rather than historical billing snapshots.
 
 ## Errors and frontend behavior
 

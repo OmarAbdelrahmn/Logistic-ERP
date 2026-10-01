@@ -493,9 +493,10 @@ internal sealed partial class MaintenanceService
         if (!locationMatch) return Result.Failure<UsagePosting>(MaintenanceErrors.InvalidLocation);
         var item = await dbContext.InventoryItems.AsNoTracking().SingleOrDefaultAsync(x => x.Id == itemId && x.Status == CatalogStatus.Active, cancellationToken);
         if (item is null || !UsageMatchesItem(usageType, item)) return Result.Failure<UsagePosting>(MaintenanceErrors.InvalidInventoryItem);
-        if (item.CompatibleVehicleTypesMask != InventoryItemVehicleCompatibility.AllVehicleTypesMask)
+        VehicleType? vehicleType = null;
+        if (item.ItemType == InventoryItemType.Oil || item.CompatibleVehicleTypesMask != InventoryItemVehicleCompatibility.AllVehicleTypesMask)
         {
-            VehicleType? vehicleType = vehicleId.HasValue
+            vehicleType = vehicleId.HasValue
                 ? await dbContext.Vehicles.AsNoTracking().Where(x => x.Id == vehicleId.Value).Select(x => (VehicleType?)x.VehicleType).SingleOrDefaultAsync(cancellationToken)
                 : workOrder is not null
                     ? await dbContext.ExternalVehicleSnapshots.AsNoTracking().Where(x => x.MaintenanceWorkOrderId == workOrder.Id).Select(x => x.VehicleType).SingleOrDefaultAsync(cancellationToken)
@@ -503,7 +504,10 @@ internal sealed partial class MaintenanceService
             if (!InventoryItemVehicleCompatibility.Allows(item.CompatibleVehicleTypesMask, vehicleType))
                 return Result.Failure<UsagePosting>(MaintenanceErrors.IncompatibleVehicleType);
         }
-        var allocationResult = await AllocateTrackedLayersAsync(item.Id, inventoryLocationId, quantity, usedAtUtc, cancellationToken);
+        var allocationResult = item.ItemType == InventoryItemType.Oil
+            ? await AllocateOilBarrelsAsync(usageId, item.Id, inventoryLocationId, quantity,
+                vehicleType, usedAtUtc, actor, nextOilBarrelId, cancellationToken)
+            : await AllocateTrackedLayersAsync(item.Id, inventoryLocationId, quantity, usedAtUtc, cancellationToken);
         if (allocationResult.IsFailure) return Result.Failure<UsagePosting>(allocationResult.Error);
         var allocations = allocationResult.Value!;
         var total = allocations.Sum(x => x.Cost);
@@ -529,11 +533,6 @@ internal sealed partial class MaintenanceService
             : riderProfileId.HasValue ? InventoryAttributionStatus.AssignedRider : InventoryAttributionStatus.Unassigned;
         var usage = new MaintenanceMaterialUsage { Id = usageId, MaintenanceWorkOrderId = workOrder?.Id, InventoryItemId = item.Id, InventoryLocationId = inventoryLocationId, UsageType = usageType, Quantity = quantity, UnitOfMeasure = item.BaseUnitOfMeasure, TotalCost = total, StockMovementId = movementId, StockMovementLineId = movementLineId, VehicleId = vehicleId, RiderVehicleAssignmentId = assignmentId, RiderProfileId = riderProfileId, AttributionStatus = attribution, UsedAtUtc = usedAtUtc, UsedByUserId = actor, Notes = notes };
         dbContext.MaintenanceMaterialUsages.Add(usage);
-        if (item.ItemType == InventoryItemType.Oil)
-        {
-            var barrelAllocation = await AllocateOilBarrelsAsync(usageId, inventoryLocationId, allocations, usedAtUtc, actor, nextOilBarrelId, cancellationToken);
-            if (barrelAllocation.IsFailure) return Result.Failure<UsagePosting>(barrelAllocation.Error);
-        }
         foreach (var allocation in allocations)
             dbContext.StockCostAllocations.Add(new StockCostAllocation { StockMovementLineId = movementLineId, MaintenanceMaterialUsageId = usageId, StockCostLayerId = allocation.Layer.Id, AllocatedQuantity = allocation.Quantity, UnitCost = allocation.Layer.UnitCost, AllocatedCost = allocation.Cost });
         if (workOrder is not null)

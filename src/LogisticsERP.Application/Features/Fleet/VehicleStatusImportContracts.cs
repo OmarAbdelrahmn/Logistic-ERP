@@ -40,7 +40,7 @@ public static class VehicleStatusImportErrors
 {
     public static readonly OperationError InvalidWorkbook = new(
         "fleet.vehicle_status_import.invalid_workbook",
-        "ملف حالات المركبات غير صالح أو لا يحتوي على عمودي serial و status.",
+        "ملف حالات المركبات غير صالح أو لا يحتوي على عمودي الرقم التسلسلي والحالة.",
         ErrorType.Validation,
         "file");
 

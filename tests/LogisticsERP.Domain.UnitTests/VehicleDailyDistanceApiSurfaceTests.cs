@@ -6,6 +6,7 @@ using LogisticsERP.Application.Features.Fleet;
 using LogisticsERP.Domain.Entities.Fleet;
 using LogisticsERP.Domain.Enums;
 using LogisticsERP.Domain.Fleet;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Xunit;
@@ -66,5 +67,33 @@ public sealed class VehicleDailyDistanceApiSurfaceTests
         Assert.Equal((150m, VehicleDailyDistanceSource.Gps), gpsAvailable);
         Assert.Equal(-14m, VehicleDailyDistanceRules.CalculateTotalAdjustment(manualOnly.Item1, gpsAvailable.Item1));
         Assert.Equal(164m, VehicleDailyDistanceRules.CalculateManualDistance(10_000, 10_164));
+    }
+
+    [Fact]
+    public void GpsDateMismatchNamesBothDatesInArabic()
+    {
+        var error = FleetErrors.GpsDateMismatch(new DateOnly(2026, 9, 24), new DateOnly(2026, 9, 23));
+
+        Assert.Equal("fleet.daily_distance.gps_date_mismatch", error.Code);
+        Assert.Contains("2026-09-23", error.Description);
+        Assert.Contains("2026-09-24", error.Description);
+        Assert.Contains("اختر تاريخ الملف", error.Description);
+    }
+
+    [Fact]
+    public async Task MissingGpsFileReturnsArabicProblemDetails()
+    {
+        var controller = new VehicleDailyDistancesController(null!)
+        {
+            ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() }
+        };
+
+        var response = await controller.ImportGps(new GpsDistanceImportForm(), CancellationToken.None);
+
+        var result = Assert.IsType<ObjectResult>(response);
+        var problem = Assert.IsType<ProblemDetails>(result.Value);
+        Assert.Equal(StatusCodes.Status400BadRequest, problem.Status);
+        Assert.Equal("تعذر رفع تقرير GPS", problem.Title);
+        Assert.Equal("اختر ملف تقرير GPS أولًا.", problem.Detail);
     }
 }

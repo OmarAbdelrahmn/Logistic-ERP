@@ -65,7 +65,7 @@ public sealed class PhoneSimsController(IPhoneSimService service) : ControllerBa
     {
         if (form.ReceiptForm is null || form.ReceiptForm.Length == 0)
         {
-            return BadRequest();
+            return ApiProblemDetails.BadRequest(HttpContext, "اختر ملف نموذج استلام الشريحة.");
         }
 
         await using var stream = form.ReceiptForm.OpenReadStream();
@@ -174,9 +174,10 @@ public sealed class CreatePhoneSimForm
     public string? Iccid { get; init; }
     public string? CarrierName { get; init; }
     public Guid ResponsibleEmployeeId { get; init; }
+    public Guid PlaceId { get; init; }
     public string? Notes { get; init; }
     public IFormFile ReceiptForm { get; init; } = null!;
 
     public CreatePhoneSimRequest ToRequest() =>
-        new(PhoneNumber, Iccid, CarrierName, ResponsibleEmployeeId, Notes);
+        new(PhoneNumber, Iccid, CarrierName, ResponsibleEmployeeId, PlaceId, Notes);
 }

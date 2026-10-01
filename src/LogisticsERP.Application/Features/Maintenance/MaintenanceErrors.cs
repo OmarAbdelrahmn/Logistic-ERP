@@ -23,10 +23,13 @@ public static class MaintenanceErrors
     public static readonly OperationError FileMissing = new("maintenance.bill_file_missing", "ملف الفاتورة غير موجود.", ErrorType.NotFound);
     public static readonly OperationError AlreadyReversed = new("maintenance.already_reversed", "تم عكس هذه العملية مسبقًا.", ErrorType.Conflict);
     public static readonly OperationError InvalidOilBarrel = new("maintenance.invalid_oil_barrel", "برميل الزيت غير صالح لهذه العملية.", ErrorType.Validation, "oilBarrelId");
+    public static readonly OperationError InvalidOilBarrelVehicleType = new("maintenance.invalid_oil_barrel_vehicle_type", "حدد السيارات أو الدراجات النارية فقط للبرميل.", ErrorType.Validation, "allowedVehicleType");
+    public static readonly OperationError OilBarrelVehicleTypeMismatch = new("maintenance.oil_barrel_vehicle_type_mismatch", "برميل الزيت غير مخصص لنوع المركبة المختار، أو لم يتم تحديد نوع المركبة للبرميل.", ErrorType.Conflict, "oilBarrelId");
+    public static readonly OperationError OilBarrelVehicleTypeLocked = new("maintenance.oil_barrel_vehicle_type_locked", "لا يمكن تغيير نوع المركبة لبرميل تم فتحه وتخصيصه بالفعل.", ErrorType.Conflict, "allowedVehicleType");
     public static readonly OperationError OilLossAllowanceExceeded = new("maintenance.oil_loss_allowance_exceeded", "الفقد المسجل يتجاوز نسبة 2% المسموحة للبرميل.", ErrorType.Validation, "quantityLiters");
     public static readonly OperationError OilTransferRequiresWholeBarrels = new("maintenance.oil_transfer_requires_whole_barrels", "نقل الزيت يجب أن يشمل براميل كاملة دون تقسيم محتوى البرميل.", ErrorType.Validation, "quantity");
     public static readonly OperationError OilBarrelNotNextFifo = new("maintenance.oil_barrel_not_next_fifo", "البرميل المختار ليس من أقدم طبقة تكلفة متاحة وفق FIFO.", ErrorType.Conflict, "oilBarrelId");
-    public static readonly OperationError OpenOilBarrelRequired = new("maintenance.open_oil_barrel_required", "يجب فتح برميل زيت أولاً، أو اختيار البرميل التالي إذا كانت العملية ستستنفد البرميل المفتوح.", ErrorType.Conflict, "nextOilBarrelId");
+    public static readonly OperationError OpenOilBarrelRequired = new("maintenance.open_oil_barrel_required", "يجب فتح برميل زيت مخصص لنوع المركبة أولاً، أو اختيار برميل تالٍ لنفس النوع إذا كانت العملية ستستنفد البرميل المفتوح.", ErrorType.Conflict, "nextOilBarrelId");
     public static readonly OperationError SupplyRequestRequired = new("maintenance.supply_request_required", "يجب إرسال صنف واحد على الأقل في طلب الصرف.", ErrorType.Validation, "lines");
     public static OperationError SupplyRequestLocationMismatch(Guid inventoryLocationId, Guid maintenanceLocationId) => new(
         "maintenance.supply_request_location_mismatch",

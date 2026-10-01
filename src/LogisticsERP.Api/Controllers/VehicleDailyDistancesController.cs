@@ -3,6 +3,7 @@ using LogisticsERP.Api.ErrorHandling;
 using LogisticsERP.Application.Abstractions.Files;
 using LogisticsERP.Application.Authorization;
 using LogisticsERP.Application.Features.Fleet;
+using LogisticsERP.Application.Common.Results;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LogisticsERP.Api.Controllers;
@@ -22,7 +23,7 @@ public sealed class VehicleDailyDistancesController(IVehicleDailyDistanceService
         CancellationToken cancellationToken = default)
     {
         var result = await service.GetDailyAsync(workDate, search, source, page, pageSize, cancellationToken);
-        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext, "تعذر عرض المسافات اليومية");
     }
 
     [HttpPut("{vehicleId:guid}/{workDate}")]
@@ -34,7 +35,7 @@ public sealed class VehicleDailyDistancesController(IVehicleDailyDistanceService
         CancellationToken cancellationToken)
     {
         var result = await service.UpsertManualAsync(vehicleId, workDate, request, cancellationToken);
-        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext, "تعذر حفظ قراءة العداد");
     }
 
     [HttpPost("gps-import")]
@@ -47,7 +48,7 @@ public sealed class VehicleDailyDistancesController(IVehicleDailyDistanceService
     {
         if (form.File is null || form.File.Length == 0)
         {
-            return BadRequest();
+            return Result.Failure(FleetErrors.GpsFileRequired).ToProblem(HttpContext, "تعذر رفع تقرير GPS");
         }
 
         await using var stream = form.File.OpenReadStream();
@@ -57,7 +58,7 @@ public sealed class VehicleDailyDistancesController(IVehicleDailyDistanceService
             form.File.ContentType,
             form.File.Length);
         var result = await service.ImportGpsAsync(upload, form.ExpectedWorkDate, cancellationToken);
-        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext, "تعذر رفع تقرير GPS");
     }
 
     [HttpGet("gps-imports")]
@@ -67,7 +68,7 @@ public sealed class VehicleDailyDistancesController(IVehicleDailyDistanceService
         CancellationToken cancellationToken)
     {
         var result = await service.GetImportsAsync(workDate, cancellationToken);
-        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext, "تعذر عرض سجل تقارير GPS");
     }
 }
 

@@ -13,8 +13,12 @@ public sealed class VehicleRegistrationTransitionApiTests
     {
         var controller = new VehiclesController(null!)
         {
-            ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() }
+            ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext()
+            }
         };
+        controller.HttpContext.Request.Path = "/api/vehicles/registration-transition";
         var form = new VehicleRegistrationTransitionForm
         {
             PlateNumberAr = "س ب 5149",
@@ -28,7 +32,8 @@ public sealed class VehicleRegistrationTransitionApiTests
 
         var problem = Assert.IsType<ProblemDetails>(Assert.IsType<ObjectResult>(response).Value);
         Assert.Equal(StatusCodes.Status400BadRequest, problem.Status);
-        Assert.Equal(FleetErrors.TransitionIstimaraInvalid.Code, problem.Title);
+        Assert.Equal("طلب غير صالح", problem.Title);
+        Assert.Equal(FleetErrors.TransitionIstimaraInvalid.Code, problem.Extensions["errorCode"]);
         Assert.Equal("istimara", problem.Extensions["field"]);
         Assert.Equal(FleetErrors.TransitionIstimaraInvalid.Description, problem.Detail);
     }

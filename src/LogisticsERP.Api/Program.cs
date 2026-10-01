@@ -14,6 +14,7 @@ using LogisticsERP.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -64,10 +65,40 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, HttpCurrentUser>();
 builder.Services.AddControllers();
+builder.Services.PostConfigure<ApiBehaviorOptions>(options =>
+{
+    options.InvalidModelStateResponseFactory = context =>
+    {
+        var field = context.ModelState.Keys.FirstOrDefault(key =>
+            context.ModelState[key]?.Errors.Count > 0);
+        var isGpsImport = context.HttpContext.Request.Path.Value?.Equals(
+            "/api/vehicle-daily-distances/gps-import", StringComparison.OrdinalIgnoreCase) == true;
+        var detail = isGpsImport && field?.EndsWith("ExpectedWorkDate", StringComparison.OrdinalIgnoreCase) == true
+            ? "تاريخ التقرير غير صالح. أدخله بصيغة yyyy-MM-dd."
+            : field?.EndsWith("File", StringComparison.OrdinalIgnoreCase) == true
+                ? "اختر ملفًا صالحًا."
+                : "تحقق من البيانات المدخلة وحاول مرة أخرى.";
+        var problem = ApiProblemDetails.Create(context.HttpContext, StatusCodes.Status400BadRequest, detail);
+        if (field is not null)
+        {
+            problem.Extensions["field"] = field;
+        }
+
+        return new BadRequestObjectResult(problem);
+    };
+});
 builder.Services.AddProblemDetails(options => options.CustomizeProblemDetails = context =>
 {
     context.ProblemDetails.Instance ??= context.HttpContext.Request.Path;
     context.ProblemDetails.Extensions["correlationId"] = context.HttpContext.TraceIdentifier;
+    if (context.HttpContext.Request.Path.StartsWithSegments("/api"))
+    {
+        var status = context.ProblemDetails.Status ?? context.HttpContext.Response.StatusCode;
+        var localized = ApiProblemDetails.Create(context.HttpContext, status);
+        context.ProblemDetails.Title = localized.Title;
+        context.ProblemDetails.Detail = localized.Detail;
+        context.ProblemDetails.Extensions.TryAdd("errorCode", localized.Extensions["errorCode"]);
+    }
 });
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddHealthChecks();
@@ -186,6 +217,17 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
 });
 app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseExceptionHandler();
+app.UseStatusCodePages(async context =>
+{
+    var httpContext = context.HttpContext;
+    if (!httpContext.Request.Path.StartsWithSegments("/api"))
+    {
+        return;
+    }
+
+    var problem = ApiProblemDetails.Create(httpContext, httpContext.Response.StatusCode);
+    await httpContext.Response.WriteAsJsonAsync(problem);
+});
 app.UseMiddleware<SecurityHeadersMiddleware>();
 app.UseResponseCompression();
 

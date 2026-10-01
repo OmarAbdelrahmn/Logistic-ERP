@@ -5,7 +5,7 @@ namespace LogisticsERP.Api.ErrorHandling;
 
 internal static class ResultExtensions
 {
-    public static IActionResult ToProblem(this Result result, HttpContext httpContext)
+    public static IActionResult ToProblem(this Result result, HttpContext httpContext, string? title = null)
     {
         var statusCode = result.Error.Type switch
         {
@@ -17,19 +17,11 @@ internal static class ResultExtensions
             _ => StatusCodes.Status500InternalServerError
         };
 
-        var problem = new ProblemDetails
+        var problem = ApiProblemDetails.Create(httpContext, statusCode, result.Error.Description, result.Error.Code);
+        if (title is not null)
         {
-            Status = statusCode,
-            Title = result.Error.Code,
-            Detail = result.Error.Description,
-            Type = $"https://httpstatuses.io/{statusCode}",
-            Instance = httpContext.Request.Path,
-            Extensions =
-            {
-                ["errorCode"] = result.Error.Code,
-                ["correlationId"] = httpContext.TraceIdentifier
-            }
-        };
+            problem.Title = title;
+        }
         if (result.Error.Field is not null)
         {
             problem.Extensions["field"] = result.Error.Field;

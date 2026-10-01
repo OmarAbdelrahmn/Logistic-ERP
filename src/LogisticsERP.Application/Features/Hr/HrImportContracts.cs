@@ -109,27 +109,27 @@ public static class HrImportErrors
 {
     public static readonly OperationError InvalidWorkbook = new(
         "hr_import.invalid_workbook",
-        "The uploaded workbook is invalid or does not contain the required HR headers.",
+        "ملف الموظفين غير صالح أو لا يحتوي على الأعمدة المطلوبة.",
         ErrorType.Validation);
 
     public static readonly OperationError ImportFailed = new(
         "hr_import.failed",
-        "The HR workbook could not be imported. No partial database changes were committed.",
+        "تعذر استيراد ملف الموظفين. لم تُحفظ أي تغييرات جزئية.",
         ErrorType.Conflict);
 
     public static readonly OperationError InvalidPhoneNumberWorkbook = new(
         "hr_phone_import.invalid_workbook",
-        "The uploaded workbook is invalid or does not contain Iqama and phone-number rows in its first two columns.",
+        "ملف أرقام الجوال غير صالح. يجب أن يحتوي العمودان الأول والثاني على رقم الإقامة ورقم الجوال.",
         ErrorType.Validation);
 
     public static readonly OperationError PhoneNumberUpdateFailed = new(
         "hr_phone_import.failed",
-        "The employee and rider phone numbers could not be updated. No partial database changes were committed.",
+        "تعذر تحديث أرقام جوال الموظفين والسائقين. لم تُحفظ أي تغييرات جزئية.",
         ErrorType.Conflict);
 
     public static readonly OperationError InvalidEmployeeStatusWorkbook = new(
         "hr_status_import.invalid_workbook",
-        "The uploaded workbook is invalid or does not contain Iqama and numeric employee-status rows in its first two columns.",
+        "ملف حالات الموظفين غير صالح. يجب أن يحتوي العمودان الأول والثاني على رقم الإقامة ورمز الحالة الرقمي.",
         ErrorType.Validation);
 
     public static readonly OperationError InvalidExternalRiderWorkbook = new(
@@ -146,6 +146,6 @@ public static class HrImportErrors
 
     public static readonly OperationError EmployeeStatusUpdateFailed = new(
         "hr_status_import.failed",
-        "The employee and rider statuses could not be updated. No partial database changes were committed.",
+        "تعذر تحديث حالات الموظفين والسائقين. لم تُحفظ أي تغييرات جزئية.",
         ErrorType.Conflict);
 }

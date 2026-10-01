@@ -112,11 +112,28 @@ internal sealed class UserManagementService(
             return Result.Failure<CreatedManagedUserResponse>(DescribeInvalidPermissionAssignments(permissionAssignments));
         }
 
-        if (await IsUserNameInUseAsync(request.UserName, null, cancellationToken)
-            || await IsEmailInUseAsync(request.Email, null, cancellationToken)
-            || !await IsEmployeeAvailableAsync(request.EmployeeId, null, cancellationToken))
+        if (await IsUserNameInUseAsync(request.UserName, null, cancellationToken))
         {
-            return Result.Failure<CreatedManagedUserResponse>(UserManagementErrors.Duplicate);
+            return Result.Failure<CreatedManagedUserResponse>(DuplicateUserField("userName", "اسم المستخدم مرتبط بحساب قائم أو مؤرشف."));
+        }
+        if (await IsEmailInUseAsync(request.Email, null, cancellationToken))
+        {
+            return Result.Failure<CreatedManagedUserResponse>(DuplicateUserField("email", "البريد الإلكتروني مرتبط بحساب قائم أو مؤرشف."));
+        }
+        if (request.EmployeeId is { } employeeId)
+        {
+            if (!await applicationDbContext.Employees.AnyAsync(employee => employee.Id == employeeId, cancellationToken))
+            {
+                return Result.Failure<CreatedManagedUserResponse>(UserManagementErrors.NotFound with
+                {
+                    Description = "الموظف المحدد غير موجود.",
+                    Field = "employeeId"
+                });
+            }
+            if (await identityDbContext.Users.IgnoreQueryFilters().AnyAsync(user => user.EmployeeId == employeeId, cancellationToken))
+            {
+                return Result.Failure<CreatedManagedUserResponse>(DuplicateUserField("employeeId", "الموظف مرتبط بحساب قائم أو مؤرشف."));
+            }
         }
 
         var roleIds = roleAssignments.Select(assignment => assignment.RoleId).ToArray();
@@ -868,11 +885,6 @@ internal sealed class UserManagementService(
         {
             return Result.Failure<ManagedUserAuthorizationResponse>(UserManagementErrors.ProtectedAccount);
         }
-        if (user.Id == actorId)
-        {
-            return Result.Failure<ManagedUserAuthorizationResponse>(UserManagementErrors.SelfSecurityChange);
-        }
-
         var assignments = request.Assignments ?? [];
         if (!ValidatePermissionAssignments(assignments))
         {
@@ -905,7 +917,7 @@ internal sealed class UserManagementService(
                 StartsAtUtc = input.StartsAtUtc ?? now,
                 ExpiresAtUtc = input.ExpiresAtUtc,
                 GrantedByUserId = actorId,
-                GrantReason = TrimOrNull(input.Reason) ?? "Direct permission assigned by an administrator.",
+                GrantReason = TrimOrNull(input.Reason) ?? "Direct permission assigned by a permissions manager.",
                 IsAllHousingScope = input.IsAllHousingScope,
                 IsAllClientScope = input.IsAllClientScope,
                 IncludesFuturePlatformContracts = input.IncludesFuturePlatformContracts
@@ -914,7 +926,7 @@ internal sealed class UserManagementService(
             AddScopes(null, entity.Id, parsedScopes[index]);
         }
 
-        await SaveAuthorizationChangesAsync(user, actorId, "User direct permissions changed by an administrator.", cancellationToken);
+        await SaveAuthorizationChangesAsync(user, actorId, "User direct permissions changed by a permissions manager.", cancellationToken);
         return Result.Success(await BuildAuthorizationResponseAsync(userId, cancellationToken));
     }
 
@@ -1183,13 +1195,20 @@ internal sealed class UserManagementService(
             };
         }
 
-        if (errors.Any(error => error.Code is "DuplicateUserName" or "DuplicateEmail"))
+        if (errors.Any(error => error.Code == "DuplicateUserName"))
         {
-            return UserManagementErrors.Duplicate with { Details = details };
+            return DuplicateUserField("userName", "اسم المستخدم مرتبط بحساب آخر.") with { Details = details };
+        }
+        if (errors.Any(error => error.Code == "DuplicateEmail"))
+        {
+            return DuplicateUserField("email", "البريد الإلكتروني مرتبط بحساب آخر.") with { Details = details };
         }
 
         return UserManagementErrors.InvalidRequest with { Details = details };
     }
+
+    private static OperationError DuplicateUserField(string field, string description) =>
+        UserManagementErrors.Duplicate with { Description = description, Field = field };
 
     private static bool MatchesRowVersion(byte[] rowVersion, string? supplied) =>
         !string.IsNullOrWhiteSpace(supplied) && Convert.TryFromBase64String(supplied, new Span<byte>(new byte[rowVersion.Length]), out _)

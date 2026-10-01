@@ -62,6 +62,71 @@ public sealed class RoomsController(IHousingService service) : ControllerBase
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 
+    [HttpPost("{id:guid}/occupants/iqama")]
+    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    public async Task<IActionResult> AssignByIqama(Guid id, [FromBody] AssignRoomByIqamaRequest request, CancellationToken cancellationToken)
+    {
+        var result = await service.AssignByIqamaToRoomAsync(id, request, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpPost("{id:guid}/equipment")]
+    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    public async Task<IActionResult> CreateEquipment(Guid id, [FromBody] HousingEquipmentUpsertRequest request, CancellationToken cancellationToken)
+    {
+        var result = await service.UpsertEquipmentAsync(null, id, null, request, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpPut("{id:guid}/equipment/{equipmentId:guid}")]
+    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    public async Task<IActionResult> UpdateEquipment(Guid id, Guid equipmentId, [FromBody] HousingEquipmentUpsertRequest request, CancellationToken cancellationToken)
+    {
+        var result = await service.UpsertEquipmentAsync(null, id, equipmentId, request, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpPost("{id:guid}/occupants/external")]
+    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    public async Task<IActionResult> CreateExternalOccupant(Guid id, [FromBody] HousingExternalOccupantUpsertRequest request, CancellationToken cancellationToken)
+    {
+        var result = await service.UpsertExternalOccupantAsync(null, id, request, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpPut("occupants/external/{occupantId:guid}")]
+    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    public async Task<IActionResult> UpdateExternalOccupant(Guid occupantId, [FromBody] HousingExternalOccupantUpsertRequest request, CancellationToken cancellationToken)
+    {
+        if (request.RoomId is not { } roomId) return BadRequest("roomId is required.");
+        var result = await service.UpsertExternalOccupantAsync(occupantId, roomId, request, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpDelete("occupants/external/{occupantId:guid}")]
+    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    public async Task<IActionResult> DeleteExternalOccupant(Guid occupantId, CancellationToken cancellationToken)
+    {
+        var result = await service.DeleteExternalOccupantAsync(occupantId, cancellationToken);
+        return result.IsSuccess ? NoContent() : result.ToProblem(HttpContext);
+    }
+
+    [HttpPost("occupants/pending/{pendingId:guid}/resolve")]
+    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    public async Task<IActionResult> ResolvePendingOccupant(Guid pendingId, [FromBody] ResolvePendingOccupantRequest request, CancellationToken cancellationToken)
+    {
+        var result = await service.ResolvePendingOccupantAsync(pendingId, request.EffectiveFrom, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpDelete("occupants/pending/{pendingId:guid}")]
+    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    public async Task<IActionResult> DeletePendingOccupant(Guid pendingId, CancellationToken cancellationToken)
+    {
+        var result = await service.DeletePendingOccupantAsync(pendingId, cancellationToken);
+        return result.IsSuccess ? NoContent() : result.ToProblem(HttpContext);
+    }
+
     [HttpPost("occupants/{occupancyPeriodId:guid}/move")]
     [RequirePermission(PermissionKeys.Operations.HousingManage)]
     public async Task<IActionResult> MoveOccupant(

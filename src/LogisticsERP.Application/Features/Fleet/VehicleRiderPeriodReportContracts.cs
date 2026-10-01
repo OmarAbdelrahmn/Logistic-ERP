@@ -1,4 +1,5 @@
 using LogisticsERP.Application.Common.Results;
+using LogisticsERP.Domain.Enums;
 
 namespace LogisticsERP.Application.Features.Fleet;
 
@@ -18,7 +19,8 @@ public sealed record VehicleAssignmentsPeriodReport(
 public sealed record VehicleAssignmentsPeriodRow(
     Guid VehicleId, string AssetNumber, string? SerialNumber, string? PlateNumberAr,
     decimal TotalDaysAssignedInPeriod,
-    IReadOnlyList<VehicleRiderPeriodAssignment> Assignments);
+    decimal? TotalAmountToCollectInPeriodSar,
+    IReadOnlyList<RiderVehiclePeriodAssignment> Assignments);
 
 public sealed record RiderAssignmentsPeriodReport(
     DateOnly FromDate, DateOnly ToDate, DateTimeOffset AsOfUtc,
@@ -27,9 +29,10 @@ public sealed record RiderAssignmentsPeriodReport(
 public sealed record RiderAssignmentsPeriodRow(
     string RiderKey, Guid? RiderProfileId, string? RiderName, string? RiderIqamaNo,
     decimal TotalDaysWithVehiclesInPeriod,
-    IReadOnlyList<VehicleRiderPeriodAssignment> Assignments);
+    decimal? TotalVehicleCostInPeriodSar,
+    IReadOnlyList<RiderVehiclePeriodAssignment> Assignments);
 
-public sealed record VehicleRiderPeriodAssignment(
+public record VehicleRiderPeriodAssignment(
     Guid AssignmentId,
     Guid VehicleId,
     string AssetNumber,
@@ -50,6 +53,25 @@ public sealed record VehicleRiderPeriodAssignment(
     DateTimeOffset PeriodEndedAtUtc,
     decimal DaysInPeriod,
     decimal TotalAssignmentDays);
+
+public sealed record RiderVehiclePeriodAssignment : VehicleRiderPeriodAssignment
+{
+    public RiderVehiclePeriodAssignment(
+        VehicleRiderPeriodAssignment assignment, VehicleType vehicleType,
+        decimal? monthlyCostSar, decimal? dailyCostSar, decimal? costInPeriodSar)
+        : base(assignment)
+    {
+        VehicleType = vehicleType;
+        MonthlyCostSar = monthlyCostSar;
+        DailyCostSar = dailyCostSar;
+        CostInPeriodSar = costInPeriodSar;
+    }
+
+    public VehicleType VehicleType { get; init; }
+    public decimal? MonthlyCostSar { get; init; }
+    public decimal? DailyCostSar { get; init; }
+    public decimal? CostInPeriodSar { get; init; }
+}
 
 public static class VehicleRiderPeriodReportErrors
 {

@@ -15,6 +15,6 @@ public interface IPrivateFileStorage
 
 public static class PrivateFileErrors
 {
-    public static readonly OperationError InvalidFile = new("files.invalid_file", "The file is empty, too large, unsupported, or does not match its declared type.", ErrorType.Validation);
-    public static readonly OperationError FileMissing = new("files.file_missing", "The stored file could not be found.", ErrorType.NotFound);
+    public static readonly OperationError InvalidFile = new("files.invalid_file", "الملف فارغ أو كبير جدًا أو غير مدعوم أو لا يتطابق مع نوعه المعلن.", ErrorType.Validation);
+    public static readonly OperationError FileMissing = new("files.file_missing", "الملف المحفوظ غير موجود.", ErrorType.NotFound);
 }

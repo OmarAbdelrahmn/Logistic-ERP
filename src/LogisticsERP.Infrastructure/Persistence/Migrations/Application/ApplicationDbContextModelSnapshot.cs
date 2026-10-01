@@ -4307,6 +4307,9 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("rowversion");
 
+                    b.Property<Guid>("SponsorId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTimeOffset?>("UpdatedAtUtc")
                         .HasColumnType("datetimeoffset");
 
@@ -4316,6 +4319,8 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.HasKey("Id");
 
                     b.HasIndex("IsDeleted");
+
+                    b.HasIndex("SponsorId");
 
                     b.HasIndex("Provider", "IdentifierType");
 
@@ -4697,6 +4702,249 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         });
                 });
 
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Housing.HousingEquipment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid?>("FloorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("RoomId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("FloorId", "Name")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0 AND [FloorId] IS NOT NULL");
+
+                    b.HasIndex("RoomId", "Name")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0 AND [RoomId] IS NOT NULL");
+
+                    b.ToTable("HousingEquipment", "app", t =>
+                        {
+                            t.HasCheckConstraint("CK_HousingEquipment_Quantity", "[Quantity] >= 0");
+
+                            t.HasCheckConstraint("CK_HousingEquipment_Scope", "([FloorId] IS NULL AND [RoomId] IS NOT NULL) OR ([FloorId] IS NOT NULL AND [RoomId] IS NULL)");
+                        });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Housing.HousingExternalOccupant", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<Guid>("RoomId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("RoomId");
+
+                    b.ToTable("HousingExternalOccupants", "app");
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Housing.HousingFloor", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid>("HousingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("HousingId", "Name")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.ToTable("HousingFloors", "app");
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Housing.HousingPendingOccupant", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("IqamaNo")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<Guid>("RoomId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int>("SourceRow")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IqamaNo")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("RoomId");
+
+                    b.ToTable("HousingPendingOccupants", "app");
+                });
+
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Housing.HousingResidencePeriod", b =>
                 {
                     b.Property<Guid>("Id")
@@ -4803,6 +5051,9 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<Guid>("FloorId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("HousingId")
                         .HasColumnType("uniqueidentifier");
 
@@ -4813,6 +5064,10 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
@@ -4830,11 +5085,11 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.HasIndex("IsDeleted");
 
-                    b.HasIndex("HousingId", "IsDeleted");
-
-                    b.HasIndex("HousingId", "Name")
+                    b.HasIndex("FloorId", "Name")
                         .IsUnique()
                         .HasFilter("[IsDeleted] = 0");
+
+                    b.HasIndex("HousingId", "IsDeleted");
 
                     b.ToTable("HousingRooms", "app", t =>
                         {
@@ -6487,6 +6742,9 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int?>("AllowedVehicleType")
+                        .HasColumnType("int");
+
                     b.Property<string>("BarrelNumber")
                         .IsRequired()
                         .HasMaxLength(64)
@@ -6538,7 +6796,7 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<int>("PackageSequence")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("PurchaseReceiptLineId")
+                    b.Property<Guid?>("PurchaseReceiptLineId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("RecordedLossLiters")
@@ -6582,18 +6840,20 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.HasIndex("StockCostLayerId");
 
-                    b.HasIndex("InventoryLocationId", "InventoryItemId")
-                        .IsUnique()
-                        .HasFilter("[Status] = 2 AND [IsDeleted] = 0");
-
                     b.HasIndex("PurchaseReceiptLineId", "PackageSequence")
                         .IsUnique()
-                        .HasFilter("[IsDeleted] = 0");
+                        .HasFilter("[PurchaseReceiptLineId] IS NOT NULL AND [IsDeleted] = 0");
+
+                    b.HasIndex("InventoryLocationId", "InventoryItemId", "AllowedVehicleType")
+                        .IsUnique()
+                        .HasFilter("[Status] = 2 AND [IsDeleted] = 0");
 
                     b.HasIndex("InventoryLocationId", "InventoryItemId", "Status", "OpenedAtUtc");
 
                     b.ToTable("OilBarrels", "maintenance", t =>
                         {
+                            t.HasCheckConstraint("CK_OilBarrels_AllowedVehicleType", "[AllowedVehicleType] IS NULL OR [AllowedVehicleType] IN (1, 2)");
+
                             t.HasCheckConstraint("CK_OilBarrels_Quantities", "[NominalCapacityLiters] > 0 AND [RemainingLiters] >= 0 AND [RemainingLiters] <= [NominalCapacityLiters] AND [UnitCostPerLiter] >= 0 AND [MaximumAllowedLossLiters] = ROUND([NominalCapacityLiters] * 0.02, 3) AND [RecordedLossLiters] >= 0 AND [RecordedLossLiters] <= [MaximumAllowedLossLiters]");
 
                             t.HasCheckConstraint("CK_OilBarrels_Status", "([Status] = 1 AND [OpenedAtUtc] IS NULL AND [RemainingLiters] > 0) OR ([Status] = 2 AND [OpenedAtUtc] IS NOT NULL AND [RemainingLiters] > 0) OR ([Status] = 3 AND [OpenedAtUtc] IS NOT NULL AND [RemainingLiters] = 0) OR [Status] = 4");
@@ -7498,7 +7758,7 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.ToTable("StockMovements", "maintenance", t =>
                         {
-                            t.HasCheckConstraint("CK_StockMovements_Type", "[MovementType] BETWEEN 1 AND 9");
+                            t.HasCheckConstraint("CK_StockMovements_Type", "[MovementType] BETWEEN 1 AND 10");
                         });
                 });
 
@@ -8910,6 +9170,46 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                             Key = "riders.manage",
                             NameAr = "إدارة المناديب",
                             NameEn = "Manage riders",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000120"),
+                            Category = "Workforce",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "عرض ملفات المناديب الخارجيين.",
+                            DescriptionEn = "View external rider profiles.",
+                            DisplayOrder = 120,
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = false,
+                            Key = "external_riders.read",
+                            NameAr = "عرض المناديب الخارجيين",
+                            NameEn = "Read external riders",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000121"),
+                            Category = "Workforce",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "إنشاء وتعديل ملفات المناديب الخارجيين.",
+                            DescriptionEn = "Create and update external rider profiles.",
+                            DisplayOrder = 121,
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = false,
+                            Key = "external_riders.manage",
+                            NameAr = "إدارة المناديب الخارجيين",
+                            NameEn = "Manage external riders",
                             RequiresClientScope = false,
                             RequiresHousingScope = false,
                             RowVersion = new byte[0],
@@ -11841,6 +12141,9 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .HasMaxLength(32)
                         .HasColumnType("nvarchar(32)");
 
+                    b.Property<Guid?>("PlaceId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("ReceiptFormContentType")
                         .HasMaxLength(100)
                         .IsUnicode(false)
@@ -11902,6 +12205,8 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .IsUnique()
                         .HasFilter("[IsDeleted] = 0");
 
+                    b.HasIndex("PlaceId");
+
                     b.HasIndex("ResponsibleEmployeeId");
 
                     b.HasIndex("Status", "ResponsibleEmployeeId");
@@ -11955,6 +12260,25 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         {
                             t.HasCheckConstraint("CK_PhoneSimResponsibilityChanges_ChangedResponsibleEmployee", "[PreviousResponsibleEmployeeId] IS NULL OR [PreviousResponsibleEmployeeId] <> [ResponsibleEmployeeId]");
                         });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Telecom.Place", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Places", "app");
                 });
 
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Telecom.RiderPhoneSimAssignment", b =>
@@ -16179,6 +16503,15 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Fuel.FuelCard", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.Sponsor", null)
+                        .WithMany()
+                        .HasForeignKey("SponsorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Fuel.FuelCardMonthlyUsage", b =>
                 {
                     b.HasOne("LogisticsERP.Domain.Entities.Workforce.Employee", null)
@@ -16282,6 +16615,46 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Housing.HousingEquipment", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Housing.HousingFloor", null)
+                        .WithMany()
+                        .HasForeignKey("FloorId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Housing.HousingRoom", null)
+                        .WithMany()
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Housing.HousingExternalOccupant", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Housing.HousingRoom", null)
+                        .WithMany()
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Housing.HousingFloor", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Housing.Housing", null)
+                        .WithMany()
+                        .HasForeignKey("HousingId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Housing.HousingPendingOccupant", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Housing.HousingRoom", null)
+                        .WithMany()
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Housing.HousingResidencePeriod", b =>
                 {
                     b.HasOne("LogisticsERP.Domain.Entities.Workforce.Employee", null)
@@ -16299,6 +16672,12 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Housing.HousingRoom", b =>
                 {
+                    b.HasOne("LogisticsERP.Domain.Entities.Housing.HousingFloor", null)
+                        .WithMany()
+                        .HasForeignKey("FloorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("LogisticsERP.Domain.Entities.Housing.Housing", null)
                         .WithMany()
                         .HasForeignKey("HousingId")
@@ -16603,8 +16982,7 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.HasOne("LogisticsERP.Domain.Entities.Maintenance.PurchaseReceiptLine", null)
                         .WithMany()
                         .HasForeignKey("PurchaseReceiptLineId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("LogisticsERP.Domain.Entities.Maintenance.StockCostLayer", null)
                         .WithMany()
@@ -17154,11 +17532,18 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Telecom.PhoneSimCard", b =>
                 {
+                    b.HasOne("LogisticsERP.Domain.Entities.Telecom.Place", "Place")
+                        .WithMany("PhoneSims")
+                        .HasForeignKey("PlaceId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("LogisticsERP.Domain.Entities.Workforce.Employee", null)
                         .WithMany()
                         .HasForeignKey("ResponsibleEmployeeId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("Place");
                 });
 
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Telecom.PhoneSimResponsibilityChange", b =>
@@ -17695,6 +18080,11 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.Navigation("Address")
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Telecom.Place", b =>
+                {
+                    b.Navigation("PhoneSims");
                 });
 #pragma warning restore 612, 618
         }

@@ -18,6 +18,21 @@ public sealed class HousingController(IHousingService service) : ControllerBase
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 
+    [HttpGet("stay-report")]
+    [RequirePermission(PermissionKeys.Operations.HousingRead)]
+    public async Task<IActionResult> GetStayReport(
+        [FromQuery] DateOnly? fromDate,
+        [FromQuery] DateOnly? toDate,
+        [FromQuery] Guid? housingId,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 100,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await service.GetStayReportAsync(
+            new HousingStayReportRequest(fromDate, toDate, housingId, page, pageSize), cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
     [HttpGet("{id:guid}")]
     [RequirePermission(PermissionKeys.Operations.HousingRead)]
     public async Task<IActionResult> Get(Guid id, CancellationToken cancellationToken)
@@ -61,6 +76,62 @@ public sealed class HousingController(IHousingService service) : ControllerBase
         return result.IsSuccess
             ? Created($"/api/rooms/{result.Value!.Id}", result.Value)
             : result.ToProblem(HttpContext);
+    }
+
+    [HttpGet("{id:guid}/floors")]
+    [RequirePermission(PermissionKeys.Operations.HousingRead)]
+    public async Task<IActionResult> GetFloors(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await service.GetFloorsAsync(id, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpPost("{id:guid}/floors")]
+    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    public async Task<IActionResult> CreateFloor(Guid id, [FromBody] HousingFloorUpsertRequest request, CancellationToken cancellationToken)
+    {
+        var result = await service.UpsertFloorAsync(id, null, request, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpPut("{id:guid}/floors/{floorId:guid}")]
+    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    public async Task<IActionResult> UpdateFloor(Guid id, Guid floorId, [FromBody] HousingFloorUpsertRequest request, CancellationToken cancellationToken)
+    {
+        var result = await service.UpsertFloorAsync(id, floorId, request, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpDelete("floors/{floorId:guid}")]
+    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    public async Task<IActionResult> DeleteFloor(Guid floorId, [FromBody] ArchiveRequest request, CancellationToken cancellationToken)
+    {
+        var result = await service.DeleteFloorAsync(floorId, request, cancellationToken);
+        return result.IsSuccess ? NoContent() : result.ToProblem(HttpContext);
+    }
+
+    [HttpPost("floors/{floorId:guid}/equipment")]
+    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    public async Task<IActionResult> CreateFloorEquipment(Guid floorId, [FromBody] HousingEquipmentUpsertRequest request, CancellationToken cancellationToken)
+    {
+        var result = await service.UpsertEquipmentAsync(floorId, null, null, request, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpPut("floors/{floorId:guid}/equipment/{equipmentId:guid}")]
+    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    public async Task<IActionResult> UpdateFloorEquipment(Guid floorId, Guid equipmentId, [FromBody] HousingEquipmentUpsertRequest request, CancellationToken cancellationToken)
+    {
+        var result = await service.UpsertEquipmentAsync(floorId, null, equipmentId, request, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpDelete("equipment/{equipmentId:guid}")]
+    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    public async Task<IActionResult> DeleteEquipment(Guid equipmentId, CancellationToken cancellationToken)
+    {
+        var result = await service.DeleteEquipmentAsync(equipmentId, cancellationToken);
+        return result.IsSuccess ? NoContent() : result.ToProblem(HttpContext);
     }
 
     [HttpGet("{id:guid}/residents")]

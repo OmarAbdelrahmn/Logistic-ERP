@@ -1,3 +1,4 @@
+using System.Globalization;
 using LogisticsERP.Application.Common.Results;
 
 namespace LogisticsERP.Application.Features.Fleet;
@@ -17,6 +18,7 @@ public static class FleetErrors
     public static readonly OperationError Forbidden = new("fleet.forbidden", "لا يمكن للمستخدم الحالي الوصول إلى سجل الأسطول هذا.", ErrorType.Forbidden);
     public static readonly OperationError CurrentUserUnavailable = new("fleet.current_user_unavailable", "تعذر تحديد هوية المستخدم المصادق عليه.", ErrorType.Unauthorized);
     public static readonly OperationError InvalidFile = new("fleet.invalid_file", "الملف فارغ أو كبير جدًا أو غير مدعوم أو لا يتطابق مع نوعه المعلن.", ErrorType.Validation);
+    public static readonly OperationError FileRequired = new("fleet.file_required", "اختر ملفًا أولًا.", ErrorType.Validation, "file");
     public static readonly OperationError TransitionPlateNumberArInvalid = new("fleet.registration_transition.plate_number_ar_invalid", "أدخل رقم اللوحة العربية الجديدة بما لا يزيد عن 32 حرفًا.", ErrorType.Validation, "plateNumberAr");
     public static readonly OperationError TransitionPlateNumberEnInvalid = new("fleet.registration_transition.plate_number_en_invalid", "أدخل رقم اللوحة الإنجليزية الجديدة بما لا يزيد عن 32 حرفًا.", ErrorType.Validation, "plateNumberEn");
     public static readonly OperationError TransitionPlateLettersArInvalid = new("fleet.registration_transition.plate_letters_ar_invalid", "حروف اللوحة العربية الجديدة يجب ألا تتجاوز 8 أحرف.", ErrorType.Validation, "plateLettersAr");
@@ -41,9 +43,26 @@ public static class FleetErrors
     public static readonly OperationError KeetaPlatformUnavailable = new("fleet.keeta_platform_unavailable", "تعذر تنفيذ العملية المطلوبة.", ErrorType.Conflict);
     public static readonly OperationError LeaseVehicleSponsorMismatch = new("fleet.lease_vehicle_sponsor_mismatch", "تعذر تنفيذ العملية المطلوبة.", ErrorType.Validation);
     public static readonly OperationError LeasePeriodConflict = new("fleet.lease_period_conflict", "تعذر تنفيذ العملية المطلوبة.", ErrorType.Conflict);
-    public static readonly OperationError InvalidGpsFile = new("fleet.daily_distance.invalid_gps_file", "ملف GPS غير صالح أو لا يحتوي على أعمدة المركبة وطول الطريق وفترة التقرير المطلوبة.", ErrorType.Validation, "file");
-    public static readonly OperationError GpsFramesetMissingSheet = new("fleet.daily_distance.gps_frameset_missing_sheet", "ملف Excel المحدد هو صفحة ربط ولا يحتوي على بيانات المركبات داخله. احفظ التقرير بصيغة XLSX، أو ارفع ملف sheet001.htm من المجلد المرافق، أو ارفع ملف ZIP يحتوي على ملف XLS والمجلد المرافق.", ErrorType.Validation, "file");
-    public static readonly OperationError GpsDateMismatch = new("fleet.daily_distance.gps_date_mismatch", "تاريخ ملف GPS لا يطابق التاريخ المتوقع.", ErrorType.Validation, "expectedWorkDate");
+    public static readonly OperationError GpsFileRequired = new("fleet.daily_distance.gps_file_required", "اختر ملف تقرير GPS أولًا.", ErrorType.Validation, "file");
+    public static readonly OperationError GpsFileTooLarge = new("fleet.daily_distance.gps_file_too_large", "حجم ملف GPS يتجاوز 10 ميجابايت. اختر ملفًا أصغر.", ErrorType.Validation, "file");
+    public static readonly OperationError GpsFileTypeUnsupported = new("fleet.daily_distance.gps_file_type_unsupported", "نوع الملف غير مدعوم. اختر ملف XLS أو XLSX أو HTM أو HTML أو ZIP.", ErrorType.Validation, "file");
+    public static readonly OperationError InvalidGpsFile = new("fleet.daily_distance.invalid_gps_file", "تعذر قراءة تقرير GPS. تأكد من وجود فترة التقرير وأعمدة المركبة والمسافة في الملف.", ErrorType.Validation, "file");
+    public static readonly OperationError GpsFramesetMissingSheet = new("fleet.daily_distance.gps_frameset_missing_sheet", "هذا الملف لا يحتوي على بيانات المركبات. ارفع ملف sheet001.htm من المجلد المرافق، أو احفظ التقرير بصيغة XLSX ثم ارفعه.", ErrorType.Validation, "file");
+    public static OperationError GpsDateMismatch(DateOnly expectedWorkDate, DateOnly reportWorkDate)
+    {
+        var selectedDate = expectedWorkDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+        var fileDate = reportWorkDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+        return new OperationError(
+            "fleet.daily_distance.gps_date_mismatch",
+            $"الملف لتاريخ {fileDate}، لكنك اخترت {selectedDate}. اختر تاريخ الملف أو ارفع تقريرًا للتاريخ المحدد.",
+            ErrorType.Validation,
+            "expectedWorkDate",
+            new Dictionary<string, object?>
+            {
+                ["expectedWorkDate"] = expectedWorkDate,
+                ["reportWorkDate"] = reportWorkDate
+            });
+    }
     public static readonly OperationError DuplicateGpsImport = new("fleet.daily_distance.duplicate_gps_import", "تم استيراد ملف GPS نفسه لهذا اليوم مسبقًا.", ErrorType.Conflict, "file");
     public static readonly OperationError InvalidManualOdometer = new("fleet.daily_distance.invalid_manual_odometer", "قراءة العداد اليدوية يجب ألا تقل عن قراءة الأساس أو القراءة اليدوية السابقة.", ErrorType.Validation, "odometerReading");
     public static readonly OperationError ManualBaselineRequired = new("fleet.daily_distance.manual_baseline_required", "يلزم إدخال قراءة عداد أساس لحساب مسافة أول يوم يدوي لهذه المركبة.", ErrorType.Validation, "baselineOdometerReading");

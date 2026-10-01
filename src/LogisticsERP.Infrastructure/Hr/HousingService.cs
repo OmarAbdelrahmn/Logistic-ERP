@@ -8,9 +8,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LogisticsERP.Infrastructure.Hr;
 
-internal sealed class HousingService(
+internal sealed partial class HousingService(
     ApplicationDbContext dbContext,
-    ICurrentUser currentUser) : IHousingService
+    ICurrentUser currentUser,
+    TimeProvider? timeProvider = null) : IHousingService
 {
     public async Task<Result<IReadOnlyList<HousingResponse>>> GetAllAsync(CancellationToken cancellationToken = default)
     {
@@ -27,7 +28,8 @@ internal sealed class HousingService(
         }
 
         var rooms = await BuildRoomsAsync(id, cancellationToken);
-        return Result.Success(ToHousing(row, rooms));
+        var floors = await BuildFloorsAsync(id, rooms, cancellationToken);
+        return Result.Success(ToHousing(row, rooms, floors));
     }
 
     public async Task<Result<HousingResponse>> UpsertAsync(
@@ -93,6 +95,7 @@ internal sealed class HousingService(
 
         if (id is null)
         {
+            dbContext.HousingFloors.Add(new HousingFloor { HousingId = entity.Id, Name = "1" });
             dbContext.HousingWarehouses.Add(new HousingWarehouse
             {
                 HousingId = entity.Id,
@@ -144,7 +147,10 @@ internal sealed class HousingService(
             return Result.Failure<HousingRoomResponse>(HrErrors.RoomNotFound);
 
         var occupants = await BuildCurrentOccupantsAsync([room.Id], cancellationToken);
-        return Result.Success(ToRoom(room, occupants.GetValueOrDefault(room.Id, [])));
+        var equipment = await BuildRoomEquipmentAsync([room.Id], cancellationToken);
+        var external = await BuildExternalOccupantsAsync([room.Id], cancellationToken);
+        var pending = await BuildPendingOccupantsAsync([room.Id], cancellationToken);
+        return Result.Success(ToRoom(room, occupants.GetValueOrDefault(room.Id, []), equipment.GetValueOrDefault(room.Id, []), external.GetValueOrDefault(room.Id, []), pending.GetValueOrDefault(room.Id, [])));
     }
 
     public async Task<Result<HousingRoomResponse>> UpsertRoomAsync(
@@ -165,7 +171,14 @@ internal sealed class HousingService(
         {
             if (housingId is null || !await dbContext.Housing.AnyAsync(item => item.Id == housingId, cancellationToken))
                 return Result.Failure<HousingRoomResponse>(HrErrors.HousingNotFound);
-            room = new HousingRoom { HousingId = housingId.Value };
+            var floorId = request.FloorId ?? await dbContext.HousingFloors
+                .Where(item => item.HousingId == housingId)
+                .OrderBy(item => item.Name)
+                .Select(item => item.Id)
+                .FirstOrDefaultAsync(cancellationToken);
+            if (floorId == Guid.Empty || !await dbContext.HousingFloors.AnyAsync(item => item.Id == floorId && item.HousingId == housingId, cancellationToken))
+                return Result.Failure<HousingRoomResponse>(HrErrors.InvalidRequest);
+            room = new HousingRoom { HousingId = housingId.Value, FloorId = floorId };
             dbContext.HousingRooms.Add(room);
         }
         else
@@ -179,14 +192,19 @@ internal sealed class HousingService(
                 return Result.Failure<HousingRoomResponse>(HrErrors.CapacityExceeded);
         }
 
+        var floorIdForRoom = request.FloorId ?? room.FloorId;
+        if (!await dbContext.HousingFloors.AnyAsync(item => item.Id == floorIdForRoom && item.HousingId == room.HousingId, cancellationToken))
+            return Result.Failure<HousingRoomResponse>(HrErrors.InvalidRequest);
         var name = request.Name.Trim();
         if (await dbContext.HousingRooms.AnyAsync(
-                item => item.HousingId == room.HousingId && item.Id != room.Id && item.Name == name,
+                item => item.FloorId == floorIdForRoom && item.Id != room.Id && item.Name == name,
                 cancellationToken))
             return Result.Failure<HousingRoomResponse>(HrErrors.RoomNameDuplicate);
 
         room.Name = name;
         room.Capacity = request.Capacity;
+        room.Notes = HrServiceSupport.TrimOrNull(request.Notes);
+        room.FloorId = floorIdForRoom;
         await dbContext.SaveChangesAsync(cancellationToken);
         return await GetRoomAsync(room.Id, cancellationToken);
     }
@@ -595,7 +613,11 @@ internal sealed class HousingService(
             .OrderBy(item => item.Name)
             .ToArrayAsync(cancellationToken);
         var occupants = await BuildCurrentOccupantsAsync(rooms.Select(item => item.Id).ToArray(), cancellationToken);
-        return rooms.Select(room => ToRoom(room, occupants.GetValueOrDefault(room.Id, []))).ToArray();
+        var ids = rooms.Select(item => item.Id).ToArray();
+        var equipment = await BuildRoomEquipmentAsync(ids, cancellationToken);
+        var external = await BuildExternalOccupantsAsync(ids, cancellationToken);
+        var pending = await BuildPendingOccupantsAsync(ids, cancellationToken);
+        return rooms.Select(room => ToRoom(room, occupants.GetValueOrDefault(room.Id, []), equipment.GetValueOrDefault(room.Id, []), external.GetValueOrDefault(room.Id, []), pending.GetValueOrDefault(room.Id, []))).ToArray();
     }
 
     private async Task<Dictionary<Guid, RoomOccupantResponse[]>> BuildCurrentOccupantsAsync(
@@ -663,7 +685,8 @@ internal sealed class HousingService(
 
     private static HousingResponse ToHousing(
         HousingProjection row,
-        IReadOnlyList<HousingRoomResponse>? rooms = null) =>
+        IReadOnlyList<HousingRoomResponse>? rooms = null,
+        IReadOnlyList<HousingFloorResponse>? floors = null) =>
         new(
             row.Item.Id,
             row.Item.Code,
@@ -684,9 +707,12 @@ internal sealed class HousingService(
             row.Item.StatusReason,
             row.Item.Notes,
             HrServiceSupport.EncodeRowVersion(row.Item.RowVersion),
-            rooms);
+            rooms,
+            floors);
 
-    private static HousingRoomResponse ToRoom(HousingRoom room, IReadOnlyList<RoomOccupantResponse> occupants) =>
+    private static HousingRoomResponse ToRoom(HousingRoom room, IReadOnlyList<RoomOccupantResponse> occupants,
+        IReadOnlyList<HousingEquipmentResponse> equipment, IReadOnlyList<HousingExternalOccupantResponse> external,
+        IReadOnlyList<HousingPendingOccupantResponse> pending) =>
         new(
             room.Id,
             room.HousingId,
@@ -695,7 +721,12 @@ internal sealed class HousingService(
             room.CurrentOccupancy,
             Math.Max(0, room.Capacity - room.CurrentOccupancy),
             HrServiceSupport.EncodeRowVersion(room.RowVersion),
-            occupants);
+            occupants,
+            room.FloorId,
+            room.Notes,
+            equipment,
+            external,
+            pending);
 
     private static bool TryParseEnum<TEnum>(string value, out TEnum parsed) where TEnum : struct, Enum =>
         Enum.TryParse(value, true, out parsed) && Enum.IsDefined(parsed);

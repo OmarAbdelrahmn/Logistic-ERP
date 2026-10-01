@@ -11,6 +11,9 @@ public sealed record UpsertManualVehicleDistanceRequest(
 public sealed record VehicleDailyDistanceResponse(
     Guid? Id,
     Guid VehicleId,
+    VehicleType VehicleType,
+    Guid? OperatingCityId,
+    string? OperatingCity,
     DateOnly WorkDate,
     string AssetNumber,
     string? PlateNumberAr,

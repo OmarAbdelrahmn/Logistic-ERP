@@ -3,6 +3,7 @@ using LogisticsERP.Application.Abstractions.Authentication;
 using LogisticsERP.Application.Abstractions.Files;
 using LogisticsERP.Application.Authorization;
 using LogisticsERP.Domain.Entities.Fleet;
+using LogisticsERP.Domain.Entities.Platform;
 using LogisticsERP.Domain.Enums;
 using LogisticsERP.Domain.Fleet;
 using LogisticsERP.Infrastructure.Fleet;
@@ -25,6 +26,17 @@ public sealed class VehicleMileageIntegrationTests
             .AddInterceptors(new ApplicationPersistenceInterceptor(currentUser, TimeProvider.System))
             .Options;
         await using var db = new ApplicationDbContext(options);
+        var globalCity = new GlobalCity
+        {
+            Id = Guid.CreateVersion7(),
+            NameAr = "الرياض",
+            NameEn = "Riyadh"
+        };
+        var operatingCity = new OperatingCity
+        {
+            Id = Guid.CreateVersion7(),
+            GlobalCityId = globalCity.Id
+        };
         var vehicle = new Vehicle
         {
             Id = Guid.CreateVersion7(),
@@ -35,14 +47,24 @@ public sealed class VehicleMileageIntegrationTests
             VehicleManufacturerId = Guid.CreateVersion7(),
             VehicleModelId = Guid.CreateVersion7(),
             VehicleType = VehicleType.Car,
+            OperatingCityId = operatingCity.Id,
             CurrentOdometer = 10_000,
             TrackedDistanceKm = 10_000m
         };
+        db.GlobalCities.Add(globalCity);
+        db.OperatingCities.Add(operatingCity);
         db.Vehicles.Add(vehicle);
         await db.SaveChangesAsync(cancellationToken);
         var service = new VehicleDailyDistanceService(
             db,
             new FleetServiceSupport(currentUser, new PermitAll(), TimeProvider.System));
+
+        var missingDaily = await service.GetDailyAsync(new DateOnly(2026, 8, 31), null, null, 1, 100, cancellationToken);
+        Assert.True(missingDaily.IsSuccess, missingDaily.Error.Description);
+        var missingItem = Assert.Single(missingDaily.Value!.Items);
+        Assert.Equal(VehicleType.Car, missingItem.VehicleType);
+        Assert.Equal(operatingCity.Id, missingItem.OperatingCityId);
+        Assert.Equal("الرياض", missingItem.OperatingCity);
 
         await using var firstFile = CreateGpsWorkbook(150.75m);
         var first = await service.ImportGpsAsync(
@@ -51,6 +73,12 @@ public sealed class VehicleMileageIntegrationTests
             cancellationToken);
 
         Assert.True(first.IsSuccess, first.Error.Description);
+        var importedDaily = await service.GetDailyAsync(new DateOnly(2026, 8, 31), null, null, 1, 100, cancellationToken);
+        Assert.True(importedDaily.IsSuccess, importedDaily.Error.Description);
+        var importedItem = Assert.Single(importedDaily.Value!.Items);
+        Assert.Equal(VehicleType.Car, importedItem.VehicleType);
+        Assert.Equal(operatingCity.Id, importedItem.OperatingCityId);
+        Assert.Equal("الرياض", importedItem.OperatingCity);
         Assert.Equal(10_150.75m, vehicle.TrackedDistanceKm);
         Assert.Equal(10_150, vehicle.CurrentOdometer);
 

@@ -39,7 +39,8 @@ public sealed class MaintenanceWorkOrdersController(IMaintenanceService service)
     [RequirePermission(PermissionKeys.Maintenance.WorkOrdersManage)]
     public async Task<IActionResult> CreateCompany([FromBody] CreateMaintenanceWorkOrderRequest request, CancellationToken cancellationToken)
     {
-        if (request.ServiceSubjectType != MaintenanceServiceSubjectType.CompanyVehicle) return BadRequest();
+        if (request.ServiceSubjectType != MaintenanceServiceSubjectType.CompanyVehicle)
+            return ApiProblemDetails.BadRequest(HttpContext, "اختر مركبة تابعة للشركة لأمر الصيانة هذا.");
         var result = await service.CreateWorkOrderAsync(request, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
@@ -48,7 +49,8 @@ public sealed class MaintenanceWorkOrdersController(IMaintenanceService service)
     [RequirePermission(PermissionKeys.Maintenance.ExternalJobsManage)]
     public async Task<IActionResult> CreateExternal([FromBody] CreateMaintenanceWorkOrderRequest request, CancellationToken cancellationToken)
     {
-        if (request.ServiceSubjectType != MaintenanceServiceSubjectType.ExternalVehicle) return BadRequest();
+        if (request.ServiceSubjectType != MaintenanceServiceSubjectType.ExternalVehicle)
+            return ApiProblemDetails.BadRequest(HttpContext, "اختر مركبة خارجية لأمر الصيانة هذا.");
         var result = await service.CreateWorkOrderAsync(request, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }

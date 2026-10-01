@@ -116,7 +116,7 @@ internal sealed class TagService(ApplicationDbContext dbContext) : ITagService
             return Result.Failure<IReadOnlyList<TagResponse>>(TagErrors.ConcurrencyConflict);
 
         var requestedIds = request.TagIds.ToHashSet();
-        var tags = requestedIds.Count == 0 ? [] : await dbContext.Tags
+        var tags = requestedIds.Count == 0 ? [] : await dbContext.Tags.AsNoTracking()
             .Where(item => requestedIds.Contains(item.Id) && item.Status == CatalogStatus.Active)
             .ToArrayAsync(cancellationToken);
         if (tags.Length != requestedIds.Count || tags.Any(item => !IsApplicable(item, normalized)))
@@ -203,10 +203,10 @@ internal sealed class TagService(ApplicationDbContext dbContext) : ITagService
 
     private async Task<AuditableEntity?> GetParentAsync(string resource, Guid resourceId, CancellationToken cancellationToken) => resource switch
     {
-        "employees" => await dbContext.Employees.SingleOrDefaultAsync(item => item.Id == resourceId, cancellationToken),
-        "housing" => await dbContext.Housing.SingleOrDefaultAsync(item => item.Id == resourceId, cancellationToken),
-        "client-contracts" => await dbContext.ClientContracts.SingleOrDefaultAsync(item => item.Id == resourceId, cancellationToken),
-        "platform-accounts" => await dbContext.PlatformRiderAccounts.SingleOrDefaultAsync(item => item.Id == resourceId, cancellationToken),
+        "employees" => await dbContext.Employees.AsNoTracking().SingleOrDefaultAsync(item => item.Id == resourceId, cancellationToken),
+        "housing" => await dbContext.Housing.AsNoTracking().SingleOrDefaultAsync(item => item.Id == resourceId, cancellationToken),
+        "client-contracts" => await dbContext.ClientContracts.AsNoTracking().SingleOrDefaultAsync(item => item.Id == resourceId, cancellationToken),
+        "platform-accounts" => await dbContext.PlatformRiderAccounts.AsNoTracking().SingleOrDefaultAsync(item => item.Id == resourceId, cancellationToken),
         _ => null
     };
 
@@ -236,4 +236,3 @@ internal sealed class TagService(ApplicationDbContext dbContext) : ITagService
         item.AppliesToHousing, item.AppliesToClientContracts, item.AppliesToPlatformAccounts,
         item.Status.ToString(), HrServiceSupport.EncodeRowVersion(item.RowVersion));
 }
-

@@ -11,6 +11,8 @@ public sealed class PhoneSimCard : AuditableEntity
     public string? NormalizedIccid { get; set; }
     public string? CarrierName { get; set; }
     public Guid ResponsibleEmployeeId { get; set; }
+    public Guid? PlaceId { get; set; }
+    public Place? Place { get; set; }
     public PhoneSimStatus Status { get; set; } = PhoneSimStatus.Available;
     public string? StatusReason { get; set; }
     public string? Notes { get; set; }

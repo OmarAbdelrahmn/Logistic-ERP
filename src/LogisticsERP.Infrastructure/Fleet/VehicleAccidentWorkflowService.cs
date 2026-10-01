@@ -94,12 +94,12 @@ internal sealed partial class VehicleAccidentService
         if (!FleetServiceSupport.MatchesRowVersion(item.RowVersion, request.RowVersion)) return Result.Failure<AccidentWorkflowResponse>(FleetErrors.Conflict);
         if (accident.Status == VehicleAccidentStatus.Closed) return Result.Failure<AccidentWorkflowResponse>(FleetErrors.InvalidState);
         var next = AccidentWorkflowRules.NextStage(item.Stage, request.Action);
-        if (next is null) return Result.Failure<AccidentWorkflowResponse>(WorkflowError($"Action {request.Action} is not allowed in {item.Stage}."));
+        if (next is null) return Result.Failure<AccidentWorkflowResponse>(WorkflowError("لا يمكن تنفيذ هذا الإجراء في مرحلة الحادث الحالية."));
         if (string.IsNullOrWhiteSpace(request.Notes) || request.Notes.Length > 1000
             || request.OccurredAtUtc < accident.OccurredAtUtc || request.OccurredAtUtc > support.UtcNow
             || item.LastActionAtUtc.HasValue && request.OccurredAtUtc < item.LastActionAtUtc
             || request.Reference?.Length > 150 || request.Location?.Length > 1000 || request.Contact?.Length > 300)
-            return Result.Failure<AccidentWorkflowResponse>(WorkflowError("Provide notes and a chronological action time between the accident and now; respect field length limits."));
+            return Result.Failure<AccidentWorkflowResponse>(WorkflowError("أدخل ملاحظات ووقتًا للإجراء بين وقت الحادث والوقت الحالي، والتزم بالحد الأقصى لطول الحقول."));
         var files = await dbContext.VehicleAccidentAttachments.AsNoTracking().Where(x => x.VehicleAccidentId == accidentId).ToArrayAsync(cancellationToken);
         var documents = await LoadSourceDocumentsAsync(accident, item, cancellationToken);
         var error = ValidateAction(accident, item, request, files, documents);
@@ -109,7 +109,7 @@ internal sealed partial class VehicleAccidentService
             foreach (var document in documents)
             {
                 var available = await fileStorage.OpenReadAsync(document.Path!, document.ContentType!, document.Name!, document.Length, cancellationToken);
-                if (available.IsFailure) return Result.Failure<AccidentWorkflowResponse>(WorkflowError($"The {document.Kind} file is missing from storage; upload it to the source record before submitting."));
+                if (available.IsFailure) return Result.Failure<AccidentWorkflowResponse>(WorkflowError("أحد الملفات المطلوبة غير موجود. ارفعه إلى سجله الأصلي قبل تقديم المطالبة."));
                 await available.Value!.Content.DisposeAsync();
             }
         }
@@ -117,19 +117,19 @@ internal sealed partial class VehicleAccidentService
         {
             var supplierId = request.SupplierId ?? access.Value!.PurchasedFromSupplierId;
             if (!supplierId.HasValue || !await dbContext.VehicleSuppliers.AnyAsync(x => x.Id == supplierId && x.Status == VehicleCatalogStatus.Active, cancellationToken))
-                return Result.Failure<AccidentWorkflowResponse>(WorkflowError("Select an active vehicle purchase supplier."));
+                return Result.Failure<AccidentWorkflowResponse>(WorkflowError("اختر مورد شراء مركبات نشطًا."));
             item.SupplierId = supplierId;
         }
         if (request.Action == AccidentWorkflowAction.SubmitInstallmentRefund)
         {
             var installments = await dbContext.VehicleAccidentInstallments.AsNoTracking().Where(x => x.VehicleAccidentId == accidentId).ToArrayAsync(cancellationToken);
             if (installments.Length == 0 || request.Amount != installments.Sum(x => x.RefundEligibleAmount))
-                return Result.Failure<AccidentWorkflowResponse>(WorkflowError("Refund amount must equal the eligible total of recorded paid installments."));
+                return Result.Failure<AccidentWorkflowResponse>(WorkflowError("مبلغ الاسترداد يجب أن يساوي إجمالي الأقساط المدفوعة المؤهلة المسجلة."));
         }
         if (request.Action == AccidentWorkflowAction.MarkNoInstallments
             && (item.RefundStatus != AccidentRefundStatus.NotSubmitted
                 || await dbContext.VehicleAccidentInstallments.AnyAsync(x => x.VehicleAccidentId == accidentId, cancellationToken)))
-            return Result.Failure<AccidentWorkflowResponse>(WorkflowError("Only an unsubmitted refund with no recorded installments can be marked not applicable; explain why in notes."));
+            return Result.Failure<AccidentWorkflowResponse>(WorkflowError("يمكن استبعاد الاسترداد فقط إذا لم يُقدم الطلب ولم تُسجل أقساط. وضح السبب في الملاحظات."));
         var fromStage = item.Stage;
         ApplyWorkflowAction(accident, item, request, documents);
         item.Stage = next.Value;
@@ -178,82 +178,82 @@ internal sealed partial class VehicleAccidentService
                 if (!Has(VehicleAccidentEvidenceType.NajmReport) || !r.RiderFaultPercentage.HasValue || r.OtherParties is null
                     || r.OtherParties.Any(x => x is null || string.IsNullOrWhiteSpace(x.Name) || x.Name.Length > 300 || x.VehiclePlate?.Length > 100 || x.InsuranceCompany?.Length > 300)
                     || !AccidentWorkflowRules.ValidFaultShares(r.RiderFaultPercentage.Value, r.OtherParties.Select(x => x.FaultPercentage)))
-                    return "Attach the Najm file and enter each party's fault share; shares must total exactly 100%.";
+                    return "أرفق تقرير نجم وأدخل نسبة مسؤولية كل طرف. يجب أن يكون مجموع النسب 100٪.";
                 break;
             case AccidentWorkflowAction.StartLocalRepair:
                 if (item.RiderFaultPercentage != 100 || accident.Severity != VehicleAccidentSeverity.Minor
                     || !ValidMoney(r.Amount) || !Has(VehicleAccidentEvidenceType.DamagePromissoryNote)
                     || files.Count(x => x.EvidenceType == VehicleAccidentEvidenceType.DamagePhoto && x.ContentType.StartsWith("image/", StringComparison.Ordinal)) < 2)
-                    return "Local repair requires a minor accident, 100% rider fault, at least two damage photos, an estimated cost and its promissory-note file. Notes describe the assessed damage.";
+                    return "الإصلاح المحلي يتطلب حادثًا بسيطًا ومسؤولية السائق بنسبة 100٪ وصورتين للأضرار على الأقل وتكلفة تقديرية وملف سند الأمر. صف الأضرار في الملاحظات.";
                 break;
             case AccidentWorkflowAction.OpenClaim:
-                if (!item.RiderFaultPercentage.HasValue || !r.ClaimType.HasValue || !Enum.IsDefined(r.ClaimType.Value)) return "Choose Repair or Compensation as the requested claim type.";
+                if (!item.RiderFaultPercentage.HasValue || !r.ClaimType.HasValue || !Enum.IsDefined(r.ClaimType.Value)) return "اختر نوع المطالبة: إصلاح أو تعويض.";
                 if (item.RiderFaultPercentage == 100 && accident.Severity == VehicleAccidentSeverity.Minor)
-                    return "A minor accident with 100% rider fault follows local repair.";
+                    return "الحادث البسيط الذي يتحمل السائق مسؤوليته كاملة يتبع مسار الإصلاح المحلي.";
                 if (AccidentWorkflowRules.RequiresOpeningFee(item.RiderFaultPercentage.Value, accident.Severity)
                     && (r.Amount != 2500 || !Has(VehicleAccidentEvidenceType.ClaimOpeningFeeReceipt)))
-                    return "A non-minor accident with 100% rider fault requires a paid SAR 2500 opening fee and its receipt file.";
+                    return "الحادث غير البسيط الذي يتحمل السائق مسؤوليته كاملة يتطلب سداد رسوم فتح المطالبة بقيمة 2500 ريال وإرفاق الإيصال.";
                 break;
             case AccidentWorkflowAction.SubmitClaim:
                 if (string.IsNullOrWhiteSpace(r.Reference) || !Has(VehicleAccidentEvidenceType.ClaimSubmissionReport) || documents.Any(x => x.VersionId is null))
-                    return "Submission requires the external claim number, submission file, and the driver's iqama, license and vehicle registration from the system.";
+                    return "تقديم المطالبة يتطلب رقم المطالبة الخارجي وملف التقديم وإقامة السائق ورخصته واستمارة المركبة المسجلة في النظام.";
                 break;
             case AccidentWorkflowAction.ReceiveCompensationOffer:
-                if (!ValidMoney(r.Amount) || !Has(VehicleAccidentEvidenceType.AssessmentReceipt)) return "Provide the compensation amount and assessment receipt file.";
+                if (!ValidMoney(r.Amount) || !Has(VehicleAccidentEvidenceType.AssessmentReceipt)) return "أدخل مبلغ التعويض وأرفق إيصال التقييم.";
                 break;
             case AccidentWorkflowAction.ApproveInsurance:
-                if (!Has(VehicleAccidentEvidenceType.PaymentReceipt)) return "Attach the approved payment receipt file.";
+                if (!Has(VehicleAccidentEvidenceType.PaymentReceipt)) return "أرفق إيصال الدفع المعتمد.";
                 break;
             case AccidentWorkflowAction.RejectInsurance:
-                if (!Has(VehicleAccidentEvidenceType.InsuranceDecision)) return "Attach the rejection file and record the reason in notes.";
+                if (!Has(VehicleAccidentEvidenceType.InsuranceDecision)) return "أرفق ملف الرفض وسجل السبب في الملاحظات.";
                 break;
             case AccidentWorkflowAction.SubmitToSupplier:
-                if (!item.SupplierId.HasValue || !Has(VehicleAccidentEvidenceType.ClaimSubmissionReport)) return "Supplier handoff requires a supplier and proof-of-submission file.";
+                if (!item.SupplierId.HasValue || !Has(VehicleAccidentEvidenceType.ClaimSubmissionReport)) return "إحالة المطالبة إلى المورد تتطلب تحديد المورد وإرفاق إثبات التقديم.";
                 break;
             case AccidentWorkflowAction.ConfirmTransfer:
-                if (!ValidMoney(r.Amount) || !Has(VehicleAccidentEvidenceType.TransferReceipt)) return "Record the actual amount received by our company and the transfer receipt file.";
-                if (r.Amount != item.SettlementAmount) return "The received transfer must settle the assessed amount; record partial payments as follow-ups until fully received.";
+                if (!ValidMoney(r.Amount) || !Has(VehicleAccidentEvidenceType.TransferReceipt)) return "سجل المبلغ المستلم فعليًا وأرفق إيصال التحويل.";
+                if (r.Amount != item.SettlementAmount) return "يجب أن يغطي التحويل المبلغ المعتمد. سجل الدفعات الجزئية كمتابعات حتى استلام المبلغ كاملًا.";
                 break;
             case AccidentWorkflowAction.ReceiveRepairDirection:
-                if (string.IsNullOrWhiteSpace(r.Location) || string.IsNullOrWhiteSpace(r.Contact) || !Has(VehicleAccidentEvidenceType.RepairDirection)) return "Provide the repair location, contact and direction file.";
+                if (string.IsNullOrWhiteSpace(r.Location) || string.IsNullOrWhiteSpace(r.Contact) || !Has(VehicleAccidentEvidenceType.RepairDirection)) return "أدخل موقع الإصلاح وجهة التواصل وأرفق ملف توجيه الإصلاح.";
                 break;
             case AccidentWorkflowAction.CompleteRepair:
             case AccidentWorkflowAction.CompleteLocalRepair:
-                if (!Has(VehicleAccidentEvidenceType.RepairCompletion)) return "Attach the repair completion file.";
+                if (!Has(VehicleAccidentEvidenceType.RepairCompletion)) return "أرفق ملف إكمال الإصلاح.";
                 break;
             case AccidentWorkflowAction.ProposeTotalLoss:
-                if (!Has(VehicleAccidentEvidenceType.AssessmentReceipt)) return "Attach the total-loss assessment file.";
+                if (!Has(VehicleAccidentEvidenceType.AssessmentReceipt)) return "أرفق ملف تقييم الخسارة الكلية.";
                 break;
             case AccidentWorkflowAction.RequestReinspection:
                 if (string.IsNullOrWhiteSpace(r.Location) || !r.AppointmentAtUtc.HasValue || r.AppointmentAtUtc < r.OccurredAtUtc)
-                    return "Provide the reinspection location and appointment time.";
+                    return "أدخل موقع إعادة الفحص ووقت الموعد.";
                 break;
             case AccidentWorkflowAction.ConfirmTotalLoss:
-                if (!Has(VehicleAccidentEvidenceType.TotalLossConfirmation)) return "Attach the final total-loss confirmation file.";
+                if (!Has(VehicleAccidentEvidenceType.TotalLossConfirmation)) return "أرفق ملف تأكيد الخسارة الكلية النهائي.";
                 break;
             case AccidentWorkflowAction.RecordVehicleCollection:
-                if (!Has(VehicleAccidentEvidenceType.VehicleCollectionReceipt)) return "Attach the vehicle collection receipt file.";
+                if (!Has(VehicleAccidentEvidenceType.VehicleCollectionReceipt)) return "أرفق إيصال استلام المركبة.";
                 break;
             case AccidentWorkflowAction.RecordValuation:
-                if (!ValidMoney(r.Amount) || !Has(VehicleAccidentEvidenceType.ValuationReceipt)) return "Provide the final vehicle valuation and its receipt file.";
+                if (!ValidMoney(r.Amount) || !Has(VehicleAccidentEvidenceType.ValuationReceipt)) return "أدخل التقييم النهائي للمركبة وأرفق إيصال التقييم.";
                 break;
             case AccidentWorkflowAction.FollowUp:
             case AccidentWorkflowAction.RepairProgress:
-                if (r.AttachmentId.HasValue && !files.Any(x => x.Id == r.AttachmentId)) return "Attachment must belong to this accident.";
+                if (r.AttachmentId.HasValue && !files.Any(x => x.Id == r.AttachmentId)) return "يجب أن يكون المرفق تابعًا لهذا الحادث.";
                 break;
             case AccidentWorkflowAction.SubmitInstallmentRefund:
                 if (!item.RequestedClaimType.HasValue || !item.IncidentEndedAtUtc.HasValue
                     || item.RefundStatus is not (AccidentRefundStatus.NotSubmitted or AccidentRefundStatus.Rejected)
                     || string.IsNullOrWhiteSpace(r.Reference) || !ValidMoney(r.Amount) || !Has(VehicleAccidentEvidenceType.InstallmentRefundRequest))
-                    return "An ended claim, refund reference, amount and request file are required; a pending or received refund cannot be resubmitted.";
+                    return "طلب الاسترداد يتطلب انتهاء المطالبة ورقمًا مرجعيًا ومبلغًا وملف الطلب. لا يمكن إعادة تقديم طلب قيد المعالجة أو تم استلامه.";
                 break;
             case AccidentWorkflowAction.ReceiveInstallmentRefund:
                 if (item.RefundStatus != AccidentRefundStatus.Submitted || !ValidMoney(r.Amount)
                     || r.Amount > item.RefundRequestedAmount || !Has(VehicleAccidentEvidenceType.InstallmentRefundReceipt))
-                    return "A pending refund and its receipt file are required; record an amount up to the requested amount and explain any shortfall in notes.";
+                    return "استلام الاسترداد يتطلب طلبًا مقدمًا وإيصالًا. أدخل مبلغًا لا يتجاوز المطلوب ووضح أي نقص في الملاحظات.";
                 break;
             case AccidentWorkflowAction.RejectInstallmentRefund:
-                if (item.RefundStatus != AccidentRefundStatus.Submitted || !Has(VehicleAccidentEvidenceType.InsuranceDecision)) return "A pending refund, rejection file and reason are required.";
+                if (item.RefundStatus != AccidentRefundStatus.Submitted || !Has(VehicleAccidentEvidenceType.InsuranceDecision)) return "رفض الاسترداد يتطلب طلبًا مقدمًا وملف الرفض وسببه.";
                 break;
         }
         return null;
@@ -333,7 +333,7 @@ internal sealed partial class VehicleAccidentService
         if (type == VehicleAccidentEvidenceType.TowingReceipt && (string.IsNullOrWhiteSpace(metadata.Description)
             || string.IsNullOrWhiteSpace(metadata.FromLocation) || string.IsNullOrWhiteSpace(metadata.ToLocation)
             || !metadata.TransportedAtUtc.HasValue || metadata.TransportedAtUtc < accident.OccurredAtUtc || metadata.TransportedAtUtc > support.UtcNow || !ValidMoney(metadata.Amount)))
-            return Result.Failure<VehicleAccidentAttachmentResponse>(WorkflowError("A towing receipt requires a description, origin, destination, transport time and amount."));
+            return Result.Failure<VehicleAccidentAttachmentResponse>(WorkflowError("إيصال السحب يتطلب وصفًا وموقع الانطلاق والوجهة ووقت النقل والمبلغ."));
         var id = Guid.CreateVersion7();
         var stored = await fileStorage.StoreAsync($"vehicle-accidents/{accidentId:N}/evidence/{id:N}", file, MaximumEvidenceSize, cancellationToken);
         if (stored.IsFailure) return Result.Failure<VehicleAccidentAttachmentResponse>(FleetErrors.InvalidFile);
@@ -412,10 +412,10 @@ internal sealed partial class VehicleAccidentService
             || request.PaidOn < start || request.PaidOn > end || !ValidMoney(request.Amount) || !ValidMoney(request.RefundEligibleAmount)
             || request.RefundEligibleAmount > request.Amount || string.IsNullOrWhiteSpace(request.Notes) || request.Notes.Length > 1000
             || !await dbContext.VehicleAccidentAttachments.AnyAsync(x => x.Id == request.ReceiptAttachmentId && x.VehicleAccidentId == accidentId && x.EvidenceType == VehicleAccidentEvidenceType.InstallmentReceipt, cancellationToken))
-            return Result.Failure<AccidentWorkflowResponse>(WorkflowError("Record a paid installment within the incident dates, an overlapping installment period, a receipt and a valid eligible amount."));
+            return Result.Failure<AccidentWorkflowResponse>(WorkflowError("سجل قسطًا مدفوعًا ضمن فترة الحادث مع فترة قسط متداخلة وإيصال ومبلغ مؤهل صالح."));
         if (await dbContext.VehicleAccidentInstallments.AnyAsync(x => x.VehicleAccidentId == accidentId
             && (x.ReceiptAttachmentId == request.ReceiptAttachmentId || x.PeriodFrom <= request.PeriodTo && x.PeriodTo >= request.PeriodFrom), cancellationToken))
-            return Result.Failure<AccidentWorkflowResponse>(WorkflowError("This receipt or installment period has already been recorded."));
+            return Result.Failure<AccidentWorkflowResponse>(WorkflowError("سبق تسجيل هذا الإيصال أو فترة القسط."));
         dbContext.VehicleAccidentInstallments.Add(new VehicleAccidentInstallment { VehicleAccidentId = accidentId,
             PeriodFrom = request.PeriodFrom, PeriodTo = request.PeriodTo, PaidOn = request.PaidOn, Amount = request.Amount,
             RefundEligibleAmount = request.RefundEligibleAmount, ReceiptAttachmentId = request.ReceiptAttachmentId, Notes = request.Notes.Trim() });

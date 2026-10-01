@@ -14,7 +14,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LogisticsERP.Infrastructure.Fuel;
 
-internal sealed class FuelCardService(
+internal sealed partial class FuelCardService(
     ApplicationDbContext dbContext,
     ICurrentUser currentUser,
     IPermissionChecker permissionChecker,
@@ -118,6 +118,8 @@ internal sealed class FuelCardService(
         {
             return Result.Failure<FuelCardResponse>(FuelErrors.InvalidRequest);
         }
+        if (!await SponsorExistsAsync(request.SponsorId, cancellationToken))
+            return Result.Failure<FuelCardResponse>(FuelErrors.SponsorNotFound);
 
         string normalizedCardNumber;
         var identifierType = FuelCardRules.DetectIdentifierType(request.CardNumber);
@@ -140,6 +142,7 @@ internal sealed class FuelCardService(
         var plate = TrimOrNull(request.PlateNumberText);
         var card = new FuelCard
         {
+            SponsorId = request.SponsorId,
             Provider = provider,
             IdentifierType = identifierType,
             CardNumber = request.CardNumber.Trim(),
@@ -154,6 +157,26 @@ internal sealed class FuelCardService(
         return save.IsFailure
             ? Result.Failure<FuelCardResponse>(save.Error)
             : Result.Success(MapCard(card, null));
+    }
+
+    public async Task<Result<FuelCardResponse>> SetSponsorAsync(
+        Guid id, SetFuelCardSponsorRequest request, CancellationToken cancellationToken = default)
+    {
+        if (!await HasPermissionAsync(PermissionKeys.Fuel.Manage, cancellationToken))
+            return Result.Failure<FuelCardResponse>(FuelErrors.Forbidden);
+        var card = await dbContext.FuelCards.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
+        if (card is null)
+            return Result.Failure<FuelCardResponse>(FuelErrors.NotFound);
+        if (!MatchesRowVersion(card.RowVersion, request.RowVersion))
+            return Result.Failure<FuelCardResponse>(FuelErrors.ConcurrencyConflict);
+        if (!await SponsorExistsAsync(request.SponsorId, cancellationToken))
+            return Result.Failure<FuelCardResponse>(FuelErrors.SponsorNotFound);
+
+        card.SponsorId = request.SponsorId;
+        var save = await SaveAsync(cancellationToken);
+        if (save.IsFailure) return Result.Failure<FuelCardResponse>(save.Error);
+        var currentRiders = await GetCurrentRidersAsync([id], cancellationToken);
+        return Result.Success(MapCard(card, currentRiders.GetValueOrDefault(id)));
     }
 
     public async Task<Result<IReadOnlyList<FuelCardAssignmentResponse>>> GetAssignmentsAsync(
@@ -406,6 +429,7 @@ internal sealed class FuelCardService(
     public async Task<Result<FuelImportResponse>> ImportAsync(
         PrivateFileUpload file,
         DateOnly? expectedMonth,
+        Guid sponsorId,
         CancellationToken cancellationToken = default)
     {
         if (!await HasPermissionAsync(PermissionKeys.Fuel.Import, cancellationToken))
@@ -416,6 +440,8 @@ internal sealed class FuelCardService(
         {
             return Result.Failure<FuelImportResponse>(FuelErrors.CurrentUserUnavailable);
         }
+        if (!await SponsorExistsAsync(sponsorId, cancellationToken))
+            return Result.Failure<FuelImportResponse>(FuelErrors.SponsorNotFound);
 
         var extension = Path.GetExtension(file.OriginalFileName).ToLowerInvariant();
         if (file.Length <= 0 || file.Length > MaximumImportSize || extension is not ".xls" and not ".xlsx")
@@ -474,6 +500,7 @@ internal sealed class FuelCardService(
             {
                 card = new FuelCard
                 {
+                    SponsorId = sponsorId,
                     Provider = report.Provider,
                     IdentifierType = parsed.IdentifierType,
                     CardNumber = parsed.CardNumber,
@@ -707,6 +734,10 @@ internal sealed class FuelCardService(
         return await permissionChecker.HasPermissionAsync(userId, version, permissionKey, null, cancellationToken);
     }
 
+    private async Task<bool> SponsorExistsAsync(Guid sponsorId, CancellationToken cancellationToken) =>
+        sponsorId != Guid.Empty && await dbContext.Sponsors.AsNoTracking()
+            .AnyAsync(x => x.Id == sponsorId, cancellationToken);
+
     private async Task<Result> SaveAsync(CancellationToken cancellationToken)
     {
         try
@@ -726,6 +757,7 @@ internal sealed class FuelCardService(
 
     private static FuelCardResponse MapCard(FuelCard card, CurrentRiderProjection? rider) => new(
         card.Id,
+        card.SponsorId,
         card.Provider.ToString(),
         ProviderNameAr(card.Provider),
         card.IdentifierType.ToString(),

@@ -7,7 +7,7 @@ Upload a `.xlsx` workbook as multipart form data with a `file` field (maximum 20
 | POST | `/api/import/vehicles/odometer/validate` | Preview vehicle matches and errors without saving |
 | POST | `/api/import/vehicles/odometer` | Validate again and update the matched vehicle records |
 
-Validation requires `fleet.vehicles.read`; committing requires both `fleet.vehicles.manage` and `fleet.corrections.manage`, because imported readings can replace a higher current value.
+Both endpoints allow anonymous requests. No bearer token or fleet permission is required. The commit endpoint can replace a higher current reading with the value in the workbook.
 
 The first worksheet needs these two columns. Arabic or English headers are accepted:
 

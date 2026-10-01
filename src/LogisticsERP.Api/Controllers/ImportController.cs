@@ -3,6 +3,7 @@ using LogisticsERP.Api.Authorization;
 using LogisticsERP.Application.Authorization;
 using LogisticsERP.Application.Common.Results;
 using LogisticsERP.Application.Features.Fleet;
+using LogisticsERP.Application.Features.Fuel;
 using LogisticsERP.Application.Features.Hr;
 using LogisticsERP.Application.Features.Maintenance;
 using Microsoft.AspNetCore.Mvc;
@@ -17,6 +18,7 @@ namespace LogisticsERP.Api.Controllers;
 public sealed class ImportController(
     IHrExcelImportService service,
     IExternalRiderImportService externalRiderImportService,
+    IFuelCardBulkImportService fuelCardBulkImportService,
     IVehicleImportValidationService vehicleValidationService,
     IVehicleImportService vehicleImportService,
     IVehicleOdometerImportService vehicleOdometerImportService,
@@ -26,6 +28,22 @@ public sealed class ImportController(
     IVehicleRiderHistoryImportService vehicleRiderHistoryImportService,
     ISparePartCatalogImportService sparePartCatalogImportService) : ControllerBase
 {
+    [HttpPost("fuel-cards/validate")]
+    [Consumes("multipart/form-data")]
+    [AllowAnonymous]
+    public Task<IActionResult> ValidateFuelCards(
+        [FromForm] HrExcelImportForm request,
+        CancellationToken cancellationToken) =>
+        ExecuteFuelCardImport(request.File, validateOnly: true, cancellationToken);
+
+    [HttpPost("fuel-cards")]
+    [Consumes("multipart/form-data")]
+    [AllowAnonymous]
+    public Task<IActionResult> ImportFuelCards(
+        [FromForm] HrExcelImportForm request,
+        CancellationToken cancellationToken) =>
+        ExecuteFuelCardImport(request.File, validateOnly: false, cancellationToken);
+
     [HttpPost("/api/maintenance-inventory/items/import/validate")]
     [Consumes("multipart/form-data")]
     [RequestSizeLimit(10 * 1024 * 1024)]
@@ -61,7 +79,7 @@ public sealed class ImportController(
 
     [HttpPost("external-riders/validate")]
     [Consumes("multipart/form-data")]
-    [AllowAnonymous]
+    [RequirePermission(PermissionKeys.Workforce.ExternalRidersManage)]
     public Task<IActionResult> ValidateExternalRiders(
         [FromForm] HrExcelImportForm request,
         CancellationToken cancellationToken) =>
@@ -69,7 +87,7 @@ public sealed class ImportController(
 
     [HttpPost("external-riders")]
     [Consumes("multipart/form-data")]
-    [AllowAnonymous]
+    [RequirePermission(PermissionKeys.Workforce.ExternalRidersManage)]
     public Task<IActionResult> ImportExternalRiders(
         [FromForm] HrExcelImportForm request,
         CancellationToken cancellationToken) =>
@@ -125,7 +143,7 @@ public sealed class ImportController(
 
     [HttpPost("vehicles/odometer/validate")]
     [Consumes("multipart/form-data")]
-    [RequirePermission(PermissionKeys.Fleet.VehiclesRead)]
+    [AllowAnonymous]
     public Task<IActionResult> ValidateVehicleOdometers(
         [FromForm] HrExcelImportForm request,
         CancellationToken cancellationToken) =>
@@ -133,8 +151,7 @@ public sealed class ImportController(
 
     [HttpPost("vehicles/odometer")]
     [Consumes("multipart/form-data")]
-    [RequirePermission(PermissionKeys.Fleet.VehiclesManage)]
-    [RequirePermission(PermissionKeys.Fleet.CorrectionsManage)]
+    [AllowAnonymous]
     public Task<IActionResult> ImportVehicleOdometers(
         [FromForm] HrExcelImportForm request,
         CancellationToken cancellationToken) =>
@@ -209,7 +226,8 @@ public sealed class ImportController(
         if (file is null || file.Length == 0 || file.Length > 20 * 1024 * 1024
             || !string.Equals(Path.GetExtension(file.FileName), ".xlsx", StringComparison.OrdinalIgnoreCase))
         {
-            return BadRequest(new { error = "A non-empty .xlsx file up to 20 MB is required." });
+            return BadRequest(ApiProblemDetails.Create(HttpContext, StatusCodes.Status400BadRequest,
+                "اختر ملف Excel بصيغة xlsx غير فارغ ولا يتجاوز حجمه 20 ميجابايت."));
         }
 
         await using var stream = file.OpenReadStream();
@@ -225,7 +243,8 @@ public sealed class ImportController(
         if (file is null || file.Length == 0 || file.Length > 20 * 1024 * 1024
             || !string.Equals(Path.GetExtension(file.FileName), ".xlsx", StringComparison.OrdinalIgnoreCase))
         {
-            return BadRequest(new { error = "A non-empty .xlsx file up to 20 MB is required." });
+            return BadRequest(ApiProblemDetails.Create(HttpContext, StatusCodes.Status400BadRequest,
+                "اختر ملف Excel بصيغة xlsx غير فارغ ولا يتجاوز حجمه 20 ميجابايت."));
         }
 
         await using var stream = file.OpenReadStream();
@@ -245,7 +264,8 @@ public sealed class ImportController(
         if (file is null || file.Length == 0 || file.Length > 20 * 1024 * 1024
             || !string.Equals(Path.GetExtension(file.FileName), ".xlsx", StringComparison.OrdinalIgnoreCase))
         {
-            return BadRequest(new { error = "A non-empty .xlsx file up to 20 MB is required." });
+            return BadRequest(ApiProblemDetails.Create(HttpContext, StatusCodes.Status400BadRequest,
+                "اختر ملف Excel بصيغة xlsx غير فارغ ولا يتجاوز حجمه 20 ميجابايت."));
         }
 
         await using var stream = file.OpenReadStream();
@@ -265,7 +285,8 @@ public sealed class ImportController(
         if (file is null || file.Length == 0 || file.Length > 20 * 1024 * 1024
             || !string.Equals(Path.GetExtension(file.FileName), ".xlsx", StringComparison.OrdinalIgnoreCase))
         {
-            return BadRequest(new { error = "A non-empty .xlsx file up to 20 MB is required." });
+            return BadRequest(ApiProblemDetails.Create(HttpContext, StatusCodes.Status400BadRequest,
+                "اختر ملف Excel بصيغة xlsx غير فارغ ولا يتجاوز حجمه 20 ميجابايت."));
         }
 
         await using var stream = file.OpenReadStream();
@@ -285,7 +306,7 @@ public sealed class ImportController(
         if (file is null || file.Length == 0 || file.Length > 20 * 1024 * 1024
             || !string.Equals(Path.GetExtension(file.FileName), ".xlsx", StringComparison.OrdinalIgnoreCase))
         {
-            return BadRequest(new { error = "A non-empty .xlsx file up to 20 MB is required." });
+            return Result.Failure(VehicleImportErrors.InvalidUpload).ToProblem(HttpContext);
         }
 
         await using var stream = file.OpenReadStream();
@@ -301,7 +322,7 @@ public sealed class ImportController(
         if (file is null || file.Length == 0 || file.Length > 20 * 1024 * 1024
             || !string.Equals(Path.GetExtension(file.FileName), ".xlsx", StringComparison.OrdinalIgnoreCase))
         {
-            return BadRequest(new { error = "A non-empty .xlsx file up to 20 MB is required." });
+            return Result.Failure(VehicleImportErrors.InvalidUpload).ToProblem(HttpContext);
         }
 
         await using var stream = file.OpenReadStream();
@@ -321,7 +342,7 @@ public sealed class ImportController(
         if (file is null || file.Length == 0 || file.Length > 20 * 1024 * 1024
             || !string.Equals(Path.GetExtension(file.FileName), ".xlsx", StringComparison.OrdinalIgnoreCase))
         {
-            return BadRequest(new { error = "A non-empty .xlsx file up to 20 MB is required." });
+            return Result.Failure(VehicleImportErrors.InvalidUpload).ToProblem(HttpContext);
         }
 
         await using var stream = file.OpenReadStream();
@@ -333,6 +354,18 @@ public sealed class ImportController(
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 
+    private async Task<IActionResult> ExecuteFuelCardImport(
+        IFormFile? file, bool validateOnly, CancellationToken cancellationToken)
+    {
+        if (file is null || file.Length == 0 || file.Length > 20 * 1024 * 1024
+            || !string.Equals(Path.GetExtension(file.FileName), ".xlsx", StringComparison.OrdinalIgnoreCase))
+            return Result.Failure(FuelErrors.InvalidFile).ToProblem(HttpContext);
+
+        await using var stream = file.OpenReadStream();
+        var result = await fuelCardBulkImportService.ImportAsync(stream, validateOnly, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
     private async Task<IActionResult> ExecuteSparePartImport(
         IFormFile? file,
         bool validateOnly,
@@ -340,7 +373,8 @@ public sealed class ImportController(
     {
         if (file is null || file.Length == 0 || file.Length > 10 * 1024 * 1024
             || !string.Equals(Path.GetExtension(file.FileName), ".xlsx", StringComparison.OrdinalIgnoreCase))
-            return BadRequest(new { error = "A non-empty .xlsx file up to 10 MB is required." });
+            return BadRequest(ApiProblemDetails.Create(HttpContext, StatusCodes.Status400BadRequest,
+                "اختر ملف Excel بصيغة xlsx غير فارغ ولا يتجاوز حجمه 10 ميجابايت."));
 
         await using var stream = file.OpenReadStream();
         var result = await sparePartCatalogImportService.ImportAsync(
@@ -356,7 +390,7 @@ public sealed class ImportController(
         if (file is null || file.Length == 0 || file.Length > 20 * 1024 * 1024
             || !string.Equals(Path.GetExtension(file.FileName), ".xlsx", StringComparison.OrdinalIgnoreCase))
         {
-            return BadRequest(new { error = "A non-empty .xlsx file up to 20 MB is required." });
+            return Result.Failure(VehicleImportErrors.InvalidUpload).ToProblem(HttpContext);
         }
 
         await using var stream = file.OpenReadStream();
@@ -373,7 +407,7 @@ public sealed class ImportController(
     {
         if (file is null || file.Length == 0 || file.Length > 20 * 1024 * 1024
             || !string.Equals(Path.GetExtension(file.FileName), ".xlsx", StringComparison.OrdinalIgnoreCase))
-            return BadRequest(new { error = "A non-empty .xlsx file up to 20 MB is required." });
+            return Result.Failure(VehicleImportErrors.InvalidUpload).ToProblem(HttpContext);
 
         await using var stream = file.OpenReadStream();
         var result = await vehicleStatusImportService.ImportAsync(
@@ -386,7 +420,7 @@ public sealed class ImportController(
     {
         if (file is null || file.Length == 0 || file.Length > 20 * 1024 * 1024
             || !string.Equals(Path.GetExtension(file.FileName), ".xlsx", StringComparison.OrdinalIgnoreCase))
-            return BadRequest(new { error = "A non-empty .xlsx file up to 20 MB is required." });
+            return Result.Failure(VehicleImportErrors.InvalidUpload).ToProblem(HttpContext);
 
         await using var stream = file.OpenReadStream();
         var result = await vehicleRiderHistoryImportService.ImportAsync(

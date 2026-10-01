@@ -62,8 +62,8 @@ public sealed class HrPhoneNumberImportParserTests
         Assert.Single(parsed.Rows);
         Assert.Equal(2, parsed.Issues.Count);
         Assert.All(parsed.Issues, issue => Assert.Equal("Error", issue.Severity));
-        Assert.Contains(parsed.Issues, issue => issue.Message.Contains("Duplicate", StringComparison.Ordinal));
-        Assert.Contains(parsed.Issues, issue => issue.Message.Contains("second column", StringComparison.Ordinal));
+        Assert.Contains(parsed.Issues, issue => issue.Message.Contains("مكرر", StringComparison.Ordinal));
+        Assert.Contains(parsed.Issues, issue => issue.Message.Contains("العمود الثاني", StringComparison.Ordinal));
     }
 
     private static MemoryStream Save(XLWorkbook workbook)

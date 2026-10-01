@@ -14,6 +14,7 @@ The first worksheet must include `serial` and `status` columns. The optional `ا
 | `ready` | `Available` (1) |
 | `صيانه` or `صيانة` | `OutOfService` (6) |
 | `حادث` | `AccidentHold` (4) |
+| `stolen`, `stolen property`, `مسروق`, or `مسروقة` | `Stolen` (5) |
 | `تالف` | `Decommissioned` (7) |
 | `تحت مسؤلية الحركة` (also `تحت مسؤليه الحركة` or `تحت مسؤولية الحركة`) | `UnderMovementResponsibility` (8) |
 

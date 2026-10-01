@@ -1,8 +1,10 @@
 using LogisticsERP.Application.Abstractions.Authentication;
 using LogisticsERP.Application.Common.Results;
 using LogisticsERP.Application.Features.Hr;
+using LogisticsERP.Domain.Entities.System;
 using LogisticsERP.Domain.Entities.Workforce;
 using LogisticsERP.Domain.Enums;
+using LogisticsERP.Infrastructure.Identity;
 using LogisticsERP.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,6 +12,7 @@ namespace LogisticsERP.Infrastructure.Hr;
 
 internal sealed class WorkforceService(
     ApplicationDbContext dbContext,
+    IdentityDbContext identityDbContext,
     ICurrentUser currentUser) : IWorkforceService
 {
     private static readonly Guid SystemActorId = Guid.Parse("019c18d5-62e1-7000-d000-000000000002");
@@ -148,6 +151,7 @@ internal sealed class WorkforceService(
                 || await dbContext.RiderVehicleAssignments.AnyAsync(item => item.RiderProfileId == rider.Id && item.EndedAtUtc == null, cancellationToken)))
             return Result.Failure<EmployeeDetailsResponse>(HrErrors.Conflict);
 
+        var previousStatus = employee.Status;
         var actor = ActorId;
         var effectiveDate = DateOnly.FromDateTime(DateTime.UtcNow);
         TrackChanges(employee, request, validation.Value!, effectiveDate, "Employee details updated.", actor);
@@ -171,6 +175,11 @@ internal sealed class WorkforceService(
         }
 
         await dbContext.SaveChangesAsync(cancellationToken);
+        if (previousStatus != employee.Status)
+        {
+            await AddStatusNotificationsAsync(employee, previousStatus, employee.Status, actor, cancellationToken);
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
         return Result.Success(await BuildEmployeeDetailsAsync(employee, cancellationToken));
     }
 
@@ -187,9 +196,13 @@ internal sealed class WorkforceService(
 
         AddHistory(employee.Id, EmployeeWorkChangeType.Status, employee.Status.ToString(), EmployeeStatus.Archived.ToString(),
             DateOnly.FromDateTime(DateTime.UtcNow), request.Reason.Trim(), ActorId);
+        var previousStatus = employee.Status;
+        var actor = ActorId;
         employee.Status = EmployeeStatus.Archived;
         employee.IsDeleted = true;
         employee.DeletionReason = request.Reason.Trim();
+        await dbContext.SaveChangesAsync(cancellationToken);
+        await AddStatusNotificationsAsync(employee, previousStatus, employee.Status, actor, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
         return Result.Success();
     }
@@ -207,13 +220,17 @@ internal sealed class WorkforceService(
             || !employee.IsEmployee && !await dbContext.RiderProfiles.AnyAsync(item => item.EmployeeId == employeeId, cancellationToken)))
             return Result.Failure<EmployeeDetailsResponse>(HrErrors.InvalidRequest);
 
-        AddHistory(employeeId, EmployeeWorkChangeType.Status, employee.Status.ToString(), status.ToString(), request.EffectiveDate, request.Reason.Trim(), ActorId);
+        var previousStatus = employee.Status;
+        var actor = ActorId;
+        AddHistory(employeeId, EmployeeWorkChangeType.Status, previousStatus.ToString(), status.ToString(), request.EffectiveDate, request.Reason.Trim(), actor);
         employee.Status = status;
         employee.StatusReason = status is EmployeeStatus.Suspended or EmployeeStatus.Terminated or EmployeeStatus.Fleeing
             or EmployeeStatus.Accident or EmployeeStatus.Sick
             ? request.Reason.Trim()
             : null;
         if (status == EmployeeStatus.Terminated) employee.TerminationDate = request.EffectiveDate;
+        await dbContext.SaveChangesAsync(cancellationToken);
+        await AddStatusNotificationsAsync(employee, previousStatus, status, actor, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
         return Result.Success(await BuildEmployeeDetailsAsync(employee, cancellationToken));
     }
@@ -539,6 +556,46 @@ internal sealed class WorkforceService(
         employee.AlternateContactName = HrServiceSupport.TrimOrNull(request.AlternateContactName);
         employee.AlternateContactPhone = HrServiceSupport.TrimOrNull(request.AlternateContactPhone);
         employee.Notes = HrServiceSupport.TrimOrNull(request.Notes);
+    }
+
+    private async Task AddStatusNotificationsAsync(Employee employee, EmployeeStatus previousStatus, EmployeeStatus newStatus,
+        Guid actorId, CancellationToken cancellationToken)
+    {
+        var recipients = await identityDbContext.Users.AsNoTracking()
+            .Where(user => user.Status == UserAccountStatus.Active && !user.IsDevelopmentOnly && !user.IsDeleted)
+            .Select(user => user.Id)
+            .ToArrayAsync(cancellationToken);
+        if (recipients.Length == 0) return;
+
+        var entityType = employee.IsEmployee ? "employee" : "rider";
+        var entityNameAr = employee.IsEmployee ? "الموظف" : "السائق";
+        var entityNameEn = employee.IsEmployee ? "Employee" : "Rider";
+        var deduplicationKey = $"{entityType}-status:{employee.Id:N}:{newStatus}";
+        var alreadyNotified = await dbContext.Notifications.AsNoTracking()
+            .Where(item => item.SourceEntityId == employee.Id && item.DeduplicationKey == deduplicationKey)
+            .Select(item => item.RecipientUserId)
+            .ToArrayAsync(cancellationToken);
+
+        foreach (var recipientId in recipients)
+        {
+            if (alreadyNotified.Contains(recipientId)) continue;
+            dbContext.Notifications.Add(new Notification
+            {
+                RecipientUserId = recipientId,
+                EventType = $"{entityType}.status.changed",
+                Severity = NotificationSeverity.Information,
+                TitleAr = $"تغيير حالة {entityNameAr}",
+                TitleEn = $"{entityNameEn} status changed",
+                BodyAr = $"تم تغيير حالة {entityNameAr} {employee.FullNameAr} من {previousStatus} إلى {newStatus}.",
+                BodyEn = $"{entityNameEn} {employee.FullNameAr} status changed from {previousStatus} to {newStatus}.",
+                SourceEntityType = entityType,
+                SourceEntityId = employee.Id,
+                DeepLink = $"/employees/{employee.Id}",
+                ScopeSnapshotJson = "{}",
+                DeduplicationKey = deduplicationKey,
+                VisibleAtUtc = DateTimeOffset.UtcNow
+            });
+        }
     }
 
     private static void ApplyRider(RiderProfile rider, RiderProfileUpsertRequest request)

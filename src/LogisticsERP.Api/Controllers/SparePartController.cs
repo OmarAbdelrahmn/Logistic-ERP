@@ -18,8 +18,10 @@ public sealed class SparePartController(IMaintenanceService service) : Controlle
         [FromBody] BatchSparePartUsageRequest request,
         CancellationToken cancellationToken)
     {
-        if (date == default || request.Usages is null || request.Usages.Count == 0)
-            return BadRequest(new { message = "The body must contain a non-empty usages array." });
+        if (date == default)
+            return ApiProblemDetails.BadRequest(HttpContext, "حدد تاريخ استخدام قطع الغيار.");
+        if (request.Usages is null || request.Usages.Count == 0)
+            return ApiProblemDetails.BadRequest(HttpContext, "أضف صنفًا واحدًا على الأقل إلى قائمة القطع المستخدمة.");
 
         var usedAtUtc = new DateTimeOffset(DateTime.SpecifyKind(date, DateTimeKind.Utc));
         var result = await service.PostBatchSparePartUsageAsync(usedAtUtc, request, cancellationToken);

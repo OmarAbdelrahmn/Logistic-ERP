@@ -78,6 +78,9 @@
     {
       "id": "daily-record-id-or-null",
       "vehicleId": "vehicle-id",
+      "vehicleType": "Car",
+      "operatingCityId": "operating-city-id-or-null",
+      "operatingCity": "الرياض",
       "workDate": "2026-08-31",
       "assetNumber": "VEH-0001",
       "plateNumberAr": "أ ط س 1098",
@@ -112,6 +115,7 @@
 ```
 
 تسلسل enum للمصدر: `None = 0`، `Manual = 1`، `Gps = 2`. إعداد JSON الحالي قد يعيد الرقم بدل الاسم؛ دعم الحالتين في الواجهة.
+تسلسل `vehicleType`: `Motorcycle = 1`، `Car = 2`، `Van = 3`، `Truck = 4`، `Other = 5`. قد يعيد إعداد JSON الرقم بدل الاسم.
 
 ### معالجة الواجهة بعد الدمج
 
@@ -172,6 +176,10 @@
 
 ## حالات الخطأ المهمة
 
+- يعيد API رسائل `title` و`detail` بالعربية. استخدم `detail` لعرض سبب الخطأ للمستخدم، و`errorCode` للمعالجة البرمجية.
+- `fleet.daily_distance.gps_file_required`: لم يُحدد ملف للرفع.
+- `fleet.daily_distance.gps_file_too_large`: حجم الملف يتجاوز 10 ميجابايت.
+- `fleet.daily_distance.gps_file_type_unsupported`: امتداد الملف غير مدعوم.
 - `fleet.daily_distance.invalid_gps_file`: بنية الملف غير صالحة.
 - `fleet.daily_distance.gps_frameset_missing_sheet`: ملف XLS هو صفحة ربط والبيانات موجودة في مجلد `.files` المرافق؛ اطلب من المستخدم رفع `sheet001.htm` أو ZIP يحتوي الملف والمجلد، أو حفظ التقرير كـ XLSX.
 - `fleet.daily_distance.gps_date_mismatch`: تاريخ التقرير لا يطابق التاريخ المختار.

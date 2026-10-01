@@ -197,8 +197,9 @@ public sealed class PurchaseReceiptAttachment : HistoryEntity
 
 public sealed class OilBarrel : AuditableEntity
 {
+    public VehicleType? AllowedVehicleType { get; set; }
     public string BarrelNumber { get; set; } = string.Empty;
-    public Guid PurchaseReceiptLineId { get; set; }
+    public Guid? PurchaseReceiptLineId { get; set; }
     public Guid InventoryItemId { get; set; }
     public Guid InventoryLocationId { get; set; }
     public Guid StockCostLayerId { get; set; }

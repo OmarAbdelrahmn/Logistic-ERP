@@ -11,7 +11,7 @@ namespace LogisticsERP.Api.Controllers;
 public sealed class ExternalRidersController(IWorkforceService service) : ControllerBase
 {
     [HttpGet]
-    [RequirePermission(PermissionKeys.Workforce.RidersRead)]
+    [RequirePermission(PermissionKeys.Workforce.ExternalRidersRead)]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
         var result = await service.GetExternalRidersAsync(cancellationToken);
@@ -19,7 +19,7 @@ public sealed class ExternalRidersController(IWorkforceService service) : Contro
     }
 
     [HttpGet("{employeeId:guid}")]
-    [RequirePermission(PermissionKeys.Workforce.RidersRead)]
+    [RequirePermission(PermissionKeys.Workforce.ExternalRidersRead)]
     public async Task<IActionResult> Get(Guid employeeId, CancellationToken cancellationToken)
     {
         var result = await service.GetExternalRiderAsync(employeeId, cancellationToken);
@@ -27,7 +27,7 @@ public sealed class ExternalRidersController(IWorkforceService service) : Contro
     }
 
     [HttpPost]
-    [RequirePermission(PermissionKeys.Workforce.EmployeesCreate)]
+    [RequirePermission(PermissionKeys.Workforce.ExternalRidersManage)]
     public async Task<IActionResult> Create([FromBody] CreateExternalRiderRequest request, CancellationToken cancellationToken)
     {
         var result = await service.CreateExternalRiderAsync(request, cancellationToken);
@@ -37,7 +37,7 @@ public sealed class ExternalRidersController(IWorkforceService service) : Contro
     }
 
     [HttpPut("{employeeId:guid}")]
-    [RequirePermission(PermissionKeys.Workforce.EmployeesUpdate)]
+    [RequirePermission(PermissionKeys.Workforce.ExternalRidersManage)]
     public async Task<IActionResult> Update(
         Guid employeeId,
         [FromBody] UpdateExternalRiderRequest request,

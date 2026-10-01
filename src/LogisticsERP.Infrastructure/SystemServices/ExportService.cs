@@ -62,13 +62,13 @@ internal sealed class ExportService(
 
     public async Task<Result<ExportJobResponse>> GetAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var result = await FindOwnedAsync(id, cancellationToken);
+        var result = await FindOwnedAsync(id, trackChanges: false, cancellationToken);
         return result is null ? Result.Failure<ExportJobResponse>(SystemErrors.NotFound) : Result.Success(ToResponse(result));
     }
 
     public async Task<Result<ExportArtifactResponse>> DownloadAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var item = await FindOwnedAsync(id, cancellationToken);
+        var item = await FindOwnedAsync(id, trackChanges: false, cancellationToken);
         var now = timeProvider.GetUtcNow();
         if (item is null) return Result.Failure<ExportArtifactResponse>(SystemErrors.NotFound);
         if (item.Status != ExportStatus.Completed || item.ArtifactExpiresAtUtc <= now
@@ -87,7 +87,7 @@ internal sealed class ExportService(
 
     public async Task<Result> CancelAsync(Guid id, string rowVersion, CancellationToken cancellationToken = default)
     {
-        var item = await FindOwnedAsync(id, cancellationToken);
+        var item = await FindOwnedAsync(id, trackChanges: true, cancellationToken);
         if (item is null) return Result.Failure(SystemErrors.NotFound);
         if (!HrServiceSupport.MatchesRowVersion(item.RowVersion, rowVersion)) return Result.Failure(SystemErrors.ConcurrencyConflict);
         if (item.Status != ExportStatus.Pending) return Result.Failure(SystemErrors.Conflict);
@@ -97,9 +97,16 @@ internal sealed class ExportService(
         return Result.Success();
     }
 
-    private async Task<ExportJob?> FindOwnedAsync(Guid id, CancellationToken cancellationToken) =>
-        currentUser.UserId is not { } userId ? null : await dbContext.ExportJobs.SingleOrDefaultAsync(
-            item => item.Id == id && item.RequestedByUserId == userId, cancellationToken);
+    private async Task<ExportJob?> FindOwnedAsync(Guid id, bool trackChanges, CancellationToken cancellationToken)
+    {
+        if (currentUser.UserId is not { } userId)
+        {
+            return null;
+        }
+
+        var query = dbContext.ExportJobs.Where(item => item.Id == id && item.RequestedByUserId == userId);
+        return await (trackChanges ? query : query.AsNoTracking()).SingleOrDefaultAsync(cancellationToken);
+    }
 
     private string? ResolveArtifactPath(string storagePath)
     {

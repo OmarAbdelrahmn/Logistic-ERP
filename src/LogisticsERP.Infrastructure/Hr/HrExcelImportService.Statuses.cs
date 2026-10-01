@@ -56,7 +56,7 @@ internal sealed partial class HrExcelImportService
             {
                 if (!employees.TryGetValue(row.IqamaNo, out var employee))
                 {
-                    issues.Add(new(row.RowNumber, row.IqamaNo, "Error", "No employee or rider was found for this Iqama number."));
+                    issues.Add(new(row.RowNumber, row.IqamaNo, "Error", "لم يُعثر على موظف أو سائق برقم الإقامة هذا."));
                     continue;
                 }
 
@@ -64,14 +64,14 @@ internal sealed partial class HrExcelImportService
                     && (employee.EngagementType == EmployeeRelationshipType.SponsoredInternal && employee.SponsorId is null
                         || !employee.IsEmployee && !riderIdsByEmployeeId.ContainsKey(employee.Id)))
                 {
-                    issues.Add(new(row.RowNumber, row.IqamaNo, "Error", "This employee or rider does not meet the requirements for Active status."));
+                    issues.Add(new(row.RowNumber, row.IqamaNo, "Error", "الموظف أو السائق لا يستوفي شروط الحالة النشطة."));
                 }
 
                 if (row.Status == EmployeeStatus.Archived
                     && riderIdsByEmployeeId.TryGetValue(employee.Id, out var riderId)
                     && assignedRiderIds.Contains(riderId))
                 {
-                    issues.Add(new(row.RowNumber, row.IqamaNo, "Error", "A rider with an active platform or vehicle assignment cannot be archived."));
+                    issues.Add(new(row.RowNumber, row.IqamaNo, "Error", "لا يمكن أرشفة سائق لديه ارتباط نشط بمنصة أو مركبة."));
                 }
             }
 

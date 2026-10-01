@@ -62,7 +62,7 @@ public sealed class VehicleAssignmentsController(
     public async Task<IActionResult> Take([FromForm] VehicleAssignmentMultipartForm form, [FromHeader(Name = "Idempotency-Key")] string? idempotencyKey, CancellationToken cancellationToken)
     {
         var request = Deserialize<TakeVehicleRequest>(form.Metadata);
-        if (request is null) return BadRequest();
+        if (request is null) return Result.Failure(FleetErrors.InvalidRequest).ToProblem(HttpContext);
         return await ExecuteAssignmentAsync(
             () => WithUploadsAsync(form.PromissoryFiles, uploads => service.TakeAsync(request, uploads, idempotencyKey ?? string.Empty, cancellationToken)),
             cancellationToken);
@@ -87,8 +87,9 @@ public sealed class VehicleAssignmentsController(
     public async Task<IActionResult> ReturnWithConditionReport([FromForm] VehicleReturnMultipartForm form, [FromHeader(Name = "Idempotency-Key")] string? idempotencyKey, CancellationToken cancellationToken)
     {
         var request = Deserialize<ReturnVehicleRequest>(form.Metadata);
-        if (request is null) return BadRequest();
-        if (request.EndCondition == LogisticsERP.Domain.Enums.VehicleCondition.Good) return BadRequest();
+        if (request is null) return Result.Failure(FleetErrors.InvalidRequest).ToProblem(HttpContext);
+        if (request.EndCondition == LogisticsERP.Domain.Enums.VehicleCondition.Good)
+            return Result.Failure(FleetErrors.ReturnConditionReportNotAllowed).ToProblem(HttpContext);
         return await ExecuteAssignmentAsync(
             () => WithUploadsAsync(form.EvidenceFiles, uploads => service.ReturnAsync(request, uploads, idempotencyKey ?? string.Empty, cancellationToken)),
             cancellationToken);
@@ -101,7 +102,7 @@ public sealed class VehicleAssignmentsController(
     public async Task<IActionResult> Switch([FromForm] VehicleSwitchMultipartForm form, [FromHeader(Name = "Idempotency-Key")] string? idempotencyKey, CancellationToken cancellationToken)
     {
         var request = Deserialize<SwitchVehicleRequest>(form.Metadata);
-        if (request is null) return BadRequest();
+        if (request is null) return Result.Failure(FleetErrors.InvalidRequest).ToProblem(HttpContext);
         return await ExecuteAssignmentAsync(
             () => WithUploadGroupsAsync(
                 form.PromissoryFiles,
@@ -185,22 +186,10 @@ public sealed class VehicleAssignmentsController(
         {
             LogAssignmentFailure(logger, HttpContext.TraceIdentifier, exception);
 
-            var problem = new ProblemDetails
-            {
-                Status = StatusCodes.Status500InternalServerError,
-                Title = "fleet.assignment_unexpected_error",
-                Detail = exception.Message,
-                Type = "https://httpstatuses.io/500",
-                Instance = HttpContext.Request.Path,
-                Extensions =
-                {
-                    ["errorCode"] = "fleet.assignment_unexpected_error",
-                    ["correlationId"] = HttpContext.TraceIdentifier,
-                    ["exceptionType"] = exception.GetType().FullName,
-                    ["exception"] = exception.ToString(),
-                    ["innerException"] = exception.InnerException?.ToString()
-                }
-            };
+            var problem = FleetProblemDetails.Create(
+                HttpContext,
+                StatusCodes.Status500InternalServerError,
+                errorCode: "fleet.assignment_unexpected_error");
 
             return StatusCode(StatusCodes.Status500InternalServerError, problem);
         }

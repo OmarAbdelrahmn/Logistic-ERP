@@ -135,15 +135,15 @@ internal sealed partial class HrExcelImportService(
             if (engagement == EmployeeRelationshipType.SponsoredInternal && sponsor is null && status == EmployeeStatus.Active)
             {
                 status = EmployeeStatus.Onboarding;
-                issues.Add(new(row.RowNumber, row.IqamaNo, "Warning", "Sponsor was not found; employee was imported as Onboarding."));
+                issues.Add(new(row.RowNumber, row.IqamaNo, "Warning", "لم يُعثر على الكفيل؛ استُورد الموظف بحالة التهيئة."));
             }
             if (city is null && row.City.Length > 0)
             {
-                issues.Add(new(row.RowNumber, row.IqamaNo, "Warning", $"Operating city '{row.City}' is not configured and was ignored."));
+                issues.Add(new(row.RowNumber, row.IqamaNo, "Warning", $"مدينة التشغيل «{row.City}» غير مهيأة وتم تجاهلها."));
             }
             if (workType is null && row.ActualWork.Length > 0 && !IsNoOperationalWork(row.ActualWork))
             {
-                issues.Add(new(row.RowNumber, row.IqamaNo, "Warning", $"Operational work type '{row.ActualWork}' is not configured and was ignored."));
+                issues.Add(new(row.RowNumber, row.IqamaNo, "Warning", $"نوع العمل «{row.ActualWork}» غير مهيأ وتم تجاهله."));
             }
 
             if (employees.TryGetValue(row.IqamaNo, out var existingEmployee)
@@ -156,8 +156,8 @@ internal sealed partial class HrExcelImportService(
                     row.IqamaNo,
                     "Error",
                     status == EmployeeStatus.Archived
-                        ? "A rider with an active platform or vehicle assignment cannot be archived."
-                        : "A rider with an active platform or vehicle assignment cannot be converted to an employee."));
+                        ? "لا يمكن أرشفة سائق لديه ارتباط نشط بمنصة أو مركبة."
+                        : "لا يمكن تحويل سائق لديه ارتباط نشط بمنصة أو مركبة إلى موظف."));
                 continue;
             }
 
@@ -234,7 +234,7 @@ internal sealed partial class HrExcelImportService(
                 var category = ResolveLicenseCategory(licenseType, licenseCategories);
                 if (category is null)
                 {
-                    issues.Add(new(row.RowNumber, row.IqamaNo, "Warning", $"Driver-license category '{licenseType}' is not configured and was ignored."));
+                    issues.Add(new(row.RowNumber, row.IqamaNo, "Warning", $"فئة رخصة القيادة «{licenseType}» غير مهيأة وتم تجاهلها."));
                     continue;
                 }
                 if (!currentLicenses.TryGetValue((employee.Id, category.Id), out var license))
@@ -283,7 +283,7 @@ internal sealed partial class HrExcelImportService(
                     if (externalId.Length == 0) continue;
                     if (!platforms.TryGetValue(platformColumn.Code, out var platform))
                     {
-                        issues.Add(new(row.RowNumber, row.IqamaNo, "Warning", $"Platform {platformColumn.Code} is not configured."));
+                        issues.Add(new(row.RowNumber, row.IqamaNo, "Warning", $"المنصة {platformColumn.Code} غير مهيأة."));
                         continue;
                     }
                     if (await dbContext.PlatformRiderAccounts.AnyAsync(item => item.ClientPlatformId == platform.Id && item.ExternalAccountId == externalId, cancellationToken))
@@ -355,7 +355,7 @@ internal sealed partial class HrExcelImportService(
         };
         if (status is null)
         {
-            issues.Add(new(rowNumber, iqama, "Warning", $"Employee status '{value}' is not recognized; the default status was used."));
+            issues.Add(new(rowNumber, iqama, "Warning", $"حالة الموظف «{value}» غير معروفة؛ استُخدمت الحالة الافتراضية."));
         }
         return status;
     }
@@ -381,7 +381,7 @@ internal sealed partial class HrExcelImportService(
         };
         if (gender is null)
         {
-            issues.Add(new(rowNumber, iqama, "Warning", $"Gender '{value}' is not recognized and was ignored."));
+            issues.Add(new(rowNumber, iqama, "Warning", $"الجنس «{value}» غير معروف وتم تجاهله."));
         }
         return gender;
     }

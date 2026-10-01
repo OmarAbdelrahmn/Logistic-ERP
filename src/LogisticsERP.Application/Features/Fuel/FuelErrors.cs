@@ -22,6 +22,9 @@ public static class FuelErrors
     public static readonly OperationError DuplicateCard = new(
         "fuel.duplicate_card", "رقم البطاقة مسجل مسبقًا لدى شركة الوقود نفسها.", ErrorType.Conflict, "cardNumber");
 
+    public static readonly OperationError SponsorNotFound = new(
+        "fuel.sponsor_not_found", "لم يتم العثور على الكفيل.", ErrorType.NotFound, "sponsorId");
+
     public static readonly OperationError RiderNotFound = new(
         "fuel.rider_not_found", "لم يتم العثور على الرايدر.", ErrorType.NotFound, "riderProfileId");
 

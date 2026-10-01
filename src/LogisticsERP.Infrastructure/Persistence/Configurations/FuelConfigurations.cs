@@ -15,6 +15,8 @@ internal sealed class FuelCardConfiguration : IEntityTypeConfiguration<FuelCard>
         builder.Property(x => x.PlateNumberText).HasMaxLength(100);
         builder.Property(x => x.NormalizedPlateNumber).HasMaxLength(100);
         builder.Property(x => x.Notes).HasMaxLength(4000);
+        builder.HasOne<Sponsor>().WithMany().HasForeignKey(x => x.SponsorId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(x => x.SponsorId);
         builder.HasIndex(x => new { x.Provider, x.NormalizedCardNumber })
             .IsUnique()
             .HasFilter("[IsDeleted] = 0");

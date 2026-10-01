@@ -28,7 +28,7 @@ Permissions: `maintenance.oil.complete` and `inventory.stock.move`. Send a uniqu
 
 `GET /api/maintenance/oil-inventory-locations` requires `maintenance.oil.read` and returns `{ inventoryLocationId, maintenanceLocationId, inventoryLocationNameAr, maintenanceLocationNameAr }[]` for eligible active locations. Use `inventoryLocationId` in the POST body.
 
-`GET /api/maintenance/oil-barrels?inventoryLocationId={id}&inventoryItemId={id}` also requires `maintenance.oil.read`. It returns open and sealed barrels as `{ id, barrelNumber, inventoryLocationId, inventoryItemId, status, remainingLiters }[]`. It does not reveal costs or FIFO layers.
+`GET /api/maintenance/oil-barrels?inventoryLocationId={id}&inventoryItemId={id}&vehicleType=2` also requires `maintenance.oil.read`. It returns open and sealed barrels as `{ id, barrelNumber, inventoryLocationId, inventoryItemId, status, remainingLiters, allowedVehicleType }[]`. The optional `vehicleType` filter is `1` for motorcycles or `2` for cars; it includes matching barrels and unclassified sealed barrels eligible as the next barrel. Oil usage consumes only the open barrel matching the actual vehicle type. Users choose the allowed type when opening a barrel. See [Opening and usage report handoff](oil-barrel-vehicle-types-frontend-handoff.md).
 
 Success (`200 OK`):
 

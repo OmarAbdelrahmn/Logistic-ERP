@@ -30,7 +30,15 @@ public sealed class PhoneSimModelTests
         Assert.Equal("[IsDeleted] = 0", phoneIndex.GetFilter());
         Assert.True(iccidIndex.IsUnique);
         Assert.Equal("[NormalizedIccid] IS NOT NULL AND [IsDeleted] = 0", iccidIndex.GetFilter());
-        Assert.Equal(typeof(Employee), Assert.Single(entity.GetForeignKeys()).PrincipalEntityType.ClrType);
+        Assert.Contains(entity.GetForeignKeys(), foreignKey =>
+            foreignKey.PrincipalEntityType.ClrType == typeof(Employee));
+        var placeForeignKey = Assert.Single(entity.GetForeignKeys(), foreignKey =>
+            foreignKey.PrincipalEntityType.ClrType == typeof(Place));
+        Assert.False(placeForeignKey.IsRequired);
+        Assert.Equal(nameof(PhoneSimCard.PlaceId), Assert.Single(placeForeignKey.Properties).Name);
+        Assert.Equal(typeof(PhoneSimCard), Assert.Single(
+            context.GetService<IDesignTimeModel>().Model.FindEntityType(typeof(Place))!.GetReferencingForeignKeys())
+            .DeclaringEntityType.ClrType);
 
         var rowVersion = entity.FindProperty(nameof(PhoneSimCard.RowVersion))!;
         Assert.True(rowVersion.IsConcurrencyToken);

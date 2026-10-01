@@ -1,4 +1,4 @@
-﻿IF OBJECT_ID(N'[migration].[__ApplicationMigrationsHistory]') IS NULL
+IF OBJECT_ID(N'[migration].[__ApplicationMigrationsHistory]') IS NULL
 BEGIN
     IF SCHEMA_ID(N'migration') IS NULL EXEC(N'CREATE SCHEMA [migration];');
     CREATE TABLE [migration].[__ApplicationMigrationsHistory] (
@@ -14615,3 +14615,539 @@ END;
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260928125846_AddExternalRiderPermissions'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Category', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'DescriptionAr', N'DescriptionEn', N'DisplayOrder', N'GrantabilityRule', N'IsDeleted', N'IsDeprecated', N'IsHighTrust', N'IsSensitive', N'Key', N'NameAr', N'NameEn', N'ReplacementKey', N'RequiresClientScope', N'RequiresHousingScope', N'UpdatedAtUtc', N'UpdatedByUserId', N'Version') AND [object_id] = OBJECT_ID(N'[platform].[PermissionDefinitions]'))
+        SET IDENTITY_INSERT [platform].[PermissionDefinitions] ON;
+    EXEC(N'INSERT INTO [platform].[PermissionDefinitions] ([Id], [Category], [CreatedAtUtc], [CreatedByUserId], [DeletedAtUtc], [DeletedByUserId], [DeletionReason], [DescriptionAr], [DescriptionEn], [DisplayOrder], [GrantabilityRule], [IsDeleted], [IsDeprecated], [IsHighTrust], [IsSensitive], [Key], [NameAr], [NameEn], [ReplacementKey], [RequiresClientScope], [RequiresHousingScope], [UpdatedAtUtc], [UpdatedByUserId], [Version])
+    VALUES (''019c18d5-62e1-7000-a000-000000000120'', N''Workforce'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''عرض ملفات المناديب الخارجيين.'', N''View external rider profiles.'', 120, NULL, CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), N''external_riders.read'', N''عرض المناديب الخارجيين'', N''Read external riders'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1),
+    (''019c18d5-62e1-7000-a000-000000000121'', N''Workforce'', ''2026-01-01T00:00:00.0000000+00:00'', NULL, NULL, NULL, NULL, N''إنشاء وتعديل ملفات المناديب الخارجيين.'', N''Create and update external rider profiles.'', 121, NULL, CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), CAST(0 AS bit), N''external_riders.manage'', N''إدارة المناديب الخارجيين'', N''Manage external riders'', NULL, CAST(0 AS bit), CAST(0 AS bit), NULL, NULL, 1)');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Category', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'DescriptionAr', N'DescriptionEn', N'DisplayOrder', N'GrantabilityRule', N'IsDeleted', N'IsDeprecated', N'IsHighTrust', N'IsSensitive', N'Key', N'NameAr', N'NameEn', N'ReplacementKey', N'RequiresClientScope', N'RequiresHousingScope', N'UpdatedAtUtc', N'UpdatedByUserId', N'Version') AND [object_id] = OBJECT_ID(N'[platform].[PermissionDefinitions]'))
+        SET IDENTITY_INSERT [platform].[PermissionDefinitions] OFF;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260928125846_AddExternalRiderPermissions'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260928125846_AddExternalRiderPermissions', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260928131854_SupportManualOilBarrels'
+)
+BEGIN
+    ALTER TABLE [maintenance].[StockMovements] DROP CONSTRAINT [CK_StockMovements_Type];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260928131854_SupportManualOilBarrels'
+)
+BEGIN
+    DROP INDEX [IX_OilBarrels_PurchaseReceiptLineId_PackageSequence] ON [maintenance].[OilBarrels];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260928131854_SupportManualOilBarrels'
+)
+BEGIN
+    DECLARE @var49 nvarchar(max);
+    SELECT @var49 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[maintenance].[OilBarrels]') AND [c].[name] = N'PurchaseReceiptLineId');
+    IF @var49 IS NOT NULL EXEC(N'ALTER TABLE [maintenance].[OilBarrels] DROP CONSTRAINT ' + @var49 + ';');
+    ALTER TABLE [maintenance].[OilBarrels] ALTER COLUMN [PurchaseReceiptLineId] uniqueidentifier NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260928131854_SupportManualOilBarrels'
+)
+BEGIN
+    EXEC(N'ALTER TABLE [maintenance].[StockMovements] ADD CONSTRAINT [CK_StockMovements_Type] CHECK ([MovementType] BETWEEN 1 AND 10)');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260928131854_SupportManualOilBarrels'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_OilBarrels_PurchaseReceiptLineId_PackageSequence] ON [maintenance].[OilBarrels] ([PurchaseReceiptLineId], [PackageSequence]) WHERE [PurchaseReceiptLineId] IS NOT NULL AND [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260928131854_SupportManualOilBarrels'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260928131854_SupportManualOilBarrels', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260929065655_LinkFuelCardsToSponsors'
+)
+BEGIN
+    IF EXISTS (SELECT 1 FROM [app].[FuelCards]) THROW 51000, 'Assign sponsors to existing fuel cards before applying this migration.', 1;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260929065655_LinkFuelCardsToSponsors'
+)
+BEGIN
+    ALTER TABLE [app].[FuelCards] ADD [SponsorId] uniqueidentifier NOT NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260929065655_LinkFuelCardsToSponsors'
+)
+BEGIN
+    CREATE INDEX [IX_FuelCards_SponsorId] ON [app].[FuelCards] ([SponsorId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260929065655_LinkFuelCardsToSponsors'
+)
+BEGIN
+    ALTER TABLE [app].[FuelCards] ADD CONSTRAINT [FK_FuelCards_Sponsors_SponsorId] FOREIGN KEY ([SponsorId]) REFERENCES [app].[Sponsors] ([Id]) ON DELETE NO ACTION;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260929065655_LinkFuelCardsToSponsors'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260929065655_LinkFuelCardsToSponsors', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260929084255_AddHousingFloorsEquipmentExternalOccupants'
+)
+BEGIN
+    ALTER TABLE [app].[HousingRooms] ADD [FloorId] uniqueidentifier NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260929084255_AddHousingFloorsEquipmentExternalOccupants'
+)
+BEGIN
+    ALTER TABLE [app].[HousingRooms] ADD [Notes] nvarchar(2000) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260929084255_AddHousingFloorsEquipmentExternalOccupants'
+)
+BEGIN
+    CREATE TABLE [app].[HousingExternalOccupants] (
+        [Id] uniqueidentifier NOT NULL,
+        [RoomId] uniqueidentifier NOT NULL,
+        [Name] nvarchar(200) NOT NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_HousingExternalOccupants] PRIMARY KEY ([Id]),
+        CONSTRAINT [FK_HousingExternalOccupants_HousingRooms_RoomId] FOREIGN KEY ([RoomId]) REFERENCES [app].[HousingRooms] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260929084255_AddHousingFloorsEquipmentExternalOccupants'
+)
+BEGIN
+    CREATE TABLE [app].[HousingFloors] (
+        [Id] uniqueidentifier NOT NULL,
+        [HousingId] uniqueidentifier NOT NULL,
+        [Name] nvarchar(100) NOT NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_HousingFloors] PRIMARY KEY ([Id]),
+        CONSTRAINT [FK_HousingFloors_Housing_HousingId] FOREIGN KEY ([HousingId]) REFERENCES [app].[Housing] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260929084255_AddHousingFloorsEquipmentExternalOccupants'
+)
+BEGIN
+    CREATE TABLE [app].[HousingEquipment] (
+        [Id] uniqueidentifier NOT NULL,
+        [FloorId] uniqueidentifier NULL,
+        [RoomId] uniqueidentifier NULL,
+        [Name] nvarchar(100) NOT NULL,
+        [Quantity] int NOT NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_HousingEquipment] PRIMARY KEY ([Id]),
+        CONSTRAINT [CK_HousingEquipment_Quantity] CHECK ([Quantity] >= 0),
+        CONSTRAINT [CK_HousingEquipment_Scope] CHECK (([FloorId] IS NULL AND [RoomId] IS NOT NULL) OR ([FloorId] IS NOT NULL AND [RoomId] IS NULL)),
+        CONSTRAINT [FK_HousingEquipment_HousingFloors_FloorId] FOREIGN KEY ([FloorId]) REFERENCES [app].[HousingFloors] ([Id]) ON DELETE NO ACTION,
+        CONSTRAINT [FK_HousingEquipment_HousingRooms_RoomId] FOREIGN KEY ([RoomId]) REFERENCES [app].[HousingRooms] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260929084255_AddHousingFloorsEquipmentExternalOccupants'
+)
+BEGIN
+    INSERT INTO [app].[HousingFloors]
+        ([Id], [HousingId], [Name], [CreatedAtUtc], [IsDeleted])
+    SELECT NEWID(), h.[Id], N'1', SYSUTCDATETIME(), 0
+    FROM [app].[Housing] h
+    WHERE NOT EXISTS (SELECT 1 FROM [app].[HousingFloors] f WHERE f.[HousingId] = h.[Id]);
+
+    UPDATE r SET [FloorId] = f.[Id]
+    FROM [app].[HousingRooms] r
+    JOIN [app].[HousingFloors] f ON f.[HousingId] = r.[HousingId] AND f.[Name] = N'1';
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260929084255_AddHousingFloorsEquipmentExternalOccupants'
+)
+BEGIN
+    DECLARE @var50 nvarchar(max);
+    SELECT @var50 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[app].[HousingRooms]') AND [c].[name] = N'FloorId');
+    IF @var50 IS NOT NULL EXEC(N'ALTER TABLE [app].[HousingRooms] DROP CONSTRAINT ' + @var50 + ';');
+    ALTER TABLE [app].[HousingRooms] ALTER COLUMN [FloorId] uniqueidentifier NOT NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260929084255_AddHousingFloorsEquipmentExternalOccupants'
+)
+BEGIN
+    CREATE INDEX [IX_HousingRooms_FloorId] ON [app].[HousingRooms] ([FloorId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260929084255_AddHousingFloorsEquipmentExternalOccupants'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_HousingEquipment_FloorId_Name] ON [app].[HousingEquipment] ([FloorId], [Name]) WHERE [IsDeleted] = 0 AND [FloorId] IS NOT NULL');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260929084255_AddHousingFloorsEquipmentExternalOccupants'
+)
+BEGIN
+    CREATE INDEX [IX_HousingEquipment_IsDeleted] ON [app].[HousingEquipment] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260929084255_AddHousingFloorsEquipmentExternalOccupants'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_HousingEquipment_RoomId_Name] ON [app].[HousingEquipment] ([RoomId], [Name]) WHERE [IsDeleted] = 0 AND [RoomId] IS NOT NULL');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260929084255_AddHousingFloorsEquipmentExternalOccupants'
+)
+BEGIN
+    CREATE INDEX [IX_HousingExternalOccupants_IsDeleted] ON [app].[HousingExternalOccupants] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260929084255_AddHousingFloorsEquipmentExternalOccupants'
+)
+BEGIN
+    CREATE INDEX [IX_HousingExternalOccupants_RoomId] ON [app].[HousingExternalOccupants] ([RoomId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260929084255_AddHousingFloorsEquipmentExternalOccupants'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_HousingFloors_HousingId_Name] ON [app].[HousingFloors] ([HousingId], [Name]) WHERE [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260929084255_AddHousingFloorsEquipmentExternalOccupants'
+)
+BEGIN
+    CREATE INDEX [IX_HousingFloors_IsDeleted] ON [app].[HousingFloors] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260929084255_AddHousingFloorsEquipmentExternalOccupants'
+)
+BEGIN
+    ALTER TABLE [app].[HousingRooms] ADD CONSTRAINT [FK_HousingRooms_HousingFloors_FloorId] FOREIGN KEY ([FloorId]) REFERENCES [app].[HousingFloors] ([Id]) ON DELETE NO ACTION;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260929084255_AddHousingFloorsEquipmentExternalOccupants'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260929084255_AddHousingFloorsEquipmentExternalOccupants', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260929085316_AddHousingPendingOccupants'
+)
+BEGIN
+    CREATE TABLE [app].[HousingPendingOccupants] (
+        [Id] uniqueidentifier NOT NULL,
+        [RoomId] uniqueidentifier NOT NULL,
+        [IqamaNo] nvarchar(20) NOT NULL,
+        [Name] nvarchar(200) NOT NULL,
+        [SourceRow] int NOT NULL,
+        [CreatedAtUtc] datetimeoffset NOT NULL,
+        [CreatedByUserId] uniqueidentifier NULL,
+        [UpdatedAtUtc] datetimeoffset NULL,
+        [UpdatedByUserId] uniqueidentifier NULL,
+        [RowVersion] rowversion NOT NULL,
+        [IsDeleted] bit NOT NULL,
+        [DeletedAtUtc] datetimeoffset NULL,
+        [DeletedByUserId] uniqueidentifier NULL,
+        [DeletionReason] nvarchar(500) NULL,
+        CONSTRAINT [PK_HousingPendingOccupants] PRIMARY KEY ([Id]),
+        CONSTRAINT [FK_HousingPendingOccupants_HousingRooms_RoomId] FOREIGN KEY ([RoomId]) REFERENCES [app].[HousingRooms] ([Id]) ON DELETE NO ACTION
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260929085316_AddHousingPendingOccupants'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_HousingPendingOccupants_IqamaNo] ON [app].[HousingPendingOccupants] ([IqamaNo]) WHERE [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260929085316_AddHousingPendingOccupants'
+)
+BEGIN
+    CREATE INDEX [IX_HousingPendingOccupants_IsDeleted] ON [app].[HousingPendingOccupants] ([IsDeleted]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260929085316_AddHousingPendingOccupants'
+)
+BEGIN
+    CREATE INDEX [IX_HousingPendingOccupants_RoomId] ON [app].[HousingPendingOccupants] ([RoomId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260929085316_AddHousingPendingOccupants'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260929085316_AddHousingPendingOccupants', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260929085712_ScopeHousingRoomNumbersToFloor'
+)
+BEGIN
+    DROP INDEX [IX_HousingRooms_FloorId] ON [app].[HousingRooms];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260929085712_ScopeHousingRoomNumbersToFloor'
+)
+BEGIN
+    DROP INDEX [IX_HousingRooms_HousingId_Name] ON [app].[HousingRooms];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260929085712_ScopeHousingRoomNumbersToFloor'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_HousingRooms_FloorId_Name] ON [app].[HousingRooms] ([FloorId], [Name]) WHERE [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260929085712_ScopeHousingRoomNumbersToFloor'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260929085712_ScopeHousingRoomNumbersToFloor', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260930130031_AddPhoneSimPlaces'
+)
+BEGIN
+    ALTER TABLE [app].[PhoneSimCards] ADD [PlaceId] uniqueidentifier NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260930130031_AddPhoneSimPlaces'
+)
+BEGIN
+    CREATE TABLE [app].[Places] (
+        [Id] uniqueidentifier NOT NULL,
+        [Name] nvarchar(200) NOT NULL,
+        CONSTRAINT [PK_Places] PRIMARY KEY ([Id])
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260930130031_AddPhoneSimPlaces'
+)
+BEGIN
+    CREATE INDEX [IX_PhoneSimCards_PlaceId] ON [app].[PhoneSimCards] ([PlaceId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260930130031_AddPhoneSimPlaces'
+)
+BEGIN
+    CREATE UNIQUE INDEX [IX_Places_Name] ON [app].[Places] ([Name]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260930130031_AddPhoneSimPlaces'
+)
+BEGIN
+    ALTER TABLE [app].[PhoneSimCards] ADD CONSTRAINT [FK_PhoneSimCards_Places_PlaceId] FOREIGN KEY ([PlaceId]) REFERENCES [app].[Places] ([Id]) ON DELETE NO ACTION;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20260930130031_AddPhoneSimPlaces'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260930130031_AddPhoneSimPlaces', N'10.0.11');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20261001073011_RestrictOilBarrelsByVehicleType'
+)
+BEGIN
+    DROP INDEX [IX_OilBarrels_InventoryLocationId_InventoryItemId] ON [maintenance].[OilBarrels];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20261001073011_RestrictOilBarrelsByVehicleType'
+)
+BEGIN
+    ALTER TABLE [maintenance].[OilBarrels] ADD [AllowedVehicleType] int NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20261001073011_RestrictOilBarrelsByVehicleType'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [IX_OilBarrels_InventoryLocationId_InventoryItemId_AllowedVehicleType] ON [maintenance].[OilBarrels] ([InventoryLocationId], [InventoryItemId], [AllowedVehicleType]) WHERE [Status] = 2 AND [IsDeleted] = 0');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20261001073011_RestrictOilBarrelsByVehicleType'
+)
+BEGIN
+    EXEC(N'ALTER TABLE [maintenance].[OilBarrels] ADD CONSTRAINT [CK_OilBarrels_AllowedVehicleType] CHECK ([AllowedVehicleType] IS NULL OR [AllowedVehicleType] IN (1, 2))');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [migration].[__ApplicationMigrationsHistory]
+    WHERE [MigrationId] = N'20261001073011_RestrictOilBarrelsByVehicleType'
+)
+BEGIN
+    INSERT INTO [migration].[__ApplicationMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20261001073011_RestrictOilBarrelsByVehicleType', N'10.0.11');
+END;
+
+COMMIT;
+GO

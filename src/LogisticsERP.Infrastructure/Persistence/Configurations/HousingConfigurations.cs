@@ -35,8 +35,10 @@ internal sealed class HousingRoomConfiguration : IEntityTypeConfiguration<Housin
     {
         builder.ConfigureOperational("HousingRooms");
         builder.Property(entity => entity.Name).HasMaxLength(100).IsRequired();
+        builder.Property(entity => entity.Notes).HasMaxLength(2000);
         builder.HasOne<Housing>().WithMany().HasForeignKey(entity => entity.HousingId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasIndex(entity => new { entity.HousingId, entity.Name })
+        builder.HasOne<HousingFloor>().WithMany().HasForeignKey(entity => entity.FloorId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(entity => new { entity.FloorId, entity.Name })
             .IsUnique()
             .HasFilter("[IsDeleted] = 0");
         builder.HasIndex(entity => new { entity.HousingId, entity.IsDeleted });
@@ -45,6 +47,59 @@ internal sealed class HousingRoomConfiguration : IEntityTypeConfiguration<Housin
             table.HasCheckConstraint("CK_HousingRooms_Capacity", "[Capacity] > 0");
             table.HasCheckConstraint("CK_HousingRooms_CurrentOccupancy", "[CurrentOccupancy] >= 0 AND [CurrentOccupancy] <= [Capacity]");
         });
+    }
+}
+
+internal sealed class HousingFloorConfiguration : IEntityTypeConfiguration<HousingFloor>
+{
+    public void Configure(EntityTypeBuilder<HousingFloor> builder)
+    {
+        builder.ConfigureOperational("HousingFloors");
+        builder.Property(entity => entity.Name).HasMaxLength(100).IsRequired();
+        builder.HasOne<Housing>().WithMany().HasForeignKey(entity => entity.HousingId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(entity => new { entity.HousingId, entity.Name }).IsUnique().HasFilter("[IsDeleted] = 0");
+    }
+}
+
+internal sealed class HousingEquipmentConfiguration : IEntityTypeConfiguration<HousingEquipment>
+{
+    public void Configure(EntityTypeBuilder<HousingEquipment> builder)
+    {
+        builder.ConfigureOperational("HousingEquipment");
+        builder.Property(entity => entity.Name).HasMaxLength(100).IsRequired();
+        builder.HasOne<HousingFloor>().WithMany().HasForeignKey(entity => entity.FloorId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<HousingRoom>().WithMany().HasForeignKey(entity => entity.RoomId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(entity => new { entity.FloorId, entity.Name }).IsUnique().HasFilter("[IsDeleted] = 0 AND [FloorId] IS NOT NULL");
+        builder.HasIndex(entity => new { entity.RoomId, entity.Name }).IsUnique().HasFilter("[IsDeleted] = 0 AND [RoomId] IS NOT NULL");
+        builder.ToTable(table =>
+        {
+            table.HasCheckConstraint("CK_HousingEquipment_Scope", "([FloorId] IS NULL AND [RoomId] IS NOT NULL) OR ([FloorId] IS NOT NULL AND [RoomId] IS NULL)");
+            table.HasCheckConstraint("CK_HousingEquipment_Quantity", "[Quantity] >= 0");
+        });
+    }
+}
+
+internal sealed class HousingExternalOccupantConfiguration : IEntityTypeConfiguration<HousingExternalOccupant>
+{
+    public void Configure(EntityTypeBuilder<HousingExternalOccupant> builder)
+    {
+        builder.ConfigureOperational("HousingExternalOccupants");
+        builder.Property(entity => entity.Name).HasMaxLength(200).IsRequired();
+        builder.HasOne<HousingRoom>().WithMany().HasForeignKey(entity => entity.RoomId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(entity => entity.RoomId);
+    }
+}
+
+internal sealed class HousingPendingOccupantConfiguration : IEntityTypeConfiguration<HousingPendingOccupant>
+{
+    public void Configure(EntityTypeBuilder<HousingPendingOccupant> builder)
+    {
+        builder.ConfigureOperational("HousingPendingOccupants");
+        builder.Property(entity => entity.IqamaNo).HasMaxLength(20).IsRequired();
+        builder.Property(entity => entity.Name).HasMaxLength(200).IsRequired();
+        builder.HasOne<HousingRoom>().WithMany().HasForeignKey(entity => entity.RoomId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(entity => entity.IqamaNo).IsUnique().HasFilter("[IsDeleted] = 0");
+        builder.HasIndex(entity => entity.RoomId);
     }
 }
 

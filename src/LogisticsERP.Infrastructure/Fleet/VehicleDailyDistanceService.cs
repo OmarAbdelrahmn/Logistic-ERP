@@ -79,7 +79,11 @@ internal sealed class VehicleDailyDistanceService(
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToArrayAsync(cancellationToken);
-        var items = rows.Select(x => Map(x.Vehicle, x.Distance, workDate)).ToArray();
+        var cityNames = await GetOperatingCityNamesAsync(
+            rows.Select(x => x.Vehicle.OperatingCityId).OfType<Guid>(), cancellationToken);
+        var items = rows.Select(x => Map(x.Vehicle, x.Distance, workDate,
+            x.Vehicle.OperatingCityId is { } cityId && cityNames.TryGetValue(cityId, out var cityName)
+                ? cityName : null)).ToArray();
 
         return Result.Success(new VehicleDailyDistancePageResponse(
             items,
@@ -128,6 +132,11 @@ internal sealed class VehicleDailyDistanceService(
         {
             return Result.Failure<VehicleDailyDistanceResponse>(FleetErrors.ConcurrencyConflict);
         }
+
+        var cityNames = await GetOperatingCityNamesAsync(
+            vehicle.OperatingCityId is { } cityId ? new[] { cityId } : Array.Empty<Guid>(), cancellationToken);
+        var operatingCityName = vehicle.OperatingCityId is { } operatingCityId
+            && cityNames.TryGetValue(operatingCityId, out var cityName) ? cityName : null;
 
         var isNew = current is null;
         current ??= new VehicleDailyDistance
@@ -183,7 +192,7 @@ internal sealed class VehicleDailyDistanceService(
             return Result.Failure<VehicleDailyDistanceResponse>(FleetErrors.ConcurrencyConflict);
         }
 
-        return Result.Success(Map(vehicle, current, workDate));
+        return Result.Success(Map(vehicle, current, workDate, operatingCityName));
     }
 
     public async Task<Result<GpsDistanceImportResponse>> ImportGpsAsync(
@@ -203,10 +212,19 @@ internal sealed class VehicleDailyDistanceService(
         }
 
         var extension = Path.GetExtension(file.OriginalFileName).ToLowerInvariant();
-        if (file.Length <= 0 || file.Length > 10 * 1024 * 1024
-            || extension is not ".xls" and not ".xlsx" and not ".htm" and not ".html" and not ".zip")
+        if (file.Length <= 0)
         {
-            return Result.Failure<GpsDistanceImportResponse>(FleetErrors.InvalidGpsFile);
+            return Result.Failure<GpsDistanceImportResponse>(FleetErrors.GpsFileRequired);
+        }
+
+        if (file.Length > 10 * 1024 * 1024)
+        {
+            return Result.Failure<GpsDistanceImportResponse>(FleetErrors.GpsFileTooLarge);
+        }
+
+        if (extension is not ".xls" and not ".xlsx" and not ".htm" and not ".html" and not ".zip")
+        {
+            return Result.Failure<GpsDistanceImportResponse>(FleetErrors.GpsFileTypeUnsupported);
         }
 
         await using var workbook = new MemoryStream((int)Math.Min(file.Length, int.MaxValue));
@@ -236,7 +254,8 @@ internal sealed class VehicleDailyDistanceService(
 
         if (expectedWorkDate.HasValue && expectedWorkDate.Value != report.WorkDate)
         {
-            return Result.Failure<GpsDistanceImportResponse>(FleetErrors.GpsDateMismatch);
+            return Result.Failure<GpsDistanceImportResponse>(
+                FleetErrors.GpsDateMismatch(expectedWorkDate.Value, report.WorkDate));
         }
 
         if (await dbContext.VehicleDailyDistanceImports.AnyAsync(
@@ -483,10 +502,27 @@ internal sealed class VehicleDailyDistanceService(
 
     private static long ToWholeOdometer(decimal value) => decimal.ToInt64(decimal.Floor(value));
 
-    private static VehicleDailyDistanceResponse Map(Vehicle vehicle, VehicleDailyDistance? distance, DateOnly workDate) =>
+    private async Task<Dictionary<Guid, string>> GetOperatingCityNamesAsync(
+        IEnumerable<Guid> operatingCityIds, CancellationToken cancellationToken)
+    {
+        var ids = operatingCityIds.Distinct().ToArray();
+        if (ids.Length == 0) return [];
+
+        return await (from operatingCity in dbContext.OperatingCities.AsNoTracking()
+                      join city in dbContext.GlobalCities.AsNoTracking()
+                          on operatingCity.GlobalCityId equals city.Id
+                      where ids.Contains(operatingCity.Id)
+                      select new { operatingCity.Id, city.NameAr })
+            .ToDictionaryAsync(x => x.Id, x => x.NameAr, cancellationToken);
+    }
+
+    private static VehicleDailyDistanceResponse Map(Vehicle vehicle, VehicleDailyDistance? distance, DateOnly workDate, string? operatingCity) =>
         new(
             distance?.Id,
             vehicle.Id,
+            vehicle.VehicleType,
+            vehicle.OperatingCityId,
+            operatingCity,
             workDate,
             vehicle.AssetNumber,
             vehicle.PlateNumberAr,

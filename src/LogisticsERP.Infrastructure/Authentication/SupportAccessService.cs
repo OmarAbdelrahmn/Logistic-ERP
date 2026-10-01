@@ -67,7 +67,7 @@ internal sealed class SupportAccessService(
         {
             return Result.Failure<SupportAccessResponse>(new OperationError(
                 "support_access.forbidden",
-                "Only a high-trust support-access administrator can request access for another operator or use break-glass.",
+                "يمكن لمسؤول الوصول إلى الدعم المخوّل فقط طلب صلاحية لمشغّل آخر أو استخدام الوصول الطارئ.",
                 ErrorType.Forbidden));
         }
         if (!await identityDbContext.Users.AnyAsync(item => item.Id == operatorId, cancellationToken)
@@ -167,7 +167,7 @@ internal sealed class SupportAccessService(
         if (grant.PlatformOperatorUserId != actorId && !await CanManageAsync(actorId, cancellationToken))
         {
             return Result.Failure<SupportAccessResponse>(new OperationError(
-                "support_access.forbidden", "Only the operator or a support-access administrator can revoke this grant.", ErrorType.Forbidden));
+                "support_access.forbidden", "يمكن للمشغّل أو مسؤول الوصول إلى الدعم فقط إلغاء هذه الصلاحية.", ErrorType.Forbidden));
         }
         if (!MatchesRowVersion(grant.RowVersion, request.RowVersion))
         {

@@ -4,6 +4,12 @@ namespace LogisticsERP.Application.Features.Telecom;
 
 public static class PhoneSimErrors
 {
+    public static readonly OperationError PlaceNotFound = new(
+        "phone_sim.place_not_found",
+        "المكان المحدد غير موجود.",
+        ErrorType.NotFound,
+        "placeId");
+
     public static readonly OperationError InvalidRequest = new(
         "phone_sim.invalid_request",
         "تعذر تنفيذ العملية المطلوبة.",

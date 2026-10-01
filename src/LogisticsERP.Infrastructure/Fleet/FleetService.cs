@@ -4,9 +4,11 @@ using LogisticsERP.Application.Authorization;
 using LogisticsERP.Application.Common.Results;
 using LogisticsERP.Application.Features.Fleet;
 using LogisticsERP.Domain.Entities.Fleet;
+using LogisticsERP.Domain.Entities.System;
 using LogisticsERP.Domain.Entities.Workforce;
 using LogisticsERP.Domain.Enums;
 using LogisticsERP.Domain.Fleet;
+using LogisticsERP.Infrastructure.Identity;
 using LogisticsERP.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,6 +16,7 @@ namespace LogisticsERP.Infrastructure.Fleet;
 
 internal sealed partial class FleetService(
     ApplicationDbContext dbContext,
+    IdentityDbContext identityDbContext,
     FleetServiceSupport support,
     IPrivateFileStorage fileStorage) : IFleetService
 {
@@ -616,6 +619,7 @@ internal sealed partial class FleetService(
                 }
                 vehicle.CurrentAssignmentId = assignment.Id;
                 await SetStatusAsync(vehicle, VehicleOperationalStatus.Assigned, request.StartedAtUtc, reason, VehicleStatusSourceType.Assignment, assignment.Id, actor.Value, cancellationToken);
+                await AddAssignmentNotificationAsync(assignment, vehicle, "taken", request.StartedAtUtc, cancellationToken);
                 dbContext.FleetCommandReceipts.Add(new FleetCommandReceipt { CommandName = "take", IdempotencyKey = idempotencyKey.Trim(), RequestHash = hash, ResultEntityId = assignment.Id });
                 await dbContext.SaveChangesAsync(cancellationToken);
                 ActivateStagedPromissoryFiles(staged);
@@ -706,6 +710,7 @@ internal sealed partial class FleetService(
                     var target = await ResolveAvailableStatusAsync(vehicle.Id, null, cancellationToken);
                     await SetStatusAsync(vehicle, target, request.EndedAtUtc, reason, VehicleStatusSourceType.Assignment, assignment.Id, actor.Value, cancellationToken);
                 }
+                await AddAssignmentNotificationAsync(assignment, vehicle, "returned", request.EndedAtUtc, cancellationToken);
                 dbContext.FleetCommandReceipts.Add(new FleetCommandReceipt { CommandName = "return", IdempotencyKey = idempotencyKey.Trim(), RequestHash = hash, ResultEntityId = assignment.Id });
                 await dbContext.SaveChangesAsync(cancellationToken);
                 return Result.Success(await MapAssignmentAsync(assignment, cancellationToken));
@@ -839,6 +844,7 @@ internal sealed partial class FleetService(
                 if (request.NewVehicleOdometer > next.CurrentOdometer) dbContext.VehicleOdometerReadings.Add(NewOdometer(next.Id, request.NewVehicleOdometer, request.SwitchedAtUtc, VehicleOdometerSourceType.AssignmentTake, newAssignment.Id, request.Reason));
                 VehicleMileageRules.ApplyVerifiedReading(next, request.NewVehicleOdometer, request.SwitchedAtUtc); next.CurrentAssignmentId = newAssignment.Id;
                 await SetStatusAsync(next, VehicleOperationalStatus.Assigned, request.SwitchedAtUtc, request.Reason, VehicleStatusSourceType.Assignment, newAssignment.Id, actor.Value, cancellationToken);
+                await AddAssignmentNotificationAsync(newAssignment, next, "switched", request.SwitchedAtUtc, cancellationToken, oldVehicle.AssetNumber);
                 dbContext.FleetCommandReceipts.Add(new FleetCommandReceipt { CommandName = "switch", IdempotencyKey = idempotencyKey.Trim(), RequestHash = hash, ResultEntityId = newAssignment.Id });
                 await dbContext.SaveChangesAsync(cancellationToken);
                 ActivateStagedPromissoryFiles(stagedPromissory);
@@ -1438,15 +1444,101 @@ internal sealed partial class FleetService(
 
     private async Task SetStatusAsync(Vehicle vehicle, VehicleOperationalStatus target, DateTimeOffset at, string reason, VehicleStatusSourceType source, Guid? sourceId, Guid actor, CancellationToken cancellationToken)
     {
+        var previousStatus = vehicle.CurrentOperationalStatus;
         await CloseCurrentStatusAsync(vehicle.Id, at, cancellationToken);
         vehicle.CurrentOperationalStatus = target;
         dbContext.VehicleOperationalStatusPeriods.Add(NewStatus(vehicle.Id, target, at, reason, source, sourceId, actor));
+        if (previousStatus != target)
+            await AddVehicleStatusNotificationsAsync(vehicle, previousStatus, target, at, actor, cancellationToken);
+    }
+
+    private async Task AddVehicleStatusNotificationsAsync(Vehicle vehicle, VehicleOperationalStatus previousStatus,
+        VehicleOperationalStatus newStatus, DateTimeOffset at, Guid actorId, CancellationToken cancellationToken)
+    {
+        var recipients = await identityDbContext.Users.AsNoTracking()
+            .Where(user => user.Status == UserAccountStatus.Active && !user.IsDevelopmentOnly && !user.IsDeleted)
+            .Select(user => user.Id)
+            .ToArrayAsync(cancellationToken);
+        if (recipients.Length == 0) return;
+
+        var deduplicationKey = $"vehicle-status:{vehicle.Id:N}:{at.UtcTicks}:{newStatus}";
+        var alreadyNotified = await dbContext.Notifications.AsNoTracking()
+            .Where(item => item.SourceEntityId == vehicle.Id && item.DeduplicationKey == deduplicationKey)
+            .Select(item => item.RecipientUserId)
+            .ToArrayAsync(cancellationToken);
+        foreach (var recipientId in recipients)
+        {
+            if (alreadyNotified.Contains(recipientId)) continue;
+            dbContext.Notifications.Add(new Notification
+            {
+                RecipientUserId = recipientId,
+                EventType = "fleet.vehicle.status.changed",
+                Severity = NotificationSeverity.Information,
+                TitleAr = "تغيير حالة مركبة",
+                TitleEn = "Vehicle status changed",
+                BodyAr = $"تم تغيير حالة المركبة {vehicle.AssetNumber} من {previousStatus} إلى {newStatus}.",
+                BodyEn = $"Vehicle {vehicle.AssetNumber} status changed from {previousStatus} to {newStatus}.",
+                SourceEntityType = "vehicle",
+                SourceEntityId = vehicle.Id,
+                DeepLink = $"/fleet/vehicles/{vehicle.Id}",
+                ScopeSnapshotJson = "{}",
+                DeduplicationKey = deduplicationKey,
+                VisibleAtUtc = at
+            });
+        }
     }
 
     private async Task CloseCurrentStatusAsync(Guid vehicleId, DateTimeOffset at, CancellationToken cancellationToken)
     {
         var current = await dbContext.VehicleOperationalStatusPeriods.SingleOrDefaultAsync(x => x.VehicleId == vehicleId && x.EffectiveToUtc == null, cancellationToken);
         if (current is not null) current.EffectiveToUtc = at < current.EffectiveFromUtc ? current.EffectiveFromUtc : at;
+    }
+
+    private async Task AddAssignmentNotificationAsync(RiderVehicleAssignment assignment, Vehicle vehicle, string action,
+        DateTimeOffset occurredAt, CancellationToken cancellationToken, string? previousVehicleAsset = null)
+    {
+        var recipients = await identityDbContext.Users.AsNoTracking()
+            .Where(user => user.Status == UserAccountStatus.Active && !user.IsDevelopmentOnly && !user.IsDeleted)
+            .Select(user => user.Id)
+            .ToArrayAsync(cancellationToken);
+        if (recipients.Length == 0) return;
+
+        var riderName = await (from profile in dbContext.RiderProfiles.AsNoTracking()
+                               join employee in dbContext.Employees.AsNoTracking() on profile.EmployeeId equals employee.Id
+                               where profile.Id == assignment.RiderProfileId
+                               select employee.FullNameAr).SingleOrDefaultAsync(cancellationToken) ?? "";
+        var deduplicationKey = $"vehicle-assignment:{assignment.OperationId:N}:{action}";
+        var alreadyNotified = await dbContext.Notifications.AsNoTracking()
+            .Where(item => item.DeduplicationKey == deduplicationKey)
+            .Select(item => item.RecipientUserId)
+            .ToArrayAsync(cancellationToken);
+        var (titleAr, titleEn, bodyAr, bodyEn) = action switch
+        {
+            "taken" => ("استلام مركبة", "Vehicle taken", $"استلم {riderName} المركبة {vehicle.AssetNumber}.", $"{riderName} took vehicle {vehicle.AssetNumber}."),
+            "returned" => ("إرجاع مركبة", "Vehicle returned", $"أعاد {riderName} المركبة {vehicle.AssetNumber}.", $"{riderName} returned vehicle {vehicle.AssetNumber}."),
+            _ => ("تبديل مركبة", "Vehicle switched", $"بدّل {riderName} المركبة {previousVehicleAsset} بالمركبة {vehicle.AssetNumber}.", $"{riderName} switched from vehicle {previousVehicleAsset} to {vehicle.AssetNumber}.")
+        };
+
+        foreach (var recipientId in recipients)
+        {
+            if (alreadyNotified.Contains(recipientId)) continue;
+            dbContext.Notifications.Add(new Notification
+            {
+                RecipientUserId = recipientId,
+                EventType = $"fleet.vehicle.assignment.{action}",
+                Severity = NotificationSeverity.Information,
+                TitleAr = titleAr,
+                TitleEn = titleEn,
+                BodyAr = bodyAr,
+                BodyEn = bodyEn,
+                SourceEntityType = "vehicle-assignment",
+                SourceEntityId = assignment.Id,
+                DeepLink = $"/fleet/vehicles/{vehicle.Id}",
+                ScopeSnapshotJson = "{}",
+                DeduplicationKey = deduplicationKey,
+                VisibleAtUtc = occurredAt
+            });
+        }
     }
 
     private static VehicleOperationalStatusPeriod NewStatus(Guid vehicleId, VehicleOperationalStatus status, DateTimeOffset at, string reason, VehicleStatusSourceType source, Guid? sourceId, Guid actor) => new() { VehicleId = vehicleId, Status = status, EffectiveFromUtc = at, Reason = reason.Trim(), SourceType = source, SourceEntityId = sourceId, ChangedByUserId = actor };

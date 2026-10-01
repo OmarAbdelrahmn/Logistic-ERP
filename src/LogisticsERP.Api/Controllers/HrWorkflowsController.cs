@@ -53,7 +53,7 @@ public sealed class HrWorkflowsController(IHrWorkflowService service) : Controll
         var action = request.Action.Trim().ToLowerInvariant();
         return action is "submit" or "activate" or "complete"
             ? ToAction(service.TransitionLeaveAsync(id, request, cancellationToken))
-            : Task.FromResult<IActionResult>(BadRequest());
+            : Task.FromResult<IActionResult>(ApiProblemDetails.BadRequest(HttpContext, "الإجراء غير صالح. استخدم submit أو activate أو complete."));
     }
 
     [HttpPost("leave-requests/{id:guid}/force-cancel")]
@@ -61,7 +61,7 @@ public sealed class HrWorkflowsController(IHrWorkflowService service) : Controll
     public Task<IActionResult> ForceCancelLeave(Guid id, [FromBody] LeaveTransitionRequest request, CancellationToken cancellationToken) =>
         string.Equals(request.Action, "force-cancel", StringComparison.OrdinalIgnoreCase)
             ? ToAction(service.TransitionLeaveAsync(id, request, cancellationToken))
-            : Task.FromResult<IActionResult>(BadRequest());
+            : Task.FromResult<IActionResult>(ApiProblemDetails.BadRequest(HttpContext, "الإجراء غير صالح. استخدم force-cancel."));
 
     [HttpPost("leave-requests/{id:guid}/approval-decisions")]
     [RequirePermission(PermissionKeys.Workflows.LeaveRequestsApprove)]
@@ -70,7 +70,7 @@ public sealed class HrWorkflowsController(IHrWorkflowService service) : Controll
         var action = request.Action.Trim().ToLowerInvariant();
         return action is "approve" or "reject" or "return"
             ? ToAction(service.TransitionLeaveAsync(id, request, cancellationToken))
-            : Task.FromResult<IActionResult>(BadRequest());
+            : Task.FromResult<IActionResult>(ApiProblemDetails.BadRequest(HttpContext, "الإجراء غير صالح. استخدم approve أو reject أو return."));
     }
 
     [HttpGet("leave-requests/{id:guid}/date-change-requests")]

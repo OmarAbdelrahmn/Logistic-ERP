@@ -119,7 +119,7 @@ public sealed class HrEmployeeStatusImportServiceTests
         Assert.False(result.Value!.CanUpdate);
         Assert.False(result.Value.Updated);
         Assert.Contains(result.Value.Issues, issue =>
-            issue.IqamaNo == "2234567890" && issue.Message.Contains("No employee or rider", StringComparison.Ordinal));
+            issue.IqamaNo == "2234567890" && issue.Message.Contains("لم يُعثر على موظف أو سائق", StringComparison.Ordinal));
         Assert.Equal(EmployeeStatus.Active, (await dbContext.Employees.SingleAsync(cancellationToken)).Status);
     }
 
@@ -158,7 +158,7 @@ public sealed class HrEmployeeStatusImportServiceTests
 
         Assert.True(result.IsSuccess);
         Assert.False(result.Value!.CanUpdate);
-        Assert.Contains(result.Value.Issues, issue => issue.Message.Contains("cannot be archived", StringComparison.Ordinal));
+        Assert.Contains(result.Value.Issues, issue => issue.Message.Contains("لا يمكن أرشفة", StringComparison.Ordinal));
         Assert.Equal(EmployeeStatus.Active, (await dbContext.Employees.SingleAsync(cancellationToken)).Status);
     }
 

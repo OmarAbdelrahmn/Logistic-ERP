@@ -42,6 +42,8 @@ internal static class PermissionSeedCatalog
         Create(17, PermissionKeys.Workforce.EmployeesSensitiveRead, "Workforce", "عرض بيانات الموظفين الحساسة", "Read sensitive employee data", "عرض الهوية والإقامة والبيانات الشخصية المقيدة.", "View restricted identity, residency, and personal data.", sensitive: true, highTrust: true),
         Create(18, PermissionKeys.Workforce.RidersRead, "Workforce", "عرض المناديب", "Read riders", "عرض ملفات المناديب وبياناتهم التشغيلية.", "View rider profiles and operational data."),
         Create(19, PermissionKeys.Workforce.RidersManage, "Workforce", "إدارة المناديب", "Manage riders", "إنشاء وتعديل حالات وملفات المناديب.", "Create and update rider profiles and status."),
+        Create(120, PermissionKeys.Workforce.ExternalRidersRead, "Workforce", "عرض المناديب الخارجيين", "Read external riders", "عرض ملفات المناديب الخارجيين.", "View external rider profiles."),
+        Create(121, PermissionKeys.Workforce.ExternalRidersManage, "Workforce", "إدارة المناديب الخارجيين", "Manage external riders", "إنشاء وتعديل ملفات المناديب الخارجيين.", "Create and update external rider profiles."),
         Create(20, PermissionKeys.Workforce.SponsorsRead, "Workforce", "عرض الكفلاء", "Read sponsors", "عرض جهات الكفالة وبيانات السجل.", "View sponsors and registry information.", sensitive: true),
         Create(21, PermissionKeys.Workforce.SponsorsManage, "Workforce", "إدارة الكفلاء", "Manage sponsors", "إدارة جهات الكفالة وفترات كفالة الموظفين.", "Manage sponsors and employee sponsorship periods.", sensitive: true),
 

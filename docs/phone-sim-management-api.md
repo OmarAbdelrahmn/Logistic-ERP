@@ -5,6 +5,7 @@ The phone SIM module keeps three distinct records:
 - `PhoneSimCard`: the SIM inventory record and its one current responsible employee.
 - `PhoneSimResponsibilityChange`: append-only history whenever responsibility moves to another employee.
 - `RiderPhoneSimAssignment`: immutable rider handover history; an open period has `effectiveTo = null`.
+- `Place`: a named location that may contain many SIMs; each SIM has one optional `PlaceId` in storage for legacy rows. New and updated SIMs require a valid place.
 
 The current responsible person is an active internal `Employee`. A rider handover uses a `RiderProfile` ID, not an employee ID. The underlying rider employee must be active and marked as a rider (`isEmployee = false`).
 
@@ -22,9 +23,12 @@ Both permissions are included in the default `SYSTEM_ADMIN` and `MANAGER` role g
 | Method | Route | Permission | Purpose |
 | --- | --- | --- | --- |
 | `GET` | `/api/phone-sims` | read | Paged inventory search and filters. |
+| `GET` | `/api/places` | read | List place IDs and names for the SIM selector. |
+| `POST` | `/api/places` | manage | Create a place from `{ "name": "..." }`. |
+| `PUT` | `/api/places/{id}` | manage | Rename a place from `{ "name": "..." }`. |
 | `GET` | `/api/phone-sims/{id}` | read | SIM details and current rider. |
 | `POST` | `/api/phone-sims` | manage | Create a SIM and initial responsibility history. |
-| `PUT` | `/api/phone-sims/{id}` | manage | Update number, ICCID, carrier, or notes. |
+| `PUT` | `/api/phone-sims/{id}` | manage | Update number, ICCID, carrier, place, or notes. |
 | `PATCH` | `/api/phone-sims/{id}/responsible-employee` | manage | Transfer responsibility with a mandatory reason. |
 | `PATCH` | `/api/phone-sims/{id}/status` | manage | Set `Available`, `Suspended`, `Lost`, or `Deactivated`. |
 | `PATCH` | `/api/phone-sims/{id}/archive` | manage | Soft-delete a SIM with no active rider assignment. |
@@ -40,18 +44,20 @@ List query parameters are `search`, `status`, `responsibleEmployeeId`, `riderPro
 ```http
 POST /api/phone-sims
 Authorization: Bearer <token>
-Content-Type: application/json
+Content-Type: multipart/form-data
 
-{
-  "phoneNumber": "0555 123 456",
-  "iccid": "8996601234567890123",
-  "carrierName": "STC",
-  "responsibleEmployeeId": "019d0000-0000-7000-8000-000000000001",
-  "notes": "Operations pool"
-}
+phoneNumber=0555 123 456
+iccid=8996601234567890123
+carrierName=STC
+responsibleEmployeeId=019d0000-0000-7000-8000-000000000001
+placeId=<existing-place-guid>
+notes=Operations pool
+receiptForm=<required-file>
 ```
 
 Saudi formats (`05…`, `5…`, `966…`, `00966…`) and Arabic/Persian numerals normalize to canonical E.164, such as `+966555123456`. Other valid international E.164 numbers are also accepted. ICCID is optional; when supplied it must be 18–22 digits beginning with `89`. Canonical phone and ICCID values are unique among non-archived SIMs.
+
+`PUT /api/phone-sims/{id}` accepts JSON with `phoneNumber`, `iccid`, `carrierName`, `placeId`, `notes`, and the latest `rowVersion`. List and detail responses include `placeId` and `placeName`; both can be `null` for SIMs created before the place migration. An invalid place ID returns `404 phone_sim.place_not_found`.
 
 ## Responsibility transfer
 
@@ -110,11 +116,12 @@ Expected failures use standard problem details:
 
 ## Database rollout
 
-Hosted database status (2026-08-31): both migrations below are applied to `db64865` and verified through the migration histories, table existence, permission definitions, and default role grants. Publishing the updated API application is a separate deployment step.
+Hosted database status (2026-09-30): `AddPhoneSimPlaces` is applied to the configured hosted database `db67927`; its table, foreign key column, and migration history entry were verified. Publishing the updated API application is a separate deployment step.
 
 Application data and permissions are separate EF contexts:
 
 - `AddPhoneSimManagement` creates SIM tables, constraints, indexes, and permission definitions.
 - `GrantPhoneSimPermissions` adds the four default role grants.
+- `AddPhoneSimPlaces` creates `app.Places` and the nullable `app.PhoneSimCards.PlaceId` foreign key.
 
 The idempotent deployment scripts are regenerated in `database/scripts/application.sql` and `database/scripts/identity.sql`. Apply the application script before the identity script in the normal migration pipeline.

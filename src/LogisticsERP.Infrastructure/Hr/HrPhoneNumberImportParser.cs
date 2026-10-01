@@ -81,12 +81,12 @@ internal static class HrPhoneNumberImportParser
             var rowHasError = false;
             if (iqama.Length != 10 || !iqama.All(char.IsAsciiDigit))
             {
-                issues.Add(new(rowNumber, NullIfEmpty(iqama), "Error", "The first column must contain a 10-digit Iqama number."));
+                issues.Add(new(rowNumber, NullIfEmpty(iqama), "Error", "يجب أن يحتوي العمود الأول على رقم إقامة مكوّن من 10 أرقام."));
                 rowHasError = true;
             }
             else if (!iqamas.Add(iqama))
             {
-                issues.Add(new(rowNumber, iqama, "Error", "Duplicate Iqama number in the workbook."));
+                issues.Add(new(rowNumber, iqama, "Error", "رقم الإقامة مكرر داخل الملف."));
                 rowHasError = true;
             }
 
@@ -96,7 +96,7 @@ internal static class HrPhoneNumberImportParser
                     rowNumber,
                     NullIfEmpty(iqama),
                     "Error",
-                    "The second column must contain a valid Saudi mobile number or international E.164 phone number."));
+                    "يجب أن يحتوي العمود الثاني على رقم جوال سعودي صالح أو رقم دولي بصيغة E.164."));
                 rowHasError = true;
             }
 

@@ -162,39 +162,39 @@ internal static partial class HrExcelImportParser
             var rowHasError = false;
             if (iqama.Length != 10 || name.Length == 0)
             {
-                issues.Add(new(rowNumber, EmptyToNull(iqama), "Error", "A 10-digit Iqama number and a name are required."));
+                issues.Add(new(rowNumber, EmptyToNull(iqama), "Error", "رقم إقامة مكوّن من 10 أرقام والاسم مطلوبان."));
                 rowHasError = true;
             }
             else if (!iqamas.Add(iqama))
             {
-                issues.Add(new(rowNumber, iqama, "Error", "Duplicate Iqama number in the workbook."));
+                issues.Add(new(rowNumber, iqama, "Error", "رقم الإقامة مكرر داخل الملف."));
                 rowHasError = true;
             }
 
-            rowHasError |= ValidateLength(rowNumber, iqama, name, 200, "Name", issues);
+            rowHasError |= ValidateLength(rowNumber, iqama, name, 200, "الاسم", issues);
             var nationality = CollapseWhitespace(Value(row, headers, Nationality));
-            rowHasError |= ValidateLength(rowNumber, iqama, nationality, 100, "Nationality", issues);
+            rowHasError |= ValidateLength(rowNumber, iqama, nationality, 100, "الجنسية", issues);
             var residencyProfession = CollapseWhitespace(Value(row, headers, ResidencyProfession));
             if (residencyProfession.Length == 0)
             {
                 residencyProfession = CollapseWhitespace(Value(row, headers, Profession));
             }
-            rowHasError |= ValidateLength(rowNumber, iqama, residencyProfession, 200, "Residency profession", issues);
+            rowHasError |= ValidateLength(rowNumber, iqama, residencyProfession, 200, "مهنة الإقامة", issues);
             var actualWork = CollapseWhitespace(Value(row, headers, ActualWork));
             var workingForMeAs = CollapseWhitespace(Value(row, headers, JobTitle));
             if (workingForMeAs.Length == 0)
             {
                 workingForMeAs = actualWork;
             }
-            rowHasError |= ValidateLength(rowNumber, iqama, workingForMeAs, 200, "Job title", issues);
-            var birthDate = ParseOptionalDate(rowNumber, iqama, "Birth date", Cell(row, headers, BirthDate), issues, ref rowHasError);
-            var hireDate = ParseOptionalDate(rowNumber, iqama, "Hire date", Cell(row, headers, HireDate), issues, ref rowHasError);
-            var residencyIssueDate = ParseOptionalDate(rowNumber, iqama, "Residency issue date", Cell(row, headers, ResidencyIssueDate), issues, ref rowHasError);
-            var residencyExpiryDate = ParseOptionalDate(rowNumber, iqama, "Residency expiry date", Cell(row, headers, ResidencyExpiryDate), issues, ref rowHasError);
-            var driverLicenseIssueDate = ParseOptionalDate(rowNumber, iqama, "Driver-license issue date", Cell(row, headers, DriverLicenseIssueDate), issues, ref rowHasError);
-            var driverLicenseExpiryDate = ParseOptionalDate(rowNumber, iqama, "Driver-license expiry date", Cell(row, headers, DriverLicenseExpiryDate), issues, ref rowHasError);
-            rowHasError |= ValidateDateRange(rowNumber, iqama, "Residency", residencyIssueDate, residencyExpiryDate, issues);
-            rowHasError |= ValidateDateRange(rowNumber, iqama, "Driver-license", driverLicenseIssueDate, driverLicenseExpiryDate, issues);
+            rowHasError |= ValidateLength(rowNumber, iqama, workingForMeAs, 200, "المسمى الوظيفي", issues);
+            var birthDate = ParseOptionalDate(rowNumber, iqama, "تاريخ الميلاد", Cell(row, headers, BirthDate), issues, ref rowHasError);
+            var hireDate = ParseOptionalDate(rowNumber, iqama, "تاريخ التعيين", Cell(row, headers, HireDate), issues, ref rowHasError);
+            var residencyIssueDate = ParseOptionalDate(rowNumber, iqama, "تاريخ إصدار الإقامة", Cell(row, headers, ResidencyIssueDate), issues, ref rowHasError);
+            var residencyExpiryDate = ParseOptionalDate(rowNumber, iqama, "تاريخ انتهاء الإقامة", Cell(row, headers, ResidencyExpiryDate), issues, ref rowHasError);
+            var driverLicenseIssueDate = ParseOptionalDate(rowNumber, iqama, "تاريخ إصدار رخصة القيادة", Cell(row, headers, DriverLicenseIssueDate), issues, ref rowHasError);
+            var driverLicenseExpiryDate = ParseOptionalDate(rowNumber, iqama, "تاريخ انتهاء رخصة القيادة", Cell(row, headers, DriverLicenseExpiryDate), issues, ref rowHasError);
+            rowHasError |= ValidateDateRange(rowNumber, iqama, "الإقامة", residencyIssueDate, residencyExpiryDate, issues);
+            rowHasError |= ValidateDateRange(rowNumber, iqama, "رخصة القيادة", driverLicenseIssueDate, driverLicenseExpiryDate, issues);
 
             if (rowHasError)
             {
@@ -305,7 +305,7 @@ internal static partial class HrExcelImportParser
             return false;
         }
 
-        issues.Add(new(rowNumber, EmptyToNull(iqama), "Error", $"{fieldName} exceeds {maximumLength} characters."));
+        issues.Add(new(rowNumber, EmptyToNull(iqama), "Error", $"{fieldName} يتجاوز {maximumLength} حرفًا."));
         return true;
     }
 
@@ -337,7 +337,7 @@ internal static partial class HrExcelImportParser
             return parsed;
         }
 
-        issues.Add(new(rowNumber, EmptyToNull(iqama), "Error", $"{fieldName} is not a valid date."));
+        issues.Add(new(rowNumber, EmptyToNull(iqama), "Error", $"{fieldName} غير صالح."));
         rowHasError = true;
         return null;
     }
@@ -355,7 +355,7 @@ internal static partial class HrExcelImportParser
             return false;
         }
 
-        issues.Add(new(rowNumber, EmptyToNull(iqama), "Error", $"{fieldName} expiry date cannot be before its issue date."));
+        issues.Add(new(rowNumber, EmptyToNull(iqama), "Error", $"تاريخ انتهاء {fieldName} يسبق تاريخ الإصدار."));
         return true;
     }
 

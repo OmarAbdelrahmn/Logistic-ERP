@@ -57,9 +57,10 @@
 ## إدارة براميل الزيت
 
 - `GET /api/maintenance-inventory/oil-barrels` يعيد السعة والمتبقي وحالة البرميل وحد الفقد.
-- `POST /api/maintenance-inventory/oil-barrels/{id}/open` يفتح البرميل باستخدام `RowVersion`.
-- لا يوجد إلا برميل مفتوح واحد للصنف داخل الموقع. إذا كان هناك برميل مفتوح لم ينفد، يعيد الرد `opened = false` و`hasPreviousBarrelWarning = true` و`previousOpenBarrelsRemainingLiters`، ولا يغير حالة البرميل المختار. بعد صرف 200 لتر من 208، تكون القيمة 8 لترات.
-- عندما يصل الحالي إلى صفر، يختار المستخدم أي برميل مقفل صالح من أقدم طبقة FIFO ويفتحه. الاختيار من طبقة أحدث يُرفض حتى تنفد الأقدم.
+- `POST /api/maintenance-inventory/oil-barrels/{id}/open` يفتح البرميل باستخدام `rowVersion` واختيار إلزامي `allowedVehicleType`: دراجات نارية `1` أو سيارات `2`. يختار المستخدم النوع عند الفتح، ويظل ثابتاً بعده.
+- لا يوجد إلا برميل مفتوح واحد للصنف داخل الموقع لكل نوع مركبة؛ يمكن فتح برميل سيارات وبرميل دراجات معاً. إذا كان هناك برميل من النوع نفسه لم ينفد، يعيد الرد `opened = false` و`hasPreviousBarrelWarning = true` و`previousOpenBarrelsRemainingLiters`، ولا يغير حالة البرميل المختار.
+- عندما يصل الحالي إلى صفر، يختار المستخدم برميلاً مقفلاً صالحاً من أقدم طبقة FIFO مؤهلة لنوع المركبة ويفتحه.
+- `GET /api/maintenance-inventory/oil-barrels/{id}/usage` يعيد المركبات التي استهلكت الزيت واللترات لكل منها، مع طرح المرتجعات. راجع [العقد الكامل وتسليم الواجهة](oil-barrel-vehicle-types-frontend-handoff.md).
 - كل عنصر في القائمة يعرض `nominalCapacityLiters`, `consumedLiters`, `remainingLiters`, `unitCostPerLiter`, و`remainingInventoryValue`، لذلك تظل الأحجام وأسعار اللتر المختلفة واضحة.
 - `POST /api/maintenance-inventory/oil-barrels/{id}/losses` يسجل الفقد الفعلي وحركة المخزون. الحد التراكمي هو 2% من السعة؛ أي 4.160 لتر لبرميل 208 لتر.
 - لا يخصم النظام 2% مقدمًا؛ المتبقي المعروض هو المتبقي الفعلي.
@@ -69,7 +70,8 @@
 ```json
 {
   "openedAtUtc": "2026-09-05T10:00:00+03:00",
-  "rowVersion": "<base64-row-version>"
+  "rowVersion": "<base64-row-version>",
+  "allowedVehicleType": 2
 }
 ```
 

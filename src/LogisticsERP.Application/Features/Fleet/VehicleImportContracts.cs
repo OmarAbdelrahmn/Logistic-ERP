@@ -190,6 +190,12 @@ public sealed record VehiclePurchaseSupplierImportIssue(
 
 public static class VehicleImportErrors
 {
+    public static readonly OperationError InvalidUpload = new(
+        "fleet.vehicle_import.invalid_upload",
+        "اختر ملف XLSX غير فارغ بحجم لا يتجاوز 20 ميجابايت.",
+        ErrorType.Validation,
+        "file");
+
     public static readonly OperationError InvalidOdometerWorkbook = new(
         "fleet.vehicle_odometer_import.invalid_workbook",
         "ملف عدادات المركبات غير صالح أو لا يحتوي على الرقم التسلسلي والكيلومترات الحالية.",

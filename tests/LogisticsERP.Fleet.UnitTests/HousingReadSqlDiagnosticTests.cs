@@ -1,4 +1,5 @@
 using LogisticsERP.Application.Abstractions.Authentication;
+using LogisticsERP.Application.Features.Hr;
 using LogisticsERP.Infrastructure.Hr;
 using LogisticsERP.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -27,9 +28,12 @@ public sealed class HousingReadSqlDiagnosticTests
 
         var housing = await service.GetAsync(housingId, TestContext.Current.CancellationToken);
         var rooms = await service.GetRoomsAsync(housingId, TestContext.Current.CancellationToken);
+        var stays = await service.GetStayReportAsync(
+            new HousingStayReportRequest(PageSize: 5000), TestContext.Current.CancellationToken);
 
         Assert.True(housing.IsSuccess, housing.Error.Description);
         Assert.True(rooms.IsSuccess, rooms.Error.Description);
+        Assert.True(stays.IsSuccess, stays.Error.Description);
         Assert.Equal(rooms.Value!.Count, housing.Value!.Rooms!.Count);
     }
 

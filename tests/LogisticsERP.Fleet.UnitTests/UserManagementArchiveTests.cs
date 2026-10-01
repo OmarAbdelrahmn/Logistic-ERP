@@ -1,16 +1,79 @@
 using LogisticsERP.Application.Abstractions.Authentication;
 using LogisticsERP.Application.Features.UserManagement;
+using LogisticsERP.Domain.Entities.Workforce;
 using LogisticsERP.Domain.Enums;
 using LogisticsERP.Infrastructure.Authentication;
 using LogisticsERP.Infrastructure.Identity;
 using LogisticsERP.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
 using Xunit;
 
 namespace LogisticsERP.Fleet.UnitTests;
 
 public sealed class UserManagementArchiveTests
 {
+    [Theory]
+    [InlineData("userName")]
+    [InlineData("email")]
+    public async Task CreateUserIdentifiesTheDuplicateField(string duplicateField)
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        await using var fixture = CreateFixture();
+        var existing = NewUser("existing", isArchived: true);
+        existing.Email = "existing@example.com";
+        existing.NormalizedEmail = "EXISTING@EXAMPLE.COM";
+        fixture.Identity.Users.Add(existing);
+        await fixture.Identity.SaveChangesAsync(cancellationToken);
+
+        var request = NewCreateRequest(
+            userName: duplicateField == "userName" ? "existing" : "new-user",
+            email: duplicateField == "email" ? "existing@example.com" : null);
+        var result = await fixture.Service.CreateUserAsync(request, cancellationToken);
+
+        Assert.True(result.IsFailure);
+        Assert.Equal(UserManagementErrors.Duplicate.Code, result.Error.Code);
+        Assert.Equal(duplicateField, result.Error.Field);
+        Assert.NotEqual(UserManagementErrors.Duplicate.Description, result.Error.Description);
+    }
+
+    [Fact]
+    public async Task CreateUserIdentifiesAnUnknownEmployee()
+    {
+        await using var fixture = CreateFixture();
+        var result = await fixture.Service.CreateUserAsync(
+            NewCreateRequest(employeeId: Guid.NewGuid()),
+            TestContext.Current.CancellationToken);
+
+        Assert.True(result.IsFailure);
+        Assert.Equal(UserManagementErrors.NotFound.Code, result.Error.Code);
+        Assert.Equal("employeeId", result.Error.Field);
+    }
+
+    [Fact]
+    public async Task CreateUserIdentifiesAnEmployeeLinkedToAnArchivedAccount()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        await using var fixture = CreateFixture();
+        var employeeId = Guid.NewGuid();
+        fixture.Application.Employees.Add(new Employee { Id = employeeId, FullNameAr = "موظف" });
+        await fixture.Application.SaveChangesAsync(cancellationToken);
+        var existing = NewUser("archived", isArchived: true);
+        existing.EmployeeId = employeeId;
+        fixture.Identity.Users.Add(existing);
+        await fixture.Identity.SaveChangesAsync(cancellationToken);
+
+        var result = await fixture.Service.CreateUserAsync(
+            NewCreateRequest(employeeId: employeeId), cancellationToken);
+
+        Assert.True(result.IsFailure);
+        Assert.Equal(UserManagementErrors.Duplicate.Code, result.Error.Code);
+        Assert.Equal("employeeId", result.Error.Field);
+    }
+
     [Fact]
     public async Task ArchivedUsersQueryReturnsOnlyArchivedUsersInNewestFirstOrder()
     {
@@ -98,9 +161,22 @@ public sealed class UserManagementArchiveTests
         var currentUser = new CurrentUser();
         var sessions = new SessionValidator();
         var clock = new FixedTimeProvider();
-        var service = new UserManagementService(identity, application, null!, currentUser, sessions, clock);
-        return new Fixture(identity, application, service, sessions, clock.GetUtcNow());
+        var userManager = new UserManager<ApplicationUser>(
+            new Microsoft.AspNetCore.Identity.EntityFrameworkCore.UserStore<ApplicationUser, ApplicationRole, IdentityDbContext, Guid>(identity),
+            Options.Create(new IdentityOptions()),
+            new PasswordHasher<ApplicationUser>(),
+            [],
+            [],
+            new UpperInvariantLookupNormalizer(),
+            new IdentityErrorDescriber(),
+            new ServiceCollection().BuildServiceProvider(),
+            NullLogger<UserManager<ApplicationUser>>.Instance);
+        var service = new UserManagementService(identity, application, userManager, currentUser, sessions, clock);
+        return new Fixture(identity, application, userManager, service, sessions, clock.GetUtcNow());
     }
+
+    private static CreateManagedUserRequest NewCreateRequest(string userName = "new-user", string? email = null, Guid? employeeId = null) =>
+        new(userName, "TemporaryP@ss123", "مستخدم جديد", null, email, null, employeeId, null, null);
 
     private static ApplicationUser NewUser(string userName, bool isArchived, DateTimeOffset? deletedAtUtc = null) => new()
     {
@@ -123,12 +199,14 @@ public sealed class UserManagementArchiveTests
     private sealed record Fixture(
         IdentityDbContext Identity,
         ApplicationDbContext Application,
+        UserManager<ApplicationUser> UserManager,
         UserManagementService Service,
         SessionValidator Sessions,
         DateTimeOffset Now) : IAsyncDisposable
     {
         public async ValueTask DisposeAsync()
         {
+            UserManager.Dispose();
             await Identity.DisposeAsync();
             await Application.DisposeAsync();
         }

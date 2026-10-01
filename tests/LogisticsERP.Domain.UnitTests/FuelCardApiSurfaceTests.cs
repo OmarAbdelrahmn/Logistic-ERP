@@ -7,6 +7,7 @@ using LogisticsERP.Domain.Entities.Fuel;
 using LogisticsERP.Domain.Fuel;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.AspNetCore.Authorization;
 using Xunit;
 
 namespace LogisticsERP.Domain.UnitTests;
@@ -18,6 +19,7 @@ public sealed class FuelCardApiSurfaceTests
         { nameof(FuelCardsController.GetCards), typeof(HttpGetAttribute), null, PermissionKeys.Fuel.Read },
         { nameof(FuelCardsController.GetCard), typeof(HttpGetAttribute), "{id:guid}", PermissionKeys.Fuel.Read },
         { nameof(FuelCardsController.CreateCard), typeof(HttpPostAttribute), null, PermissionKeys.Fuel.Manage },
+        { nameof(FuelCardsController.SetSponsor), typeof(HttpPutAttribute), "{id:guid}/sponsor", PermissionKeys.Fuel.Manage },
         { nameof(FuelCardsController.GetAssignments), typeof(HttpGetAttribute), "{id:guid}/assignments", PermissionKeys.Fuel.Read },
         { nameof(FuelCardsController.AssignRider), typeof(HttpPostAttribute), "{id:guid}/assignments", PermissionKeys.Fuel.Manage },
         { nameof(FuelCardsController.StopRider), typeof(HttpPostAttribute), "{id:guid}/stop-rider", PermissionKeys.Fuel.Manage },
@@ -31,6 +33,18 @@ public sealed class FuelCardApiSurfaceTests
     {
         var route = Assert.Single(typeof(FuelCardsController).GetCustomAttributes<RouteAttribute>());
         Assert.Equal("api/fuel-cards", route.Template);
+    }
+
+    [Theory]
+    [InlineData(nameof(ImportController.ValidateFuelCards), "fuel-cards/validate")]
+    [InlineData(nameof(ImportController.ImportFuelCards), "fuel-cards")]
+    public void ImportControllerExposesSeparateFuelCardBulkRoutes(string methodName, string route)
+    {
+        var controllerRoute = Assert.Single(typeof(ImportController).GetCustomAttributes<RouteAttribute>());
+        Assert.Equal("api/import", controllerRoute.Template);
+        var method = typeof(ImportController).GetMethod(methodName)!;
+        Assert.Equal(route, Assert.Single(method.GetCustomAttributes<HttpPostAttribute>()).Template);
+        Assert.NotNull(Assert.Single(method.GetCustomAttributes<AllowAnonymousAttribute>()));
     }
 
     [Theory]
@@ -49,6 +63,7 @@ public sealed class FuelCardApiSurfaceTests
     [Fact]
     public void DomainKeepsFuelPlateTextIndependentFromRealVehicles()
     {
+        Assert.Equal(typeof(Guid), typeof(FuelCard).GetProperty(nameof(FuelCard.SponsorId))!.PropertyType);
         Assert.NotNull(typeof(FuelCard).GetProperty(nameof(FuelCard.PlateNumberText)));
         Assert.Null(typeof(FuelCard).GetProperty("VehicleId"));
         Assert.Null(typeof(FuelCardMonthlyUsage).GetProperty("VehicleId"));

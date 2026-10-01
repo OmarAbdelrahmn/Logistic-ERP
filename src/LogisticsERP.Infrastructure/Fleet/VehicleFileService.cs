@@ -117,7 +117,8 @@ internal sealed class VehicleFileService(
         var vehicle = await dbContext.Vehicles.AsNoTracking().SingleOrDefaultAsync(x => x.Id == vehicleId, cancellationToken);
         if (vehicle is null) return Result.Failure<VehicleAttachment>(FleetErrors.NotFound);
         if (!await support.HasVehiclePermissionAsync(vehicle, permission, cancellationToken)) return Result.Failure<VehicleAttachment>(FleetErrors.Forbidden);
-        var attachment = await dbContext.VehicleAttachments.SingleOrDefaultAsync(x => x.Id == attachmentId && x.VehicleId == vehicleId, cancellationToken);
+        var attachment = await dbContext.VehicleAttachments.AsNoTracking()
+            .SingleOrDefaultAsync(x => x.Id == attachmentId && x.VehicleId == vehicleId, cancellationToken);
         return attachment is null ? Result.Failure<VehicleAttachment>(FleetErrors.NotFound) : Result.Success(attachment);
     }
 

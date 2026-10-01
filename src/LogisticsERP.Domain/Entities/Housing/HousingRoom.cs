@@ -5,7 +5,9 @@ namespace LogisticsERP.Domain.Entities.Housing;
 public sealed class HousingRoom : AuditableEntity
 {
     public Guid HousingId { get; set; }
+    public Guid FloorId { get; set; }
     public string Name { get; set; } = string.Empty;
+    public string? Notes { get; set; }
     public int Capacity { get; set; }
     public int CurrentOccupancy { get; set; }
 }

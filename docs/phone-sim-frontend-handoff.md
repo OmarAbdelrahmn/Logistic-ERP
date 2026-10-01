@@ -3,8 +3,8 @@
 ## Delivery status
 
 - Backend implementation: complete in this repository.
-- Hosted database `db64865`: application and identity migrations applied and verified on 2026-08-31.
-- Hosted API binary: this handoff does not claim the new controller has been published. Deploy the updated API build before enabling the frontend route against `https://gate.premiumasp.net`.
+- Hosted database `db67927`: `AddPhoneSimPlaces` was applied and verified on 2026-09-30. The `app.Places` table and `app.PhoneSimCards.PlaceId` column are present.
+- Hosted API binary: the new place endpoints and SIM fields require publishing the updated API build before the frontend uses them against `https://gate.premiumasp.net`.
 - Base route after API deployment: `/api/phone-sims`.
 
 The longer backend reference is [phone-sim-management-api.md](phone-sim-management-api.md). This document is the frontend implementation contract.
@@ -33,7 +33,10 @@ Lookup dependencies:
 
 - Responsible employee: use `GET /api/employees`; allow records with `isEmployee: true` and status `Active` or `OnLeave`. Send the employee `id`.
 - Rider: use `GET /api/riders`; send the rider response `id` as `riderProfileId`, not its `employeeId`.
+- Place: use `GET /api/places`; send the chosen place `id` as `placeId`. A place can contain many SIMs, while each SIM has at most one place.
 - Loading those selectors also requires the existing `employees.read` and `riders.read` permissions.
+
+Place management uses the existing SIM permissions: `phone_sims.read` for `GET /api/places` and `phone_sims.manage` for `POST /api/places` and `PUT /api/places/{id}`. The place contract has only `id` and `name`. Create and rename requests use JSON `{ "name": "Main office" }`; names are trimmed, required, limited to 200 characters, and unique. Successful create returns `201` with `{ "id": "...", "name": "Main office" }`; rename returns `200` with the same shape. Duplicate names return `409 place.duplicate_name`; an empty or overlong name returns `400 place.invalid_name`; an unknown rename ID returns `404 place.not_found`. There is no place delete endpoint.
 
 ## Suggested TypeScript types
 
@@ -60,6 +63,8 @@ export type PhoneSim = {
   phoneNumber: string; // canonical E.164, e.g. +966555123456
   iccid: string | null;
   carrierName: string | null;
+  placeId: string | null;
+  placeName: string | null;
   status: PhoneSimStatus;
   statusReason: string | null;
   responsibleEmployeeId: string;
@@ -67,10 +72,18 @@ export type PhoneSim = {
   responsibleEmployeeNameEn: string | null;
   currentRider: PhoneSimCurrentRider | null;
   notes: string | null;
+  receiptForm: {
+    originalFileName: string;
+    contentType: string;
+    fileSizeBytes: number;
+    sha256Checksum: string;
+  } | null;
   createdAtUtc: string;
   updatedAtUtc: string | null;
   rowVersion: string;
 };
+
+export type Place = { id: string; name: string };
 
 export type PhoneSimPage = {
   items: PhoneSim[];
@@ -129,6 +142,7 @@ Recommended table columns:
 
 - Phone number
 - Carrier
+- Place
 - ICCID
 - Status
 - Responsible employee
@@ -152,9 +166,13 @@ type CreatePhoneSimRequest = {
   iccid: string | null;
   carrierName: string | null;
   responsibleEmployeeId: string;
+  placeId: string;
   notes: string | null;
+  receiptForm: File;
 };
 ```
+
+Send create as `multipart/form-data`, with fields named exactly as above. `receiptForm` is required and must be a nonempty file. Obtain the place ID from `GET /api/places`; the server returns `404 phone_sim.place_not_found` for an unknown or empty ID. The create response includes the selected `placeId` and `placeName`.
 
 Update inventory details:
 
@@ -167,12 +185,15 @@ type UpdatePhoneSimRequest = {
   phoneNumber: string;
   iccid: string | null;
   carrierName: string | null;
+  placeId: string;
   notes: string | null;
   rowVersion: string;
 };
 ```
 
-The edit endpoint intentionally does not change the responsible employee or lifecycle status. Use their dedicated commands.
+Send update as JSON. The edit endpoint changes the place along with the SIM details; it does not change the responsible employee or lifecycle status. Use their dedicated commands.
+
+Existing SIMs created before this migration may return `placeId: null` and `placeName: null`. Show an unassigned place label, and require the user to choose a place when editing one. Use `placeName` directly in list and detail views; a second lookup is unnecessary for display. Renaming a place changes the name returned by subsequent SIM GET requests.
 
 Phone input may use Saudi local formats, international E.164, Arabic digits, spaces, or dashes. After saving, replace the local row with the returned object because the backend returns the canonical number. ICCID is optional; if supplied it must be 18–22 digits beginning with `89`.
 
@@ -307,6 +328,7 @@ Errors use the existing `ProblemDetails` structure with `status`, `title`, `deta
 | `phone_sim.invalid_status` | 400 | Refresh allowed status values. |
 | `phone_sim.invalid_date_range` | 400 | Mark the assignment date field invalid. |
 | `phone_sim.responsible_employee_not_found` | 404 | Refresh the employee selector. |
+| `phone_sim.place_not_found` | 404 | Refresh the place selector and require a valid place. |
 | `phone_sim.responsible_employee_unavailable` | 409 | Select an active internal employee. |
 | `phone_sim.rider_not_found` | 404 | Refresh the rider selector. |
 | `phone_sim.rider_unavailable` | 409 | Select an active rider. |
@@ -320,6 +342,7 @@ Errors use the existing `ProblemDetails` structure with `status`, `title`, `deta
 
 - Add `phone_sims.read` navigation visibility and `phone_sims.manage` action guards.
 - Add API types and functions without using the generic controller workspace for the operational flow.
+- Load and manage places through `/api/places`; add a required place selector to SIM create and edit, and display `placeName` on list and detail views.
 - Build the inventory list with server pagination and filters.
 - Add create/edit, responsibility-transfer, assign, return, status, and archive dialogs.
 - Add separate responsibility and rider-assignment timelines.

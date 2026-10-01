@@ -2,6 +2,7 @@ using LogisticsERP.Api.Authorization;
 using LogisticsERP.Api.ErrorHandling;
 using LogisticsERP.Application.Authorization;
 using LogisticsERP.Application.Features.Maintenance;
+using LogisticsERP.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LogisticsERP.Api.Controllers;
@@ -69,9 +70,9 @@ public sealed class MaintenanceController(IMaintenanceService service) : Control
 
     [HttpGet("oil-barrels")]
     [RequirePermission(PermissionKeys.Maintenance.OilRead)]
-    public async Task<IActionResult> GetDirectOilBarrels([FromQuery] Guid inventoryLocationId, [FromQuery] Guid inventoryItemId, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetDirectOilBarrels([FromQuery] Guid inventoryLocationId, [FromQuery] Guid inventoryItemId, [FromQuery] VehicleType? vehicleType = null, CancellationToken cancellationToken = default)
     {
-        var result = await service.GetDirectOilBarrelsAsync(inventoryLocationId, inventoryItemId, cancellationToken);
+        var result = await service.GetDirectOilBarrelsAsync(inventoryLocationId, inventoryItemId, vehicleType, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 

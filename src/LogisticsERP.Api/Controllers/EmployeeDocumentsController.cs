@@ -39,7 +39,7 @@ public sealed class EmployeeDocumentsController(IEmployeeDocumentService service
     public async Task<IActionResult> UploadVersion(Guid employeeId, Guid documentId, [FromForm] DocumentVersionUploadForm request, CancellationToken cancellationToken)
     {
         var validation = CreateFile(request.File);
-        if (validation is null) return BadRequest();
+        if (validation is null) return ApiProblemDetails.BadRequest(HttpContext, "اختر ملفًا صالحًا للمستند.");
         await using var stream = request.File.OpenReadStream();
         var result = await service.UploadNewVersionAsync(employeeId, documentId, validation with { Content = stream }, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
@@ -93,7 +93,7 @@ public sealed class EmployeeDocumentsController(IEmployeeDocumentService service
     private async Task<IActionResult> UploadInternal(Guid employeeId, Guid documentTypeId, EmployeeDocumentUploadForm request, CancellationToken cancellationToken)
     {
         var file = CreateFile(request.File);
-        if (file is null) return BadRequest();
+        if (file is null) return ApiProblemDetails.BadRequest(HttpContext, "اختر ملفًا صالحًا للمستند.");
         await using var stream = request.File.OpenReadStream();
         var result = await service.UploadAsync(employeeId, documentTypeId, request.ToMetadata(), file with { Content = stream }, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
@@ -156,7 +156,7 @@ public sealed class RiderDocumentsController(IEmployeeDocumentService service) :
     private async Task<IActionResult> Upload(Guid riderProfileId, Guid documentTypeId, EmployeeDocumentUploadForm request, CancellationToken cancellationToken)
     {
         var file = EmployeeDocumentsController.CreateFile(request.File);
-        if (file is null) return BadRequest();
+        if (file is null) return ApiProblemDetails.BadRequest(HttpContext, "اختر ملفًا صالحًا للمستند.");
         await using var stream = request.File.OpenReadStream();
         var result = await service.UploadForRiderAsync(riderProfileId, documentTypeId, request.ToMetadata(), file with { Content = stream }, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);

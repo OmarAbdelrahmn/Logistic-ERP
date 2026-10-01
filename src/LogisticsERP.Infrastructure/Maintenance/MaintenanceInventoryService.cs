@@ -293,7 +293,7 @@ internal sealed partial class MaintenanceService
         var attachment = await dbContext.PurchaseReceiptAttachments.AsNoTracking().SingleAsync(x => x.PurchaseReceiptId == id, cancellationToken);
         var lineIds = rows.Select(x => x.Line.Id).ToArray();
         var oilBarrels = await dbContext.OilBarrels.AsNoTracking()
-            .Where(x => lineIds.Contains(x.PurchaseReceiptLineId))
+            .Where(x => x.PurchaseReceiptLineId.HasValue && lineIds.Contains(x.PurchaseReceiptLineId.Value))
             .OrderBy(x => x.PackageSequence)
             .ThenBy(x => x.BarrelNumber)
             .ToArrayAsync(cancellationToken);

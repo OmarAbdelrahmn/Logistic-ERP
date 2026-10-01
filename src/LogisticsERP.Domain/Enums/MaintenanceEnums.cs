@@ -16,7 +16,8 @@ public enum StockMovementType
     SupplierReturn = 6,
     Reversal = 7,
     ExternalPartSale = 8,
-    OilLoss = 9
+    OilLoss = 9,
+    ManualStockAddition = 10
 }
 public enum InventoryDocumentStatus { Posted = 1, Reversed = 2 }
 public enum InventorySupplyRequestSubjectType { VehicleMaintenance = 1, Rider = 2 }

@@ -81,7 +81,7 @@ public sealed class HrExcelImportParserTests
         Assert.Empty(parsed.Rows);
         var issue = Assert.Single(parsed.Issues);
         Assert.Equal("Error", issue.Severity);
-        Assert.Contains("Residency expiry date", issue.Message, StringComparison.Ordinal);
+        Assert.Contains("تاريخ انتهاء الإقامة", issue.Message, StringComparison.Ordinal);
     }
 
     [Fact]

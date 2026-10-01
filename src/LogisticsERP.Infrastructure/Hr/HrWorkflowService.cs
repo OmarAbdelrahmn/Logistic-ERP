@@ -3,8 +3,10 @@ using LogisticsERP.Application.Abstractions.Authentication;
 using LogisticsERP.Application.Authorization;
 using LogisticsERP.Application.Common.Results;
 using LogisticsERP.Application.Features.Hr;
+using LogisticsERP.Domain.Entities.System;
 using LogisticsERP.Domain.Entities.Workforce;
 using LogisticsERP.Domain.Enums;
+using LogisticsERP.Infrastructure.Identity;
 using LogisticsERP.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,6 +14,7 @@ namespace LogisticsERP.Infrastructure.Hr;
 
 internal sealed class HrWorkflowService(
     ApplicationDbContext dbContext,
+    IdentityDbContext identityDbContext,
     ICurrentUser currentUser,
     IPermissionChecker permissionChecker,
     TimeProvider timeProvider) : IHrWorkflowService
@@ -179,8 +182,50 @@ internal sealed class HrWorkflowService(
         entity.EmergencyContactPhone = HrServiceSupport.TrimOrNull(request.EmergencyContactPhone);
         entity.RelatedClientContractId = request.RelatedClientContractId;
         entity.Notes = HrServiceSupport.TrimOrNull(request.Notes);
+        if (id is null)
+        {
+            var submitted = await SubmitLeave(entity, cancellationToken);
+            if (submitted.IsFailure) return Result.Failure<LeaveRequestResponse>(submitted.Error);
+            await AddLeaveSubmittedNotificationsAsync(entity, leaveType.NameAr, leaveType.NameEn, cancellationToken);
+        }
         await dbContext.SaveChangesAsync(cancellationToken);
         return (await GetLeaveRequestsAsync(null, cancellationToken)).MapSingle(item => item.Id == entity.Id);
+    }
+
+    private async Task AddLeaveSubmittedNotificationsAsync(LeaveRequest leaveRequest, string leaveTypeNameAr, string leaveTypeNameEn,
+        CancellationToken cancellationToken)
+    {
+        var recipients = await identityDbContext.Users.AsNoTracking()
+            .Where(user => user.Status == UserAccountStatus.Active && !user.IsDevelopmentOnly && !user.IsDeleted)
+            .Select(user => user.Id)
+            .ToArrayAsync(cancellationToken);
+        if (recipients.Length == 0) return;
+
+        var employeeName = await dbContext.Employees.AsNoTracking()
+            .Where(employee => employee.Id == leaveRequest.EmployeeId)
+            .Select(employee => employee.FullNameAr)
+            .SingleAsync(cancellationToken);
+        var occurredAt = timeProvider.GetUtcNow();
+        var deduplicationKey = $"leave-submitted:{leaveRequest.Id:N}";
+        foreach (var recipientId in recipients)
+        {
+            dbContext.Notifications.Add(new Notification
+            {
+                RecipientUserId = recipientId,
+                EventType = "hr.leave.submitted",
+                Severity = NotificationSeverity.Information,
+                TitleAr = "إرسال طلب إجازة",
+                TitleEn = "Vacation request submitted",
+                BodyAr = $"تم إرسال طلب إجازة {leaveTypeNameAr} للموظف {employeeName} من {leaveRequest.StartDate:yyyy-MM-dd} إلى {leaveRequest.EndDate:yyyy-MM-dd}.",
+                BodyEn = $"A {leaveTypeNameEn} vacation request was submitted for {employeeName} from {leaveRequest.StartDate:yyyy-MM-dd} to {leaveRequest.EndDate:yyyy-MM-dd}.",
+                SourceEntityType = "leave-request",
+                SourceEntityId = leaveRequest.Id,
+                DeepLink = $"/hr/leave-requests/{leaveRequest.Id}",
+                ScopeSnapshotJson = "{}",
+                DeduplicationKey = deduplicationKey,
+                VisibleAtUtc = occurredAt
+            });
+        }
     }
 
     public async Task<Result<LeaveRequestResponse>> TransitionLeaveAsync(Guid id, LeaveTransitionRequest request, CancellationToken cancellationToken = default)
@@ -547,15 +592,20 @@ internal sealed class HrWorkflowService(
                 && (item.AppliesToRider == null || item.AppliesToRider == isRider)
                 && (item.ClientPlatformId == null || item.ClientPlatformId == platformId))
             .OrderByDescending(item => item.Priority).ThenByDescending(item => item.Version).FirstOrDefaultAsync(cancellationToken);
-        if (workflow is null) return Result.Failure(HrErrors.Conflict);
-        var steps = await dbContext.LeaveApprovalWorkflowSteps.AsNoTracking().Where(item => item.LeaveApprovalWorkflowId == workflow.Id && item.Status == CatalogStatus.Active)
-            .OrderBy(item => item.Sequence).Select(item => new WorkflowStepSnapshot(item.StepKey, item.Sequence, item.RequiredPermissionKey,
-                item.ScopeSource, item.AllowsReturnForChanges, item.RequiresCommentOnApproval)).ToArrayAsync(cancellationToken);
+        if (workflow is null && await dbContext.LeaveApprovalWorkflows.AnyAsync(item => item.Status == CatalogStatus.Active
+            && item.EffectiveFrom <= today && (item.EffectiveTo == null || item.EffectiveTo >= today), cancellationToken))
+            return Result.Failure(HrErrors.Conflict);
+        WorkflowStepSnapshot[] steps = workflow is null
+            ? [new WorkflowStepSnapshot("company-approval", 1, PermissionKeys.Workflows.LeaveRequestsApprove,
+                LeaveApprovalScopeSource.CompanyWide, true, false)]
+            : await dbContext.LeaveApprovalWorkflowSteps.AsNoTracking().Where(item => item.LeaveApprovalWorkflowId == workflow.Id && item.Status == CatalogStatus.Active)
+                .OrderBy(item => item.Sequence).Select(item => new WorkflowStepSnapshot(item.StepKey, item.Sequence, item.RequiredPermissionKey,
+                    item.ScopeSource, item.AllowsReturnForChanges, item.RequiresCommentOnApproval)).ToArrayAsync(cancellationToken);
         if (steps.Length == 0) return Result.Failure(HrErrors.Conflict);
         entity.Status = LeaveWorkflowStatus.PendingApproval;
         entity.SubmittedAtUtc = timeProvider.GetUtcNow();
-        entity.ApprovalWorkflowId = workflow.Id;
-        entity.ApprovalWorkflowVersion = workflow.Version;
+        entity.ApprovalWorkflowId = workflow?.Id;
+        entity.ApprovalWorkflowVersion = workflow?.Version;
         entity.ApprovalWorkflowSnapshotJson = JsonSerializer.Serialize(steps);
         entity.CurrentApprovalStepKey = steps[0].StepKey;
         entity.CurrentApprovalStepSequence = steps[0].Sequence;
@@ -573,7 +623,7 @@ internal sealed class HrWorkflowService(
             return Result.Failure(HrErrors.InvalidRequest);
         var scope = await ResolveScope(entity, step.ScopeSource, cancellationToken);
         if (!await permissionChecker.HasPermissionAsync(userId, version, step.RequiredPermissionKey, scope, cancellationToken))
-            return Result.Failure(new OperationError("leave.approval_forbidden", "The user does not have the permission or scope required by this workflow step.", ErrorType.Forbidden));
+            return Result.Failure(new OperationError("leave.approval_forbidden", "ليست لديك الصلاحية أو نطاق الوصول المطلوب لهذه الخطوة.", ErrorType.Forbidden));
         var fromStatus = entity.Status;
         if (decision == LeaveDecisionType.Approved)
         {

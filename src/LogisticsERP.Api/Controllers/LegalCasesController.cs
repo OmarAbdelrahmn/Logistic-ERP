@@ -98,7 +98,7 @@ public sealed class LegalCasesController(ILegalCaseService service) : Controller
     [RequestSizeLimit(11 * 1024 * 1024)]
     public async Task<IActionResult> UploadFile(Guid caseId, Guid hearingId, [FromForm] LegalCaseFileForm form, CancellationToken cancellationToken)
     {
-        if (form.File is null || form.File.Length == 0) return BadRequest();
+        if (form.File is null || form.File.Length == 0) return ApiProblemDetails.BadRequest(HttpContext, "اختر ملفًا لإرفاقه بالقضية.");
         await using var stream = form.File.OpenReadStream();
         var result = await service.UploadFileAsync(caseId, hearingId,
             new(form.Description, new PrivateFileUpload(stream, form.File.FileName, form.File.ContentType, form.File.Length)), cancellationToken);

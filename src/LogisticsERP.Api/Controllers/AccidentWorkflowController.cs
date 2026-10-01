@@ -2,6 +2,7 @@ using LogisticsERP.Api.ErrorHandling;
 using LogisticsERP.Api.Authorization;
 using LogisticsERP.Application.Abstractions.Files;
 using LogisticsERP.Application.Authorization;
+using LogisticsERP.Application.Common.Results;
 using LogisticsERP.Application.Features.Fleet;
 using LogisticsERP.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
@@ -43,7 +44,7 @@ public sealed class AccidentWorkflowController(IAccidentWorkflowService service)
     [RequestSizeLimit(11 * 1024 * 1024)]
     public async Task<IActionResult> Upload(Guid accidentId, [FromForm] AccidentWorkflowAttachmentForm form, CancellationToken cancellationToken)
     {
-        if (form.File is null || form.File.Length == 0) return BadRequest();
+        if (form.File is null || form.File.Length == 0) return Result.Failure(FleetErrors.FileRequired).ToProblem(HttpContext);
         await using var stream = form.File.OpenReadStream();
         var result = await service.UploadWorkflowAttachmentAsync(accidentId, form.EvidenceType,
             new(form.Description, form.FromLocation, form.ToLocation, form.TransportedAtUtc, form.Amount),

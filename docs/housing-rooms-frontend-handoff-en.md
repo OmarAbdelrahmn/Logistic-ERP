@@ -1,5 +1,7 @@
 # Housing Rooms API — Frontend Handoff
 
+For the complete current contract, including floors, equipment, name-only external occupants, pending iqama matches, and all CRUD routes, use [Housing frontend handoff — Riyadh workbook and full room management](housing-frontend-handoff-20260929.md). The examples below predate those additions.
+
 ## Overview
 
 Room is now the assignment level: employee/rider → occupancy period → room → housing.

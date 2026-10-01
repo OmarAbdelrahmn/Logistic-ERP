@@ -40,7 +40,7 @@ public sealed class UserProfileController(IUserProfileService userProfileService
     {
         if (request.File is null || request.File.Length == 0)
         {
-            return BadRequest();
+            return ApiProblemDetails.BadRequest(HttpContext, "اختر صورة ملف شخصي غير فارغة.");
         }
 
         await using var stream = request.File.OpenReadStream();

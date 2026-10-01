@@ -87,6 +87,7 @@ public static class DependencyInjection
         services.AddScoped<IReportingService, ReportingService>();
         services.AddScoped<IDatasetVersionService, DatasetVersionService>();
         services.AddScoped<IPhoneSimService, PhoneSimService>();
+        services.AddScoped<IPlaceService, PlaceService>();
         services.AddScoped<IPrivateFileStorage, PrivateFileStorage>();
         services.AddScoped<FleetServiceSupport>();
         services.AddScoped<IFleetService, FleetService>();
@@ -101,6 +102,7 @@ public static class DependencyInjection
         services.AddScoped<IVehicleRiderHistoryImportService, VehicleRiderHistoryImportService>();
         services.AddScoped<IVehicleDailyDistanceService, VehicleDailyDistanceService>();
         services.AddScoped<IFuelCardService, FuelCardService>();
+        services.AddScoped<IFuelCardBulkImportService, FuelCardBulkImportService>();
         services.AddScoped<IMaintenanceService, MaintenanceService>();
         services.AddScoped<ISparePartCatalogImportService, SparePartCatalogImportService>();
         services.AddScoped<IVehiclePlatformAccountAssignmentService, VehiclePlatformAccountAssignmentService>();
