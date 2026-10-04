@@ -5,6 +5,7 @@ namespace LogisticsERP.Application.Features.Fleet;
 
 public static class FleetErrors
 {
+    public static readonly OperationError InvalidDistanceReportPeriod = new("fleet.daily_distance.invalid_report_period", "حدد تاريخ بداية ونهاية صحيحين، بفترة لا تتجاوز 366 يومًا شاملة التاريخين.", ErrorType.Validation, "fromDate");
     public static readonly OperationError InvalidRequest = new("fleet.invalid_request", "يحتوي طلب الأسطول على بيانات غير صالحة أو غير مكتملة.", ErrorType.Validation);
     public static readonly OperationError NotFound = new("fleet.not_found", "لم يتم العثور على سجل الأسطول المطلوب.", ErrorType.NotFound);
     public static readonly OperationError Duplicate = new("fleet.duplicate", "يوجد بالفعل سجل مركبة أو كتالوج بالقيمة الفريدة نفسها.", ErrorType.Conflict);

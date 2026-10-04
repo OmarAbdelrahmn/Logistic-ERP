@@ -9,6 +9,7 @@ using LogisticsERP.Domain.Entities.Maintenance;
 using LogisticsERP.Domain.Entities.Workforce;
 using LogisticsERP.Domain.Enums;
 using LogisticsERP.Infrastructure.Fleet;
+using LogisticsERP.Infrastructure.Identity;
 using LogisticsERP.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -43,7 +44,8 @@ public sealed class VehicleTakeWithoutFilesTests
         db.AddRange(employee, rider, vehicle);
         await db.SaveChangesAsync(cancellationToken);
         var storage = new TestFileStorage();
-        var service = new FleetService(db, new FleetServiceSupport(new TestCurrentUser(), new PermitAll(), TimeProvider.System), storage);
+        await using var identity = CreateIdentityDbContext();
+        var service = new FleetService(db, identity, new FleetServiceSupport(new TestCurrentUser(), new PermitAll(), TimeProvider.System), storage);
         var taken = await service.TakeAsync(new TakeVehicleRequest(rider.Id, true, null, vehicle.Id,
             DateTimeOffset.UtcNow, 0, VehicleCondition.Good, null, "PERM-123", null, null), [], "take-before-upload", cancellationToken);
         Assert.True(taken.IsSuccess, taken.Error.Description);
@@ -133,7 +135,8 @@ public sealed class VehicleTakeWithoutFilesTests
         };
         db.AddRange(employee, rider, vehicle, nextVehicle);
         await db.SaveChangesAsync(cancellationToken);
-        var service = new FleetService(db,
+        await using var identity = CreateIdentityDbContext();
+        var service = new FleetService(db, identity,
             new FleetServiceSupport(new TestCurrentUser(), new PermitAll(), TimeProvider.System),
             new UnusedFileStorage());
         var request = new TakeVehicleRequest(rider.Id, true, null, vehicle.Id,
@@ -161,8 +164,10 @@ public sealed class VehicleTakeWithoutFilesTests
         Assert.Empty(await db.RiderVehicleAssignmentPromissoryFiles.ToArrayAsync(cancellationToken));
     }
 
-    [Fact]
-    public async Task CompleteHistoriesIncludeReturnsEvidenceArchivedAccidentsOilAndEquipment()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task CompleteHistoriesIncludeReturnsEvidenceArchivedAccidentsOilAndEquipment(bool creatorIsDeleted)
     {
         var ct = TestContext.Current.CancellationToken;
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
@@ -171,6 +176,13 @@ public sealed class VehicleTakeWithoutFilesTests
         await using var db = new ApplicationDbContext(options);
         var now = DateTimeOffset.Parse("2026-09-06T10:00:00Z", global::System.Globalization.CultureInfo.InvariantCulture);
         var actor = Guid.NewGuid();
+        var returnActor = Guid.NewGuid();
+        var unknownActor = Guid.NewGuid();
+        await using var identity = CreateIdentityDbContext();
+        identity.Users.AddRange(
+            new ApplicationUser { Id = actor, UserName = "history.creator", IsDeleted = creatorIsDeleted },
+            new ApplicationUser { Id = returnActor, UserName = "history.returner" });
+        await identity.SaveChangesAsync(ct);
         var employee = new Employee { FullNameAr = "History Rider", IsEmployee = false, Status = EmployeeStatus.Active };
         var rider = new RiderProfile { EmployeeId = employee.Id };
         var vehicle = new Vehicle
@@ -182,7 +194,7 @@ public sealed class VehicleTakeWithoutFilesTests
         {
             RiderProfileId = rider.Id, VehicleId = vehicle.Id, OperationId = Guid.NewGuid(),
             StartedAtUtc = now.AddDays(-3), EndedAtUtc = now.AddDays(-1),
-            AssignedByUserId = actor, EndedByUserId = actor
+            AssignedByUserId = actor, EndedByUserId = returnActor, CreatedByUserId = unknownActor
         };
         var issue = new VehicleIssue
         {
@@ -229,17 +241,27 @@ public sealed class VehicleTakeWithoutFilesTests
         {
             IssueNumber = "EQ-1", RiderProfileId = rider.Id, IssuedAtUtc = now.AddDays(-3),
             IssuedByUserId = actor, IssuedFromLocationId = Guid.NewGuid(),
-            RelatedAssignmentId = assignment.Id
+            RelatedAssignmentId = assignment.Id, UpdatedByUserId = returnActor
+        };
+        var unknownCreatorExpense = new VehicleExpense
+        {
+            VehicleId = vehicle.Id, RiderProfileId = rider.Id, CreatedByUserId = unknownActor,
+            ExpenseType = "test", Description = "Unknown creator", CurrencyCode = "SAR"
+        };
+        var missingCreatorExpense = new VehicleExpense
+        {
+            VehicleId = vehicle.Id, RiderProfileId = rider.Id,
+            ExpenseType = "test", Description = "No recorded creator", CurrencyCode = "SAR"
         };
         db.AddRange(employee, rider, vehicle, assignment, issue, evidence, accident,
-            oilItem, oilUsage, oilChange, equipment, equipmentIssue,
+            oilItem, oilUsage, oilChange, equipment, equipmentIssue, unknownCreatorExpense, missingCreatorExpense,
             new RiderInventoryIssueLine
             {
                 RiderInventoryIssueId = equipmentIssue.Id, InventoryItemId = equipment.Id,
                 Quantity = 1, ReturnedQuantity = 1, ExpectedReturn = true
             });
         await db.SaveChangesAsync(ct);
-        var service = new FleetService(db,
+        var service = new FleetService(db, identity,
             new FleetServiceSupport(new TestCurrentUser(), new PermitAll(), TimeProvider.System),
             new UnusedFileStorage());
 
@@ -256,11 +278,41 @@ public sealed class VehicleTakeWithoutFilesTests
             Assert.Contains(timeline.Events, x => x.Category == "issue" && x.Files.Any(f => f.FileName == "return.jpg"));
             Assert.Contains(timeline.Events, x => x.Category == "accident" && x.EntityId == accident.Id);
             Assert.Contains(timeline.Events, x => x.Category == "oil_change" && x.Action == "direct");
+            Assert.All(timeline.Events.Where(x => x.CreatedByUserId == actor),
+                x => Assert.Equal("history.creator", x.CreatedByUserName));
+            var handover = Assert.Single(timeline.Events, x => x.Category == "assignment" && x.Action == "handed_over");
+            Assert.Equal(actor, handover.CreatedByUserId);
+            Assert.Equal("history.creator", handover.CreatedByUserName);
+            var returned = Assert.Single(timeline.Events, x => x.Category == "assignment" && x.Action == "returned_or_switched");
+            Assert.Equal(returnActor, returned.CreatedByUserId);
+            Assert.Equal("history.returner", returned.CreatedByUserName);
+            foreach (var category in new[] { "issue", "accident", "material_usage", "oil_change" })
+            {
+                var entry = Assert.Single(timeline.Events, x => x.Category == category);
+                Assert.Equal(actor, entry.CreatedByUserId);
+                Assert.Equal("history.creator", entry.CreatedByUserName);
+            }
+            var unknown = Assert.Single(timeline.Events, x => x.EntityId == unknownCreatorExpense.Id);
+            Assert.Equal(unknownActor, unknown.CreatedByUserId);
+            Assert.Null(unknown.CreatedByUserName);
+            var missing = Assert.Single(timeline.Events, x => x.EntityId == missingCreatorExpense.Id);
+            Assert.Null(missing.CreatedByUserId);
+            Assert.Null(missing.CreatedByUserName);
+            var json = System.Text.Json.JsonSerializer.Serialize(timeline, System.Text.Json.JsonSerializerOptions.Web);
+            Assert.Contains("\"createdByUserName\":\"history.creator\"", json);
+            Assert.Contains("\"createdByUserName\":null", json);
             Assert.DoesNotContain("private/return.jpg", System.Text.Json.JsonSerializer.Serialize(timeline));
         }
         Assert.Contains(riderHistory.Value!.Events, x => x.Category == "rider_equipment" && x.Action == "issued");
         Assert.Contains(riderHistory.Value.Events, x => x.Category == "rider_equipment" && x.Action == "return_balance_recorded");
+        var equipmentReturn = Assert.Single(riderHistory.Value.Events, x => x.Category == "rider_equipment" && x.Action == "return_balance_recorded");
+        Assert.Equal(returnActor, equipmentReturn.CreatedByUserId);
+        Assert.Equal("history.returner", equipmentReturn.CreatedByUserName);
     }
+
+    private static IdentityDbContext CreateIdentityDbContext() => new(
+        new DbContextOptionsBuilder<IdentityDbContext>()
+            .UseInMemoryDatabase($"HistoryIdentity_{Guid.NewGuid():N}").Options);
 
     private sealed class TestCurrentUser : ICurrentUser
     {

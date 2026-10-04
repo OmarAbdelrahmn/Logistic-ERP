@@ -11,7 +11,7 @@ namespace LogisticsERP.Api.Controllers;
 public sealed class SparePartController(IMaintenanceService service) : ControllerBase
 {
     [HttpPost("spare-parts")]
-    [RequirePermission(PermissionKeys.Maintenance.WorkOrdersManage)]
+    [RequirePermission(PermissionKeys.Maintenance.WorkOrdersUpdate)]
     [RequirePermission(PermissionKeys.Inventory.StockMove)]
     public async Task<IActionResult> PostUsages(
         [FromQuery] DateTime date,

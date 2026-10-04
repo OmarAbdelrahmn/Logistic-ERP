@@ -5,7 +5,6 @@ using LogisticsERP.Application.Features.Maintenance;
 using LogisticsERP.Domain.Entities.Fleet;
 using LogisticsERP.Domain.Entities.Maintenance;
 using LogisticsERP.Domain.Enums;
-using LogisticsERP.Domain.Fleet;
 using LogisticsERP.Domain.Maintenance;
 using Microsoft.EntityFrameworkCore;
 
@@ -78,8 +77,6 @@ internal sealed partial class MaintenanceService
                     return Result.Failure(MaintenanceErrors.InvalidSubject);
                 if (!MatchesRowVersion(vehicle.RowVersion, request.VehicleRowVersion))
                     return Result.Failure(MaintenanceErrors.ConcurrencyConflict);
-                if (request.OdometerAtChange < vehicle.CurrentOdometer)
-                    return Result.Failure(MaintenanceErrors.InvalidOdometer);
                 var location = await (from inventory in dbContext.InventoryLocations.AsNoTracking()
                                       join site in dbContext.MaintenanceLocations.AsNoTracking() on inventory.MaintenanceLocationId equals site.Id
                                       where inventory.Id == request.InventoryLocationId && inventory.Status == CatalogStatus.Active &&
@@ -115,8 +112,7 @@ internal sealed partial class MaintenanceService
                     filter = posted.Value;
                 }
 
-                VehicleMileageRules.ApplyVerifiedReading(vehicle, request.OdometerAtChange, request.PerformedAtUtc);
-                dbContext.Entry(vehicle).Property(x => x.CurrentOdometer).IsModified = true;
+                ApplyOilChangeVehicleMileage(vehicle, request.OdometerAtChange, request.PerformedAtUtc);
                 dbContext.VehicleOdometerReadings.Add(new VehicleOdometerReading
                 {
                     VehicleId = vehicle.Id, Reading = request.OdometerAtChange, RecordedAtUtc = request.PerformedAtUtc,

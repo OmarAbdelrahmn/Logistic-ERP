@@ -6,6 +6,7 @@ using LogisticsERP.Application.Authorization;
 using LogisticsERP.Application.Common.Results;
 using LogisticsERP.Application.Features.Fuel;
 using LogisticsERP.Domain.Entities.Fuel;
+using LogisticsERP.Domain.Entities.Platform;
 using LogisticsERP.Domain.Enums;
 using LogisticsERP.Domain.Fleet;
 using LogisticsERP.Domain.Fuel;
@@ -29,6 +30,7 @@ internal sealed partial class FuelCardService(
         Guid? riderProfileId,
         int page,
         int pageSize,
+        Guid? operatingCityId = null,
         CancellationToken cancellationToken = default)
     {
         if (!await HasPermissionAsync(PermissionKeys.Fuel.Read, cancellationToken))
@@ -39,6 +41,8 @@ internal sealed partial class FuelCardService(
         page = Math.Max(1, page);
         pageSize = Math.Clamp(pageSize <= 0 ? 50 : pageSize, 1, 300);
         var query = dbContext.FuelCards.AsNoTracking().AsQueryable();
+        if (operatingCityId.HasValue)
+            query = query.Where(x => x.OperatingCityId == operatingCityId.Value);
         if (!string.IsNullOrWhiteSpace(provider))
         {
             if (!TryParseProvider(provider, out var parsedProvider))
@@ -79,7 +83,8 @@ internal sealed partial class FuelCardService(
             .Take(pageSize)
             .ToArrayAsync(cancellationToken);
         var currentRiders = await GetCurrentRidersAsync(cards.Select(x => x.Id).ToArray(), cancellationToken);
-        var items = cards.Select(card => MapCard(card, currentRiders.GetValueOrDefault(card.Id))).ToArray();
+        var cityNames = await GetCityNamesAsync(cards.Select(x => x.OperatingCityId).Distinct().ToArray(), cancellationToken);
+        var items = cards.Select(card => MapCard(card, currentRiders.GetValueOrDefault(card.Id), cityNames.GetValueOrDefault(card.OperatingCityId))).ToArray();
         return Result.Success(new FuelCardPageResponse(items, page, pageSize, totalCount));
     }
 
@@ -97,7 +102,7 @@ internal sealed partial class FuelCardService(
         }
 
         var currentRiders = await GetCurrentRidersAsync([id], cancellationToken);
-        return Result.Success(MapCard(card, currentRiders.GetValueOrDefault(id)));
+        return Result.Success(await MapCardAsync(card, currentRiders.GetValueOrDefault(id), cancellationToken));
     }
 
     public async Task<Result<FuelCardResponse>> CreateCardAsync(
@@ -121,6 +126,9 @@ internal sealed partial class FuelCardService(
         if (!await SponsorExistsAsync(request.SponsorId, cancellationToken))
             return Result.Failure<FuelCardResponse>(FuelErrors.SponsorNotFound);
 
+        if (!await OperatingCityExistsAsync(request.OperatingCityId, cancellationToken))
+            return Result.Failure<FuelCardResponse>(FuelErrors.OperatingCityNotFound);
+
         string normalizedCardNumber;
         var identifierType = FuelCardRules.DetectIdentifierType(request.CardNumber);
         try
@@ -143,6 +151,7 @@ internal sealed partial class FuelCardService(
         var card = new FuelCard
         {
             SponsorId = request.SponsorId,
+            OperatingCityId = request.OperatingCityId,
             Provider = provider,
             IdentifierType = identifierType,
             CardNumber = request.CardNumber.Trim(),
@@ -156,7 +165,7 @@ internal sealed partial class FuelCardService(
         var save = await SaveAsync(cancellationToken);
         return save.IsFailure
             ? Result.Failure<FuelCardResponse>(save.Error)
-            : Result.Success(MapCard(card, null));
+            : Result.Success(await MapCardAsync(card, null, cancellationToken));
     }
 
     public async Task<Result<FuelCardResponse>> SetSponsorAsync(
@@ -176,7 +185,27 @@ internal sealed partial class FuelCardService(
         var save = await SaveAsync(cancellationToken);
         if (save.IsFailure) return Result.Failure<FuelCardResponse>(save.Error);
         var currentRiders = await GetCurrentRidersAsync([id], cancellationToken);
-        return Result.Success(MapCard(card, currentRiders.GetValueOrDefault(id)));
+        return Result.Success(await MapCardAsync(card, currentRiders.GetValueOrDefault(id), cancellationToken));
+    }
+
+    public async Task<Result<FuelCardResponse>> SetCityAsync(
+        Guid id, SetFuelCardCityRequest request, CancellationToken cancellationToken = default)
+    {
+        if (!await HasPermissionAsync(PermissionKeys.Fuel.Manage, cancellationToken))
+            return Result.Failure<FuelCardResponse>(FuelErrors.Forbidden);
+        var card = await dbContext.FuelCards.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
+        if (card is null)
+            return Result.Failure<FuelCardResponse>(FuelErrors.NotFound);
+        if (!MatchesRowVersion(card.RowVersion, request.RowVersion))
+            return Result.Failure<FuelCardResponse>(FuelErrors.ConcurrencyConflict);
+        if (!await OperatingCityExistsAsync(request.OperatingCityId, cancellationToken))
+            return Result.Failure<FuelCardResponse>(FuelErrors.OperatingCityNotFound);
+
+        card.OperatingCityId = request.OperatingCityId;
+        var save = await SaveAsync(cancellationToken);
+        if (save.IsFailure) return Result.Failure<FuelCardResponse>(save.Error);
+        var currentRiders = await GetCurrentRidersAsync([id], cancellationToken);
+        return Result.Success(await MapCardAsync(card, currentRiders.GetValueOrDefault(id), cancellationToken));
     }
 
     public async Task<Result<IReadOnlyList<FuelCardAssignmentResponse>>> GetAssignmentsAsync(
@@ -430,6 +459,7 @@ internal sealed partial class FuelCardService(
         PrivateFileUpload file,
         DateOnly? expectedMonth,
         Guid sponsorId,
+        Guid? operatingCityId = null,
         CancellationToken cancellationToken = default)
     {
         if (!await HasPermissionAsync(PermissionKeys.Fuel.Import, cancellationToken))
@@ -442,6 +472,9 @@ internal sealed partial class FuelCardService(
         }
         if (!await SponsorExistsAsync(sponsorId, cancellationToken))
             return Result.Failure<FuelImportResponse>(FuelErrors.SponsorNotFound);
+        var cityId = operatingCityId ?? OperatingCity.JeddahId;
+        if (!await OperatingCityExistsAsync(cityId, cancellationToken))
+            return Result.Failure<FuelImportResponse>(FuelErrors.OperatingCityNotFound);
 
         var extension = Path.GetExtension(file.OriginalFileName).ToLowerInvariant();
         if (file.Length <= 0 || file.Length > MaximumImportSize || extension is not ".xls" and not ".xlsx")
@@ -501,6 +534,7 @@ internal sealed partial class FuelCardService(
                 card = new FuelCard
                 {
                     SponsorId = sponsorId,
+                    OperatingCityId = cityId,
                     Provider = report.Provider,
                     IdentifierType = parsed.IdentifierType,
                     CardNumber = parsed.CardNumber,
@@ -738,6 +772,29 @@ internal sealed partial class FuelCardService(
         sponsorId != Guid.Empty && await dbContext.Sponsors.AsNoTracking()
             .AnyAsync(x => x.Id == sponsorId, cancellationToken);
 
+    private async Task<bool> OperatingCityExistsAsync(Guid operatingCityId, CancellationToken cancellationToken) =>
+        operatingCityId != Guid.Empty && await dbContext.OperatingCities.AsNoTracking()
+            .AnyAsync(x => x.Id == operatingCityId, cancellationToken);
+
+    private async Task<Dictionary<Guid, CityProjection>> GetCityNamesAsync(Guid[] cityIds, CancellationToken cancellationToken)
+    {
+        if (cityIds.Length == 0) return [];
+        return await (from operatingCity in dbContext.OperatingCities.IgnoreQueryFilters().AsNoTracking()
+                      join city in dbContext.GlobalCities.IgnoreQueryFilters().AsNoTracking()
+                          on operatingCity.GlobalCityId equals city.Id
+                      where cityIds.Contains(operatingCity.Id)
+                      select new CityProjection(operatingCity.Id, city.NameAr, city.NameEn))
+            .ToDictionaryAsync(x => x.Id, cancellationToken);
+    }
+
+    private async Task<FuelCardResponse> MapCardAsync(FuelCard card, CurrentRiderProjection? rider, CancellationToken cancellationToken)
+    {
+        var cities = await GetCityNamesAsync([card.OperatingCityId], cancellationToken);
+        return MapCard(card, rider, cities.GetValueOrDefault(card.OperatingCityId));
+    }
+
+    private sealed record CityProjection(Guid Id, string NameAr, string NameEn);
+
     private async Task<Result> SaveAsync(CancellationToken cancellationToken)
     {
         try
@@ -755,9 +812,12 @@ internal sealed partial class FuelCardService(
         }
     }
 
-    private static FuelCardResponse MapCard(FuelCard card, CurrentRiderProjection? rider) => new(
+    private static FuelCardResponse MapCard(FuelCard card, CurrentRiderProjection? rider, CityProjection? city) => new(
         card.Id,
         card.SponsorId,
+        card.OperatingCityId,
+        city?.NameAr,
+        city?.NameEn,
         card.Provider.ToString(),
         ProviderNameAr(card.Provider),
         card.IdentifierType.ToString(),

@@ -6,6 +6,7 @@ namespace LogisticsERP.Domain.Entities.Fuel;
 public sealed class FuelCard : AuditableEntity
 {
     public Guid SponsorId { get; set; }
+    public Guid OperatingCityId { get; set; }
     public FuelCardProvider Provider { get; set; }
     public FuelCardIdentifierType IdentifierType { get; set; }
     public string CardNumber { get; set; } = string.Empty;

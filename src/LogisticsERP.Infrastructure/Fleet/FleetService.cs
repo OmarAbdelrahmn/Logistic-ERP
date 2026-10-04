@@ -1288,6 +1288,7 @@ internal sealed partial class FleetService(
                           select new
                           {
                               v.AssetNumber,
+                              v.VehicleType,
                               RiderName = e.FullNameAr,
                               RiderIqamaNo = e.IqamaNo,
                               VehicleOperatingCityId = v.OperatingCityId,
@@ -1303,7 +1304,7 @@ internal sealed partial class FleetService(
             .Select(x => new RealRiderResponse(x.Id, x.Name, x.IqamaNo, x.RelationshipToAssignedRider))
             .SingleOrDefaultAsync(cancellationToken);
         var versionIds = await dbContext.RiderVehicleAssignmentPromissoryFiles.AsNoTracking().Where(x => x.RiderVehicleAssignmentId == item.Id).Select(x => x.RiderPromissoryFileVersionId).ToArrayAsync(cancellationToken);
-        return new RiderVehicleAssignmentResponse(item.Id, item.RiderProfileId, employeeId, item.IsRealRider, realRider, item.VehicleId, info.AssetNumber, info.RiderName, info.RiderIqamaNo, info.VehicleOperatingCityId, info.VehicleOperatingCityNameAr, item.StartedAtUtc, item.EndedAtUtc, item.StartLocationSnapshot, item.EndLocationSnapshot, item.StartOdometer, item.EndOdometer, item.PermissionReference, item.PermissionStartsOn, item.PermissionEndsOn, item.Status, item.AssignmentReason, item.CompletionReason, item.OperationId, versionIds, FleetServiceSupport.EncodeRowVersion(item.RowVersion));
+        return new RiderVehicleAssignmentResponse(item.Id, item.RiderProfileId, employeeId, item.IsRealRider, realRider, item.VehicleId, info.VehicleType, info.AssetNumber, info.RiderName, info.RiderIqamaNo, info.VehicleOperatingCityId, info.VehicleOperatingCityNameAr, item.StartedAtUtc, item.EndedAtUtc, item.StartLocationSnapshot, item.EndLocationSnapshot, item.StartOdometer, item.EndOdometer, item.PermissionReference, item.PermissionStartsOn, item.PermissionEndsOn, item.Status, item.AssignmentReason, item.CompletionReason, item.OperationId, versionIds, FleetServiceSupport.EncodeRowVersion(item.RowVersion));
     }
 
     private async Task<VehicleIssueSummaryResponse> BuildIssueResponseAsync(VehicleIssue issue, CancellationToken cancellationToken) =>

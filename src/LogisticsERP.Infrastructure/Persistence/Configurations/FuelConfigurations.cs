@@ -1,4 +1,5 @@
 using LogisticsERP.Domain.Entities.Fuel;
+using LogisticsERP.Domain.Entities.Platform;
 using LogisticsERP.Domain.Entities.Workforce;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -15,8 +16,11 @@ internal sealed class FuelCardConfiguration : IEntityTypeConfiguration<FuelCard>
         builder.Property(x => x.PlateNumberText).HasMaxLength(100);
         builder.Property(x => x.NormalizedPlateNumber).HasMaxLength(100);
         builder.Property(x => x.Notes).HasMaxLength(4000);
+        builder.Property(x => x.OperatingCityId).HasDefaultValue(OperatingCity.JeddahId);
         builder.HasOne<Sponsor>().WithMany().HasForeignKey(x => x.SponsorId).OnDelete(DeleteBehavior.Restrict);
         builder.HasIndex(x => x.SponsorId);
+        builder.HasOne<OperatingCity>().WithMany().HasForeignKey(x => x.OperatingCityId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(x => x.OperatingCityId);
         builder.HasIndex(x => new { x.Provider, x.NormalizedCardNumber })
             .IsUnique()
             .HasFilter("[IsDeleted] = 0");

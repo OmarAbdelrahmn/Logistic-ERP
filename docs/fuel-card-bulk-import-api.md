@@ -9,6 +9,8 @@ The Import module has two endpoints for uploading fuel cards from one Excel shee
 
 Send `multipart/form-data` with one `file` field containing a nonempty `.xlsx` workbook up to 20 MiB. No `sponsorId` form field is needed. The first worksheet must have exactly three column headers, in any order:
 
+An optional `operatingCityId` form field selects the city for every new card in the upload; omit it to use Jeddah (`019c18d5-62e1-7000-8000-000000000003`). The city must exist and not be soft-deleted. Existing cards keep their stored city. Each valid preview row includes `operatingCityId`, showing the resulting city for that row. Send the same city during validation and import. The spreadsheet still has only the three headers below; see the [city handoff](fuel-card-city-frontend-handoff.md).
+
 | number | sponsor 70 number | company name |
 |---|---|---|
 | BW203 | 7038745530 | بترو اب |

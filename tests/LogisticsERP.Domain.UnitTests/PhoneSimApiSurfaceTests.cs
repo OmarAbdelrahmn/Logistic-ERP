@@ -6,7 +6,9 @@ using LogisticsERP.Application.Features.Telecom;
 using LogisticsERP.Domain.Entities.Telecom;
 using LogisticsERP.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace LogisticsERP.Domain.UnitTests;
@@ -84,6 +86,21 @@ public sealed class PhoneSimApiSurfaceTests
 
         var consumes = Assert.Single(method.GetCustomAttributes<ConsumesAttribute>());
         Assert.Contains("multipart/form-data", consumes.ContentTypes);
+    }
+
+    [Fact]
+    public void CreateReceiptUploadIsOptionalInMvcValidation()
+    {
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddControllers();
+        using var provider = services.BuildServiceProvider();
+        var metadataProvider = provider.GetRequiredService<IModelMetadataProvider>();
+        var receiptMetadata = metadataProvider.GetMetadataForProperty(
+            typeof(CreatePhoneSimForm), nameof(CreatePhoneSimForm.ReceiptForm));
+
+        Assert.False(receiptMetadata.IsRequired);
+        Assert.Null(new CreatePhoneSimForm().ReceiptForm);
     }
 
     [Fact]

@@ -68,7 +68,7 @@ public sealed class AccidentWorkflowSqlTests
             Assert.Equal(AccidentCaseStage.Completed, minorState.Stage);
             Assert.Null(minorState.Fault.OpeningFeeAmount);
             var minorAccident = await db.VehicleAccidents.SingleAsync(x => x.Id == minor, ct);
-            Assert.Equal(VehicleOperationalStatus.Available, (await db.Vehicles.SingleAsync(x => x.Id == minorAccident.VehicleId, ct)).CurrentOperationalStatus);
+            Assert.Equal(VehicleOperationalStatus.Assigned, (await db.Vehicles.SingleAsync(x => x.Id == minorAccident.VehicleId, ct)).CurrentOperationalStatus);
 
             // 100% serious: fee is mandatory; requested Repair may receive Compensation instead.
             var compensation = await fixture.CreateAsync(VehicleAccidentSeverity.Serious);

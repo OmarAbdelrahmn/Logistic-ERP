@@ -314,6 +314,9 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<Guid?>("CreatedByUserId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("DashboardSponsorId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTimeOffset?>("DeletedAtUtc")
                         .HasColumnType("datetimeoffset");
 
@@ -387,6 +390,8 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.HasIndex("Code")
                         .IsUnique();
+
+                    b.HasIndex("DashboardSponsorId");
 
                     b.HasIndex("IsDeleted");
 
@@ -4294,6 +4299,11 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .HasMaxLength(4000)
                         .HasColumnType("nvarchar(4000)");
 
+                    b.Property<Guid>("OperatingCityId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValue(new Guid("019c18d5-62e1-7000-8000-000000000003"));
+
                     b.Property<string>("PlateNumberText")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
@@ -4319,6 +4329,8 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.HasKey("Id");
 
                     b.HasIndex("IsDeleted");
+
+                    b.HasIndex("OperatingCityId");
 
                     b.HasIndex("SponsorId");
 
@@ -5346,6 +5358,1048 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                             t.HasCheckConstraint("CK_HousingWarehouseItemBalances_Status", "[Status] IN (1, 2, 3)");
                         });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.JahezAccountFee", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(19, 6)
+                        .HasColumnType("decimal(19,6)");
+
+                    b.Property<Guid?>("ApprovalRequestId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<Guid>("HandoverId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("WaivedAmount")
+                        .HasPrecision(19, 6)
+                        .HasColumnType("decimal(19,6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApprovalRequestId");
+
+                    b.HasIndex("HandoverId")
+                        .IsUnique();
+
+                    b.HasIndex("IsDeleted");
+
+                    b.ToTable("JahezAccountFee", "jahez", t =>
+                        {
+                            t.HasCheckConstraint("CK_JahezFee_Amount", "[Amount] >= 0 AND [WaivedAmount] >= 0 AND [WaivedAmount] <= [Amount]");
+                        });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.JahezAccountHandover", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly?>("CommissionPostedThrough")
+                        .HasColumnType("date");
+
+                    b.Property<DateOnly>("CommissionStartsOn")
+                        .HasColumnType("date");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("DebtTransferred")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<DateTimeOffset?>("EndedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsLegacy")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("LastSettlementPaymentAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("PlatformRiderAccountId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<Guid>("RiderClientAssignmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("RiderProfileId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<DateTimeOffset>("StartedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("PlatformRiderAccountId")
+                        .IsUnique()
+                        .HasFilter("[EndedAtUtc] IS NULL AND [IsDeleted] = 0");
+
+                    b.HasIndex("RiderClientAssignmentId")
+                        .IsUnique();
+
+                    b.HasIndex("RiderProfileId", "StartedAtUtc");
+
+                    b.ToTable("JahezAccountHandover", "jahez", t =>
+                        {
+                            t.HasCheckConstraint("CK_JahezHandover_Range", "[EndedAtUtc] IS NULL OR [EndedAtUtc] >= [StartedAtUtc]");
+                        });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.JahezApprovalDecision", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ActorUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("DecidedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<Guid>("RequestId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RequestId")
+                        .IsUnique();
+
+                    b.ToTable("JahezApprovalDecision", "jahez");
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.JahezApprovalRequest", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<DateTimeOffset?>("EffectiveAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("ExternalResetReference")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateOnly?>("FromDate")
+                        .HasColumnType("date");
+
+                    b.Property<Guid>("HandoverId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Kind")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<Guid>("RequestedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("TargetAccountId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly?>("ToDate")
+                        .HasColumnType("date");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("WaiverAmount")
+                        .HasPrecision(19, 6)
+                        .HasColumnType("decimal(19,6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HandoverId");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("TargetAccountId");
+
+                    b.HasIndex("Status", "CreatedAtUtc");
+
+                    b.ToTable("JahezApprovalRequest", "jahez");
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.JahezCashboxEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(19, 6)
+                        .HasColumnType("decimal(19,6)");
+
+                    b.Property<Guid?>("CashboxHandoverId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CollectedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<Guid>("HandoverId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset>("ReceivedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int>("Section")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("SettlementId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HandoverId");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("CashboxHandoverId", "ReceivedAtUtc");
+
+                    b.HasIndex("SettlementId", "Section")
+                        .IsUnique();
+
+                    b.ToTable("JahezCashboxEntry", "jahez", t =>
+                        {
+                            t.HasCheckConstraint("CK_JahezCashbox_Positive", "[Amount] > 0");
+                        });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.JahezCashboxHandover", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal?>("AccountantFeeAmount")
+                        .HasPrecision(19, 6)
+                        .HasColumnType("decimal(19,6)");
+
+                    b.Property<decimal?>("AccountantSettlementAmount")
+                        .HasPrecision(19, 6)
+                        .HasColumnType("decimal(19,6)");
+
+                    b.Property<Guid?>("AccountantUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ApprovedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly>("BusinessDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("ConfirmationReason")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<DateTimeOffset?>("ConfirmedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DecidedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("DecisionReason")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<decimal>("FeeAmount")
+                        .HasPrecision(19, 6)
+                        .HasColumnType("decimal(19,6)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<Guid>("RequestedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<decimal>("SettlementAmount")
+                        .HasPrecision(19, 6)
+                        .HasColumnType("decimal(19,6)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("Status", "BusinessDate");
+
+                    b.ToTable("JahezCashboxHandover", "jahez", t =>
+                        {
+                            t.HasCheckConstraint("CK_JahezCashboxHandover_Amounts", "[FeeAmount] >= 0 AND [SettlementAmount] >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.JahezCommandReceipt", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ActorUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CommandKey")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Operation")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("PayloadHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<string>("ResultJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ActorUserId", "Operation", "CommandKey")
+                        .IsUnique();
+
+                    b.ToTable("JahezCommandReceipt", "jahez");
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.JahezCommissionPolicyPeriod", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ApprovalRequestId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly>("FromDate")
+                        .HasColumnType("date");
+
+                    b.Property<Guid>("HandoverId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Rate")
+                        .HasPrecision(19, 6)
+                        .HasColumnType("decimal(19,6)");
+
+                    b.Property<DateOnly>("ToDate")
+                        .HasColumnType("date");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApprovalRequestId")
+                        .IsUnique();
+
+                    b.HasIndex("HandoverId", "FromDate", "ToDate");
+
+                    b.ToTable("JahezCommissionPolicyPeriod", "jahez", t =>
+                        {
+                            t.HasCheckConstraint("CK_JahezPolicy_Range", "[ToDate] >= [FromDate] AND [Rate] = 0.15");
+                        });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.JahezDailyDispatch", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AllocationReason")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<Guid>("BatchId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Count")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<Guid>("HandoverId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ImportRowId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BatchId");
+
+                    b.HasIndex("HandoverId", "Date");
+
+                    b.HasIndex("ImportRowId", "HandoverId")
+                        .IsUnique();
+
+                    b.ToTable("JahezDailyDispatch", "jahez", t =>
+                        {
+                            t.HasCheckConstraint("CK_JahezDispatch_Count", "[Count] >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.JahezEarningsStatement", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly>("FromDate")
+                        .HasColumnType("date");
+
+                    b.Property<Guid>("HandoverId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<Guid?>("SupersedesId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly>("ToDate")
+                        .HasColumnType("date");
+
+                    b.Property<decimal>("TotalBonuses")
+                        .HasPrecision(19, 6)
+                        .HasColumnType("decimal(19,6)");
+
+                    b.Property<decimal>("TotalCashAmount")
+                        .HasPrecision(19, 6)
+                        .HasColumnType("decimal(19,6)");
+
+                    b.Property<decimal>("TotalDeliveryPrice")
+                        .HasPrecision(19, 6)
+                        .HasColumnType("decimal(19,6)");
+
+                    b.Property<decimal>("TotalDriverCredit")
+                        .HasPrecision(19, 6)
+                        .HasColumnType("decimal(19,6)");
+
+                    b.Property<decimal>("TotalDriverDebit")
+                        .HasPrecision(19, 6)
+                        .HasColumnType("decimal(19,6)");
+
+                    b.Property<decimal>("TotalFreeOrders")
+                        .HasPrecision(19, 6)
+                        .HasColumnType("decimal(19,6)");
+
+                    b.Property<decimal>("TotalPenalties")
+                        .HasPrecision(19, 6)
+                        .HasColumnType("decimal(19,6)");
+
+                    b.Property<decimal>("TotalServiceDeduction")
+                        .HasPrecision(19, 6)
+                        .HasColumnType("decimal(19,6)");
+
+                    b.Property<decimal>("TotalTips")
+                        .HasPrecision(19, 6)
+                        .HasColumnType("decimal(19,6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SupersedesId")
+                        .IsUnique()
+                        .HasFilter("[SupersedesId] IS NOT NULL");
+
+                    b.HasIndex("HandoverId", "FromDate", "ToDate");
+
+                    b.ToTable("JahezEarningsStatement", "jahez", t =>
+                        {
+                            t.HasCheckConstraint("CK_JahezEarnings_Range", "[ToDate] >= [FromDate]");
+                        });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.JahezImportBatch", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("CommittedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("ContentHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<string>("CorrectionReason")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Kind")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("ReplacesBatchId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UploadedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("ReplacesBatchId")
+                        .IsUnique()
+                        .HasFilter("[ReplacesBatchId] IS NOT NULL AND [CommittedAtUtc] IS NOT NULL");
+
+                    b.HasIndex("Kind", "ContentHash")
+                        .IsUnique();
+
+                    b.ToTable("JahezImportBatch", "jahez");
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.JahezImportFile", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("BatchId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("Content")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("ContentHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(260)
+                        .HasColumnType("nvarchar(260)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BatchId", "ContentHash")
+                        .IsUnique();
+
+                    b.ToTable("JahezImportFile", "jahez");
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.JahezImportRow", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("CashAmount")
+                        .HasPrecision(19, 6)
+                        .HasColumnType("decimal(19,6)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("DeliveryPrice")
+                        .HasPrecision(19, 6)
+                        .HasColumnType("decimal(19,6)");
+
+                    b.Property<int?>("Dispatches")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("DriverAdjustment")
+                        .HasPrecision(19, 6)
+                        .HasColumnType("decimal(19,6)");
+
+                    b.Property<string>("DriverId")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<Guid>("FileId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("NetAmount")
+                        .HasPrecision(19, 6)
+                        .HasColumnType("decimal(19,6)");
+
+                    b.Property<DateTimeOffset>("OccurredAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("ParseError")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RawValuesJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("RowNumber")
+                        .HasColumnType("int");
+
+                    b.Property<DateOnly?>("ToDate")
+                        .HasColumnType("date");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FileId", "RowNumber")
+                        .IsUnique();
+
+                    b.ToTable("JahezImportRow", "jahez");
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.JahezLedgerEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(19, 6)
+                        .HasColumnType("decimal(19,6)");
+
+                    b.Property<int>("Bucket")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CalculationJson")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly?>("FromDate")
+                        .HasColumnType("date");
+
+                    b.Property<Guid>("HandoverId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Kind")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("OccurredAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<Guid?>("ReversesEntryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SourceId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly?>("ThroughDate")
+                        .HasColumnType("date");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReversesEntryId")
+                        .IsUnique()
+                        .HasFilter("[ReversesEntryId] IS NOT NULL");
+
+                    b.HasIndex("HandoverId", "Bucket", "OccurredAtUtc");
+
+                    b.HasIndex("SourceId", "Bucket", "Kind")
+                        .IsUnique();
+
+                    b.ToTable("JahezLedgerEntry", "jahez");
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.JahezReminderState", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("AnchorAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<Guid>("HandoverId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("ResolvedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("HandoverId", "AnchorAtUtc")
+                        .IsUnique();
+
+                    b.ToTable("JahezReminderState", "jahez");
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.JahezRiderSettlement", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CollectedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("CommissionPayment")
+                        .HasPrecision(19, 6)
+                        .HasColumnType("decimal(19,6)");
+
+                    b.Property<bool>("CountsAsSettlement")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("DebtPayment")
+                        .HasPrecision(19, 6)
+                        .HasColumnType("decimal(19,6)");
+
+                    b.Property<decimal>("FeePayment")
+                        .HasPrecision(19, 6)
+                        .HasColumnType("decimal(19,6)");
+
+                    b.Property<Guid>("HandoverId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<DateTimeOffset>("RecordedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateOnly>("ThroughDate")
+                        .HasColumnType("date");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HandoverId", "RecordedAtUtc");
+
+                    b.ToTable("JahezRiderSettlement", "jahez", t =>
+                        {
+                            t.HasCheckConstraint("CK_JahezSettlement_Payments", "[FeePayment] >= 0 AND [DebtPayment] >= 0 AND [CommissionPayment] >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.JahezTransaction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("BatchId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("CashAmount")
+                        .HasPrecision(19, 6)
+                        .HasColumnType("decimal(19,6)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("DeliveryPrice")
+                        .HasPrecision(19, 6)
+                        .HasColumnType("decimal(19,6)");
+
+                    b.Property<decimal>("DriverAdjustment")
+                        .HasPrecision(19, 6)
+                        .HasColumnType("decimal(19,6)");
+
+                    b.Property<Guid>("HandoverId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ImportRowId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("NetAmount")
+                        .HasPrecision(19, 6)
+                        .HasColumnType("decimal(19,6)");
+
+                    b.Property<DateTimeOffset>("OccurredAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BatchId");
+
+                    b.HasIndex("ImportRowId")
+                        .IsUnique();
+
+                    b.HasIndex("HandoverId", "OccurredAtUtc");
+
+                    b.ToTable("JahezTransaction", "jahez");
                 });
 
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Maintenance.ExternalCustomerPayment", b =>
@@ -9200,16 +10254,56 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                             Id = new Guid("019c18d5-62e1-7000-a000-000000000121"),
                             Category = "Workforce",
                             CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            DescriptionAr = "إنشاء وتعديل ملفات المناديب الخارجيين.",
-                            DescriptionEn = "Create and update external rider profiles.",
+                            DescriptionAr = "إنشاء ملفات المناديب الخارجيين.",
+                            DescriptionEn = "Create external rider profiles.",
                             DisplayOrder = 121,
                             IsDeleted = false,
                             IsDeprecated = false,
                             IsHighTrust = false,
                             IsSensitive = false,
-                            Key = "external_riders.manage",
-                            NameAr = "إدارة المناديب الخارجيين",
-                            NameEn = "Manage external riders",
+                            Key = "external_riders.create",
+                            NameAr = "إنشاء المناديب الخارجيين",
+                            NameEn = "Create external riders",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000122"),
+                            Category = "Workforce",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "تعديل ملفات المناديب الخارجيين.",
+                            DescriptionEn = "Update external rider profiles.",
+                            DisplayOrder = 122,
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = false,
+                            Key = "external_riders.update",
+                            NameAr = "تعديل المناديب الخارجيين",
+                            NameEn = "Edit external riders",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000123"),
+                            Category = "Workforce",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "أرشفة ملفات المناديب الخارجيين مع حفظ التاريخ.",
+                            DescriptionEn = "Archive external rider profiles while retaining history.",
+                            DisplayOrder = 123,
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = false,
+                            Key = "external_riders.delete",
+                            NameAr = "حذف المناديب الخارجيين",
+                            NameEn = "Delete external riders",
                             RequiresClientScope = false,
                             RequiresHousingScope = false,
                             RowVersion = new byte[0],
@@ -10792,17 +11886,59 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                             Id = new Guid("019c18d5-62e1-7000-a000-000000000096"),
                             Category = "Maintenance",
                             CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            DescriptionAr = "فتح وبدء وإكمال وإغلاق أوامر الصيانة وصرف موادها.",
-                            DescriptionEn = "Open, start, complete, close, and post materials to maintenance work orders.",
+                            DescriptionAr = "فتح أوامر الصيانة.",
+                            DescriptionEn = "Create maintenance work orders.",
                             DisplayOrder = 96,
                             GrantabilityRule = "SENSITIVE_DATA",
                             IsDeleted = false,
                             IsDeprecated = false,
                             IsHighTrust = false,
                             IsSensitive = true,
-                            Key = "maintenance.work_orders.manage",
-                            NameAr = "إدارة أوامر الصيانة",
-                            NameEn = "Manage maintenance work orders",
+                            Key = "maintenance.work_orders.create",
+                            NameAr = "إنشاء أوامر الصيانة",
+                            NameEn = "Create maintenance work orders",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000124"),
+                            Category = "Maintenance",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "بدء وإكمال وإغلاق أوامر الصيانة وتحديث موادها وتكاليفها.",
+                            DescriptionEn = "Start, complete, close, and update materials and costs of maintenance work orders.",
+                            DisplayOrder = 124,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "maintenance.work_orders.update",
+                            NameAr = "تعديل أوامر الصيانة",
+                            NameEn = "Edit maintenance work orders",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000125"),
+                            Category = "Maintenance",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "إلغاء أوامر الصيانة مع حفظ التاريخ.",
+                            DescriptionEn = "Cancel maintenance work orders while retaining history.",
+                            DisplayOrder = 125,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "maintenance.work_orders.delete",
+                            NameAr = "إلغاء أوامر الصيانة",
+                            NameEn = "Cancel maintenance work orders",
                             RequiresClientScope = false,
                             RequiresHousingScope = false,
                             RowVersion = new byte[0],
@@ -11282,6 +12418,279 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                             NameAr = "تنزيل ملفات القضايا",
                             NameEn = "Download legal case files",
                             RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000130"),
+                            Category = "Jahez",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "عرض جاهز ضمن نطاق جاهز.",
+                            DescriptionEn = "Read Jahez within Jahez scope.",
+                            DisplayOrder = 130,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "jahez.read",
+                            NameAr = "عرض جاهز",
+                            NameEn = "Read Jahez",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000131"),
+                            Category = "Jahez",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "تسليم وإغلاق حسابات جاهز ضمن نطاق جاهز.",
+                            DescriptionEn = "Manage Jahez handovers within Jahez scope.",
+                            DisplayOrder = 131,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "jahez.handovers.manage",
+                            NameAr = "تسليم وإغلاق حسابات جاهز",
+                            NameEn = "Manage Jahez handovers",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000132"),
+                            Category = "Jahez",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "تحصيل مبالغ جاهز ضمن نطاق جاهز.",
+                            DescriptionEn = "Collect Jahez payments within Jahez scope.",
+                            DisplayOrder = 132,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "jahez.collections.manage",
+                            NameAr = "تحصيل مبالغ جاهز",
+                            NameEn = "Collect Jahez payments",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000133"),
+                            Category = "Jahez",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "إنشاء طلبات جاهز ضمن نطاق جاهز.",
+                            DescriptionEn = "Create Jahez requests within Jahez scope.",
+                            DisplayOrder = 133,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "jahez.requests.create",
+                            NameAr = "إنشاء طلبات جاهز",
+                            NameEn = "Create Jahez requests",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000134"),
+                            Category = "Jahez",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "اعتماد استثناءات جاهز ضمن نطاق جاهز.",
+                            DescriptionEn = "Approve Jahez exceptions within Jahez scope.",
+                            DisplayOrder = 134,
+                            GrantabilityRule = "HIGH_TRUST_ONLY",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = true,
+                            IsSensitive = true,
+                            Key = "jahez.requests.approve",
+                            NameAr = "اعتماد استثناءات جاهز",
+                            NameEn = "Approve Jahez exceptions",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000135"),
+                            Category = "Jahez",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "اعتماد تصفير حسابات جاهز ضمن نطاق جاهز.",
+                            DescriptionEn = "Approve Jahez resets within Jahez scope.",
+                            DisplayOrder = 135,
+                            GrantabilityRule = "HIGH_TRUST_ONLY",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = true,
+                            IsSensitive = true,
+                            Key = "jahez.resets.approve",
+                            NameAr = "اعتماد تصفير حسابات جاهز",
+                            NameEn = "Approve Jahez resets",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000136"),
+                            Category = "Jahez",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "تسجيل أرباح جاهز ضمن نطاق جاهز.",
+                            DescriptionEn = "Manage Jahez earnings within Jahez scope.",
+                            DisplayOrder = 136,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "jahez.earnings.manage",
+                            NameAr = "تسجيل أرباح جاهز",
+                            NameEn = "Manage Jahez earnings",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000137"),
+                            Category = "Jahez",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "استيراد تقارير جاهز ضمن نطاق جاهز.",
+                            DescriptionEn = "Import Jahez reports within Jahez scope.",
+                            DisplayOrder = 137,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "jahez.imports.manage",
+                            NameAr = "استيراد تقارير جاهز",
+                            NameEn = "Import Jahez reports",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000138"),
+                            Category = "Jahez",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "تسويات وأرصدة جاهز ضمن نطاق جاهز.",
+                            DescriptionEn = "Adjust Jahez balances within Jahez scope.",
+                            DisplayOrder = 138,
+                            GrantabilityRule = "HIGH_TRUST_ONLY",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = true,
+                            IsSensitive = true,
+                            Key = "jahez.adjustments.manage",
+                            NameAr = "تسويات وأرصدة جاهز",
+                            NameEn = "Adjust Jahez balances",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000139"),
+                            Category = "Jahez",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "عرض صندوق جاهز ضمن نطاق جاهز.",
+                            DescriptionEn = "Read Jahez cashbox within Jahez scope.",
+                            DisplayOrder = 139,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "jahez.cashbox.read",
+                            NameAr = "عرض صندوق جاهز",
+                            NameEn = "Read Jahez cashbox",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000140"),
+                            Category = "Jahez",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "تسليم صندوق جاهز ضمن نطاق جاهز.",
+                            DescriptionEn = "Submit Jahez cashbox within Jahez scope.",
+                            DisplayOrder = 140,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "jahez.cashbox.submit",
+                            NameAr = "تسليم صندوق جاهز",
+                            NameEn = "Submit Jahez cashbox",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000141"),
+                            Category = "Jahez",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "تأكيد استلام صندوق جاهز ضمن نطاق جاهز.",
+                            DescriptionEn = "Confirm Jahez cashbox receipt within Jahez scope.",
+                            DisplayOrder = 141,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "jahez.cashbox.confirm",
+                            NameAr = "تأكيد استلام صندوق جاهز",
+                            NameEn = "Confirm Jahez cashbox receipt",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000142"),
+                            Category = "Jahez",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "اعتماد تسليم صندوق جاهز ضمن نطاق جاهز.",
+                            DescriptionEn = "Approve Jahez cashbox handovers within Jahez scope.",
+                            DisplayOrder = 142,
+                            GrantabilityRule = "HIGH_TRUST_ONLY",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = true,
+                            IsSensitive = true,
+                            Key = "jahez.cashbox.approve",
+                            NameAr = "اعتماد تسليم صندوق جاهز",
+                            NameEn = "Approve Jahez cashbox handovers",
+                            RequiresClientScope = true,
                             RequiresHousingScope = false,
                             RowVersion = new byte[0],
                             Version = 1
@@ -15807,6 +17216,11 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.Sponsor", null)
+                        .WithMany()
+                        .HasForeignKey("DashboardSponsorId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("LogisticsERP.Domain.Entities.Platform.OperatingCity", null)
                         .WithMany()
                         .HasForeignKey("OperatingCityId")
@@ -16505,6 +17919,12 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Fuel.FuelCard", b =>
                 {
+                    b.HasOne("LogisticsERP.Domain.Entities.Platform.OperatingCity", null)
+                        .WithMany()
+                        .HasForeignKey("OperatingCityId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("LogisticsERP.Domain.Entities.Workforce.Sponsor", null)
                         .WithMany()
                         .HasForeignKey("SponsorId")
@@ -16723,6 +18143,213 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.HasOne("LogisticsERP.Domain.Entities.Housing.HousingWarehouseItem", null)
                         .WithMany()
                         .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.JahezAccountFee", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Jahez.JahezApprovalRequest", null)
+                        .WithMany()
+                        .HasForeignKey("ApprovalRequestId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Jahez.JahezAccountHandover", null)
+                        .WithMany()
+                        .HasForeignKey("HandoverId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.JahezAccountHandover", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Clients.PlatformRiderAccount", null)
+                        .WithMany()
+                        .HasForeignKey("PlatformRiderAccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Clients.RiderClientAssignment", null)
+                        .WithMany()
+                        .HasForeignKey("RiderClientAssignmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.RiderProfile", null)
+                        .WithMany()
+                        .HasForeignKey("RiderProfileId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.JahezApprovalDecision", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Jahez.JahezApprovalRequest", null)
+                        .WithMany()
+                        .HasForeignKey("RequestId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.JahezApprovalRequest", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Jahez.JahezAccountHandover", null)
+                        .WithMany()
+                        .HasForeignKey("HandoverId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Clients.PlatformRiderAccount", null)
+                        .WithMany()
+                        .HasForeignKey("TargetAccountId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.JahezCashboxEntry", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Jahez.JahezCashboxHandover", null)
+                        .WithMany()
+                        .HasForeignKey("CashboxHandoverId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Jahez.JahezAccountHandover", null)
+                        .WithMany()
+                        .HasForeignKey("HandoverId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Jahez.JahezRiderSettlement", null)
+                        .WithMany()
+                        .HasForeignKey("SettlementId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.JahezCommissionPolicyPeriod", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Jahez.JahezApprovalRequest", null)
+                        .WithMany()
+                        .HasForeignKey("ApprovalRequestId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Jahez.JahezAccountHandover", null)
+                        .WithMany()
+                        .HasForeignKey("HandoverId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.JahezDailyDispatch", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Jahez.JahezImportBatch", null)
+                        .WithMany()
+                        .HasForeignKey("BatchId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Jahez.JahezAccountHandover", null)
+                        .WithMany()
+                        .HasForeignKey("HandoverId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Jahez.JahezImportRow", null)
+                        .WithMany()
+                        .HasForeignKey("ImportRowId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.JahezEarningsStatement", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Jahez.JahezAccountHandover", null)
+                        .WithMany()
+                        .HasForeignKey("HandoverId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Jahez.JahezEarningsStatement", null)
+                        .WithMany()
+                        .HasForeignKey("SupersedesId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.JahezImportBatch", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Jahez.JahezImportBatch", null)
+                        .WithMany()
+                        .HasForeignKey("ReplacesBatchId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.JahezImportFile", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Jahez.JahezImportBatch", null)
+                        .WithMany()
+                        .HasForeignKey("BatchId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.JahezImportRow", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Jahez.JahezImportFile", null)
+                        .WithMany()
+                        .HasForeignKey("FileId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.JahezLedgerEntry", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Jahez.JahezAccountHandover", null)
+                        .WithMany()
+                        .HasForeignKey("HandoverId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Jahez.JahezLedgerEntry", null)
+                        .WithMany()
+                        .HasForeignKey("ReversesEntryId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.JahezReminderState", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Jahez.JahezAccountHandover", null)
+                        .WithMany()
+                        .HasForeignKey("HandoverId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.JahezRiderSettlement", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Jahez.JahezAccountHandover", null)
+                        .WithMany()
+                        .HasForeignKey("HandoverId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.JahezTransaction", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Jahez.JahezImportBatch", null)
+                        .WithMany()
+                        .HasForeignKey("BatchId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Jahez.JahezAccountHandover", null)
+                        .WithMany()
+                        .HasForeignKey("HandoverId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Jahez.JahezImportRow", null)
+                        .WithMany()
+                        .HasForeignKey("ImportRowId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });

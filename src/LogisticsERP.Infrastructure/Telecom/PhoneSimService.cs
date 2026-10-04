@@ -139,7 +139,7 @@ internal sealed class PhoneSimService(
 
     public async Task<Result<PhoneSimResponse>> CreateAsync(
         CreatePhoneSimRequest request,
-        PrivateFileUpload receiptForm,
+        PrivateFileUpload? receiptForm = null,
         CancellationToken cancellationToken = default)
     {
         if (currentUser.UserId is not { } actorId)
@@ -195,22 +195,25 @@ internal sealed class PhoneSimService(
             Notes = TrimOrNull(request.Notes)
         };
 
-        var storedReceiptForm = await fileStorage.StoreAsync(
-            $"phone-sims/{sim.Id:N}/receipt-form",
-            receiptForm,
-            MaximumReceiptFormSize,
-            cancellationToken);
-        if (storedReceiptForm.IsFailure)
+        if (receiptForm is not null)
         {
-            return Result.Failure<PhoneSimResponse>(storedReceiptForm.Error);
-        }
+            var storedReceiptForm = await fileStorage.StoreAsync(
+                $"phone-sims/{sim.Id:N}/receipt-form",
+                receiptForm,
+                MaximumReceiptFormSize,
+                cancellationToken);
+            if (storedReceiptForm.IsFailure)
+            {
+                return Result.Failure<PhoneSimResponse>(storedReceiptForm.Error);
+            }
 
-        sim.ReceiptFormOriginalFileName = storedReceiptForm.Value!.OriginalFileName;
-        sim.ReceiptFormStoredFileName = storedReceiptForm.Value.StoredFileName;
-        sim.ReceiptFormContentType = storedReceiptForm.Value.ContentType;
-        sim.ReceiptFormSizeBytes = storedReceiptForm.Value.Length;
-        sim.ReceiptFormSha256Checksum = storedReceiptForm.Value.Sha256Checksum;
-        sim.ReceiptFormStoragePath = storedReceiptForm.Value.StoragePath;
+            sim.ReceiptFormOriginalFileName = storedReceiptForm.Value!.OriginalFileName;
+            sim.ReceiptFormStoredFileName = storedReceiptForm.Value.StoredFileName;
+            sim.ReceiptFormContentType = storedReceiptForm.Value.ContentType;
+            sim.ReceiptFormSizeBytes = storedReceiptForm.Value.Length;
+            sim.ReceiptFormSha256Checksum = storedReceiptForm.Value.Sha256Checksum;
+            sim.ReceiptFormStoragePath = storedReceiptForm.Value.StoragePath;
+        }
 
         dbContext.PhoneSimCards.Add(sim);
         dbContext.PhoneSimResponsibilityChanges.Add(new PhoneSimResponsibilityChange
@@ -228,12 +231,18 @@ internal sealed class PhoneSimService(
         }
         catch (DbUpdateException)
         {
-            fileStorage.DeleteBestEffort(storedReceiptForm.Value.StoragePath);
+            if (sim.ReceiptFormStoragePath is not null)
+            {
+                fileStorage.DeleteBestEffort(sim.ReceiptFormStoragePath);
+            }
             return Result.Failure<PhoneSimResponse>(PhoneSimErrors.PersistenceConflict);
         }
         catch
         {
-            fileStorage.DeleteBestEffort(storedReceiptForm.Value.StoragePath);
+            if (sim.ReceiptFormStoragePath is not null)
+            {
+                fileStorage.DeleteBestEffort(sim.ReceiptFormStoragePath);
+            }
             throw;
         }
 

@@ -4,6 +4,7 @@
     <UserSecretsId>LogisticsERP-Api-Development</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
+    <InternalsVisibleTo Include="LogisticsERP.Jahez.Tests" />
     <ProjectReference Include="..\LogisticsERP.Application\LogisticsERP.Application.csproj" />
     <ProjectReference Include="..\LogisticsERP.Infrastructure\LogisticsERP.Infrastructure.csproj" />
   </ItemGroup>

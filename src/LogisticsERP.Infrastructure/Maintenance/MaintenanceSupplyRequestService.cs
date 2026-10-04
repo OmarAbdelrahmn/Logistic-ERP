@@ -4,7 +4,6 @@ using LogisticsERP.Domain.Entities.Fleet;
 using LogisticsERP.Domain.Entities.Maintenance;
 using LogisticsERP.Domain.Entities.System;
 using LogisticsERP.Domain.Enums;
-using LogisticsERP.Domain.Fleet;
 using LogisticsERP.Domain.Maintenance;
 using Microsoft.EntityFrameworkCore;
 
@@ -272,7 +271,7 @@ internal sealed partial class MaintenanceService
         var vehicle = await dbContext.Vehicles.SingleOrDefaultAsync(x => x.Id == workOrder.VehicleId.Value, cancellationToken);
         if (vehicle is null)
             return Result.Failure<decimal>(MaintenanceErrors.NotFound);
-        if (workOrder.OdometerAtOpen.Value < vehicle.CurrentOdometer)
+        if (workOrder.OdometerAtOpen.Value < 0)
             return Result.Failure<decimal>(MaintenanceErrors.InvalidOdometer);
 
         var operationId = Guid.CreateVersion7();
@@ -303,7 +302,7 @@ internal sealed partial class MaintenanceService
             filterLine.MaintenanceMaterialUsageId = filterUsageId;
         }
 
-        VehicleMileageRules.ApplyVerifiedReading(vehicle, workOrder.OdometerAtOpen.Value, issuedAtUtc);
+        ApplyOilChangeVehicleMileage(vehicle, workOrder.OdometerAtOpen.Value, issuedAtUtc);
         dbContext.VehicleOdometerReadings.Add(new VehicleOdometerReading
         {
             VehicleId = vehicle.Id,
@@ -485,11 +484,11 @@ internal sealed partial class MaintenanceService
 
         var vehicle = await dbContext.Vehicles.AsNoTracking()
             .Where(x => x.Id == workOrder.VehicleId.Value)
-            .Select(x => new { x.VehicleType, x.VehicleModelId, x.CurrentOdometer })
+            .Select(x => new { x.VehicleType, x.VehicleModelId })
             .SingleOrDefaultAsync(cancellationToken);
         if (vehicle is null)
             return Result.Failure<InventorySupplyRequest>(MaintenanceErrors.NotFound);
-        if (workOrder.OdometerAtOpen.Value < vehicle.CurrentOdometer)
+        if (workOrder.OdometerAtOpen.Value < 0)
             return Result.Failure<InventorySupplyRequest>(MaintenanceErrors.InvalidOdometer);
 
         var configuredQuantity = await dbContext.MaintenancePlans.AsNoTracking()

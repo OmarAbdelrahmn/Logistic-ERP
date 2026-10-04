@@ -20,7 +20,7 @@ There is no pagination, search, vehicle filter, rider filter, or maximum date-ra
 
 ## TypeScript response contracts
 
-The API sends camelCase JSON properties. GUIDs, dates, and timestamps are strings in JSON. Day totals are JSON numbers, including fractional values. Neither endpoint wraps a successful response in a `result` or `data` property.
+The API sends camelCase JSON properties. GUIDs, dates, and timestamps are strings in JSON. Day totals remain JSON numbers but contain only whole billable days. Neither endpoint wraps a successful response in a `result` or `data` property. Response fields and types are unchanged.
 
 ```ts
 type Guid = string;
@@ -39,6 +39,8 @@ interface VehicleAssignmentsPeriodRow {
   assetNumber: string;
   serialNumber: string | null;
   plateNumberAr: string | null;
+  sponsorId: Guid | null;
+  sponsorName: string | null;
   totalDaysAssignedInPeriod: number;
   totalAmountToCollectInPeriodSar: number | null;
   assignments: RiderVehiclePeriodAssignment[];
@@ -92,6 +94,10 @@ interface VehicleRiderPeriodAssignment {
 }
 ```
 
+## Vehicle sponsor column
+
+In `src/app/admin/fleet/vehicles/reports/page.tsx`, display `row.sponsorName ?? "—"` in a sponsor column (Arabic label: `الكفيل المسؤول`). The vehicle report returns `sponsorId` and `sponsorName` on each vehicle row, including vehicles without assignments. They come from the vehicle's current `SponsorId` and the sponsor's Arabic registry name, rather than the registered owner or a rider's sponsor. Both fields are `null` when no sponsor is linked; a missing linked record yields a `null` name. Soft-deleted sponsor names remain available in historical reports. The sponsor is a current related-record value, not a historical snapshot for the selected period.
+
 ## Shared assignment fields
 
 | Field | Meaning |
@@ -104,10 +110,10 @@ interface VehicleRiderPeriodAssignment {
 | `relationshipToAssignedRider` | Relationship stored on the separate `RealRider` record. `null` when `isRealRider=true` or no separate record exists. |
 | `startedAtUtc`, `endedAtUtc` | Original recorded assignment boundaries. `endedAtUtc=null` means the assignment is still open. |
 | `periodStartedAtUtc`, `periodEndedAtUtc` | The part of the assignment counted inside the requested date range. For an open assignment, the end is capped at the report's `asOfUtc`. |
-| `daysInPeriod` | Elapsed 24-hour days between the clipped period timestamps, rounded to four decimal places. Use this for the selected report's duration. |
-| `totalAssignmentDays` | Elapsed days from original assignment start to its recorded end; for an open assignment, from its start to `asOfUtc`. This can be larger than `daysInPeriod`. |
+| `daysInPeriod` | Whole billable Riyadh calendar days inside the inclusive requested date range, using the 14:00 cutoff. Use this for the selected report's duration. |
+| `totalAssignmentDays` | Whole billable days from original assignment start to its recorded end; for an open assignment, from its start to `asOfUtc`, using the same cutoff. This can be larger than `daysInPeriod`. |
 
-The end timestamp is a boundary, not another full day. For example, an assignment from September 1 at 00:00 to September 11 at 00:00 Riyadh time is **10 days**. A 12-hour assignment contributes `0.5` days. Use the API's day values instead of counting dates in the browser. `asOfUtc` is in UTC; stored assignment timestamps can serialize with another explicit offset, including `+03:00`, even though their property names end in `Utc`. Parse their offsets rather than appending `Z`.
+The cutoff is **14:00 Riyadh time**. Pickup at or before 14:00 includes that date; pickup after 14:00 starts counting the next date. Return after 14:00 includes that date; return at or before 14:00 excludes it. For example, September 1 at 15:00 to September 6 at 13:00 counts as **4 days**; September 1 at 13:00 to September 6 at 15:00 counts as **6 days**. Same-day use counts as one day only when pickup is at or before 14:00 and return is after 14:00; otherwise it counts as zero. Open assignments apply the same cutoff to `asOfUtc`. Use the API's day values instead of counting dates in the browser. Original and clipped timestamps are unchanged. `asOfUtc` is in UTC; stored assignment timestamps can serialize with another explicit offset, including `+03:00`, even though their property names end in `Utc`. Parse their offsets rather than appending `Z`.
 
 ## Vehicle response example
 
@@ -124,6 +130,8 @@ The end timestamp is a boundary, not another full day. For example, an assignmen
       "assetNumber": "CAR-A",
       "serialNumber": "SN-100",
       "plateNumberAr": "ا ب ج 1234",
+      "sponsorId": "55555555-5555-4555-8555-555555555555",
+      "sponsorName": "مؤسسة البوابة التجارية",
       "totalDaysAssignedInPeriod": 15,
       "totalAmountToCollectInPeriodSar": 900,
       "assignments": [
@@ -186,6 +194,8 @@ The end timestamp is a boundary, not another full day. For example, an assignmen
       "assetNumber": "CAR-B",
       "serialNumber": null,
       "plateNumberAr": null,
+      "sponsorId": null,
+      "sponsorName": null,
       "totalDaysAssignedInPeriod": 0,
       "totalAmountToCollectInPeriodSar": 0,
       "assignments": []
@@ -295,7 +305,7 @@ Both reports include the same cost fields on each assignment. All amounts are in
 | `vehicleType` | Current vehicle type: `1` motorcycle, `2` car, `3` van, `4` truck, `5` other. |
 | `monthlyCostSar` | SAR `1800` for a car or `800` for a motorcycle, using a fixed 30-day month. `null` for types with no specified rate. |
 | `dailyCostSar` | `monthlyCostSar / 30`, without intermediate rounding. Motorcycle rates are approximately `26.66666666666667`. `null` for types with no specified rate. |
-| `costInPeriodSar` | Exact elapsed days between the clipped period timestamps multiplied by the daily rate, rounded to two decimal places with midpoints away from zero. `null` for types with no specified rate. |
+| `costInPeriodSar` | Whole billable `daysInPeriod` multiplied by the daily rate, rounded to two decimal places with midpoints away from zero. `null` for types with no specified rate. |
 | `totalVehicleCostInPeriodSar` | Sum of the displayed assignments' rounded `costInPeriodSar` amounts. `null` if any assignment has no specified rate. |
 | `totalAmountToCollectInPeriodSar` | Vehicle-row total to collect from its riders for the selected period: the sum of its assignments' rounded `costInPeriodSar` amounts. `0` when it has no overlapping assignments, even if its vehicle type has no rate; `null` when it has an assignment with no specified rate. |
 
@@ -305,7 +315,7 @@ Vehicle totals add the individually rounded charges rather than multiplying the 
 
 For 6 days with a car, followed by 10 days without a vehicle, then 14 days with a motorcycle, the report returns SAR `360` for the car, SAR `373.33` for the motorcycle, and `totalVehicleCostInPeriodSar: 733.33`. The 10 days without a vehicle contribute no assignment and no cost.
 
-Use the API's cost fields for display; do not recalculate costs from the rounded `daysInPeriod` or from a rounded daily rate in the browser. Fractional days are prorated, and open assignments are charged only through `asOfUtc` or the report end, whichever comes first. The divisor is always 30: a complete 31-day car assignment costs SAR `1860`, and a complete 30-day motorcycle assignment costs SAR `800`. Totals follow the same actual-driver grouping as vehicle-use days, including substitute drivers with the same Iqama.
+Use the API's cost fields for display; do not recalculate costs from a rounded daily rate in the browser. Charges use whole billable days with the 14:00 Riyadh cutoff, limited to the requested range; open assignments use `asOfUtc` as their effective end. The divisor is always 30: a complete 31-day car assignment costs SAR `1860`, and a complete 30-day motorcycle assignment costs SAR `800`. Totals follow the same actual-driver grouping as vehicle-use days, including substitute drivers with the same Iqama.
 
 For vans, trucks, other types, or an unrecognized type, display a missing-rate label for the `null` amounts rather than zero. Known assignment costs can still be displayed even when the rider total is `null`. Vehicle totals are also `null` when an overlapping assignment has no rate. Overlapping assignments are each priced and added, just as their days are added. Rates and vehicle type come from the current report rules and vehicle record, rather than historical billing snapshots.
 

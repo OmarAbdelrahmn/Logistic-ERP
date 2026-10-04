@@ -1,0 +1,1010 @@
+{
+  "info": {
+    "name": "Logistics ERP — جاهز",
+    "description": "كل واجهات /api/jahez الفعلية. الأمثلة توضيحية؛ اقرأ docs/jahez-endpoints-handoff-ar.md لأشكال الاستجابة الكاملة. اضبط baseUrl وaccessToken وUUIDs قبل التنفيذ. استدعاءات POST تستخدم مفتاح عدم تكرار جديدًا؛ استعمل المفتاح نفسه فقط عند إعادة محاولة نفس الطلب. لا تشغل أمثلة التحصيل/الترحيل على قاعدة التشغيل إلا بقيم فعلية مؤكدة.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://localhost:7112"
+    },
+    {
+      "key": "accessToken",
+      "value": ""
+    },
+    {
+      "key": "accountId",
+      "value": "11111111-1111-1111-1111-111111111111"
+    },
+    {
+      "key": "riderProfileId",
+      "value": "22222222-2222-2222-2222-222222222222"
+    },
+    {
+      "key": "handoverId",
+      "value": "33333333-3333-3333-3333-333333333333"
+    },
+    {
+      "key": "assignmentId",
+      "value": "44444444-4444-4444-4444-444444444444"
+    },
+    {
+      "key": "targetAccountId",
+      "value": "55555555-5555-5555-5555-555555555555"
+    },
+    {
+      "key": "approvalRequestId",
+      "value": "66666666-6666-6666-6666-666666666666"
+    },
+    {
+      "key": "batchId",
+      "value": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"
+    },
+    {
+      "key": "fileId",
+      "value": "dddddddd-dddd-dddd-dddd-dddddddddddd"
+    },
+    {
+      "key": "cashboxHandoverId",
+      "value": "ffffffff-ffff-ffff-ffff-ffffffffffff"
+    }
+  ],
+  "item": [
+    {
+      "name": "الحسابات والأرصدة",
+      "item": [
+        {
+          "name": "GET handovers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/jahez/handovers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jahez",
+                "handovers"
+              ]
+            },
+            "description": "الطلب: Query اختياري `accountId`, `riderId`, `page`, `pageSize`\n\nاستجابة 200: `{ \"items\": Handover[], \"page\":1, \"pageSize\":50 }`\n\nالصلاحية: `jahez.read`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md"
+          },
+          "response": []
+        },
+        {
+          "name": "POST handovers",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Idempotency-Key",
+                "value": "{{$guid}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/jahez/handovers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jahez",
+                "handovers"
+              ]
+            },
+            "description": "الطلب: جسم `HandoverRequest` بالمثال أعلاه؛ `initialFeePayment` من 0 إلى 200 بالهللة، و`feeApprovalRequestId` إن أرسل يجب أن يكون `null`\n\nاستجابة 200: `Handover`؛ `id` هو `handoverId` لبقية العمليات\n\nالصلاحية: `jahez.handovers.manage`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountId\": \"{{accountId}}\",\n  \"riderProfileId\": \"{{riderProfileId}}\",\n  \"effectiveAtUtc\": \"2026-10-01T08:00:00+03:00\",\n  \"reason\": \"تسليم حساب جاهز\",\n  \"initialFeePayment\": 80,\n  \"feeApprovalRequestId\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST legacy-adoptions",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Idempotency-Key",
+                "value": "{{$guid}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/jahez/legacy-adoptions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jahez",
+                "legacy-adoptions"
+              ]
+            },
+            "description": "الطلب: جسم `LegacyAdoptionRequest` أدناه؛ `assignmentId` لإسناد جاهز قديم نشط\n\nاستجابة 200: `Handover` مع `isLegacy:true`\n\nالصلاحية: `jahez.adjustments.manage`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"assignmentId\": \"{{assignmentId}}\",\n  \"financialStartOn\": \"2026-10-01\",\n  \"openingDebt\": 500,\n  \"openingFees\": 70,\n  \"openingCommission\": 30,\n  \"reason\": \"تهيئة رصيد قديم موثق\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST handovers/{id:guid}/close",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Idempotency-Key",
+                "value": "{{$guid}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/jahez/handovers/{{handoverId}}/close",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jahez",
+                "handovers",
+                "{{handoverId}}",
+                "close"
+              ]
+            },
+            "description": "الطلب: `{id}` = `handoverId`، جسم `CloseRequest` أدناه\n\nاستجابة 200: `Handover` مع `endedAtUtc` وتثبيت العمولة حتى يوم الإغلاق\n\nالصلاحية: `jahez.handovers.manage`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"effectiveAtUtc\": \"2026-10-03T08:00:00+03:00\",\n  \"reason\": \"إغلاق فترة استخدام الحساب\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET handovers/{id:guid}/balance",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/jahez/handovers/{{handoverId}}/balance?through=2026-10-03",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jahez",
+                "handovers",
+                "{{handoverId}}",
+                "balance"
+              ],
+              "query": [
+                {
+                  "key": "through",
+                  "value": "2026-10-03"
+                }
+              ]
+            },
+            "description": "الطلب: `{id}` = `handoverId`؛ `through` مطلوب، حتى اليوم ولا يسبق تاريخ عمولة/تصفية مثبتة\n\nاستجابة 200: `Balance`؛ مثال كامل أدناه\n\nالصلاحية: `jahez.read`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md"
+          },
+          "response": []
+        },
+        {
+          "name": "GET handovers/{id:guid}/fee",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/jahez/handovers/{{handoverId}}/fee",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jahez",
+                "handovers",
+                "{{handoverId}}",
+                "fee"
+              ]
+            },
+            "description": "الطلب: `{id}` = `handoverId`\n\nاستجابة 200: `Fee` مع حقول Auditable\n\nالصلاحية: `jahez.read`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md"
+          },
+          "response": []
+        },
+        {
+          "name": "GET handovers/{id:guid}/settlements",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/jahez/handovers/{{handoverId}}/settlements",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jahez",
+                "handovers",
+                "{{handoverId}}",
+                "settlements"
+              ]
+            },
+            "description": "الطلب: `{id}` = `handoverId`, Query `page`, `pageSize`\n\nاستجابة 200: `{ \"items\": Settlement[], \"page\":1, \"pageSize\":50 }`\n\nالصلاحية: `jahez.read`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md"
+          },
+          "response": []
+        },
+        {
+          "name": "GET handovers/{id:guid}/earnings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/jahez/handovers/{{handoverId}}/earnings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jahez",
+                "handovers",
+                "{{handoverId}}",
+                "earnings"
+              ]
+            },
+            "description": "الطلب: `{id}` = `handoverId`, Query `page`, `pageSize`\n\nاستجابة 200: `{ \"items\": Earnings[], \"page\":1, \"pageSize\":50 }`\n\nالصلاحية: `jahez.read`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md"
+          },
+          "response": []
+        },
+        {
+          "name": "GET handovers/{id:guid}/commission-policies",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/jahez/handovers/{{handoverId}}/commission-policies",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jahez",
+                "handovers",
+                "{{handoverId}}",
+                "commission-policies"
+              ]
+            },
+            "description": "الطلب: `{id}` = `handoverId`, Query `page`, `pageSize`\n\nاستجابة 200: `{ \"items\": CommissionPolicy[], \"page\":1, \"pageSize\":50 }`\n\nالصلاحية: `jahez.read`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md"
+          },
+          "response": []
+        },
+        {
+          "name": "GET debts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/jahez/debts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jahez",
+                "debts"
+              ]
+            },
+            "description": "الطلب: Query `riderId?`, `overdueOnly=false`, `page=1`, `pageSize=50`\n\nاستجابة 200: `{ \"items\": Balance[], \"page\":1, \"pageSize\":50 }`؛ تشمل ديون الإسنادات المغلقة\n\nالصلاحية: `jahez.read`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md"
+          },
+          "response": []
+        },
+        {
+          "name": "GET ledger",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/jahez/ledger",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jahez",
+                "ledger"
+              ]
+            },
+            "description": "الطلب: Query `riderId?`, `handoverId?`, `page`, `pageSize`\n\nاستجابة 200: `{ \"items\": LedgerEntry[], \"page\":1, \"pageSize\":50 }`\n\nالصلاحية: `jahez.read`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "الموافقات",
+      "item": [
+        {
+          "name": "GET requests",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/jahez/requests",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jahez",
+                "requests"
+              ]
+            },
+            "description": "الطلب: `status?` من 1 إلى 4، `page`, `pageSize`\n\nاستجابة 200: `{ \"items\": ApprovalRequest[], \"page\":1, \"pageSize\":50 }`؛ عناصر القائمة لا تحتوي قرارات\n\nالصلاحية: `jahez.read`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md"
+          },
+          "response": []
+        },
+        {
+          "name": "POST requests",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Idempotency-Key",
+                "value": "{{$guid}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/jahez/requests",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jahez",
+                "requests"
+              ]
+            },
+            "description": "الطلب: `ApprovalCreateRequest`؛ `handoverId`, `kind`, `reason`، وباقي الحقول حسب النوع أدناه\n\nاستجابة 200: `ApprovalResponse` وحالة `request.status=1` و`decisions=[]`\n\nالصلاحية: `jahez.requests.create`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"handoverId\": \"{{handoverId}}\",\n  \"kind\": 1,\n  \"reason\": \"استثناء رسوم موثق\",\n  \"waiverAmount\": 50\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST requests/{id:guid}/decision",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Idempotency-Key",
+                "value": "{{$guid}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/jahez/requests/{{approvalRequestId}}/decision",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jahez",
+                "requests",
+                "{{approvalRequestId}}",
+                "decision"
+              ]
+            },
+            "description": "الطلب: `{id}` = `approvalRequestId`، `DecisionRequest`\n\nاستجابة 200: `ApprovalResponse` محدث؛ بعد الموافقة status=2 والرفض status=3\n\nالصلاحية: `jahez.read` عند الـController؛ الخدمة تتطلب `jahez.requests.approve` أو `jahez.resets.approve` للتصفير\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"approve\": true,\n  \"reason\": \"تم التحقق واعتماد الطلب\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST requests/{id:guid}/cancel",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Idempotency-Key",
+                "value": "{{$guid}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/jahez/requests/{{approvalRequestId}}/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jahez",
+                "requests",
+                "{{approvalRequestId}}",
+                "cancel"
+              ]
+            },
+            "description": "الطلب: `{id}` = `approvalRequestId`، جسم `{ \"reason\":\"لم يعد مطلوبًا\" }`\n\nاستجابة 200: `ApprovalResponse` مع status=4 وقرار إلغاء\n\nالصلاحية: `jahez.requests.create`، والمقدم نفسه فقط\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"لم يعد مطلوبًا\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET requests/{id:guid}",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/jahez/requests/{{approvalRequestId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jahez",
+                "requests",
+                "{{approvalRequestId}}"
+              ]
+            },
+            "description": "الطلب: `{id}` = `approvalRequestId`\n\nاستجابة 200: `ApprovalResponse` مع تاريخ القرار\n\nالصلاحية: `jahez.read`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "الأرباح والتحصيل",
+      "item": [
+        {
+          "name": "POST earnings",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Idempotency-Key",
+                "value": "{{$guid}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/jahez/earnings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jahez",
+                "earnings"
+              ]
+            },
+            "description": "الطلب: `EarningsRequest` بكل البنود التسعة صراحةً؛ `supersedesId?` لتصحيح بيان لم يُثبت\n\nاستجابة 200: `Earnings` + History\n\nالصلاحية: `jahez.earnings.manage`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"handoverId\": \"{{handoverId}}\",\n  \"fromDate\": \"2026-10-02\",\n  \"toDate\": \"2026-10-03\",\n  \"totalDeliveryPrice\": 1000,\n  \"totalPenalties\": 20,\n  \"totalCashAmount\": 100,\n  \"totalDriverDebit\": 10,\n  \"totalServiceDeduction\": 5,\n  \"totalDriverCredit\": 50,\n  \"totalBonuses\": 30,\n  \"totalTips\": 10,\n  \"totalFreeOrders\": 5,\n  \"reason\": \"كشف أرباح معتمد يدويًا\",\n  \"supersedesId\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST settlements",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Idempotency-Key",
+                "value": "{{$guid}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/jahez/settlements",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jahez",
+                "settlements"
+              ]
+            },
+            "description": "الطلب: `PaymentRequest`؛ توزيع المقبوض على الرسوم والدين والعمولة\n\nاستجابة 200: `Settlement` + History\n\nالصلاحية: `jahez.collections.manage`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"handoverId\": \"{{handoverId}}\",\n  \"throughDate\": \"2026-10-03\",\n  \"feePayment\": 50,\n  \"debtPayment\": 100,\n  \"commissionPayment\": 30,\n  \"countsAsSettlement\": true,\n  \"reason\": \"دفعة تصفية جزئية\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST adjustments",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Idempotency-Key",
+                "value": "{{$guid}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/jahez/adjustments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jahez",
+                "adjustments"
+              ]
+            },
+            "description": "الطلب: `LedgerAdjustmentRequest`؛ مبلغ موقع موجب لزيادة الدين أو سالب لتخفيضه، `reversesEntryId?`\n\nاستجابة 200: `LedgerEntry` + History؛ لا ينشئ قبضًا\n\nالصلاحية: `jahez.adjustments.manage`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"handoverId\": \"{{handoverId}}\",\n  \"bucket\": 2,\n  \"amount\": -25,\n  \"reason\": \"تصحيح مديونية موثق\",\n  \"reversesEntryId\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "الاستيراد والطلبات",
+      "item": [
+        {
+          "name": "GET imports",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/jahez/imports",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jahez",
+                "imports"
+              ]
+            },
+            "description": "الطلب: `page`, `pageSize`\n\nاستجابة 200: `{ \"items\": ImportBatch[], \"page\":1, \"pageSize\":50 }`\n\nالصلاحية: `jahez.imports.manage`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md"
+          },
+          "response": []
+        },
+        {
+          "name": "POST imports",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Idempotency-Key",
+                "value": "{{$guid}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/jahez/imports",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jahez",
+                "imports"
+              ]
+            },
+            "description": "الطلب: `multipart/form-data`: `kind` = 1 للحركات أو 2 للطلبات، حقل `files` مكرر لكل ملف XLSX، `replacesBatchId?`, `correctionReason?`\n\nاستجابة 200: `ImportPreview` محفوظة، `committed:false`\n\nالصلاحية: `jahez.imports.manage`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "kind",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "files",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET imports/{id:guid}",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/jahez/imports/{{batchId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jahez",
+                "imports",
+                "{{batchId}}"
+              ]
+            },
+            "description": "الطلب: `{id}` = `batchId`\n\nاستجابة 200: `ImportPreview` حديثة مع مشكلات الربط والتداخل\n\nالصلاحية: `jahez.imports.manage`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md"
+          },
+          "response": []
+        },
+        {
+          "name": "POST imports/{id:guid}/commit",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Idempotency-Key",
+                "value": "{{$guid}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/jahez/imports/{{batchId}}/commit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jahez",
+                "imports",
+                "{{batchId}}",
+                "commit"
+              ]
+            },
+            "description": "الطلب: `{id}` = `batchId`، جسم `{}` للحركات أو `ImportCommitRequest` للطلبات الملتبسة\n\nاستجابة 200: `ImportPreview` مع `committed:true`\n\nالصلاحية: `jahez.imports.manage`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"allocations\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET import-files/{id:guid}",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/jahez/import-files/{{fileId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jahez",
+                "import-files",
+                "{{fileId}}"
+              ]
+            },
+            "description": "الطلب: `{id}` = `files[].id` من المعاينة\n\nاستجابة 200: بايتات ملف XLSX، `Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`، واسم الملف الأصلي للتنزيل\n\nالصلاحية: `jahez.imports.manage`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md"
+          },
+          "response": []
+        },
+        {
+          "name": "GET dispatches",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/jahez/dispatches?from=2026-10-02&to=2026-10-02",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jahez",
+                "dispatches"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2026-10-02"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-10-02"
+                }
+              ]
+            },
+            "description": "الطلب: `from`, `to` مطلوبان، `riderId?`, `page`, `pageSize`\n\nاستجابة 200: `{ \"items\": Dispatch[], \"page\":1, \"pageSize\":50 }`\n\nالصلاحية: `jahez.read`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "الصندوق",
+      "item": [
+        {
+          "name": "GET cashbox",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/jahez/cashbox",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jahez",
+                "cashbox"
+              ]
+            },
+            "description": "الطلب: بلا Query\n\nاستجابة 200: `CashboxBalance`\n\nالصلاحية: `jahez.cashbox.read`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md"
+          },
+          "response": []
+        },
+        {
+          "name": "GET cashbox/handovers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/jahez/cashbox/handovers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jahez",
+                "cashbox",
+                "handovers"
+              ]
+            },
+            "description": "الطلب: `page`, `pageSize`\n\nاستجابة 200: `{ \"items\": CashboxHandover[], \"page\":1, \"pageSize\":50 }`\n\nالصلاحية: `jahez.cashbox.read`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md"
+          },
+          "response": []
+        },
+        {
+          "name": "POST cashbox/handovers",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Idempotency-Key",
+                "value": "{{$guid}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/jahez/cashbox/handovers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jahez",
+                "cashbox",
+                "handovers"
+              ]
+            },
+            "description": "الطلب: `CashboxCreateRequest`\n\nاستجابة 200: `CashboxHandover` بحالة 1\n\nالصلاحية: `jahez.cashbox.submit`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"businessDate\": \"2026-10-03\",\n  \"reason\": \"تسليم اليومية للمحاسب\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST cashbox/handovers/{id:guid}/confirm",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Idempotency-Key",
+                "value": "{{$guid}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/jahez/cashbox/handovers/{{cashboxHandoverId}}/confirm",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jahez",
+                "cashbox",
+                "handovers",
+                "{{cashboxHandoverId}}",
+                "confirm"
+              ]
+            },
+            "description": "الطلب: `{id}` = معرف تسليم الصندوق، `AccountantConfirmRequest`\n\nاستجابة 200: `CashboxHandover` بحالة 2؛ يجب تطابق كل قسم\n\nالصلاحية: `jahez.cashbox.confirm`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"feeAmount\": 130,\n  \"settlementAmount\": 130,\n  \"reason\": \"تم استلام ومطابقة القسمين\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST cashbox/handovers/{id:guid}/decision",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Idempotency-Key",
+                "value": "{{$guid}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/jahez/cashbox/handovers/{{cashboxHandoverId}}/decision",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jahez",
+                "cashbox",
+                "handovers",
+                "{{cashboxHandoverId}}",
+                "decision"
+              ]
+            },
+            "description": "الطلب: `{id}` = معرف تسليم الصندوق، `DecisionRequest` نفسه المستخدم للموافقات\n\nاستجابة 200: `CashboxHandover` بحالة 3 للموافقة أو 4 للرفض\n\nالصلاحية: `jahez.cashbox.approve`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"approve\": true,\n  \"reason\": \"اعتماد التسليم بعد تأكيد المحاسب\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET cashbox/entries",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/jahez/cashbox/entries",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jahez",
+                "cashbox",
+                "entries"
+              ]
+            },
+            "description": "الطلب: `cashboxHandoverId?`, `page`, `pageSize`\n\nاستجابة 200: `{ \"items\": CashboxEntry[], \"page\":1, \"pageSize\":50 }`\n\nالصلاحية: `jahez.cashbox.read`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

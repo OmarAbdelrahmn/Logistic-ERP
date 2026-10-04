@@ -72,10 +72,13 @@ Response `200 OK`:
     "sponsorId": null,
     "sponsorNameAr": null,
     "riderProfileId": "00000000-0000-0000-0000-000000000001",
+    "licenseNamesAr": ["خصوصي", "دراجة نارية"],
     "rowVersion": "AAAAAAAAAAA="
   }
 ]
 ```
+
+`licenseNamesAr` contains only distinct Arabic category names from the employee's current, non-deleted driver-license records. It is an array of strings and returns `[]` when no licenses are recorded. Current records remain included regardless of expiry or license status; historical records with `isCurrent: false` are excluded.
 
 ### 2. Get employee details
 
@@ -417,7 +420,7 @@ Use these endpoints to create an external rider from the essential identity and 
 
 `GET /api/external-riders`
 
-Permission: `riders.read`
+Permission: `external_riders.read`
 
 Response `200 OK`:
 
@@ -442,7 +445,7 @@ Response `200 OK`:
 
 `GET /api/external-riders/{employeeId}`
 
-Permission: `riders.read`
+Permission: `external_riders.read`
 
 Response `200 OK`: one item with the same shape as the list response.
 
@@ -450,7 +453,7 @@ Response `200 OK`: one item with the same shape as the list response.
 
 `POST /api/external-riders`
 
-Permission: `employees.create`
+Permission: `external_riders.create`
 
 Required fields:
 
@@ -471,7 +474,7 @@ Required fields:
 
 `PUT /api/external-riders/{employeeId}`
 
-Permission: `employees.update`
+Permission: `external_riders.update`
 
 Send the latest `rowVersion` returned by a create, get, or update request:
 
@@ -487,6 +490,10 @@ Send the latest `rowVersion` returned by a create, get, or update request:
 ```
 
 The update accepts the Iqama number, Arabic full name, nationality, IBAN, required primary phone number, optional address, and required operational work type ID. `primaryPhone` must not be blank or exceed 32 characters. `operationalWorkTypeId` must reference an existing value from `GET /api/hr-catalogs/operational-work-types`. Sending `address: null` clears the address. Response: `200 OK` with a refreshed `rowVersion`.
+
+### Delete an external rider
+
+`DELETE /api/external-riders/{employeeId}` requires `external_riders.delete`. Send `{ "reason": "Reason for deletion", "rowVersion": "<latest rowVersion>" }` as JSON. Success is `204 No Content`. The employee record is soft deleted and its history is retained. Active vehicle/client assignments or a stale version block deletion. See [the four-permission frontend handoff](external-rider-work-order-permissions-frontend-handoff.md) for imports, permission loading, and deployment details.
 
 ## Frontend workflow
 

@@ -49,9 +49,11 @@ internal sealed partial class FleetService
     {
         var events = new List<CompleteHistoryEventResponse>();
         void Add(DateTimeOffset at, string category, string action, Guid id, Guid? vehicle, Guid? rider,
-            Guid? assignment, string summary, object details, IReadOnlyList<CompleteHistoryFileResponse>? files = null) =>
+            Guid? assignment, string summary, object details, Guid? createdByUserId,
+            IReadOnlyList<CompleteHistoryFileResponse>? files = null) =>
             events.Add(new CompleteHistoryEventResponse(at, category, action, id, vehicle, rider, assignment,
-                summary, JsonSerializer.SerializeToElement(details, CompleteHistoryJsonOptions), files ?? []));
+                summary, JsonSerializer.SerializeToElement(details, CompleteHistoryJsonOptions), files ?? [],
+                createdByUserId, null));
 
         var assignments = await dbContext.RiderVehicleAssignments.IgnoreQueryFilters().AsNoTracking()
             .Where(x => vehicleId.HasValue ? x.VehicleId == vehicleId.Value : x.RiderProfileId == riderId!.Value)
@@ -79,13 +81,13 @@ internal sealed partial class FleetService
                     assignment.PermissionReference, assignment.PermissionStartsOn, assignment.PermissionEndsOn,
                     assignment.AssignmentReason, assignment.AssignedByUserId, assignment.IsRealRider,
                     RealRider = realRider is null ? null : new { realRider.Name, realRider.IqamaNo, realRider.RelationshipToAssignedRider },
-                    assignment.Notes });
+                    assignment.Notes }, assignment.AssignedByUserId);
             if (assignment.EndedAtUtc.HasValue)
                 Add(assignment.EndedAtUtc.Value, "assignment", "returned_or_switched", assignment.Id,
                     assignment.VehicleId, assignment.RiderProfileId, assignment.Id, $"Vehicle {assetNumber} assignment ended",
                     new { assignment.EndOdometer, assignment.EndVehicleCondition, assignment.EndFuelLevelPercentage,
                         assignment.EndLocationSnapshot, assignment.CompletionReason, assignment.EndedByUserId,
-                        assignment.Status });
+                        assignment.Status }, assignment.EndedByUserId);
         }
         var assignmentEvents = await dbContext.RiderVehicleAssignmentEvents.IgnoreQueryFilters().AsNoTracking()
             .Where(x => assignmentIds.Contains(x.RiderVehicleAssignmentId)).ToArrayAsync(ct);
@@ -94,7 +96,7 @@ internal sealed partial class FleetService
             var assignment = assignments.First(x => x.Id == entry.RiderVehicleAssignmentId);
             Add(entry.OccurredAtUtc, "assignment_event", entry.EventType.ToString(), entry.Id,
                 assignment.VehicleId, assignment.RiderProfileId, assignment.Id, entry.Reason,
-                new { entry.OperationId, entry.ActorUserId, entry.ChangeSnapshotJson, entry.CorrelationId });
+                new { entry.OperationId, entry.ActorUserId, entry.ChangeSnapshotJson, entry.CorrelationId }, entry.ActorUserId);
         }
         var promissoryLinks = await dbContext.RiderVehicleAssignmentPromissoryFiles.IgnoreQueryFilters().AsNoTracking()
             .Where(x => assignmentIds.Contains(x.RiderVehicleAssignmentId)).ToArrayAsync(ct);
@@ -108,6 +110,7 @@ internal sealed partial class FleetService
             Add(version.UploadedAtUtc, "assignment_file", "promissory_note", version.Id, assignment.VehicleId,
                 assignment.RiderProfileId, assignment.Id, version.OriginalFileName,
                 new { version.RiderPromissoryFileId, version.VersionNumber, version.UploadedByUserId },
+                version.UploadedByUserId,
                 [new CompleteHistoryFileResponse(version.RiderPromissoryFileId, version.OriginalFileName, version.ContentType,
                     version.FileSizeBytes, $"/api/riders/{assignment.RiderProfileId}/promissory-files/{version.RiderPromissoryFileId}/download?versionId={version.Id}")]);
         }
@@ -128,7 +131,7 @@ internal sealed partial class FleetService
                 issue.RelatedAssignmentId, issue.Description,
                 new { issue.IssueNumber, issue.Category, issue.Severity, issue.Status, issue.OdometerAtReport,
                     issue.LocationDescription, issue.EstimatedRepairCost, issue.IsRiderResponsible,
-                    issue.BlocksOperation, issue.ResolutionSummary, issue.ResolvedAtUtc, issue.ClosedAtUtc }, files);
+                    issue.BlocksOperation, issue.ResolutionSummary, issue.ResolvedAtUtc, issue.ClosedAtUtc }, issue.ReportedByUserId, files);
         }
         var issueEvents = await dbContext.VehicleIssueEvents.IgnoreQueryFilters().AsNoTracking()
             .Where(x => issueIds.Contains(x.VehicleIssueId)).ToArrayAsync(ct);
@@ -138,7 +141,7 @@ internal sealed partial class FleetService
             Add(entry.OccurredAtUtc, "issue_event", entry.EventType.ToString(), entry.Id, issue.VehicleId,
                 assignments.FirstOrDefault(x => x.Id == issue.RelatedAssignmentId)?.RiderProfileId,
                 issue.RelatedAssignmentId, entry.Reason,
-                new { entry.FromStatus, entry.ToStatus, entry.ActorUserId, entry.SnapshotJson });
+                new { entry.FromStatus, entry.ToStatus, entry.ActorUserId, entry.SnapshotJson }, entry.ActorUserId);
         }
 
         var accidents = await dbContext.VehicleAccidents.IgnoreQueryFilters().AsNoTracking()
@@ -166,7 +169,7 @@ internal sealed partial class FleetService
                     accident.InsuranceClaimNumber, accident.ClosedAtUtc,
                     WorkflowStage = workflow?.Stage,
                     Reports = accidentReports.Where(x => x.VehicleAccidentId == accident.Id)
-                        .Select(x => new { x.Id, x.VersionNumber, x.ReportNumber, x.GeneratedAtUtc, x.CorrectionReason }) }, files);
+                        .Select(x => new { x.Id, x.VersionNumber, x.ReportNumber, x.GeneratedAtUtc, x.CorrectionReason }) }, accident.ReportedByUserId, files);
         }
         var accidentEvents = await dbContext.VehicleAccidentEvents.IgnoreQueryFilters().AsNoTracking()
             .Where(x => accidentIds.Contains(x.VehicleAccidentId)).ToArrayAsync(ct);
@@ -175,7 +178,7 @@ internal sealed partial class FleetService
             var accident = accidents.First(x => x.Id == entry.VehicleAccidentId);
             Add(entry.OccurredAtUtc, "accident_event", entry.EventType.ToString(), entry.Id,
                 accident.VehicleId, accident.RiderProfileId, accident.RiderVehicleAssignmentId, entry.Reason,
-                new { entry.ActorUserId, entry.SnapshotJson });
+                new { entry.ActorUserId, entry.SnapshotJson }, entry.ActorUserId);
         }
 
         var orders = vehicleId.HasValue
@@ -187,7 +190,7 @@ internal sealed partial class FleetService
                 new { order.MaintenanceType, order.Status, order.MaintenanceLocationId, order.VehicleIssueId,
                     order.Diagnosis, order.WorkPerformed, order.OdometerAtOpen, order.OdometerAtCompletion,
                     order.ActualMaterialCost, order.ActualOtherCost, order.ActualTotalCost,
-                    order.StartedAtUtc, order.CompletedAtUtc, order.ClosedAtUtc, order.Notes });
+                    order.StartedAtUtc, order.CompletedAtUtc, order.ClosedAtUtc, order.Notes }, order.OpenedByUserId);
         var usages = await dbContext.MaintenanceMaterialUsages.IgnoreQueryFilters().AsNoTracking()
             .Where(x => vehicleId.HasValue ? x.VehicleId == vehicleId.Value : x.RiderProfileId == riderId!.Value)
             .ToArrayAsync(ct);
@@ -202,7 +205,7 @@ internal sealed partial class FleetService
                 itemName ?? usage.InventoryItemId.ToString(),
                 new { usage.MaintenanceWorkOrderId, usage.InventoryItemId, usage.InventoryLocationId,
                     usage.Direction, usage.Quantity, usage.UnitOfMeasure, usage.TotalCost,
-                    usage.StockMovementId, usage.AttributionStatus, usage.ReversalOfUsageId, usage.Notes });
+                    usage.StockMovementId, usage.AttributionStatus, usage.ReversalOfUsageId, usage.Notes }, usage.UsedByUserId);
         }
         var oilOperations = await dbContext.OilChangeOperations.IgnoreQueryFilters().AsNoTracking()
             .Where(x => vehicleId.HasValue ? x.VehicleId == vehicleId.Value : x.VehicleId.HasValue && vehicleIds.Contains(x.VehicleId.Value))
@@ -216,7 +219,7 @@ internal sealed partial class FleetService
                 new { oil.MaintenanceWorkOrderId, oil.OdometerAtChange, oil.VehicleTypeSnapshot,
                     oil.OilInventoryItemId, oil.OilQuantityLiters, oil.OilMaterialUsageId, oil.OilCost,
                     oil.OilFilterChanged, oil.OilFilterInventoryItemId, oil.OilFilterMaterialUsageId,
-                    oil.OilFilterCost, oil.OtherCost, oil.TotalCost, oil.PerformedByUserId, oil.Notes });
+                    oil.OilFilterCost, oil.OtherCost, oil.TotalCost, oil.PerformedByUserId, oil.Notes }, oil.PerformedByUserId);
         }
 
         var expenses = await dbContext.VehicleExpenses.IgnoreQueryFilters().AsNoTracking()
@@ -227,7 +230,7 @@ internal sealed partial class FleetService
                 expense.VehicleId, expense.RiderProfileId, expense.RiderVehicleAssignmentId,
                 expense.Description, new { expense.SourceEntityType, expense.SourceEntityId,
                     expense.OccurredOn, expense.AmountBeforeTax, expense.TaxAmount,
-                    expense.TotalAmount, expense.CurrencyCode, expense.ReversalOfExpenseId });
+                    expense.TotalAmount, expense.CurrencyCode, expense.ReversalOfExpenseId }, expense.CreatedByUserId);
 
         if (vehicleId.HasValue)
         {
@@ -238,7 +241,7 @@ internal sealed partial class FleetService
                     vehicleId, null, null, registration.RegistrationNumber,
                     new { registration.IssuingAuthority, registration.IssueDate, registration.ExpiryDate,
                         registration.Status, registration.IsCurrent, registration.PreviousRecordId,
-                        registration.ProofAttachmentId, registration.Notes });
+                        registration.ProofAttachmentId, registration.Notes }, registration.CreatedByUserId);
             var policies = await dbContext.VehicleInsurancePolicies.IgnoreQueryFilters().AsNoTracking()
                 .Where(x => x.VehicleId == vehicleId.Value).ToArrayAsync(ct);
             foreach (var policy in policies)
@@ -246,7 +249,7 @@ internal sealed partial class FleetService
                     vehicleId, null, null, policy.PolicyNumber,
                     new { policy.ProviderName, policy.CoverageType, policy.EffectiveFrom, policy.ExpiryDate,
                         policy.ClaimReference, policy.Status, policy.IsCurrent, policy.PreviousRecordId,
-                        policy.ProofAttachmentId, policy.Notes });
+                        policy.ProofAttachmentId, policy.Notes }, policy.CreatedByUserId);
             var inspections = await dbContext.VehiclePeriodicInspections.IgnoreQueryFilters().AsNoTracking()
                 .Where(x => x.VehicleId == vehicleId.Value).ToArrayAsync(ct);
             foreach (var inspection in inspections)
@@ -255,38 +258,38 @@ internal sealed partial class FleetService
                     new { inspection.StationName, inspection.InspectionDate, inspection.ExpiryDate,
                         inspection.Result, inspection.Odometer, inspection.FailureNotes, inspection.Status,
                         inspection.IsCurrent, inspection.PreviousRecordId, inspection.ProofAttachmentId,
-                        inspection.Notes });
+                        inspection.Notes }, inspection.CreatedByUserId);
             var cards = await dbContext.VehicleOperationCards.IgnoreQueryFilters().AsNoTracking()
                 .Where(x => x.VehicleId == vehicleId.Value).ToArrayAsync(ct);
             foreach (var card in cards)
                 Add(card.CreatedAtUtc, "compliance", "operation_card", card.Id,
                     vehicleId, null, null, card.CardNumber,
                     new { card.IssuingAuthority, card.IssueDate, card.ExpiryDate, card.Status,
-                        card.IsCurrent, card.PreviousRecordId, card.ProofAttachmentId, card.Notes });
+                        card.IsCurrent, card.PreviousRecordId, card.ProofAttachmentId, card.Notes }, card.CreatedByUserId);
             var statusPeriods = await dbContext.VehicleOperationalStatusPeriods.IgnoreQueryFilters().AsNoTracking()
                 .Where(x => x.VehicleId == vehicleId.Value).ToArrayAsync(ct);
             foreach (var status in statusPeriods)
                 Add(status.EffectiveFromUtc, "vehicle_status", status.Status.ToString(), status.Id,
                     vehicleId, null, null, status.Reason,
-                    new { status.EffectiveToUtc, status.SourceType, status.SourceEntityId, status.ChangedByUserId });
+                    new { status.EffectiveToUtc, status.SourceType, status.SourceEntityId, status.ChangedByUserId }, status.ChangedByUserId);
             var readings = await dbContext.VehicleOdometerReadings.IgnoreQueryFilters().AsNoTracking()
                 .Where(x => x.VehicleId == vehicleId.Value).ToArrayAsync(ct);
             foreach (var reading in readings)
                 Add(reading.RecordedAtUtc, "odometer", reading.SourceType.ToString(), reading.Id,
                     vehicleId, null, null, $"{reading.Reading} km",
-                    new { reading.Reading, reading.SourceEntityId, reading.IsCorrection, reading.CorrectionReason, reading.Notes });
+                    new { reading.Reading, reading.SourceEntityId, reading.IsCorrection, reading.CorrectionReason, reading.Notes }, reading.CreatedByUserId);
             var corrections = await dbContext.VehicleIdentityCorrections.IgnoreQueryFilters().AsNoTracking()
                 .Where(x => x.VehicleId == vehicleId.Value).ToArrayAsync(ct);
             foreach (var correction in corrections)
                 Add(correction.CreatedAtUtc, "vehicle_identity", "corrected", correction.Id, vehicleId,
-                    null, null, "Vehicle identity correction", new { correction.Reason });
+                    null, null, "Vehicle identity correction", new { correction.Reason }, correction.ActorUserId);
             var transitions = await dbContext.VehicleRegistrationTransitions.IgnoreQueryFilters().AsNoTracking()
                 .Where(x => x.VehicleId == vehicleId.Value).ToArrayAsync(ct);
             foreach (var transition in transitions)
                 Add(transition.EffectiveAtUtc, "registration", "type_changed", transition.Id, vehicleId,
                     null, null, transition.Reason, new { transition.FromType, transition.ToType,
                         transition.OldPlateNumberAr, transition.NewPlateNumberAr, transition.OldPlateNumberEn,
-                        transition.NewPlateNumberEn, transition.ActorUserId });
+                        transition.NewPlateNumberEn, transition.ActorUserId }, transition.ActorUserId);
             var vehicleFiles = await (from attachment in dbContext.VehicleAttachments.IgnoreQueryFilters().AsNoTracking()
                                       join version in dbContext.VehicleAttachmentVersions.IgnoreQueryFilters().AsNoTracking()
                                           on attachment.Id equals version.VehicleAttachmentId
@@ -296,6 +299,7 @@ internal sealed partial class FleetService
                 Add(file.version.UploadedAtUtc, "vehicle_file", file.Kind.ToString(), file.version.Id,
                     vehicleId, null, null, file.version.OriginalFileName,
                     new { file.version.VersionNumber, file.version.UploadedByUserId },
+                    file.version.UploadedByUserId,
                     [new CompleteHistoryFileResponse(file.version.VehicleAttachmentId, file.version.OriginalFileName,
                         file.version.ContentType, file.version.FileSizeBytes,
                         $"/api/vehicles/{vehicleId}/files/{file.version.VehicleAttachmentId}/download?versionId={file.version.Id}")]);
@@ -318,12 +322,12 @@ internal sealed partial class FleetService
                 Add(issue.IssuedAtUtc, "rider_equipment", "issued", issue.Id,
                     assignments.FirstOrDefault(x => x.Id == issue.RelatedAssignmentId)?.VehicleId,
                     riderId, issue.RelatedAssignmentId, issue.IssueNumber,
-                    new { issue.IssuedFromLocationId, issue.IssuedByUserId, issue.Status, issue.Notes, Lines = ownLines });
+                    new { issue.IssuedFromLocationId, issue.IssuedByUserId, issue.Status, issue.Notes, Lines = ownLines }, issue.IssuedByUserId);
                 if (ownLines.Any(x => x.ReturnedQuantity > 0))
                     Add(issue.UpdatedAtUtc ?? issue.IssuedAtUtc, "rider_equipment", "return_balance_recorded", issue.Id,
                         assignments.FirstOrDefault(x => x.Id == issue.RelatedAssignmentId)?.VehicleId,
                         riderId, issue.RelatedAssignmentId, "Equipment return quantities recorded; exact return time unavailable",
-                        new { Lines = ownLines.Where(x => x.ReturnedQuantity > 0), ReturnTimestampKnown = false });
+                        new { Lines = ownLines.Where(x => x.ReturnedQuantity > 0), ReturnTimestampKnown = false }, issue.UpdatedByUserId);
             }
             var requests = await dbContext.InventorySupplyRequests.IgnoreQueryFilters().AsNoTracking()
                 .Where(x => x.RiderProfileId == riderId!.Value).ToArrayAsync(ct);
@@ -331,10 +335,21 @@ internal sealed partial class FleetService
                 Add(request.RequestedAtUtc, "inventory_request", request.Status.ToString(), request.Id,
                     request.VehicleId, riderId, null, request.RequestNumber,
                     new { request.InventoryLocationId, request.RequestedByUserId, request.DecidedAtUtc,
-                        request.IssuedAtUtc, request.TotalIssuedCost, request.DecisionNotes, request.Notes });
+                        request.IssuedAtUtc, request.TotalIssuedCost, request.DecisionNotes, request.Notes }, request.RequestedByUserId);
         }
 
-        var sorted = events.OrderByDescending(x => x.OccurredAtUtc).ThenBy(x => x.Category)
+        var creatorIds = events.Where(x => x.CreatedByUserId.HasValue)
+            .Select(x => x.CreatedByUserId!.Value).Distinct().ToArray();
+        var creatorNames = await identityDbContext.Users.IgnoreQueryFilters().AsNoTracking()
+            .Where(x => creatorIds.Contains(x.Id))
+            .Select(x => new { x.Id, x.UserName })
+            .ToDictionaryAsync(x => x.Id, x => x.UserName, ct);
+        var sorted = events.Select(x => x with
+            {
+                CreatedByUserName = x.CreatedByUserId.HasValue
+                    ? creatorNames.GetValueOrDefault(x.CreatedByUserId.Value)
+                    : null
+            }).OrderByDescending(x => x.OccurredAtUtc).ThenBy(x => x.Category)
             .ThenBy(x => x.EntityId).ToArray();
         return new CompleteHistoryResponse(vehicleId ?? riderId!.Value, vehicleId.HasValue ? "vehicle" : "rider",
             subjectName, support.UtcNow, sorted.Length, sorted);

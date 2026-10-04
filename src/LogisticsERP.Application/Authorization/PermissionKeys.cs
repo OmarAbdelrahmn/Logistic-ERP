@@ -38,7 +38,9 @@ public static class PermissionKeys
         public const string RidersRead = "riders.read";
         public const string RidersManage = "riders.manage";
         public const string ExternalRidersRead = "external_riders.read";
-        public const string ExternalRidersManage = "external_riders.manage";
+        public const string ExternalRidersCreate = "external_riders.create";
+        public const string ExternalRidersUpdate = "external_riders.update";
+        public const string ExternalRidersDelete = "external_riders.delete";
         public const string SponsorsRead = "sponsors.read";
         public const string SponsorsManage = "sponsors.manage";
     }
@@ -117,6 +119,23 @@ public static class PermissionKeys
         public const string DailyDistancesImport = "fleet.daily_distances.import";
     }
 
+    public static class Jahez
+    {
+        public const string Read = "jahez.read";
+        public const string HandoversManage = "jahez.handovers.manage";
+        public const string CollectionsManage = "jahez.collections.manage";
+        public const string RequestsCreate = "jahez.requests.create";
+        public const string RequestsApprove = "jahez.requests.approve";
+        public const string ResetsApprove = "jahez.resets.approve";
+        public const string EarningsManage = "jahez.earnings.manage";
+        public const string ImportsManage = "jahez.imports.manage";
+        public const string AdjustmentsManage = "jahez.adjustments.manage";
+        public const string CashboxRead = "jahez.cashbox.read";
+        public const string CashboxSubmit = "jahez.cashbox.submit";
+        public const string CashboxConfirm = "jahez.cashbox.confirm";
+        public const string CashboxApprove = "jahez.cashbox.approve";
+    }
+
     public static class Fuel
     {
         public const string Read = "fuel.read";
@@ -129,7 +148,9 @@ public static class PermissionKeys
         public const string LocationsRead = "maintenance.locations.read";
         public const string LocationsManage = "maintenance.locations.manage";
         public const string WorkOrdersRead = "maintenance.work_orders.read";
-        public const string WorkOrdersManage = "maintenance.work_orders.manage";
+        public const string WorkOrdersCreate = "maintenance.work_orders.create";
+        public const string WorkOrdersUpdate = "maintenance.work_orders.update";
+        public const string WorkOrdersDelete = "maintenance.work_orders.delete";
         public const string OilRead = "maintenance.oil.read";
         public const string OilComplete = "maintenance.oil.complete";
         public const string ExternalJobsRead = "maintenance.external_jobs.read";
@@ -203,7 +224,9 @@ public static class PermissionKeys
         Workforce.RidersRead,
         Workforce.RidersManage,
         Workforce.ExternalRidersRead,
-        Workforce.ExternalRidersManage,
+        Workforce.ExternalRidersCreate,
+        Workforce.ExternalRidersUpdate,
+        Workforce.ExternalRidersDelete,
         Workforce.SponsorsRead,
         Workforce.SponsorsManage,
         Compliance.ResidencyRead,
@@ -260,13 +283,28 @@ public static class PermissionKeys
         Fleet.DailyDistancesRead,
         Fleet.DailyDistancesManage,
         Fleet.DailyDistancesImport,
+        Jahez.Read,
+        Jahez.HandoversManage,
+        Jahez.CollectionsManage,
+        Jahez.RequestsCreate,
+        Jahez.RequestsApprove,
+        Jahez.ResetsApprove,
+        Jahez.EarningsManage,
+        Jahez.ImportsManage,
+        Jahez.AdjustmentsManage,
+        Jahez.CashboxRead,
+        Jahez.CashboxSubmit,
+        Jahez.CashboxConfirm,
+        Jahez.CashboxApprove,
         Fuel.Read,
         Fuel.Manage,
         Fuel.Import,
         Maintenance.LocationsRead,
         Maintenance.LocationsManage,
         Maintenance.WorkOrdersRead,
-        Maintenance.WorkOrdersManage,
+        Maintenance.WorkOrdersCreate,
+        Maintenance.WorkOrdersUpdate,
+        Maintenance.WorkOrdersDelete,
         Maintenance.OilRead,
         Maintenance.OilComplete,
         Maintenance.ExternalJobsRead,

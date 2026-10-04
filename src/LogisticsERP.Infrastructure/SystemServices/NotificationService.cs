@@ -88,8 +88,15 @@ internal sealed class NotificationService(
             return Result.Failure<string[]>(SystemErrors.InvalidRequest);
         var candidates = requested is null ? PermissionKeys.All.ToArray() : requested.Select(x => x.Trim()).Distinct(StringComparer.Ordinal).ToArray();
         var effective = new List<string>();
+        PermissionScope? jahezScope = null;
+        if (candidates.Any(key => key.StartsWith("jahez.", StringComparison.Ordinal)))
+        {
+            var platformId = await dbContext.ClientPlatforms.AsNoTracking().Where(x => x.Code == "JAHEZ").Select(x => (Guid?)x.Id).SingleOrDefaultAsync(ct);
+            if (platformId.HasValue) jahezScope = new PermissionScope(AccessScopeType.ClientPlatform, platformId.Value);
+        }
         foreach (var key in candidates)
-            if (await permissionChecker.HasPermissionAsync(userId, version, key, null, ct)) effective.Add(key);
+            if (await permissionChecker.HasPermissionAsync(userId, version, key,
+                key.StartsWith("jahez.", StringComparison.Ordinal) ? jahezScope : null, ct)) effective.Add(key);
         return Result.Success(effective.Order(StringComparer.Ordinal).ToArray());
     }
 

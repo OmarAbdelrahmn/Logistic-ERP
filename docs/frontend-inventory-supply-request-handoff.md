@@ -13,7 +13,7 @@ The client must never reduce stock locally. Always refresh from the server after
 
 | User | Required permission | UI entry point |
 |---|---|---|
-| Vehicle administrator | `maintenance.work_orders.manage`; add `inventory.supply_requests.submit` when they must cancel a pending request | **Maintenance → New work order** |
+| Vehicle administrator | `maintenance.work_orders.create`; add `inventory.supply_requests.submit` when they must cancel a pending request | **Maintenance → New work order** |
 | Rider/operations administrator | `inventory.supply_requests.submit` | **Inventory → Request rider items** |
 | Warehouse administrator | `inventory.supply_requests.read`, `inventory.supply_requests.approve`, `inventory.stock.move` | **Inventory → Supply requests** |
 

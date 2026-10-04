@@ -24,6 +24,14 @@ internal sealed class WorkforceService(
             .OrderBy(item => item.FullNameAr)
             .ToArrayAsync(cancellationToken);
         var employeeIds = employees.Select(item => item.Id).ToArray();
+        var licenseNames = (await (from license in dbContext.EmployeeDriverLicenses.AsNoTracking()
+                                  join category in dbContext.DriverLicenseCategories.AsNoTracking()
+                                      on license.DriverLicenseCategoryId equals category.Id
+                                  where employeeIds.Contains(license.EmployeeId) && license.IsCurrent
+                                  select new { license.EmployeeId, category.NameAr })
+            .Distinct().OrderBy(item => item.NameAr).ToArrayAsync(cancellationToken))
+            .GroupBy(item => item.EmployeeId)
+            .ToDictionary(group => group.Key, group => group.Select(item => item.NameAr).ToArray());
         var riderIds = await dbContext.RiderProfiles.AsNoTracking().Where(item => employeeIds.Contains(item.EmployeeId))
             .ToDictionaryAsync(item => item.EmployeeId, item => item.Id, cancellationToken);
         var riders = await dbContext.RiderProfiles.AsNoTracking().Where(item => employeeIds.Contains(item.EmployeeId))
@@ -97,7 +105,8 @@ internal sealed class WorkforceService(
                 : null,
             item.OperatingCityId is { } operatingCityId && operatingCities.TryGetValue(operatingCityId, out var operatingCity)
                 ? operatingCity : null,
-            housingNames.GetValueOrDefault(item.Id))).ToArray());
+            housingNames.GetValueOrDefault(item.Id),
+            licenseNames.GetValueOrDefault(item.Id) ?? [])).ToArray());
     }
 
     public async Task<Result<EmployeeDetailsResponse>> GetEmployeeAsync(Guid employeeId, CancellationToken cancellationToken = default)
@@ -411,6 +420,18 @@ internal sealed class WorkforceService(
         employee.OperationalWorkTypeId = request.OperationalWorkTypeId;
         await dbContext.SaveChangesAsync(cancellationToken);
         return Result.Success(ToExternalRider(rider, employee));
+    }
+
+    public async Task<Result> ArchiveExternalRiderAsync(
+        Guid employeeId, ArchiveRequest request, CancellationToken cancellationToken = default)
+    {
+        var isExternalRider = await (from rider in dbContext.RiderProfiles.AsNoTracking()
+                                     join employee in dbContext.Employees.AsNoTracking() on rider.EmployeeId equals employee.Id
+                                     where employee.Id == employeeId && !employee.IsEmployee
+                                         && employee.EngagementType == EmployeeRelationshipType.OutsideRider
+                                     select rider.Id).AnyAsync(cancellationToken);
+        if (!isExternalRider) return Result.Failure(HrErrors.NotFound);
+        return await ArchiveEmployeeAsync(employeeId, request, cancellationToken);
     }
 
     public async Task<Result<IReadOnlyList<SponsorResponse>>> GetSponsorsAsync(CancellationToken cancellationToken = default)

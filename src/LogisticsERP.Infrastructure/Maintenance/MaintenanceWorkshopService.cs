@@ -259,8 +259,7 @@ internal sealed partial class MaintenanceService
                 {
                     var vehicle = await dbContext.Vehicles.SingleAsync(x => x.Id == workOrder.VehicleId.Value, cancellationToken);
                     vehicleType = vehicle.VehicleType;
-                    if (request.OdometerAtChange < vehicle.CurrentOdometer) return Result.Failure(MaintenanceErrors.InvalidOdometer);
-                    VehicleMileageRules.ApplyVerifiedReading(vehicle, request.OdometerAtChange, request.PerformedAtUtc);
+                    ApplyOilChangeVehicleMileage(vehicle, request.OdometerAtChange, request.PerformedAtUtc);
                     dbContext.VehicleOdometerReadings.Add(new VehicleOdometerReading { VehicleId = vehicle.Id, Reading = request.OdometerAtChange, RecordedAtUtc = request.PerformedAtUtc, SourceType = VehicleOdometerSourceType.Maintenance, SourceEntityId = operationId, Notes = "Oil change" });
                 }
                 else
@@ -364,7 +363,7 @@ internal sealed partial class MaintenanceService
             .Where(x => x.VehicleId.HasValue && vehicleIds.Contains(x.VehicleId.Value))
             .Select(x => new { VehicleId = x.VehicleId!.Value, Operation = x })
             .ToArrayAsync(cancellationToken);
-        var latest = operations.GroupBy(x => x.VehicleId).ToDictionary(group => group.Key, group => group.OrderByDescending(x => x.Operation.OdometerAtChange).ThenByDescending(x => x.Operation.PerformedAtUtc).First().Operation);
+        var latest = operations.GroupBy(x => x.VehicleId).ToDictionary(group => group.Key, group => group.OrderByDescending(x => x.Operation.PerformedAtUtc).ThenByDescending(x => x.Operation.OdometerAtChange).First().Operation);
         return Result.Success<IReadOnlyList<OilReminderResponse>>(vehicles.Select(vehicle =>
         {
             latest.TryGetValue(vehicle.Id, out var last);
@@ -625,12 +624,20 @@ internal sealed partial class MaintenanceService
         dbContext.VehicleExpenses.Add(new VehicleExpense { VehicleId = vehicleId, RiderVehicleAssignmentId = attributionSource.RiderVehicleAssignmentId, RiderProfileId = attributionSource.RiderProfileId, ExpenseType = expenseType, SourceEntityType = nameof(OilChangeOperation), SourceEntityId = sourceId, OccurredOn = DateOnly.FromDateTime(occurredAt.UtcDateTime), AmountBeforeTax = amount, TotalAmount = amount, Description = description });
     }
 
+    private void ApplyOilChangeVehicleMileage(Vehicle vehicle, long reading, DateTimeOffset performedAtUtc)
+    {
+        if (reading < vehicle.CurrentOdometer) return;
+        VehicleMileageRules.ApplyVerifiedReading(vehicle, reading, performedAtUtc);
+        dbContext.Entry(vehicle).Property(x => x.CurrentOdometer).IsModified = true;
+    }
+
     private async Task UpdateOilScheduleAsync(Guid vehicleId, Guid? workOrderId, OilChangeOperation operation, VehicleType vehicleType, CancellationToken cancellationToken)
     {
         var plan = await dbContext.MaintenancePlans.Where(x => x.Status == CatalogStatus.Active && x.TriggerType == MaintenanceTriggerType.OdometerWindow && x.VehicleType == vehicleType).OrderBy(x => x.Code).FirstOrDefaultAsync(cancellationToken);
         if (plan is null) return;
         var schedule = await dbContext.VehicleMaintenanceSchedules.SingleOrDefaultAsync(x => x.VehicleId == vehicleId && x.MaintenancePlanId == plan.Id, cancellationToken)
             ?? new VehicleMaintenanceSchedule { VehicleId = vehicleId, MaintenancePlanId = plan.Id };
+        if (schedule.LastCompletedAtUtc > operation.PerformedAtUtc) return;
         if (dbContext.Entry(schedule).State == EntityState.Detached) dbContext.VehicleMaintenanceSchedules.Add(schedule);
         schedule.LastCompletedWorkOrderId = workOrderId;
         schedule.LastCompletedAtUtc = operation.PerformedAtUtc;

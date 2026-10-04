@@ -105,14 +105,7 @@ internal sealed partial class VehicleAccidentService(
         dbContext.VehicleAccidentCases.Add(new VehicleAccidentCase { VehicleAccidentId = accident.Id });
         await notifications.QueueAsync(accident.Id, vehicle.Id, accident.AccidentNumber, "reported", "تم تسجيل حادث للمركبة.", cancellationToken);
         dbContext.VehicleAccidentEvents.Add(new VehicleAccidentEvent { VehicleAccidentId = accident.Id, EventType = VehicleAccidentEventType.Reported, OccurredAtUtc = support.UtcNow, ActorUserId = actor.Value, Reason = narrative ?? defaultEventReason });
-        if (!request.IsDrivable && assignment.EndedAtUtc is null && vehicle.CurrentAssignmentId == assignment.Id)
-        {
-            assignment.EndedAtUtc = support.UtcNow; assignment.EndLocationSnapshot = assignment.StartLocationSnapshot; assignment.EndOdometer = vehicle.CurrentOdometer;
-            assignment.EndVehicleCondition = VehicleCondition.Damaged; assignment.Status = RiderVehicleAssignmentStatus.Completed; assignment.CompletionReason = $"Accident {accident.AccidentNumber}"; assignment.EndedByUserId = actor.Value;
-            vehicle.CurrentAssignmentId = null;
-            dbContext.RiderVehicleAssignmentEvents.Add(new RiderVehicleAssignmentEvent { RiderVehicleAssignmentId = assignment.Id, OperationId = assignment.OperationId, EventType = RiderVehicleAssignmentEventType.Returned, OccurredAtUtc = support.UtcNow, ActorUserId = actor.Value, Reason = $"Non-drivable accident {accident.AccidentNumber}" });
-            await SetAccidentHoldAsync(vehicle, accident, actor.Value, cancellationToken);
-        }
+        // Accident creation currently preserves the vehicle status and rider assignment.
         dbContext.FleetCommandReceipts.Add(new FleetCommandReceipt { CommandName = "create-accident", IdempotencyKey = idempotencyKey.Trim(), RequestHash = hash, ResultEntityId = accident.Id });
         try { await dbContext.SaveChangesAsync(cancellationToken); }
         catch (DbUpdateException) { return Result.Failure<VehicleAccidentDetailResponse>(FleetErrors.Conflict); }

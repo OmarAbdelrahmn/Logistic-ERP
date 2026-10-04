@@ -525,7 +525,7 @@ Assignments connect a rider to a vehicle and update operational status, odometer
 
 ### `GET /api/vehicle-assignments`
 
-Returns vehicle-rider assignments ordered from newest to oldest. Each item is a `RiderVehicleAssignmentResponse`, including `isRealRider` and `realRider`.
+Returns vehicle-rider assignments ordered from newest to oldest. Each item is a `RiderVehicleAssignmentResponse`, including `isRealRider`, `realRider`, and `vehicleType` from the assigned vehicle. `vehicleType` is numeric: `1` motorcycle, `2` car, `3` van, `4` truck, `5` other.
 
 Optional query parameters:
 
@@ -838,7 +838,7 @@ Downloads the current generated accident PDF, or the requested report version wh
 
 ### Assignment response
 
-`RiderVehicleAssignmentResponse` contains assignment `id`, rider and employee IDs, `isRealRider`, optional `realRider` details, vehicle ID and asset number, rider name, start/end timestamps, location snapshots, start/end odometers, permission reference and dates, status, assignment reason, completion reason, operation ID, promissory-file version IDs, and row version.
+`RiderVehicleAssignmentResponse` contains assignment `id`, rider and employee IDs, `isRealRider`, optional `realRider` details, vehicle ID, `vehicleType`, asset number, rider name, start/end timestamps, location snapshots, start/end odometers, permission reference and dates, status, assignment reason, completion reason, operation ID, promissory-file version IDs, and row version. `vehicleType` is the assigned vehicle's current type; the shared response includes it in list, detail, command, and timeline responses.
 
 ### Issue response
 

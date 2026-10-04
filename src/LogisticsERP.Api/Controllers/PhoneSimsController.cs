@@ -63,14 +63,14 @@ public sealed class PhoneSimsController(IPhoneSimService service) : ControllerBa
         [FromForm] CreatePhoneSimForm form,
         CancellationToken cancellationToken)
     {
-        if (form.ReceiptForm is null || form.ReceiptForm.Length == 0)
+        if (form.ReceiptForm is { Length: 0 })
         {
-            return ApiProblemDetails.BadRequest(HttpContext, "اختر ملف نموذج استلام الشريحة.");
+            return ApiProblemDetails.BadRequest(HttpContext, "ملف نموذج استلام الشريحة فارغ.");
         }
 
-        await using var stream = form.ReceiptForm.OpenReadStream();
-        var receiptForm = new PrivateFileUpload(
-            stream,
+        await using var stream = form.ReceiptForm?.OpenReadStream();
+        var receiptForm = form.ReceiptForm is null ? null : new PrivateFileUpload(
+            stream!,
             form.ReceiptForm.FileName,
             form.ReceiptForm.ContentType,
             form.ReceiptForm.Length);
@@ -176,7 +176,7 @@ public sealed class CreatePhoneSimForm
     public Guid ResponsibleEmployeeId { get; init; }
     public Guid PlaceId { get; init; }
     public string? Notes { get; init; }
-    public IFormFile ReceiptForm { get; init; } = null!;
+    public IFormFile? ReceiptForm { get; init; }
 
     public CreatePhoneSimRequest ToRequest() =>
         new(PhoneNumber, Iccid, CarrierName, ResponsibleEmployeeId, PlaceId, Notes);

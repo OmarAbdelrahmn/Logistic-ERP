@@ -32,7 +32,7 @@ public sealed class FuelCardsController(IFuelCardService service) : ControllerBa
             || !string.Equals(Path.GetExtension(form.File.FileName), ".xlsx", StringComparison.OrdinalIgnoreCase))
             return ApiProblemDetails.BadRequest(HttpContext, "اختر ملف Excel بصيغة xlsx لا يتجاوز 10 ميغابايت.");
         await using var stream = form.File.OpenReadStream();
-        var result = await service.ImportCardNumbersAsync(stream, form.SponsorId, validateOnly, cancellationToken);
+        var result = await service.ImportCardNumbersAsync(stream, form.SponsorId, validateOnly, form.OperatingCityId, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 
@@ -44,9 +44,10 @@ public sealed class FuelCardsController(IFuelCardService service) : ControllerBa
         [FromQuery] Guid? riderProfileId,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 50,
+        [FromQuery] Guid? operatingCityId = null,
         CancellationToken cancellationToken = default)
     {
-        var result = await service.GetCardsAsync(search, provider, riderProfileId, page, pageSize, cancellationToken);
+        var result = await service.GetCardsAsync(search, provider, riderProfileId, page, pageSize, operatingCityId, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 
@@ -76,6 +77,15 @@ public sealed class FuelCardsController(IFuelCardService service) : ControllerBa
         CancellationToken cancellationToken)
     {
         var result = await service.SetSponsorAsync(id, request, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpPut("{id:guid}/city")]
+    [RequirePermission(PermissionKeys.Fuel.Manage)]
+    public async Task<IActionResult> SetCity(Guid id, [FromBody] SetFuelCardCityRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await service.SetCityAsync(id, request, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 
@@ -150,7 +160,7 @@ public sealed class FuelCardsController(IFuelCardService service) : ControllerBa
             form.File.FileName,
             form.File.ContentType,
             form.File.Length);
-        var result = await service.ImportAsync(upload, form.ExpectedMonth, form.SponsorId, cancellationToken);
+        var result = await service.ImportAsync(upload, form.ExpectedMonth, form.SponsorId, form.OperatingCityId, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 
@@ -170,6 +180,7 @@ public sealed class FuelImportForm
 {
     public DateOnly? ExpectedMonth { get; init; }
     public Guid SponsorId { get; init; }
+    public Guid? OperatingCityId { get; init; }
     public IFormFile File { get; init; } = null!;
 }
 
@@ -177,4 +188,5 @@ public sealed class FuelCardNumberImportForm
 {
     public IFormFile File { get; init; } = null!;
     public Guid SponsorId { get; init; }
+    public Guid? OperatingCityId { get; init; }
 }

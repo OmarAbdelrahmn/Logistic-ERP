@@ -32,17 +32,17 @@ public sealed class ImportController(
     [Consumes("multipart/form-data")]
     [AllowAnonymous]
     public Task<IActionResult> ValidateFuelCards(
-        [FromForm] HrExcelImportForm request,
+        [FromForm] FuelCardBulkImportForm request,
         CancellationToken cancellationToken) =>
-        ExecuteFuelCardImport(request.File, validateOnly: true, cancellationToken);
+        ExecuteFuelCardImport(request.File, request.OperatingCityId, validateOnly: true, cancellationToken);
 
     [HttpPost("fuel-cards")]
     [Consumes("multipart/form-data")]
     [AllowAnonymous]
     public Task<IActionResult> ImportFuelCards(
-        [FromForm] HrExcelImportForm request,
+        [FromForm] FuelCardBulkImportForm request,
         CancellationToken cancellationToken) =>
-        ExecuteFuelCardImport(request.File, validateOnly: false, cancellationToken);
+        ExecuteFuelCardImport(request.File, request.OperatingCityId, validateOnly: false, cancellationToken);
 
     [HttpPost("/api/maintenance-inventory/items/import/validate")]
     [Consumes("multipart/form-data")]
@@ -79,7 +79,8 @@ public sealed class ImportController(
 
     [HttpPost("external-riders/validate")]
     [Consumes("multipart/form-data")]
-    [RequirePermission(PermissionKeys.Workforce.ExternalRidersManage)]
+    [RequirePermission(PermissionKeys.Workforce.ExternalRidersCreate)]
+    [RequirePermission(PermissionKeys.Workforce.ExternalRidersUpdate)]
     public Task<IActionResult> ValidateExternalRiders(
         [FromForm] HrExcelImportForm request,
         CancellationToken cancellationToken) =>
@@ -87,7 +88,8 @@ public sealed class ImportController(
 
     [HttpPost("external-riders")]
     [Consumes("multipart/form-data")]
-    [RequirePermission(PermissionKeys.Workforce.ExternalRidersManage)]
+    [RequirePermission(PermissionKeys.Workforce.ExternalRidersCreate)]
+    [RequirePermission(PermissionKeys.Workforce.ExternalRidersUpdate)]
     public Task<IActionResult> ImportExternalRiders(
         [FromForm] HrExcelImportForm request,
         CancellationToken cancellationToken) =>
@@ -355,14 +357,14 @@ public sealed class ImportController(
     }
 
     private async Task<IActionResult> ExecuteFuelCardImport(
-        IFormFile? file, bool validateOnly, CancellationToken cancellationToken)
+        IFormFile? file, Guid? operatingCityId, bool validateOnly, CancellationToken cancellationToken)
     {
         if (file is null || file.Length == 0 || file.Length > 20 * 1024 * 1024
             || !string.Equals(Path.GetExtension(file.FileName), ".xlsx", StringComparison.OrdinalIgnoreCase))
             return Result.Failure(FuelErrors.InvalidFile).ToProblem(HttpContext);
 
         await using var stream = file.OpenReadStream();
-        var result = await fuelCardBulkImportService.ImportAsync(stream, validateOnly, cancellationToken);
+        var result = await fuelCardBulkImportService.ImportAsync(stream, validateOnly, operatingCityId, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 
@@ -432,4 +434,10 @@ public sealed class ImportController(
 public sealed class HrExcelImportForm
 {
     public IFormFile File { get; init; } = null!;
+}
+
+public sealed class FuelCardBulkImportForm
+{
+    public IFormFile File { get; init; } = null!;
+    public Guid? OperatingCityId { get; init; }
 }

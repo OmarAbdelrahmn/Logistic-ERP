@@ -20,6 +20,7 @@ public sealed class FuelCardApiSurfaceTests
         { nameof(FuelCardsController.GetCard), typeof(HttpGetAttribute), "{id:guid}", PermissionKeys.Fuel.Read },
         { nameof(FuelCardsController.CreateCard), typeof(HttpPostAttribute), null, PermissionKeys.Fuel.Manage },
         { nameof(FuelCardsController.SetSponsor), typeof(HttpPutAttribute), "{id:guid}/sponsor", PermissionKeys.Fuel.Manage },
+        { nameof(FuelCardsController.SetCity), typeof(HttpPutAttribute), "{id:guid}/city", PermissionKeys.Fuel.Manage },
         { nameof(FuelCardsController.GetAssignments), typeof(HttpGetAttribute), "{id:guid}/assignments", PermissionKeys.Fuel.Read },
         { nameof(FuelCardsController.AssignRider), typeof(HttpPostAttribute), "{id:guid}/assignments", PermissionKeys.Fuel.Manage },
         { nameof(FuelCardsController.StopRider), typeof(HttpPostAttribute), "{id:guid}/stop-rider", PermissionKeys.Fuel.Manage },

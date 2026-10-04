@@ -1,3 +1,5 @@
+using LogisticsERP.Application.Features.Jahez;
+using LogisticsERP.Infrastructure.Jahez;
 using LogisticsERP.Application.Abstractions.Authentication;
 using LogisticsERP.Application.Abstractions.Persistence;
 using LogisticsERP.Application.Features.Authentication;
@@ -72,6 +74,9 @@ public static class DependencyInjection
         services.AddScoped<IHousingWarehouseService, HousingWarehouseService>();
         services.AddScoped<IPlatformOperationsService, PlatformOperationsService>();
         services.AddScoped<ISimplePlatformService, SimplePlatformService>();
+        services.AddScoped<JahezService>();
+        services.AddScoped<IJahezService>(provider => provider.GetRequiredService<JahezService>());
+        services.AddScoped<IJahezReminderService, JahezReminderService>();
         services.AddScoped<IHrWorkflowService, HrWorkflowService>();
         services.AddScoped<ILegalCaseService, LegalCaseService>();
         services.AddScoped<IHrExcelImportService, HrExcelImportService>();

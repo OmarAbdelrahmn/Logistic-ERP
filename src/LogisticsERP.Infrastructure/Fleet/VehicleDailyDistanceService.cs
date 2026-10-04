@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LogisticsERP.Infrastructure.Fleet;
 
-internal sealed class VehicleDailyDistanceService(
+internal sealed partial class VehicleDailyDistanceService(
     ApplicationDbContext dbContext,
     FleetServiceSupport support) : IVehicleDailyDistanceService
 {

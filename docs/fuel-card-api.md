@@ -21,7 +21,7 @@ All requests require the normal bearer token. JSON uses camel case. Send `DateOn
 Permissions:
 
 - `fuel.read`: cards, assignments, monthly usage, and import history.
-- `fuel.manage`: create cards, change card sponsors, assign riders, and stop assignments.
+- `fuel.manage`: create cards, change card sponsors/cities, assign riders, and stop assignments.
 - `fuel.import`: upload fuel-company spreadsheets.
 
 The `omar` account receives all three permissions directly through the Identity migration. `SYSTEM_ADMIN` and `MANAGER` roles also receive all three permissions.
@@ -37,6 +37,10 @@ Use the same required selector on both existing fuel-card upload screens: the de
 For an existing card, provide a Change sponsor action under `fuel.manage`. Send `PUT /api/fuel-cards/{id}/sponsor` with the chosen `sponsorId` and the card's latest `rowVersion`. The response is the updated `FuelCard`; update the local card and invalidate the cards list and detail query. On `409 fuel.concurrency_conflict`, refresh the card before retrying. On `404 fuel.sponsor_not_found`, refresh the sponsor options. On `404 fuel.card_not_found`, remove or refresh the stale card detail.
 
 `sponsorId` is a GUID, not the sponsor's employer identity number. The API does not currently have a `sponsorId` query filter on `GET /api/fuel-cards`; any sponsor filter in the UI would need to filter only the loaded page or require a separate backend change.
+
+## City link
+
+Each fuel card has an `operatingCityId` foreign key and returns `operatingCityNameAr`/`operatingCityNameEn`. Existing cards are backfilled to Jeddah (`019c18d5-62e1-7000-8000-000000000003`). Manual creation requires a city ID; imports accept an optional city ID and default new cards to Jeddah. Existing cards keep their city during imports. Use `PUT /api/fuel-cards/{id}/city` with `operatingCityId` and the card's latest `rowVersion` to change it. The list accepts an optional `operatingCityId` query filter. See the complete [city endpoint handoff](fuel-card-city-frontend-handoff.md) for request examples, selector options, upload changes, errors, and rollout details.
 
 ## Plate direction and normalization
 
@@ -66,6 +70,7 @@ Use isolated bidirectional rendering for every plate/card cell so mixed Arabic l
 | `GET` | `/api/fuel-cards/{id}` | `fuel.read` | `200` card |
 | `POST` | `/api/fuel-cards` | `fuel.manage` | `201` card |
 | `PUT` | `/api/fuel-cards/{id}/sponsor` | `fuel.manage` | `200` updated card |
+| `PUT` | `/api/fuel-cards/{id}/city` | `fuel.manage` | `200` updated card |
 | `GET` | `/api/fuel-cards/{id}/assignments` | `fuel.read` | `200` assignment array |
 | `POST` | `/api/fuel-cards/{id}/assignments` | `fuel.manage` | `200` assignment |
 | `POST` | `/api/fuel-cards/{id}/stop-rider` | `fuel.manage` | `200` closed assignment |
@@ -89,6 +94,9 @@ export interface FuelCardCurrentRider {
 export interface FuelCard {
   id: string;
   sponsorId: string;
+  operatingCityId: string;
+  operatingCityNameAr: string | null;
+  operatingCityNameEn: string | null;
   provider: FuelProvider;
   providerNameAr: string;
   identifierType: FuelCardIdentifierType;
@@ -130,6 +138,7 @@ Query parameters:
 - `search?: string`: card number, plate text, or Arabic/English rider name.
 - `provider?: FuelProvider`
 - `riderProfileId?: UUID`
+- `operatingCityId?: UUID`: filter cards by their own operating city before pagination.
 - `page?: number` defaults to `1`.
 - `pageSize?: number` defaults to `50` and is capped at `300`.
 
@@ -162,7 +171,8 @@ Returns `FuelCard`. Use it to refresh the detail drawer before an assignment act
   "cardNumber": "BW203",
   "plateNumberText": null,
   "notes": "Optional note",
-  "sponsorId": "019c18d5-62e1-7000-8000-000000000040"
+  "sponsorId": "019c18d5-62e1-7000-8000-000000000040",
+  "operatingCityId": "019c18d5-62e1-7000-8000-000000000003"
 }
 ```
 
@@ -171,6 +181,7 @@ Returns `FuelCard`. Use it to refresh the detail drawer before an assignment act
 - `plateNumberText` is optional, maximum 100 characters.
 - `notes` is optional, maximum 4,000 characters.
 - `sponsorId` is required and must identify an existing sponsor. Each card belongs to one sponsor; a sponsor may own many cards.
+- `operatingCityId` is required and must identify an existing, non-deleted operating city. Load options from `GET /api/hr-catalogs/operating-cities`; submit the option's `id`, not `globalCityId`.
 - Values shaped as `BW` plus digits are classified as `InternalNumber`; all others are `PlateNumber`.
 
 Returns `201`, the created `FuelCard`, and a `Location` header. Duplicate normalized card numbers are rejected only within the same provider with `409 fuel.duplicate_card`.
@@ -290,6 +301,7 @@ Send `multipart/form-data`:
 - `File`: required `.xls` or `.xlsx`, maximum 25 MiB.
 - `ExpectedMonth`: optional `YYYY-MM-DD`; use it to prevent uploading a file for the wrong month.
 - `SponsorId`: required UUID. This sponsor is assigned to cards newly created by the import; existing card sponsors stay as they are.
+- `OperatingCityId`: optional UUID for new cards; defaults to Jeddah when omitted. Existing cards keep their current city.
 
 Do not manually set the multipart `Content-Type` boundary in browser code:
 
@@ -298,6 +310,7 @@ const data = new FormData();
 data.append("File", file);
 data.append("ExpectedMonth", selectedMonth); // e.g. 2026-09-01
 data.append("SponsorId", selectedSponsorId);
+data.append("OperatingCityId", selectedOperatingCityId);
 await api.post("/api/fuel-cards/imports", data);
 ```
 

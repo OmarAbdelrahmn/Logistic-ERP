@@ -221,6 +221,147 @@ public sealed class OilBarrelVehicleTypeTests
         Assert.Equal(3m, row.NetUsedLiters);
     }
 
+    [Theory]
+    [InlineData(VehicleType.Car)]
+    [InlineData(VehicleType.Motorcycle)]
+    public async Task BackdatedDirectOilChangeKeepsLowerReadingInHistoryWithoutChangingVehicleMileage(VehicleType type)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var db = CreateContext();
+        var (service, car, motorcycle, item, location) = await SeedAsync(db);
+        var vehicle = type == VehicleType.Car ? car : motorcycle;
+        vehicle.CurrentOdometer = 10000;
+        vehicle.TrackedDistanceKm = 10000.875m;
+        vehicle.LastOdometerAtUtc = Now;
+        var barrel = AddBarrel(db, item, location, type, 30, 10, 1, open: true);
+        await db.SaveChangesAsync(ct);
+        var originalVersion = Version(vehicle);
+        var performedAt = Now.AddDays(-2);
+        var request = Request(vehicle, item, location) with { OdometerAtChange = 9900, PerformedAtUtc = performedAt };
+        var negative = await service.CompleteDirectOilChangeAsync(vehicle.Id,
+            request with { OdometerAtChange = -1 }, "negative-reading", ct);
+        Assert.True(negative.IsFailure);
+        Assert.Empty(db.OilChangeOperations);
+
+        var result = await service.CompleteDirectOilChangeAsync(vehicle.Id, request, "historical-oil", ct);
+        Assert.True(result.IsSuccess, result.Error.Description);
+        Assert.Equal(9900, result.Value!.OdometerAtChange);
+        Assert.Equal(performedAt, result.Value.PerformedAtUtc);
+        var persisted = await db.Vehicles.AsNoTracking().SingleAsync(x => x.Id == vehicle.Id, ct);
+        Assert.Equal(10000, persisted.CurrentOdometer);
+        Assert.Equal(10000.875m, persisted.TrackedDistanceKm);
+        Assert.Equal(Now, persisted.LastOdometerAtUtc);
+        Assert.Equal(originalVersion, Version(persisted));
+        var reading = await db.VehicleOdometerReadings.SingleAsync(ct);
+        Assert.Equal(9900, reading.Reading);
+        Assert.Equal(performedAt, reading.RecordedAtUtc);
+        Assert.Equal(30m - result.Value.OilQuantityLiters, barrel.RemainingLiters);
+        var replay = await service.CompleteDirectOilChangeAsync(vehicle.Id, request, "historical-oil", ct);
+        Assert.Equal(result.Value.Id, replay.Value!.Id);
+        Assert.Single(db.OilChangeOperations);
+        Assert.Single(db.VehicleOdometerReadings);
+    }
+
+    [Theory]
+    [InlineData(10000)]
+    [InlineData(10500)]
+    public async Task DirectOilChangeStillAppliesEqualOrHigherVehicleMileage(long reading)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var db = CreateContext();
+        var (service, car, _, item, location) = await SeedAsync(db);
+        car.CurrentOdometer = 10000;
+        car.TrackedDistanceKm = 10000;
+        car.LastOdometerAtUtc = Now.AddDays(-1);
+        AddBarrel(db, item, location, VehicleType.Car, 30, 10, 1, open: true);
+        await db.SaveChangesAsync(ct);
+        var result = await service.CompleteDirectOilChangeAsync(car.Id,
+            Request(car, item, location) with { OdometerAtChange = reading }, "current-oil", ct);
+        Assert.True(result.IsSuccess, result.Error.Description);
+        var persisted = await db.Vehicles.AsNoTracking().SingleAsync(x => x.Id == car.Id, ct);
+        Assert.Equal(reading, persisted.CurrentOdometer);
+        Assert.Equal(reading, persisted.TrackedDistanceKm);
+        Assert.Equal(Now, persisted.LastOdometerAtUtc);
+    }
+
+    [Fact]
+    public async Task WarehouseOilChangeAcceptsLowerMileageAtSubmissionAndAfterVehicleMovesBeforeApproval()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var db = CreateContext();
+        var (service, car, _, item, location) = await SeedAsync(db);
+        car.CurrentOdometer = 10000;
+        car.TrackedDistanceKm = 10000.75m;
+        car.LastOdometerAtUtc = Now;
+        var barrel = AddBarrel(db, item, location, VehicleType.Car, 30, 10, 1, open: true);
+        await db.SaveChangesAsync(ct);
+        var request = new CreateMaintenanceWorkOrderRequest(MaintenanceServiceSubjectType.CompanyVehicle,
+            car.Id, null, location.MaintenanceLocationId, MaintenanceType.OilChange,
+            Now.AddDays(-2), null, 9500, "Historical oil change", null, null,
+            OilChange: new(location.Id, item.Id, false, null));
+        var negative = await service.CreateWorkOrderAsync(request with { OdometerAtOpen = -1 }, ct);
+        Assert.Equal(MaintenanceErrors.InvalidOdometer.Code, negative.Error.Code);
+        var created = await service.CreateWorkOrderAsync(request, ct);
+        Assert.True(created.IsSuccess, created.Error.Description);
+        car.CurrentOdometer = 10100;
+        car.TrackedDistanceKm = 10100.875m;
+        car.LastOdometerAtUtc = Now.AddHours(1);
+        await db.SaveChangesAsync(ct);
+        var versionAtApproval = Version(car);
+        var supplied = created.Value!.SupplyRequest!;
+        var issuedAt = Now.AddDays(-2).AddHours(1);
+        var approved = await service.ApproveAndIssueSupplyRequestAsync(supplied.Id,
+            new(issuedAt, supplied.RowVersion), ct);
+        Assert.True(approved.IsSuccess, approved.Error.Description);
+        var persisted = await db.Vehicles.AsNoTracking().SingleAsync(x => x.Id == car.Id, ct);
+        Assert.Equal(10100, persisted.CurrentOdometer);
+        Assert.Equal(10100.875m, persisted.TrackedDistanceKm);
+        Assert.Equal(Now.AddHours(1), persisted.LastOdometerAtUtc);
+        Assert.Equal(versionAtApproval, Version(persisted));
+        var operation = await db.OilChangeOperations.SingleAsync(ct);
+        Assert.Equal(9500, operation.OdometerAtChange);
+        Assert.Equal(issuedAt, operation.PerformedAtUtc);
+        var order = await db.MaintenanceWorkOrders.SingleAsync(ct);
+        Assert.Equal(MaintenanceWorkOrderStatus.Completed, order.Status);
+        Assert.Equal(9500, order.OdometerAtCompletion);
+        Assert.Equal(9500, (await db.VehicleOdometerReadings.SingleAsync(ct)).Reading);
+        Assert.Equal(26.5m, barrel.RemainingLiters);
+    }
+
+    [Fact]
+    public async Task OlderOilChangeDoesNotReplaceNewerScheduleOrLatestReminder()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var db = CreateContext();
+        var (service, car, _, item, location) = await SeedAsync(db);
+        car.CurrentOdometer = 11000;
+        car.TrackedDistanceKm = 11000;
+        car.LastOdometerAtUtc = Now;
+        AddBarrel(db, item, location, VehicleType.Car, 30, 10, 1, open: true);
+        db.MaintenancePlans.Add(new MaintenancePlan
+        {
+            Code = "CAR-OIL", VehicleType = VehicleType.Car, TriggerType = MaintenanceTriggerType.OdometerWindow,
+            ReminderAfterKilometers = 4000, MaximumAfterKilometers = 5000
+        });
+        await db.SaveChangesAsync(ct);
+        var recent = await service.CompleteDirectOilChangeAsync(car.Id,
+            Request(car, item, location) with { OdometerAtChange = 9900, PerformedAtUtc = Now.AddDays(-1) }, "recent-oil", ct);
+        Assert.True(recent.IsSuccess, recent.Error.Description);
+        var older = await service.CompleteDirectOilChangeAsync(car.Id,
+            Request(car, item, location) with { OdometerAtChange = 9950, PerformedAtUtc = Now.AddDays(-2) }, "older-oil", ct);
+        Assert.True(older.IsSuccess, older.Error.Description);
+        var schedule = await db.VehicleMaintenanceSchedules.SingleAsync(ct);
+        Assert.Equal(9900, schedule.LastCompletedOdometer);
+        Assert.Equal(Now.AddDays(-1), schedule.LastCompletedAtUtc);
+        Assert.Equal(13900, schedule.ReminderFromOdometer);
+        var reminders = await service.GetOilRemindersAsync(ct);
+        var reminder = Assert.Single(reminders.Value!, x => x.VehicleId == car.Id);
+        Assert.Equal(9900, reminder.LastOilChangeOdometer);
+        Assert.Equal(Now.AddDays(-1), reminder.LastCompletedAtUtc);
+        Assert.Equal(11000, reminder.CurrentOdometer);
+        Assert.Equal(2, await db.OilChangeOperations.CountAsync(ct));
+    }
+
     private static ApplicationDbContext CreateContext() => new(new DbContextOptionsBuilder<ApplicationDbContext>()
         .UseInMemoryDatabase(Guid.NewGuid().ToString(), x => x.EnableNullChecks(false))
         .AddInterceptors(new TestRowVersionInterceptor())

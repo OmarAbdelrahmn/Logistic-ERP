@@ -12,6 +12,30 @@ namespace LogisticsERP.Api.Controllers;
 [Route("api/vehicle-daily-distances")]
 public sealed class VehicleDailyDistancesController(IVehicleDailyDistanceService service) : ControllerBase
 {
+    [HttpGet("reports/vehicles/{vehicleId:guid}")]
+    [RequirePermission(PermissionKeys.Fleet.DailyDistancesRead)]
+    public async Task<IActionResult> GetVehiclePeriodReport(
+        Guid vehicleId, [FromQuery] DateOnly fromDate, [FromQuery] DateOnly toDate,
+        CancellationToken cancellationToken)
+    {
+        var result = await service.GetVehiclePeriodReportAsync(vehicleId, fromDate, toDate, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext, "تعذر عرض تقرير مسافات المركبة");
+    }
+
+    [HttpGet("reports/missing-records")]
+    [RequirePermission(PermissionKeys.Fleet.DailyDistancesRead)]
+    public async Task<IActionResult> GetMissingRecordsReport(
+        [FromQuery] DateOnly fromDate, [FromQuery] DateOnly toDate,
+        [FromQuery] string? search, [FromQuery] Guid? operatingCityId,
+        [FromQuery] LogisticsERP.Domain.Enums.VehicleType? vehicleType,
+        [FromQuery] int page = 1, [FromQuery] int pageSize = 50,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await service.GetMissingRecordsReportAsync(
+            fromDate, toDate, search, operatingCityId, vehicleType, page, pageSize, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext, "تعذر عرض تقرير المسافات المفقودة");
+    }
+
     [HttpGet]
     [RequirePermission(PermissionKeys.Fleet.DailyDistancesRead)]
     public async Task<IActionResult> GetDaily(

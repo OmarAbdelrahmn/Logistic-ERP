@@ -18,6 +18,7 @@ public sealed record VehicleAssignmentsPeriodReport(
 
 public sealed record VehicleAssignmentsPeriodRow(
     Guid VehicleId, string AssetNumber, string? SerialNumber, string? PlateNumberAr,
+    Guid? SponsorId, string? SponsorName,
     decimal TotalDaysAssignedInPeriod,
     decimal? TotalAmountToCollectInPeriodSar,
     IReadOnlyList<RiderVehiclePeriodAssignment> Assignments);

@@ -24,7 +24,7 @@ public interface IPhoneSimService
 
     Task<Result<PhoneSimResponse>> CreateAsync(
         CreatePhoneSimRequest request,
-        PrivateFileUpload receiptForm,
+        PrivateFileUpload? receiptForm = null,
         CancellationToken cancellationToken = default);
 
     Task<Result<PhoneSimResponse>> UpdateAsync(

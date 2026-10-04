@@ -168,11 +168,11 @@ type CreatePhoneSimRequest = {
   responsibleEmployeeId: string;
   placeId: string;
   notes: string | null;
-  receiptForm: File;
+  receiptForm?: File;
 };
 ```
 
-Send create as `multipart/form-data`, with fields named exactly as above. `receiptForm` is required and must be a nonempty file. Obtain the place ID from `GET /api/places`; the server returns `404 phone_sim.place_not_found` for an unknown or empty ID. The create response includes the selected `placeId` and `placeName`.
+Send create as `multipart/form-data`, with fields named exactly as above. `receiptForm` is optional: omit the field when no file is selected, and do not require an upload in the create dialog. If supplied, it must be a nonempty file and pass the existing file validation (maximum 10 MB). Without an upload, the response has `receiptForm: null`; hide or disable its download action. Obtain the place ID from `GET /api/places`; the server returns `404 phone_sim.place_not_found` for an unknown or empty ID. The create response includes the selected `placeId` and `placeName`.
 
 Update inventory details:
 

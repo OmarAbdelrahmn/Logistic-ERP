@@ -54,7 +54,9 @@ internal static class AuthorizationSeedCatalog
         PermissionKeys.Maintenance.LocationsRead,
         PermissionKeys.Maintenance.LocationsManage,
         PermissionKeys.Maintenance.WorkOrdersRead,
-        PermissionKeys.Maintenance.WorkOrdersManage,
+        PermissionKeys.Maintenance.WorkOrdersCreate,
+        PermissionKeys.Maintenance.WorkOrdersUpdate,
+        PermissionKeys.Maintenance.WorkOrdersDelete,
         PermissionKeys.Maintenance.OilRead,
         PermissionKeys.Maintenance.OilComplete,
         PermissionKeys.Maintenance.ExternalJobsRead,
@@ -74,7 +76,24 @@ internal static class AuthorizationSeedCatalog
         PermissionKeys.Inventory.ReturnsManage,
         PermissionKeys.Workflows.LegalCasesRead,
         PermissionKeys.Workflows.LegalCasesManage,
-        PermissionKeys.Workflows.LegalCaseFilesDownload
+        PermissionKeys.Workflows.LegalCaseFilesDownload,
+        PermissionKeys.Workforce.ExternalRidersRead,
+        PermissionKeys.Workforce.ExternalRidersCreate,
+        PermissionKeys.Workforce.ExternalRidersUpdate,
+        PermissionKeys.Workforce.ExternalRidersDelete,
+        PermissionKeys.Jahez.Read,
+        PermissionKeys.Jahez.HandoversManage,
+        PermissionKeys.Jahez.CollectionsManage,
+        PermissionKeys.Jahez.RequestsCreate,
+        PermissionKeys.Jahez.RequestsApprove,
+        PermissionKeys.Jahez.ResetsApprove,
+        PermissionKeys.Jahez.EarningsManage,
+        PermissionKeys.Jahez.ImportsManage,
+        PermissionKeys.Jahez.AdjustmentsManage,
+        PermissionKeys.Jahez.CashboxRead,
+        PermissionKeys.Jahez.CashboxSubmit,
+        PermissionKeys.Jahez.CashboxConfirm,
+        PermissionKeys.Jahez.CashboxApprove,
     ];
 
     public static IReadOnlyList<string> ManagerPermissions { get; } =
@@ -109,7 +128,9 @@ internal static class AuthorizationSeedCatalog
         PermissionKeys.Fuel.Import,
         PermissionKeys.Maintenance.LocationsRead,
         PermissionKeys.Maintenance.WorkOrdersRead,
-        PermissionKeys.Maintenance.WorkOrdersManage,
+        PermissionKeys.Maintenance.WorkOrdersCreate,
+        PermissionKeys.Maintenance.WorkOrdersUpdate,
+        PermissionKeys.Maintenance.WorkOrdersDelete,
         PermissionKeys.Maintenance.OilRead,
         PermissionKeys.Maintenance.OilComplete,
         PermissionKeys.Maintenance.ExternalJobsRead,
@@ -173,7 +194,9 @@ internal static class AuthorizationSeedCatalog
                 && !key.StartsWith("fuel.", StringComparison.Ordinal)
                 && !key.StartsWith("maintenance.", StringComparison.Ordinal)
                 && !key.StartsWith("inventory.", StringComparison.Ordinal)
-                && !key.StartsWith("legal_cases.", StringComparison.Ordinal)), ref sequence);
+                && !key.StartsWith("legal_cases.", StringComparison.Ordinal)
+                && !key.StartsWith("external_riders.", StringComparison.Ordinal)
+                && !key.StartsWith("jahez.", StringComparison.Ordinal)), ref sequence);
         AddRolePermissions(seeds, SystemRoles.ManagerId,
             ManagerPermissions.Except(legacyManagerPermissions).Where(key =>
                 !key.StartsWith("fleet.", StringComparison.Ordinal)
@@ -198,13 +221,25 @@ internal static class AuthorizationSeedCatalog
         AddRolePermissions(seeds, SystemRoles.ManagerId,
             [PermissionKeys.Fuel.Read, PermissionKeys.Fuel.Manage, PermissionKeys.Fuel.Import], ref sequence);
         AddRolePermissions(seeds, SystemRoles.SystemAdminId,
-            SystemAdminPermissions.Where(key => key.StartsWith("maintenance.", StringComparison.Ordinal) || key.StartsWith("inventory.", StringComparison.Ordinal)), ref sequence);
+            SystemAdminPermissions.Where(key => (key.StartsWith("maintenance.", StringComparison.Ordinal) || key.StartsWith("inventory.", StringComparison.Ordinal))
+                && key != PermissionKeys.Maintenance.WorkOrdersUpdate && key != PermissionKeys.Maintenance.WorkOrdersDelete), ref sequence);
         AddRolePermissions(seeds, SystemRoles.ManagerId,
-            ManagerPermissions.Where(key => key.StartsWith("maintenance.", StringComparison.Ordinal) || key.StartsWith("inventory.", StringComparison.Ordinal)), ref sequence);
+            ManagerPermissions.Where(key => (key.StartsWith("maintenance.", StringComparison.Ordinal) || key.StartsWith("inventory.", StringComparison.Ordinal))
+                && key != PermissionKeys.Maintenance.WorkOrdersUpdate && key != PermissionKeys.Maintenance.WorkOrdersDelete), ref sequence);
         AddRolePermissions(seeds, SystemRoles.SystemAdminId,
             [PermissionKeys.Workflows.LegalCasesRead, PermissionKeys.Workflows.LegalCasesManage, PermissionKeys.Workflows.LegalCaseFilesDownload], ref sequence);
         AddRolePermissions(seeds, SystemRoles.ManagerId,
             [PermissionKeys.Workflows.LegalCasesRead, PermissionKeys.Workflows.LegalCasesManage, PermissionKeys.Workflows.LegalCaseFilesDownload], ref sequence);
+
+        AddRolePermissions(seeds, SystemRoles.SystemAdminId,
+            [PermissionKeys.Maintenance.WorkOrdersUpdate, PermissionKeys.Maintenance.WorkOrdersDelete,
+                PermissionKeys.Workforce.ExternalRidersRead, PermissionKeys.Workforce.ExternalRidersCreate,
+                PermissionKeys.Workforce.ExternalRidersUpdate, PermissionKeys.Workforce.ExternalRidersDelete], ref sequence);
+        AddRolePermissions(seeds, SystemRoles.ManagerId,
+            [PermissionKeys.Maintenance.WorkOrdersUpdate, PermissionKeys.Maintenance.WorkOrdersDelete], ref sequence);
+
+        AddRolePermissions(seeds, SystemRoles.SystemAdminId,
+            SystemAdminPermissions.Where(key => key.StartsWith("jahez.", StringComparison.Ordinal)), ref sequence);
 
         return seeds;
     }

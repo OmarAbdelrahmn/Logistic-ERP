@@ -20,7 +20,7 @@ public sealed class MaintenanceController(IMaintenanceService service) : Control
     }
 
     [HttpPost("plans")]
-    [RequirePermission(PermissionKeys.Maintenance.WorkOrdersManage)]
+    [RequirePermission(PermissionKeys.Maintenance.WorkOrdersCreate)]
     public async Task<IActionResult> CreatePlan([FromBody] MaintenancePlanRequest request, CancellationToken cancellationToken)
     {
         var result = await service.UpsertPlanAsync(null, request, cancellationToken);
@@ -28,7 +28,7 @@ public sealed class MaintenanceController(IMaintenanceService service) : Control
     }
 
     [HttpPut("plans/{id:guid}")]
-    [RequirePermission(PermissionKeys.Maintenance.WorkOrdersManage)]
+    [RequirePermission(PermissionKeys.Maintenance.WorkOrdersUpdate)]
     public async Task<IActionResult> UpdatePlan(Guid id, [FromBody] MaintenancePlanRequest request, CancellationToken cancellationToken)
     {
         var result = await service.UpsertPlanAsync(id, request, cancellationToken);

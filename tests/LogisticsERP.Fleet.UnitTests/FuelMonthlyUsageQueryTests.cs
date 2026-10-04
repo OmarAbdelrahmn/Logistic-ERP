@@ -76,6 +76,34 @@ public sealed class FuelMonthlyUsageQueryTests
         Assert.Equal(latestAssignment.Id, result.Value!.Id);
     }
 
+    [Fact]
+    public async Task HostedCardCityQueriesExecuteWhenConfigured()
+    {
+        var connectionString = Environment.GetEnvironmentVariable("LOGISTICS_INTEGRATION_CONNECTION_STRING");
+        if (string.IsNullOrWhiteSpace(connectionString)) return;
+        var ct = TestContext.Current.CancellationToken;
+        await using var db = new ApplicationDbContext(new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseSqlServer(connectionString).Options);
+        var service = new FuelCardService(db, new DiagnosticCurrentUser(), new AllowPermissionChecker(), TimeProvider.System);
+        var page = await service.GetCardsAsync(null, null, null, 1, 10,
+            LogisticsERP.Domain.Entities.Platform.OperatingCity.JeddahId, ct);
+        Assert.True(page.IsSuccess, page.Error.Description);
+        Assert.All(page.Value!.Items, card =>
+        {
+            Assert.Equal(LogisticsERP.Domain.Entities.Platform.OperatingCity.JeddahId, card.OperatingCityId);
+            Assert.Equal("جدة", card.OperatingCityNameAr);
+            Assert.Equal("Jeddah", card.OperatingCityNameEn);
+        });
+        if (page.Value.Items.Count > 0)
+        {
+            var first = page.Value.Items[0];
+            var detail = await service.GetCardAsync(first.Id, ct);
+            Assert.True(detail.IsSuccess, detail.Error.Description);
+            Assert.Equal(first.OperatingCityId, detail.Value!.OperatingCityId);
+            Assert.Equal(first.OperatingCityNameAr, detail.Value.OperatingCityNameAr);
+        }
+    }
+
     private sealed class DiagnosticCurrentUser : ICurrentUser
     {
         public Guid? UserId { get; } = Guid.Parse("019c18d5-62e1-7000-c000-000000000001");

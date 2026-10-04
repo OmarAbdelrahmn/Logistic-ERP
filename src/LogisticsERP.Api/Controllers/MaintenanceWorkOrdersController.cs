@@ -20,6 +20,7 @@ public sealed class MaintenanceWorkOrdersController(IMaintenanceService service)
     }
 
     [HttpGet("external")]
+    [RequirePermission(PermissionKeys.Maintenance.WorkOrdersRead)]
     [RequirePermission(PermissionKeys.Maintenance.ExternalJobsRead)]
     public async Task<IActionResult> GetExternal([FromQuery] Guid? maintenanceLocationId, [FromQuery] string? status, CancellationToken cancellationToken)
     {
@@ -36,7 +37,7 @@ public sealed class MaintenanceWorkOrdersController(IMaintenanceService service)
     }
 
     [HttpPost]
-    [RequirePermission(PermissionKeys.Maintenance.WorkOrdersManage)]
+    [RequirePermission(PermissionKeys.Maintenance.WorkOrdersCreate)]
     public async Task<IActionResult> CreateCompany([FromBody] CreateMaintenanceWorkOrderRequest request, CancellationToken cancellationToken)
     {
         if (request.ServiceSubjectType != MaintenanceServiceSubjectType.CompanyVehicle)
@@ -46,6 +47,7 @@ public sealed class MaintenanceWorkOrdersController(IMaintenanceService service)
     }
 
     [HttpPost("external")]
+    [RequirePermission(PermissionKeys.Maintenance.WorkOrdersCreate)]
     [RequirePermission(PermissionKeys.Maintenance.ExternalJobsManage)]
     public async Task<IActionResult> CreateExternal([FromBody] CreateMaintenanceWorkOrderRequest request, CancellationToken cancellationToken)
     {
@@ -55,16 +57,34 @@ public sealed class MaintenanceWorkOrdersController(IMaintenanceService service)
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 
-    [HttpPost("{id:guid}/{operation:regex(^(start|complete|close|cancel)$)}")]
-    [RequirePermission(PermissionKeys.Maintenance.WorkOrdersManage)]
-    public async Task<IActionResult> Act(Guid id, string operation, [FromBody] MaintenanceWorkOrderActionRequest request, CancellationToken cancellationToken)
+    [HttpPost("{id:guid}/start")]
+    [RequirePermission(PermissionKeys.Maintenance.WorkOrdersUpdate)]
+    public Task<IActionResult> Start(Guid id, [FromBody] MaintenanceWorkOrderActionRequest request, CancellationToken cancellationToken) =>
+        Act(id, "start", request, cancellationToken);
+
+    [HttpPost("{id:guid}/complete")]
+    [RequirePermission(PermissionKeys.Maintenance.WorkOrdersUpdate)]
+    public Task<IActionResult> Complete(Guid id, [FromBody] MaintenanceWorkOrderActionRequest request, CancellationToken cancellationToken) =>
+        Act(id, "complete", request, cancellationToken);
+
+    [HttpPost("{id:guid}/close")]
+    [RequirePermission(PermissionKeys.Maintenance.WorkOrdersUpdate)]
+    public Task<IActionResult> Close(Guid id, [FromBody] MaintenanceWorkOrderActionRequest request, CancellationToken cancellationToken) =>
+        Act(id, "close", request, cancellationToken);
+
+    [HttpPost("{id:guid}/cancel")]
+    [RequirePermission(PermissionKeys.Maintenance.WorkOrdersDelete)]
+    public Task<IActionResult> Cancel(Guid id, [FromBody] MaintenanceWorkOrderActionRequest request, CancellationToken cancellationToken) =>
+        Act(id, "cancel", request, cancellationToken);
+
+    private async Task<IActionResult> Act(Guid id, string operation, MaintenanceWorkOrderActionRequest request, CancellationToken cancellationToken)
     {
         var result = await service.ActOnWorkOrderAsync(id, operation, request, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 
     [HttpPost("{id:guid}/materials")]
-    [RequirePermission(PermissionKeys.Maintenance.WorkOrdersManage)]
+    [RequirePermission(PermissionKeys.Maintenance.WorkOrdersUpdate)]
     [RequirePermission(PermissionKeys.Inventory.StockMove)]
     public async Task<IActionResult> PostMaterial(Guid id, [FromBody] PostMaterialUsageRequest request, CancellationToken cancellationToken)
     {
@@ -73,6 +93,7 @@ public sealed class MaintenanceWorkOrdersController(IMaintenanceService service)
     }
 
     [HttpPost("materials/{usageId:guid}/reverse")]
+    [RequirePermission(PermissionKeys.Maintenance.WorkOrdersUpdate)]
     [RequirePermission(PermissionKeys.Inventory.StockAdjust)]
     public async Task<IActionResult> ReverseMaterial(Guid usageId, [FromBody] ReverseMaterialUsageRequest request, CancellationToken cancellationToken)
     {
@@ -81,6 +102,7 @@ public sealed class MaintenanceWorkOrdersController(IMaintenanceService service)
     }
 
     [HttpPost("{id:guid}/oil-change")]
+    [RequirePermission(PermissionKeys.Maintenance.WorkOrdersUpdate)]
     [RequirePermission(PermissionKeys.Maintenance.OilComplete)]
     [RequirePermission(PermissionKeys.Inventory.StockMove)]
     public async Task<IActionResult> CompleteOilChange(Guid id, [FromBody] CompleteOilChangeRequest request, CancellationToken cancellationToken)
@@ -90,6 +112,7 @@ public sealed class MaintenanceWorkOrdersController(IMaintenanceService service)
     }
 
     [HttpPost("{id:guid}/part-sales")]
+    [RequirePermission(PermissionKeys.Maintenance.WorkOrdersUpdate)]
     [RequirePermission(PermissionKeys.Maintenance.PartSalesManage)]
     [RequirePermission(PermissionKeys.Inventory.StockMove)]
     public async Task<IActionResult> PostPartSale(Guid id, [FromBody] ExternalPartSaleRequest request, CancellationToken cancellationToken)
@@ -99,6 +122,7 @@ public sealed class MaintenanceWorkOrdersController(IMaintenanceService service)
     }
 
     [HttpPost("{id:guid}/customer-labor-charges")]
+    [RequirePermission(PermissionKeys.Maintenance.WorkOrdersUpdate)]
     [RequirePermission(PermissionKeys.Maintenance.CustomerLaborChargesManage)]
     public async Task<IActionResult> PostCustomerLaborCharge(Guid id, [FromBody] ExternalFinancialEntryRequest request, CancellationToken cancellationToken)
     {
@@ -107,6 +131,7 @@ public sealed class MaintenanceWorkOrdersController(IMaintenanceService service)
     }
 
     [HttpPost("{id:guid}/mechanic-labor-payments")]
+    [RequirePermission(PermissionKeys.Maintenance.WorkOrdersUpdate)]
     [RequirePermission(PermissionKeys.Maintenance.MechanicLaborPaymentsManage)]
     public async Task<IActionResult> PostMechanicLaborPayment(Guid id, [FromBody] MechanicLaborPaymentRequest request, CancellationToken cancellationToken)
     {
@@ -115,6 +140,7 @@ public sealed class MaintenanceWorkOrdersController(IMaintenanceService service)
     }
 
     [HttpPost("{id:guid}/other-financial-entries")]
+    [RequirePermission(PermissionKeys.Maintenance.WorkOrdersUpdate)]
     [RequirePermission(PermissionKeys.Maintenance.ExternalJobsManage)]
     public async Task<IActionResult> PostOtherFinancialEntry(Guid id, [FromQuery] bool income, [FromBody] ExternalFinancialEntryRequest request, CancellationToken cancellationToken)
     {
@@ -123,6 +149,7 @@ public sealed class MaintenanceWorkOrdersController(IMaintenanceService service)
     }
 
     [HttpPost("{id:guid}/customer-payments")]
+    [RequirePermission(PermissionKeys.Maintenance.WorkOrdersUpdate)]
     [RequirePermission(PermissionKeys.Maintenance.ExternalJobsManage)]
     public async Task<IActionResult> PostCustomerPayment(Guid id, [FromBody] ExternalCustomerPaymentRequest request, CancellationToken cancellationToken)
     {

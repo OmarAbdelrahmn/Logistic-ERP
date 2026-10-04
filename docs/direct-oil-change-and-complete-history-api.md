@@ -24,7 +24,15 @@ Permissions: `maintenance.oil.complete` and `inventory.stock.move`. Send a uniqu
 }
 ```
 
-`nextOilBarrelId` is needed only when the open barrel cannot cover the required quantity. For cars, the service enforces 4 L with a filter or 3.5 L without it. Motorcycles use `configuredOilQuantityLiters` or an active maintenance plan quantity. `oilFilterInventoryItemId` must be present exactly when `oilFilterChanged` is true. Odometer must be at least the vehicle's current reading. The inventory location must be active, linked to an active company maintenance location, and contain eligible oil and filter stock. The stock posting follows existing FIFO and oil-barrel rules.
+`nextOilBarrelId` is needed only when the open barrel cannot cover the required quantity. For cars, the service enforces 4 L with a filter or 3.5 L without it. Motorcycles use `configuredOilQuantityLiters` or an active maintenance plan quantity. `oilFilterInventoryItemId` must be present exactly when `oilFilterChanged` is true. Odometer must be nonnegative; it may be below the vehicle's current reading when recording earlier service. The inventory location must be active, linked to an active company maintenance location, and contain eligible oil and filter stock. The stock posting follows existing FIFO and oil-barrel rules.
+
+### Earlier oil changes and vehicle mileage
+
+Record the actual service date in `performedAtUtc` and the kilometers at that time in `odometerAtChange`. A lower reading is accepted and retained in the oil-change response, report and odometer history. When it is below `vehicle.currentOdometer`, the vehicle's current odometer, tracked distance and last odometer timestamp remain unchanged. Equal or higher readings continue to update vehicle mileage.
+
+For example, a vehicle currently at 25,000 km can have an oil change recorded for two days ago at 24,700 km. The oil change stores 24,700; the vehicle stays at 25,000. The same rule applies to `odometerAtOpen` in company oil requests, at submission and warehouse approval. Negative readings remain invalid.
+
+The frontend must allow a lower historical reading: use a minimum of zero, and remove validation that requires service kilometers to be at least the vehicle's current kilometers. Keep sending the latest required row version. Reminder history uses the latest service date, and an older entry cannot replace a newer completed oil-change schedule. This change requires backend deployment; no database migration is needed.
 
 `GET /api/maintenance/oil-inventory-locations` requires `maintenance.oil.read` and returns `{ inventoryLocationId, maintenanceLocationId, inventoryLocationNameAr, maintenanceLocationNameAr }[]` for eligible active locations. Use `inventoryLocationId` in the POST body.
 
@@ -92,6 +100,8 @@ Both endpoints return `CompleteHistoryResponse`:
       "riderProfileId": null,
       "assignmentId": null,
       "summary": "Oil and filter service",
+      "createdByUserId": "00000000-0000-0000-0000-000000000012",
+      "createdByUserName": "fleet.operator",
       "details": {
         "maintenanceWorkOrderId": null,
         "odometerAtChange": 25000,
@@ -107,6 +117,8 @@ Both endpoints return `CompleteHistoryResponse`:
 `subjectType` is `vehicle` or `rider`. `events` are sorted newest first. `category` and `action` identify the record type; `details` carries fields specific to that record. `files` contains `{ id, fileName, contentType, fileSizeBytes, downloadPath }`; paths call existing authenticated file-download routes and never expose storage paths. Downloading a file still requires the download route's own permission.
 
 Vehicle events cover assignment handovers and endings, assignment changes and promissory notes, issues/damages and return evidence, accidents and evidence/reports (including archived older accidents), maintenance work orders, material usage and oil changes, vehicle expenses, registration/insurance/inspection/operation-card records, status, odometer, identity correction, registration transition, and vehicle attachment versions. Rider events include their assignments, vehicle returns and evidence, issues tied to their assignments, accidents, attributed maintenance/material usage/oil changes and expenses, promissory notes, issued equipment and recorded returned quantities, and supply requests.
+
+Every event includes `createdByUserId` and `createdByUserName`. The creator is the user responsible for that event (for example, the handover user, return user, uploader, reporter, or oil-service performer); records without a dedicated actor field use their stored audit creator. `createdByUserName` is the current Identity username, including users whose accounts were soft-deleted. It is `null` if no creator was recorded or the user no longer exists. A missing creator ID is also `null`.
 
 Equipment issue lines currently store `returnedQuantity` but have no dedicated return timestamp or return transaction. The rider timeline marks that entry `return_balance_recorded` and `returnTimestampKnown: false` in `details`; its timestamp is the issue record's last update (or issue time when unavailable), not a claimed physical return time.
 

@@ -27,7 +27,7 @@ public sealed class ExternalRidersController(IWorkforceService service) : Contro
     }
 
     [HttpPost]
-    [RequirePermission(PermissionKeys.Workforce.ExternalRidersManage)]
+    [RequirePermission(PermissionKeys.Workforce.ExternalRidersCreate)]
     public async Task<IActionResult> Create([FromBody] CreateExternalRiderRequest request, CancellationToken cancellationToken)
     {
         var result = await service.CreateExternalRiderAsync(request, cancellationToken);
@@ -37,7 +37,7 @@ public sealed class ExternalRidersController(IWorkforceService service) : Contro
     }
 
     [HttpPut("{employeeId:guid}")]
-    [RequirePermission(PermissionKeys.Workforce.ExternalRidersManage)]
+    [RequirePermission(PermissionKeys.Workforce.ExternalRidersUpdate)]
     public async Task<IActionResult> Update(
         Guid employeeId,
         [FromBody] UpdateExternalRiderRequest request,
@@ -45,5 +45,14 @@ public sealed class ExternalRidersController(IWorkforceService service) : Contro
     {
         var result = await service.UpdateExternalRiderAsync(employeeId, request, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpDelete("{employeeId:guid}")]
+    [RequirePermission(PermissionKeys.Workforce.ExternalRidersDelete)]
+    public async Task<IActionResult> Delete(
+        Guid employeeId, [FromBody] ArchiveRequest request, CancellationToken cancellationToken)
+    {
+        var result = await service.ArchiveExternalRiderAsync(employeeId, request, cancellationToken);
+        return result.IsSuccess ? NoContent() : result.ToProblem(HttpContext);
     }
 }

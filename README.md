@@ -131,3 +131,4 @@ The private document root is `src/LogisticsERP.Api/wwwroot/private/employee-docu
 - [English frontend handoff: maintenance, inventory, oil, and Riyadh workshop](docs/maintenance-frontend-handoff-en.md)
 - [Frontend handoff: maintenance item and vehicle compatibility](docs/maintenance-spare-part-vehicle-compatibility-frontend-handoff.md)
 - [Create users with roles and permissions](docs/user-creation-authorization-api.md)
+- [Jahez operations, financial workflows, imports, and Backend API (Arabic)](docs/jahez-backend-api.md)

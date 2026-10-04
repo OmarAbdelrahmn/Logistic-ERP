@@ -9,6 +9,9 @@ public sealed record FuelCardPageResponse(
 public sealed record FuelCardResponse(
     Guid Id,
     Guid SponsorId,
+    Guid OperatingCityId,
+    string? OperatingCityNameAr,
+    string? OperatingCityNameEn,
     string Provider,
     string ProviderNameAr,
     string IdentifierType,
@@ -35,9 +38,12 @@ public sealed record CreateFuelCardRequest(
     string CardNumber,
     string? PlateNumberText,
     string? Notes,
-    Guid SponsorId);
+    Guid SponsorId,
+    Guid OperatingCityId);
 
 public sealed record SetFuelCardSponsorRequest(Guid SponsorId, string RowVersion);
+
+public sealed record SetFuelCardCityRequest(Guid OperatingCityId, string RowVersion);
 
 public sealed record FuelCardNumberImportIssue(int RowNumber, string? Number, string Message);
 

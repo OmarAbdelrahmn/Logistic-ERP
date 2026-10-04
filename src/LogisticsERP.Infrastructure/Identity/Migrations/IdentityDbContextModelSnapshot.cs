@@ -1148,7 +1148,7 @@ namespace LogisticsERP.Infrastructure.Identity.Migrations
                             Id = new Guid("019c18d5-62e1-7000-b000-000000000077"),
                             CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             IsDeleted = false,
-                            PermissionKey = "maintenance.work_orders.manage",
+                            PermissionKey = "maintenance.work_orders.create",
                             RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
                             RowVersion = new byte[0]
                         },
@@ -1328,7 +1328,7 @@ namespace LogisticsERP.Infrastructure.Identity.Migrations
                             Id = new Guid("019c18d5-62e1-7000-b000-000000000097"),
                             CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             IsDeleted = false,
-                            PermissionKey = "maintenance.work_orders.manage",
+                            PermissionKey = "maintenance.work_orders.create",
                             RoleId = new Guid("019c18d5-62e1-7000-9000-000000000002"),
                             RowVersion = new byte[0]
                         },
@@ -1501,6 +1501,195 @@ namespace LogisticsERP.Infrastructure.Identity.Migrations
                             IsDeleted = false,
                             PermissionKey = "legal_cases.files.download",
                             RoleId = new Guid("019c18d5-62e1-7000-9000-000000000002"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000117"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "maintenance.work_orders.update",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000118"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "maintenance.work_orders.delete",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000119"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "external_riders.read",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000120"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "external_riders.create",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000121"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "external_riders.update",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000122"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "external_riders.delete",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000123"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "maintenance.work_orders.update",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000002"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000124"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "maintenance.work_orders.delete",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000002"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000125"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "jahez.read",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000126"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "jahez.handovers.manage",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000127"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "jahez.collections.manage",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000128"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "jahez.requests.create",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000129"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "jahez.requests.approve",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000130"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "jahez.resets.approve",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000131"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "jahez.earnings.manage",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000132"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "jahez.imports.manage",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000133"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "jahez.adjustments.manage",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000134"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "jahez.cashbox.read",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000135"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "jahez.cashbox.submit",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000136"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "jahez.cashbox.confirm",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000137"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "jahez.cashbox.approve",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
                             RowVersion = new byte[0]
                         });
                 });

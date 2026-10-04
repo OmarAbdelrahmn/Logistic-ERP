@@ -1,6 +1,7 @@
 using System.Text.Json;
 using LogisticsERP.Application.Abstractions.Authentication;
 using LogisticsERP.Domain.Common;
+using LogisticsERP.Domain.Entities.Jahez;
 using LogisticsERP.Domain.Entities.System;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -186,7 +187,9 @@ internal sealed class ApplicationPersistenceInterceptor(
             var before = new Dictionary<string, object?>(StringComparer.Ordinal);
             var after = new Dictionary<string, object?>(StringComparer.Ordinal);
 
-            foreach (var property in entry.Properties.Where(property => !IsSensitiveAuditProperty(property.Metadata.Name)))
+            // The immutable import file already retains its bytes; audit its identity and hash without duplicating the whole workbook.
+            foreach (var property in entry.Properties.Where(property => !IsSensitiveAuditProperty(property.Metadata.Name)
+                && !(entry.Entity is JahezImportFile && property.Metadata.Name == nameof(JahezImportFile.Content))))
             {
                 if (entry.State != EntityState.Added && (entry.State == EntityState.Deleted || property.IsModified))
                 {

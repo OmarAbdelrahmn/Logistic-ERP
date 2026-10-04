@@ -1,3 +1,4 @@
+using LogisticsERP.Application.Features.Jahez;
 using System.Text.Json;
 using LogisticsERP.Application.Abstractions.Authentication;
 using LogisticsERP.Application.Common.Results;
@@ -39,6 +40,20 @@ internal sealed class SimplePlatformService(
         CancellationToken cancellationToken = default) =>
         UpsertPlatformAsync(id, request, cancellationToken);
 
+    public Task<Result<IReadOnlyList<SimplePlatformAccountResponse>>> GetAccountsAsync(
+        Guid? accountId,
+        Guid? platformId,
+        Guid? operatingCityId,
+        Guid? sponsorId,
+        Guid? ownerRiderProfileId,
+        Guid? actualRiderProfileId,
+        string? status,
+        string? paymentModel,
+        bool currentOnly,
+        bool includeArchived,
+        CancellationToken cancellationToken = default) =>
+        GetAccountsAsync(accountId, platformId, operatingCityId, sponsorId, ownerRiderProfileId, actualRiderProfileId, status, paymentModel, currentOnly, includeArchived, null, cancellationToken);
+
     public async Task<Result<IReadOnlyList<SimplePlatformAccountResponse>>> GetAccountsAsync(
         Guid? accountId,
         Guid? platformId,
@@ -50,6 +65,7 @@ internal sealed class SimplePlatformService(
         string? paymentModel,
         bool currentOnly,
         bool includeArchived,
+        Guid? dashboardSponsorId,
         CancellationToken cancellationToken = default)
     {
         PlatformRiderAccountStatus? parsedStatus = null;
@@ -97,6 +113,8 @@ internal sealed class SimplePlatformService(
         {
             accountQuery = accountQuery.Where(item => item.SponsorId == sponsorId);
         }
+
+        if (dashboardSponsorId is not null) accountQuery = accountQuery.Where(item => item.DashboardSponsorId == dashboardSponsorId);
 
         if (parsedStatus is not null)
         {
@@ -175,6 +193,7 @@ internal sealed class SimplePlatformService(
             RegisteredEmployeeId = validation.Value,
             OperatingCityId = request.OperatingCityId,
             SponsorId = request.SponsorId,
+            DashboardSponsorId = request.DashboardSponsorId,
             Code = HrServiceSupport.NormalizeCode(request.Code),
             ExternalAccountId = request.ExternalAccountId.Trim(),
             UserName = HrServiceSupport.TrimOrNull(request.UserName),
@@ -223,6 +242,12 @@ internal sealed class SimplePlatformService(
 
         var status = ParseEnum<PlatformRiderAccountStatus>(request.Status);
         var paymentModel = ParseEnum<PlatformAccountPaymentModel>(request.PaymentModel);
+        if (await dbContext.Set<LogisticsERP.Domain.Entities.Jahez.JahezAccountHandover>().AnyAsync(x => x.PlatformRiderAccountId == entity.Id, cancellationToken)
+            && (entity.ClientPlatformId != request.PlatformId || entity.ExternalAccountId != request.ExternalAccountId.Trim()))
+            return Result.Failure<SimplePlatformAccountResponse>(JahezErrors.Conflict("لا يمكن تغيير منصة أو رقم حساب له تاريخ مالي في جاهز."));
+        if (entity.DashboardSponsorId.HasValue && request.DashboardSponsorId is null)
+            return Result.Failure<SimplePlatformAccountResponse>(HrErrors.InvalidRequest);
+
         var activeAssignment = await dbContext.RiderClientAssignments.SingleOrDefaultAsync(
             item => item.PlatformRiderAccountId == id && item.EffectiveTo == null,
             cancellationToken);
@@ -274,6 +299,7 @@ internal sealed class SimplePlatformService(
         entity.RegisteredEmployeeId = validation.Value;
         entity.OperatingCityId = request.OperatingCityId;
         entity.SponsorId = request.SponsorId;
+        entity.DashboardSponsorId = request.DashboardSponsorId;
         entity.Code = HrServiceSupport.NormalizeCode(request.Code);
         entity.ExternalAccountId = request.ExternalAccountId.Trim();
         entity.UserName = HrServiceSupport.TrimOrNull(request.UserName);
@@ -311,6 +337,9 @@ internal sealed class SimplePlatformService(
         var account = await dbContext.PlatformRiderAccounts.SingleOrDefaultAsync(
             item => item.Id == accountId,
             cancellationToken);
+        if (account is not null && await dbContext.ClientPlatforms.AnyAsync(x => x.Id == account.ClientPlatformId && x.Code == "JAHEZ", cancellationToken))
+            return Result.Failure<SimplePlatformAssignmentResponse>(JahezErrors.UseJahezWorkflow);
+
         if (account is null)
         {
             return Result.Failure<SimplePlatformAssignmentResponse>(HrErrors.PlatformAccountNotFound(accountId));
@@ -440,6 +469,9 @@ internal sealed class SimplePlatformService(
         var assignment = await dbContext.RiderClientAssignments.SingleOrDefaultAsync(
             item => item.PlatformRiderAccountId == accountId && item.EffectiveTo == null,
             cancellationToken);
+        if (account is not null && await dbContext.ClientPlatforms.AnyAsync(x => x.Id == account.ClientPlatformId && x.Code == "JAHEZ", cancellationToken))
+            return Result.Failure<SimplePlatformAssignmentResponse>(JahezErrors.UseJahezWorkflow);
+
         if (account is null || assignment is null)
         {
             return Result.Failure<SimplePlatformAssignmentResponse>(HrErrors.NotFound);
@@ -731,6 +763,11 @@ internal sealed class SimplePlatformService(
         {
             return Result.Failure<Guid>(HrErrors.InvalidRequest);
         }
+
+        if ((!isUpdate && request.DashboardSponsorId is null) || request.DashboardSponsorId == Guid.Empty)
+            return Result.Failure<Guid>(HrErrors.InvalidRequest);
+        if (request.DashboardSponsorId.HasValue && !await dbContext.Sponsors.AnyAsync(x => x.Id == request.DashboardSponsorId && x.Status == CatalogStatus.Active, cancellationToken))
+            return Result.Failure<Guid>(HrErrors.NotFound);
 
         var owner = await LoadRiderAsync(request.OwnerRiderProfileId, false, cancellationToken);
         var supportedPaymentModels = await dbContext.ClientPlatforms
@@ -1050,7 +1087,8 @@ internal sealed class SimplePlatformService(
             projection.Account.EndDate,
             projection.Account.OperationalNotes,
             currentAssignment,
-            HrServiceSupport.EncodeRowVersion(projection.Account.RowVersion));
+            HrServiceSupport.EncodeRowVersion(projection.Account.RowVersion),
+            projection.Account.DashboardSponsorId);
 
     private static SimplePlatformAssignmentResponse ToAssignment(AssignmentProjection projection) => new(
         projection.Assignment.Id,

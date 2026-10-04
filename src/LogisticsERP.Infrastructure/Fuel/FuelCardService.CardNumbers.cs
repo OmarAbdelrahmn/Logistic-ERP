@@ -3,6 +3,7 @@ using LogisticsERP.Application.Authorization;
 using LogisticsERP.Application.Common.Results;
 using LogisticsERP.Application.Features.Fuel;
 using LogisticsERP.Domain.Entities.Fuel;
+using LogisticsERP.Domain.Entities.Platform;
 using LogisticsERP.Domain.Enums;
 using LogisticsERP.Domain.Fuel;
 using Microsoft.EntityFrameworkCore;
@@ -12,12 +13,15 @@ namespace LogisticsERP.Infrastructure.Fuel;
 internal sealed partial class FuelCardService
 {
     public async Task<Result<FuelCardNumberImportResponse>> ImportCardNumbersAsync(
-        Stream content, Guid sponsorId, bool validateOnly, CancellationToken cancellationToken = default)
+        Stream content, Guid sponsorId, bool validateOnly, Guid? operatingCityId = null, CancellationToken cancellationToken = default)
     {
         if (!await HasPermissionAsync(PermissionKeys.Fuel.Import, cancellationToken))
             return Result.Failure<FuelCardNumberImportResponse>(FuelErrors.Forbidden);
         if (!await SponsorExistsAsync(sponsorId, cancellationToken))
             return Result.Failure<FuelCardNumberImportResponse>(FuelErrors.SponsorNotFound);
+        var cityId = operatingCityId ?? OperatingCity.JeddahId;
+        if (!await OperatingCityExistsAsync(cityId, cancellationToken))
+            return Result.Failure<FuelCardNumberImportResponse>(FuelErrors.OperatingCityNotFound);
         if (content is null || !content.CanRead)
             return Result.Failure<FuelCardNumberImportResponse>(FuelErrors.InvalidFile);
 
@@ -67,6 +71,7 @@ internal sealed partial class FuelCardService
                 newCards.Add(new FuelCard
                 {
                     SponsorId = sponsorId,
+                    OperatingCityId = cityId,
                     Provider = FuelCardProvider.PetroApp,
                     IdentifierType = FuelCardIdentifierType.InternalNumber,
                     CardNumber = row.Number,

@@ -3,6 +3,7 @@ using ClosedXML.Excel;
 using LogisticsERP.Application.Common.Results;
 using LogisticsERP.Application.Features.Fuel;
 using LogisticsERP.Domain.Entities.Fuel;
+using LogisticsERP.Domain.Entities.Platform;
 using LogisticsERP.Domain.Enums;
 using LogisticsERP.Domain.Fuel;
 using LogisticsERP.Infrastructure.Persistence;
@@ -13,10 +14,13 @@ namespace LogisticsERP.Infrastructure.Fuel;
 internal sealed class FuelCardBulkImportService(ApplicationDbContext dbContext) : IFuelCardBulkImportService
 {
     public async Task<Result<FuelCardBulkImportResponse>> ImportAsync(
-        Stream content, bool validateOnly, CancellationToken cancellationToken = default)
+        Stream content, bool validateOnly, Guid? operatingCityId = null, CancellationToken cancellationToken = default)
     {
         if (content is null || !content.CanRead)
             return Result.Failure<FuelCardBulkImportResponse>(FuelErrors.InvalidFile);
+        var cityId = operatingCityId ?? OperatingCity.JeddahId;
+        if (cityId == Guid.Empty || !await dbContext.OperatingCities.AsNoTracking().AnyAsync(x => x.Id == cityId, cancellationToken))
+            return Result.Failure<FuelCardBulkImportResponse>(FuelErrors.OperatingCityNotFound);
 
         List<ParsedRow> rows;
         try
@@ -36,10 +40,10 @@ internal sealed class FuelCardBulkImportService(ApplicationDbContext dbContext) 
             .Where(number => number.Length > 0).Distinct(StringComparer.Ordinal).ToArray();
         var existing = await dbContext.FuelCards.AsNoTracking()
             .Where(card => cardNumbers.Contains(card.NormalizedCardNumber))
-            .Select(card => new { card.Provider, card.NormalizedCardNumber, card.SponsorId })
+            .Select(card => new { card.Provider, card.NormalizedCardNumber, card.SponsorId, card.OperatingCityId })
             .ToArrayAsync(cancellationToken);
         var existingByKey = existing.ToDictionary(
-            card => (card.Provider, card.NormalizedCardNumber), card => card.SponsorId);
+            card => (card.Provider, card.NormalizedCardNumber));
 
         var seen = new HashSet<(FuelCardProvider Provider, string Number)>();
         var issues = new List<FuelCardBulkImportIssue>();
@@ -72,14 +76,15 @@ internal sealed class FuelCardBulkImportService(ApplicationDbContext dbContext) 
                 continue;
             }
 
-            var isExisting = existingByKey.TryGetValue((provider, row.NormalizedCardNumber), out var existingSponsorId);
-            if (isExisting && existingSponsorId != sponsor.Id)
+            var isExisting = existingByKey.TryGetValue((provider, row.NormalizedCardNumber), out var existingCard);
+            if (isExisting && existingCard!.SponsorId != sponsor.Id)
             {
                 issues.Add(new(row.RowNumber, row.CardNumber, "البطاقة موجودة ومسجلة لدى كفيل آخر."));
                 continue;
             }
             previews.Add(new(row.RowNumber, row.CardNumber, sponsor70, sponsor.Id,
-                sponsor.RegistryNameAr, row.CompanyName, provider.ToString(), !isExisting));
+                sponsor.RegistryNameAr, row.CompanyName, provider.ToString(), !isExisting,
+                isExisting ? existingCard!.OperatingCityId : cityId));
             if (isExisting)
             {
                 existingCount++;
@@ -88,6 +93,7 @@ internal sealed class FuelCardBulkImportService(ApplicationDbContext dbContext) 
             newCards.Add(new FuelCard
             {
                 SponsorId = sponsor.Id,
+                OperatingCityId = cityId,
                 Provider = provider,
                 IdentifierType = FuelCardIdentifierType.InternalNumber,
                 CardNumber = row.CardNumber,

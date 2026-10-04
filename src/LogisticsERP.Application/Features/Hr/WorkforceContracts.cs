@@ -24,7 +24,8 @@ public sealed record EmployeeListItemResponse(
     IReadOnlyList<CurrentRiderWorkPlatformResponse> CurrentWorkPlatforms,
     CatalogResponse? OperationalWorkType,
     OperatingCityResponse? OperatingCity,
-    string? HousingNameAr);
+    string? HousingNameAr,
+    IReadOnlyList<string> LicenseNamesAr);
 
 public sealed record CurrentRiderWorkPlatformResponse(
     Guid Id,

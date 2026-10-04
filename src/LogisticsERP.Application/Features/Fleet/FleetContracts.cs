@@ -170,7 +170,7 @@ public sealed record ReturnVehicleRequest(Guid AssignmentId, DateTimeOffset Ende
 public sealed record SwitchVehicleRequest(Guid CurrentAssignmentId, Guid NewVehicleId, DateTimeOffset SwitchedAtUtc, long OldVehicleOdometer, long NewVehicleOdometer, VehicleCondition OldVehicleCondition, VehicleCondition NewVehicleCondition, byte? OldFuelLevelPercentage, byte? NewFuelLevelPercentage, string PermissionReference, string Reason, string RowVersion, VehicleConditionReportRequest? ConditionReport = null);
 public sealed record RenewVehiclePermissionRequest(DateOnly PermissionStartsOn, string PermissionReference, string Reason, string RowVersion);
 public sealed record RiderPromissoryFileResponse(Guid Id, Guid RiderProfileId, Guid CurrentVersionId, int VersionNumber, string OriginalFileName, string ContentType, long FileSizeBytes, string Sha256Checksum, DateTimeOffset UploadedAtUtc, string RowVersion);
-public sealed record RiderVehicleAssignmentResponse(Guid Id, Guid RiderProfileId, Guid EmployeeId, bool IsRealRider, RealRiderResponse? RealRider, Guid VehicleId, string AssetNumber, string RiderName, string? RiderIqamaNo, Guid? VehicleOperatingCityId, string? VehicleOperatingCityNameAr, DateTimeOffset StartedAtUtc, DateTimeOffset? EndedAtUtc, string? StartLocationSnapshot, string? EndLocationSnapshot, long StartOdometer, long? EndOdometer, string? PermissionReference, DateOnly? PermissionStartsOn, DateOnly? PermissionEndsOn, RiderVehicleAssignmentStatus Status, string AssignmentReason, string? CompletionReason, Guid OperationId, IReadOnlyList<Guid> PromissoryFileVersionIds, string RowVersion);
+public sealed record RiderVehicleAssignmentResponse(Guid Id, Guid RiderProfileId, Guid EmployeeId, bool IsRealRider, RealRiderResponse? RealRider, Guid VehicleId, VehicleType VehicleType, string AssetNumber, string RiderName, string? RiderIqamaNo, Guid? VehicleOperatingCityId, string? VehicleOperatingCityNameAr, DateTimeOffset StartedAtUtc, DateTimeOffset? EndedAtUtc, string? StartLocationSnapshot, string? EndLocationSnapshot, long StartOdometer, long? EndOdometer, string? PermissionReference, DateOnly? PermissionStartsOn, DateOnly? PermissionEndsOn, RiderVehicleAssignmentStatus Status, string AssignmentReason, string? CompletionReason, Guid OperationId, IReadOnlyList<Guid> PromissoryFileVersionIds, string RowVersion);
 public sealed record RiderVehicleTimelineResponse(RiderVehicleAssignmentResponse Assignment, IReadOnlyList<VehicleIssueSummaryResponse> Issues, IReadOnlyList<VehicleAccidentSummaryResponse> Accidents);
 
 public sealed record VehicleRegistrationRequest(string RegistrationNumber, string IssuingAuthority, DateOnly IssueDate, DateOnly ExpiryDate, string? Notes);
@@ -242,7 +242,9 @@ public sealed record CompleteHistoryEventResponse(
     Guid? AssignmentId,
     string Summary,
     JsonElement Details,
-    IReadOnlyList<CompleteHistoryFileResponse> Files);
+    IReadOnlyList<CompleteHistoryFileResponse> Files,
+    Guid? CreatedByUserId,
+    string? CreatedByUserName);
 
 public sealed record CompleteHistoryFileResponse(
     Guid Id,

@@ -142,7 +142,7 @@ All decisions require the latest `rowVersion`. The requester receives a persiste
 - `inventory.supply_requests.read`: view the warehouse queue and request details.
 - `inventory.supply_requests.approve`: approve/issue or reject requests.
 - `inventory.stock.move`: additionally required for `approve-and-issue` because this action posts stock movements.
-- `maintenance.work_orders.manage`: creates the vehicle work order and its nested request.
+- `maintenance.work_orders.create`: creates the vehicle work order and its nested request.
 
 ## Relevant errors
 

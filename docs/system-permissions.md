@@ -33,6 +33,10 @@ This is the complete permission-key catalog defined by `PermissionKeys.cs`. The 
 - `employees.sensitive.read`
 - `riders.read`
 - `riders.manage`
+- `external_riders.read`
+- `external_riders.create`
+- `external_riders.update`
+- `external_riders.delete`
 - `sponsors.read`
 - `sponsors.manage`
 
@@ -116,7 +120,9 @@ This is the complete permission-key catalog defined by `PermissionKeys.cs`. The 
 - `maintenance.locations.read`
 - `maintenance.locations.manage`
 - `maintenance.work_orders.read`
-- `maintenance.work_orders.manage`
+- `maintenance.work_orders.create`
+- `maintenance.work_orders.update`
+- `maintenance.work_orders.delete`
 - `maintenance.oil.read`
 - `maintenance.oil.complete`
 - `maintenance.external_jobs.read`
@@ -156,3 +162,21 @@ This is the complete permission-key catalog defined by `PermissionKeys.cs`. The 
 
 - `hr_forms.templates.read`
 - `hr_forms.templates.manage`
+
+## Jahez
+
+All Jahez grants support the ClientPlatform scope of the JAHEZ platform. Approval actors must differ from requesters; cashbox confirmation and final approval use separate users. See [Arabic Backend API](jahez-backend-api.md).
+
+- `jahez.read`
+- `jahez.handovers.manage`
+- `jahez.collections.manage`
+- `jahez.requests.create`
+- `jahez.requests.approve`
+- `jahez.resets.approve`
+- `jahez.earnings.manage`
+- `jahez.imports.manage`
+- `jahez.adjustments.manage`
+- `jahez.cashbox.read`
+- `jahez.cashbox.submit`
+- `jahez.cashbox.confirm`
+- `jahez.cashbox.approve`

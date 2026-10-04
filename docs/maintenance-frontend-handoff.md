@@ -1,5 +1,7 @@
 # تسليم الواجهة الأمامية — الصيانة والمخزون وورش العمل
 
+تحديث الصلاحيات: راجع [دليل صلاحيات المناديب الخارجيين وأوامر الصيانة](external-rider-work-order-permissions-frontend-handoff.md) للمتطلبات الدقيقة لكل إجراء، بما فيها صلاحية أمر الصيانة الإضافية للأعمال الخارجية وصرف المواد وإتمام الزيت والقيود المالية.
+
 > هذا العقد يخص الإصدار المطبق في قاعدة البيانات المستضافة. جميع الأمثلة أدناه تستخدم JSON باسماء `camelCase`، والتواريخ بصيغة ISO-8601، والقيم العشرية أرقام JSON وليست نصوصاً.
 
 ## 1. قواعد التكامل العامة
@@ -35,7 +37,9 @@
 |عرض المواقع|`maintenance.locations.read`|
 |إدارة المواقع|`maintenance.locations.manage`|
 |قراءة أوامر العمل والتاريخ والخطط|`maintenance.work_orders.read`|
-|إنشاء/تغيير أوامر الشركة والخطط|`maintenance.work_orders.manage`|
+|إنشاء أوامر الصيانة والخطط|`maintenance.work_orders.create`|
+|تعديل أوامر الصيانة والخطط وبدء/إكمال/إغلاق الأوامر|`maintenance.work_orders.update`|
+|إلغاء أوامر الصيانة|`maintenance.work_orders.delete`|
 |عرض تذكيرات الزيت|`maintenance.oil.read`|
 |إتمام تغيير الزيت|`maintenance.oil.complete`|
 |قراءة/إدارة أعمال المركبات الخارجية|`maintenance.external_jobs.read`, `maintenance.external_jobs.manage`|
@@ -370,6 +374,8 @@ await api.post("/api/maintenance-inventory/receipts", form);
 
 ### إتمام تغيير الزيت
 
+اسمح بقراءة تغيير الزيت التاريخية الأقل من عداد المركبة الحالي، بشرط أن تكون صفراً أو أكثر. احفظ تاريخ الخدمة وقراءتها الفعليين؛ لا يخفض الخادم عداد المركبة الحالي أو المسافة المتراكمة أو تاريخ آخر قراءة. تنطبق القاعدة أيضاً عند إرسال طلب الزيت واعتماده في المستودع. راجع [قراءة الخدمة التاريخية](direct-oil-change-and-complete-history-api.md#earlier-oil-changes-and-vehicle-mileage).
+
 أنشئ أمر صيانة نوع `maintenanceType:5` أولاً، ثم:
 
 `POST /api/maintenance-work-orders/{workOrderId}/oil-change`
@@ -485,7 +491,7 @@ await api.post("/api/maintenance-inventory/receipts", form);
 |`maintenance.oil_loss_allowance_exceeded`|احسب الحد المعروض `maximumAllowedLossLiters - recordedLossLiters`، ولا تتجاوز 2%.|
 |`maintenance.invalid_bill_file`|اطلب PDF/صورة معتمدة أقل من 10MB.|
 |`maintenance.invalid_oil_filter`|إذا `oilFilterChanged=true` فالفلتر إلزامي؛ وإذا false فاجعله null.|
-|`maintenance.invalid_odometer`|اطلب قراءة أحدث من/تساوي القراءة الحالية للمركبة.|
+|`maintenance.invalid_odometer`|اطلب قراءة غير سالبة. يسمح لتغيير الزيت بقراءة تاريخية أقل من عداد المركبة الحالي.|
 |`maintenance.invalid_location`|أعد تحميل الموقع واختر موقعاً يسمح بالعملية.|
 |`maintenance.invalid_state`|أعد تحميل أمر العمل؛ لا تُكمل انتقال حالة قديم.|
 |`maintenance.concurrency_conflict`|أعد التحميل وخذ `rowVersion` الجديد قبل الحفظ.|

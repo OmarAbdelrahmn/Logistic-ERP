@@ -125,7 +125,7 @@ public sealed class MaintenanceApiSurfaceTests
         Assert.Equal("spare-parts", Assert.Single(method!.GetCustomAttributes<HttpPostAttribute>()).Template);
         Assert.Equal("api/[controller]", Assert.Single(typeof(SparePartController).GetCustomAttributes<RouteAttribute>()).Template);
         Assert.Contains(method.GetCustomAttributes<RequirePermissionAttribute>(), attribute =>
-            attribute.Policy?.EndsWith(PermissionKeys.Maintenance.WorkOrdersManage, StringComparison.Ordinal) == true);
+            attribute.Policy?.EndsWith(PermissionKeys.Maintenance.WorkOrdersUpdate, StringComparison.Ordinal) == true);
         Assert.Contains(method.GetCustomAttributes<RequirePermissionAttribute>(), attribute =>
             attribute.Policy?.EndsWith(PermissionKeys.Inventory.StockMove, StringComparison.Ordinal) == true);
         Assert.Equal(typeof(IReadOnlyList<BatchSparePartUsageLineRequest>), typeof(BatchSparePartUsageRequest).GetProperty(nameof(BatchSparePartUsageRequest.Usages))!.PropertyType);

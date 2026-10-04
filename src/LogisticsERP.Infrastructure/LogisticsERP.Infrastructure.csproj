@@ -4,6 +4,7 @@
   </PropertyGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="LogisticsERP.Fleet.UnitTests" />
+    <InternalsVisibleTo Include="LogisticsERP.Jahez.Tests" />
   </ItemGroup>
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />

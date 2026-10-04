@@ -1,4 +1,5 @@
 using System.Reflection;
+using LogisticsERP.Domain.Entities.Jahez;
 using LogisticsERP.Application.Abstractions.Persistence;
 using LogisticsERP.Domain.Common;
 using LogisticsERP.Domain.Entities.Clients;
@@ -184,6 +185,24 @@ public sealed class ApplicationDbContext(
     public DbSet<RiderPhoneSimAssignment> RiderPhoneSimAssignments => Set<RiderPhoneSimAssignment>();
     public DbSet<PhoneSimResponsibilityChange> PhoneSimResponsibilityChanges => Set<PhoneSimResponsibilityChange>();
 
+    public DbSet<JahezAccountHandover> JahezAccountHandovers => Set<JahezAccountHandover>();
+    public DbSet<JahezAccountFee> JahezAccountFees => Set<JahezAccountFee>();
+    public DbSet<JahezApprovalRequest> JahezApprovalRequests => Set<JahezApprovalRequest>();
+    public DbSet<JahezApprovalDecision> JahezApprovalDecisions => Set<JahezApprovalDecision>();
+    public DbSet<JahezCommissionPolicyPeriod> JahezCommissionPolicyPeriods => Set<JahezCommissionPolicyPeriod>();
+    public DbSet<JahezEarningsStatement> JahezEarningsStatements => Set<JahezEarningsStatement>();
+    public DbSet<JahezImportBatch> JahezImportBatches => Set<JahezImportBatch>();
+    public DbSet<JahezImportFile> JahezImportFiles => Set<JahezImportFile>();
+    public DbSet<JahezImportRow> JahezImportRows => Set<JahezImportRow>();
+    public DbSet<JahezTransaction> JahezTransactions => Set<JahezTransaction>();
+    public DbSet<JahezDailyDispatch> JahezDailyDispatches => Set<JahezDailyDispatch>();
+    public DbSet<JahezRiderSettlement> JahezRiderSettlements => Set<JahezRiderSettlement>();
+    public DbSet<JahezLedgerEntry> JahezLedgerEntries => Set<JahezLedgerEntry>();
+    public DbSet<JahezCashboxEntry> JahezCashboxEntries => Set<JahezCashboxEntry>();
+    public DbSet<JahezCashboxHandover> JahezCashboxHandovers => Set<JahezCashboxHandover>();
+    public DbSet<JahezReminderState> JahezReminderStates => Set<JahezReminderState>();
+    public DbSet<JahezCommandReceipt> JahezCommandReceipts => Set<JahezCommandReceipt>();
+
     public IQueryable<TEntity> Query<TEntity>() where TEntity : Entity => Set<TEntity>();
 
     public void AddEntity<TEntity>(TEntity entity) where TEntity : Entity => Set<TEntity>().Add(entity);
@@ -288,6 +307,7 @@ public sealed class ApplicationDbContext(
     private static string GetModuleKey(Type entityType)
     {
         var entityNamespace = entityType.Namespace ?? string.Empty;
+        if (entityNamespace.EndsWith(".Jahez", StringComparison.Ordinal)) return "jahez";
         if (entityNamespace.EndsWith(".Fleet", StringComparison.Ordinal)) return "fleet";
         if (entityNamespace.EndsWith(".Fuel", StringComparison.Ordinal)) return "fuel";
         if (entityNamespace.EndsWith(".Maintenance", StringComparison.Ordinal)) return "maintenance";

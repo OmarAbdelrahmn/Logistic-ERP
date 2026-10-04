@@ -2,10 +2,13 @@ using System.Globalization;
 using LogisticsERP.Application.Abstractions.Authentication;
 using LogisticsERP.Application.Authorization;
 using Microsoft.AspNetCore.Authorization;
+using LogisticsERP.Domain.Enums;
+using LogisticsERP.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 namespace LogisticsERP.Api.Authorization;
 
-internal sealed class PermissionAuthorizationHandler(IPermissionChecker permissionChecker)
+internal sealed class PermissionAuthorizationHandler(IPermissionChecker permissionChecker, ApplicationDbContext dbContext)
     : AuthorizationHandler<PermissionRequirement>
 {
     protected override async Task HandleRequirementAsync(
@@ -28,10 +31,20 @@ internal sealed class PermissionAuthorizationHandler(IPermissionChecker permissi
             return;
         }
 
+        PermissionScope? scope = null;
+        if (requirement.PermissionKey.StartsWith("jahez.", StringComparison.Ordinal))
+        {
+            var platformId = await dbContext.ClientPlatforms.AsNoTracking().Where(x => x.Code == "JAHEZ")
+                .Select(x => (Guid?)x.Id).SingleOrDefaultAsync();
+            if (!platformId.HasValue) return;
+            scope = new PermissionScope(AccessScopeType.ClientPlatform, platformId.Value);
+        }
+
         if (await permissionChecker.HasPermissionAsync(
             userId,
             authorizationVersion,
-            requirement.PermissionKey))
+            requirement.PermissionKey,
+            scope))
         {
             context.Succeed(requirement);
         }

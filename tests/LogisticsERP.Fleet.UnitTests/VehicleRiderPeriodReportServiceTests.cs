@@ -11,12 +11,16 @@ namespace LogisticsERP.Fleet.UnitTests;
 
 public sealed class VehicleRiderPeriodReportServiceTests
 {
-    [Fact]
-    public async Task VehicleReportShowsEachHandoverAndVehiclesWithoutAssignments()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task VehicleReportShowsEachHandoverAndVehiclesWithoutAssignments(bool sponsorIsDeleted)
     {
         var cancellationToken = TestContext.Current.CancellationToken;
         await using var dbContext = CreateContext();
         var fixture = await SeedHandoverAsync(dbContext, cancellationToken);
+        dbContext.Sponsors.Single(x => x.Id == fixture.SponsorId).IsDeleted = sponsorIsDeleted;
+        await dbContext.SaveChangesAsync(cancellationToken);
         var service = CreateService(dbContext, LocalTime(20));
 
         var result = await service.GetByVehicleAsync(new(2026, 9, 1), new(2026, 9, 20), cancellationToken);
@@ -24,6 +28,8 @@ public sealed class VehicleRiderPeriodReportServiceTests
         Assert.True(result.IsSuccess, result.Error.Description);
         Assert.Equal(2, result.Value!.Vehicles.Count);
         var vehicle = Assert.Single(result.Value.Vehicles, x => x.VehicleId == fixture.VehicleId);
+        Assert.Equal(fixture.SponsorId, vehicle.SponsorId);
+        Assert.Equal("مؤسسة البوابة التجارية", vehicle.SponsorName);
         Assert.Equal(15m, vehicle.TotalDaysAssignedInPeriod);
         Assert.Equal(900m, vehicle.TotalAmountToCollectInPeriodSar);
         Assert.Collection(vehicle.Assignments,
@@ -47,11 +53,18 @@ public sealed class VehicleRiderPeriodReportServiceTests
                 Assert.Equal(300m, second.CostInPeriodSar);
             });
         var unused = Assert.Single(result.Value.Vehicles, x => x.VehicleId == fixture.UnusedVehicleId);
+        Assert.Null(unused.SponsorId);
+        Assert.Null(unused.SponsorName);
         Assert.Empty(unused.Assignments);
         Assert.Equal(0m, unused.TotalDaysAssignedInPeriod);
         Assert.Equal(0m, unused.TotalAmountToCollectInPeriodSar);
         var json = JsonSerializer.SerializeToElement(result.Value, JsonSerializerOptions.Web);
         var vehicleJson = json.GetProperty("vehicles")[0];
+        Assert.Equal(fixture.SponsorId, vehicleJson.GetProperty("sponsorId").GetGuid());
+        Assert.Equal("مؤسسة البوابة التجارية", vehicleJson.GetProperty("sponsorName").GetString());
+        var unusedJson = json.GetProperty("vehicles")[1];
+        Assert.Equal(JsonValueKind.Null, unusedJson.GetProperty("sponsorId").ValueKind);
+        Assert.Equal(JsonValueKind.Null, unusedJson.GetProperty("sponsorName").ValueKind);
         Assert.Equal(900m, vehicleJson.GetProperty("totalAmountToCollectInPeriodSar").GetDecimal());
         var assignmentJson = vehicleJson.GetProperty("assignments")[0];
         Assert.Equal("Assigned A", assignmentJson.GetProperty("actualRiderName").GetString());
@@ -111,7 +124,7 @@ public sealed class VehicleRiderPeriodReportServiceTests
 
         Assert.True(result.IsSuccess, result.Error.Description);
         var vehicleRow = Assert.Single(result.Value!.Vehicles);
-        Assert.Equal(450m, vehicleRow.TotalAmountToCollectInPeriodSar);
+        Assert.Equal(420m, vehicleRow.TotalAmountToCollectInPeriodSar);
         var items = vehicleRow.Assignments;
         Assert.Equal(2m, items[0].DaysInPeriod);
         Assert.Equal(LocalTime(3), items[0].PeriodStartedAtUtc);
@@ -119,8 +132,9 @@ public sealed class VehicleRiderPeriodReportServiceTests
         Assert.Equal(120m, items[0].CostInPeriodSar);
         Assert.Null(items[1].EndedAtUtc);
         Assert.Equal(LocalTime(15).AddHours(12), items[1].PeriodEndedAtUtc);
-        Assert.Equal(5.5m, items[1].DaysInPeriod);
-        Assert.Equal(330m, items[1].CostInPeriodSar);
+        Assert.Equal(5m, items[1].DaysInPeriod);
+        Assert.Equal(5m, items[1].TotalAssignmentDays);
+        Assert.Equal(300m, items[1].CostInPeriodSar);
     }
 
     [Fact]
@@ -286,17 +300,18 @@ public sealed class VehicleRiderPeriodReportServiceTests
 
         Assert.True(result.IsSuccess, result.Error.Description);
         var rider = Assert.Single(result.Value!.Riders);
-        Assert.Equal(450m, rider.TotalVehicleCostInPeriodSar);
+        Assert.Equal(420m, rider.TotalVehicleCostInPeriodSar);
         Assert.Equal(120m, rider.Assignments[0].CostInPeriodSar);
-        Assert.Equal(330m, rider.Assignments[1].CostInPeriodSar);
+        Assert.Equal(300m, rider.Assignments[1].CostInPeriodSar);
     }
 
     [Theory]
     [InlineData(VehicleType.Motorcycle, 2592000, 800)] // 30 days
-    [InlineData(VehicleType.Motorcycle, 43200, 13.33)] // 12 hours
-    [InlineData(VehicleType.Car, 7, 0)] // Rounded display days must not inflate the cost.
-    [InlineData(VehicleType.Car, 108, 0.08)] // Halfway amounts round away from zero.
-    public async Task RiderCostUsesExactDurationAndRoundsOnlyTheFinalAmount(
+    [InlineData(VehicleType.Motorcycle, 43200, 0)] // Returned before the cutoff on pickup day.
+    [InlineData(VehicleType.Motorcycle, 50401, 26.67)] // Returned just after 14:00.
+    [InlineData(VehicleType.Car, 7, 0)]
+    [InlineData(VehicleType.Car, 108, 0)]
+    public async Task RiderCostUsesWholeBillableDaysAndRoundsTheFinalAmount(
         VehicleType vehicleType, int seconds, decimal expectedCost)
     {
         var cancellationToken = TestContext.Current.CancellationToken;
@@ -326,6 +341,119 @@ public sealed class VehicleRiderPeriodReportServiceTests
         var vehicleRow = Assert.Single(vehicleResult.Value!.Vehicles);
         Assert.Equal(expectedCost, vehicleRow.TotalAmountToCollectInPeriodSar);
         Assert.Equal(expectedCost, Assert.Single(vehicleRow.Assignments).CostInPeriodSar);
+    }
+
+    [Theory]
+    [InlineData(1, 839, 6, 839, 1, 30, 5, 5)]
+    [InlineData(1, 840, 6, 840, 1, 30, 5, 5)]
+    [InlineData(1, 841, 6, 839, 1, 30, 4, 4)]
+    [InlineData(1, 839, 6, 841, 1, 30, 6, 6)]
+    [InlineData(1, 841, 6, 841, 1, 30, 5, 5)]
+    [InlineData(1, 600, 1, 839, 1, 30, 0, 0)]
+    [InlineData(1, 600, 1, 840, 1, 30, 0, 0)]
+    [InlineData(1, 600, 1, 841, 1, 30, 1, 1)]
+    [InlineData(1, 841, 1, 900, 1, 30, 0, 0)]
+    [InlineData(1, 841, 2, 839, 1, 30, 0, 0)]
+    [InlineData(1, 841, 7, 839, 3, 5, 3, 5)]
+    [InlineData(3, 841, 7, 841, 3, 5, 2, 4)]
+    [InlineData(1, 839, 5, 839, 3, 5, 2, 4)]
+    [InlineData(1, 839, 5, 841, 3, 5, 3, 5)]
+    [InlineData(1, 839, 6, 839, 5, 5, 1, 5)]
+    [InlineData(5, 841, 6, 839, 5, 5, 0, 0)]
+    public async Task ReportsUseRiyadhCutoffAndClipBillableDatesWithoutChangingTimestamps(
+        int startDay, int startMinute, int endDay, int endMinute,
+        int fromDay, int toDay, decimal expectedDays, decimal expectedTotalDays)
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        await using var dbContext = CreateContext();
+        var fixture = await SeedHandoverAsync(dbContext, cancellationToken);
+        dbContext.RiderVehicleAssignments.Single(x => x.Id == fixture.SecondAssignmentId).IsDeleted = true;
+        var assignment = dbContext.RiderVehicleAssignments.Single(x => x.Id == fixture.FirstAssignmentId);
+        var start = LocalTime(startDay).AddMinutes(startMinute).ToUniversalTime();
+        var end = LocalTime(endDay).AddMinutes(endMinute).ToUniversalTime();
+        assignment.StartedAtUtc = start;
+        assignment.EndedAtUtc = end;
+        await dbContext.SaveChangesAsync(cancellationToken);
+        var service = CreateService(dbContext, LocalTime(30));
+        var fromDate = new DateOnly(2026, 9, fromDay);
+        var toDate = new DateOnly(2026, 9, toDay);
+
+        var riderResult = await service.GetByRiderAsync(fromDate, toDate, cancellationToken);
+        var vehicleResult = await service.GetByVehicleAsync(fromDate, toDate, cancellationToken);
+
+        Assert.True(riderResult.IsSuccess, riderResult.Error.Description);
+        Assert.True(vehicleResult.IsSuccess, vehicleResult.Error.Description);
+        var rider = Assert.Single(riderResult.Value!.Riders);
+        var vehicle = Assert.Single(vehicleResult.Value!.Vehicles, x => x.VehicleId == fixture.VehicleId);
+        var item = Assert.Single(rider.Assignments);
+        Assert.Equal(expectedDays, item.DaysInPeriod);
+        Assert.Equal(expectedTotalDays, item.TotalAssignmentDays);
+        Assert.Equal(expectedDays, rider.TotalDaysWithVehiclesInPeriod);
+        Assert.Equal(expectedDays, vehicle.TotalDaysAssignedInPeriod);
+        Assert.Equal(expectedDays * 60m, item.CostInPeriodSar);
+        Assert.Equal(expectedDays * 60m, rider.TotalVehicleCostInPeriodSar);
+        Assert.Equal(expectedDays * 60m, vehicle.TotalAmountToCollectInPeriodSar);
+        Assert.Equal(item, Assert.Single(vehicle.Assignments));
+        Assert.Equal(start, item.StartedAtUtc);
+        Assert.Equal(end, item.EndedAtUtc);
+        Assert.Equal(start > LocalTime(fromDay) ? start : LocalTime(fromDay), item.PeriodStartedAtUtc);
+        var reportEnd = LocalTime(toDay).AddDays(1);
+        Assert.Equal(end < reportEnd ? end : reportEnd, item.PeriodEndedAtUtc);
+    }
+
+    [Theory]
+    [InlineData(839, 5)]
+    [InlineData(840, 5)]
+    [InlineData(841, 6)]
+    public async Task OpenAssignmentsUseAsOfRiyadhCutoff(int nowMinute, decimal expectedDays)
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        await using var dbContext = CreateContext();
+        var fixture = await SeedHandoverAsync(dbContext, cancellationToken);
+        dbContext.RiderVehicleAssignments.Single(x => x.Id == fixture.SecondAssignmentId).IsDeleted = true;
+        var assignment = dbContext.RiderVehicleAssignments.Single(x => x.Id == fixture.FirstAssignmentId);
+        assignment.EndedAtUtc = null;
+        await dbContext.SaveChangesAsync(cancellationToken);
+        var asOf = LocalTime(6).AddMinutes(nowMinute).ToUniversalTime();
+        var service = CreateService(dbContext, asOf);
+
+        var result = await service.GetByRiderAsync(new(2026, 9, 1), new(2026, 9, 30), cancellationToken);
+
+        Assert.True(result.IsSuccess, result.Error.Description);
+        var rider = Assert.Single(result.Value!.Riders);
+        var item = Assert.Single(rider.Assignments);
+        Assert.Equal(expectedDays, item.DaysInPeriod);
+        Assert.Equal(expectedDays, item.TotalAssignmentDays);
+        Assert.Equal(expectedDays * 60m, rider.TotalVehicleCostInPeriodSar);
+        Assert.Null(item.EndedAtUtc);
+        Assert.Equal(asOf, item.PeriodEndedAtUtc);
+        Assert.Equal(asOf, result.Value.AsOfUtc);
+    }
+
+    [Theory]
+    [InlineData(839, 10, 5)]
+    [InlineData(840, 10, 5)]
+    [InlineData(841, 11, 4)]
+    public async Task HandoverDayIsChargedToOneRiderAtCutoff(
+        int handoverMinute, decimal firstDays, decimal secondDays)
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        await using var dbContext = CreateContext();
+        var fixture = await SeedHandoverAsync(dbContext, cancellationToken);
+        var handover = LocalTime(11).AddMinutes(handoverMinute).ToUniversalTime();
+        dbContext.RiderVehicleAssignments.Single(x => x.Id == fixture.FirstAssignmentId).EndedAtUtc = handover;
+        dbContext.RiderVehicleAssignments.Single(x => x.Id == fixture.SecondAssignmentId).StartedAtUtc = handover;
+        await dbContext.SaveChangesAsync(cancellationToken);
+        var service = CreateService(dbContext, LocalTime(20));
+
+        var result = await service.GetByVehicleAsync(new(2026, 9, 1), new(2026, 9, 20), cancellationToken);
+
+        Assert.True(result.IsSuccess, result.Error.Description);
+        var vehicle = Assert.Single(result.Value!.Vehicles, x => x.VehicleId == fixture.VehicleId);
+        Assert.Equal(firstDays, vehicle.Assignments[0].DaysInPeriod);
+        Assert.Equal(secondDays, vehicle.Assignments[1].DaysInPeriod);
+        Assert.Equal(15m, vehicle.TotalDaysAssignedInPeriod);
+        Assert.Equal(900m, vehicle.TotalAmountToCollectInPeriodSar);
     }
 
     [Theory]
@@ -425,9 +553,12 @@ public sealed class VehicleRiderPeriodReportServiceTests
     private static async Task<HandoverFixture> SeedHandoverAsync(
         ApplicationDbContext dbContext, CancellationToken cancellationToken)
     {
+        var sponsor = new Sponsor { RegistryNameAr = "مؤسسة البوابة التجارية" };
+        var registeredOwner = new Sponsor { RegistryNameAr = "Registered owner" };
         var vehicle = new Vehicle
         {
-            AssetNumber = "CAR-A", NormalizedAssetNumber = "CARA", VehicleType = VehicleType.Car
+            AssetNumber = "CAR-A", NormalizedAssetNumber = "CARA", VehicleType = VehicleType.Car,
+            SponsorId = sponsor.Id, RegisteredOwnerSponsorId = registeredOwner.Id
         };
         var unused = new Vehicle
         {
@@ -452,14 +583,15 @@ public sealed class VehicleRiderPeriodReportServiceTests
             RiderVehicleAssignmentId = second.Id, Name = "Actual M",
             IqamaNo = "2222222222", RelationshipToAssignedRider = "Substitute"
         };
-        dbContext.AddRange(vehicle, unused, employeeA, employeeB, profileA, profileB, first, second, real);
+        dbContext.AddRange(sponsor, registeredOwner, vehicle, unused, employeeA, employeeB,
+            profileA, profileB, first, second, real);
         await dbContext.SaveChangesAsync(cancellationToken);
-        return new(vehicle.Id, unused.Id, profileA.Id, profileB.Id, first.Id, second.Id);
+        return new(vehicle.Id, unused.Id, profileA.Id, profileB.Id, first.Id, second.Id, sponsor.Id);
     }
 
     private sealed record HandoverFixture(
         Guid VehicleId, Guid UnusedVehicleId, Guid FirstProfileId, Guid SecondProfileId,
-        Guid FirstAssignmentId, Guid SecondAssignmentId);
+        Guid FirstAssignmentId, Guid SecondAssignmentId, Guid SponsorId);
 
     private sealed class FixedTimeProvider(DateTimeOffset now) : TimeProvider
     {

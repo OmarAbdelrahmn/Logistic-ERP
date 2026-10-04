@@ -12,10 +12,11 @@ public sealed class ExternalRiderApiSurfaceTests
 {
     public static TheoryData<string, Type, string> ProtectedEndpoints => new()
     {
-        { nameof(ExternalRidersController.GetAll), typeof(HttpGetAttribute), PermissionKeys.Workforce.RidersRead },
-        { nameof(ExternalRidersController.Get), typeof(HttpGetAttribute), PermissionKeys.Workforce.RidersRead },
-        { nameof(ExternalRidersController.Create), typeof(HttpPostAttribute), PermissionKeys.Workforce.EmployeesCreate },
-        { nameof(ExternalRidersController.Update), typeof(HttpPutAttribute), PermissionKeys.Workforce.EmployeesUpdate }
+        { nameof(ExternalRidersController.GetAll), typeof(HttpGetAttribute), PermissionKeys.Workforce.ExternalRidersRead },
+        { nameof(ExternalRidersController.Get), typeof(HttpGetAttribute), PermissionKeys.Workforce.ExternalRidersRead },
+        { nameof(ExternalRidersController.Create), typeof(HttpPostAttribute), PermissionKeys.Workforce.ExternalRidersCreate },
+        { nameof(ExternalRidersController.Update), typeof(HttpPutAttribute), PermissionKeys.Workforce.ExternalRidersUpdate },
+        { nameof(ExternalRidersController.Delete), typeof(HttpDeleteAttribute), PermissionKeys.Workforce.ExternalRidersDelete }
     };
 
     [Fact]

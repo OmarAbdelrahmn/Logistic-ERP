@@ -25,6 +25,9 @@ public static class FuelErrors
     public static readonly OperationError SponsorNotFound = new(
         "fuel.sponsor_not_found", "لم يتم العثور على الكفيل.", ErrorType.NotFound, "sponsorId");
 
+    public static readonly OperationError OperatingCityNotFound = new(
+        "fuel.operating_city_not_found", "لم يتم العثور على مدينة التشغيل.", ErrorType.NotFound, "operatingCityId");
+
     public static readonly OperationError RiderNotFound = new(
         "fuel.rider_not_found", "لم يتم العثور على الرايدر.", ErrorType.NotFound, "riderProfileId");
 

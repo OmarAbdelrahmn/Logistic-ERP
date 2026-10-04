@@ -38,7 +38,8 @@ public sealed record SimplePlatformAccountUpsertRequest(
     DateOnly? EndDate,
     string? Notes,
     string? ArchiveReason,
-    string? RowVersion);
+    string? RowVersion,
+    Guid? DashboardSponsorId = null);
 
 public sealed record AssignSimplePlatformAccountRequest(
     Guid ActualRiderProfileId,
@@ -155,7 +156,8 @@ public sealed record SimplePlatformAccountResponse(
     DateOnly? EndDate,
     string? Notes,
     SimplePlatformAssignmentResponse? CurrentAssignment,
-    string RowVersion);
+    string RowVersion,
+    Guid? DashboardSponsorId = null);
 
 public interface ISimplePlatformService
 {
@@ -183,6 +185,20 @@ public interface ISimplePlatformService
         string? paymentModel,
         bool currentOnly,
         bool includeArchived,
+        CancellationToken cancellationToken = default);
+
+    Task<Result<IReadOnlyList<SimplePlatformAccountResponse>>> GetAccountsAsync(
+        Guid? accountId,
+        Guid? platformId,
+        Guid? operatingCityId,
+        Guid? sponsorId,
+        Guid? ownerRiderProfileId,
+        Guid? actualRiderProfileId,
+        string? status,
+        string? paymentModel,
+        bool currentOnly,
+        bool includeArchived,
+        Guid? dashboardSponsorId,
         CancellationToken cancellationToken = default);
 
     Task<Result<SimplePlatformAccountResponse>> GetAccountAsync(

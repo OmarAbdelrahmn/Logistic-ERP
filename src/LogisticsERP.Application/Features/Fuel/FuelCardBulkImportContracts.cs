@@ -7,6 +7,7 @@ public interface IFuelCardBulkImportService
     Task<Result<FuelCardBulkImportResponse>> ImportAsync(
         Stream content,
         bool validateOnly,
+        Guid? operatingCityId = null,
         CancellationToken cancellationToken = default);
 }
 
@@ -28,6 +29,7 @@ public sealed record FuelCardBulkImportRow(
     string SponsorNameAr,
     string CompanyName,
     string Provider,
-    bool WillCreateCard);
+    bool WillCreateCard,
+    Guid OperatingCityId);
 
 public sealed record FuelCardBulkImportIssue(int RowNumber, string? CardNumber, string Message);

@@ -11,6 +11,7 @@ internal sealed class VehicleRiderPeriodReportService(
     TimeProvider timeProvider) : IVehicleRiderPeriodReportService
 {
     private static readonly TimeSpan RiyadhOffset = TimeSpan.FromHours(3);
+    private static readonly TimeSpan BillingCutoff = TimeSpan.FromHours(14);
 
     public async Task<Result<VehicleAssignmentsPeriodReport>> GetByVehicleAsync(
         DateOnly fromDate, DateOnly toDate, CancellationToken cancellationToken = default)
@@ -29,6 +30,7 @@ internal sealed class VehicleRiderPeriodReportService(
                     .Select(x => PriceAssignment(x, vehicle.VehicleType)).ToArray();
                 return new VehicleAssignmentsPeriodRow(
                     vehicle.Id, vehicle.AssetNumber, vehicle.SerialNumber, vehicle.PlateNumberAr,
+                    vehicle.SponsorId, vehicle.SponsorName,
                     items.Sum(x => x.DaysInPeriod), TotalCost(items), items);
             }).ToArray();
         return Result.Success(new VehicleAssignmentsPeriodReport(fromDate, toDate, asOfUtc, rows));
@@ -70,9 +72,14 @@ internal sealed class VehicleRiderPeriodReportService(
         var asOfUtc = timeProvider.GetUtcNow();
         var reportStartUtc = StartOfDayUtc(fromDate);
         var reportEndUtc = StartOfDayUtc(toDate.AddDays(1));
-        var vehicles = await dbContext.Vehicles.IgnoreQueryFilters().AsNoTracking()
-            .Select(vehicle => new VehicleLookup(vehicle.Id, vehicle.AssetNumber,
-                vehicle.SerialNumber, vehicle.PlateNumberAr, vehicle.VehicleType))
+        var vehicles = await (
+            from vehicle in dbContext.Vehicles.IgnoreQueryFilters().AsNoTracking()
+            join sponsor in dbContext.Sponsors.IgnoreQueryFilters().AsNoTracking()
+                on vehicle.SponsorId equals sponsor.Id into sponsors
+            from sponsor in sponsors.DefaultIfEmpty()
+            select new VehicleLookup(vehicle.Id, vehicle.AssetNumber,
+                vehicle.SerialNumber, vehicle.PlateNumberAr, vehicle.VehicleType,
+                vehicle.SponsorId, sponsor == null ? null : sponsor.RegistryNameAr))
             .ToArrayAsync(cancellationToken);
         var vehicleById = vehicles.ToDictionary(x => x.Id);
         var assignments = await dbContext.RiderVehicleAssignments.AsNoTracking()
@@ -126,7 +133,7 @@ internal sealed class VehicleRiderPeriodReportService(
                 assignment.EndedAtUtc,
                 periodStartUtc,
                 periodEndUtc,
-                Days(periodStartUtc, periodEndUtc),
+                Days(assignment.StartedAtUtc, assignmentEndUtc, fromDate, toDate),
                 Days(assignment.StartedAtUtc, assignmentEndUtc)));
         }
         return (asOfUtc, vehicles, rows.ToArray());
@@ -138,11 +145,23 @@ internal sealed class VehicleRiderPeriodReportService(
     private static DateTimeOffset StartOfDayUtc(DateOnly date) =>
         new DateTimeOffset(date.ToDateTime(TimeOnly.MinValue), RiyadhOffset).ToUniversalTime();
 
-    private static decimal Days(DateTimeOffset start, DateTimeOffset end) =>
-        Math.Round(ElapsedDays(start, end), 4);
+    private static decimal Days(
+        DateTimeOffset start, DateTimeOffset end, DateOnly? fromDate = null, DateOnly? toDate = null)
+    {
+        var firstDay = BillingDayBoundary(start);
+        var endDayExclusive = BillingDayBoundary(end);
+        if (fromDate.HasValue) firstDay = Math.Max(firstDay, fromDate.Value.DayNumber);
+        if (toDate.HasValue) endDayExclusive = Math.Min(endDayExclusive, toDate.Value.DayNumber + 1);
+        return Math.Max(0, endDayExclusive - firstDay);
+    }
 
-    private static decimal ElapsedDays(DateTimeOffset start, DateTimeOffset end) =>
-        (decimal)(end - start).Ticks / TimeSpan.TicksPerDay;
+    private static int BillingDayBoundary(DateTimeOffset timestamp)
+    {
+        var local = timestamp.ToOffset(RiyadhOffset);
+        // Pickup after 14:00 starts billing tomorrow; return after 14:00 includes today.
+        return DateOnly.FromDateTime(local.DateTime).DayNumber
+            + (local.TimeOfDay > BillingCutoff ? 1 : 0);
+    }
 
     private static RiderVehiclePeriodAssignment PriceAssignment(
         VehicleRiderPeriodAssignment assignment, VehicleType vehicleType)
@@ -155,8 +174,8 @@ internal sealed class VehicleRiderPeriodReportService(
         };
         var dailyCostSar = monthlyCostSar / 30m;
         var costInPeriodSar = dailyCostSar.HasValue
-            ? Math.Round(ElapsedDays(assignment.PeriodStartedAtUtc, assignment.PeriodEndedAtUtc)
-                * dailyCostSar.Value, 2, MidpointRounding.AwayFromZero)
+            ? Math.Round(assignment.DaysInPeriod * dailyCostSar.Value,
+                2, MidpointRounding.AwayFromZero)
             : (decimal?)null;
         return new RiderVehiclePeriodAssignment(
             assignment, vehicleType, monthlyCostSar, dailyCostSar, costInPeriodSar);
@@ -176,6 +195,7 @@ internal sealed class VehicleRiderPeriodReportService(
     }
 
     private sealed record VehicleLookup(
-        Guid Id, string AssetNumber, string? SerialNumber, string? PlateNumberAr, VehicleType VehicleType);
+        Guid Id, string AssetNumber, string? SerialNumber, string? PlateNumberAr, VehicleType VehicleType,
+        Guid? SponsorId, string? SponsorName);
     private sealed record AssignedRiderLookup(Guid ProfileId, Guid EmployeeId, string Name, string? IqamaNo);
 }

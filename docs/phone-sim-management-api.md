@@ -52,8 +52,10 @@ carrierName=STC
 responsibleEmployeeId=019d0000-0000-7000-8000-000000000001
 placeId=<existing-place-guid>
 notes=Operations pool
-receiptForm=<required-file>
+receiptForm=<optional-file; omit when no file is selected>
 ```
+
+The receipt form upload is optional. When omitted, the SIM is created with `receiptForm: null`. An uploaded file must be nonempty and pass the existing file validation (maximum 10 MB). Downloading a receipt for a SIM without one returns `404 phone_sim.receipt_form_not_found`.
 
 Saudi formats (`05…`, `5…`, `966…`, `00966…`) and Arabic/Persian numerals normalize to canonical E.164, such as `+966555123456`. Other valid international E.164 numbers are also accepted. ICCID is optional; when supplied it must be 18–22 digits beginning with `89`. Canonical phone and ICCID values are unique among non-archived SIMs.
 

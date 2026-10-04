@@ -1,3 +1,4 @@
+using LogisticsERP.Application.Features.Jahez;
 using System.Text.Json;
 using LogisticsERP.Application.Abstractions.Authentication;
 using LogisticsERP.Application.Common.Results;
@@ -113,9 +114,16 @@ internal sealed class PlatformOperationsService(
         return (await GetContractsAsync(null, cancellationToken)).MapSingle(item => item.Id == entity.Id);
     }
 
+    public Task<Result<IReadOnlyList<PlatformAccountResponse>>> GetAccountsAsync(
+        Guid? platformId,
+        Guid? sponsorId,
+        CancellationToken cancellationToken = default) =>
+        GetAccountsAsync(platformId, sponsorId, null, cancellationToken);
+
     public async Task<Result<IReadOnlyList<PlatformAccountResponse>>> GetAccountsAsync(
         Guid? platformId,
         Guid? sponsorId,
+        Guid? dashboardSponsorId,
         CancellationToken cancellationToken = default)
     {
         var rows = await (from account in dbContext.PlatformRiderAccounts.AsNoTracking()
@@ -127,6 +135,7 @@ internal sealed class PlatformOperationsService(
                           join sponsor in dbContext.Sponsors.AsNoTracking() on account.SponsorId equals sponsor.Id
                           where (platformId == null || account.ClientPlatformId == platformId)
                               && (sponsorId == null || account.SponsorId == sponsorId)
+                              && (dashboardSponsorId == null || account.DashboardSponsorId == dashboardSponsorId)
                           orderby platform.NameAr, account.ExternalAccountId
                           select new AccountProjection(account, platform.NameAr,
                               employee == null ? null : employee.FullNameAr, city.NameAr,
@@ -143,6 +152,10 @@ internal sealed class PlatformOperationsService(
             || !HrServiceSupport.HasText(request.Code) || !HrServiceSupport.HasText(request.ExternalAccountId)
             || request.EndDate is not null && request.StartDate is not null && request.EndDate < request.StartDate)
             return Result.Failure<PlatformAccountResponse>(HrErrors.InvalidRequest);
+        if ((!id.HasValue && request.DashboardSponsorId is null) || request.DashboardSponsorId == Guid.Empty)
+            return Result.Failure<PlatformAccountResponse>(HrErrors.InvalidRequest);
+        if (request.DashboardSponsorId.HasValue && !await dbContext.Sponsors.AnyAsync(x => x.Id == request.DashboardSponsorId && x.Status == CatalogStatus.Active, cancellationToken))
+            return Result.Failure<PlatformAccountResponse>(HrErrors.NotFound);
         var supportedPaymentModels = await dbContext.ClientPlatforms
             .Where(item => item.Id == request.ClientPlatformId)
             .Select(item => (SupportedPlatformPaymentModels?)item.SupportedPaymentModels)
@@ -168,6 +181,12 @@ internal sealed class PlatformOperationsService(
             if (entity is null) return Result.Failure<PlatformAccountResponse>(HrErrors.NotFound);
             if (!HrServiceSupport.MatchesRowVersion(entity.RowVersion, request.RowVersion)) return Result.Failure<PlatformAccountResponse>(HrErrors.ConcurrencyConflict);
         }
+        if (await dbContext.Set<LogisticsERP.Domain.Entities.Jahez.JahezAccountHandover>().AnyAsync(x => x.PlatformRiderAccountId == entity.Id, cancellationToken)
+            && (entity.ClientPlatformId != request.ClientPlatformId || entity.ExternalAccountId != request.ExternalAccountId.Trim()))
+            return Result.Failure<PlatformAccountResponse>(JahezErrors.Conflict("لا يمكن تغيير منصة أو رقم حساب له تاريخ مالي في جاهز."));
+        if (entity.DashboardSponsorId.HasValue && request.DashboardSponsorId is null)
+            return Result.Failure<PlatformAccountResponse>(HrErrors.InvalidRequest);
+
         var activeAssignment = await dbContext.RiderClientAssignments.SingleOrDefaultAsync(
             item => item.PlatformRiderAccountId == entity.Id && item.EffectiveTo == null,
             cancellationToken);
@@ -213,6 +232,7 @@ internal sealed class PlatformOperationsService(
         entity.RegisteredEmployeeId = request.RegisteredEmployeeId;
         entity.OperatingCityId = request.OperatingCityId;
         entity.SponsorId = request.SponsorId;
+        entity.DashboardSponsorId = request.DashboardSponsorId;
         entity.Code = code;
         entity.ExternalAccountId = externalId;
         entity.UserName = HrServiceSupport.TrimOrNull(request.UserName);
@@ -407,6 +427,8 @@ internal sealed class PlatformOperationsService(
             return Result.Failure<PlatformAssignmentResponse>(HrErrors.RiderProfileNotFound("riderProfileId", request.RiderProfileId));
         if (!rider.IsEligible)
             return Result.Failure<PlatformAssignmentResponse>(HrErrors.RiderProfileUnavailable("riderProfileId", request.RiderProfileId));
+        if (account is not null && await dbContext.ClientPlatforms.AnyAsync(x => x.Id == account.ClientPlatformId && x.Code == "JAHEZ", cancellationToken))
+            return Result.Failure<PlatformAssignmentResponse>(JahezErrors.UseJahezWorkflow);
         if (account is null || account.ClientPlatformId != contractPlatform)
             return Result.Failure<PlatformAssignmentResponse>(HrErrors.NotFound);
         if (account.Status != PlatformRiderAccountStatus.Available
@@ -475,6 +497,9 @@ internal sealed class PlatformOperationsService(
             || status is not (RiderAssignmentStatus.Ended or RiderAssignmentStatus.Cancelled) || !HrServiceSupport.HasText(request.EndReason))
             return Result.Failure<PlatformAssignmentResponse>(HrErrors.InvalidRequest);
         var entity = await dbContext.RiderClientAssignments.SingleOrDefaultAsync(item => item.Id == id, cancellationToken);
+        if (entity is not null && await (from a in dbContext.PlatformRiderAccounts join p in dbContext.ClientPlatforms on a.ClientPlatformId equals p.Id
+                where a.Id == entity.PlatformRiderAccountId && p.Code == "JAHEZ" select a.Id).AnyAsync(cancellationToken))
+            return Result.Failure<PlatformAssignmentResponse>(JahezErrors.UseJahezWorkflow);
         if (entity is null) return Result.Failure<PlatformAssignmentResponse>(HrErrors.NotFound);
         if (!HrServiceSupport.MatchesRowVersion(entity.RowVersion, request.RowVersion)) return Result.Failure<PlatformAssignmentResponse>(HrErrors.ConcurrencyConflict);
         if (entity.EffectiveTo is not null || request.EffectiveTo < entity.EffectiveFrom) return Result.Failure<PlatformAssignmentResponse>(HrErrors.Conflict);
@@ -535,7 +560,7 @@ internal sealed class PlatformOperationsService(
         row.Item.OperatingCityId, row.CityNameAr, row.Item.SponsorId, row.SponsorNameAr, row.SponsorNameEn,
         row.Item.Code, row.Item.ExternalAccountId, row.Item.UserName,
         row.Item.PaymentModel.ToString(), row.Item.Status.ToString(), row.Item.StatusReason, row.Item.AcquisitionDate, row.Item.StartDate,
-        row.Item.EndDate, row.Item.OwnershipNotes, row.Item.OperationalNotes, HrServiceSupport.EncodeRowVersion(row.Item.RowVersion));
+        row.Item.EndDate, row.Item.OwnershipNotes, row.Item.OperationalNotes, HrServiceSupport.EncodeRowVersion(row.Item.RowVersion), row.Item.DashboardSponsorId);
     private static PlatformRegistrationResponse ToRegistration(RegistrationProjection row) => new(row.Item.Id,
         row.Item.RegisteredEmployeeId, row.EmployeeNameAr, row.Item.RiderProfileId, row.Item.ClientPlatformId,
         row.PlatformNameAr, row.Item.ClientContractId, row.ContractNameAr, row.Item.SponsorId, row.SponsorNameAr,

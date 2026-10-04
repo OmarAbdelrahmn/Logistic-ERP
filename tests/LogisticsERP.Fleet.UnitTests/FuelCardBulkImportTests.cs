@@ -2,6 +2,7 @@ using ClosedXML.Excel;
 using LogisticsERP.Application.Abstractions.Authentication;
 using LogisticsERP.Application.Authorization;
 using LogisticsERP.Domain.Entities.Fuel;
+using LogisticsERP.Domain.Entities.Platform;
 using LogisticsERP.Domain.Entities.Workforce;
 using LogisticsERP.Domain.Enums;
 using LogisticsERP.Infrastructure.Fuel;
@@ -27,7 +28,7 @@ public sealed class FuelCardBulkImportTests
             ["BW203", "7038745530", "بترو اب"],
             ["BW203", "7015658094", "سياره كار"]);
 
-        var preview = await service.ImportAsync(previewFile, true, cancellationToken);
+        var preview = await service.ImportAsync(previewFile, true, cancellationToken: cancellationToken);
 
         Assert.True(preview.IsSuccess, preview.Error.Description);
         Assert.True(preview.Value!.CanImport);
@@ -39,7 +40,7 @@ public sealed class FuelCardBulkImportTests
         using var importFile = BulkWorkbook(
             ["BW203", "7038745530", "بترو اب"],
             ["BW203", "7015658094", "سياره كار"]);
-        var import = await service.ImportAsync(importFile, false, cancellationToken);
+        var import = await service.ImportAsync(importFile, false, cancellationToken: cancellationToken);
 
         Assert.True(import.IsSuccess, import.Error.Description);
         Assert.True(import.Value!.Imported);
@@ -47,6 +48,8 @@ public sealed class FuelCardBulkImportTests
         Assert.Equal(2, cards.Length);
         Assert.Equal(first.Id, cards[0].SponsorId);
         Assert.Equal(second.Id, cards[1].SponsorId);
+        Assert.All(cards, card => Assert.Equal(OperatingCity.JeddahId, card.OperatingCityId));
+        Assert.All(preview.Value.Rows, row => Assert.Equal(OperatingCity.JeddahId, row.OperatingCityId));
     }
 
     [Fact]
@@ -61,7 +64,7 @@ public sealed class FuelCardBulkImportTests
             ["BW202", "7099999999", "بترو اب"],
             ["BW203", "7038745530", "غير معروف"]);
 
-        var result = await BulkService(dbContext).ImportAsync(workbook, false, cancellationToken);
+        var result = await BulkService(dbContext).ImportAsync(workbook, false, cancellationToken: cancellationToken);
 
         Assert.True(result.IsSuccess, result.Error.Description);
         Assert.False(result.Value!.CanImport);
@@ -87,7 +90,7 @@ public sealed class FuelCardBulkImportTests
         await dbContext.SaveChangesAsync(cancellationToken);
         using var workbook = BulkWorkbook(["BW203", "7015658094", "بترو اب"]);
 
-        var result = await BulkService(dbContext).ImportAsync(workbook, false, cancellationToken);
+        var result = await BulkService(dbContext).ImportAsync(workbook, false, cancellationToken: cancellationToken);
 
         Assert.True(result.IsSuccess, result.Error.Description);
         Assert.False(result.Value!.CanImport);
@@ -112,16 +115,20 @@ public sealed class FuelCardBulkImportTests
         stream.Position = 0;
 
         var result = await new FuelCardService(dbContext, new TestCurrentUser(), new AllowPermissionChecker(), TimeProvider.System)
-            .ImportCardNumbersAsync(stream, sponsor.Id, false, cancellationToken);
+            .ImportCardNumbersAsync(stream, sponsor.Id, false, cancellationToken: cancellationToken);
 
         Assert.True(result.IsSuccess, result.Error.Description);
         Assert.Equal(sponsor.Id, (await dbContext.FuelCards.SingleAsync(cancellationToken)).SponsorId);
     }
 
-    private static ApplicationDbContext CreateContext() => new(
-        new DbContextOptionsBuilder<ApplicationDbContext>()
+    private static ApplicationDbContext CreateContext()
+    {
+        var context = new ApplicationDbContext(new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseInMemoryDatabase($"FuelCardBulkImport_{Guid.NewGuid():N}",
                 options => options.EnableNullChecks(false)).Options);
+        context.OperatingCities.Add(new OperatingCity { Id = OperatingCity.JeddahId, GlobalCityId = GlobalCity.JeddahId });
+        return context;
+    }
 
     private static FuelCardBulkImportService BulkService(ApplicationDbContext dbContext) =>
         new(dbContext);

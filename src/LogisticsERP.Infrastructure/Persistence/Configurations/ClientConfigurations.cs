@@ -51,6 +51,8 @@ internal sealed class PlatformRiderAccountConfiguration : IEntityTypeConfigurati
         builder.HasOne<Employee>().WithMany().HasForeignKey(entity => entity.RegisteredEmployeeId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<OperatingCity>().WithMany().HasForeignKey(entity => entity.OperatingCityId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<Sponsor>().WithMany().HasForeignKey(entity => entity.SponsorId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<Sponsor>().WithMany().HasForeignKey(entity => entity.DashboardSponsorId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(entity => entity.DashboardSponsorId);
         builder.HasIndex(entity => entity.Code).IsUnique();
         builder.HasIndex(entity => new { entity.ClientPlatformId, entity.ExternalAccountId }).IsUnique();
         builder.HasIndex(entity => new

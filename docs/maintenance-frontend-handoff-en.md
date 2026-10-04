@@ -1,5 +1,7 @@
 # Frontend Handoff — Maintenance, Inventory, and Workshops
 
+Permission update: use the action-by-action requirements in [the external rider and work order permission handoff](external-rider-work-order-permissions-frontend-handoff.md). They include the additional work order permission required for external jobs, material posting, oil completion, and financial entries.
+
 This is the implementation contract for the deployed maintenance database. It covers Jeddah Warehouse, Riyadh Workshop, FIFO spare parts, bill attachments, oil barrels, company vehicles, riders, external customers, workshop revenue, mechanic cost, and profit reporting.
 
 ## API conventions
@@ -37,7 +39,10 @@ Hide or disable each action unless the signed-in user has its permission.
 | Area | Permission |
 |---|---|
 |Read/manage locations|`maintenance.locations.read`, `maintenance.locations.manage`|
-|Read/manage company work orders and plans|`maintenance.work_orders.read`, `maintenance.work_orders.manage`|
+|Show work orders and plans|`maintenance.work_orders.read`|
+|Create work orders and plans|`maintenance.work_orders.create`|
+|Edit work orders/plans and start/complete/close orders|`maintenance.work_orders.update`|
+|Cancel work orders|`maintenance.work_orders.delete`|
 |Read/complete oil work|`maintenance.oil.read`, `maintenance.oil.complete`|
 |Read/manage external jobs|`maintenance.external_jobs.read`, `maintenance.external_jobs.manage`|
 |External part sales|`maintenance.part_sales.manage`|
@@ -406,6 +411,8 @@ Plans use `GET|POST /api/maintenance/plans` and `PUT /api/maintenance/plans/{id}
 
 ### Complete an oil change
 
+Allow historical service kilometers below the vehicle's current odometer, with a minimum of zero. Keep the actual service date and reading; the backend records them without lowering the vehicle's current mileage. Company oil request submission and warehouse approval use this rule as well. See [Historical oil-change mileage](direct-oil-change-and-complete-history-api.md#earlier-oil-changes-and-vehicle-mileage).
+
 Create an OilChange work order (`maintenanceType: 5`) first, then call:
 
 `POST /api/maintenance-work-orders/{workOrderId}/oil-change`
@@ -523,7 +530,7 @@ Display the formula clearly:
 |`maintenance.oil_loss_allowance_exceeded`|Show remaining loss allowance and cap input at the API-provided value.|
 |`maintenance.invalid_bill_file`|Require an accepted file type below 10 MB.|
 |`maintenance.invalid_oil_filter`|Require a filter item only when filter change is selected.|
-|`maintenance.invalid_odometer`|Require a non-decreasing vehicle odometer value.|
+|`maintenance.invalid_odometer`|Require a nonnegative reading. Oil-change readings may be below the vehicle's current kilometers.|
 |`maintenance.invalid_location`|Reload locations and choose one permitted for the operation.|
 |`maintenance.invalid_state`|Reload the work order before presenting valid next actions.|
 |`maintenance.concurrency_conflict`|Reload the resource and replace the stale `rowVersion`.|
