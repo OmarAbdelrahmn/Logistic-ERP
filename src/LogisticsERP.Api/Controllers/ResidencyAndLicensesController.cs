@@ -19,15 +19,15 @@ public sealed class ResidencyAndLicensesController(IComplianceService service) :
     }
 
     [HttpPost("employees/{employeeId:guid}/driver-licenses")]
-    [RequirePermission(PermissionKeys.Compliance.LicensesManage)]
+    [RequirePermission(PermissionKeys.Compliance.LicensesCreate)]
     public Task<IActionResult> CreateLicense(Guid employeeId, [FromBody] DriverLicenseUpsertRequest request, CancellationToken cancellationToken) => UpsertLicense(employeeId, null, request, cancellationToken);
 
     [HttpPut("employees/{employeeId:guid}/driver-licenses/{id:guid}")]
-    [RequirePermission(PermissionKeys.Compliance.LicensesManage)]
+    [RequirePermission(PermissionKeys.Compliance.LicensesUpdate)]
     public Task<IActionResult> UpdateLicense(Guid employeeId, Guid id, [FromBody] DriverLicenseUpsertRequest request, CancellationToken cancellationToken) => UpsertLicense(employeeId, id, request, cancellationToken);
 
     [HttpPatch("driver-licenses/{id:guid}/archive")]
-    [RequirePermission(PermissionKeys.Compliance.LicensesManage)]
+    [RequirePermission(PermissionKeys.Compliance.LicensesUpdate)]
     public Task<IActionResult> ArchiveLicense(Guid id, [FromBody] ArchiveRequest request, CancellationToken cancellationToken) =>
         Archive("license", id, request, cancellationToken);
 

@@ -14,7 +14,9 @@ public sealed class HousingPermissionCatalogTests
 {
     [Theory]
     [InlineData(PermissionKeys.Operations.HousingRead)]
-    [InlineData(PermissionKeys.Operations.HousingManage)]
+    [InlineData(PermissionKeys.Operations.HousingCreate)]
+    [InlineData(PermissionKeys.Operations.HousingUpdate)]
+    [InlineData(PermissionKeys.Operations.HousingDelete)]
     public void HousingControllerPermissionsAreModuleLevel(string permissionKey)
     {
         var definition = Assert.Single(PermissionSeedCatalog.All, item => item.Key == permissionKey);
@@ -90,7 +92,7 @@ public sealed class HousingPermissionCatalogTests
         identity.RolePermissionGrants.Add(new RolePermissionGrant
         {
             RoleId = roleId,
-            PermissionKey = PermissionKeys.Operations.HousingManage
+            PermissionKey = PermissionKeys.Operations.HousingCreate
         });
         identity.UserRoleAssignments.Add(new UserRoleAssignment
         {
@@ -108,7 +110,7 @@ public sealed class HousingPermissionCatalogTests
         Assert.True(await checker.HasPermissionAsync(
             userId,
             1,
-            PermissionKeys.Operations.HousingManage,
+            PermissionKeys.Operations.HousingCreate,
             cancellationToken: cancellationToken));
     }
 

@@ -51,7 +51,7 @@ public sealed class VehiclesController(IFleetService service) : ControllerBase
     }
 
     [HttpPost]
-    [RequirePermission(PermissionKeys.Fleet.VehiclesManage)]
+    [RequirePermission(PermissionKeys.Fleet.VehiclesCreate)]
     public async Task<IActionResult> Create([FromBody] VehicleUpsertRequest request, CancellationToken cancellationToken)
     {
         var result = await service.UpsertVehicleAsync(null, request, cancellationToken);
@@ -59,7 +59,7 @@ public sealed class VehiclesController(IFleetService service) : ControllerBase
     }
 
     [HttpPut("{id:guid}")]
-    [RequirePermission(PermissionKeys.Fleet.VehiclesManage)]
+    [RequirePermission(PermissionKeys.Fleet.VehiclesUpdate)]
     public async Task<IActionResult> Update(Guid id, [FromBody] VehicleUpsertRequest request, CancellationToken cancellationToken)
     {
         var result = await service.UpsertVehicleAsync(id, request, cancellationToken);
@@ -131,7 +131,7 @@ public sealed class VehiclesController(IFleetService service) : ControllerBase
     }
 
     [HttpPost("{id:guid}/identity-corrections")]
-    [RequirePermission(PermissionKeys.Fleet.CorrectionsManage)]
+    [RequirePermission(PermissionKeys.Fleet.CorrectionsCreate)]
     public async Task<IActionResult> CorrectIdentity(Guid id, [FromBody] VehicleIdentityCorrectionRequest request, CancellationToken cancellationToken)
     {
         var result = await service.CorrectIdentityAsync(id, request, cancellationToken);
@@ -147,7 +147,7 @@ public sealed class VehiclesController(IFleetService service) : ControllerBase
     }
 
     [HttpPost("{id:guid}/registration-transitions/private-to-public")]
-    [RequirePermission(PermissionKeys.Fleet.RegistrationTransitionsManage)]
+    [RequirePermission(PermissionKeys.Fleet.RegistrationTransitionsCreate)]
     [Consumes("multipart/form-data")]
     [RequestSizeLimit(22 * 1024 * 1024)]
     public async Task<IActionResult> TransitionToPublic(Guid id, [FromForm] VehicleRegistrationTransitionForm form, CancellationToken cancellationToken)

@@ -34,7 +34,7 @@ public sealed class ImportController(
     public Task<IActionResult> ValidateFuelCards(
         [FromForm] FuelCardBulkImportForm request,
         CancellationToken cancellationToken) =>
-        ExecuteFuelCardImport(request.File, request.OperatingCityId, validateOnly: true, cancellationToken);
+        ExecuteFuelCardImport(request.File, validateOnly: true, cancellationToken);
 
     [HttpPost("fuel-cards")]
     [Consumes("multipart/form-data")]
@@ -42,7 +42,7 @@ public sealed class ImportController(
     public Task<IActionResult> ImportFuelCards(
         [FromForm] FuelCardBulkImportForm request,
         CancellationToken cancellationToken) =>
-        ExecuteFuelCardImport(request.File, request.OperatingCityId, validateOnly: false, cancellationToken);
+        ExecuteFuelCardImport(request.File, validateOnly: false, cancellationToken);
 
     [HttpPost("/api/maintenance-inventory/items/import/validate")]
     [Consumes("multipart/form-data")]
@@ -357,14 +357,14 @@ public sealed class ImportController(
     }
 
     private async Task<IActionResult> ExecuteFuelCardImport(
-        IFormFile? file, Guid? operatingCityId, bool validateOnly, CancellationToken cancellationToken)
+        IFormFile? file, bool validateOnly, CancellationToken cancellationToken)
     {
         if (file is null || file.Length == 0 || file.Length > 20 * 1024 * 1024
             || !string.Equals(Path.GetExtension(file.FileName), ".xlsx", StringComparison.OrdinalIgnoreCase))
             return Result.Failure(FuelErrors.InvalidFile).ToProblem(HttpContext);
 
         await using var stream = file.OpenReadStream();
-        var result = await fuelCardBulkImportService.ImportAsync(stream, validateOnly, operatingCityId, cancellationToken);
+        var result = await fuelCardBulkImportService.ImportAsync(stream, validateOnly, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 
@@ -439,5 +439,4 @@ public sealed class HrExcelImportForm
 public sealed class FuelCardBulkImportForm
 {
     public IFormFile File { get; init; } = null!;
-    public Guid? OperatingCityId { get; init; }
 }

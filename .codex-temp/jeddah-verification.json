@@ -1,0 +1,33 @@
+{
+  "housing": 3,
+  "floors": 8,
+  "rooms": 27,
+  "capacity": 215,
+  "occupants": 139,
+  "vacancies": 76,
+  "employeeAssignments": 124,
+  "newEmployeeAssignments": 119,
+  "pendingIqamas": 5,
+  "nameOnlyOccupants": 10,
+  "originalPeriodsPreserved": 60,
+  "originalRoomIdsPreserved": 26,
+  "otherHousingAndEmployeesUnchanged": true,
+  "rerunWrites": 0,
+  "summary": {
+    "safa": {
+      "rooms": 12,
+      "capacity": 84,
+      "occupants": 56
+    },
+    "SAMER": {
+      "rooms": 9,
+      "capacity": 85,
+      "occupants": 53
+    },
+    "MECANIC": {
+      "rooms": 6,
+      "capacity": 46,
+      "occupants": 30
+    }
+  }
+}

@@ -19,7 +19,7 @@ public sealed class VehicleComplianceController(IFleetService service) : Control
     }
 
     [HttpPost("registrations")]
-    [RequirePermission(PermissionKeys.Fleet.ComplianceManage)]
+    [RequirePermission(PermissionKeys.Fleet.ComplianceCreate)]
     public async Task<IActionResult> Registration(Guid vehicleId, [FromBody] VehicleRegistrationRequest request, CancellationToken cancellationToken)
     {
         var result = await service.RenewRegistrationAsync(vehicleId, request, cancellationToken);
@@ -27,7 +27,7 @@ public sealed class VehicleComplianceController(IFleetService service) : Control
     }
 
     [HttpPost("insurance-policies")]
-    [RequirePermission(PermissionKeys.Fleet.ComplianceManage)]
+    [RequirePermission(PermissionKeys.Fleet.ComplianceCreate)]
     public async Task<IActionResult> Insurance(Guid vehicleId, [FromBody] VehicleInsuranceRequest request, CancellationToken cancellationToken)
     {
         var result = await service.RenewInsuranceAsync(vehicleId, request, cancellationToken);
@@ -35,7 +35,7 @@ public sealed class VehicleComplianceController(IFleetService service) : Control
     }
 
     [HttpPost("inspections")]
-    [RequirePermission(PermissionKeys.Fleet.ComplianceManage)]
+    [RequirePermission(PermissionKeys.Fleet.ComplianceCreate)]
     public async Task<IActionResult> Inspection(Guid vehicleId, [FromBody] VehicleInspectionRequest request, CancellationToken cancellationToken)
     {
         var result = await service.RenewInspectionAsync(vehicleId, request, cancellationToken);
@@ -43,7 +43,7 @@ public sealed class VehicleComplianceController(IFleetService service) : Control
     }
 
     [HttpPost("operation-cards")]
-    [RequirePermission(PermissionKeys.Fleet.ComplianceManage)]
+    [RequirePermission(PermissionKeys.Fleet.ComplianceCreate)]
     public async Task<IActionResult> OperationCard(Guid vehicleId, [FromBody] VehicleOperationCardRequest request, CancellationToken cancellationToken)
     {
         var result = await service.RenewOperationCardAsync(vehicleId, request, cancellationToken);

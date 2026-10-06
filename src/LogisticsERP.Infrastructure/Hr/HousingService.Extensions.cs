@@ -211,43 +211,69 @@ internal sealed partial class HousingService
         if (!HrServiceSupport.HasText(request.Name) || request.Name.Trim().Length > 200)
             return Result.Failure<HousingExternalOccupantResponse>(HrErrors.InvalidRequest);
         var targetId = request.RoomId ?? roomId;
-        var target = await (from room in dbContext.HousingRooms.AsNoTracking()
-                            join housing in dbContext.Housing.AsNoTracking() on room.HousingId equals housing.Id
-                            where room.Id == targetId
-                            select new { room.Id, housing.Status }).SingleOrDefaultAsync(cancellationToken);
-        if (target is null) return Result.Failure<HousingExternalOccupantResponse>(HrErrors.RoomNotFound);
-        if (target.Status != HousingStatus.Active) return Result.Failure<HousingExternalOccupantResponse>(HrErrors.HousingNotActive);
-        var item = occupantId is null ? new HousingExternalOccupant { RoomId = targetId } :
-            await dbContext.HousingExternalOccupants.SingleOrDefaultAsync(x => x.Id == occupantId, cancellationToken);
-        if (item is null) return Result.Failure<HousingExternalOccupantResponse>(HrErrors.InvalidRequest);
-        if (occupantId is not null && !HrServiceSupport.MatchesRowVersion(item.RowVersion, request.RowVersion))
-            return Result.Failure<HousingExternalOccupantResponse>(HrErrors.ConcurrencyConflict);
-        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
-        if (occupantId is null || item.RoomId != targetId)
+        var strategy = dbContext.Database.CreateExecutionStrategy();
+        return await strategy.ExecuteAsync(async () =>
         {
-            if (!await TryIncrementOccupancyAsync(targetId, cancellationToken))
-                return Result.Failure<HousingExternalOccupantResponse>(HrErrors.CapacityExceeded);
-            if (occupantId is not null) await DecrementOccupancyAsync(item.RoomId, cancellationToken);
-        }
-        item.RoomId = targetId;
-        item.Name = request.Name.Trim();
-        if (occupantId is null) dbContext.HousingExternalOccupants.Add(item);
-        await dbContext.SaveChangesAsync(cancellationToken);
-        await transaction.CommitAsync(cancellationToken);
-        return Result.Success(ToExternal(item));
+            dbContext.ChangeTracker.Clear();
+            await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+            var target = await (from room in dbContext.HousingRooms.AsNoTracking()
+                                join housing in dbContext.Housing.AsNoTracking() on room.HousingId equals housing.Id
+                                where room.Id == targetId
+                                select new { room.Id, housing.Status }).SingleOrDefaultAsync(cancellationToken);
+            if (target is null) return Result.Failure<HousingExternalOccupantResponse>(HrErrors.RoomNotFound);
+            if (target.Status != HousingStatus.Active) return Result.Failure<HousingExternalOccupantResponse>(HrErrors.HousingNotActive);
+            var item = occupantId is null ? new HousingExternalOccupant { RoomId = targetId } :
+                await dbContext.HousingExternalOccupants.SingleOrDefaultAsync(x => x.Id == occupantId, cancellationToken);
+            if (item is null) return Result.Failure<HousingExternalOccupantResponse>(HrErrors.InvalidRequest);
+            if (occupantId is not null && !HrServiceSupport.MatchesRowVersion(item.RowVersion, request.RowVersion))
+                return Result.Failure<HousingExternalOccupantResponse>(HrErrors.ConcurrencyConflict);
+            if (occupantId is null || item.RoomId != targetId)
+            {
+                if (!await TryIncrementOccupancyAsync(targetId, cancellationToken))
+                    return Result.Failure<HousingExternalOccupantResponse>(HrErrors.CapacityExceeded);
+                if (occupantId is not null) await DecrementOccupancyAsync(item.RoomId, cancellationToken);
+            }
+            item.RoomId = targetId;
+            item.Name = request.Name.Trim();
+            if (occupantId is null) dbContext.HousingExternalOccupants.Add(item);
+            try
+            {
+                await dbContext.SaveChangesAsync(cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
+            }
+            catch
+            {
+                dbContext.ChangeTracker.Clear();
+                throw;
+            }
+            return Result.Success(ToExternal(item));
+        });
     }
 
     public async Task<Result> DeleteExternalOccupantAsync(Guid occupantId, CancellationToken cancellationToken = default)
     {
-        var item = await dbContext.HousingExternalOccupants.SingleOrDefaultAsync(x => x.Id == occupantId, cancellationToken);
-        if (item is null) return Result.Failure(HrErrors.InvalidRequest);
-        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
-        item.IsDeleted = true;
-        item.DeletionReason = "Moved out";
-        await DecrementOccupancyAsync(item.RoomId, cancellationToken);
-        await dbContext.SaveChangesAsync(cancellationToken);
-        await transaction.CommitAsync(cancellationToken);
-        return Result.Success();
+        var strategy = dbContext.Database.CreateExecutionStrategy();
+        return await strategy.ExecuteAsync(async () =>
+        {
+            dbContext.ChangeTracker.Clear();
+            await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+            var item = await dbContext.HousingExternalOccupants.SingleOrDefaultAsync(x => x.Id == occupantId, cancellationToken);
+            if (item is null) return Result.Failure(HrErrors.InvalidRequest);
+            item.IsDeleted = true;
+            item.DeletionReason = "Moved out";
+            await DecrementOccupancyAsync(item.RoomId, cancellationToken);
+            try
+            {
+                await dbContext.SaveChangesAsync(cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
+            }
+            catch
+            {
+                dbContext.ChangeTracker.Clear();
+                throw;
+            }
+            return Result.Success();
+        });
     }
 
     private static HousingEquipmentResponse ToEquipment(HousingEquipment item) =>

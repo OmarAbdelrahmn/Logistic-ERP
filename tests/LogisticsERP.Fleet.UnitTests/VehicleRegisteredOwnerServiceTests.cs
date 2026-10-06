@@ -302,6 +302,7 @@ public sealed class VehicleRegisteredOwnerServiceTests
             OwnerSupplier = ownerSupplier;
             Service = new FleetService(
                 db,
+                new LogisticsERP.Infrastructure.Identity.IdentityDbContext(new DbContextOptionsBuilder<LogisticsERP.Infrastructure.Identity.IdentityDbContext>().UseInMemoryDatabase(Guid.NewGuid().ToString()).Options),
                 new FleetServiceSupport(new TestCurrentUser(), new PermitAll(), TimeProvider.System),
                 new UnusedFileStorage());
         }

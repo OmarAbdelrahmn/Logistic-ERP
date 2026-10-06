@@ -22,7 +22,7 @@ public sealed class MaintenanceInventoryController(IMaintenanceService service) 
     }
 
     [HttpPost("items")]
-    [RequirePermission(PermissionKeys.Inventory.ItemsManage)]
+    [RequirePermission(PermissionKeys.Inventory.ItemsCreate)]
     public async Task<IActionResult> CreateItem([FromBody] InventoryItemRequest request, CancellationToken cancellationToken)
     {
         var result = await service.UpsertItemAsync(null, request, cancellationToken);
@@ -30,7 +30,7 @@ public sealed class MaintenanceInventoryController(IMaintenanceService service) 
     }
 
     [HttpPut("items/{id:guid}")]
-    [RequirePermission(PermissionKeys.Inventory.ItemsManage)]
+    [RequirePermission(PermissionKeys.Inventory.ItemsUpdate)]
     public async Task<IActionResult> UpdateItem(Guid id, [FromBody] InventoryItemRequest request, CancellationToken cancellationToken)
     {
         var result = await service.UpsertItemAsync(id, request, cancellationToken);
@@ -38,7 +38,7 @@ public sealed class MaintenanceInventoryController(IMaintenanceService service) 
     }
 
     [HttpGet("suppliers")]
-    [RequirePermission(PermissionKeys.Inventory.ReceiptsManage)]
+    [RequirePermission(PermissionKeys.Inventory.ReceiptsRead)]
     public async Task<IActionResult> GetSuppliers(CancellationToken cancellationToken)
     {
         var result = await service.GetSuppliersAsync(cancellationToken);
@@ -46,7 +46,7 @@ public sealed class MaintenanceInventoryController(IMaintenanceService service) 
     }
 
     [HttpPost("suppliers")]
-    [RequirePermission(PermissionKeys.Inventory.ReceiptsManage)]
+    [RequirePermission(PermissionKeys.Inventory.ReceiptsCreate)]
     public async Task<IActionResult> CreateSupplier([FromBody] MaintenanceSupplierRequest request, CancellationToken cancellationToken)
     {
         var result = await service.UpsertSupplierAsync(null, request, cancellationToken);
@@ -54,7 +54,7 @@ public sealed class MaintenanceInventoryController(IMaintenanceService service) 
     }
 
     [HttpPut("suppliers/{id:guid}")]
-    [RequirePermission(PermissionKeys.Inventory.ReceiptsManage)]
+    [RequirePermission(PermissionKeys.Inventory.ReceiptsUpdate)]
     public async Task<IActionResult> UpdateSupplier(Guid id, [FromBody] MaintenanceSupplierRequest request, CancellationToken cancellationToken)
     {
         var result = await service.UpsertSupplierAsync(id, request, cancellationToken);
@@ -80,7 +80,7 @@ public sealed class MaintenanceInventoryController(IMaintenanceService service) 
     [HttpPost("receipts")]
     [Consumes("multipart/form-data")]
     [RequestSizeLimit(11 * 1024 * 1024)]
-    [RequirePermission(PermissionKeys.Inventory.ReceiptsManage)]
+    [RequirePermission(PermissionKeys.Inventory.ReceiptsCreate)]
     public async Task<IActionResult> PostReceipt([FromForm] PurchaseReceiptForm form, CancellationToken cancellationToken)
     {
         if (form.BillFile is null || form.BillFile.Length == 0 || string.IsNullOrWhiteSpace(form.ReceiptJson))
@@ -96,7 +96,7 @@ public sealed class MaintenanceInventoryController(IMaintenanceService service) 
     }
 
     [HttpGet("receipts")]
-    [RequirePermission(PermissionKeys.Inventory.ReceiptsManage)]
+    [RequirePermission(PermissionKeys.Inventory.ReceiptsRead)]
     public async Task<IActionResult> GetReceipts(CancellationToken cancellationToken)
     {
         var result = await service.GetPurchaseReceiptsAsync(cancellationToken);
@@ -104,7 +104,7 @@ public sealed class MaintenanceInventoryController(IMaintenanceService service) 
     }
 
     [HttpGet("receipts/{id:guid}")]
-    [RequirePermission(PermissionKeys.Inventory.ReceiptsManage)]
+    [RequirePermission(PermissionKeys.Inventory.ReceiptsRead)]
     public async Task<IActionResult> GetReceipt(Guid id, CancellationToken cancellationToken)
     {
         var result = await service.GetPurchaseReceiptAsync(id, cancellationToken);
@@ -112,7 +112,7 @@ public sealed class MaintenanceInventoryController(IMaintenanceService service) 
     }
 
     [HttpGet("receipts/{id:guid}/bill-file")]
-    [RequirePermission(PermissionKeys.Inventory.ReceiptsManage)]
+    [RequirePermission(PermissionKeys.Inventory.ReceiptsRead)]
     public async Task<IActionResult> DownloadReceiptFile(Guid id, CancellationToken cancellationToken)
     {
         var result = await service.DownloadPurchaseReceiptAttachmentAsync(id, cancellationToken);
@@ -173,7 +173,7 @@ public sealed class MaintenanceInventoryController(IMaintenanceService service) 
     }
 
     [HttpPost("supplier-returns")]
-    [RequirePermission(PermissionKeys.Inventory.ReturnsManage)]
+    [RequirePermission(PermissionKeys.Inventory.ReturnsCreate)]
     public async Task<IActionResult> PostSupplierReturn([FromBody] PostSupplierReturnRequest request, CancellationToken cancellationToken)
     {
         var result = await service.PostSupplierReturnAsync(request, cancellationToken);

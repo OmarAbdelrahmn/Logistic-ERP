@@ -23,7 +23,7 @@ public sealed class MaintenanceApiSurfaceTests
         Assert.Equal("receipts", Assert.Single(method!.GetCustomAttributes<HttpPostAttribute>()).Template);
         Assert.Contains("multipart/form-data", Assert.Single(method.GetCustomAttributes<ConsumesAttribute>()).ContentTypes);
         Assert.Contains(method.GetCustomAttributes<RequirePermissionAttribute>(), attribute =>
-            attribute.Policy?.EndsWith(PermissionKeys.Inventory.ReceiptsManage, StringComparison.Ordinal) == true);
+            attribute.Policy?.EndsWith(PermissionKeys.Inventory.ReceiptsCreate, StringComparison.Ordinal) == true);
         var formParameter = Assert.Single(method.GetParameters(), parameter => parameter.ParameterType == typeof(PurchaseReceiptForm));
         Assert.NotNull(formParameter.GetCustomAttribute<FromFormAttribute>());
         Assert.Equal(typeof(IFormFile), typeof(PurchaseReceiptForm).GetProperty(nameof(PurchaseReceiptForm.BillFile))!.PropertyType);
@@ -60,9 +60,9 @@ public sealed class MaintenanceApiSurfaceTests
     public void ExternalWorkshopEndpointsHaveDedicatedFinancialPermissions()
     {
         AssertEndpointPermission(nameof(MaintenanceWorkOrdersController.GetExternal), PermissionKeys.Maintenance.ExternalJobsRead, typeof(MaintenanceWorkOrdersController));
-        AssertEndpointPermission(nameof(MaintenanceWorkOrdersController.PostPartSale), PermissionKeys.Maintenance.PartSalesManage, typeof(MaintenanceWorkOrdersController));
-        AssertEndpointPermission(nameof(MaintenanceWorkOrdersController.PostCustomerLaborCharge), PermissionKeys.Maintenance.CustomerLaborChargesManage, typeof(MaintenanceWorkOrdersController));
-        AssertEndpointPermission(nameof(MaintenanceWorkOrdersController.PostMechanicLaborPayment), PermissionKeys.Maintenance.MechanicLaborPaymentsManage, typeof(MaintenanceWorkOrdersController));
+        AssertEndpointPermission(nameof(MaintenanceWorkOrdersController.PostPartSale), PermissionKeys.Maintenance.PartSalesCreate, typeof(MaintenanceWorkOrdersController));
+        AssertEndpointPermission(nameof(MaintenanceWorkOrdersController.PostCustomerLaborCharge), PermissionKeys.Maintenance.CustomerLaborChargesCreate, typeof(MaintenanceWorkOrdersController));
+        AssertEndpointPermission(nameof(MaintenanceWorkOrdersController.PostMechanicLaborPayment), PermissionKeys.Maintenance.MechanicLaborPaymentsCreate, typeof(MaintenanceWorkOrdersController));
         AssertEndpointPermission(nameof(MaintenanceController.GetExternalProfit), PermissionKeys.Maintenance.ProfitReportsRead, typeof(MaintenanceController));
     }
 
@@ -73,7 +73,7 @@ public sealed class MaintenanceApiSurfaceTests
         Assert.Contains(PermissionKeys.Maintenance.OilComplete, permissions);
         Assert.Contains(PermissionKeys.Maintenance.ProfitReportsRead, permissions);
         Assert.Contains(PermissionKeys.Inventory.CostLayersRead, permissions);
-        Assert.Contains(PermissionKeys.Inventory.ReceiptsManage, permissions);
+        Assert.Contains(PermissionKeys.Inventory.ReceiptsCreate, permissions);
         Assert.Contains(PermissionKeys.Inventory.SupplyRequestsSubmit, permissions);
         Assert.Contains(PermissionKeys.Inventory.SupplyRequestsRead, permissions);
         Assert.Contains(PermissionKeys.Inventory.SupplyRequestsApprove, permissions);

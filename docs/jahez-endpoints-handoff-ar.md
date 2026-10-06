@@ -1,6 +1,6 @@
 # تسليم واجهات جاهز للـFrontend
 
-هذا العقد مبني على `JahezController` وملفات العقود والكيانات في المشروع بتاريخ **3 أكتوبر 2026**. طُبقت ترحيلات جاهز على قاعدة `db67927`: يوجد 17 جدولًا في `jahez`، وحقل `DashboardSponsorId`، و13 صلاحية و13 منحة لمدير النظام، ولا توجد ترحيلات معلقة في سياقي Application وIdentity. تطبيق الترحيلات لا يشغّل نسخة API أو Worker جديدة؛ شغّل النسخة التي تحتوي هذا الكود في بيئة التطبيق. [قواعد العمل والمحاسبة](jahez-backend-api.md) و[مجموعة Postman](jahez.postman_collection.json).
+هذا العقد مبني على `JahezController` وملفات العقود والكيانات في المشروع، ومُحدَّث بتاريخ **4 أكتوبر 2026**. الحسابات تستخدم `sponsorId` الموجود فقط. طُبقت ترحيلات جاهز الأصلية على قاعدة `db67927` في 3 أكتوبر: يوجد 17 جدولًا في `jahez` و13 صلاحية و13 منحة لمدير النظام. تحديث 4 أكتوبر يزيل كفيل الداشبورد المنفصل؛ راجع [تسليم توحيد كفيل الحساب للواجهة](platform-account-sponsor-unification-frontend-handoff.md) لحالة نشر API وWorker وترحيل قاعدة البيانات. [قواعد العمل والمحاسبة](jahez-backend-api.md) و[مجموعة Postman](jahez.postman_collection.json).
 
 ## قواعد مشتركة
 
@@ -13,6 +13,8 @@
 - الأرقام الخاصة بـenums: `kind` في طلب الموافقة = 1 إعفاء رسوم، 2 تبديل مجاني، 3 نسبة عمولة، 4 تصفير؛ حالته = 1 معلق، 2 معتمد، 3 مرفوض، 4 ملغى. `bucket` = 1 رسوم، 2 دين جاهز، 3 عمولة. نوع قيد الدفتر = 1 استحقاق، 2 دفع، 3 تسوية، 4 نقل، 5 افتتاحي. حالة تسليم الصندوق = 1 معلق، 2 أكد المحاسب، 3 معتمد، 4 مرفوض. `kind` للاستيراد = 1 حركات، 2 طلبات يومية.
 
 ## عقود الاستجابة المشتركة
+
+العقود أدناه تعرض الحقول الأصلية. جميع نتائج JSON تضيف بيانات الحساب وأسماء المالك والمندوب الفعلي مع معرّفاتهم، وأسماء المستخدمين بالعربية والإنجليزية. ينطبق ذلك داخل `items` و`request` و`decisions` و`rows` و`accounts` وعلى ردود POST. راجع [حقول الأسماء وأمثلتها](jahez-response-names.md) لإضافتها إلى عقود الواجهة.
 
 الحقول في الجداول أدناه هي مفاتيح JSON الفعلية. `id` من النوع UUID، والمال رقم عشري، و`...AtUtc` لحظة زمنية، و`...Date` تاريخ يومي. كل كيان **History** يعيد أيضًا `id`, `createdAtUtc`, `createdByUserId`. كل كيان **Auditable** يعيد أيضًا هذه الثلاثة مع `updatedAtUtc`, `updatedByUserId`, `rowVersion` كسلسلة Base64، و`isDeleted`, `deletedAtUtc`, `deletedByUserId`, `deletionReason`. هذه حقول استجابة وليست حقول أوامر إنشاء جاهز.
 
@@ -232,16 +234,16 @@ curl -X POST "$BASE_URL/api/jahez/imports" -H "Authorization: Bearer $TOKEN" -H 
 
 ## 6. حساب المنصة والكفلاء والإشعارات الموجودة
 
-هذه المسارات موجودة في API العام واستُخدمت/عُدلت لدعم جاهز. `sponsorId` كفيل الحساب و`dashboardSponsorId` كفيل الداشبورد **معرفان مستقلان**. قيمة Dashboard Sponsor مطلوبة في حساب منصة جديد، ومن `GET /api/sponsors` ضمن الكفلاء النشطين. الحسابات القديمة قد تعيد `dashboardSponsorId:null` حتى تُستكمل. يسمح تحديثها بإضافته، ولا يسمح بمسح قيمة موجودة. صاحب الحساب المسجل قد يختلف عن `riderProfileId` الذي يستلم الحساب.
+هذه المسارات موجودة في API العام وتدعم جاهز. `sponsorId` هو كفيل الحساب ويغطي أيضًا تشغيل جاهز. الكفيل مطلوب في حساب منصة جديد ويُختار من `GET /api/sponsors` ضمن الكفلاء النشطين. لا يوجد حقل كفيل داشبورد منفصل. صاحب الحساب المسجل قد يختلف عن `riderProfileId` الذي يستلم الحساب.
 
 | الطريقة والمسار | الطلب | استجابة 200 | الصلاحية |
 |---|---|---|---|
-| `GET /api/platform-accounts` | `accountId?`, `platformId?`, `operatingCityId?`, `sponsorId?`, `dashboardSponsorId?`, `ownerRiderProfileId?`, `actualRiderProfileId?`, `status?`, `paymentModel?`, `currentOnly=false`, `includeArchived=false` | مصفوفة `SimplePlatformAccountResponse[]`، **وليست صفحة جاهز** | `platform_accounts.read` |
+| `GET /api/platform-accounts` | `accountId?`, `platformId?`, `operatingCityId?`, `sponsorId?`, `ownerRiderProfileId?`, `actualRiderProfileId?`, `status?`, `paymentModel?`, `currentOnly=false`, `includeArchived=false` | مصفوفة `SimplePlatformAccountResponse[]`، **وليست صفحة جاهز** | `platform_accounts.read` |
 | `GET /api/platform-accounts/{id}` | معرف الحساب | `SimplePlatformAccountResponse` | `platform_accounts.read` |
-| `POST /api/platform-accounts` | `SimplePlatformAccountUpsertRequest` أدناه، `dashboardSponsorId` مطلوب | `SimplePlatformAccountResponse` | `platform_accounts.manage` |
-| `PUT /api/platform-accounts/{id}` | جسم الإنشاء مع `rowVersion` من GET؛ أرسل `dashboardSponsorId` الموجود | `SimplePlatformAccountResponse` | `platform_accounts.manage` |
-| `GET /api/platform-operations/accounts` | `platformId?`, `sponsorId?`, `dashboardSponsorId?` | `PlatformAccountResponse[]` | `platform_accounts.read` |
-| `POST /api/platform-operations/accounts` | `PlatformAccountUpsertRequest` أدناه، `dashboardSponsorId` مطلوب | `PlatformAccountResponse` | `platform_accounts.manage` |
+| `POST /api/platform-accounts` | `SimplePlatformAccountUpsertRequest` أدناه، `sponsorId` مطلوب | `SimplePlatformAccountResponse` | `platform_accounts.manage` |
+| `PUT /api/platform-accounts/{id}` | جسم الإنشاء مع `rowVersion` من GET؛ أرسل `sponsorId` الموجود | `SimplePlatformAccountResponse` | `platform_accounts.manage` |
+| `GET /api/platform-operations/accounts` | `platformId?`, `sponsorId?` | `PlatformAccountResponse[]` | `platform_accounts.read` |
+| `POST /api/platform-operations/accounts` | `PlatformAccountUpsertRequest` أدناه، `sponsorId` مطلوب | `PlatformAccountResponse` | `platform_accounts.manage` |
 | `PUT /api/platform-operations/accounts/{id}` | جسم الإنشاء مع `rowVersion` من GET | `PlatformAccountResponse` | `platform_accounts.manage` |
 
 مسارا الإسناد `POST /api/platform-accounts/{id}/assign` و`POST /api/platform-operations/assignments` وإغلاق الإسناد العام يرجعان تعارضًا لحساب جاهز، لضمان إنشاء الرسوم والتاريخ المالي عبر `/api/jahez/handovers` و`/close`. عند إنشاء حساب جاهز، استخدم `paymentModel:"PayPerOrder"` و`status:"Available"`. عند تحديث حساب له تاريخ مالي لا تغير `clientPlatformId`/`platformId` أو `externalAccountId`.
@@ -249,22 +251,22 @@ curl -X POST "$BASE_URL/api/jahez/imports" -H "Authorization: Bearer $TOKEN" -H 
 `SimplePlatformAccountUpsertRequest` لمسار `POST /api/platform-accounts`:
 
 ```json
-{"platformId":"12121212-1212-1212-1212-121212121212","operatingCityId":"13131313-1313-1313-1313-131313131313","sponsorId":"14141414-1414-1414-1414-141414141414","dashboardSponsorId":"15151515-1515-1515-1515-151515151515","ownerRiderProfileId":"16161616-1616-1616-1616-161616161616","code":"J-456469","externalAccountId":"456469","userName":null,"paymentModel":"PayPerOrder","status":"Available","statusReason":null,"acquisitionDate":null,"startDate":null,"endDate":null,"notes":null,"archiveReason":null,"rowVersion":null}
+{"platformId":"12121212-1212-1212-1212-121212121212","operatingCityId":"13131313-1313-1313-1313-131313131313","sponsorId":"14141414-1414-1414-1414-141414141414","ownerRiderProfileId":"16161616-1616-1616-1616-161616161616","code":"J-456469","externalAccountId":"456469","userName":null,"paymentModel":"PayPerOrder","status":"Available","statusReason":null,"acquisitionDate":null,"startDate":null,"endDate":null,"notes":null,"archiveReason":null,"rowVersion":null}
 ```
 `PlatformAccountUpsertRequest` لمسار `POST /api/platform-operations/accounts`:
 
 ```json
-{"clientPlatformId":"12121212-1212-1212-1212-121212121212","registeredEmployeeId":"17171717-1717-1717-1717-171717171717","operatingCityId":"13131313-1313-1313-1313-131313131313","sponsorId":"14141414-1414-1414-1414-141414141414","dashboardSponsorId":"15151515-1515-1515-1515-151515151515","code":"J-456469","externalAccountId":"456469","userName":null,"paymentModel":"PayPerOrder","status":"Available","statusReason":null,"acquisitionDate":null,"startDate":null,"endDate":null,"ownershipNotes":null,"operationalNotes":null,"rowVersion":null}
+{"clientPlatformId":"12121212-1212-1212-1212-121212121212","registeredEmployeeId":"17171717-1717-1717-1717-171717171717","operatingCityId":"13131313-1313-1313-1313-131313131313","sponsorId":"14141414-1414-1414-1414-141414141414","code":"J-456469","externalAccountId":"456469","userName":null,"paymentModel":"PayPerOrder","status":"Available","statusReason":null,"acquisitionDate":null,"startDate":null,"endDate":null,"ownershipNotes":null,"operationalNotes":null,"rowVersion":null}
 ```
 
-كل حقول استجابة الحساب الأساسي `SimplePlatformAccountResponse`: `id`, `platformId`, `platformCode`, `platformNameAr`, `platformNameEn`, `operatingCityId`, `operatingCityNameAr`, `operatingCityNameEn`, `sponsorId`, `sponsorNameAr`, `sponsorNameEn`, `ownerRiderProfileId`, `ownerEmployeeId`, `ownerRiderNameAr`, `ownerRiderNameEn`, `code`, `externalAccountId`, `userName`, `paymentModel`, `status`, `statusReason`, `acquisitionDate`, `startDate`, `endDate`, `notes`, `currentAssignment`, `rowVersion`, `dashboardSponsorId`. إن وُجد `currentAssignment`، حقوله: `id`, `accountId`, `paymentModel`, `actualRiderProfileId`, `actualEmployeeId`, `actualRiderNameAr`, `actualRiderNameEn`, `effectiveFrom`, `effectiveTo`, `status`, `startReason`, `endReason`, `wasBackdated`, `backdatedReason`, `assignedByUserId`, `endedByUserId`, `rowVersion`.
+كل حقول استجابة الحساب الأساسي `SimplePlatformAccountResponse`: `id`, `platformId`, `platformCode`, `platformNameAr`, `platformNameEn`, `operatingCityId`, `operatingCityNameAr`, `operatingCityNameEn`, `sponsorId`, `sponsorNameAr`, `sponsorNameEn`, `ownerRiderProfileId`, `ownerEmployeeId`, `ownerRiderNameAr`, `ownerRiderNameEn`, `code`, `externalAccountId`, `userName`, `paymentModel`, `status`, `statusReason`, `acquisitionDate`, `startDate`, `endDate`, `notes`, `currentAssignment`, `rowVersion`. إن وُجد `currentAssignment`، حقوله: `id`, `accountId`, `paymentModel`, `actualRiderProfileId`, `actualEmployeeId`, `actualRiderNameAr`, `actualRiderNameEn`, `effectiveFrom`, `effectiveTo`, `status`, `startReason`, `endReason`, `wasBackdated`, `backdatedReason`, `assignedByUserId`, `endedByUserId`, `rowVersion`.
 
-كل حقول استجابة التوافق `PlatformAccountResponse`: `id`, `clientPlatformId`, `platformNameAr`, `registeredEmployeeId`, `registeredEmployeeNameAr`, `operatingCityId`, `operatingCityAr`, `sponsorId`, `sponsorNameAr`, `sponsorNameEn`, `code`, `externalAccountId`, `userName`, `paymentModel`, `status`, `statusReason`, `acquisitionDate`, `startDate`, `endDate`, `ownershipNotes`, `operationalNotes`, `rowVersion`, `dashboardSponsorId`.
+كل حقول استجابة التوافق `PlatformAccountResponse`: `id`, `clientPlatformId`, `platformNameAr`, `registeredEmployeeId`, `registeredEmployeeNameAr`, `operatingCityId`, `operatingCityAr`, `sponsorId`, `sponsorNameAr`, `sponsorNameEn`, `code`, `externalAccountId`, `userName`, `paymentModel`, `status`, `statusReason`, `acquisitionDate`, `startDate`, `endDate`, `ownershipNotes`, `operationalNotes`, `rowVersion`.
 
 | مسار مساند | الاستخدام والاستجابة | الصلاحية |
 |---|---|---|
 | `GET /api/platforms` | مصفوفة المنصات؛ ابحث عن `code:"JAHEZ"` وخذ `id` عند إنشاء الحساب | `platform_accounts.read` |
-| `GET /api/sponsors` | قائمة الكفلاء؛ اختَر `dashboardSponsorId` و`sponsorId` كلًا على حدة | `sponsors.read` |
+| `GET /api/sponsors` | قائمة الكفلاء؛ اختَر كفيل الحساب الحالي `sponsorId` | `sponsors.read` |
 | `GET /api/hr-catalogs/operating-cities` | قائمة المدن واستخدام `id` | `operating_cities.read` |
 | `GET /api/riders` | المندوبون الفعليون؛ `id` يُستخدم `riderProfileId` | `riders.read` |
 | `GET /api/notifications?permissions=jahez.read` | إشعارات تذكير التصفية، عند منح `notifications.read`؛ يعيد `{items,nextCursor}` | `notifications.read`، وفلتر `jahez.read` بحسب نطاق المنصة |

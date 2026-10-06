@@ -4,6 +4,7 @@
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="**\bin\**\*.cs;**\obj\**\*.cs" />
     <ProjectReference Include="..\..\src\LogisticsERP.Infrastructure\LogisticsERP.Infrastructure.csproj" />
   </ItemGroup>
   <ItemGroup>

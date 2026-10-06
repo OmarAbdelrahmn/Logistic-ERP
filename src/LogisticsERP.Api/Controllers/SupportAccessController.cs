@@ -12,7 +12,7 @@ namespace LogisticsERP.Api.Controllers;
 public sealed class SupportAccessController(ISupportAccessService service) : ControllerBase
 {
     [HttpGet]
-    [RequirePermission(PermissionKeys.Security.SupportAccessManage)]
+    [RequirePermission(PermissionKeys.Security.SupportAccessRead)]
     public async Task<IActionResult> Get([FromQuery] Guid? operatorUserId, [FromQuery] string? status, CancellationToken cancellationToken)
     {
         var result = await service.GetAsync(operatorUserId, status, cancellationToken);
@@ -20,7 +20,7 @@ public sealed class SupportAccessController(ISupportAccessService service) : Con
     }
 
     [HttpPost]
-    [Authorize]
+    [RequirePermission(PermissionKeys.Security.SupportAccessCreate)]
     public async Task<IActionResult> RequestAccess([FromBody] RequestSupportAccessRequest request, CancellationToken cancellationToken)
     {
         var result = await service.RequestAsync(request, cancellationToken);
@@ -28,7 +28,7 @@ public sealed class SupportAccessController(ISupportAccessService service) : Con
     }
 
     [HttpPost("{id:guid}/resolve")]
-    [RequirePermission(PermissionKeys.Security.SupportAccessManage)]
+    [RequirePermission(PermissionKeys.Security.SupportAccessUpdate)]
     public async Task<IActionResult> Resolve(Guid id, [FromBody] ResolveSupportAccessRequest request, CancellationToken cancellationToken)
     {
         var result = await service.ResolveAsync(id, request, cancellationToken);
@@ -36,7 +36,7 @@ public sealed class SupportAccessController(ISupportAccessService service) : Con
     }
 
     [HttpPost("{id:guid}/revoke")]
-    [Authorize]
+    [RequirePermission(PermissionKeys.Security.SupportAccessDelete)]
     public async Task<IActionResult> Revoke(Guid id, [FromBody] RevokeSupportAccessRequest request, CancellationToken cancellationToken)
     {
         var result = await service.RevokeAsync(id, request, cancellationToken);

@@ -43,7 +43,7 @@ public sealed class VehicleAssignmentsController(
     }
 
     [HttpPost("{assignmentId:guid}/promissory-files")]
-    [RequirePermission(PermissionKeys.Fleet.AssignmentsManage)]
+    [RequirePermission(PermissionKeys.Fleet.AssignmentsUpdate)]
     [Consumes("multipart/form-data")]
     [RequestSizeLimit(32 * 1024 * 1024)]
     public Task<IActionResult> AttachPromissoryFiles(
@@ -56,7 +56,7 @@ public sealed class VehicleAssignmentsController(
             cancellationToken);
 
     [HttpPost("take")]
-    [RequirePermission(PermissionKeys.Fleet.AssignmentsManage)]
+    [RequirePermission(PermissionKeys.Fleet.AssignmentsCreate)]
     [Consumes("multipart/form-data")]
     [RequestSizeLimit(32 * 1024 * 1024)]
     public async Task<IActionResult> Take([FromForm] VehicleAssignmentMultipartForm form, [FromHeader(Name = "Idempotency-Key")] string? idempotencyKey, CancellationToken cancellationToken)
@@ -69,7 +69,7 @@ public sealed class VehicleAssignmentsController(
     }
 
     [HttpPost("return")]
-    [RequirePermission(PermissionKeys.Fleet.AssignmentsManage)]
+    [RequirePermission(PermissionKeys.Fleet.AssignmentsDelete)]
     [Consumes("application/json")]
     public async Task<IActionResult> Return([FromBody] ReturnVehicleRequest request, [FromHeader(Name = "Idempotency-Key")] string? idempotencyKey, CancellationToken cancellationToken)
     {
@@ -81,7 +81,7 @@ public sealed class VehicleAssignmentsController(
     }
 
     [HttpPost("return-with-condition-report")]
-    [RequirePermission(PermissionKeys.Fleet.AssignmentsManage)]
+    [RequirePermission(PermissionKeys.Fleet.AssignmentsDelete)]
     [Consumes("multipart/form-data")]
     [RequestSizeLimit(22 * 1024 * 1024)]
     public async Task<IActionResult> ReturnWithConditionReport([FromForm] VehicleReturnMultipartForm form, [FromHeader(Name = "Idempotency-Key")] string? idempotencyKey, CancellationToken cancellationToken)
@@ -96,7 +96,9 @@ public sealed class VehicleAssignmentsController(
     }
 
     [HttpPost("switch")]
-    [RequirePermission(PermissionKeys.Fleet.AssignmentsManage)]
+    [RequirePermission(PermissionKeys.Fleet.AssignmentsUpdate)]
+    [RequirePermission(PermissionKeys.Fleet.AssignmentsCreate)]
+    [RequirePermission(PermissionKeys.Fleet.AssignmentsDelete)]
     [Consumes("multipart/form-data")]
     [RequestSizeLimit(54 * 1024 * 1024)]
     public async Task<IActionResult> Switch([FromForm] VehicleSwitchMultipartForm form, [FromHeader(Name = "Idempotency-Key")] string? idempotencyKey, CancellationToken cancellationToken)
@@ -112,7 +114,7 @@ public sealed class VehicleAssignmentsController(
     }
 
     [HttpPost("{assignmentId:guid}/renew-permission")]
-    [RequirePermission(PermissionKeys.Fleet.AssignmentsManage)]
+    [RequirePermission(PermissionKeys.Fleet.AssignmentsUpdate)]
     public async Task<IActionResult> Renew(Guid assignmentId, [FromBody] RenewVehiclePermissionRequest request, [FromHeader(Name = "Idempotency-Key")] string? idempotencyKey, CancellationToken cancellationToken)
     {
         return await ExecuteAssignmentAsync(async () =>

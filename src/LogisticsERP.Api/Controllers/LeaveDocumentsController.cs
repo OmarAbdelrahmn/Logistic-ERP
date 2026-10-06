@@ -43,7 +43,7 @@ public sealed class LeaveDocumentsController(ILeaveDocumentService service) : Co
     }
 
     [HttpPut("{documentId:guid}")]
-    [RequirePermission(PermissionKeys.Workflows.LeaveRequestsManage)]
+    [RequirePermission(PermissionKeys.Workflows.LeaveRequestsUpdate)]
     public async Task<IActionResult> UpdateMetadata(Guid leaveRequestId, Guid documentId, [FromBody] UpdateLeaveDocumentRequest request, CancellationToken cancellationToken)
     {
         var result = await service.UpdateMetadataAsync(leaveRequestId, documentId, request.Metadata, request.RowVersion, cancellationToken);
@@ -69,7 +69,7 @@ public sealed class LeaveDocumentsController(ILeaveDocumentService service) : Co
     }
 
     [HttpPatch("{documentId:guid}/archive")]
-    [RequirePermission(PermissionKeys.Workflows.LeaveRequestsManage)]
+    [RequirePermission(PermissionKeys.Workflows.LeaveRequestsDelete)]
     public async Task<IActionResult> Archive(Guid leaveRequestId, Guid documentId, [FromBody] ArchiveRequest request, CancellationToken cancellationToken)
     {
         var result = await service.ArchiveAsync(leaveRequestId, documentId, request, cancellationToken);

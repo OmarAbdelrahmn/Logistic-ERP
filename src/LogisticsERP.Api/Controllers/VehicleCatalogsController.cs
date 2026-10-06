@@ -19,7 +19,7 @@ public sealed class VehicleCatalogsController(IFleetService service) : Controlle
     }
 
     [HttpPost("manufacturers")]
-    [RequirePermission(PermissionKeys.Fleet.VehiclesManage)]
+    [RequirePermission(PermissionKeys.Fleet.VehiclesCreate)]
     public async Task<IActionResult> CreateManufacturer([FromBody] VehicleManufacturerRequest request, CancellationToken cancellationToken)
     {
         var result = await service.UpsertManufacturerAsync(null, request, cancellationToken);
@@ -27,7 +27,7 @@ public sealed class VehicleCatalogsController(IFleetService service) : Controlle
     }
 
     [HttpPut("manufacturers/{id:guid}")]
-    [RequirePermission(PermissionKeys.Fleet.VehiclesManage)]
+    [RequirePermission(PermissionKeys.Fleet.VehiclesUpdate)]
     public async Task<IActionResult> UpdateManufacturer(Guid id, [FromBody] VehicleManufacturerRequest request, CancellationToken cancellationToken)
     {
         var result = await service.UpsertManufacturerAsync(id, request, cancellationToken);
@@ -43,7 +43,7 @@ public sealed class VehicleCatalogsController(IFleetService service) : Controlle
     }
 
     [HttpPost("models")]
-    [RequirePermission(PermissionKeys.Fleet.VehiclesManage)]
+    [RequirePermission(PermissionKeys.Fleet.VehiclesCreate)]
     public async Task<IActionResult> CreateModel([FromBody] VehicleModelRequest request, CancellationToken cancellationToken)
     {
         var result = await service.UpsertModelAsync(null, request, cancellationToken);
@@ -51,7 +51,7 @@ public sealed class VehicleCatalogsController(IFleetService service) : Controlle
     }
 
     [HttpPut("models/{id:guid}")]
-    [RequirePermission(PermissionKeys.Fleet.VehiclesManage)]
+    [RequirePermission(PermissionKeys.Fleet.VehiclesUpdate)]
     public async Task<IActionResult> UpdateModel(Guid id, [FromBody] VehicleModelRequest request, CancellationToken cancellationToken)
     {
         var result = await service.UpsertModelAsync(id, request, cancellationToken);

@@ -58,6 +58,8 @@ Without a `permissions` query parameter, both endpoints derive the user's curren
 
 ## Read state and history
 
+`POST /api/notifications/read-all` marks all matching visible unread notifications for the authenticated user. Send `{}` to include all accessible audiences and personal notifications, or `{ "permissions": ["jahez.read"] }` to select an audience using the same permission semantics as `/query`. Requires `notifications.read`; returns `{ markedCount, readAtUtc, effectivePermissions }`. No user ID or row versions are required. Refresh the feed after success. See [bulk read handoff](notifications-read-all-handoff.md).
+
 ```text
 POST /api/notifications/{id}/state
 ```

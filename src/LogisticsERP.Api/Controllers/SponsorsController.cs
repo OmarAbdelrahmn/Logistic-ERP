@@ -27,15 +27,15 @@ public sealed class SponsorsController(IWorkforceService service) : ControllerBa
     }
 
     [HttpPost]
-    [RequirePermission(PermissionKeys.Workforce.SponsorsManage)]
+    [RequirePermission(PermissionKeys.Workforce.SponsorsCreate)]
     public Task<IActionResult> Create([FromBody] SponsorUpsertRequest request, CancellationToken cancellationToken) => Upsert(null, request, cancellationToken);
 
     [HttpPut("{id:guid}")]
-    [RequirePermission(PermissionKeys.Workforce.SponsorsManage)]
+    [RequirePermission(PermissionKeys.Workforce.SponsorsUpdate)]
     public Task<IActionResult> Update(Guid id, [FromBody] SponsorUpsertRequest request, CancellationToken cancellationToken) => Upsert(id, request, cancellationToken);
 
     [HttpPatch("{id:guid}/archive")]
-    [RequirePermission(PermissionKeys.Workforce.SponsorsManage)]
+    [RequirePermission(PermissionKeys.Workforce.SponsorsDelete)]
     public async Task<IActionResult> Archive(Guid id, [FromBody] ArchiveRequest request, CancellationToken cancellationToken)
     {
         var result = await service.ArchiveSponsorAsync(id, request, cancellationToken);

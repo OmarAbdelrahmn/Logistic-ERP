@@ -19,7 +19,7 @@ public sealed class PlacesController(IPlaceService service) : ControllerBase
     }
 
     [HttpPost]
-    [RequirePermission(PermissionKeys.Operations.PhoneSimsManage)]
+    [RequirePermission(PermissionKeys.Operations.PhoneSimsCreate)]
     public async Task<IActionResult> Create([FromBody] SavePlaceRequest request, CancellationToken cancellationToken)
     {
         var result = await service.CreateAsync(request, cancellationToken);
@@ -27,7 +27,7 @@ public sealed class PlacesController(IPlaceService service) : ControllerBase
     }
 
     [HttpPut("{id:guid}")]
-    [RequirePermission(PermissionKeys.Operations.PhoneSimsManage)]
+    [RequirePermission(PermissionKeys.Operations.PhoneSimsUpdate)]
     public async Task<IActionResult> Update(Guid id, [FromBody] SavePlaceRequest request, CancellationToken cancellationToken)
     {
         var result = await service.UpdateAsync(id, request, cancellationToken);

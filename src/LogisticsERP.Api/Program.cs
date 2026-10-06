@@ -69,6 +69,10 @@ builder.Services.PostConfigure<ApiBehaviorOptions>(options =>
 {
     options.InvalidModelStateResponseFactory = context =>
     {
+        if (context.ActionDescriptor.Parameters.Any(parameter =>
+            parameter.ParameterType == typeof(LogisticsERP.Application.Features.Hr.SimplePlatformAccountUpsertRequest)))
+            return PlatformAccountValidationProblem.Create(context);
+
         var field = context.ModelState.Keys.FirstOrDefault(key =>
             context.ModelState[key]?.Errors.Count > 0);
         var isGpsImport = context.HttpContext.Request.Path.Value?.Equals(

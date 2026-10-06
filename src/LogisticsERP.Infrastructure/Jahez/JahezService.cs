@@ -109,7 +109,7 @@ internal sealed partial class JahezService(
             OccurredAtUtc = occurred ?? Now, Reason = reason, ReversesEntryId = reverses });
 
     public Task<Result<JahezHandoverResponse>> HandoverAsync(string key, JahezHandoverRequest request, CancellationToken ct = default) =>
-        ExecuteAsync(key, "handover", request, PermissionKeys.Jahez.HandoversManage, async () =>
+        ExecuteAsync(key, "handover", request, PermissionKeys.Jahez.HandoversCreate, async () =>
         {
             Require(request.FeeApprovalRequestId is null, JahezErrors.Invalid("سجل الاستلام ثم أرسل طلب استثناء الرسوم، أو استخدم التبديل المجاني المعتمد."));
             var h = await CreateHandover(request.AccountId, request.RiderProfileId, request.EffectiveAtUtc, request.Reason, 0m, null, ct);
@@ -126,7 +126,8 @@ internal sealed partial class JahezService(
         effective = effective.ToUniversalTime();
         Require(effective <= Now && effective > DateTimeOffset.MinValue, JahezErrors.Invalid("تاريخ الاستلام يجب ألا يكون في المستقبل."));
         var account = await Account(accountId, ct);
-        Require(account.DashboardSponsorId.HasValue, JahezErrors.Invalid("استكمل كفيل الداشبورد قبل تسليم حساب جاهز."));
+        Require(account.SponsorId != Guid.Empty && await db.Sponsors.AnyAsync(x => x.Id == account.SponsorId, ct),
+            JahezErrors.Invalid("كفيل الحساب غير صالح. استكمل كفيل الحساب قبل تسليم حساب جاهز."));
         Require(account.PaymentModel == PlatformAccountPaymentModel.PayPerOrder, JahezErrors.Invalid("وحدة جاهز تدعم حسابات الدفع حسب الطلب فقط."));
         Require(account.Status == PlatformRiderAccountStatus.Available, JahezErrors.Conflict("الحساب غير متاح للاستلام."));
         Require(!await db.RiderClientAssignments.AnyAsync(x => x.PlatformRiderAccountId == accountId && x.EffectiveTo == null, ct), JahezErrors.Conflict("الحساب مسند بالفعل."));
@@ -165,7 +166,7 @@ internal sealed partial class JahezService(
     }
 
     public Task<Result<JahezHandoverResponse>> AdoptLegacyAsync(string key, JahezLegacyAdoptionRequest request, CancellationToken ct = default) =>
-        ExecuteAsync(key, "adopt-legacy", request, PermissionKeys.Jahez.AdjustmentsManage, async () =>
+        ExecuteAsync(key, "adopt-legacy", request, PermissionKeys.Jahez.AdjustmentsCreate, async () =>
         {
             Reason(request.Reason);
             var assignment = await db.RiderClientAssignments.SingleOrDefaultAsync(x => x.Id == request.AssignmentId, ct);
@@ -190,7 +191,7 @@ internal sealed partial class JahezService(
         }, ct);
 
     public Task<Result<JahezHandoverResponse>> CloseAsync(string key, Guid id, JahezCloseRequest request, CancellationToken ct = default) =>
-        ExecuteAsync(key, "close", new { id, request }, PermissionKeys.Jahez.HandoversManage, async () =>
+        ExecuteAsync(key, "close", new { id, request }, PermissionKeys.Jahez.HandoversDelete, async () =>
         {
             var h = await Handover(id, ct);
             await CloseHandover(h, request.EffectiveAtUtc, request.Reason, false, ct);
@@ -322,9 +323,13 @@ internal sealed partial class JahezService(
         {
             Page(page, pageSize);
             var query = db.Set<JahezAccountHandover>().AsNoTracking().Where(x => (!accountId.HasValue || x.PlatformRiderAccountId == accountId) && (!riderId.HasValue || x.RiderProfileId == riderId));
-            var rows = await query.OrderByDescending(x => x.StartedAtUtc).ThenBy(x => x.Id).Skip((page - 1) * pageSize).Take(pageSize).ToArrayAsync(ct);
-            List<JahezHandoverResponse> result = [];
-            foreach (var h in rows) result.Add(await Response(h, ct));
+            var result = await (from h in query
+                join a in db.PlatformRiderAccounts.IgnoreQueryFilters().AsNoTracking() on h.PlatformRiderAccountId equals a.Id
+                orderby h.StartedAtUtc descending, h.Id
+                select new JahezHandoverResponse(h.Id, a.Id, a.ExternalAccountId, h.RiderProfileId,
+                    h.RiderClientAssignmentId, h.StartedAtUtc, h.EndedAtUtc, h.CommissionStartsOn,
+                    h.CommissionPostedThrough, h.LastSettlementPaymentAtUtc, h.IsLegacy, h.DebtTransferred))
+                .Skip((page - 1) * pageSize).Take(pageSize).ToArrayAsync(ct);
             return new JahezPage<JahezHandoverResponse>(result, page, pageSize);
         }, ct);
 

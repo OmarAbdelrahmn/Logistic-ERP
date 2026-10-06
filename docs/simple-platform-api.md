@@ -205,7 +205,22 @@ Permission: `platform_accounts.manage`
 }
 ```
 
-`ownerRiderProfileId`, `sponsorId`, and `paymentModel` are required. `paymentModel` must be enabled in the selected platform's `supportedPaymentModels`. A second usable account for the same owner, platform, city, and sponsor returns `409 Conflict`; suspended, retired, and archived accounts do not block a replacement.
+`platformId`, `operatingCityId`, `ownerRiderProfileId`, `sponsorId`, `code`, `externalAccountId`, `status`, and `paymentModel` are required when creating an account. `sponsorId` must identify an active sponsor and also supplies the sponsor used by Jahez. `paymentModel` must be enabled in the selected platform's `supportedPaymentModels`. Create with `Available`, `Suspended`, or `Retired`; use the assignment action after creation to reach `Assigned`. A second usable account for the same owner, platform, city, and sponsor returns `409 Conflict`; suspended, retired, and archived accounts do not block a replacement.
+
+Validation failures return a specific Arabic `detail`, a stable `errorCode`, the JSON `field` name, and an `errors` map. For example, omitting `sponsorId` returns `400`:
+
+```json
+{
+  "status": 400,
+  "title": "طلب غير صالح",
+  "detail": "حقل الكفيل مطلوب.",
+  "errorCode": "platform.account_required_field",
+  "field": "sponsorId",
+  "errors": { "sponsorId": ["حقل الكفيل مطلوب."] }
+}
+```
+
+Show the returned `detail` in the error notification and use `field`/`errors` beside the form input. Do not replace these account errors with a generic status-400 message. The API also identifies duplicate codes (`platform.account_code_duplicate`), duplicate platform/external IDs (`platform.account_external_id_duplicate`), duplicate usable owner accounts (`platform.account_owner_duplicate`), unavailable references (`platform.account_reference_unavailable`), and unsupported payment models (`platform.payment_model_not_supported`).
 
 Response: `200 OK` with the created Account response.
 

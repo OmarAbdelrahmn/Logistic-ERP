@@ -2,6 +2,8 @@
 
 Upload an `.xlsx` workbook with one column headed `number` in cell A1. Put one card number per row, such as `BAWABA255`. Blank rows are ignored. The cards are created for PetroApp as internal card numbers, without rider assignments.
 
+Spaces and other whitespace within a card number are removed before duplicate matching and saving. For example, `BAWABA 255` is stored as `BAWABA255`.
+
 - `POST /api/fuel-cards/card-number-imports/validate` previews the upload without saving.
 - `POST /api/fuel-cards/card-number-imports` creates the new cards.
 

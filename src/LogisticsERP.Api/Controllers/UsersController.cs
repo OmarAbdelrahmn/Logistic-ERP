@@ -36,8 +36,8 @@ public sealed class UsersController(IUserManagementService service) : Controller
 
     [HttpPost]
     [RequirePermission(PermissionKeys.Security.UsersCreate)]
-    [RequirePermission(PermissionKeys.Security.RolesManage)]
-    [RequirePermission(PermissionKeys.Security.PermissionsManage)]
+    [RequirePermission(PermissionKeys.Security.RolesCreate)]
+    [RequirePermission(PermissionKeys.Security.PermissionsCreate)]
     public async Task<IActionResult> Create([FromBody] CreateManagedUserRequest request, CancellationToken cancellationToken)
     {
         var result = await service.CreateUserAsync(request, cancellationToken);
@@ -126,7 +126,7 @@ public sealed class UsersController(IUserManagementService service) : Controller
     }
 
     [HttpPost("roles")]
-    [RequirePermission(PermissionKeys.Security.RolesManage)]
+    [RequirePermission(PermissionKeys.Security.RolesCreate)]
     public async Task<IActionResult> CreateRole([FromBody] ManagedRoleUpsertRequest request, CancellationToken cancellationToken)
     {
         var result = await service.UpsertRoleAsync(null, request, cancellationToken);
@@ -134,7 +134,7 @@ public sealed class UsersController(IUserManagementService service) : Controller
     }
 
     [HttpPut("roles/{roleId:guid}")]
-    [RequirePermission(PermissionKeys.Security.RolesManage)]
+    [RequirePermission(PermissionKeys.Security.RolesUpdate)]
     public async Task<IActionResult> UpdateRole(Guid roleId, [FromBody] ManagedRoleUpsertRequest request, CancellationToken cancellationToken)
     {
         var result = await service.UpsertRoleAsync(roleId, request, cancellationToken);
@@ -142,7 +142,9 @@ public sealed class UsersController(IUserManagementService service) : Controller
     }
 
     [HttpPut("roles/{roleId:guid}/permissions")]
-    [RequirePermission(PermissionKeys.Security.RolesManage)]
+    [RequirePermission(PermissionKeys.Security.RolesUpdate)]
+    [RequirePermission(PermissionKeys.Security.RolesCreate)]
+    [RequirePermission(PermissionKeys.Security.RolesDelete)]
     public async Task<IActionResult> ReplaceRolePermissions(Guid roleId, [FromBody] ReplaceRolePermissionsRequest request, CancellationToken cancellationToken)
     {
         var result = await service.ReplaceRolePermissionsAsync(roleId, request, cancellationToken);
@@ -150,7 +152,7 @@ public sealed class UsersController(IUserManagementService service) : Controller
     }
 
     [HttpPatch("roles/{roleId:guid}/archive")]
-    [RequirePermission(PermissionKeys.Security.RolesManage)]
+    [RequirePermission(PermissionKeys.Security.RolesDelete)]
     public async Task<IActionResult> ArchiveRole(Guid roleId, [FromBody] ArchiveManagedUserRequest request, CancellationToken cancellationToken)
     {
         var result = await service.ArchiveRoleAsync(roleId, request, cancellationToken);
@@ -174,7 +176,9 @@ public sealed class UsersController(IUserManagementService service) : Controller
     }
 
     [HttpPut("{userId:guid}/roles")]
-    [RequirePermission(PermissionKeys.Security.RolesManage)]
+    [RequirePermission(PermissionKeys.Security.RolesUpdate)]
+    [RequirePermission(PermissionKeys.Security.RolesCreate)]
+    [RequirePermission(PermissionKeys.Security.RolesDelete)]
     public async Task<IActionResult> ReplaceRoles(Guid userId, [FromBody] ReplaceManagedUserRolesRequest request, CancellationToken cancellationToken)
     {
         var result = await service.ReplaceRolesAsync(userId, request, cancellationToken);
@@ -182,7 +186,9 @@ public sealed class UsersController(IUserManagementService service) : Controller
     }
 
     [HttpPut("{userId:guid}/permissions")]
-    [RequirePermission(PermissionKeys.Security.PermissionsManage)]
+    [RequirePermission(PermissionKeys.Security.PermissionsUpdate)]
+    [RequirePermission(PermissionKeys.Security.PermissionsCreate)]
+    [RequirePermission(PermissionKeys.Security.PermissionsDelete)]
     public async Task<IActionResult> ReplacePermissions(Guid userId, [FromBody] ReplaceManagedUserPermissionsRequest request, CancellationToken cancellationToken)
     {
         var result = await service.ReplacePermissionsAsync(userId, request, cancellationToken);

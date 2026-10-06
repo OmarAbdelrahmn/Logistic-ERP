@@ -19,11 +19,11 @@ public sealed class RiderCardsController(IComplianceService service) : Controlle
     }
 
     [HttpPost("cards")]
-    [RequirePermission(PermissionKeys.Compliance.RiderCardsManage)]
+    [RequirePermission(PermissionKeys.Compliance.RiderCardsCreate)]
     public Task<IActionResult> CreateCard(Guid riderProfileId, [FromBody] RiderCardUpsertRequest request, CancellationToken cancellationToken) => UpsertCard(riderProfileId, null, request, cancellationToken);
 
     [HttpPut("cards/{id:guid}")]
-    [RequirePermission(PermissionKeys.Compliance.RiderCardsManage)]
+    [RequirePermission(PermissionKeys.Compliance.RiderCardsUpdate)]
     public Task<IActionResult> UpdateCard(Guid riderProfileId, Guid id, [FromBody] RiderCardUpsertRequest request, CancellationToken cancellationToken) => UpsertCard(riderProfileId, id, request, cancellationToken);
 
     [HttpGet("health-cards")]
@@ -35,19 +35,19 @@ public sealed class RiderCardsController(IComplianceService service) : Controlle
     }
 
     [HttpPost("health-cards")]
-    [RequirePermission(PermissionKeys.Compliance.HealthCardsManage)]
+    [RequirePermission(PermissionKeys.Compliance.HealthCardsCreate)]
     public Task<IActionResult> CreateHealthCard(Guid riderProfileId, [FromBody] HealthCardUpsertRequest request, CancellationToken cancellationToken) => UpsertHealthCard(riderProfileId, null, request, cancellationToken);
 
     [HttpPut("health-cards/{id:guid}")]
-    [RequirePermission(PermissionKeys.Compliance.HealthCardsManage)]
+    [RequirePermission(PermissionKeys.Compliance.HealthCardsUpdate)]
     public Task<IActionResult> UpdateHealthCard(Guid riderProfileId, Guid id, [FromBody] HealthCardUpsertRequest request, CancellationToken cancellationToken) => UpsertHealthCard(riderProfileId, id, request, cancellationToken);
 
     [HttpPatch("cards/{id:guid}/archive")]
-    [RequirePermission(PermissionKeys.Compliance.RiderCardsManage)]
+    [RequirePermission(PermissionKeys.Compliance.RiderCardsDelete)]
     public Task<IActionResult> ArchiveCard(Guid riderProfileId, Guid id, [FromBody] ArchiveRequest request, CancellationToken cancellationToken) => Archive("rider-card", id, request, cancellationToken);
 
     [HttpPatch("health-cards/{id:guid}/archive")]
-    [RequirePermission(PermissionKeys.Compliance.HealthCardsManage)]
+    [RequirePermission(PermissionKeys.Compliance.HealthCardsDelete)]
     public Task<IActionResult> ArchiveHealthCard(Guid riderProfileId, Guid id, [FromBody] ArchiveRequest request, CancellationToken cancellationToken) => Archive("health-card", id, request, cancellationToken);
 
     private async Task<IActionResult> UpsertCard(Guid riderProfileId, Guid? id, RiderCardUpsertRequest request, CancellationToken cancellationToken)

@@ -27,30 +27,39 @@ public sealed record JahezImportCreateRequest(JahezImportKind Kind, IReadOnlyLis
     Guid? ReplacesBatchId = null, string? CorrectionReason = null);
 public sealed record JahezDispatchAllocation(Guid RowId, Guid HandoverId, int Count, string Reason);
 public sealed record JahezImportCommitRequest(IReadOnlyList<JahezDispatchAllocation>? Allocations = null);
-public sealed record JahezPage<T>(IReadOnlyList<T> Items, int Page, int PageSize);
+public interface IJahezPage
+{
+    IEnumerable<object> Values { get; }
+    int Page { get; }
+    int PageSize { get; }
+}
+public sealed record JahezPage<T>(IReadOnlyList<T> Items, int Page, int PageSize) : IJahezPage
+{
+    IEnumerable<object> IJahezPage.Values => Items.Cast<object>();
+}
 public sealed record JahezHandoverResponse(Guid Id, Guid AccountId, string ExternalAccountId, Guid RiderProfileId,
     Guid AssignmentId, DateTimeOffset StartedAtUtc, DateTimeOffset? EndedAtUtc, DateOnly CommissionStartsOn,
-    DateOnly? CommissionPostedThrough, DateTimeOffset? LastSettlementPaymentAtUtc, bool IsLegacy, bool DebtTransferred);
+    DateOnly? CommissionPostedThrough, DateTimeOffset? LastSettlementPaymentAtUtc, bool IsLegacy, bool DebtTransferred) : JahezNamedResponse;
 public sealed record JahezBalanceResponse(Guid HandoverId, Guid AccountId, string ExternalAccountId, Guid RiderProfileId,
     DateOnly ThroughDate, decimal Fees, decimal PlatformDebt, decimal PostedCommission, decimal UnpostedCommission,
     decimal TotalReceivable, bool CommissionComplete, IReadOnlyList<string> Problems,
     DateTimeOffset ReminderAnchorAtUtc, int DaysSinceSettlementPayment, bool IsOverdue, bool DebtTransferred,
-    DateTimeOffset? LatestTransactionAtUtc);
+    DateTimeOffset? LatestTransactionAtUtc) : JahezNamedResponse;
 public sealed record JahezApprovalResponse(JahezApprovalRequest Request, IReadOnlyList<JahezApprovalDecision> Decisions);
 public sealed record JahezImportIssue(Guid RowId, string FileName, int RowNumber, string Code, string Description);
 public sealed record JahezImportRowPreview(Guid RowId, string FileName, int RowNumber, string DriverId,
-    DateTimeOffset OccurredAtUtc, Guid? AccountId, Guid? HandoverId, Guid? RiderProfileId, decimal NetAmount, int? Dispatches);
+    DateTimeOffset OccurredAtUtc, Guid? AccountId, Guid? HandoverId, Guid? RiderProfileId, decimal NetAmount, int? Dispatches) : JahezNamedResponse;
 public sealed record JahezImportPreview(Guid BatchId, JahezImportKind Kind, bool Committed,
     IReadOnlyList<JahezImportRowPreview> Rows, IReadOnlyList<JahezImportIssue> Issues, IReadOnlyList<JahezImportFileMetadata>? Files = null,
     IReadOnlyList<JahezImportAccountSummary>? Accounts = null);
 public sealed record JahezImportAccountSummary(Guid? AccountId, string DriverId, DateOnly FromDate, DateOnly ToDate,
-    int ValidRowCount, decimal NetAmount, decimal PlatformDebtChange, long? Dispatches, bool HasIssues);
+    int ValidRowCount, decimal NetAmount, decimal PlatformDebtChange, long? Dispatches, bool HasIssues) : JahezNamedResponse;
 public sealed record JahezImportFileMetadata(Guid Id, string FileName);
 public sealed record JahezImportFileResponse(Guid Id, string FileName, byte[] Content);
 public sealed record JahezCashboxBalance(decimal Fees, decimal Settlements, decimal ReservedFees,
     decimal ReservedSettlements, decimal AvailableFees, decimal AvailableSettlements);
 public sealed record JahezDispatchReportRow(Guid AccountId, string ExternalAccountId, Guid RiderProfileId,
-    Guid HandoverId, DateOnly Date, int Count);
+    Guid HandoverId, DateOnly Date, int Count) : JahezNamedResponse;
 
 public interface IJahezService
 {

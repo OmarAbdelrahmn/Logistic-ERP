@@ -587,7 +587,7 @@ internal sealed class UserManagementService(
             .ToListAsync(cancellationToken);
         return Result.Success<IReadOnlyList<ManagedRoleResponse>>(roles.Select(role => new ManagedRoleResponse(
             role.Id, role.Code, role.NameAr, role.NameEn, role.Status.ToString(), role.IsProtected,
-            grants.Where(grant => grant.RoleId == role.Id).Select(grant => grant.PermissionKey).Order().ToArray(),
+            grants.Where(grant => grant.RoleId == role.Id).Select(grant => grant.PermissionKey).Where(PermissionKeys.All.Contains).Order().ToArray(),
             Convert.ToBase64String(role.RowVersion))).ToArray());
     }
 
@@ -779,7 +779,7 @@ internal sealed class UserManagementService(
     public async Task<Result<IReadOnlyList<PermissionCatalogItemResponse>>> GetPermissionsAsync(CancellationToken cancellationToken = default)
     {
         var permissions = await applicationDbContext.PermissionDefinitions.AsNoTracking()
-            .Where(permission => !permission.IsDeprecated)
+            .Where(permission => !permission.IsDeprecated && !permission.Key.EndsWith(".manage"))
             .OrderBy(permission => permission.DisplayOrder)
             .Select(permission => new PermissionCatalogItemResponse(
                 permission.Key, permission.Category, permission.NameAr, permission.NameEn,
@@ -953,7 +953,7 @@ internal sealed class UserManagementService(
                 row.Assignment.GrantReason, row.Assignment.IsAllHousingScope, row.Assignment.IsAllClientScope,
                 row.Assignment.IncludesFuturePlatformContracts, scopes.Where(scope => scope.UserRoleAssignmentId == row.Assignment.Id)
                     .Select(ToScopeResponse).ToArray())).ToArray(),
-            directAssignments.OrderBy(item => item.PermissionKey).Select(item => new ManagedUserDirectPermissionResponse(
+            directAssignments.Where(item => PermissionKeys.All.Contains(item.PermissionKey)).OrderBy(item => item.PermissionKey).Select(item => new ManagedUserDirectPermissionResponse(
                 item.Id, item.PermissionKey, item.Effect.ToString(), item.StartsAtUtc, item.ExpiresAtUtc, item.GrantReason,
                 item.IsAllHousingScope, item.IsAllClientScope, item.IncludesFuturePlatformContracts,
                 scopes.Where(scope => scope.DirectPermissionAssignmentId == item.Id).Select(ToScopeResponse).ToArray())).ToArray());
@@ -1061,7 +1061,7 @@ internal sealed class UserManagementService(
             role.NameEn,
             role.Status.ToString(),
             role.IsProtected,
-            permissions,
+            permissions.Where(PermissionKeys.All.Contains).ToArray(),
             Convert.ToBase64String(role.RowVersion));
     }
 

@@ -75,6 +75,7 @@ internal sealed class FuelCardMonthlyUsageConfiguration : IEntityTypeConfigurati
             table.HasCheckConstraint("CK_FuelCardMonthlyUsages_MonthStart", "DAY([ReportMonth]) = 1");
             table.HasCheckConstraint("CK_FuelCardMonthlyUsages_Amounts", "[TotalLiters] >= 0 AND [TotalAmount] >= 0 AND ([AmountBeforeTax] IS NULL OR [AmountBeforeTax] >= 0) AND ([VatAmount] IS NULL OR [VatAmount] >= 0)");
             table.HasCheckConstraint("CK_FuelCardMonthlyUsages_TransactionCount", "[TransactionCount] IS NULL OR [TransactionCount] >= 0");
+            table.HasCheckConstraint("CK_FuelCardMonthlyUsages_RiderPair", "([RiderProfileId] IS NULL AND [EmployeeId] IS NULL) OR ([RiderProfileId] IS NOT NULL AND [EmployeeId] IS NOT NULL)");
         });
     }
 }

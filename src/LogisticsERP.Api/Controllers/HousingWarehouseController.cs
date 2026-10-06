@@ -39,7 +39,7 @@ public sealed class HousingWarehouseController(IHousingWarehouseService service)
     }
 
     [HttpPost("items")]
-    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    [RequirePermission(PermissionKeys.Operations.HousingCreate)]
     public async Task<IActionResult> CreateItem(
         Guid housingId,
         [FromBody] CreateHousingWarehouseItemRequest request,
@@ -52,7 +52,7 @@ public sealed class HousingWarehouseController(IHousingWarehouseService service)
     }
 
     [HttpPut("items/{itemId:guid}")]
-    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    [RequirePermission(PermissionKeys.Operations.HousingUpdate)]
     public async Task<IActionResult> UpdateItem(
         Guid housingId,
         Guid itemId,
@@ -64,7 +64,7 @@ public sealed class HousingWarehouseController(IHousingWarehouseService service)
     }
 
     [HttpPatch("items/{itemId:guid}/statuses/{status}/quantity")]
-    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    [RequirePermission(PermissionKeys.Operations.HousingUpdate)]
     public async Task<IActionResult> SetStatusQuantity(
         Guid housingId,
         Guid itemId,
@@ -77,7 +77,7 @@ public sealed class HousingWarehouseController(IHousingWarehouseService service)
     }
 
     [HttpPost("items/{itemId:guid}/status-transfers")]
-    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    [RequirePermission(PermissionKeys.Operations.HousingUpdate)]
     public async Task<IActionResult> TransferStatus(
         Guid housingId,
         Guid itemId,
@@ -89,7 +89,7 @@ public sealed class HousingWarehouseController(IHousingWarehouseService service)
     }
 
     [HttpPost("items/{itemId:guid}/housing-transfers")]
-    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    [RequirePermission(PermissionKeys.Operations.HousingUpdate)]
     public async Task<IActionResult> TransferUnusedToHousing(
         Guid housingId,
         Guid itemId,
@@ -101,7 +101,7 @@ public sealed class HousingWarehouseController(IHousingWarehouseService service)
     }
 
     [HttpDelete("items/{itemId:guid}")]
-    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    [RequirePermission(PermissionKeys.Operations.HousingDelete)]
     public async Task<IActionResult> ArchiveItem(
         Guid housingId,
         Guid itemId,

@@ -92,7 +92,7 @@ public sealed class VehicleRegistrationTransitionTests
     }
 
     private static FleetService CreateService(ApplicationDbContext db) =>
-        new(db, new FleetServiceSupport(new TestCurrentUser(), new PermitAll(), TimeProvider.System), new TestFileStorage());
+        new(db, new LogisticsERP.Infrastructure.Identity.IdentityDbContext(new DbContextOptionsBuilder<LogisticsERP.Infrastructure.Identity.IdentityDbContext>().UseInMemoryDatabase(Guid.NewGuid().ToString()).Options), new FleetServiceSupport(new TestCurrentUser(), new PermitAll(), TimeProvider.System), new TestFileStorage());
 
     private sealed class TestCurrentUser : ICurrentUser
     {

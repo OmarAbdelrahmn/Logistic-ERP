@@ -51,7 +51,7 @@ public sealed class VehicleDailyDistancesController(IVehicleDailyDistanceService
     }
 
     [HttpPut("{vehicleId:guid}/{workDate}")]
-    [RequirePermission(PermissionKeys.Fleet.DailyDistancesManage)]
+    [Microsoft.AspNetCore.Authorization.Authorize]
     public async Task<IActionResult> UpsertManual(
         Guid vehicleId,
         DateOnly workDate,

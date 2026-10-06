@@ -12,18 +12,18 @@ public sealed class MissingModelApiSurfaceTests
 {
     public static TheoryData<Type, string, Type, string> ProtectedEndpoints => new()
     {
-        { typeof(CompanyProfileController), nameof(CompanyProfileController.Update), typeof(HttpPutAttribute), PermissionKeys.Catalog.CompanyProfileManage },
-        { typeof(TagsController), nameof(TagsController.ReplaceAssignments), typeof(HttpPutAttribute), PermissionKeys.Catalog.TagsManage },
+        { typeof(CompanyProfileController), nameof(CompanyProfileController.Update), typeof(HttpPutAttribute), PermissionKeys.Catalog.CompanyProfileUpdate },
+        { typeof(TagsController), nameof(TagsController.ReplaceAssignments), typeof(HttpPutAttribute), PermissionKeys.Catalog.TagsUpdate },
         { typeof(PlatformOperationsController), nameof(PlatformOperationsController.RotateCredential), typeof(HttpPostAttribute), PermissionKeys.Operations.PlatformCredentialsRotate },
         { typeof(UsersController), nameof(UsersController.IssueTemporaryCredential), typeof(HttpPostAttribute), PermissionKeys.Security.UsersUpdate },
-        { typeof(SupportAccessController), nameof(SupportAccessController.Resolve), typeof(HttpPostAttribute), PermissionKeys.Security.SupportAccessManage },
+        { typeof(SupportAccessController), nameof(SupportAccessController.Resolve), typeof(HttpPostAttribute), PermissionKeys.Security.SupportAccessUpdate },
         { typeof(HrWorkflowsController), nameof(HrWorkflowsController.ResolveCancellation), typeof(HttpPostAttribute), PermissionKeys.Workflows.LeaveRequestsApprove },
         { typeof(LeaveDocumentsController), nameof(LeaveDocumentsController.Download), typeof(HttpGetAttribute), PermissionKeys.Documents.DownloadSensitive },
         { typeof(RiderDocumentsController), nameof(RiderDocumentsController.AjeerContract), typeof(HttpPostAttribute), PermissionKeys.Documents.Upload },
         { typeof(ExportsController), nameof(ExportsController.Create), typeof(HttpPostAttribute), PermissionKeys.Reporting.ExportsCreate },
         { typeof(AuditEntriesController), nameof(AuditEntriesController.Query), typeof(HttpGetAttribute), PermissionKeys.Security.AuditRead },
         { typeof(DatasetVersionsController), nameof(DatasetVersionsController.Get), typeof(HttpGetAttribute), PermissionKeys.Reporting.ReportsRead },
-        { typeof(HrFormTemplatesController), nameof(HrFormTemplatesController.Create), typeof(HttpPostAttribute), PermissionKeys.HrForms.TemplatesManage },
+        { typeof(HrFormTemplatesController), nameof(HrFormTemplatesController.Create), typeof(HttpPostAttribute), PermissionKeys.HrForms.TemplatesCreate },
         { typeof(HrFormTemplatesController), nameof(HrFormTemplatesController.GetByCode), typeof(HttpGetAttribute), PermissionKeys.HrForms.TemplatesRead }
     };
 
@@ -33,14 +33,14 @@ public sealed class MissingModelApiSurfaceTests
         string[] expected =
         [
             PermissionKeys.Catalog.CompanyProfileRead,
-            PermissionKeys.Catalog.CompanyProfileManage,
+            PermissionKeys.Catalog.CompanyProfileCreate,
             PermissionKeys.Catalog.TagsRead,
-            PermissionKeys.Catalog.TagsManage,
-            PermissionKeys.Documents.CatalogManage,
+            PermissionKeys.Catalog.TagsCreate,
+            PermissionKeys.Documents.CatalogCreate,
             PermissionKeys.Operations.PlatformCredentialsRead,
             PermissionKeys.Operations.PlatformCredentialsRotate,
             PermissionKeys.HrForms.TemplatesRead,
-            PermissionKeys.HrForms.TemplatesManage
+            PermissionKeys.HrForms.TemplatesCreate
         ];
 
         Assert.Equal(PermissionKeys.All.Count, PermissionKeys.All.Distinct(StringComparer.Ordinal).Count());
@@ -75,7 +75,7 @@ public sealed class MissingModelApiSurfaceTests
             .ToArray();
 
         Assert.Contains(permissions, policy => policy?.EndsWith(PermissionKeys.Security.UsersCreate, StringComparison.Ordinal) == true);
-        Assert.Contains(permissions, policy => policy?.EndsWith(PermissionKeys.Security.RolesManage, StringComparison.Ordinal) == true);
-        Assert.Contains(permissions, policy => policy?.EndsWith(PermissionKeys.Security.PermissionsManage, StringComparison.Ordinal) == true);
+        Assert.Contains(permissions, policy => policy?.EndsWith(PermissionKeys.Security.RolesCreate, StringComparison.Ordinal) == true);
+        Assert.Contains(permissions, policy => policy?.EndsWith(PermissionKeys.Security.PermissionsCreate, StringComparison.Ordinal) == true);
     }
 }

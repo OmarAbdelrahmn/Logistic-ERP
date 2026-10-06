@@ -219,7 +219,7 @@ internal sealed class UserProfileService(
                     first.IsAllHousingScope,
                     first.IsAllClientScope,
                     first.IncludesFuturePlatformContracts,
-                    group.Where(row => row.PermissionKey is not null)
+                    group.Where(row => row.PermissionKey is not null && PermissionKeys.All.Contains(row.PermissionKey))
                         .Select(row => row.PermissionKey!)
                         .Distinct(StringComparer.Ordinal)
                         .Order(StringComparer.Ordinal)
@@ -233,7 +233,7 @@ internal sealed class UserProfileService(
             .OrderBy(role => role.Code, StringComparer.Ordinal)
             .ToArray();
 
-        var directPermissions = directRows
+        var directPermissions = directRows.Where(row => PermissionKeys.All.Contains(row.PermissionKey))
             .OrderBy(row => row.PermissionKey, StringComparer.Ordinal)
             .Select(row => new DirectPermissionAuthorizationResponse(
                 row.AssignmentId,
@@ -252,7 +252,7 @@ internal sealed class UserProfileService(
             .ToArray();
 
         var deniedKeys = directRows
-            .Where(row => row.Effect == PermissionEffect.Deny)
+            .Where(row => row.Effect == PermissionEffect.Deny && PermissionKeys.All.Contains(row.PermissionKey))
             .Select(row => row.PermissionKey)
             .Distinct(StringComparer.Ordinal)
             .Order(StringComparer.Ordinal)

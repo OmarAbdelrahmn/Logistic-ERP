@@ -15,11 +15,11 @@ public sealed class PlatformOperationsController(IPlatformOperationsService serv
     public Task<IActionResult> Platforms(CancellationToken cancellationToken) => ToAction(service.GetPlatformsAsync(cancellationToken));
 
     [HttpPost("platforms")]
-    [RequirePermission(PermissionKeys.Operations.PlatformAccountsManage)]
+    [RequirePermission(PermissionKeys.Operations.PlatformAccountsCreate)]
     public Task<IActionResult> CreatePlatform([FromBody] ClientPlatformUpsertRequest request, CancellationToken cancellationToken) => ToAction(service.UpsertPlatformAsync(null, request, cancellationToken));
 
     [HttpPut("platforms/{id:guid}")]
-    [RequirePermission(PermissionKeys.Operations.PlatformAccountsManage)]
+    [RequirePermission(PermissionKeys.Operations.PlatformAccountsUpdate)]
     public Task<IActionResult> UpdatePlatform(Guid id, [FromBody] ClientPlatformUpsertRequest request, CancellationToken cancellationToken) => ToAction(service.UpsertPlatformAsync(id, request, cancellationToken));
 
     [HttpGet("contracts")]
@@ -27,24 +27,24 @@ public sealed class PlatformOperationsController(IPlatformOperationsService serv
     public Task<IActionResult> Contracts([FromQuery] Guid? platformId, CancellationToken cancellationToken) => ToAction(service.GetContractsAsync(platformId, cancellationToken));
 
     [HttpPost("contracts")]
-    [RequirePermission(PermissionKeys.Operations.PlatformAccountsManage)]
+    [RequirePermission(PermissionKeys.Operations.PlatformAccountsCreate)]
     public Task<IActionResult> CreateContract([FromBody] ClientContractUpsertRequest request, CancellationToken cancellationToken) => ToAction(service.UpsertContractAsync(null, request, cancellationToken));
 
     [HttpPut("contracts/{id:guid}")]
-    [RequirePermission(PermissionKeys.Operations.PlatformAccountsManage)]
+    [RequirePermission(PermissionKeys.Operations.PlatformAccountsUpdate)]
     public Task<IActionResult> UpdateContract(Guid id, [FromBody] ClientContractUpsertRequest request, CancellationToken cancellationToken) => ToAction(service.UpsertContractAsync(id, request, cancellationToken));
 
     [HttpGet("accounts")]
     [RequirePermission(PermissionKeys.Operations.PlatformAccountsRead)]
-    public Task<IActionResult> Accounts([FromQuery] Guid? platformId, [FromQuery] Guid? sponsorId, [FromQuery] Guid? dashboardSponsorId, CancellationToken cancellationToken) =>
-        ToAction(service.GetAccountsAsync(platformId, sponsorId, dashboardSponsorId, cancellationToken));
+    public Task<IActionResult> Accounts([FromQuery] Guid? platformId, [FromQuery] Guid? sponsorId, CancellationToken cancellationToken) =>
+        ToAction(service.GetAccountsAsync(platformId, sponsorId, cancellationToken));
 
     [HttpPost("accounts")]
-    [RequirePermission(PermissionKeys.Operations.PlatformAccountsManage)]
+    [RequirePermission(PermissionKeys.Operations.PlatformAccountsCreate)]
     public Task<IActionResult> CreateAccount([FromBody] PlatformAccountUpsertRequest request, CancellationToken cancellationToken) => ToAction(service.UpsertAccountAsync(null, request, cancellationToken));
 
     [HttpPut("accounts/{id:guid}")]
-    [RequirePermission(PermissionKeys.Operations.PlatformAccountsManage)]
+    [RequirePermission(PermissionKeys.Operations.PlatformAccountsUpdate)]
     public Task<IActionResult> UpdateAccount(Guid id, [FromBody] PlatformAccountUpsertRequest request, CancellationToken cancellationToken) => ToAction(service.UpsertAccountAsync(id, request, cancellationToken));
 
     [HttpGet("accounts/{id:guid}/credentials/versions")]
@@ -65,11 +65,11 @@ public sealed class PlatformOperationsController(IPlatformOperationsService serv
     public Task<IActionResult> Registrations([FromQuery] Guid? riderProfileId, CancellationToken cancellationToken) => ToAction(service.GetRegistrationsAsync(riderProfileId, cancellationToken));
 
     [HttpPost("registrations")]
-    [RequirePermission(PermissionKeys.Operations.PlatformAccountsManage)]
+    [RequirePermission(PermissionKeys.Operations.PlatformAccountsCreate)]
     public Task<IActionResult> CreateRegistration([FromBody] PlatformRegistrationUpsertRequest request, CancellationToken cancellationToken) => ToAction(service.UpsertRegistrationAsync(null, request, cancellationToken));
 
     [HttpPut("registrations/{id:guid}")]
-    [RequirePermission(PermissionKeys.Operations.PlatformAccountsManage)]
+    [RequirePermission(PermissionKeys.Operations.PlatformAccountsUpdate)]
     public Task<IActionResult> UpdateRegistration(Guid id, [FromBody] PlatformRegistrationUpsertRequest request, CancellationToken cancellationToken) => ToAction(service.UpsertRegistrationAsync(id, request, cancellationToken));
 
     [HttpGet("assignments")]
@@ -77,15 +77,15 @@ public sealed class PlatformOperationsController(IPlatformOperationsService serv
     public Task<IActionResult> Assignments([FromQuery] Guid? riderProfileId, [FromQuery] bool currentOnly = false, CancellationToken cancellationToken = default) => ToAction(service.GetAssignmentsAsync(riderProfileId, currentOnly, cancellationToken));
 
     [HttpPost("assignments")]
-    [RequirePermission(PermissionKeys.Operations.PlatformAssignmentsManage)]
+    [RequirePermission(PermissionKeys.Operations.PlatformAssignmentsCreate)]
     public Task<IActionResult> AssignAccount([FromBody] AssignPlatformAccountRequest request, CancellationToken cancellationToken) => ToAction(service.AssignAccountAsync(request, cancellationToken));
 
     [HttpPost("assignments/{id:guid}/close")]
-    [RequirePermission(PermissionKeys.Operations.PlatformAssignmentsManage)]
+    [RequirePermission(PermissionKeys.Operations.PlatformAssignmentsDelete)]
     public Task<IActionResult> CloseAssignment(Guid id, [FromBody] ClosePlatformAssignmentRequest request, CancellationToken cancellationToken) => ToAction(service.CloseAssignmentAsync(id, request, cancellationToken));
 
     [HttpPatch("{resource}/{id:guid}/archive")]
-    [RequirePermission(PermissionKeys.Operations.PlatformAccountsManage)]
+    [RequirePermission(PermissionKeys.Operations.PlatformAccountsDelete)]
     public async Task<IActionResult> Archive(string resource, Guid id, [FromBody] ArchiveRequest request, CancellationToken cancellationToken)
     {
         var result = await service.ArchiveAsync(resource, id, request, cancellationToken);

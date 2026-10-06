@@ -60,7 +60,7 @@ public sealed class FuelCardsController(IFuelCardService service) : ControllerBa
     }
 
     [HttpPost]
-    [RequirePermission(PermissionKeys.Fuel.Manage)]
+    [RequirePermission(PermissionKeys.Fuel.Create)]
     public async Task<IActionResult> CreateCard(
         [FromBody] CreateFuelCardRequest request,
         CancellationToken cancellationToken)
@@ -72,7 +72,7 @@ public sealed class FuelCardsController(IFuelCardService service) : ControllerBa
     }
 
     [HttpPut("{id:guid}/sponsor")]
-    [RequirePermission(PermissionKeys.Fuel.Manage)]
+    [RequirePermission(PermissionKeys.Fuel.Update)]
     public async Task<IActionResult> SetSponsor(Guid id, [FromBody] SetFuelCardSponsorRequest request,
         CancellationToken cancellationToken)
     {
@@ -81,7 +81,7 @@ public sealed class FuelCardsController(IFuelCardService service) : ControllerBa
     }
 
     [HttpPut("{id:guid}/city")]
-    [RequirePermission(PermissionKeys.Fuel.Manage)]
+    [RequirePermission(PermissionKeys.Fuel.Update)]
     public async Task<IActionResult> SetCity(Guid id, [FromBody] SetFuelCardCityRequest request,
         CancellationToken cancellationToken)
     {
@@ -98,7 +98,7 @@ public sealed class FuelCardsController(IFuelCardService service) : ControllerBa
     }
 
     [HttpPost("{id:guid}/assignments")]
-    [RequirePermission(PermissionKeys.Fuel.Manage)]
+    [RequirePermission(PermissionKeys.Fuel.Update)]
     public async Task<IActionResult> AssignRider(
         Guid id,
         [FromBody] AssignFuelCardRiderRequest request,
@@ -109,7 +109,7 @@ public sealed class FuelCardsController(IFuelCardService service) : ControllerBa
     }
 
     [HttpPost("{id:guid}/stop-rider")]
-    [RequirePermission(PermissionKeys.Fuel.Manage)]
+    [RequirePermission(PermissionKeys.Fuel.Delete)]
     public async Task<IActionResult> StopRider(
         Guid id,
         [FromBody] StopFuelCardRiderRequest request,
@@ -141,6 +141,38 @@ public sealed class FuelCardsController(IFuelCardService service) : ControllerBa
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 
+    [HttpGet("period-usage")]
+    [RequirePermission(PermissionKeys.Fuel.Read)]
+    public async Task<IActionResult> GetPeriodUsage(
+        [FromQuery] DateOnly from,
+        [FromQuery] DateOnly to,
+        [FromQuery] string? provider,
+        [FromQuery] string? search,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 50,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await service.GetPeriodUsageAsync(
+            from, to, provider, search, page, pageSize, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpGet("unassigned-usage")]
+    [RequirePermission(PermissionKeys.Fuel.Read)]
+    public async Task<IActionResult> GetUnassignedUsage(
+        [FromQuery] DateOnly from,
+        [FromQuery] DateOnly to,
+        [FromQuery] string? provider,
+        [FromQuery] string? search,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 50,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await service.GetUnassignedUsageAsync(
+            from, to, provider, search, page, pageSize, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
     [HttpPost("imports")]
     [Consumes("multipart/form-data")]
     [RequestSizeLimit(26 * 1024 * 1024)]
@@ -160,7 +192,7 @@ public sealed class FuelCardsController(IFuelCardService service) : ControllerBa
             form.File.FileName,
             form.File.ContentType,
             form.File.Length);
-        var result = await service.ImportAsync(upload, form.ExpectedMonth, form.SponsorId, form.OperatingCityId, cancellationToken);
+        var result = await service.ImportAsync(upload, form.ExpectedMonth, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 
@@ -179,8 +211,6 @@ public sealed class FuelCardsController(IFuelCardService service) : ControllerBa
 public sealed class FuelImportForm
 {
     public DateOnly? ExpectedMonth { get; init; }
-    public Guid SponsorId { get; init; }
-    public Guid? OperatingCityId { get; init; }
     public IFormFile File { get; init; } = null!;
 }
 

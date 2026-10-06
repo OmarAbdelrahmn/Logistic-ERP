@@ -48,7 +48,7 @@ public sealed class MaintenanceWorkOrdersController(IMaintenanceService service)
 
     [HttpPost("external")]
     [RequirePermission(PermissionKeys.Maintenance.WorkOrdersCreate)]
-    [RequirePermission(PermissionKeys.Maintenance.ExternalJobsManage)]
+    [RequirePermission(PermissionKeys.Maintenance.ExternalJobsCreate)]
     public async Task<IActionResult> CreateExternal([FromBody] CreateMaintenanceWorkOrderRequest request, CancellationToken cancellationToken)
     {
         if (request.ServiceSubjectType != MaintenanceServiceSubjectType.ExternalVehicle)
@@ -113,7 +113,7 @@ public sealed class MaintenanceWorkOrdersController(IMaintenanceService service)
 
     [HttpPost("{id:guid}/part-sales")]
     [RequirePermission(PermissionKeys.Maintenance.WorkOrdersUpdate)]
-    [RequirePermission(PermissionKeys.Maintenance.PartSalesManage)]
+    [RequirePermission(PermissionKeys.Maintenance.PartSalesCreate)]
     [RequirePermission(PermissionKeys.Inventory.StockMove)]
     public async Task<IActionResult> PostPartSale(Guid id, [FromBody] ExternalPartSaleRequest request, CancellationToken cancellationToken)
     {
@@ -123,7 +123,7 @@ public sealed class MaintenanceWorkOrdersController(IMaintenanceService service)
 
     [HttpPost("{id:guid}/customer-labor-charges")]
     [RequirePermission(PermissionKeys.Maintenance.WorkOrdersUpdate)]
-    [RequirePermission(PermissionKeys.Maintenance.CustomerLaborChargesManage)]
+    [RequirePermission(PermissionKeys.Maintenance.CustomerLaborChargesCreate)]
     public async Task<IActionResult> PostCustomerLaborCharge(Guid id, [FromBody] ExternalFinancialEntryRequest request, CancellationToken cancellationToken)
     {
         var result = await service.PostCustomerLaborChargeAsync(id, request, cancellationToken);
@@ -132,7 +132,7 @@ public sealed class MaintenanceWorkOrdersController(IMaintenanceService service)
 
     [HttpPost("{id:guid}/mechanic-labor-payments")]
     [RequirePermission(PermissionKeys.Maintenance.WorkOrdersUpdate)]
-    [RequirePermission(PermissionKeys.Maintenance.MechanicLaborPaymentsManage)]
+    [RequirePermission(PermissionKeys.Maintenance.MechanicLaborPaymentsCreate)]
     public async Task<IActionResult> PostMechanicLaborPayment(Guid id, [FromBody] MechanicLaborPaymentRequest request, CancellationToken cancellationToken)
     {
         var result = await service.PostMechanicLaborPaymentAsync(id, request, cancellationToken);
@@ -141,7 +141,7 @@ public sealed class MaintenanceWorkOrdersController(IMaintenanceService service)
 
     [HttpPost("{id:guid}/other-financial-entries")]
     [RequirePermission(PermissionKeys.Maintenance.WorkOrdersUpdate)]
-    [RequirePermission(PermissionKeys.Maintenance.ExternalJobsManage)]
+    [RequirePermission(PermissionKeys.Maintenance.ExternalJobsCreate)]
     public async Task<IActionResult> PostOtherFinancialEntry(Guid id, [FromQuery] bool income, [FromBody] ExternalFinancialEntryRequest request, CancellationToken cancellationToken)
     {
         var result = await service.PostOtherFinancialEntryAsync(id, income, request, cancellationToken);
@@ -150,7 +150,7 @@ public sealed class MaintenanceWorkOrdersController(IMaintenanceService service)
 
     [HttpPost("{id:guid}/customer-payments")]
     [RequirePermission(PermissionKeys.Maintenance.WorkOrdersUpdate)]
-    [RequirePermission(PermissionKeys.Maintenance.ExternalJobsManage)]
+    [RequirePermission(PermissionKeys.Maintenance.ExternalJobsCreate)]
     public async Task<IActionResult> PostCustomerPayment(Guid id, [FromBody] ExternalCustomerPaymentRequest request, CancellationToken cancellationToken)
     {
         var result = await service.PostCustomerPaymentAsync(id, request, cancellationToken);

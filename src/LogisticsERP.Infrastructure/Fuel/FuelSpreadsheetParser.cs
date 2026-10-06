@@ -128,6 +128,7 @@ internal static class FuelSpreadsheetParser
                 errors.Add(new ParsedFuelRowError(row.Number, null, "missing_card_number", "رقم البطاقة أو اللوحة مفقود."));
                 continue;
             }
+            cardNumber = FuelCardRules.RemoveCardNumberWhitespace(cardNumber!);
 
             if (IsMeaningful(invoiceNumber) && !seenInvoices.Add(invoiceNumber!))
             {
@@ -160,7 +161,7 @@ internal static class FuelSpreadsheetParser
             {
                 aggregate = new MutableCardTotal(
                     row.Number,
-                    cardNumber!.Trim(),
+                    cardNumber!,
                     normalizedCardNumber,
                     identifierType,
                     vehicle,
@@ -232,6 +233,7 @@ internal static class FuelSpreadsheetParser
                 errors.Add(new ParsedFuelRowError(row.Number, null, "missing_card_number", "رقم البطاقة أو اللوحة مفقود."));
                 continue;
             }
+            cardNumber = FuelCardRules.RemoveCardNumberWhitespace(cardNumber!);
             if (!TryFuelAmounts(litersValue, amountValue, out var liters, out var amount))
             {
                 errors.Add(new ParsedFuelRowError(row.Number, cardNumber, "invalid_amount", "تعذر قراءة اللترات أو التكلفة من الصف."));
@@ -244,7 +246,7 @@ internal static class FuelSpreadsheetParser
             {
                 aggregate = new MutableCardTotal(
                     row.Number,
-                    cardNumber!.Trim(),
+                    cardNumber!,
                     normalizedCardNumber,
                     identifierType,
                     plate,

@@ -478,6 +478,11 @@ internal sealed class HrWorkflowService(
     {
         if (currentUser.UserId is not { } userId || !TryParseEnum<AbsenceCaseStatus>(request.Status, out var status)
             || !HrServiceSupport.HasText(request.Reason)) return Result.Failure<AbsenceCaseResponse>(HrErrors.InvalidRequest);
+        var permission = status == AbsenceCaseStatus.Cancelled
+            ? PermissionKeys.Workflows.AbsenceCasesDelete : PermissionKeys.Workflows.AbsenceCasesUpdate;
+        if (currentUser.AuthorizationVersion is not { } version
+            || !await permissionChecker.HasPermissionAsync(userId, version, permission, cancellationToken: cancellationToken))
+            return Result.Failure<AbsenceCaseResponse>(HrErrors.Forbidden);
         var entity = await dbContext.EmployeeAbsenceComplianceCases.SingleOrDefaultAsync(item => item.Id == id, cancellationToken);
         if (entity is null) return Result.Failure<AbsenceCaseResponse>(HrErrors.NotFound);
         if (!HrServiceSupport.MatchesRowVersion(entity.RowVersion, request.RowVersion)) return Result.Failure<AbsenceCaseResponse>(HrErrors.ConcurrencyConflict);

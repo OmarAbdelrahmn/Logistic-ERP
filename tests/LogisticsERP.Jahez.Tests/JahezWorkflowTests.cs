@@ -26,6 +26,130 @@ public sealed class JahezWorkflowTests
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
+    public async Task ResponseNamesFollowHistoricalHandoversAndIncludeBothRidersAndUsers(bool sql)
+    {
+        Assert.SkipUnless(!sql || OperatingSystem.IsWindows() && Environment.GetEnvironmentVariable("LOGISTICS_JAHEZ_SQL_TESTS") == "1",
+            "Set LOGISTICS_JAHEZ_SQL_TESTS=1 to run against a uniquely named disposable LocalDB database.");
+        await using var f = await Fixture.Create(sql);
+        var ct = TestContext.Current.CancellationToken;
+        await using var identity = new IdentityDbContext(new DbContextOptionsBuilder<IdentityDbContext>()
+            .UseInMemoryDatabase($"JahezNames_{Guid.NewGuid():N}").Options);
+        identity.Users.Add(new ApplicationUser { Id = f.User.UserId!.Value,
+            DisplayNameAr = "موظف التحصيل", DisplayNameEn = "Collector", IsDeleted = true });
+        await identity.SaveChangesAsync(ct);
+        var mapper = new JahezResponseMapper(f.Db, identity);
+        var account = await f.Account("names");
+        var first = Success(await f.Service.HandoverAsync("names-first", new(account.Id, f.RiderId, At(1), "استلام", 80), ct));
+        Success(await f.Service.CloseAsync("names-close", first.Id, new(At(2), "إغلاق"), ct));
+        Success(await f.Service.HandoverAsync("names-next", new(account.Id, f.OtherRiderId, At(3), "مندوب آخر", 0), ct));
+
+        // Archived owners and riders must not make their historical display names disappear.
+        var owner = await f.Db.Employees.SingleAsync(x => x.Id == account.RegisteredEmployeeId, ct);
+        owner.FullNameEn = "Account owner";
+        owner.IsDeleted = true;
+        var rider = await f.Db.RiderProfiles.SingleAsync(x => x.Id == f.RiderId, ct);
+        rider.IsDeleted = true;
+        await f.Db.SaveChangesAsync(ct);
+        var page = Assert.IsType<JahezPage<object>>(await mapper.MapAsync(
+            Success(await f.Service.GetHandoversAsync(account.Id, null, 1, 50, ct)), ct));
+        var historical = Assert.IsType<JahezHandoverResponse>(page.Items.Single(x => ((JahezHandoverResponse)x).Id == first.Id));
+        Assert.Equal(f.RiderId, historical.ActualRiderProfileId);
+        Assert.Equal("المندوب الفعلي", historical.ActualRiderNameAr);
+        Assert.Equal("صاحب الحساب", historical.OwnerRiderNameAr);
+        Assert.Equal("Account owner", historical.OwnerRiderNameEn);
+        Assert.Equal(account.RegisteredEmployeeId, historical.OwnerEmployeeId);
+        Assert.NotNull(historical.OwnerRiderProfileId);
+        Assert.NotEqual(historical.OwnerRiderProfileId, historical.ActualRiderProfileId);
+        Assert.Equal("names", historical.Account!.ExternalAccountId);
+        Assert.Equal("المندوب التالي", ((JahezHandoverResponse)page.Items[0]).ActualRiderNameAr);
+
+        var fee = Assert.IsType<JahezAccountFeeResponse>(await mapper.MapAsync(Success(await f.Service.GetFeeAsync(first.Id, ct)), ct));
+        Assert.Equal(f.RiderId, fee.ActualRiderProfileId);
+        Assert.Equal("موظف التحصيل", fee.CreatedByUserNameAr);
+        var settlements = Assert.IsType<JahezPage<object>>(await mapper.MapAsync(
+            Success(await f.Service.GetSettlementsAsync(first.Id, 1, 50, ct)), ct));
+        var settlement = Assert.IsType<JahezRiderSettlementResponse>(Assert.Single(settlements.Items));
+        Assert.Equal("Collector", settlement.CollectedByUserNameEn);
+        Assert.Equal("المندوب الفعلي", settlement.ActualRiderNameAr);
+        var balance = Assert.IsType<JahezBalanceResponse>(await mapper.MapAsync(
+            Success(await f.Service.GetBalanceAsync(first.Id, new(2026, 10, 2), ct)), ct));
+        Assert.Equal(historical.OwnerRiderProfileId, balance.OwnerRiderProfileId);
+        Assert.Equal(historical.ActualRiderNameAr, balance.ActualRiderNameAr);
+
+        var json = System.Text.Json.JsonSerializer.Serialize(settlement, System.Text.Json.JsonSerializerOptions.Web);
+        using var document = System.Text.Json.JsonDocument.Parse(json);
+        Assert.Equal(f.User.UserId, document.RootElement.GetProperty("collectedByUserId").GetGuid());
+        Assert.Equal("Collector", document.RootElement.GetProperty("collectedByUserNameEn").GetString());
+        Assert.Equal(first.Id, document.RootElement.GetProperty("handoverId").GetGuid());
+    }
+
+    [Fact]
+    public async Task ResponseMapperEnrichesNestedApprovalsImportsAndAllEntityResponses()
+    {
+        await using var f = await Fixture.Create();
+        var ct = TestContext.Current.CancellationToken;
+        await using var identity = new IdentityDbContext(new DbContextOptionsBuilder<IdentityDbContext>()
+            .UseInMemoryDatabase($"JahezNames_{Guid.NewGuid():N}").Options);
+        identity.Users.Add(new ApplicationUser { Id = f.User.UserId!.Value, DisplayNameAr = "المستخدم", DisplayNameEn = "User" });
+        await identity.SaveChangesAsync(ct);
+        var mapper = new JahezResponseMapper(f.Db, identity);
+        var account = await f.Account("source");
+        var target = await f.Account("target");
+        var handover = Success(await f.Service.HandoverAsync("start-names", new(account.Id, f.RiderId, At(1), "استلام", 80), ct));
+        var approval = Success(await f.Service.RequestApprovalAsync("request-names",
+            new(handover.Id, JahezApprovalKind.FreeSwitch, "تبديل", TargetAccountId: target.Id, EffectiveAtUtc: At(3)), ct));
+        var decision = new JahezApprovalDecision { RequestId = approval.Request.Id, ActorUserId = f.User.UserId.Value };
+        var mapped = Assert.IsType<JahezApprovalDetailsResponse>(await mapper.MapAsync(approval with { Decisions = [decision] }, ct));
+        Assert.Equal("User", mapped.Request.RequestedByUserNameEn);
+        Assert.Equal(target.Id, mapped.Request.TargetAccount!.Id);
+        Assert.Equal("target", mapped.Request.TargetAccount.ExternalAccountId);
+        Assert.Equal("User", mapped.Decisions[0].ActorUserNameEn);
+        Assert.Equal(f.RiderId, mapped.Decisions[0].ActualRiderProfileId);
+
+        var preview = new JahezImportPreview(Guid.NewGuid(), JahezImportKind.Transactions, false,
+            [new(Guid.NewGuid(), "file.xlsx", 2, "source", At(2), account.Id, handover.Id, f.RiderId, -10, null),
+             new(Guid.NewGuid(), "file.xlsx", 3, "source", At(2), account.Id, null, null, -20, null)], [],
+            Accounts: [new(account.Id, "source", new(2026, 10, 1), new(2026, 10, 2), 2, -30, 30, null, false)]);
+        var mappedPreview = Assert.IsType<JahezImportPreview>(await mapper.MapAsync(preview, ct));
+        Assert.Equal("المندوب الفعلي", mappedPreview.Rows[0].ActualRiderNameAr);
+        Assert.Equal("صاحب الحساب", mappedPreview.Rows[1].OwnerRiderNameAr);
+        Assert.Null(mappedPreview.Rows[1].ActualRiderProfileId);
+        Assert.Null(mappedPreview.Accounts![0].ActualRiderProfileId);
+
+        object[] entities = [
+            new JahezLedgerEntry { HandoverId = handover.Id },
+            new JahezEarningsStatement { HandoverId = handover.Id },
+            new JahezCommissionPolicyPeriod { HandoverId = handover.Id },
+            new JahezCashboxEntry { HandoverId = handover.Id, CollectedByUserId = f.User.UserId.Value },
+            new JahezDispatchReportRow(account.Id, "source", f.RiderId, handover.Id, new(2026, 10, 2), 3),
+            new JahezCashboxHandover { RequestedByUserId = f.User.UserId.Value,
+                AccountantUserId = f.User.UserId.Value, ApprovedByUserId = f.User.UserId.Value },
+            new JahezImportBatch { UploadedByUserId = f.User.UserId.Value }];
+        var results = Assert.IsType<JahezPage<object>>(await mapper.MapAsync(new JahezPage<object>(entities, 2, 7), ct));
+        Assert.Equal(2, results.Page);
+        Assert.Equal(7, results.PageSize);
+        Assert.All(results.Items.Take(5), x => {
+            var named = Assert.IsAssignableFrom<JahezNamedResponse>(x);
+            Assert.Equal(f.RiderId, named.ActualRiderProfileId);
+            Assert.Equal("صاحب الحساب", named.OwnerRiderNameAr);
+        });
+        var cashbox = Assert.IsType<JahezCashboxHandoverResponse>(results.Items[5]);
+        Assert.Equal("User", cashbox.RequestedByUserNameEn);
+        Assert.Equal("User", cashbox.AccountantUserNameEn);
+        Assert.Equal("User", cashbox.ApprovedByUserNameEn);
+        Assert.Equal("User", ((JahezImportBatchResponse)results.Items[6]).UploadedByUserNameEn);
+
+        var ownerless = await f.Db.PlatformRiderAccounts.SingleAsync(x => x.Id == target.Id, ct);
+        ownerless.RegisteredEmployeeId = null;
+        await f.Db.SaveChangesAsync(ct);
+        var missing = Assert.IsType<JahezHandoverResponse>(await mapper.MapAsync(handover with { AccountId = target.Id, RiderProfileId = Guid.NewGuid() }, ct));
+        Assert.Null(missing.OwnerRiderNameAr);
+        Assert.Null(missing.ActualRiderNameAr);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
     public async Task FullWorkflowKeepsDebtOnPreviousRiderAndSeparatesCashboxSections(bool sql)
     {
         Assert.SkipUnless(!sql || OperatingSystem.IsWindows() && Environment.GetEnvironmentVariable("LOGISTICS_JAHEZ_SQL_TESTS") == "1",
@@ -235,7 +359,7 @@ public sealed class JahezWorkflowTests
         await using var f = await Fixture.Create();
         var ct = TestContext.Current.CancellationToken;
         var a = await f.Account("500");
-        f.Permissions.Denied = PermissionKeys.Jahez.HandoversManage;
+        f.Permissions.Denied = PermissionKeys.Jahez.HandoversCreate;
         Assert.True((await f.Service.HandoverAsync("denied", new(a.Id, f.RiderId, At(1), "استلام", 80), ct)).IsFailure);
         Assert.Empty(await f.Db.Set<JahezAccountHandover>().ToArrayAsync(ct));
         f.Permissions.Denied = null;
@@ -447,28 +571,26 @@ public sealed class JahezWorkflowTests
     }
 
     [Fact]
-    public async Task DashboardSponsorIsIndependentInPrimaryAndCompatibilityApisAndJahezAssignmentsCannotBypassFees()
+    public async Task AccountSponsorWorksInBothApisAndJahezAssignmentsCannotBypassFees()
     {
         await using var f = await Fixture.Create(); var ct = TestContext.Current.CancellationToken;
         var sponsor = await f.Db.Sponsors.FirstAsync(ct);
         var city = await f.Db.OperatingCities.FirstAsync(ct);
-        var dashboard = new Sponsor { RegistryNameAr = "كفيل الداشبورد", Status = CatalogStatus.Active };
-        f.Db.Add(dashboard); await f.Db.SaveChangesAsync(ct);
         var simple = new SimplePlatformService(f.Db, f.User, f.Clock, new UnusedProtector());
         var compatibility = new PlatformOperationsService(f.Db, f.User, f.Clock, new UnusedProtector());
         var request = new SimplePlatformAccountUpsertRequest(f.PlatformId, city.Id, sponsor.Id, f.RiderId,
             "PRIMARY", "1200", null, "PayPerOrder", "Available", null, null, null, null, null, null, null);
-        Assert.True((await simple.CreateAccountAsync(request, ct)).IsFailure);
-        var primary = Success(await simple.CreateAccountAsync(request with { DashboardSponsorId = dashboard.Id }, ct));
-        Assert.Equal(dashboard.Id, primary.DashboardSponsorId); Assert.Equal(sponsor.Id, primary.SponsorId);
+        var primary = Success(await simple.CreateAccountAsync(request, ct));
+        Assert.Equal(sponsor.Id, primary.SponsorId);
         var employee = await f.Db.RiderProfiles.Where(x => x.Id == f.OtherRiderId).Select(x => x.EmployeeId).SingleAsync(ct);
         var compatibleRequest = new PlatformAccountUpsertRequest(f.PlatformId, employee, city.Id, sponsor.Id,
             "COMPAT", "1201", null, "PayPerOrder", "Available", null, null, null, null, null, null, null);
-        Assert.True((await compatibility.UpsertAccountAsync(null, compatibleRequest, ct)).IsFailure);
-        var compatible = Success(await compatibility.UpsertAccountAsync(null, compatibleRequest with { DashboardSponsorId = dashboard.Id }, ct));
-        Assert.Equal(dashboard.Id, compatible.DashboardSponsorId); Assert.Equal(sponsor.Id, compatible.SponsorId);
-        Assert.Equal(2, Success(await compatibility.GetAccountsAsync(f.PlatformId, null, dashboard.Id, ct)).Count);
-        Assert.Empty(Success(await simple.GetAccountsAsync(null, f.PlatformId, null, null, null, null, null, null, false, false, sponsor.Id, ct)));
+        var compatible = Success(await compatibility.UpsertAccountAsync(null, compatibleRequest, ct));
+        Assert.Equal(sponsor.Id, compatible.SponsorId);
+        Assert.Equal(2, Success(await compatibility.GetAccountsAsync(f.PlatformId, sponsor.Id, ct)).Count);
+        Assert.Equal(2, Success(await simple.GetAccountsAsync(null, f.PlatformId, null, sponsor.Id, null, null, null, null, false, false, ct)).Count);
+        Assert.Empty(Success(await compatibility.GetAccountsAsync(f.PlatformId, Guid.NewGuid(), ct)));
+        Assert.Empty(Success(await simple.GetAccountsAsync(null, f.PlatformId, null, Guid.NewGuid(), null, null, null, null, false, false, ct)));
         var bypass = await simple.AssignAccountAsync(primary.Id, new(f.RiderId, new(2026, 10, 1), "تجاوز", false, null), ct);
         Assert.True(bypass.IsFailure); Assert.Equal(JahezErrors.UseJahezWorkflow.Code, bypass.Error.Code);
         Assert.Empty(await f.Db.RiderClientAssignments.ToArrayAsync(ct));
@@ -508,7 +630,8 @@ public sealed class JahezWorkflowTests
         Assert.Contains("[jahez].[JahezLedgerEntry]", script, StringComparison.Ordinal);
         Assert.Contains("[EndedAtUtc] IS NULL AND [IsDeleted] = 0", script, StringComparison.Ordinal);
         Assert.Contains("[ReversesEntryId] IS NOT NULL", script, StringComparison.Ordinal);
-        Assert.Contains("DashboardSponsorId", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("DashboardSponsorId", script, StringComparison.Ordinal);
+        Assert.Contains("FK_PlatformRiderAccounts_Sponsors_SponsorId", script, StringComparison.Ordinal);
         var grouped = (from e in db.Set<JahezCashboxEntry>()
             join h in db.Set<JahezCashboxHandover>() on e.CashboxHandoverId equals h.Id into handovers
             from h in handovers.DefaultIfEmpty()
@@ -620,7 +743,7 @@ public sealed class JahezWorkflowTests
             var sponsor = await Db.Sponsors.FirstAsync(TestContext.Current.CancellationToken);
             var city = await Db.OperatingCities.FirstAsync(TestContext.Current.CancellationToken);
             var a = new PlatformRiderAccount { Code = $"J-{external}", ExternalAccountId = external, ClientPlatformId = PlatformId,
-                RegisteredEmployeeId = ownerEmployee, SponsorId = sponsor.Id, DashboardSponsorId = sponsor.Id,
+                RegisteredEmployeeId = ownerEmployee, SponsorId = sponsor.Id,
                 OperatingCityId = city.Id, Status = PlatformRiderAccountStatus.Available };
             Db.Add(a); await Db.SaveChangesAsync(TestContext.Current.CancellationToken); Db.ChangeTracker.Clear(); return a;
         }

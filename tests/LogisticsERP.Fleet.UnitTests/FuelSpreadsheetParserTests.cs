@@ -26,7 +26,7 @@ public sealed class FuelSpreadsheetParserTests
 
         sheet.Cell(2, 1).Value = "INV-1";
         sheet.Cell(2, 2).Value = "ب  ب  و  ٨  ٣  ٥";
-        sheet.Cell(2, 3).Value = "bw203";
+        sheet.Cell(2, 3).Value = "b w 203";
         sheet.Cell(2, 4).Value = "91";
         sheet.Cell(2, 5).Value = 20m;
         sheet.Cell(2, 6).Value = 17.39m;
@@ -48,6 +48,7 @@ public sealed class FuelSpreadsheetParserTests
         Assert.Equal(new DateOnly(2026, 8, 1), report.ReportMonth);
         var card = Assert.Single(report.Cards);
         Assert.Equal("BW203", card.NormalizedCardNumber);
+        Assert.Equal("bw203", card.CardNumber);
         Assert.Equal(FuelCardIdentifierType.InternalNumber, card.IdentifierType);
         Assert.Equal(32.110m, card.TotalLiters);
         Assert.Equal(70m, card.TotalAmount);
@@ -87,6 +88,7 @@ public sealed class FuelSpreadsheetParserTests
         Assert.Null(card.TransactionCount);
         Assert.Equal("91", card.FuelType);
         Assert.Equal(PlateNumberRules.CanonicalKey("ب ب و ٨٣٥"), card.NormalizedCardNumber);
+        Assert.Equal("\u200Fببو٨٣٥\u200E", card.CardNumber);
     }
 
     [Theory]

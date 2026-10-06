@@ -62,7 +62,7 @@ public sealed class VehiclePlatformAccountAssignmentsController(
     }
 
     [HttpPost]
-    [RequirePermission(PermissionKeys.Fleet.AssignmentsManage)]
+    [RequirePermission(PermissionKeys.Fleet.AssignmentsCreate)]
     public async Task<IActionResult> Approve(
         [FromBody] ApproveVehiclePlatformAccountAssignmentRequest request,
         CancellationToken cancellationToken)
@@ -74,7 +74,7 @@ public sealed class VehiclePlatformAccountAssignmentsController(
     }
 
     [HttpPost("{id:guid}/close")]
-    [RequirePermission(PermissionKeys.Fleet.AssignmentsManage)]
+    [RequirePermission(PermissionKeys.Fleet.AssignmentsDelete)]
     public async Task<IActionResult> Close(
         Guid id,
         [FromBody] CloseVehiclePlatformAccountAssignmentRequest request,
@@ -103,7 +103,9 @@ public sealed class VehiclePlatformAccountAssignmentsController(
     }
 
     [HttpPost("{id:guid}/switch")]
-    [RequirePermission(PermissionKeys.Fleet.AssignmentsManage)]
+    [RequirePermission(PermissionKeys.Fleet.AssignmentsUpdate)]
+    [RequirePermission(PermissionKeys.Fleet.AssignmentsCreate)]
+    [RequirePermission(PermissionKeys.Fleet.AssignmentsDelete)]
     public async Task<IActionResult> Switch(
         Guid id,
         [FromBody] SwitchVehiclePlatformAccountAssignmentRequest request,
@@ -116,7 +118,9 @@ public sealed class VehiclePlatformAccountAssignmentsController(
     }
 
     [HttpPost("switches/{switchId:guid}/accept")]
-    [RequirePermission(PermissionKeys.Fleet.AssignmentsManage)]
+    [RequirePermission(PermissionKeys.Fleet.AssignmentsUpdate)]
+    [RequirePermission(PermissionKeys.Fleet.AssignmentsCreate)]
+    [RequirePermission(PermissionKeys.Fleet.AssignmentsDelete)]
     public async Task<IActionResult> AcceptSwitch(
         Guid switchId,
         [FromBody] AcceptVehiclePlatformAccountSwitchRequest request,
@@ -169,7 +173,7 @@ public sealed class VehiclePlatformAccountAssignmentsController(
     }
 
     [HttpPost("lease-agreements")]
-    [RequirePermission(PermissionKeys.Fleet.AssignmentsManage)]
+    [RequirePermission(PermissionKeys.Fleet.AssignmentsCreate)]
     public async Task<IActionResult> CreateLeaseAgreement(
         [FromBody] CreateSponsorVehicleLeaseAgreementRequest request,
         CancellationToken cancellationToken)
@@ -181,7 +185,7 @@ public sealed class VehiclePlatformAccountAssignmentsController(
     }
 
     [HttpPost("lease-agreements/{agreementId:guid}/close")]
-    [RequirePermission(PermissionKeys.Fleet.AssignmentsManage)]
+    [RequirePermission(PermissionKeys.Fleet.AssignmentsDelete)]
     public async Task<IActionResult> CloseLeaseAgreement(
         Guid agreementId,
         [FromBody] CloseSponsorVehicleLeaseAgreementRequest request,

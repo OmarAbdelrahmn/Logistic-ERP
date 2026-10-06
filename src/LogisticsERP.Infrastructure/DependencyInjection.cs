@@ -76,6 +76,7 @@ public static class DependencyInjection
         services.AddScoped<ISimplePlatformService, SimplePlatformService>();
         services.AddScoped<JahezService>();
         services.AddScoped<IJahezService>(provider => provider.GetRequiredService<JahezService>());
+        services.AddScoped<IJahezResponseMapper, JahezResponseMapper>();
         services.AddScoped<IJahezReminderService, JahezReminderService>();
         services.AddScoped<IHrWorkflowService, HrWorkflowService>();
         services.AddScoped<ILegalCaseService, LegalCaseService>();

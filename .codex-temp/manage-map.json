@@ -1,0 +1,324 @@
+{
+  "PermissionKeys.Security.RolesManage": {
+    "ref": "PermissionKeys.Security.RolesManage",
+    "group": "Security",
+    "base": "Roles",
+    "old": "roles.manage",
+    "prefix": "roles"
+  },
+  "PermissionKeys.Security.PermissionsManage": {
+    "ref": "PermissionKeys.Security.PermissionsManage",
+    "group": "Security",
+    "base": "Permissions",
+    "old": "permissions.manage",
+    "prefix": "permissions"
+  },
+  "PermissionKeys.Security.SupportAccessManage": {
+    "ref": "PermissionKeys.Security.SupportAccessManage",
+    "group": "Security",
+    "base": "SupportAccess",
+    "old": "support_access.manage",
+    "prefix": "support_access"
+  },
+  "PermissionKeys.Catalog.CompanyProfileManage": {
+    "ref": "PermissionKeys.Catalog.CompanyProfileManage",
+    "group": "Catalog",
+    "base": "CompanyProfile",
+    "old": "company_profile.manage",
+    "prefix": "company_profile"
+  },
+  "PermissionKeys.Catalog.OperatingCitiesManage": {
+    "ref": "PermissionKeys.Catalog.OperatingCitiesManage",
+    "group": "Catalog",
+    "base": "OperatingCities",
+    "old": "operating_cities.manage",
+    "prefix": "operating_cities"
+  },
+  "PermissionKeys.Catalog.TagsManage": {
+    "ref": "PermissionKeys.Catalog.TagsManage",
+    "group": "Catalog",
+    "base": "Tags",
+    "old": "tags.manage",
+    "prefix": "tags"
+  },
+  "PermissionKeys.Workforce.RidersManage": {
+    "ref": "PermissionKeys.Workforce.RidersManage",
+    "group": "Workforce",
+    "base": "Riders",
+    "old": "riders.manage",
+    "prefix": "riders"
+  },
+  "PermissionKeys.Workforce.SponsorsManage": {
+    "ref": "PermissionKeys.Workforce.SponsorsManage",
+    "group": "Workforce",
+    "base": "Sponsors",
+    "old": "sponsors.manage",
+    "prefix": "sponsors"
+  },
+  "PermissionKeys.Compliance.ResidencyManage": {
+    "ref": "PermissionKeys.Compliance.ResidencyManage",
+    "group": "Compliance",
+    "base": "Residency",
+    "old": "residency.manage",
+    "prefix": "residency"
+  },
+  "PermissionKeys.Compliance.LicensesManage": {
+    "ref": "PermissionKeys.Compliance.LicensesManage",
+    "group": "Compliance",
+    "base": "Licenses",
+    "old": "licenses.manage",
+    "prefix": "licenses"
+  },
+  "PermissionKeys.Compliance.RiderCardsManage": {
+    "ref": "PermissionKeys.Compliance.RiderCardsManage",
+    "group": "Compliance",
+    "base": "RiderCards",
+    "old": "rider_cards.manage",
+    "prefix": "rider_cards"
+  },
+  "PermissionKeys.Compliance.HealthCardsManage": {
+    "ref": "PermissionKeys.Compliance.HealthCardsManage",
+    "group": "Compliance",
+    "base": "HealthCards",
+    "old": "health_cards.manage",
+    "prefix": "health_cards"
+  },
+  "PermissionKeys.Compliance.InsuranceManage": {
+    "ref": "PermissionKeys.Compliance.InsuranceManage",
+    "group": "Compliance",
+    "base": "Insurance",
+    "old": "insurance.manage",
+    "prefix": "insurance"
+  },
+  "PermissionKeys.Compliance.PromissoryNotesManage": {
+    "ref": "PermissionKeys.Compliance.PromissoryNotesManage",
+    "group": "Compliance",
+    "base": "PromissoryNotes",
+    "old": "promissory_notes.manage",
+    "prefix": "promissory_notes"
+  },
+  "PermissionKeys.Documents.CatalogManage": {
+    "ref": "PermissionKeys.Documents.CatalogManage",
+    "group": "Documents",
+    "base": "Catalog",
+    "old": "documents.catalog.manage",
+    "prefix": "documents.catalog"
+  },
+  "PermissionKeys.Operations.PlatformAccountsManage": {
+    "ref": "PermissionKeys.Operations.PlatformAccountsManage",
+    "group": "Operations",
+    "base": "PlatformAccounts",
+    "old": "platform_accounts.manage",
+    "prefix": "platform_accounts"
+  },
+  "PermissionKeys.Operations.PlatformAssignmentsManage": {
+    "ref": "PermissionKeys.Operations.PlatformAssignmentsManage",
+    "group": "Operations",
+    "base": "PlatformAssignments",
+    "old": "platform_assignments.manage",
+    "prefix": "platform_assignments"
+  },
+  "PermissionKeys.Operations.HousingManage": {
+    "ref": "PermissionKeys.Operations.HousingManage",
+    "group": "Operations",
+    "base": "Housing",
+    "old": "housing.manage",
+    "prefix": "housing"
+  },
+  "PermissionKeys.Operations.PhoneSimsManage": {
+    "ref": "PermissionKeys.Operations.PhoneSimsManage",
+    "group": "Operations",
+    "base": "PhoneSims",
+    "old": "phone_sims.manage",
+    "prefix": "phone_sims"
+  },
+  "PermissionKeys.Reporting.NotificationsManage": {
+    "ref": "PermissionKeys.Reporting.NotificationsManage",
+    "group": "Reporting",
+    "base": "Notifications",
+    "old": "notifications.manage",
+    "prefix": "notifications"
+  },
+  "PermissionKeys.Fleet.VehiclesManage": {
+    "ref": "PermissionKeys.Fleet.VehiclesManage",
+    "group": "Fleet",
+    "base": "Vehicles",
+    "old": "fleet.vehicles.manage",
+    "prefix": "fleet.vehicles"
+  },
+  "PermissionKeys.Fleet.AssignmentsManage": {
+    "ref": "PermissionKeys.Fleet.AssignmentsManage",
+    "group": "Fleet",
+    "base": "Assignments",
+    "old": "fleet.assignments.manage",
+    "prefix": "fleet.assignments"
+  },
+  "PermissionKeys.Fleet.IssuesManage": {
+    "ref": "PermissionKeys.Fleet.IssuesManage",
+    "group": "Fleet",
+    "base": "Issues",
+    "old": "fleet.issues.manage",
+    "prefix": "fleet.issues"
+  },
+  "PermissionKeys.Fleet.ComplianceManage": {
+    "ref": "PermissionKeys.Fleet.ComplianceManage",
+    "group": "Fleet",
+    "base": "Compliance",
+    "old": "fleet.compliance.manage",
+    "prefix": "fleet.compliance"
+  },
+  "PermissionKeys.Fleet.CorrectionsManage": {
+    "ref": "PermissionKeys.Fleet.CorrectionsManage",
+    "group": "Fleet",
+    "base": "Corrections",
+    "old": "fleet.corrections.manage",
+    "prefix": "fleet.corrections"
+  },
+  "PermissionKeys.Fleet.RegistrationTransitionsManage": {
+    "ref": "PermissionKeys.Fleet.RegistrationTransitionsManage",
+    "group": "Fleet",
+    "base": "RegistrationTransitions",
+    "old": "fleet.registration_transitions.manage",
+    "prefix": "fleet.registration_transitions"
+  },
+  "PermissionKeys.Fleet.DailyDistancesManage": {
+    "ref": "PermissionKeys.Fleet.DailyDistancesManage",
+    "group": "Fleet",
+    "base": "DailyDistances",
+    "old": "fleet.daily_distances.manage",
+    "prefix": "fleet.daily_distances"
+  },
+  "PermissionKeys.Jahez.HandoversManage": {
+    "ref": "PermissionKeys.Jahez.HandoversManage",
+    "group": "Jahez",
+    "base": "Handovers",
+    "old": "jahez.handovers.manage",
+    "prefix": "jahez.handovers"
+  },
+  "PermissionKeys.Jahez.CollectionsManage": {
+    "ref": "PermissionKeys.Jahez.CollectionsManage",
+    "group": "Jahez",
+    "base": "Collections",
+    "old": "jahez.collections.manage",
+    "prefix": "jahez.collections"
+  },
+  "PermissionKeys.Jahez.EarningsManage": {
+    "ref": "PermissionKeys.Jahez.EarningsManage",
+    "group": "Jahez",
+    "base": "Earnings",
+    "old": "jahez.earnings.manage",
+    "prefix": "jahez.earnings"
+  },
+  "PermissionKeys.Jahez.ImportsManage": {
+    "ref": "PermissionKeys.Jahez.ImportsManage",
+    "group": "Jahez",
+    "base": "Imports",
+    "old": "jahez.imports.manage",
+    "prefix": "jahez.imports"
+  },
+  "PermissionKeys.Jahez.AdjustmentsManage": {
+    "ref": "PermissionKeys.Jahez.AdjustmentsManage",
+    "group": "Jahez",
+    "base": "Adjustments",
+    "old": "jahez.adjustments.manage",
+    "prefix": "jahez.adjustments"
+  },
+  "PermissionKeys.Fuel.Manage": {
+    "ref": "PermissionKeys.Fuel.Manage",
+    "group": "Fuel",
+    "base": "",
+    "old": "fuel.manage",
+    "prefix": "fuel"
+  },
+  "PermissionKeys.Maintenance.LocationsManage": {
+    "ref": "PermissionKeys.Maintenance.LocationsManage",
+    "group": "Maintenance",
+    "base": "Locations",
+    "old": "maintenance.locations.manage",
+    "prefix": "maintenance.locations"
+  },
+  "PermissionKeys.Maintenance.ExternalJobsManage": {
+    "ref": "PermissionKeys.Maintenance.ExternalJobsManage",
+    "group": "Maintenance",
+    "base": "ExternalJobs",
+    "old": "maintenance.external_jobs.manage",
+    "prefix": "maintenance.external_jobs"
+  },
+  "PermissionKeys.Maintenance.PartSalesManage": {
+    "ref": "PermissionKeys.Maintenance.PartSalesManage",
+    "group": "Maintenance",
+    "base": "PartSales",
+    "old": "maintenance.part_sales.manage",
+    "prefix": "maintenance.part_sales"
+  },
+  "PermissionKeys.Maintenance.CustomerLaborChargesManage": {
+    "ref": "PermissionKeys.Maintenance.CustomerLaborChargesManage",
+    "group": "Maintenance",
+    "base": "CustomerLaborCharges",
+    "old": "maintenance.customer_labor_charges.manage",
+    "prefix": "maintenance.customer_labor_charges"
+  },
+  "PermissionKeys.Maintenance.MechanicLaborPaymentsManage": {
+    "ref": "PermissionKeys.Maintenance.MechanicLaborPaymentsManage",
+    "group": "Maintenance",
+    "base": "MechanicLaborPayments",
+    "old": "maintenance.mechanic_labor_payments.manage",
+    "prefix": "maintenance.mechanic_labor_payments"
+  },
+  "PermissionKeys.Inventory.ItemsManage": {
+    "ref": "PermissionKeys.Inventory.ItemsManage",
+    "group": "Inventory",
+    "base": "Items",
+    "old": "inventory.items.manage",
+    "prefix": "inventory.items"
+  },
+  "PermissionKeys.Inventory.ReceiptsManage": {
+    "ref": "PermissionKeys.Inventory.ReceiptsManage",
+    "group": "Inventory",
+    "base": "Receipts",
+    "old": "inventory.receipts.manage",
+    "prefix": "inventory.receipts"
+  },
+  "PermissionKeys.Inventory.ReturnsManage": {
+    "ref": "PermissionKeys.Inventory.ReturnsManage",
+    "group": "Inventory",
+    "base": "Returns",
+    "old": "inventory.returns.manage",
+    "prefix": "inventory.returns"
+  },
+  "PermissionKeys.Workflows.LeaveRequestsManage": {
+    "ref": "PermissionKeys.Workflows.LeaveRequestsManage",
+    "group": "Workflows",
+    "base": "LeaveRequests",
+    "old": "leave_requests.manage",
+    "prefix": "leave_requests"
+  },
+  "PermissionKeys.Workflows.AbsenceCasesManage": {
+    "ref": "PermissionKeys.Workflows.AbsenceCasesManage",
+    "group": "Workflows",
+    "base": "AbsenceCases",
+    "old": "absence_cases.manage",
+    "prefix": "absence_cases"
+  },
+  "PermissionKeys.Workflows.EmployeeStatusChangesManage": {
+    "ref": "PermissionKeys.Workflows.EmployeeStatusChangesManage",
+    "group": "Workflows",
+    "base": "EmployeeStatusChanges",
+    "old": "employee_status_changes.manage",
+    "prefix": "employee_status_changes"
+  },
+  "PermissionKeys.Workflows.LegalCasesManage": {
+    "ref": "PermissionKeys.Workflows.LegalCasesManage",
+    "group": "Workflows",
+    "base": "LegalCases",
+    "old": "legal_cases.manage",
+    "prefix": "legal_cases"
+  },
+  "PermissionKeys.HrForms.TemplatesManage": {
+    "ref": "PermissionKeys.HrForms.TemplatesManage",
+    "group": "HrForms",
+    "base": "Templates",
+    "old": "hr_forms.templates.manage",
+    "prefix": "hr_forms.templates"
+  }
+}

@@ -18,12 +18,12 @@ public sealed class HousingWarehouseApiSurfaceTests
         { nameof(HousingWarehouseController.Get), typeof(HttpGetAttribute), "", PermissionKeys.Operations.HousingRead },
         { nameof(HousingWarehouseController.GetItems), typeof(HttpGetAttribute), "items", PermissionKeys.Operations.HousingRead },
         { nameof(HousingWarehouseController.GetItem), typeof(HttpGetAttribute), "items/{itemId:guid}", PermissionKeys.Operations.HousingRead },
-        { nameof(HousingWarehouseController.CreateItem), typeof(HttpPostAttribute), "items", PermissionKeys.Operations.HousingManage },
-        { nameof(HousingWarehouseController.UpdateItem), typeof(HttpPutAttribute), "items/{itemId:guid}", PermissionKeys.Operations.HousingManage },
-        { nameof(HousingWarehouseController.SetStatusQuantity), typeof(HttpPatchAttribute), "items/{itemId:guid}/statuses/{status}/quantity", PermissionKeys.Operations.HousingManage },
-        { nameof(HousingWarehouseController.TransferStatus), typeof(HttpPostAttribute), "items/{itemId:guid}/status-transfers", PermissionKeys.Operations.HousingManage },
-        { nameof(HousingWarehouseController.TransferUnusedToHousing), typeof(HttpPostAttribute), "items/{itemId:guid}/housing-transfers", PermissionKeys.Operations.HousingManage },
-        { nameof(HousingWarehouseController.ArchiveItem), typeof(HttpDeleteAttribute), "items/{itemId:guid}", PermissionKeys.Operations.HousingManage }
+        { nameof(HousingWarehouseController.CreateItem), typeof(HttpPostAttribute), "items", PermissionKeys.Operations.HousingCreate },
+        { nameof(HousingWarehouseController.UpdateItem), typeof(HttpPutAttribute), "items/{itemId:guid}", PermissionKeys.Operations.HousingUpdate },
+        { nameof(HousingWarehouseController.SetStatusQuantity), typeof(HttpPatchAttribute), "items/{itemId:guid}/statuses/{status}/quantity", PermissionKeys.Operations.HousingUpdate },
+        { nameof(HousingWarehouseController.TransferStatus), typeof(HttpPostAttribute), "items/{itemId:guid}/status-transfers", PermissionKeys.Operations.HousingUpdate },
+        { nameof(HousingWarehouseController.TransferUnusedToHousing), typeof(HttpPostAttribute), "items/{itemId:guid}/housing-transfers", PermissionKeys.Operations.HousingUpdate },
+        { nameof(HousingWarehouseController.ArchiveItem), typeof(HttpDeleteAttribute), "items/{itemId:guid}", PermissionKeys.Operations.HousingDelete }
     };
 
     [Theory]

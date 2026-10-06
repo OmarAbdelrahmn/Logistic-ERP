@@ -19,6 +19,7 @@ The server uses the authenticated user for feed ownership. The frontend does not
 | `GET` | `/api/notifications` | Query string | `{ items, nextCursor }` |
 | `GET` | `/api/notifications/unread-count` | Optional permission query string | `{ count: number }` |
 | `POST` | `/api/notifications/{id}/state` | JSON `action` and `rowVersion` | Updated `NotificationItem` |
+| `POST` | `/api/notifications/read-all` | `{}` or optional `permissions` filter | `{ markedCount, readAtUtc, effectivePermissions }` |
 | `POST` | `/api/notifications` | JSON create request | Created `NotificationItem` |
 
 Use `POST /query` for the notification center when the list and badge count need the same permission filter. The GET routes remain available for callers that need them separately.
@@ -101,6 +102,8 @@ GET /api/notifications/unread-count?permissions=fleet.vehicles.read
 Omitting the GET parameter means all currently authorized audiences plus personal notifications. The GET feed returns `{ items, nextCursor }`; it does not include `unreadCount` or `effectivePermissions`. The count endpoint returns `{ count }`.
 
 ## State actions
+
+For a **Mark all as read** button, use `POST /api/notifications/read-all` with `{}` for all accessible notifications or `{ "permissions": ["jahez.read"] }` for a permission audience. It marks every matching visible unread notification across all pages for the authenticated user and requires `notifications.read`. No user ID or row versions are supplied. Refresh the feed and badge afterward. See [the bulk read frontend handoff](notifications-read-all-handoff.md) for the complete contract, examples, and error behavior.
 
 ```http
 POST /api/notifications/{id}/state

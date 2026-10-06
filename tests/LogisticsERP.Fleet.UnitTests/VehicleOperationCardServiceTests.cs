@@ -88,7 +88,7 @@ public sealed class VehicleOperationCardServiceTests
     }
 
     private static FleetService CreateService(ApplicationDbContext db, ICurrentUser currentUser) =>
-        new(db, new FleetServiceSupport(currentUser, new PermitAll(), TimeProvider.System), new UnusedFileStorage());
+        new(db, new LogisticsERP.Infrastructure.Identity.IdentityDbContext(new DbContextOptionsBuilder<LogisticsERP.Infrastructure.Identity.IdentityDbContext>().UseInMemoryDatabase(Guid.NewGuid().ToString()).Options), new FleetServiceSupport(currentUser, new PermitAll(), TimeProvider.System), new UnusedFileStorage());
 
     private static Vehicle CreateVehicle(VehicleType vehicleType, VehicleRegistrationType registrationType) => new()
     {

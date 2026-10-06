@@ -7,7 +7,6 @@ public interface IFuelCardBulkImportService
     Task<Result<FuelCardBulkImportResponse>> ImportAsync(
         Stream content,
         bool validateOnly,
-        Guid? operatingCityId = null,
         CancellationToken cancellationToken = default);
 }
 

@@ -18,14 +18,14 @@ public sealed class PlatformsController(ISimplePlatformService service) : Contro
         ToAction(service.GetPlatformsAsync(includeArchived, cancellationToken));
 
     [HttpPost]
-    [RequirePermission(PermissionKeys.Operations.PlatformAccountsManage)]
+    [RequirePermission(PermissionKeys.Operations.PlatformAccountsCreate)]
     public Task<IActionResult> Create(
         [FromBody] SimplePlatformUpsertRequest request,
         CancellationToken cancellationToken) =>
         ToAction(service.CreatePlatformAsync(request, cancellationToken));
 
     [HttpPut("{id:guid}")]
-    [RequirePermission(PermissionKeys.Operations.PlatformAccountsManage)]
+    [RequirePermission(PermissionKeys.Operations.PlatformAccountsUpdate)]
     public Task<IActionResult> Update(
         Guid id,
         [FromBody] SimplePlatformUpsertRequest request,

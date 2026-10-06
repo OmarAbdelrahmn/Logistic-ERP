@@ -15,12 +15,12 @@ public sealed class HrCatalogsController(IHrCatalogService service) : Controller
     public Task<IActionResult> GlobalCities(CancellationToken cancellationToken) => ToAction(service.GetGlobalCitiesAsync(cancellationToken));
 
     [HttpPost("global-cities")]
-    [RequirePermission(PermissionKeys.Catalog.OperatingCitiesManage)]
+    [RequirePermission(PermissionKeys.Catalog.OperatingCitiesCreate)]
     public Task<IActionResult> CreateGlobalCity([FromBody] GlobalCityUpsertRequest request, CancellationToken cancellationToken) =>
         ToAction(service.UpsertGlobalCityAsync(null, request, cancellationToken));
 
     [HttpPut("global-cities/{id:guid}")]
-    [RequirePermission(PermissionKeys.Catalog.OperatingCitiesManage)]
+    [RequirePermission(PermissionKeys.Catalog.OperatingCitiesUpdate)]
     public Task<IActionResult> UpdateGlobalCity(Guid id, [FromBody] GlobalCityUpsertRequest request, CancellationToken cancellationToken) =>
         ToAction(service.UpsertGlobalCityAsync(id, request, cancellationToken));
 
@@ -49,11 +49,11 @@ public sealed class HrCatalogsController(IHrCatalogService service) : Controller
     public Task<IActionResult> ResidencyProfessions(CancellationToken cancellationToken) => ToAction(service.GetResidencyProfessionsAsync(cancellationToken));
 
     [HttpPost("residency-professions")]
-    [RequirePermission(PermissionKeys.Compliance.ResidencyManage)]
+    [RequirePermission(PermissionKeys.Compliance.ResidencyCreate)]
     public Task<IActionResult> CreateResidencyProfession([FromBody] CatalogUpsertRequest request, CancellationToken cancellationToken) => ToAction(service.UpsertResidencyProfessionAsync(null, request, cancellationToken));
 
     [HttpPut("residency-professions/{id:guid}")]
-    [RequirePermission(PermissionKeys.Compliance.ResidencyManage)]
+    [RequirePermission(PermissionKeys.Compliance.ResidencyUpdate)]
     public Task<IActionResult> UpdateResidencyProfession(Guid id, [FromBody] CatalogUpsertRequest request, CancellationToken cancellationToken) => ToAction(service.UpsertResidencyProfessionAsync(id, request, cancellationToken));
 
     [HttpGet("operational-work-types")]
@@ -75,12 +75,12 @@ public sealed class HrCatalogsController(IHrCatalogService service) : Controller
     public Task<IActionResult> DriverLicenseCategories(CancellationToken cancellationToken) => ToAction(service.GetDriverLicenseCategoriesAsync(cancellationToken));
 
     [HttpPost("driver-license-categories")]
-    [RequirePermission(PermissionKeys.Compliance.LicensesManage)]
+    [RequirePermission(PermissionKeys.Compliance.LicensesCreate)]
     public Task<IActionResult> CreateDriverLicenseCategory([FromBody] CatalogUpsertRequest request, CancellationToken cancellationToken) =>
         ToAction(service.UpsertDriverLicenseCategoryAsync(null, request, cancellationToken));
 
     [HttpPut("driver-license-categories/{id:guid}")]
-    [RequirePermission(PermissionKeys.Compliance.LicensesManage)]
+    [RequirePermission(PermissionKeys.Compliance.LicensesUpdate)]
     public Task<IActionResult> UpdateDriverLicenseCategory(Guid id, [FromBody] CatalogUpsertRequest request, CancellationToken cancellationToken) =>
         ToAction(service.UpsertDriverLicenseCategoryAsync(id, request, cancellationToken));
 
@@ -89,12 +89,12 @@ public sealed class HrCatalogsController(IHrCatalogService service) : Controller
     public Task<IActionResult> DocumentTypes(CancellationToken cancellationToken) => ToAction(service.GetDocumentTypesAsync(cancellationToken));
 
     [HttpPost("document-types")]
-    [RequirePermission(PermissionKeys.Documents.CatalogManage)]
+    [RequirePermission(PermissionKeys.Documents.CatalogCreate)]
     public Task<IActionResult> CreateDocumentType([FromBody] DocumentTypeUpsertRequest request, CancellationToken cancellationToken) =>
         ToAction(service.UpsertDocumentTypeAsync(null, request, cancellationToken));
 
     [HttpPut("document-types/{id:guid}")]
-    [RequirePermission(PermissionKeys.Documents.CatalogManage)]
+    [RequirePermission(PermissionKeys.Documents.CatalogUpdate)]
     public Task<IActionResult> UpdateDocumentType(Guid id, [FromBody] DocumentTypeUpsertRequest request, CancellationToken cancellationToken) =>
         ToAction(service.UpsertDocumentTypeAsync(id, request, cancellationToken));
 
@@ -104,12 +104,12 @@ public sealed class HrCatalogsController(IHrCatalogService service) : Controller
         ToAction(service.GetDocumentRequirementsAsync(documentTypeId, cancellationToken));
 
     [HttpPost("document-requirements")]
-    [RequirePermission(PermissionKeys.Documents.CatalogManage)]
+    [RequirePermission(PermissionKeys.Documents.CatalogCreate)]
     public Task<IActionResult> CreateDocumentRequirement([FromBody] DocumentRequirementUpsertRequest request, CancellationToken cancellationToken) =>
         ToAction(service.UpsertDocumentRequirementAsync(null, request, cancellationToken));
 
     [HttpPut("document-requirements/{id:guid}")]
-    [RequirePermission(PermissionKeys.Documents.CatalogManage)]
+    [RequirePermission(PermissionKeys.Documents.CatalogUpdate)]
     public Task<IActionResult> UpdateDocumentRequirement(Guid id, [FromBody] DocumentRequirementUpsertRequest request, CancellationToken cancellationToken) =>
         ToAction(service.UpsertDocumentRequirementAsync(id, request, cancellationToken));
 
@@ -118,12 +118,12 @@ public sealed class HrCatalogsController(IHrCatalogService service) : Controller
     public Task<IActionResult> OperatingCities(CancellationToken cancellationToken) => ToAction(service.GetOperatingCitiesAsync(cancellationToken));
 
     [HttpPost("operating-cities")]
-    [RequirePermission(PermissionKeys.Catalog.OperatingCitiesManage)]
+    [RequirePermission(PermissionKeys.Catalog.OperatingCitiesCreate)]
     public Task<IActionResult> CreateOperatingCity([FromBody] OperatingCityUpsertRequest request, CancellationToken cancellationToken) =>
         ToAction(service.UpsertOperatingCityAsync(null, request, cancellationToken));
 
     [HttpPut("operating-cities/{id:guid}")]
-    [RequirePermission(PermissionKeys.Catalog.OperatingCitiesManage)]
+    [RequirePermission(PermissionKeys.Catalog.OperatingCitiesUpdate)]
     public Task<IActionResult> UpdateOperatingCity(Guid id, [FromBody] OperatingCityUpsertRequest request, CancellationToken cancellationToken) =>
         ToAction(service.UpsertOperatingCityAsync(id, request, cancellationToken));
 

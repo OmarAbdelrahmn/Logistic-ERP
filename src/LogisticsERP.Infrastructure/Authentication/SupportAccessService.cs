@@ -62,7 +62,7 @@ internal sealed class SupportAccessService(
         }
 
         var operatorId = request.PlatformOperatorUserId ?? actorId;
-        var canManage = await CanManageAsync(actorId, cancellationToken);
+        var canManage = await CanActAsync(actorId, PermissionKeys.Security.SupportAccessCreate, cancellationToken);
         if (operatorId != actorId && !canManage || request.IsBreakGlass && !canManage)
         {
             return Result.Failure<SupportAccessResponse>(new OperationError(
@@ -117,7 +117,7 @@ internal sealed class SupportAccessService(
     {
         if (currentUser.UserId is not { } actorId
             || string.IsNullOrWhiteSpace(request.Reason)
-            || !await CanManageAsync(actorId, cancellationToken))
+            || !await CanActAsync(actorId, PermissionKeys.Security.SupportAccessUpdate, cancellationToken))
         {
             return Result.Failure<SupportAccessResponse>(SupportAccessErrors.CurrentUserUnavailable);
         }
@@ -164,7 +164,7 @@ internal sealed class SupportAccessService(
         {
             return Result.Failure<SupportAccessResponse>(SupportAccessErrors.NotFound);
         }
-        if (grant.PlatformOperatorUserId != actorId && !await CanManageAsync(actorId, cancellationToken))
+        if (grant.PlatformOperatorUserId != actorId && !await CanActAsync(actorId, PermissionKeys.Security.SupportAccessDelete, cancellationToken))
         {
             return Result.Failure<SupportAccessResponse>(new OperationError(
                 "support_access.forbidden", "يمكن للمشغّل أو مسؤول الوصول إلى الدعم فقط إلغاء هذه الصلاحية.", ErrorType.Forbidden));
@@ -213,12 +213,12 @@ internal sealed class SupportAccessService(
         return true;
     }
 
-    private async Task<bool> CanManageAsync(Guid userId, CancellationToken cancellationToken) =>
+    private async Task<bool> CanActAsync(Guid userId, string permissionKey, CancellationToken cancellationToken) =>
         currentUser.AuthorizationVersion is { } version
         && await permissionChecker.HasPermissionAsync(
             userId,
             version,
-            PermissionKeys.Security.SupportAccessManage,
+            permissionKey,
             cancellationToken: cancellationToken);
 
     private async Task InvalidateOperatorAsync(Guid userId, CancellationToken cancellationToken)
@@ -258,7 +258,7 @@ internal sealed class SupportAccessService(
 
     private static string[] DeserializePermissions(string json)
     {
-        try { return JsonSerializer.Deserialize<string[]>(json) ?? []; }
+        try { return (JsonSerializer.Deserialize<string[]>(json) ?? []).Where(PermissionKeys.All.Contains).ToArray(); }
         catch (JsonException) { return []; }
     }
 

@@ -32,7 +32,7 @@ Every fuel card has exactly one sponsor. Add a required sponsor selector to the 
 
 Load selector options with `GET /api/sponsors` (`sponsors.read`). It returns an array of sponsor records with `id`, `registryNameAr`, `registryNameEn`, and `status`, among other fields. Display `registryNameAr` (or `registryNameEn` where appropriate), and submit the selected `id`. The fuel-card API does not provide an embedded sponsor name. The catalog includes its records without an active-status filter; the UI may highlight the status but must still display the sponsor of an existing card even if its status changes. A user who can read fuel cards but lacks `sponsors.read` can see the stored `sponsorId` but cannot resolve a name through this endpoint.
 
-Use the same required selector on both existing fuel-card upload screens: the detailed monthly fuel spreadsheet and the one-column PetroApp card-number spreadsheet. The selected `sponsorId` is assigned only to **new** cards created by an upload. Existing cards keep their current sponsor. Do not use an upload to change a card's sponsor. The separate Import module bulk upload accepts a three-column sheet with a sponsor 70 number and fuel company on each row; see [fuel-card-bulk-import-api.md](fuel-card-bulk-import-api.md).
+Use the required sponsor selector on the one-column PetroApp card-number upload. Its selected `sponsorId` is assigned only to new cards. The monthly usage upload accepts existing cards only and needs no sponsor selector. The separate Import module bulk upload accepts a city name, sponsor 70 number, and fuel company on each card row; see [fuel-card-bulk-import-api.md](fuel-card-bulk-import-api.md).
 
 For an existing card, provide a Change sponsor action under `fuel.manage`. Send `PUT /api/fuel-cards/{id}/sponsor` with the chosen `sponsorId` and the card's latest `rowVersion`. The response is the updated `FuelCard`; update the local card and invalidate the cards list and detail query. On `409 fuel.concurrency_conflict`, refresh the card before retrying. On `404 fuel.sponsor_not_found`, refresh the sponsor options. On `404 fuel.card_not_found`, remove or refresh the stale card detail.
 
@@ -40,7 +40,7 @@ For an existing card, provide a Change sponsor action under `fuel.manage`. Send 
 
 ## City link
 
-Each fuel card has an `operatingCityId` foreign key and returns `operatingCityNameAr`/`operatingCityNameEn`. Existing cards are backfilled to Jeddah (`019c18d5-62e1-7000-8000-000000000003`). Manual creation requires a city ID; imports accept an optional city ID and default new cards to Jeddah. Existing cards keep their city during imports. Use `PUT /api/fuel-cards/{id}/city` with `operatingCityId` and the card's latest `rowVersion` to change it. The list accepts an optional `operatingCityId` query filter. See the complete [city endpoint handoff](fuel-card-city-frontend-handoff.md) for request examples, selector options, upload changes, errors, and rollout details.
+Each fuel card has an `operatingCityId` foreign key and returns `operatingCityNameAr`/`operatingCityNameEn`. Existing cards are backfilled to Jeddah (`019c18d5-62e1-7000-8000-000000000003`). Manual creation requires a city ID. The one-column card-number import accepts an optional city ID; the Import module bulk sheet takes a city name per row. Missing city data defaults new cards to Jeddah. Monthly usage imports use existing cards and do not accept a city ID. Use `PUT /api/fuel-cards/{id}/city` with `operatingCityId` and the card's latest `rowVersion` to change it. The list accepts an optional `operatingCityId` query filter. See the complete [city endpoint handoff](fuel-card-city-frontend-handoff.md) for request examples, selector options, upload changes, errors, and rollout details.
 
 ## Plate direction and normalization
 
@@ -62,6 +62,8 @@ Use isolated bidirectional rendering for every plate/card cell so mixed Arabic l
 
 `cardNumber` and `plateNumberText` are display values. `normalizedCardNumber` is diagnostic/search data and should not replace the display value.
 
+Card numbers are stored without whitespace. Manual creation and all three fuel-card spreadsheet imports remove spaces (including tabs and nonbreaking spaces) from the card number before saving or matching it. Existing saved numbers are cleaned by the `RemoveFuelCardNumberWhitespace` data migration. The separate plate text remains as supplied for display.
+
 ## Endpoint summary
 
 | Method | Route | Permission | Success |
@@ -75,6 +77,8 @@ Use isolated bidirectional rendering for every plate/card cell so mixed Arabic l
 | `POST` | `/api/fuel-cards/{id}/assignments` | `fuel.manage` | `200` assignment |
 | `POST` | `/api/fuel-cards/{id}/stop-rider` | `fuel.manage` | `200` closed assignment |
 | `GET` | `/api/fuel-cards/monthly-usage` | `fuel.read` | `200` monthly page and totals |
+| `GET` | `/api/fuel-cards/period-usage` | `fuel.read` | `200` cards, rider assignment periods, and monthly costs for a date range |
+| `GET` | `/api/fuel-cards/unassigned-usage` | `fuel.read` | `200` saved usage without a rider, for investigation |
 | `POST` | `/api/fuel-cards/imports` | `fuel.import` | `200` import result |
 | `GET` | `/api/fuel-cards/imports` | `fuel.read` | `200` latest import array |
 
@@ -261,10 +265,11 @@ interface FuelMonthlyUsage {
   cardNumber: string;
   plateNumberText: string | null;
   reportMonth: string;
-  riderProfileId: string;
-  employeeId: string;
-  riderNameAr: string;
+  riderProfileId: string | null;
+  employeeId: string | null;
+  riderNameAr: string | null;
   riderNameEn: string | null;
+  needsReview: boolean;
   totalLiters: number;
   totalAmount: number;
   amountBeforeTax: number | null;
@@ -287,10 +292,53 @@ interface FuelMonthlyUsagePage {
   totalCount: number;
   totalLiters: number;
   totalAmount: number;
+  unassignedCount: number;
+  unassignedTotalLiters: number;
+  unassignedTotalAmount: number;
 }
 ```
 
-`totalLiters` and `totalAmount` cover the entire filtered query, not only the current page. Show them in summary cards above the table.
+`totalLiters` and `totalAmount` cover the entire filtered query, including unassigned usage, not only the current page. The unassigned fields identify the portion needing investigation. When `riderProfileId` is null, display the card and plate with a review badge rather than a rider name. A `riderProfileId` filter excludes unassigned usage.
+
+### Unassigned usage review queue
+
+`GET /api/fuel-cards/unassigned-usage?from=2026-09-01&to=2026-10-31&page=1&pageSize=50`
+
+Requires `fuel.read`. `from` and `to` are required dates; all monthly usage records in the touched calendar months are included (maximum 36 months). Optional `provider` (`PetroApp` or `SayaraApp`) and `search` (card or plate) filters apply before pagination. Page size defaults to 50 and is capped at 100. The response includes archived cards and total count, liters, and amount across all matching rows.
+
+```ts
+interface FuelUnassignedUsagePage {
+  items: FuelUnassignedUsage[];
+  from: string;
+  to: string;
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalLiters: number;
+  totalAmount: number;
+}
+
+interface FuelUnassignedUsage {
+  usageId: string;
+  fuelCardId: string;
+  provider: FuelProvider;
+  cardNumber: string;
+  plateNumberText: string | null;
+  cardNotes: string | null;
+  reportMonth: string;
+  totalLiters: number;
+  totalAmount: number;
+  transactionCount: number | null;
+  firstTransactionAtUtc: string | null;
+  lastTransactionAtUtc: string | null;
+  lastImportId: string;
+  originalFileName: string;
+  importedAtUtc: string;
+  reviewReason: "card_not_assigned";
+}
+```
+
+The queue shows saved usage with no rider attribution. Use the card number, plate, month, transaction dates, source file, and card notes to investigate who used it. Linking the cost to a rider requires correcting the assignment for that month and re-importing the report.
 
 ## 8. Import a spreadsheet
 
@@ -300,8 +348,6 @@ Send `multipart/form-data`:
 
 - `File`: required `.xls` or `.xlsx`, maximum 25 MiB.
 - `ExpectedMonth`: optional `YYYY-MM-DD`; use it to prevent uploading a file for the wrong month.
-- `SponsorId`: required UUID. This sponsor is assigned to cards newly created by the import; existing card sponsors stay as they are.
-- `OperatingCityId`: optional UUID for new cards; defaults to Jeddah when omitted. Existing cards keep their current city.
 
 Do not manually set the multipart `Content-Type` boundary in browser code:
 
@@ -309,8 +355,6 @@ Do not manually set the multipart `Content-Type` boundary in browser code:
 const data = new FormData();
 data.append("File", file);
 data.append("ExpectedMonth", selectedMonth); // e.g. 2026-09-01
-data.append("SponsorId", selectedSponsorId);
-data.append("OperatingCityId", selectedOperatingCityId);
 await api.post("/api/fuel-cards/imports", data);
 ```
 
@@ -348,8 +392,8 @@ Import behavior:
 - The SayaraApp vehicle-consumption sheet already contains one total per vehicle/card for the period; its values are used directly.
 - The format and provider are detected from the sheet headers.
 - Re-uploading the same or a later file for a card/month updates that one monthly record; it does not append another monthly record.
-- New card identifiers are created automatically.
-- An unassigned card is created but its monthly usage is skipped. Show `card_not_assigned` rows, let the user assign those cards, then re-upload the file.
+- Unknown card numbers are skipped with `card_not_found` row errors and increment `invalidRows`. Register those cards through manual creation, the card-number import, or the Import module, then re-upload the usage report. `createdCards` is always `0` for new imports; it remains in the response for compatibility with historical import records.
+- An unassigned card's monthly usage and cost are saved with null rider/employee IDs. The import increments `unassignedCards` and returns `card_not_assigned` as a review notice; it does not increment `invalidRows`. Show these rows in the review queue. Assigning the card later does not silently attribute historical cost; re-upload the report after correcting the assignment to link the usage to the rider.
 - Treat a `200` response with non-empty `errors` as a completed import with row-level attention required, not as a failed HTTP request.
 - `400 fuel.month_mismatch` means the detected month differs from `ExpectedMonth`.
 
@@ -382,4 +426,4 @@ Use `errorCode` for UI branching and `detail` for the Arabic message. Preserve `
 
 ## Recommended frontend flow
 
-Provide four views: Cards, Monthly Usage, Upload, and Import History. The Cards view owns assignment actions; Upload should show counters plus a row-error table and a direct link back to Cards filtered by the failed card number. Always invalidate cached list/detail/month/import queries after a successful mutation or import.
+Provide five views: Cards, Monthly Usage, Period Usage, Upload, and Import History. The Cards view owns assignment actions; Upload should show counters plus a row-error table and a direct link back to Cards filtered by the failed card number. Always invalidate cached list/detail/month/period/import queries after a successful mutation or import. See the [Period Usage frontend handoff](fuel-card-period-usage-frontend-handoff.md) for its request and response contract.

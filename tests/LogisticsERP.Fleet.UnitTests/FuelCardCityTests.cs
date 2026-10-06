@@ -26,12 +26,13 @@ public sealed class FuelCardCityTests
         await db.SaveChangesAsync(ct);
         var service = Service(db);
         var sponsorId = Assert.Single(db.Sponsors.Local).Id;
-        var jeddah = await service.CreateCardAsync(new("PetroApp", "BW201", null, null, sponsorId, OperatingCity.JeddahId), ct);
+        var jeddah = await service.CreateCardAsync(new("PetroApp", "B W 201", null, null, sponsorId, OperatingCity.JeddahId), ct);
         var riyadh = await service.CreateCardAsync(new("PetroApp", "BW202", null, null, sponsorId, OperatingCity.RiyadhId), ct);
 
         Assert.True(jeddah.IsSuccess, jeddah.Error.Description);
         Assert.True(riyadh.IsSuccess, riyadh.Error.Description);
         Assert.Equal("جدة", jeddah.Value!.OperatingCityNameAr);
+        Assert.Equal("BW201", jeddah.Value.CardNumber);
         Assert.Equal("Jeddah", jeddah.Value.OperatingCityNameEn);
         var page = await service.GetCardsAsync(null, null, null, 1, 1, OperatingCity.RiyadhId, ct);
         Assert.True(page.IsSuccess, page.Error.Description);
@@ -89,7 +90,7 @@ public sealed class FuelCardCityTests
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
-    public async Task AllImportsDefaultToJeddahOrUseSelectedCityAndPreserveExistingCity(bool selectRiyadh)
+    public async Task CardImportsUseCitiesWhileUsageImportSkipsUnknownCards(bool selectRiyadh)
     {
         var ct = TestContext.Current.CancellationToken;
         await using var db = CreateContext();
@@ -104,9 +105,10 @@ public sealed class FuelCardCityTests
         Guid? selectedCity = selectRiyadh ? OperatingCity.RiyadhId : null;
         var expectedCity = selectedCity ?? OperatingCity.JeddahId;
         var service = Service(db);
-        using var bulk = Workbook(["number", "sponsor 70 number", "company name"],
-            ["BW200", "7038745530", "بترو اب"], ["BW201", "7038745530", "بترو اب"]);
-        var bulkResult = await new FuelCardBulkImportService(db).ImportAsync(bulk, false, selectedCity, ct);
+        using var bulk = Workbook(["number", "sponsor 70 number", "company name", "city name"],
+            ["BW200", "7038745530", "بترو اب", "Jeddah"],
+            ["BW201", "7038745530", "بترو اب", selectRiyadh ? "Riyadh" : "Jeddah"]);
+        var bulkResult = await new FuelCardBulkImportService(db).ImportAsync(bulk, false, ct);
         Assert.True(bulkResult.IsSuccess, bulkResult.Error.Description);
         Assert.True(bulkResult.Value!.Imported);
         Assert.Equal(OperatingCity.RiyadhId, Assert.Single(bulkResult.Value.Rows, x => !x.WillCreateCard).OperatingCityId);
@@ -119,16 +121,21 @@ public sealed class FuelCardCityTests
             ["INV-1", "ب ب و 835", "BW200", "91", "20", "17.39", "9.174", "2026-09-15 10:00:00"],
             ["INV-2", "ب ب و 836", "BW203", "91", "20", "17.39", "9.174", "2026-09-15 10:00:00"]);
         var reportResult = await service.ImportAsync(new PrivateFileUpload(detailed, "fuel.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", detailed.Length),
-            new DateOnly(2026, 9, 1), sponsorId, selectedCity, ct);
+            new DateOnly(2026, 9, 1), ct);
         Assert.True(reportResult.IsSuccess, reportResult.Error.Description);
         var cards = await db.FuelCards.OrderBy(x => x.CardNumber).ToArrayAsync(ct);
-        Assert.Equal(4, cards.Length);
+        Assert.Equal(3, cards.Length);
         Assert.Equal(OperatingCity.RiyadhId, cards[0].OperatingCityId);
         Assert.All(cards.Skip(1), x => Assert.Equal(expectedCity, x.OperatingCityId));
+        Assert.DoesNotContain(cards, card => card.CardNumber == "BW203");
+        Assert.Equal(0, reportResult.Value!.CreatedCards);
+        Assert.Equal(1, reportResult.Value.InvalidRows);
+        Assert.Contains(reportResult.Value.Errors, error => error.CardNumber == "BW203" && error.Code == "card_not_found");
+        Assert.Single(await db.FuelCardMonthlyUsages.ToArrayAsync(ct));
     }
 
     [Fact]
-    public async Task ImportsRejectUnknownCityBeforeSavingAnyCardsOrImportHistory()
+    public async Task CardNumberImportRejectsUnknownCityAndUsageImportRejectsInvalidFile()
     {
         var ct = TestContext.Current.CancellationToken;
         await using var db = CreateContext();
@@ -136,14 +143,18 @@ public sealed class FuelCardCityTests
         var sponsorId = Assert.Single(db.Sponsors.Local).Id;
         var unknownCity = Guid.NewGuid();
         var service = Service(db);
-        using var bulk = Workbook(["number", "sponsor 70 number", "company name"], ["BW201", "7038745530", "بترو اب"]);
-        var bulkResult = await new FuelCardBulkImportService(db).ImportAsync(bulk, false, unknownCity, ct);
-        Assert.Equal(FuelErrors.OperatingCityNotFound.Code, bulkResult.Error.Code);
+        using var bulk = Workbook(["number", "sponsor 70 number", "company name", "city name"],
+            ["BW201", "7038745530", "بترو اب", "Unknown city"]);
+        var bulkResult = await new FuelCardBulkImportService(db).ImportAsync(bulk, false, ct);
+        Assert.True(bulkResult.IsSuccess, bulkResult.Error.Description);
+        Assert.False(bulkResult.Value!.CanImport);
+        Assert.Single(bulkResult.Value.Issues);
+        Assert.Equal(2, bulkResult.Value.Issues[0].RowNumber);
         using var numbers = Workbook(["number"], ["BW202"]);
         var numberResult = await service.ImportCardNumbersAsync(numbers, sponsorId, false, unknownCity, ct);
         Assert.Equal(FuelErrors.OperatingCityNotFound.Code, numberResult.Error.Code);
-        var reportResult = await service.ImportAsync(new PrivateFileUpload(numbers, "fuel.xlsx", "application/octet-stream", numbers.Length), null, sponsorId, unknownCity, ct);
-        Assert.Equal(FuelErrors.OperatingCityNotFound.Code, reportResult.Error.Code);
+        var reportResult = await service.ImportAsync(new PrivateFileUpload(numbers, "fuel.xlsx", "application/octet-stream", numbers.Length), null, ct);
+        Assert.Equal(FuelErrors.InvalidFile.Code, reportResult.Error.Code);
         Assert.Empty(await db.FuelCards.ToArrayAsync(ct));
         Assert.Empty(await db.FuelCardImports.ToArrayAsync(ct));
     }

@@ -40,20 +40,6 @@ internal sealed class SimplePlatformService(
         CancellationToken cancellationToken = default) =>
         UpsertPlatformAsync(id, request, cancellationToken);
 
-    public Task<Result<IReadOnlyList<SimplePlatformAccountResponse>>> GetAccountsAsync(
-        Guid? accountId,
-        Guid? platformId,
-        Guid? operatingCityId,
-        Guid? sponsorId,
-        Guid? ownerRiderProfileId,
-        Guid? actualRiderProfileId,
-        string? status,
-        string? paymentModel,
-        bool currentOnly,
-        bool includeArchived,
-        CancellationToken cancellationToken = default) =>
-        GetAccountsAsync(accountId, platformId, operatingCityId, sponsorId, ownerRiderProfileId, actualRiderProfileId, status, paymentModel, currentOnly, includeArchived, null, cancellationToken);
-
     public async Task<Result<IReadOnlyList<SimplePlatformAccountResponse>>> GetAccountsAsync(
         Guid? accountId,
         Guid? platformId,
@@ -65,7 +51,6 @@ internal sealed class SimplePlatformService(
         string? paymentModel,
         bool currentOnly,
         bool includeArchived,
-        Guid? dashboardSponsorId,
         CancellationToken cancellationToken = default)
     {
         PlatformRiderAccountStatus? parsedStatus = null;
@@ -113,8 +98,6 @@ internal sealed class SimplePlatformService(
         {
             accountQuery = accountQuery.Where(item => item.SponsorId == sponsorId);
         }
-
-        if (dashboardSponsorId is not null) accountQuery = accountQuery.Where(item => item.DashboardSponsorId == dashboardSponsorId);
 
         if (parsedStatus is not null)
         {
@@ -193,7 +176,6 @@ internal sealed class SimplePlatformService(
             RegisteredEmployeeId = validation.Value,
             OperatingCityId = request.OperatingCityId,
             SponsorId = request.SponsorId,
-            DashboardSponsorId = request.DashboardSponsorId,
             Code = HrServiceSupport.NormalizeCode(request.Code),
             ExternalAccountId = request.ExternalAccountId.Trim(),
             UserName = HrServiceSupport.TrimOrNull(request.UserName),
@@ -245,8 +227,6 @@ internal sealed class SimplePlatformService(
         if (await dbContext.Set<LogisticsERP.Domain.Entities.Jahez.JahezAccountHandover>().AnyAsync(x => x.PlatformRiderAccountId == entity.Id, cancellationToken)
             && (entity.ClientPlatformId != request.PlatformId || entity.ExternalAccountId != request.ExternalAccountId.Trim()))
             return Result.Failure<SimplePlatformAccountResponse>(JahezErrors.Conflict("لا يمكن تغيير منصة أو رقم حساب له تاريخ مالي في جاهز."));
-        if (entity.DashboardSponsorId.HasValue && request.DashboardSponsorId is null)
-            return Result.Failure<SimplePlatformAccountResponse>(HrErrors.InvalidRequest);
 
         var activeAssignment = await dbContext.RiderClientAssignments.SingleOrDefaultAsync(
             item => item.PlatformRiderAccountId == id && item.EffectiveTo == null,
@@ -299,7 +279,6 @@ internal sealed class SimplePlatformService(
         entity.RegisteredEmployeeId = validation.Value;
         entity.OperatingCityId = request.OperatingCityId;
         entity.SponsorId = request.SponsorId;
-        entity.DashboardSponsorId = request.DashboardSponsorId;
         entity.Code = HrServiceSupport.NormalizeCode(request.Code);
         entity.ExternalAccountId = request.ExternalAccountId.Trim();
         entity.UserName = HrServiceSupport.TrimOrNull(request.UserName);
@@ -750,66 +729,84 @@ internal sealed class SimplePlatformService(
         bool isUpdate,
         CancellationToken cancellationToken)
     {
-        if (request.PlatformId == Guid.Empty
-            || request.OperatingCityId == Guid.Empty
-            || request.SponsorId == Guid.Empty
-            || request.OwnerRiderProfileId == Guid.Empty
-            || !HrServiceSupport.HasText(request.Code)
-            || !HrServiceSupport.HasText(request.ExternalAccountId)
-            || !TryParseEnum(request.PaymentModel, out PlatformAccountPaymentModel paymentModel)
-            || !TryParseEnum(request.Status, out PlatformRiderAccountStatus status)
-            || request.EndDate is not null && request.StartDate is not null && request.EndDate < request.StartDate
-            || !isUpdate && status is PlatformRiderAccountStatus.Assigned or PlatformRiderAccountStatus.Archived)
+        if (request.PlatformId == Guid.Empty)
+            return Result.Failure<Guid>(PlatformAccountErrors.Required("platformId", "المنصة"));
+        if (request.OperatingCityId == Guid.Empty)
+            return Result.Failure<Guid>(PlatformAccountErrors.Required("operatingCityId", "مدينة التشغيل"));
+        if (request.SponsorId == Guid.Empty)
+            return Result.Failure<Guid>(PlatformAccountErrors.Required("sponsorId", "الكفيل"));
+        if (request.OwnerRiderProfileId == Guid.Empty)
+            return Result.Failure<Guid>(PlatformAccountErrors.Required("ownerRiderProfileId", "مالك الحساب (الرايدر)"));
+        if (!HrServiceSupport.HasText(request.Code))
+            return Result.Failure<Guid>(PlatformAccountErrors.Required("code", "رمز الحساب"));
+        if (!HrServiceSupport.HasText(request.ExternalAccountId))
+            return Result.Failure<Guid>(PlatformAccountErrors.Required("externalAccountId", "رقم الحساب الخارجي"));
+        if (!TryParseEnum(request.PaymentModel, out PlatformAccountPaymentModel paymentModel))
+            return Result.Failure<Guid>(PlatformAccountErrors.Invalid("paymentModel", "نموذج الدفع غير صالح. القيم المسموحة: PayPerOrder أو Salary."));
+        if (!TryParseEnum(request.Status, out PlatformRiderAccountStatus status))
+            return Result.Failure<Guid>(PlatformAccountErrors.Invalid("status", "حالة الحساب غير صالحة. القيم المسموحة: Available أو Assigned أو Suspended أو Retired أو Archived."));
+        if (request.EndDate is not null && request.StartDate is not null && request.EndDate < request.StartDate)
+            return Result.Failure<Guid>(PlatformAccountErrors.Invalid("endDate", "تاريخ نهاية الحساب يجب أن يكون في تاريخ البداية أو بعده."));
+        if (!isUpdate && status is PlatformRiderAccountStatus.Assigned or PlatformRiderAccountStatus.Archived)
+            return Result.Failure<Guid>(PlatformAccountErrors.Invalid("status", "لا يمكن إنشاء حساب بحالة Assigned أو Archived. أنشئه بحالة Available أو Suspended أو Retired، ثم استخدم إجراء الإسناد عند الحاجة."));
+
+        var textFields = new (string Field, string? Value, int Maximum, string Label)[]
         {
-            return Result.Failure<Guid>(HrErrors.InvalidRequest);
+            ("code", HrServiceSupport.NormalizeCode(request.Code), 32, "رمز الحساب"),
+            ("externalAccountId", request.ExternalAccountId, 150, "رقم الحساب الخارجي"),
+            ("userName", request.UserName, 150, "اسم المستخدم"),
+            ("statusReason", request.StatusReason, 500, "سبب الحالة"),
+            ("notes", request.Notes, 4000, "الملاحظات")
+        };
+        foreach (var textField in textFields)
+        {
+            if (textField.Value?.Trim().Length > textField.Maximum)
+                return Result.Failure<Guid>(PlatformAccountErrors.Invalid(textField.Field,
+                    $"حقل {textField.Label} يجب ألا يتجاوز {textField.Maximum} حرفًا."));
         }
 
-        if ((!isUpdate && request.DashboardSponsorId is null) || request.DashboardSponsorId == Guid.Empty)
-            return Result.Failure<Guid>(HrErrors.InvalidRequest);
-        if (request.DashboardSponsorId.HasValue && !await dbContext.Sponsors.AnyAsync(x => x.Id == request.DashboardSponsorId && x.Status == CatalogStatus.Active, cancellationToken))
-            return Result.Failure<Guid>(HrErrors.NotFound);
-
         var owner = await LoadRiderAsync(request.OwnerRiderProfileId, false, cancellationToken);
+        if (owner is null)
+            return Result.Failure<Guid>(PlatformAccountErrors.ReferenceUnavailable("ownerRiderProfileId", "مالك الحساب المحدد (يجب اختيار ملف رايدر وليس موظف مكتب)"));
         var supportedPaymentModels = await dbContext.ClientPlatforms
             .Where(item => item.Id == request.PlatformId)
             .Select(item => (SupportedPlatformPaymentModels?)item.SupportedPaymentModels)
             .SingleOrDefaultAsync(cancellationToken);
-        var referencesExist = owner is not null
-            && supportedPaymentModels is not null
-            && await dbContext.OperatingCities.AnyAsync(item => item.Id == request.OperatingCityId, cancellationToken)
-            && await dbContext.Sponsors.AnyAsync(
+        if (supportedPaymentModels is null)
+            return Result.Failure<Guid>(PlatformAccountErrors.ReferenceUnavailable("platformId", "المنصة المحددة"));
+        if (!await dbContext.OperatingCities.AnyAsync(item => item.Id == request.OperatingCityId, cancellationToken))
+            return Result.Failure<Guid>(PlatformAccountErrors.ReferenceUnavailable("operatingCityId", "مدينة التشغيل المحددة"));
+        if (!await dbContext.Sponsors.AnyAsync(
                 item => item.Id == request.SponsorId && item.Status == CatalogStatus.Active,
-                cancellationToken);
-        if (!referencesExist)
-        {
-            return Result.Failure<Guid>(HrErrors.NotFound);
-        }
+                cancellationToken))
+            return Result.Failure<Guid>(PlatformAccountErrors.ReferenceUnavailable("sponsorId", "الكفيل المحدد"));
 
-        if (!IsPaymentModelSupported(supportedPaymentModels!.Value, paymentModel))
+        if (!IsPaymentModelSupported(supportedPaymentModels.Value, paymentModel))
         {
-            return Result.Failure<Guid>(HrErrors.UnsupportedPlatformPaymentModel);
+            return Result.Failure<Guid>(PlatformAccountErrors.UnsupportedPaymentModel);
         }
 
         var code = HrServiceSupport.NormalizeCode(request.Code);
         var externalAccountId = request.ExternalAccountId.Trim();
-        var duplicate = await dbContext.PlatformRiderAccounts.IgnoreQueryFilters().AnyAsync(item =>
-            item.Id != accountId
-            && (item.Code == code
-                || item.ClientPlatformId == request.PlatformId && item.ExternalAccountId == externalAccountId
-                || !item.IsDeleted
+        var otherAccounts = dbContext.PlatformRiderAccounts.IgnoreQueryFilters().Where(item => item.Id != accountId);
+        if (await otherAccounts.AnyAsync(item => item.Code == code, cancellationToken))
+            return Result.Failure<Guid>(PlatformAccountErrors.DuplicateCode);
+        if (await otherAccounts.AnyAsync(item => item.ClientPlatformId == request.PlatformId
+            && item.ExternalAccountId == externalAccountId, cancellationToken))
+            return Result.Failure<Guid>(PlatformAccountErrors.DuplicateExternalAccountId);
+        if (await otherAccounts.AnyAsync(item => !item.IsDeleted
                     && (item.Status == PlatformRiderAccountStatus.Available
                         || item.Status == PlatformRiderAccountStatus.Assigned)
                     && item.ClientPlatformId == request.PlatformId
-                    && item.RegisteredEmployeeId == owner!.EmployeeId
+                    && item.RegisteredEmployeeId == owner.EmployeeId
                     && item.OperatingCityId == request.OperatingCityId
-                    && item.SponsorId == request.SponsorId),
-            cancellationToken);
-        if (duplicate)
+                    && item.SponsorId == request.SponsorId,
+            cancellationToken))
         {
-            return Result.Failure<Guid>(HrErrors.Duplicate);
+            return Result.Failure<Guid>(PlatformAccountErrors.DuplicateOwnerAccount);
         }
 
-        return Result.Success(owner!.EmployeeId);
+        return Result.Success(owner.EmployeeId);
     }
 
     private async Task<Result<SimplePlatformAccountResponse>> LoadAccountAsync(
@@ -1087,8 +1084,7 @@ internal sealed class SimplePlatformService(
             projection.Account.EndDate,
             projection.Account.OperationalNotes,
             currentAssignment,
-            HrServiceSupport.EncodeRowVersion(projection.Account.RowVersion),
-            projection.Account.DashboardSponsorId);
+            HrServiceSupport.EncodeRowVersion(projection.Account.RowVersion));
 
     private static SimplePlatformAssignmentResponse ToAssignment(AssignmentProjection projection) => new(
         projection.Assignment.Id,

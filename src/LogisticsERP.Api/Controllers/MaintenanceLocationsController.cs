@@ -19,7 +19,7 @@ public sealed class MaintenanceLocationsController(IMaintenanceService service) 
     }
 
     [HttpPost]
-    [RequirePermission(PermissionKeys.Maintenance.LocationsManage)]
+    [RequirePermission(PermissionKeys.Maintenance.LocationsCreate)]
     public async Task<IActionResult> Create([FromBody] MaintenanceLocationRequest request, CancellationToken cancellationToken)
     {
         var result = await service.UpsertLocationAsync(null, request, cancellationToken);
@@ -27,7 +27,7 @@ public sealed class MaintenanceLocationsController(IMaintenanceService service) 
     }
 
     [HttpPut("{id:guid}")]
-    [RequirePermission(PermissionKeys.Maintenance.LocationsManage)]
+    [RequirePermission(PermissionKeys.Maintenance.LocationsUpdate)]
     public async Task<IActionResult> Update(Guid id, [FromBody] MaintenanceLocationRequest request, CancellationToken cancellationToken)
     {
         var result = await service.UpsertLocationAsync(id, request, cancellationToken);

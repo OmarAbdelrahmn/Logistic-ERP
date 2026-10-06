@@ -25,8 +25,8 @@ public sealed class FuelCardBulkImportTests
         await dbContext.SaveChangesAsync(cancellationToken);
         var service = BulkService(dbContext);
         using var previewFile = BulkWorkbook(
-            ["BW203", "7038745530", "بترو اب"],
-            ["BW203", "7015658094", "سياره كار"]);
+            ["B W 203", "7038745530", "بترو اب", ""],
+            ["BW203", "7015658094", "سياره كار", "الرياض"]);
 
         var preview = await service.ImportAsync(previewFile, true, cancellationToken: cancellationToken);
 
@@ -38,8 +38,8 @@ public sealed class FuelCardBulkImportTests
         Assert.Empty(await dbContext.FuelCards.ToArrayAsync(cancellationToken));
 
         using var importFile = BulkWorkbook(
-            ["BW203", "7038745530", "بترو اب"],
-            ["BW203", "7015658094", "سياره كار"]);
+            ["B W 203", "7038745530", "بترو اب", ""],
+            ["BW203", "7015658094", "سياره كار", "الرياض"]);
         var import = await service.ImportAsync(importFile, false, cancellationToken: cancellationToken);
 
         Assert.True(import.IsSuccess, import.Error.Description);
@@ -48,8 +48,9 @@ public sealed class FuelCardBulkImportTests
         Assert.Equal(2, cards.Length);
         Assert.Equal(first.Id, cards[0].SponsorId);
         Assert.Equal(second.Id, cards[1].SponsorId);
-        Assert.All(cards, card => Assert.Equal(OperatingCity.JeddahId, card.OperatingCityId));
-        Assert.All(preview.Value.Rows, row => Assert.Equal(OperatingCity.JeddahId, row.OperatingCityId));
+        Assert.Equal("BW203", cards[0].CardNumber);
+        Assert.Equal([OperatingCity.JeddahId, OperatingCity.RiyadhId], cards.Select(card => card.OperatingCityId));
+        Assert.Equal([OperatingCity.JeddahId, OperatingCity.RiyadhId], preview.Value.Rows.Select(row => row.OperatingCityId));
     }
 
     [Fact]
@@ -60,9 +61,9 @@ public sealed class FuelCardBulkImportTests
         dbContext.Sponsors.Add(new Sponsor { EmployerIdentityNumber = "7038745530", RegistryNameAr = "مؤسسة البوابة التجارية" });
         await dbContext.SaveChangesAsync(cancellationToken);
         using var workbook = BulkWorkbook(
-            ["BW201", "7038745530", "بترو اب"],
-            ["BW202", "7099999999", "بترو اب"],
-            ["BW203", "7038745530", "غير معروف"]);
+            ["BW201", "7038745530", "بترو اب", "جدة"],
+            ["BW202", "7099999999", "بترو اب", "جدة"],
+            ["BW203", "7038745530", "غير معروف", "جدة"]);
 
         var result = await BulkService(dbContext).ImportAsync(workbook, false, cancellationToken: cancellationToken);
 
@@ -88,7 +89,7 @@ public sealed class FuelCardBulkImportTests
             CardNumber = "BW203", NormalizedCardNumber = "BW203"
         });
         await dbContext.SaveChangesAsync(cancellationToken);
-        using var workbook = BulkWorkbook(["BW203", "7015658094", "بترو اب"]);
+        using var workbook = BulkWorkbook(["BW203", "7015658094", "بترو اب", "جدة"]);
 
         var result = await BulkService(dbContext).ImportAsync(workbook, false, cancellationToken: cancellationToken);
 
@@ -109,7 +110,7 @@ public sealed class FuelCardBulkImportTests
         using var workbook = new XLWorkbook();
         var sheet = workbook.AddWorksheet("Cards");
         sheet.Cell(1, 1).Value = "number";
-        sheet.Cell(2, 1).Value = "BW203";
+        sheet.Cell(2, 1).Value = "B W 203";
         using var stream = new MemoryStream();
         workbook.SaveAs(stream);
         stream.Position = 0;
@@ -118,7 +119,35 @@ public sealed class FuelCardBulkImportTests
             .ImportCardNumbersAsync(stream, sponsor.Id, false, cancellationToken: cancellationToken);
 
         Assert.True(result.IsSuccess, result.Error.Description);
-        Assert.Equal(sponsor.Id, (await dbContext.FuelCards.SingleAsync(cancellationToken)).SponsorId);
+        var card = await dbContext.FuelCards.SingleAsync(cancellationToken);
+        Assert.Equal(sponsor.Id, card.SponsorId);
+        Assert.Equal("BW203", card.CardNumber);
+    }
+
+    [Fact]
+    public async Task LegacySheetWithoutCityColumnDefaultsToJeddah()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        await using var dbContext = CreateContext();
+        dbContext.Sponsors.Add(new Sponsor { EmployerIdentityNumber = "7038745530", RegistryNameAr = "Test sponsor" });
+        await dbContext.SaveChangesAsync(cancellationToken);
+        using var workbook = new XLWorkbook();
+        var sheet = workbook.AddWorksheet("Cards");
+        sheet.Cell(1, 1).Value = "number";
+        sheet.Cell(1, 2).Value = "sponsor 70 number";
+        sheet.Cell(1, 3).Value = "company name";
+        sheet.Cell(2, 1).Value = "BW204";
+        sheet.Cell(2, 2).Value = "7038745530";
+        sheet.Cell(2, 3).Value = "بترو اب";
+        using var stream = new MemoryStream();
+        workbook.SaveAs(stream);
+        stream.Position = 0;
+
+        var result = await BulkService(dbContext).ImportAsync(stream, false, cancellationToken);
+
+        Assert.True(result.IsSuccess, result.Error.Description);
+        Assert.True(result.Value!.Imported);
+        Assert.Equal(OperatingCity.JeddahId, (await dbContext.FuelCards.SingleAsync(cancellationToken)).OperatingCityId);
     }
 
     private static ApplicationDbContext CreateContext()
@@ -126,7 +155,12 @@ public sealed class FuelCardBulkImportTests
         var context = new ApplicationDbContext(new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseInMemoryDatabase($"FuelCardBulkImport_{Guid.NewGuid():N}",
                 options => options.EnableNullChecks(false)).Options);
-        context.OperatingCities.Add(new OperatingCity { Id = OperatingCity.JeddahId, GlobalCityId = GlobalCity.JeddahId });
+        context.GlobalCities.AddRange(
+            new GlobalCity { Id = GlobalCity.JeddahId, NameAr = "جدة", NameEn = "Jeddah" },
+            new GlobalCity { Id = GlobalCity.RiyadhId, NameAr = "الرياض", NameEn = "Riyadh" });
+        context.OperatingCities.AddRange(
+            new OperatingCity { Id = OperatingCity.JeddahId, GlobalCityId = GlobalCity.JeddahId },
+            new OperatingCity { Id = OperatingCity.RiyadhId, GlobalCityId = GlobalCity.RiyadhId });
         return context;
     }
 
@@ -140,6 +174,7 @@ public sealed class FuelCardBulkImportTests
         sheet.Cell(1, 1).Value = "number";
         sheet.Cell(1, 2).Value = "sponsor 70 number";
         sheet.Cell(1, 3).Value = "company name";
+        sheet.Cell(1, 4).Value = "city name";
         for (var row = 0; row < rows.Length; row++)
             for (var column = 0; column < rows[row].Length; column++)
                 sheet.Cell(row + 2, column + 1).Value = rows[row][column];

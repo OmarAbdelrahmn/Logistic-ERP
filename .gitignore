@@ -20,3 +20,6 @@ src/LogisticsERP.Api/App_Data/
 src/LogisticsERP.Worker/App_Data/
 src/LogisticsERP.Api/wwwroot/private/**
 !src/LogisticsERP.Api/wwwroot/private/.gitkeep
+
+# Local authorization backups contain user access details.
+.codex-temp/management-authorization-backup-*.json

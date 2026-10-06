@@ -12,7 +12,7 @@ internal sealed partial class JahezService
 {
     public Task<Result<JahezImportPreview>> UploadAsync(string key, JahezImportCreateRequest request, CancellationToken ct = default) =>
         ExecuteAsync(key, "upload", new { request.Kind, Files = request.Files.Select(f => new { f.FileName, Hash = Hash(f.Content) }), request.ReplacesBatchId, request.CorrectionReason },
-            PermissionKeys.Jahez.ImportsManage, async () =>
+            PermissionKeys.Jahez.ImportsCreate, async () =>
         {
             Require(Enum.IsDefined(request.Kind) && request.Files.Count is >= 1 and <= 10, JahezErrors.Invalid("حدد نوع الاستيراد وملفًا إلى عشرة ملفات."));
             Require(request.Files.All(f => f.Content.Length is > 0 and <= 10 * 1024 * 1024 && f.FileName.Length is > 0 and <= 260
@@ -52,7 +52,7 @@ internal sealed partial class JahezService
         }, ct);
 
     public Task<Result<JahezImportPreview>> PreviewImportAsync(Guid id, CancellationToken ct = default) =>
-        ReadAsync(PermissionKeys.Jahez.ImportsManage, async () =>
+        ReadAsync(PermissionKeys.Jahez.ImportsRead, async () =>
         {
             var batch = await db.Set<JahezImportBatch>().AsNoTracking().SingleOrDefaultAsync(x => x.Id == id, ct);
             Require(batch is not null, JahezErrors.NotFound);
@@ -166,7 +166,7 @@ internal sealed partial class JahezService
     }
 
     public Task<Result<JahezImportPreview>> CommitImportAsync(string key, Guid id, JahezImportCommitRequest request, CancellationToken ct = default) =>
-        ExecuteAsync(key, "commit-import", new { id, request }, PermissionKeys.Jahez.ImportsManage, async () =>
+        ExecuteAsync(key, "commit-import", new { id, request }, PermissionKeys.Jahez.ImportsUpdate, async () =>
         {
             var batch = await db.Set<JahezImportBatch>().SingleOrDefaultAsync(x => x.Id == id, ct);
             Require(batch is not null, JahezErrors.NotFound);
@@ -221,7 +221,7 @@ internal sealed partial class JahezService
         }, ct);
 
     public Task<Result<JahezImportFileResponse>> GetImportFileAsync(Guid id, CancellationToken ct = default) =>
-        ReadAsync(PermissionKeys.Jahez.ImportsManage, async () =>
+        ReadAsync(PermissionKeys.Jahez.ImportsRead, async () =>
         {
             var f = await db.Set<JahezImportFile>().AsNoTracking().SingleOrDefaultAsync(x => x.Id == id, ct);
             Require(f is not null, JahezErrors.NotFound);

@@ -63,7 +63,7 @@ internal sealed class VehiclePlatformAccountAssignmentService(
         ApproveVehiclePlatformAccountAssignmentRequest request,
         CancellationToken cancellationToken = default)
     {
-        if (!await support.HasPermissionAsync(PermissionKeys.Fleet.AssignmentsManage, null, cancellationToken))
+        if (!await support.HasPermissionAsync(PermissionKeys.Fleet.AssignmentsCreate, null, cancellationToken))
             return Result.Failure<VehiclePlatformAccountAssignmentResponse>(FleetErrors.Forbidden);
         if (support.UserId is not { } userId)
             return Result.Failure<VehiclePlatformAccountAssignmentResponse>(FleetErrors.CurrentUserUnavailable);
@@ -108,7 +108,7 @@ internal sealed class VehiclePlatformAccountAssignmentService(
         CloseVehiclePlatformAccountAssignmentRequest request,
         CancellationToken cancellationToken = default)
     {
-        if (!await support.HasPermissionAsync(PermissionKeys.Fleet.AssignmentsManage, null, cancellationToken))
+        if (!await support.HasPermissionAsync(PermissionKeys.Fleet.AssignmentsDelete, null, cancellationToken))
             return Result.Failure<VehiclePlatformAccountAssignmentResponse>(FleetErrors.Forbidden);
         if (support.UserId is not { } userId)
             return Result.Failure<VehiclePlatformAccountAssignmentResponse>(FleetErrors.CurrentUserUnavailable);
@@ -175,7 +175,9 @@ internal sealed class VehiclePlatformAccountAssignmentService(
         SwitchVehiclePlatformAccountAssignmentRequest request,
         CancellationToken cancellationToken = default)
     {
-        if (!await support.HasPermissionAsync(PermissionKeys.Fleet.AssignmentsManage, null, cancellationToken))
+        if (!await support.HasPermissionAsync(PermissionKeys.Fleet.AssignmentsUpdate, null, cancellationToken)
+            || !await support.HasPermissionAsync(PermissionKeys.Fleet.AssignmentsCreate, null, cancellationToken)
+            || !await support.HasPermissionAsync(PermissionKeys.Fleet.AssignmentsDelete, null, cancellationToken))
             return Result.Failure<VehiclePlatformAccountSwitchResponse>(FleetErrors.Forbidden);
         if (support.UserId is not { } userId)
             return Result.Failure<VehiclePlatformAccountSwitchResponse>(FleetErrors.CurrentUserUnavailable);
@@ -267,7 +269,9 @@ internal sealed class VehiclePlatformAccountAssignmentService(
         AcceptVehiclePlatformAccountSwitchRequest request,
         CancellationToken cancellationToken = default)
     {
-        if (!await support.HasPermissionAsync(PermissionKeys.Fleet.AssignmentsManage, null, cancellationToken))
+        if (!await support.HasPermissionAsync(PermissionKeys.Fleet.AssignmentsUpdate, null, cancellationToken)
+            || !await support.HasPermissionAsync(PermissionKeys.Fleet.AssignmentsCreate, null, cancellationToken)
+            || !await support.HasPermissionAsync(PermissionKeys.Fleet.AssignmentsDelete, null, cancellationToken))
             return Result.Failure<VehiclePlatformAccountSwitchResponse>(FleetErrors.Forbidden);
         if (support.UserId is not { } userId)
             return Result.Failure<VehiclePlatformAccountSwitchResponse>(FleetErrors.CurrentUserUnavailable);
@@ -446,7 +450,7 @@ internal sealed class VehiclePlatformAccountAssignmentService(
         CreateSponsorVehicleLeaseAgreementRequest request,
         CancellationToken cancellationToken = default)
     {
-        if (!await support.HasPermissionAsync(PermissionKeys.Fleet.AssignmentsManage, null, cancellationToken))
+        if (!await support.HasPermissionAsync(PermissionKeys.Fleet.AssignmentsCreate, null, cancellationToken))
             return Result.Failure<SponsorVehicleLeaseAgreementResponse>(FleetErrors.Forbidden);
         if (support.UserId is null)
             return Result.Failure<SponsorVehicleLeaseAgreementResponse>(FleetErrors.CurrentUserUnavailable);
@@ -533,7 +537,7 @@ internal sealed class VehiclePlatformAccountAssignmentService(
         CloseSponsorVehicleLeaseAgreementRequest request,
         CancellationToken cancellationToken = default)
     {
-        if (!await support.HasPermissionAsync(PermissionKeys.Fleet.AssignmentsManage, null, cancellationToken))
+        if (!await support.HasPermissionAsync(PermissionKeys.Fleet.AssignmentsDelete, null, cancellationToken))
             return Result.Failure<SponsorVehicleLeaseAgreementResponse>(FleetErrors.Forbidden);
         if (support.UserId is null)
             return Result.Failure<SponsorVehicleLeaseAgreementResponse>(FleetErrors.CurrentUserUnavailable);

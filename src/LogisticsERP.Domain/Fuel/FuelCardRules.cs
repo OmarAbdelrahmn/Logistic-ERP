@@ -7,6 +7,18 @@ namespace LogisticsERP.Domain.Fuel;
 
 public static class FuelCardRules
 {
+    public static string RemoveCardNumberWhitespace(string value)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+        var builder = new StringBuilder(value.Length);
+        foreach (var character in value)
+        {
+            if (!char.IsWhiteSpace(character)) builder.Append(character);
+        }
+
+        return builder.ToString();
+    }
+
     public static string NormalizeCardNumber(string value, FuelCardIdentifierType identifierType)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(value);

@@ -1,0 +1,1773 @@
+[
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Authentication\\SupportAccessService.cs",
+    "line": 221,
+    "ref": "PermissionKeys.Security.SupportAccessManage",
+    "method": "CanManageAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Fleet\\FleetService.cs",
+    "line": 36,
+    "ref": "PermissionKeys.Fleet.VehiclesManage",
+    "method": "UpsertManufacturerAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Fleet\\FleetService.cs",
+    "line": 65,
+    "ref": "PermissionKeys.Fleet.VehiclesManage",
+    "method": "UpsertModelAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Fleet\\FleetService.cs",
+    "line": 102,
+    "ref": "PermissionKeys.Fleet.VehiclesManage",
+    "method": "UpsertSupplierAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Fleet\\FleetService.cs",
+    "line": 124,
+    "ref": "PermissionKeys.Fleet.VehiclesManage",
+    "method": "ArchiveSupplierAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Fleet\\FleetService.cs",
+    "line": 169,
+    "ref": "PermissionKeys.Fleet.VehiclesManage",
+    "method": "UpsertVehicleAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Fleet\\FleetService.cs",
+    "line": 326,
+    "ref": "PermissionKeys.Fleet.CorrectionsManage",
+    "method": "CorrectIdentityAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Fleet\\FleetService.cs",
+    "line": 375,
+    "ref": "PermissionKeys.Fleet.RegistrationTransitionsManage",
+    "method": "TransitionToPublicTransportAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Fleet\\FleetService.cs",
+    "line": 490,
+    "ref": "PermissionKeys.Fleet.VehiclesManage",
+    "method": "ChangeAdministrativeStatusAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Fleet\\FleetService.cs",
+    "line": 530,
+    "ref": "PermissionKeys.Fleet.CorrectionsManage",
+    "method": "RecordOdometerAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Fleet\\FleetService.cs",
+    "line": 530,
+    "ref": "PermissionKeys.Fleet.VehiclesManage",
+    "method": "RecordOdometerAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Fleet\\FleetService.cs",
+    "line": 569,
+    "ref": "PermissionKeys.Fleet.AssignmentsManage",
+    "method": "ExecuteTakeAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Fleet\\FleetService.cs",
+    "line": 677,
+    "ref": "PermissionKeys.Fleet.AssignmentsManage",
+    "method": "ReturnAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Fleet\\FleetService.cs",
+    "line": 782,
+    "ref": "PermissionKeys.Fleet.AssignmentsManage",
+    "method": "SwitchAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Fleet\\FleetService.cs",
+    "line": 782,
+    "ref": "PermissionKeys.Fleet.AssignmentsManage",
+    "method": "SwitchAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Fleet\\FleetService.cs",
+    "line": 876,
+    "ref": "PermissionKeys.Fleet.AssignmentsManage",
+    "method": "RenewPermissionAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Fleet\\FleetService.cs",
+    "line": 909,
+    "ref": "PermissionKeys.Fleet.AssignmentsManage",
+    "method": "AttachPromissoryFilesAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Fleet\\FleetService.cs",
+    "line": 1029,
+    "ref": "PermissionKeys.Fleet.ComplianceManage",
+    "method": "RenewRegistrationAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Fleet\\FleetService.cs",
+    "line": 1041,
+    "ref": "PermissionKeys.Fleet.ComplianceManage",
+    "method": "RenewInsuranceAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Fleet\\FleetService.cs",
+    "line": 1053,
+    "ref": "PermissionKeys.Fleet.ComplianceManage",
+    "method": "RenewInspectionAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Fleet\\FleetService.cs",
+    "line": 1065,
+    "ref": "PermissionKeys.Fleet.ComplianceManage",
+    "method": "RenewOperationCardAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Fleet\\FleetService.cs",
+    "line": 1208,
+    "ref": "PermissionKeys.Fleet.IssuesManage",
+    "method": "CreateIssueAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Fleet\\FleetService.cs",
+    "line": 1231,
+    "ref": "PermissionKeys.Fleet.IssuesManage",
+    "method": "ActOnIssueAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Fleet\\FleetService.cs",
+    "line": 1255,
+    "ref": "PermissionKeys.Fleet.IssuesManage",
+    "method": "ResolveIssueAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Fleet\\VehicleDailyDistanceService.cs",
+    "line": 106,
+    "ref": "PermissionKeys.Fleet.DailyDistancesManage",
+    "method": "UpsertManualAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Fleet\\VehiclePlatformAccountAssignmentService.cs",
+    "line": 66,
+    "ref": "PermissionKeys.Fleet.AssignmentsManage",
+    "method": "ApproveAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Fleet\\VehiclePlatformAccountAssignmentService.cs",
+    "line": 111,
+    "ref": "PermissionKeys.Fleet.AssignmentsManage",
+    "method": "CloseAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Fleet\\VehiclePlatformAccountAssignmentService.cs",
+    "line": 178,
+    "ref": "PermissionKeys.Fleet.AssignmentsManage",
+    "method": "SwitchAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Fleet\\VehiclePlatformAccountAssignmentService.cs",
+    "line": 270,
+    "ref": "PermissionKeys.Fleet.AssignmentsManage",
+    "method": "AcceptSwitchAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Fleet\\VehiclePlatformAccountAssignmentService.cs",
+    "line": 449,
+    "ref": "PermissionKeys.Fleet.AssignmentsManage",
+    "method": "CreateLeaseAgreementAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Fleet\\VehiclePlatformAccountAssignmentService.cs",
+    "line": 536,
+    "ref": "PermissionKeys.Fleet.AssignmentsManage",
+    "method": "CloseLeaseAgreementAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Fuel\\FuelCardService.cs",
+    "line": 112,
+    "ref": "PermissionKeys.Fuel.Manage",
+    "method": "CreateCardAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Fuel\\FuelCardService.cs",
+    "line": 175,
+    "ref": "PermissionKeys.Fuel.Manage",
+    "method": "SetSponsorAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Fuel\\FuelCardService.cs",
+    "line": 195,
+    "ref": "PermissionKeys.Fuel.Manage",
+    "method": "SetCityAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Fuel\\FuelCardService.cs",
+    "line": 235,
+    "ref": "PermissionKeys.Fuel.Manage",
+    "method": "AssignRiderAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Fuel\\FuelCardService.cs",
+    "line": 329,
+    "ref": "PermissionKeys.Fuel.Manage",
+    "method": "StopRiderAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Jahez\\JahezService.cs",
+    "line": 112,
+    "ref": "PermissionKeys.Jahez.HandoversManage",
+    "method": "HandoverAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Jahez\\JahezService.cs",
+    "line": 169,
+    "ref": "PermissionKeys.Jahez.AdjustmentsManage",
+    "method": "AdoptLegacyAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Jahez\\JahezService.cs",
+    "line": 194,
+    "ref": "PermissionKeys.Jahez.HandoversManage",
+    "method": "CloseAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Jahez\\JahezService.Finance.cs",
+    "line": 153,
+    "ref": "PermissionKeys.Jahez.EarningsManage",
+    "method": "RecordEarningsAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Jahez\\JahezService.Finance.cs",
+    "line": 187,
+    "ref": "PermissionKeys.Jahez.CollectionsManage",
+    "method": "PayAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Jahez\\JahezService.Finance.cs",
+    "line": 231,
+    "ref": "PermissionKeys.Jahez.AdjustmentsManage",
+    "method": "AdjustAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Jahez\\JahezService.History.cs",
+    "line": 55,
+    "ref": "PermissionKeys.Jahez.ImportsManage",
+    "method": "GetImportBatchesAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Jahez\\JahezService.Imports.cs",
+    "line": 15,
+    "ref": "PermissionKeys.Jahez.ImportsManage",
+    "method": "UploadAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Jahez\\JahezService.Imports.cs",
+    "line": 55,
+    "ref": "PermissionKeys.Jahez.ImportsManage",
+    "method": "PreviewImportAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Jahez\\JahezService.Imports.cs",
+    "line": 169,
+    "ref": "PermissionKeys.Jahez.ImportsManage",
+    "method": "CommitImportAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Infrastructure\\Jahez\\JahezService.Imports.cs",
+    "line": 224,
+    "ref": "PermissionKeys.Jahez.ImportsManage",
+    "method": "GetImportFileAsync",
+    "detail": ""
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\CompanyProfileController.cs",
+    "line": 22,
+    "ref": "PermissionKeys.Catalog.CompanyProfileManage",
+    "method": "Update",
+    "detail": "('Put', '')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\FuelCardsController.cs",
+    "line": 63,
+    "ref": "PermissionKeys.Fuel.Manage",
+    "method": "CreateCard",
+    "detail": "('Post', '')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\FuelCardsController.cs",
+    "line": 75,
+    "ref": "PermissionKeys.Fuel.Manage",
+    "method": "SetSponsor",
+    "detail": "('Put', '{id:guid}/sponsor')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\FuelCardsController.cs",
+    "line": 84,
+    "ref": "PermissionKeys.Fuel.Manage",
+    "method": "SetCity",
+    "detail": "('Put', '{id:guid}/city')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\FuelCardsController.cs",
+    "line": 101,
+    "ref": "PermissionKeys.Fuel.Manage",
+    "method": "AssignRider",
+    "detail": "('Post', '{id:guid}/assignments')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\FuelCardsController.cs",
+    "line": 112,
+    "ref": "PermissionKeys.Fuel.Manage",
+    "method": "StopRider",
+    "detail": "('Post', '{id:guid}/stop-rider')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HousingController.cs",
+    "line": 45,
+    "ref": "PermissionKeys.Operations.HousingManage",
+    "method": "Create",
+    "detail": "('Post', '')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HousingController.cs",
+    "line": 49,
+    "ref": "PermissionKeys.Operations.HousingManage",
+    "method": "Update",
+    "detail": "('Put', '{id:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HousingController.cs",
+    "line": 53,
+    "ref": "PermissionKeys.Operations.HousingManage",
+    "method": "Archive",
+    "detail": "('Patch', '{id:guid}/archive')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HousingController.cs",
+    "line": 69,
+    "ref": "PermissionKeys.Operations.HousingManage",
+    "method": "CreateRoom",
+    "detail": "('Post', '{id:guid}/rooms')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HousingController.cs",
+    "line": 90,
+    "ref": "PermissionKeys.Operations.HousingManage",
+    "method": "CreateFloor",
+    "detail": "('Post', '{id:guid}/floors')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HousingController.cs",
+    "line": 98,
+    "ref": "PermissionKeys.Operations.HousingManage",
+    "method": "UpdateFloor",
+    "detail": "('Put', '{id:guid}/floors/{floorId:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HousingController.cs",
+    "line": 106,
+    "ref": "PermissionKeys.Operations.HousingManage",
+    "method": "DeleteFloor",
+    "detail": "('Delete', 'floors/{floorId:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HousingController.cs",
+    "line": 114,
+    "ref": "PermissionKeys.Operations.HousingManage",
+    "method": "CreateFloorEquipment",
+    "detail": "('Post', 'floors/{floorId:guid}/equipment')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HousingController.cs",
+    "line": 122,
+    "ref": "PermissionKeys.Operations.HousingManage",
+    "method": "UpdateFloorEquipment",
+    "detail": "('Put', 'floors/{floorId:guid}/equipment/{equipmentId:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HousingController.cs",
+    "line": 130,
+    "ref": "PermissionKeys.Operations.HousingManage",
+    "method": "DeleteEquipment",
+    "detail": "('Delete', 'equipment/{equipmentId:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HousingController.cs",
+    "line": 146,
+    "ref": "PermissionKeys.Operations.HousingManage",
+    "method": "AssignResident",
+    "detail": "('Post', '{id:guid}/residents')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HousingController.cs",
+    "line": 154,
+    "ref": "PermissionKeys.Operations.HousingManage",
+    "method": "CloseResidence",
+    "detail": "('Post', 'residence-periods/{periodId:guid}/close')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HousingController.cs",
+    "line": 170,
+    "ref": "PermissionKeys.Operations.HousingManage",
+    "method": "AssignSupervisor",
+    "detail": "('Post', '{id:guid}/supervisors')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HousingController.cs",
+    "line": 178,
+    "ref": "PermissionKeys.Operations.HousingManage",
+    "method": "CloseSupervisor",
+    "detail": "('Post', 'supervisor-periods/{periodId:guid}/close')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HousingWarehouseController.cs",
+    "line": 42,
+    "ref": "PermissionKeys.Operations.HousingManage",
+    "method": "CreateItem",
+    "detail": "('Post', 'items')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HousingWarehouseController.cs",
+    "line": 55,
+    "ref": "PermissionKeys.Operations.HousingManage",
+    "method": "UpdateItem",
+    "detail": "('Put', 'items/{itemId:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HousingWarehouseController.cs",
+    "line": 67,
+    "ref": "PermissionKeys.Operations.HousingManage",
+    "method": "SetStatusQuantity",
+    "detail": "('Patch', 'items/{itemId:guid}/statuses/{status}/quantity')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HousingWarehouseController.cs",
+    "line": 80,
+    "ref": "PermissionKeys.Operations.HousingManage",
+    "method": "TransferStatus",
+    "detail": "('Post', 'items/{itemId:guid}/status-transfers')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HousingWarehouseController.cs",
+    "line": 92,
+    "ref": "PermissionKeys.Operations.HousingManage",
+    "method": "TransferUnusedToHousing",
+    "detail": "('Post', 'items/{itemId:guid}/housing-transfers')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HousingWarehouseController.cs",
+    "line": 104,
+    "ref": "PermissionKeys.Operations.HousingManage",
+    "method": "ArchiveItem",
+    "detail": "('Delete', 'items/{itemId:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HrCatalogsController.cs",
+    "line": 18,
+    "ref": "PermissionKeys.Catalog.OperatingCitiesManage",
+    "method": "CreateGlobalCity",
+    "detail": "('Post', 'global-cities')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HrCatalogsController.cs",
+    "line": 23,
+    "ref": "PermissionKeys.Catalog.OperatingCitiesManage",
+    "method": "UpdateGlobalCity",
+    "detail": "('Put', 'global-cities/{id:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HrCatalogsController.cs",
+    "line": 52,
+    "ref": "PermissionKeys.Compliance.ResidencyManage",
+    "method": "CreateResidencyProfession",
+    "detail": "('Post', 'residency-professions')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HrCatalogsController.cs",
+    "line": 56,
+    "ref": "PermissionKeys.Compliance.ResidencyManage",
+    "method": "UpdateResidencyProfession",
+    "detail": "('Put', 'residency-professions/{id:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HrCatalogsController.cs",
+    "line": 78,
+    "ref": "PermissionKeys.Compliance.LicensesManage",
+    "method": "CreateDriverLicenseCategory",
+    "detail": "('Post', 'driver-license-categories')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HrCatalogsController.cs",
+    "line": 83,
+    "ref": "PermissionKeys.Compliance.LicensesManage",
+    "method": "UpdateDriverLicenseCategory",
+    "detail": "('Put', 'driver-license-categories/{id:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HrCatalogsController.cs",
+    "line": 92,
+    "ref": "PermissionKeys.Documents.CatalogManage",
+    "method": "CreateDocumentType",
+    "detail": "('Post', 'document-types')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HrCatalogsController.cs",
+    "line": 97,
+    "ref": "PermissionKeys.Documents.CatalogManage",
+    "method": "UpdateDocumentType",
+    "detail": "('Put', 'document-types/{id:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HrCatalogsController.cs",
+    "line": 107,
+    "ref": "PermissionKeys.Documents.CatalogManage",
+    "method": "CreateDocumentRequirement",
+    "detail": "('Post', 'document-requirements')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HrCatalogsController.cs",
+    "line": 112,
+    "ref": "PermissionKeys.Documents.CatalogManage",
+    "method": "UpdateDocumentRequirement",
+    "detail": "('Put', 'document-requirements/{id:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HrCatalogsController.cs",
+    "line": 121,
+    "ref": "PermissionKeys.Catalog.OperatingCitiesManage",
+    "method": "CreateOperatingCity",
+    "detail": "('Post', 'operating-cities')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HrCatalogsController.cs",
+    "line": 126,
+    "ref": "PermissionKeys.Catalog.OperatingCitiesManage",
+    "method": "UpdateOperatingCity",
+    "detail": "('Put', 'operating-cities/{id:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HrFormTemplatesController.cs",
+    "line": 42,
+    "ref": "PermissionKeys.HrForms.TemplatesManage",
+    "method": "Create",
+    "detail": "('Post', '')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HrFormTemplatesController.cs",
+    "line": 54,
+    "ref": "PermissionKeys.HrForms.TemplatesManage",
+    "method": "UpdateMetadata",
+    "detail": "('Put', '{id:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HrFormTemplatesController.cs",
+    "line": 73,
+    "ref": "PermissionKeys.HrForms.TemplatesManage",
+    "method": "CreateVersion",
+    "detail": "('Post', '{id:guid}/versions')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HrFormTemplatesController.cs",
+    "line": 84,
+    "ref": "PermissionKeys.HrForms.TemplatesManage",
+    "method": "Publish",
+    "detail": "('Post', '{id:guid}/versions/{versionId:guid}/publish')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HrFormTemplatesController.cs",
+    "line": 96,
+    "ref": "PermissionKeys.HrForms.TemplatesManage",
+    "method": "Archive",
+    "detail": "('Patch', '{id:guid}/archive')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HrWorkflowsController.cs",
+    "line": 18,
+    "ref": "PermissionKeys.Workflows.LeaveRequestsManage",
+    "method": "CreateLeaveType",
+    "detail": "('Post', 'leave-types')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HrWorkflowsController.cs",
+    "line": 22,
+    "ref": "PermissionKeys.Workflows.LeaveRequestsManage",
+    "method": "UpdateLeaveType",
+    "detail": "('Put', 'leave-types/{id:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HrWorkflowsController.cs",
+    "line": 30,
+    "ref": "PermissionKeys.Workflows.LeaveRequestsManage",
+    "method": "CreateLeaveWorkflow",
+    "detail": "('Post', 'leave-approval-workflows')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HrWorkflowsController.cs",
+    "line": 34,
+    "ref": "PermissionKeys.Workflows.LeaveRequestsManage",
+    "method": "UpdateLeaveWorkflow",
+    "detail": "('Put', 'leave-approval-workflows/{id:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HrWorkflowsController.cs",
+    "line": 42,
+    "ref": "PermissionKeys.Workflows.LeaveRequestsManage",
+    "method": "CreateLeaveRequest",
+    "detail": "('Post', 'leave-requests')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HrWorkflowsController.cs",
+    "line": 46,
+    "ref": "PermissionKeys.Workflows.LeaveRequestsManage",
+    "method": "UpdateLeaveRequest",
+    "detail": "('Put', 'leave-requests/{id:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HrWorkflowsController.cs",
+    "line": 50,
+    "ref": "PermissionKeys.Workflows.LeaveRequestsManage",
+    "method": "TransitionLeave",
+    "detail": "('Post', 'leave-requests/{id:guid}/transitions')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HrWorkflowsController.cs",
+    "line": 82,
+    "ref": "PermissionKeys.Workflows.LeaveRequestsManage",
+    "method": "RequestDateChange",
+    "detail": "('Post', 'leave-requests/{id:guid}/date-change-requests')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HrWorkflowsController.cs",
+    "line": 97,
+    "ref": "PermissionKeys.Workflows.LeaveRequestsManage",
+    "method": "RequestCancellation",
+    "detail": "('Post', 'leave-requests/{id:guid}/cancellation-requests')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HrWorkflowsController.cs",
+    "line": 111,
+    "ref": "PermissionKeys.Workflows.AbsenceCasesManage",
+    "method": "CreateAbsenceCase",
+    "detail": "('Post', 'absence-cases')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HrWorkflowsController.cs",
+    "line": 115,
+    "ref": "PermissionKeys.Workflows.AbsenceCasesManage",
+    "method": "UpdateAbsenceCase",
+    "detail": "('Put', 'absence-cases/{id:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HrWorkflowsController.cs",
+    "line": 119,
+    "ref": "PermissionKeys.Workflows.AbsenceCasesManage",
+    "method": "TransitionAbsenceCase",
+    "detail": "('Post', 'absence-cases/{id:guid}/transitions')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\HrWorkflowsController.cs",
+    "line": 127,
+    "ref": "PermissionKeys.Workflows.EmployeeStatusChangesManage",
+    "method": "CreateStatusChange",
+    "detail": "('Post', 'employee-status-change-requests')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\InsuranceController.cs",
+    "line": 22,
+    "ref": "PermissionKeys.Compliance.InsuranceManage",
+    "method": "CreateCompany",
+    "detail": "('Post', 'companies')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\InsuranceController.cs",
+    "line": 26,
+    "ref": "PermissionKeys.Compliance.InsuranceManage",
+    "method": "UpdateCompany",
+    "detail": "('Put', 'companies/{id:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\InsuranceController.cs",
+    "line": 38,
+    "ref": "PermissionKeys.Compliance.InsuranceManage",
+    "method": "CreatePlan",
+    "detail": "('Post', 'companies/{companyId:guid}/plans')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\InsuranceController.cs",
+    "line": 42,
+    "ref": "PermissionKeys.Compliance.InsuranceManage",
+    "method": "UpdatePlan",
+    "detail": "('Put', 'companies/{companyId:guid}/plans/{id:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\InsuranceController.cs",
+    "line": 54,
+    "ref": "PermissionKeys.Compliance.InsuranceManage",
+    "method": "CreatePolicy",
+    "detail": "('Post', 'employees/{employeeId:guid}/policies')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\InsuranceController.cs",
+    "line": 58,
+    "ref": "PermissionKeys.Compliance.InsuranceManage",
+    "method": "UpdatePolicy",
+    "detail": "('Put', 'employees/{employeeId:guid}/policies/{id:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\InsuranceController.cs",
+    "line": 62,
+    "ref": "PermissionKeys.Compliance.InsuranceManage",
+    "method": "ArchiveCompany",
+    "detail": "('Patch', 'companies/{id:guid}/archive')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\InsuranceController.cs",
+    "line": 66,
+    "ref": "PermissionKeys.Compliance.InsuranceManage",
+    "method": "ArchivePlan",
+    "detail": "('Patch', 'plans/{id:guid}/archive')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\InsuranceController.cs",
+    "line": 70,
+    "ref": "PermissionKeys.Compliance.InsuranceManage",
+    "method": "ArchivePolicy",
+    "detail": "('Patch', 'policies/{id:guid}/archive')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\JahezController.cs",
+    "line": 16,
+    "ref": "PermissionKeys.Jahez.HandoversManage",
+    "method": "Handover",
+    "detail": "('Post', 'handovers')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\JahezController.cs",
+    "line": 20,
+    "ref": "PermissionKeys.Jahez.AdjustmentsManage",
+    "method": "Adopt",
+    "detail": "('Post', 'legacy-adoptions')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\JahezController.cs",
+    "line": 24,
+    "ref": "PermissionKeys.Jahez.HandoversManage",
+    "method": "Close",
+    "detail": "('Post', 'handovers/{id:guid}/close')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\JahezController.cs",
+    "line": 81,
+    "ref": "PermissionKeys.Jahez.EarningsManage",
+    "method": "Earnings",
+    "detail": "('Post', 'earnings')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\JahezController.cs",
+    "line": 85,
+    "ref": "PermissionKeys.Jahez.CollectionsManage",
+    "method": "Payment",
+    "detail": "('Post', 'settlements')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\JahezController.cs",
+    "line": 89,
+    "ref": "PermissionKeys.Jahez.AdjustmentsManage",
+    "method": "Adjustment",
+    "detail": "('Post', 'adjustments')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\JahezController.cs",
+    "line": 96,
+    "ref": "PermissionKeys.Jahez.ImportsManage",
+    "method": "Upload",
+    "detail": "('Post', 'imports')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\JahezController.cs",
+    "line": 113,
+    "ref": "PermissionKeys.Jahez.ImportsManage",
+    "method": "ImportPreview",
+    "detail": "('Get', 'imports/{id:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\JahezController.cs",
+    "line": 117,
+    "ref": "PermissionKeys.Jahez.ImportsManage",
+    "method": "Imports",
+    "detail": "('Get', 'imports')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\JahezController.cs",
+    "line": 121,
+    "ref": "PermissionKeys.Jahez.ImportsManage",
+    "method": "CommitImport",
+    "detail": "('Post', 'imports/{id:guid}/commit')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\JahezController.cs",
+    "line": 125,
+    "ref": "PermissionKeys.Jahez.ImportsManage",
+    "method": "DownloadImportFile",
+    "detail": "('Get', 'import-files/{id:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\LeaveDocumentsController.cs",
+    "line": 46,
+    "ref": "PermissionKeys.Workflows.LeaveRequestsManage",
+    "method": "UpdateMetadata",
+    "detail": "('Put', '{documentId:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\LeaveDocumentsController.cs",
+    "line": 72,
+    "ref": "PermissionKeys.Workflows.LeaveRequestsManage",
+    "method": "Archive",
+    "detail": "('Patch', '{documentId:guid}/archive')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\LegalCasesController.cs",
+    "line": 41,
+    "ref": "PermissionKeys.Workflows.LegalCasesManage",
+    "method": "Create",
+    "detail": "('Post', '')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\LegalCasesController.cs",
+    "line": 49,
+    "ref": "PermissionKeys.Workflows.LegalCasesManage",
+    "method": "Update",
+    "detail": "('Put', '{id:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\LegalCasesController.cs",
+    "line": 57,
+    "ref": "PermissionKeys.Workflows.LegalCasesManage",
+    "method": "Archive",
+    "detail": "('Delete', '{id:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\LegalCasesController.cs",
+    "line": 73,
+    "ref": "PermissionKeys.Workflows.LegalCasesManage",
+    "method": "CreateHearing",
+    "detail": "('Post', '{caseId:guid}/hearings')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\LegalCasesController.cs",
+    "line": 81,
+    "ref": "PermissionKeys.Workflows.LegalCasesManage",
+    "method": "UpdateHearing",
+    "detail": "('Put', '{caseId:guid}/hearings/{hearingId:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\LegalCasesController.cs",
+    "line": 89,
+    "ref": "PermissionKeys.Workflows.LegalCasesManage",
+    "method": "ArchiveHearing",
+    "detail": "('Delete', '{caseId:guid}/hearings/{hearingId:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\LegalCasesController.cs",
+    "line": 97,
+    "ref": "PermissionKeys.Workflows.LegalCasesManage",
+    "method": "UploadFile",
+    "detail": "('Post', '{caseId:guid}/hearings/{hearingId:guid}/files')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\LegalCasesController.cs",
+    "line": 119,
+    "ref": "PermissionKeys.Workflows.LegalCasesManage",
+    "method": "ArchiveFile",
+    "detail": "('Delete', '{caseId:guid}/hearings/{hearingId:guid}/files/{fileId:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\MaintenanceInventoryController.cs",
+    "line": 25,
+    "ref": "PermissionKeys.Inventory.ItemsManage",
+    "method": "CreateItem",
+    "detail": "('Post', 'items')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\MaintenanceInventoryController.cs",
+    "line": 33,
+    "ref": "PermissionKeys.Inventory.ItemsManage",
+    "method": "UpdateItem",
+    "detail": "('Put', 'items/{id:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\MaintenanceInventoryController.cs",
+    "line": 41,
+    "ref": "PermissionKeys.Inventory.ReceiptsManage",
+    "method": "GetSuppliers",
+    "detail": "('Get', 'suppliers')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\MaintenanceInventoryController.cs",
+    "line": 49,
+    "ref": "PermissionKeys.Inventory.ReceiptsManage",
+    "method": "CreateSupplier",
+    "detail": "('Post', 'suppliers')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\MaintenanceInventoryController.cs",
+    "line": 57,
+    "ref": "PermissionKeys.Inventory.ReceiptsManage",
+    "method": "UpdateSupplier",
+    "detail": "('Put', 'suppliers/{id:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\MaintenanceInventoryController.cs",
+    "line": 83,
+    "ref": "PermissionKeys.Inventory.ReceiptsManage",
+    "method": "PostReceipt",
+    "detail": "('Post', 'receipts')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\MaintenanceInventoryController.cs",
+    "line": 99,
+    "ref": "PermissionKeys.Inventory.ReceiptsManage",
+    "method": "GetReceipts",
+    "detail": "('Get', 'receipts')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\MaintenanceInventoryController.cs",
+    "line": 107,
+    "ref": "PermissionKeys.Inventory.ReceiptsManage",
+    "method": "GetReceipt",
+    "detail": "('Get', 'receipts/{id:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\MaintenanceInventoryController.cs",
+    "line": 115,
+    "ref": "PermissionKeys.Inventory.ReceiptsManage",
+    "method": "DownloadReceiptFile",
+    "detail": "('Get', 'receipts/{id:guid}/bill-file')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\MaintenanceInventoryController.cs",
+    "line": 176,
+    "ref": "PermissionKeys.Inventory.ReturnsManage",
+    "method": "PostSupplierReturn",
+    "detail": "('Post', 'supplier-returns')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\MaintenanceLocationsController.cs",
+    "line": 22,
+    "ref": "PermissionKeys.Maintenance.LocationsManage",
+    "method": "Create",
+    "detail": "('Post', '')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\MaintenanceLocationsController.cs",
+    "line": 30,
+    "ref": "PermissionKeys.Maintenance.LocationsManage",
+    "method": "Update",
+    "detail": "('Put', '{id:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\MaintenanceWorkOrdersController.cs",
+    "line": 51,
+    "ref": "PermissionKeys.Maintenance.ExternalJobsManage",
+    "method": "CreateExternal",
+    "detail": "('Post', 'external')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\MaintenanceWorkOrdersController.cs",
+    "line": 116,
+    "ref": "PermissionKeys.Maintenance.PartSalesManage",
+    "method": "PostPartSale",
+    "detail": "('Post', '{id:guid}/part-sales')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\MaintenanceWorkOrdersController.cs",
+    "line": 126,
+    "ref": "PermissionKeys.Maintenance.CustomerLaborChargesManage",
+    "method": "PostCustomerLaborCharge",
+    "detail": "('Post', '{id:guid}/customer-labor-charges')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\MaintenanceWorkOrdersController.cs",
+    "line": 135,
+    "ref": "PermissionKeys.Maintenance.MechanicLaborPaymentsManage",
+    "method": "PostMechanicLaborPayment",
+    "detail": "('Post', '{id:guid}/mechanic-labor-payments')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\MaintenanceWorkOrdersController.cs",
+    "line": 144,
+    "ref": "PermissionKeys.Maintenance.ExternalJobsManage",
+    "method": "PostOtherFinancialEntry",
+    "detail": "('Post', '{id:guid}/other-financial-entries')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\MaintenanceWorkOrdersController.cs",
+    "line": 153,
+    "ref": "PermissionKeys.Maintenance.ExternalJobsManage",
+    "method": "PostCustomerPayment",
+    "detail": "('Post', '{id:guid}/customer-payments')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\NotificationsController.cs",
+    "line": 41,
+    "ref": "PermissionKeys.Reporting.NotificationsManage",
+    "method": "Create",
+    "detail": "('Post', '')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\PhoneSimsController.cs",
+    "line": 61,
+    "ref": "PermissionKeys.Operations.PhoneSimsManage",
+    "method": "Create",
+    "detail": "('Post', '')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\PhoneSimsController.cs",
+    "line": 84,
+    "ref": "PermissionKeys.Operations.PhoneSimsManage",
+    "method": "Update",
+    "detail": "('Put', '{id:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\PhoneSimsController.cs",
+    "line": 95,
+    "ref": "PermissionKeys.Operations.PhoneSimsManage",
+    "method": "ChangeResponsibleEmployee",
+    "detail": "('Patch', '{id:guid}/responsible-employee')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\PhoneSimsController.cs",
+    "line": 106,
+    "ref": "PermissionKeys.Operations.PhoneSimsManage",
+    "method": "ChangeStatus",
+    "detail": "('Patch', '{id:guid}/status')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\PhoneSimsController.cs",
+    "line": 117,
+    "ref": "PermissionKeys.Operations.PhoneSimsManage",
+    "method": "Archive",
+    "detail": "('Patch', '{id:guid}/archive')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\PhoneSimsController.cs",
+    "line": 148,
+    "ref": "PermissionKeys.Operations.PhoneSimsManage",
+    "method": "Assign",
+    "detail": "('Post', '{id:guid}/assignments')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\PhoneSimsController.cs",
+    "line": 159,
+    "ref": "PermissionKeys.Operations.PhoneSimsManage",
+    "method": "CloseAssignment",
+    "detail": "('Post', '{id:guid}/assignments/{assignmentId:guid}/close')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\PlacesController.cs",
+    "line": 22,
+    "ref": "PermissionKeys.Operations.PhoneSimsManage",
+    "method": "Create",
+    "detail": "('Post', '')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\PlacesController.cs",
+    "line": 30,
+    "ref": "PermissionKeys.Operations.PhoneSimsManage",
+    "method": "Update",
+    "detail": "('Put', '{id:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\PlatformAccountsController.cs",
+    "line": 46,
+    "ref": "PermissionKeys.Operations.PlatformAccountsManage",
+    "method": "Create",
+    "detail": "('Post', '')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\PlatformAccountsController.cs",
+    "line": 53,
+    "ref": "PermissionKeys.Operations.PlatformAccountsManage",
+    "method": "Update",
+    "detail": "('Put', '{id:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\PlatformAccountsController.cs",
+    "line": 61,
+    "ref": "PermissionKeys.Operations.PlatformAssignmentsManage",
+    "method": "Assign",
+    "detail": "('Post', '{id:guid}/assign')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\PlatformAccountsController.cs",
+    "line": 69,
+    "ref": "PermissionKeys.Operations.PlatformAssignmentsManage",
+    "method": "Release",
+    "detail": "('Post', '{id:guid}/release')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\PlatformOperationsController.cs",
+    "line": 18,
+    "ref": "PermissionKeys.Operations.PlatformAccountsManage",
+    "method": "CreatePlatform",
+    "detail": "('Post', 'platforms')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\PlatformOperationsController.cs",
+    "line": 22,
+    "ref": "PermissionKeys.Operations.PlatformAccountsManage",
+    "method": "UpdatePlatform",
+    "detail": "('Put', 'platforms/{id:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\PlatformOperationsController.cs",
+    "line": 30,
+    "ref": "PermissionKeys.Operations.PlatformAccountsManage",
+    "method": "CreateContract",
+    "detail": "('Post', 'contracts')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\PlatformOperationsController.cs",
+    "line": 34,
+    "ref": "PermissionKeys.Operations.PlatformAccountsManage",
+    "method": "UpdateContract",
+    "detail": "('Put', 'contracts/{id:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\PlatformOperationsController.cs",
+    "line": 43,
+    "ref": "PermissionKeys.Operations.PlatformAccountsManage",
+    "method": "CreateAccount",
+    "detail": "('Post', 'accounts')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\PlatformOperationsController.cs",
+    "line": 47,
+    "ref": "PermissionKeys.Operations.PlatformAccountsManage",
+    "method": "UpdateAccount",
+    "detail": "('Put', 'accounts/{id:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\PlatformOperationsController.cs",
+    "line": 68,
+    "ref": "PermissionKeys.Operations.PlatformAccountsManage",
+    "method": "CreateRegistration",
+    "detail": "('Post', 'registrations')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\PlatformOperationsController.cs",
+    "line": 72,
+    "ref": "PermissionKeys.Operations.PlatformAccountsManage",
+    "method": "UpdateRegistration",
+    "detail": "('Put', 'registrations/{id:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\PlatformOperationsController.cs",
+    "line": 80,
+    "ref": "PermissionKeys.Operations.PlatformAssignmentsManage",
+    "method": "AssignAccount",
+    "detail": "('Post', 'assignments')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\PlatformOperationsController.cs",
+    "line": 84,
+    "ref": "PermissionKeys.Operations.PlatformAssignmentsManage",
+    "method": "CloseAssignment",
+    "detail": "('Post', 'assignments/{id:guid}/close')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\PlatformOperationsController.cs",
+    "line": 88,
+    "ref": "PermissionKeys.Operations.PlatformAccountsManage",
+    "method": "Archive",
+    "detail": "('Patch', '{resource}/{id:guid}/archive')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\PlatformsController.cs",
+    "line": 21,
+    "ref": "PermissionKeys.Operations.PlatformAccountsManage",
+    "method": "Create",
+    "detail": "('Post', '')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\PlatformsController.cs",
+    "line": 28,
+    "ref": "PermissionKeys.Operations.PlatformAccountsManage",
+    "method": "Update",
+    "detail": "('Put', '{id:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\PromissoryNotesController.cs",
+    "line": 22,
+    "ref": "PermissionKeys.Compliance.PromissoryNotesManage",
+    "method": "Create",
+    "detail": "('Post', 'employee/{employeeId:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\PromissoryNotesController.cs",
+    "line": 26,
+    "ref": "PermissionKeys.Compliance.PromissoryNotesManage",
+    "method": "Update",
+    "detail": "('Put', 'employee/{employeeId:guid}/{id:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\PromissoryNotesController.cs",
+    "line": 30,
+    "ref": "PermissionKeys.Compliance.PromissoryNotesManage",
+    "method": "Archive",
+    "detail": "('Patch', '{id:guid}/archive')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\ResidencyAndLicensesController.cs",
+    "line": 22,
+    "ref": "PermissionKeys.Compliance.LicensesManage",
+    "method": "CreateLicense",
+    "detail": "('Post', 'employees/{employeeId:guid}/driver-licenses')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\ResidencyAndLicensesController.cs",
+    "line": 26,
+    "ref": "PermissionKeys.Compliance.LicensesManage",
+    "method": "UpdateLicense",
+    "detail": "('Put', 'employees/{employeeId:guid}/driver-licenses/{id:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\ResidencyAndLicensesController.cs",
+    "line": 30,
+    "ref": "PermissionKeys.Compliance.LicensesManage",
+    "method": "ArchiveLicense",
+    "detail": "('Patch', 'driver-licenses/{id:guid}/archive')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\RiderCardsController.cs",
+    "line": 22,
+    "ref": "PermissionKeys.Compliance.RiderCardsManage",
+    "method": "CreateCard",
+    "detail": "('Post', 'cards')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\RiderCardsController.cs",
+    "line": 26,
+    "ref": "PermissionKeys.Compliance.RiderCardsManage",
+    "method": "UpdateCard",
+    "detail": "('Put', 'cards/{id:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\RiderCardsController.cs",
+    "line": 38,
+    "ref": "PermissionKeys.Compliance.HealthCardsManage",
+    "method": "CreateHealthCard",
+    "detail": "('Post', 'health-cards')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\RiderCardsController.cs",
+    "line": 42,
+    "ref": "PermissionKeys.Compliance.HealthCardsManage",
+    "method": "UpdateHealthCard",
+    "detail": "('Put', 'health-cards/{id:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\RiderCardsController.cs",
+    "line": 46,
+    "ref": "PermissionKeys.Compliance.RiderCardsManage",
+    "method": "ArchiveCard",
+    "detail": "('Patch', 'cards/{id:guid}/archive')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\RiderCardsController.cs",
+    "line": 50,
+    "ref": "PermissionKeys.Compliance.HealthCardsManage",
+    "method": "ArchiveHealthCard",
+    "detail": "('Patch', 'health-cards/{id:guid}/archive')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\RidersController.cs",
+    "line": 30,
+    "ref": "PermissionKeys.Workforce.RidersManage",
+    "method": "Update",
+    "detail": "('Put', '{riderProfileId:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\RoomsController.cs",
+    "line": 22,
+    "ref": "PermissionKeys.Operations.HousingManage",
+    "method": "Update",
+    "detail": "('Put', '{id:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\RoomsController.cs",
+    "line": 33,
+    "ref": "PermissionKeys.Operations.HousingManage",
+    "method": "Archive",
+    "detail": "('Delete', '{id:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\RoomsController.cs",
+    "line": 44,
+    "ref": "PermissionKeys.Operations.HousingManage",
+    "method": "AssignEmployee",
+    "detail": "('Post', '{id:guid}/occupants/employees')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\RoomsController.cs",
+    "line": 55,
+    "ref": "PermissionKeys.Operations.HousingManage",
+    "method": "AssignRider",
+    "detail": "('Post', '{id:guid}/occupants/riders')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\RoomsController.cs",
+    "line": 66,
+    "ref": "PermissionKeys.Operations.HousingManage",
+    "method": "AssignByIqama",
+    "detail": "('Post', '{id:guid}/occupants/iqama')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\RoomsController.cs",
+    "line": 74,
+    "ref": "PermissionKeys.Operations.HousingManage",
+    "method": "CreateEquipment",
+    "detail": "('Post', '{id:guid}/equipment')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\RoomsController.cs",
+    "line": 82,
+    "ref": "PermissionKeys.Operations.HousingManage",
+    "method": "UpdateEquipment",
+    "detail": "('Put', '{id:guid}/equipment/{equipmentId:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\RoomsController.cs",
+    "line": 90,
+    "ref": "PermissionKeys.Operations.HousingManage",
+    "method": "CreateExternalOccupant",
+    "detail": "('Post', '{id:guid}/occupants/external')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\RoomsController.cs",
+    "line": 98,
+    "ref": "PermissionKeys.Operations.HousingManage",
+    "method": "UpdateExternalOccupant",
+    "detail": "('Put', 'occupants/external/{occupantId:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\RoomsController.cs",
+    "line": 107,
+    "ref": "PermissionKeys.Operations.HousingManage",
+    "method": "DeleteExternalOccupant",
+    "detail": "('Delete', 'occupants/external/{occupantId:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\RoomsController.cs",
+    "line": 115,
+    "ref": "PermissionKeys.Operations.HousingManage",
+    "method": "ResolvePendingOccupant",
+    "detail": "('Post', 'occupants/pending/{pendingId:guid}/resolve')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\RoomsController.cs",
+    "line": 123,
+    "ref": "PermissionKeys.Operations.HousingManage",
+    "method": "DeletePendingOccupant",
+    "detail": "('Delete', 'occupants/pending/{pendingId:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\RoomsController.cs",
+    "line": 131,
+    "ref": "PermissionKeys.Operations.HousingManage",
+    "method": "MoveOccupant",
+    "detail": "('Post', 'occupants/{occupancyPeriodId:guid}/move')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\RoomsController.cs",
+    "line": 142,
+    "ref": "PermissionKeys.Operations.HousingManage",
+    "method": "RemoveOccupant",
+    "detail": "('Post', 'occupants/{occupancyPeriodId:guid}/remove')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\SponsorsController.cs",
+    "line": 30,
+    "ref": "PermissionKeys.Workforce.SponsorsManage",
+    "method": "Create",
+    "detail": "('Post', '')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\SponsorsController.cs",
+    "line": 34,
+    "ref": "PermissionKeys.Workforce.SponsorsManage",
+    "method": "Update",
+    "detail": "('Put', '{id:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\SponsorsController.cs",
+    "line": 38,
+    "ref": "PermissionKeys.Workforce.SponsorsManage",
+    "method": "Archive",
+    "detail": "('Patch', '{id:guid}/archive')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\SupportAccessController.cs",
+    "line": 15,
+    "ref": "PermissionKeys.Security.SupportAccessManage",
+    "method": "Get",
+    "detail": "('Get', '')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\SupportAccessController.cs",
+    "line": 31,
+    "ref": "PermissionKeys.Security.SupportAccessManage",
+    "method": "Resolve",
+    "detail": "('Post', '{id:guid}/resolve')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\TagsController.cs",
+    "line": 19,
+    "ref": "PermissionKeys.Catalog.TagsManage",
+    "method": "Create",
+    "detail": "('Post', '')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\TagsController.cs",
+    "line": 24,
+    "ref": "PermissionKeys.Catalog.TagsManage",
+    "method": "Update",
+    "detail": "('Put', '{id:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\TagsController.cs",
+    "line": 29,
+    "ref": "PermissionKeys.Catalog.TagsManage",
+    "method": "Archive",
+    "detail": "('Patch', '{id:guid}/archive')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\TagsController.cs",
+    "line": 42,
+    "ref": "PermissionKeys.Catalog.TagsManage",
+    "method": "ReplaceAssignments",
+    "detail": "('Put', 'assignments/{resource}/{resourceId:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\UsersController.cs",
+    "line": 39,
+    "ref": "PermissionKeys.Security.RolesManage",
+    "method": "Create",
+    "detail": "('Post', '')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\UsersController.cs",
+    "line": 40,
+    "ref": "PermissionKeys.Security.PermissionsManage",
+    "method": "Create",
+    "detail": "('Post', '')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\UsersController.cs",
+    "line": 129,
+    "ref": "PermissionKeys.Security.RolesManage",
+    "method": "CreateRole",
+    "detail": "('Post', 'roles')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\UsersController.cs",
+    "line": 137,
+    "ref": "PermissionKeys.Security.RolesManage",
+    "method": "UpdateRole",
+    "detail": "('Put', 'roles/{roleId:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\UsersController.cs",
+    "line": 145,
+    "ref": "PermissionKeys.Security.RolesManage",
+    "method": "ReplaceRolePermissions",
+    "detail": "('Put', 'roles/{roleId:guid}/permissions')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\UsersController.cs",
+    "line": 153,
+    "ref": "PermissionKeys.Security.RolesManage",
+    "method": "ArchiveRole",
+    "detail": "('Patch', 'roles/{roleId:guid}/archive')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\UsersController.cs",
+    "line": 177,
+    "ref": "PermissionKeys.Security.RolesManage",
+    "method": "ReplaceRoles",
+    "detail": "('Put', '{userId:guid}/roles')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\UsersController.cs",
+    "line": 185,
+    "ref": "PermissionKeys.Security.PermissionsManage",
+    "method": "ReplacePermissions",
+    "detail": "('Put', '{userId:guid}/permissions')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\VehicleAssignmentsController.cs",
+    "line": 46,
+    "ref": "PermissionKeys.Fleet.AssignmentsManage",
+    "method": "AttachPromissoryFiles",
+    "detail": "('Post', '{assignmentId:guid}/promissory-files')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\VehicleAssignmentsController.cs",
+    "line": 59,
+    "ref": "PermissionKeys.Fleet.AssignmentsManage",
+    "method": "Take",
+    "detail": "('Post', 'take')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\VehicleAssignmentsController.cs",
+    "line": 72,
+    "ref": "PermissionKeys.Fleet.AssignmentsManage",
+    "method": "Return",
+    "detail": "('Post', 'return')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\VehicleAssignmentsController.cs",
+    "line": 84,
+    "ref": "PermissionKeys.Fleet.AssignmentsManage",
+    "method": "ReturnWithConditionReport",
+    "detail": "('Post', 'return-with-condition-report')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\VehicleAssignmentsController.cs",
+    "line": 99,
+    "ref": "PermissionKeys.Fleet.AssignmentsManage",
+    "method": "Switch",
+    "detail": "('Post', 'switch')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\VehicleAssignmentsController.cs",
+    "line": 115,
+    "ref": "PermissionKeys.Fleet.AssignmentsManage",
+    "method": "Renew",
+    "detail": "('Post', '{assignmentId:guid}/renew-permission')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\VehicleCatalogsController.cs",
+    "line": 22,
+    "ref": "PermissionKeys.Fleet.VehiclesManage",
+    "method": "CreateManufacturer",
+    "detail": "('Post', 'manufacturers')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\VehicleCatalogsController.cs",
+    "line": 30,
+    "ref": "PermissionKeys.Fleet.VehiclesManage",
+    "method": "UpdateManufacturer",
+    "detail": "('Put', 'manufacturers/{id:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\VehicleCatalogsController.cs",
+    "line": 46,
+    "ref": "PermissionKeys.Fleet.VehiclesManage",
+    "method": "CreateModel",
+    "detail": "('Post', 'models')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\VehicleCatalogsController.cs",
+    "line": 54,
+    "ref": "PermissionKeys.Fleet.VehiclesManage",
+    "method": "UpdateModel",
+    "detail": "('Put', 'models/{id:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\VehicleComplianceController.cs",
+    "line": 22,
+    "ref": "PermissionKeys.Fleet.ComplianceManage",
+    "method": "Registration",
+    "detail": "('Post', 'registrations')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\VehicleComplianceController.cs",
+    "line": 30,
+    "ref": "PermissionKeys.Fleet.ComplianceManage",
+    "method": "Insurance",
+    "detail": "('Post', 'insurance-policies')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\VehicleComplianceController.cs",
+    "line": 38,
+    "ref": "PermissionKeys.Fleet.ComplianceManage",
+    "method": "Inspection",
+    "detail": "('Post', 'inspections')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\VehicleComplianceController.cs",
+    "line": 46,
+    "ref": "PermissionKeys.Fleet.ComplianceManage",
+    "method": "OperationCard",
+    "detail": "('Post', 'operation-cards')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\VehicleDailyDistancesController.cs",
+    "line": 54,
+    "ref": "PermissionKeys.Fleet.DailyDistancesManage",
+    "method": "UpsertManual",
+    "detail": "('Put', '{vehicleId:guid}/{workDate}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\VehicleIssuesController.cs",
+    "line": 38,
+    "ref": "PermissionKeys.Fleet.IssuesManage",
+    "method": "Create",
+    "detail": "('Post', '')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\VehicleIssuesController.cs",
+    "line": 46,
+    "ref": "PermissionKeys.Fleet.IssuesManage",
+    "method": "Act",
+    "detail": "('Post', '{id:guid}/{operation:regex(^(review|close|reject)$)}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\VehicleIssuesController.cs",
+    "line": 54,
+    "ref": "PermissionKeys.Fleet.IssuesManage",
+    "method": "Resolve",
+    "detail": "('Post', '{id:guid}/resolve')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\VehiclePlatformAccountAssignmentsController.cs",
+    "line": 65,
+    "ref": "PermissionKeys.Fleet.AssignmentsManage",
+    "method": "Approve",
+    "detail": "('Post', '')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\VehiclePlatformAccountAssignmentsController.cs",
+    "line": 77,
+    "ref": "PermissionKeys.Fleet.AssignmentsManage",
+    "method": "Close",
+    "detail": "('Post', '{id:guid}/close')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\VehiclePlatformAccountAssignmentsController.cs",
+    "line": 106,
+    "ref": "PermissionKeys.Fleet.AssignmentsManage",
+    "method": "Switch",
+    "detail": "('Post', '{id:guid}/switch')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\VehiclePlatformAccountAssignmentsController.cs",
+    "line": 119,
+    "ref": "PermissionKeys.Fleet.AssignmentsManage",
+    "method": "AcceptSwitch",
+    "detail": "('Post', 'switches/{switchId:guid}/accept')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\VehiclePlatformAccountAssignmentsController.cs",
+    "line": 172,
+    "ref": "PermissionKeys.Fleet.AssignmentsManage",
+    "method": "CreateLeaseAgreement",
+    "detail": "('Post', 'lease-agreements')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\VehiclePlatformAccountAssignmentsController.cs",
+    "line": 184,
+    "ref": "PermissionKeys.Fleet.AssignmentsManage",
+    "method": "CloseLeaseAgreement",
+    "detail": "('Post', 'lease-agreements/{agreementId:guid}/close')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\VehiclesController.cs",
+    "line": 54,
+    "ref": "PermissionKeys.Fleet.VehiclesManage",
+    "method": "Create",
+    "detail": "('Post', '')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\VehiclesController.cs",
+    "line": 62,
+    "ref": "PermissionKeys.Fleet.VehiclesManage",
+    "method": "Update",
+    "detail": "('Put', '{id:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\VehiclesController.cs",
+    "line": 134,
+    "ref": "PermissionKeys.Fleet.CorrectionsManage",
+    "method": "CorrectIdentity",
+    "detail": "('Post', '{id:guid}/identity-corrections')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\VehiclesController.cs",
+    "line": 150,
+    "ref": "PermissionKeys.Fleet.RegistrationTransitionsManage",
+    "method": "TransitionToPublic",
+    "detail": "('Post', '{id:guid}/registration-transitions/private-to-public')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\VehicleSuppliersController.cs",
+    "line": 30,
+    "ref": "PermissionKeys.Fleet.VehiclesManage",
+    "method": "Create",
+    "detail": "('Post', '')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\VehicleSuppliersController.cs",
+    "line": 38,
+    "ref": "PermissionKeys.Fleet.VehiclesManage",
+    "method": "Update",
+    "detail": "('Put', '{id:guid}')"
+  },
+  {
+    "file": "src\\LogisticsERP.Api\\Controllers\\VehicleSuppliersController.cs",
+    "line": 46,
+    "ref": "PermissionKeys.Fleet.VehiclesManage",
+    "method": "Archive",
+    "detail": "('Patch', '{id:guid}/archive')"
+  }
+]

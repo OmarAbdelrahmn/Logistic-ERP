@@ -33,7 +33,7 @@ internal sealed partial class FleetService(
 
     public async Task<Result<VehicleManufacturerResponse>> UpsertManufacturerAsync(Guid? id, VehicleManufacturerRequest request, CancellationToken cancellationToken = default)
     {
-        if (!await support.HasPermissionAsync(PermissionKeys.Fleet.VehiclesManage, null, cancellationToken)) return Result.Failure<VehicleManufacturerResponse>(FleetErrors.Forbidden);
+        if (!await support.HasPermissionAsync((id.HasValue ? PermissionKeys.Fleet.VehiclesUpdate : PermissionKeys.Fleet.VehiclesCreate), null, cancellationToken)) return Result.Failure<VehicleManufacturerResponse>(FleetErrors.Forbidden);
         if (string.IsNullOrWhiteSpace(request.Code) || string.IsNullOrWhiteSpace(request.NameAr) || string.IsNullOrWhiteSpace(request.NameEn)) return Result.Failure<VehicleManufacturerResponse>(FleetErrors.InvalidRequest);
         var code = FleetServiceSupport.NormalizeIdentifier(request.Code);
         var item = id.HasValue ? await dbContext.VehicleManufacturers.SingleOrDefaultAsync(x => x.Id == id, cancellationToken) : null;
@@ -62,7 +62,7 @@ internal sealed partial class FleetService(
 
     public async Task<Result<VehicleModelResponse>> UpsertModelAsync(Guid? id, VehicleModelRequest request, CancellationToken cancellationToken = default)
     {
-        if (!await support.HasPermissionAsync(PermissionKeys.Fleet.VehiclesManage, null, cancellationToken)) return Result.Failure<VehicleModelResponse>(FleetErrors.Forbidden);
+        if (!await support.HasPermissionAsync((id.HasValue ? PermissionKeys.Fleet.VehiclesUpdate : PermissionKeys.Fleet.VehiclesCreate), null, cancellationToken)) return Result.Failure<VehicleModelResponse>(FleetErrors.Forbidden);
         if (string.IsNullOrWhiteSpace(request.Code) || string.IsNullOrWhiteSpace(request.NameAr) || string.IsNullOrWhiteSpace(request.NameEn)
             || !await dbContext.VehicleManufacturers.AnyAsync(x => x.Id == request.VehicleManufacturerId, cancellationToken)) return Result.Failure<VehicleModelResponse>(FleetErrors.InvalidRequest);
         var code = FleetServiceSupport.NormalizeIdentifier(request.Code);
@@ -99,7 +99,7 @@ internal sealed partial class FleetService(
 
     public async Task<Result<VehicleSupplierResponse>> UpsertSupplierAsync(Guid? id, VehicleSupplierRequest request, CancellationToken cancellationToken = default)
     {
-        if (!await support.HasPermissionAsync(PermissionKeys.Fleet.VehiclesManage, null, cancellationToken)) return Result.Failure<VehicleSupplierResponse>(FleetErrors.Forbidden);
+        if (!await support.HasPermissionAsync((id.HasValue ? PermissionKeys.Fleet.VehiclesUpdate : PermissionKeys.Fleet.VehiclesCreate), null, cancellationToken)) return Result.Failure<VehicleSupplierResponse>(FleetErrors.Forbidden);
         if (string.IsNullOrWhiteSpace(request.Code) || string.IsNullOrWhiteSpace(request.NameAr) || string.IsNullOrWhiteSpace(request.NameEn) || request.Address is null) return Result.Failure<VehicleSupplierResponse>(FleetErrors.InvalidRequest);
         var code = FleetServiceSupport.NormalizeIdentifier(request.Code);
         var cr = FleetServiceSupport.TrimOrNull(request.CommercialRegistrationNumber);
@@ -121,7 +121,7 @@ internal sealed partial class FleetService(
 
     public async Task<Result> ArchiveSupplierAsync(Guid id, ArchiveFleetRequest request, CancellationToken cancellationToken = default)
     {
-        if (!await support.HasPermissionAsync(PermissionKeys.Fleet.VehiclesManage, null, cancellationToken)) return Result.Failure(FleetErrors.Forbidden);
+        if (!await support.HasPermissionAsync(PermissionKeys.Fleet.VehiclesDelete, null, cancellationToken)) return Result.Failure(FleetErrors.Forbidden);
         var item = await dbContext.VehicleSuppliers.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (item is null) return Result.Failure(FleetErrors.NotFound);
         if (!FleetServiceSupport.MatchesRowVersion(item.RowVersion, request.RowVersion) || string.IsNullOrWhiteSpace(request.Reason)) return Result.Failure(FleetErrors.ConcurrencyConflict);
@@ -166,7 +166,7 @@ internal sealed partial class FleetService(
 
     public async Task<Result<VehicleDetailResponse>> UpsertVehicleAsync(Guid? id, VehicleUpsertRequest request, CancellationToken cancellationToken = default)
     {
-        if (!await support.HasPermissionAsync(PermissionKeys.Fleet.VehiclesManage, null, cancellationToken)) return Result.Failure<VehicleDetailResponse>(FleetErrors.Forbidden);
+        if (!await support.HasPermissionAsync((id.HasValue ? PermissionKeys.Fleet.VehiclesUpdate : PermissionKeys.Fleet.VehiclesCreate), null, cancellationToken)) return Result.Failure<VehicleDetailResponse>(FleetErrors.Forbidden);
         var assetNumber = string.IsNullOrWhiteSpace(request.AssetNumber) && !id.HasValue
             ? FleetServiceSupport.NewVehicleAssetNumber(Guid.CreateVersion7())
             : request.AssetNumber;
@@ -323,7 +323,7 @@ internal sealed partial class FleetService(
 
     public async Task<Result<VehicleDetailResponse>> CorrectIdentityAsync(Guid id, VehicleIdentityCorrectionRequest request, CancellationToken cancellationToken = default)
     {
-        if (!await support.HasPermissionAsync(PermissionKeys.Fleet.CorrectionsManage, null, cancellationToken)) return Result.Failure<VehicleDetailResponse>(FleetErrors.Forbidden);
+        if (!await support.HasPermissionAsync(PermissionKeys.Fleet.CorrectionsCreate, null, cancellationToken)) return Result.Failure<VehicleDetailResponse>(FleetErrors.Forbidden);
         var vehicle = await dbContext.Vehicles.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (vehicle is null) return Result.Failure<VehicleDetailResponse>(FleetErrors.NotFound);
         if (!FleetServiceSupport.MatchesRowVersion(vehicle.RowVersion, request.RowVersion)) return Result.Failure<VehicleDetailResponse>(FleetErrors.ConcurrencyConflict);
@@ -372,7 +372,7 @@ internal sealed partial class FleetService(
 
     public async Task<Result<VehicleRegistrationTransitionResponse>> TransitionToPublicTransportAsync(Guid id, VehicleRegistrationTransitionRequest request, PrivateFileUpload istimara, PrivateFileUpload operationCard, CancellationToken cancellationToken = default)
     {
-        if (!await support.HasPermissionAsync(PermissionKeys.Fleet.RegistrationTransitionsManage, null, cancellationToken)) return Result.Failure<VehicleRegistrationTransitionResponse>(FleetErrors.Forbidden);
+        if (!await support.HasPermissionAsync(PermissionKeys.Fleet.RegistrationTransitionsCreate, null, cancellationToken)) return Result.Failure<VehicleRegistrationTransitionResponse>(FleetErrors.Forbidden);
         var vehicle = await dbContext.Vehicles.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (vehicle is null) return Result.Failure<VehicleRegistrationTransitionResponse>(FleetErrors.NotFound);
         if (!FleetServiceSupport.MatchesRowVersion(vehicle.RowVersion, request.RowVersion)) return Result.Failure<VehicleRegistrationTransitionResponse>(FleetErrors.ConcurrencyConflict);
@@ -487,7 +487,7 @@ internal sealed partial class FleetService(
     {
         var vehicle = await dbContext.Vehicles.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (vehicle is null) return Result.Failure<VehicleDetailResponse>(FleetErrors.NotFound);
-        var permission = action.Equals("decommission", StringComparison.OrdinalIgnoreCase) ? PermissionKeys.Fleet.VehiclesDecommission : PermissionKeys.Fleet.VehiclesManage;
+        var permission = action.Equals("decommission", StringComparison.OrdinalIgnoreCase) ? PermissionKeys.Fleet.VehiclesDecommission : PermissionKeys.Fleet.VehiclesUpdate;
         if (!await support.HasVehiclePermissionAsync(vehicle, permission, cancellationToken)) return Result.Failure<VehicleDetailResponse>(FleetErrors.Forbidden);
         if (!FleetServiceSupport.MatchesRowVersion(vehicle.RowVersion, request.RowVersion) || string.IsNullOrWhiteSpace(request.Reason)) return Result.Failure<VehicleDetailResponse>(FleetErrors.ConcurrencyConflict);
         var actor = support.UserId;
@@ -527,7 +527,7 @@ internal sealed partial class FleetService(
     {
         var vehicle = await dbContext.Vehicles.SingleOrDefaultAsync(x => x.Id == vehicleId, cancellationToken);
         if (vehicle is null) return Result.Failure<VehicleOdometerReadingResponse>(FleetErrors.NotFound);
-        var permission = request.IsCorrection ? PermissionKeys.Fleet.CorrectionsManage : PermissionKeys.Fleet.VehiclesManage;
+        var permission = request.IsCorrection ? PermissionKeys.Fleet.CorrectionsCreate : PermissionKeys.Fleet.VehiclesCreate;
         if (!await support.HasVehiclePermissionAsync(vehicle, permission, cancellationToken)) return Result.Failure<VehicleOdometerReadingResponse>(FleetErrors.Forbidden);
         if (!FleetServiceSupport.MatchesRowVersion(vehicle.RowVersion, request.RowVersion) || request.Reading < 0 || request.IsCorrection && string.IsNullOrWhiteSpace(request.CorrectionReason)) return Result.Failure<VehicleOdometerReadingResponse>(FleetErrors.InvalidRequest);
         if (request.Reading < vehicle.CurrentOdometer && !request.IsCorrection) return Result.Failure<VehicleOdometerReadingResponse>(FleetErrors.OdometerDecreased);
@@ -566,7 +566,7 @@ internal sealed partial class FleetService(
         if (!actor.HasValue) { CleanupStaged(staged); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.CurrentUserUnavailable); }
         var vehicle = await dbContext.Vehicles.SingleOrDefaultAsync(x => x.Id == request.VehicleId, cancellationToken);
         if (vehicle is null) { CleanupStaged(staged); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.NotFound); }
-        if (!await support.HasVehiclePermissionAsync(vehicle, PermissionKeys.Fleet.AssignmentsManage, cancellationToken)) { CleanupStaged(staged); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.Forbidden); }
+        if (!await support.HasVehiclePermissionAsync(vehicle, PermissionKeys.Fleet.AssignmentsCreate, cancellationToken)) { CleanupStaged(staged); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.Forbidden); }
         var permitStart = FleetBusinessRules.RiyadhDate(request.StartedAtUtc);
         if (vehicle.CurrentOperationalStatus != VehicleOperationalStatus.Available || vehicle.CurrentAssignmentId.HasValue || !FleetBusinessRules.IsCoreIdentityReady(vehicle) || request.StartOdometer < vehicle.CurrentOdometer || !ValidFuel(request.StartFuelLevelPercentage) || string.IsNullOrWhiteSpace(request.PermissionReference)) { CleanupStaged(staged); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.VehicleUnavailable); }
         var rider = await dbContext.RiderProfiles.AsNoTracking().SingleOrDefaultAsync(x => x.Id == request.RiderProfileId, cancellationToken);
@@ -674,7 +674,7 @@ internal sealed partial class FleetService(
         var assignment = await dbContext.RiderVehicleAssignments.SingleOrDefaultAsync(x => x.Id == request.AssignmentId && x.EndedAtUtc == null, cancellationToken);
         if (assignment is null) { CleanupIssueEvidence(staged); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.NotFound); }
         var vehicle = await dbContext.Vehicles.SingleAsync(x => x.Id == assignment.VehicleId, cancellationToken);
-        if (!await support.HasVehiclePermissionAsync(vehicle, PermissionKeys.Fleet.AssignmentsManage, cancellationToken)) { CleanupIssueEvidence(staged); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.Forbidden); }
+        if (!await support.HasVehiclePermissionAsync(vehicle, PermissionKeys.Fleet.AssignmentsDelete, cancellationToken)) { CleanupIssueEvidence(staged); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.Forbidden); }
         if (!FleetServiceSupport.MatchesRowVersion(assignment.RowVersion, request.RowVersion) || request.EndedAtUtc < assignment.StartedAtUtc || request.EndOdometer < assignment.StartOdometer || !ValidFuel(request.EndFuelLevelPercentage)) { CleanupIssueEvidence(staged); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.InvalidRequest); }
         try
         {
@@ -779,7 +779,7 @@ internal sealed partial class FleetService(
         var next = await dbContext.Vehicles.SingleOrDefaultAsync(x => x.Id == request.NewVehicleId, cancellationToken);
         if (old is null || next is null) { CleanupSwitchFiles(stagedPromissory, stagedEvidence); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.NotFound); }
         var oldVehicle = await dbContext.Vehicles.SingleAsync(x => x.Id == old.VehicleId, cancellationToken);
-        if (!await support.HasVehiclePermissionAsync(oldVehicle, PermissionKeys.Fleet.AssignmentsManage, cancellationToken) || !await support.HasVehiclePermissionAsync(next, PermissionKeys.Fleet.AssignmentsManage, cancellationToken)) { CleanupSwitchFiles(stagedPromissory, stagedEvidence); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.Forbidden); }
+        if (!await support.HasVehiclePermissionAsync(oldVehicle, PermissionKeys.Fleet.AssignmentsUpdate, cancellationToken) || !await support.HasVehiclePermissionAsync(oldVehicle, PermissionKeys.Fleet.AssignmentsDelete, cancellationToken) || !await support.HasVehiclePermissionAsync(next, PermissionKeys.Fleet.AssignmentsCreate, cancellationToken)) { CleanupSwitchFiles(stagedPromissory, stagedEvidence); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.Forbidden); }
         var permitStart = FleetBusinessRules.RiyadhDate(request.SwitchedAtUtc);
         if (!FleetServiceSupport.MatchesRowVersion(old.RowVersion, request.RowVersion) || next.CurrentOperationalStatus != VehicleOperationalStatus.Available || next.CurrentAssignmentId.HasValue || !FleetBusinessRules.IsCoreIdentityReady(next) || request.OldVehicleOdometer < old.StartOdometer || request.NewVehicleOdometer < next.CurrentOdometer || !ValidFuel(request.OldFuelLevelPercentage) || !ValidFuel(request.NewFuelLevelPercentage) || string.IsNullOrWhiteSpace(request.PermissionReference) || string.IsNullOrWhiteSpace(request.Reason)) { CleanupSwitchFiles(stagedPromissory, stagedEvidence); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.Conflict); }
         var existingPromissoryVersions = await CurrentPromissoryVersionsAsync(old.RiderProfileId, cancellationToken);
@@ -873,7 +873,7 @@ internal sealed partial class FleetService(
         var assignment = await dbContext.RiderVehicleAssignments.SingleOrDefaultAsync(x => x.Id == assignmentId && x.EndedAtUtc == null, cancellationToken);
         if (assignment is null) return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.NotFound);
         var vehicle = await dbContext.Vehicles.SingleAsync(x => x.Id == assignment.VehicleId, cancellationToken);
-        if (!await support.HasVehiclePermissionAsync(vehicle, PermissionKeys.Fleet.AssignmentsManage, cancellationToken)) return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.Forbidden);
+        if (!await support.HasVehiclePermissionAsync(vehicle, PermissionKeys.Fleet.AssignmentsUpdate, cancellationToken)) return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.Forbidden);
         if (!FleetServiceSupport.MatchesRowVersion(assignment.RowVersion, request.RowVersion) || assignment.PermissionEndsOn.HasValue && request.PermissionStartsOn <= assignment.PermissionEndsOn.Value || string.IsNullOrWhiteSpace(request.PermissionReference) || string.IsNullOrWhiteSpace(request.Reason)) return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.InvalidRequest);
         var actor = support.UserId;
         if (!actor.HasValue) return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.CurrentUserUnavailable);
@@ -906,7 +906,7 @@ internal sealed partial class FleetService(
         if (assignment is null) return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.NotFound);
         var vehicle = await dbContext.Vehicles.AsNoTracking().SingleOrDefaultAsync(x => x.Id == assignment.VehicleId, cancellationToken);
         if (vehicle is null) return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.NotFound);
-        if (!await support.HasVehiclePermissionAsync(vehicle, PermissionKeys.Fleet.AssignmentsManage, cancellationToken))
+        if (!await support.HasVehiclePermissionAsync(vehicle, PermissionKeys.Fleet.AssignmentsUpdate, cancellationToken))
             return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.Forbidden);
         var actor = support.UserId;
         if (!actor.HasValue) return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.CurrentUserUnavailable);
@@ -1026,7 +1026,7 @@ internal sealed partial class FleetService(
 
     public async Task<Result<VehicleComplianceResponse>> RenewRegistrationAsync(Guid vehicleId, VehicleRegistrationRequest request, CancellationToken cancellationToken = default)
     {
-        var access = await GetAccessibleVehicleAsync(vehicleId, PermissionKeys.Fleet.ComplianceManage, cancellationToken);
+        var access = await GetAccessibleVehicleAsync(vehicleId, PermissionKeys.Fleet.ComplianceCreate, cancellationToken);
         if (access.IsFailure) return Result.Failure<VehicleComplianceResponse>(access.Error);
         if (string.IsNullOrWhiteSpace(request.RegistrationNumber) || string.IsNullOrWhiteSpace(request.IssuingAuthority) || request.ExpiryDate < request.IssueDate) return Result.Failure<VehicleComplianceResponse>(FleetErrors.InvalidRequest);
         var previous = await dbContext.VehicleRegistrations.SingleOrDefaultAsync(x => x.VehicleId == vehicleId && x.IsCurrent, cancellationToken);
@@ -1038,7 +1038,7 @@ internal sealed partial class FleetService(
 
     public async Task<Result<VehicleComplianceResponse>> RenewInsuranceAsync(Guid vehicleId, VehicleInsuranceRequest request, CancellationToken cancellationToken = default)
     {
-        var access = await GetAccessibleVehicleAsync(vehicleId, PermissionKeys.Fleet.ComplianceManage, cancellationToken);
+        var access = await GetAccessibleVehicleAsync(vehicleId, PermissionKeys.Fleet.ComplianceCreate, cancellationToken);
         if (access.IsFailure) return Result.Failure<VehicleComplianceResponse>(access.Error);
         if (string.IsNullOrWhiteSpace(request.ProviderName) || string.IsNullOrWhiteSpace(request.PolicyNumber) || request.ExpiryDate < request.EffectiveFrom) return Result.Failure<VehicleComplianceResponse>(FleetErrors.InvalidRequest);
         var previous = await dbContext.VehicleInsurancePolicies.SingleOrDefaultAsync(x => x.VehicleId == vehicleId && x.IsCurrent, cancellationToken);
@@ -1050,7 +1050,7 @@ internal sealed partial class FleetService(
 
     public async Task<Result<VehicleComplianceResponse>> RenewInspectionAsync(Guid vehicleId, VehicleInspectionRequest request, CancellationToken cancellationToken = default)
     {
-        var access = await GetAccessibleVehicleAsync(vehicleId, PermissionKeys.Fleet.ComplianceManage, cancellationToken);
+        var access = await GetAccessibleVehicleAsync(vehicleId, PermissionKeys.Fleet.ComplianceCreate, cancellationToken);
         if (access.IsFailure) return Result.Failure<VehicleComplianceResponse>(access.Error);
         if (string.IsNullOrWhiteSpace(request.InspectionNumber) || string.IsNullOrWhiteSpace(request.StationName) || request.ExpiryDate < request.InspectionDate || request.Odometer < 0) return Result.Failure<VehicleComplianceResponse>(FleetErrors.InvalidRequest);
         var previous = await dbContext.VehiclePeriodicInspections.SingleOrDefaultAsync(x => x.VehicleId == vehicleId && x.IsCurrent, cancellationToken);
@@ -1062,7 +1062,7 @@ internal sealed partial class FleetService(
 
     public async Task<Result<VehicleComplianceResponse>> RenewOperationCardAsync(Guid vehicleId, VehicleOperationCardRequest request, CancellationToken cancellationToken = default)
     {
-        var access = await GetAccessibleVehicleAsync(vehicleId, PermissionKeys.Fleet.ComplianceManage, cancellationToken);
+        var access = await GetAccessibleVehicleAsync(vehicleId, PermissionKeys.Fleet.ComplianceCreate, cancellationToken);
         if (access.IsFailure) return Result.Failure<VehicleComplianceResponse>(access.Error);
         if (!FleetBusinessRules.SupportsOperationCard(access.Value!)
             || string.IsNullOrWhiteSpace(request.CardNumber)
@@ -1205,7 +1205,7 @@ internal sealed partial class FleetService(
         }
         var vehicle = await dbContext.Vehicles.SingleOrDefaultAsync(x => x.Id == request.VehicleId, cancellationToken);
         if (vehicle is null) return Result.Failure<VehicleIssueSummaryResponse>(FleetErrors.NotFound);
-        if (!await support.HasVehiclePermissionAsync(vehicle, PermissionKeys.Fleet.IssuesManage, cancellationToken)) return Result.Failure<VehicleIssueSummaryResponse>(FleetErrors.Forbidden);
+        if (!await support.HasVehiclePermissionAsync(vehicle, PermissionKeys.Fleet.IssuesCreate, cancellationToken)) return Result.Failure<VehicleIssueSummaryResponse>(FleetErrors.Forbidden);
         if (string.IsNullOrWhiteSpace(request.Description) || request.OdometerAtReport < 0) return Result.Failure<VehicleIssueSummaryResponse>(FleetErrors.InvalidRequest);
         var actor = support.UserId;
         if (!actor.HasValue) return Result.Failure<VehicleIssueSummaryResponse>(FleetErrors.CurrentUserUnavailable);
@@ -1228,7 +1228,7 @@ internal sealed partial class FleetService(
         var issue = await dbContext.VehicleIssues.SingleOrDefaultAsync(x => x.Id == issueId, cancellationToken);
         if (issue is null) return Result.Failure<VehicleIssueSummaryResponse>(FleetErrors.NotFound);
         var vehicle = await dbContext.Vehicles.SingleAsync(x => x.Id == issue.VehicleId, cancellationToken);
-        if (!await support.HasVehiclePermissionAsync(vehicle, PermissionKeys.Fleet.IssuesManage, cancellationToken)) return Result.Failure<VehicleIssueSummaryResponse>(FleetErrors.Forbidden);
+        if (!await support.HasVehiclePermissionAsync(vehicle, PermissionKeys.Fleet.IssuesUpdate, cancellationToken)) return Result.Failure<VehicleIssueSummaryResponse>(FleetErrors.Forbidden);
         if (!FleetServiceSupport.MatchesRowVersion(issue.RowVersion, request.RowVersion) || string.IsNullOrWhiteSpace(request.Reason)) return Result.Failure<VehicleIssueSummaryResponse>(FleetErrors.ConcurrencyConflict);
         var actor = support.UserId;
         if (!actor.HasValue) return Result.Failure<VehicleIssueSummaryResponse>(FleetErrors.CurrentUserUnavailable);
@@ -1252,7 +1252,7 @@ internal sealed partial class FleetService(
         var issue = await dbContext.VehicleIssues.SingleOrDefaultAsync(x => x.Id == issueId, cancellationToken);
         if (issue is null) return Result.Failure<VehicleIssueSummaryResponse>(FleetErrors.NotFound);
         var vehicle = await dbContext.Vehicles.SingleAsync(x => x.Id == issue.VehicleId, cancellationToken);
-        if (!await support.HasVehiclePermissionAsync(vehicle, PermissionKeys.Fleet.IssuesManage, cancellationToken)) return Result.Failure<VehicleIssueSummaryResponse>(FleetErrors.Forbidden);
+        if (!await support.HasVehiclePermissionAsync(vehicle, PermissionKeys.Fleet.IssuesUpdate, cancellationToken)) return Result.Failure<VehicleIssueSummaryResponse>(FleetErrors.Forbidden);
         if (!FleetServiceSupport.MatchesRowVersion(issue.RowVersion, request.RowVersion) || string.IsNullOrWhiteSpace(request.ResolutionSummary) || issue.Status is not (VehicleIssueStatus.Open or VehicleIssueStatus.UnderReview)) return Result.Failure<VehicleIssueSummaryResponse>(FleetErrors.InvalidState);
         var actor = support.UserId;
         if (!actor.HasValue) return Result.Failure<VehicleIssueSummaryResponse>(FleetErrors.CurrentUserUnavailable);

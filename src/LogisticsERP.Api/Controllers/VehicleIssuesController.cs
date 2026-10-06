@@ -35,7 +35,7 @@ public sealed class VehicleIssuesController(IFleetService service) : ControllerB
     }
 
     [HttpPost]
-    [RequirePermission(PermissionKeys.Fleet.IssuesManage)]
+    [RequirePermission(PermissionKeys.Fleet.IssuesCreate)]
     public async Task<IActionResult> Create([FromBody] CreateVehicleIssueRequest request, [FromHeader(Name = "Idempotency-Key")] string? idempotencyKey, CancellationToken cancellationToken)
     {
         var result = await service.CreateIssueAsync(request, idempotencyKey ?? string.Empty, cancellationToken);
@@ -43,7 +43,7 @@ public sealed class VehicleIssuesController(IFleetService service) : ControllerB
     }
 
     [HttpPost("{id:guid}/{operation:regex(^(review|close|reject)$)}")]
-    [RequirePermission(PermissionKeys.Fleet.IssuesManage)]
+    [RequirePermission(PermissionKeys.Fleet.IssuesUpdate)]
     public async Task<IActionResult> Act(Guid id, string operation, [FromBody] VehicleIssueActionRequest request, CancellationToken cancellationToken)
     {
         var result = await service.ActOnIssueAsync(id, operation, request, cancellationToken);
@@ -51,7 +51,7 @@ public sealed class VehicleIssuesController(IFleetService service) : ControllerB
     }
 
     [HttpPost("{id:guid}/resolve")]
-    [RequirePermission(PermissionKeys.Fleet.IssuesManage)]
+    [RequirePermission(PermissionKeys.Fleet.IssuesUpdate)]
     public async Task<IActionResult> Resolve(Guid id, [FromBody] ResolveVehicleIssueRequest request, CancellationToken cancellationToken)
     {
         var result = await service.ResolveIssueAsync(id, request, cancellationToken);

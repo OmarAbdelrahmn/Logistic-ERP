@@ -23,11 +23,11 @@ Cards already contain Arabic/English city names, so displaying a card does not r
 | `POST /api/fuel-cards` | `fuel.manage` | Add required `operatingCityId` to JSON; returns `201` with city ID/names. |
 | `PUT /api/fuel-cards/{id}/city` | `fuel.manage` | New endpoint to change the city using the card's `rowVersion`; returns `200` with the updated card. |
 | `PUT /api/fuel-cards/{id}/sponsor` | `fuel.manage` | Returned card includes city ID/names; sponsor changes preserve the city. |
-| `POST /api/fuel-cards/imports` | `fuel.import` | Add optional `operatingCityId` multipart field. |
+| `POST /api/fuel-cards/imports` | `fuel.import` | Monthly usage now uses registered cards only; send `file` and optional `expectedMonth`. |
 | `POST /api/fuel-cards/card-number-imports/validate` | `fuel.import` | Add optional `operatingCityId` multipart field. |
 | `POST /api/fuel-cards/card-number-imports` | `fuel.import` | Add optional `operatingCityId` multipart field. |
-| `POST /api/import/fuel-cards/validate` | Existing anonymous access | Add optional `operatingCityId` multipart field; each preview row includes its resulting city ID. |
-| `POST /api/import/fuel-cards` | Existing anonymous access | Same city field and preview behavior. |
+| `POST /api/import/fuel-cards/validate` | Existing anonymous access | City comes from each Excel row; each preview row includes its resulting city ID. |
+| `POST /api/import/fuel-cards` | Existing anonymous access | Same Excel city column and preview behavior. |
 
 ## Card response additions
 
@@ -101,19 +101,20 @@ The example city is Riyadh. Use the card's latest `rowVersion`, not `currentRide
 
 ## Imports
 
-Send `operatingCityId` as an additional multipart field on all fuel-card upload and validation screens. If omitted, new cards default to Jeddah. A supplied value must identify an existing, non-deleted operating city; `Guid.Empty` is invalid.
+For the one-column card-number upload, send optional `operatingCityId` as a multipart field. If omitted, new cards default to Jeddah. A supplied value must identify an existing, non-deleted operating city; `Guid.Empty` is invalid. The detailed monthly usage upload only references registered cards.
 
-- Detailed fuel-company report: keep `file`, `sponsorId`, and optional `expectedMonth`; add optional `operatingCityId`.
+- Detailed fuel-company report: send `file` and optional `expectedMonth`. Unknown cards return `card_not_found` row errors.
 - One-column PetroApp card-number import: keep `file` and `sponsorId`; add optional `operatingCityId`. The sheet header remains `number`.
-- Three-column Import module: keep `file`; add optional `operatingCityId`. Sheet headers remain `number`, `sponsor 70 number`, and `company name`. The chosen city applies to every new card in the file.
+- Import module bulk sheet: send only `file`. Add `city name` as the fourth header alongside `number`, `sponsor 70 number`, and `company name`. Each row may use an active city's Arabic or English name. A blank city cell defaults to Jeddah; older sheets without the city header also default to Jeddah.
 
-Existing matching cards keep their current city, even when the upload selects another city. Use the change-city endpoint to move them. For the three-column import, each preview row now has `operatingCityId`: new rows show the selected/default city; skipped existing rows show that card's existing city. Send the same selected city during validation and import.
+Existing matching cards keep their current city, even when the upload supplies another city. Use the change-city endpoint to move them. For the Import module, each preview row has `operatingCityId`: new rows show the resolved/default city; skipped existing rows show that card's existing city. Send the same workbook during validation and import.
 
 ## Errors and frontend behavior
 
 | Status / error | Handling |
 |---|---|
-| `404 fuel.operating_city_not_found` | Unknown, empty, or soft-deleted city. Error field: `operatingCityId`. Show the Arabic `detail` and refresh city options. Imports fail before saving cards or import history. |
+| `404 fuel.operating_city_not_found` | Unknown, empty, or soft-deleted city. Error field: `operatingCityId`. Show the Arabic `detail` and refresh city options. Card-number imports fail before saving cards. |
+| Import module row issue | Unknown or inactive city name in the Excel row. Fix the row and upload again; no cards from that batch are saved. |
 | `404 fuel.card_not_found` | Refresh/remove the stale card detail. |
 | `409 fuel.concurrency_conflict` | Reload the card, then retry with its latest row version after the user reviews the updated data. |
 | `403 fuel.forbidden` | Hide/disable the action when the user lacks its permission. |

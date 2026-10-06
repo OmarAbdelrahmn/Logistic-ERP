@@ -39,7 +39,7 @@ public sealed class HrFormTemplatesController(IHrFormTemplateService service) : 
     }
 
     [HttpPost]
-    [RequirePermission(PermissionKeys.HrForms.TemplatesManage)]
+    [RequirePermission(PermissionKeys.HrForms.TemplatesCreate)]
     public async Task<IActionResult> Create(
         [FromBody] HrFormTemplateCreateRequest request,
         CancellationToken cancellationToken)
@@ -51,7 +51,7 @@ public sealed class HrFormTemplatesController(IHrFormTemplateService service) : 
     }
 
     [HttpPut("{id:guid}")]
-    [RequirePermission(PermissionKeys.HrForms.TemplatesManage)]
+    [RequirePermission(PermissionKeys.HrForms.TemplatesUpdate)]
     public async Task<IActionResult> UpdateMetadata(
         Guid id,
         [FromBody] HrFormTemplateMetadataRequest request,
@@ -70,7 +70,7 @@ public sealed class HrFormTemplatesController(IHrFormTemplateService service) : 
     }
 
     [HttpPost("{id:guid}/versions")]
-    [RequirePermission(PermissionKeys.HrForms.TemplatesManage)]
+    [RequirePermission(PermissionKeys.HrForms.TemplatesCreate)]
     public async Task<IActionResult> CreateVersion(
         Guid id,
         [FromBody] HrFormTemplateVersionCreateRequest request,
@@ -81,7 +81,7 @@ public sealed class HrFormTemplatesController(IHrFormTemplateService service) : 
     }
 
     [HttpPost("{id:guid}/versions/{versionId:guid}/publish")]
-    [RequirePermission(PermissionKeys.HrForms.TemplatesManage)]
+    [RequirePermission(PermissionKeys.HrForms.TemplatesUpdate)]
     public async Task<IActionResult> Publish(
         Guid id,
         Guid versionId,
@@ -93,7 +93,7 @@ public sealed class HrFormTemplatesController(IHrFormTemplateService service) : 
     }
 
     [HttpPatch("{id:guid}/archive")]
-    [RequirePermission(PermissionKeys.HrForms.TemplatesManage)]
+    [RequirePermission(PermissionKeys.HrForms.TemplatesDelete)]
     public async Task<IActionResult> Archive(
         Guid id,
         [FromBody] ArchiveRequest request,

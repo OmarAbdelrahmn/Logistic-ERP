@@ -38,7 +38,7 @@ public sealed class LegalCasesController(ILegalCaseService service) : Controller
     }
 
     [HttpPost]
-    [RequirePermission(PermissionKeys.Workflows.LegalCasesManage)]
+    [RequirePermission(PermissionKeys.Workflows.LegalCasesCreate)]
     public async Task<IActionResult> Create([FromBody] LegalCaseUpsertRequest request, CancellationToken cancellationToken)
     {
         var result = await service.CreateAsync(request, cancellationToken);
@@ -46,7 +46,7 @@ public sealed class LegalCasesController(ILegalCaseService service) : Controller
     }
 
     [HttpPut("{id:guid}")]
-    [RequirePermission(PermissionKeys.Workflows.LegalCasesManage)]
+    [RequirePermission(PermissionKeys.Workflows.LegalCasesUpdate)]
     public async Task<IActionResult> Update(Guid id, [FromBody] LegalCaseUpsertRequest request, CancellationToken cancellationToken)
     {
         var result = await service.UpdateAsync(id, request, cancellationToken);
@@ -54,7 +54,7 @@ public sealed class LegalCasesController(ILegalCaseService service) : Controller
     }
 
     [HttpDelete("{id:guid}")]
-    [RequirePermission(PermissionKeys.Workflows.LegalCasesManage)]
+    [RequirePermission(PermissionKeys.Workflows.LegalCasesDelete)]
     public async Task<IActionResult> Archive(Guid id, [FromBody] LegalCaseArchiveRequest request, CancellationToken cancellationToken)
     {
         var result = await service.ArchiveAsync(id, request, cancellationToken);
@@ -70,7 +70,7 @@ public sealed class LegalCasesController(ILegalCaseService service) : Controller
     }
 
     [HttpPost("{caseId:guid}/hearings")]
-    [RequirePermission(PermissionKeys.Workflows.LegalCasesManage)]
+    [RequirePermission(PermissionKeys.Workflows.LegalCasesCreate)]
     public async Task<IActionResult> CreateHearing(Guid caseId, [FromBody] LegalCaseHearingUpsertRequest request, CancellationToken cancellationToken)
     {
         var result = await service.CreateHearingAsync(caseId, request, cancellationToken);
@@ -78,7 +78,7 @@ public sealed class LegalCasesController(ILegalCaseService service) : Controller
     }
 
     [HttpPut("{caseId:guid}/hearings/{hearingId:guid}")]
-    [RequirePermission(PermissionKeys.Workflows.LegalCasesManage)]
+    [RequirePermission(PermissionKeys.Workflows.LegalCasesUpdate)]
     public async Task<IActionResult> UpdateHearing(Guid caseId, Guid hearingId, [FromBody] LegalCaseHearingUpsertRequest request, CancellationToken cancellationToken)
     {
         var result = await service.UpdateHearingAsync(caseId, hearingId, request, cancellationToken);
@@ -86,7 +86,7 @@ public sealed class LegalCasesController(ILegalCaseService service) : Controller
     }
 
     [HttpDelete("{caseId:guid}/hearings/{hearingId:guid}")]
-    [RequirePermission(PermissionKeys.Workflows.LegalCasesManage)]
+    [RequirePermission(PermissionKeys.Workflows.LegalCasesDelete)]
     public async Task<IActionResult> ArchiveHearing(Guid caseId, Guid hearingId, [FromBody] LegalCaseArchiveRequest request, CancellationToken cancellationToken)
     {
         var result = await service.ArchiveHearingAsync(caseId, hearingId, request, cancellationToken);
@@ -94,7 +94,7 @@ public sealed class LegalCasesController(ILegalCaseService service) : Controller
     }
 
     [HttpPost("{caseId:guid}/hearings/{hearingId:guid}/files")]
-    [RequirePermission(PermissionKeys.Workflows.LegalCasesManage)]
+    [RequirePermission(PermissionKeys.Workflows.LegalCasesCreate)]
     [RequestSizeLimit(11 * 1024 * 1024)]
     public async Task<IActionResult> UploadFile(Guid caseId, Guid hearingId, [FromForm] LegalCaseFileForm form, CancellationToken cancellationToken)
     {
@@ -116,7 +116,7 @@ public sealed class LegalCasesController(ILegalCaseService service) : Controller
     }
 
     [HttpDelete("{caseId:guid}/hearings/{hearingId:guid}/files/{fileId:guid}")]
-    [RequirePermission(PermissionKeys.Workflows.LegalCasesManage)]
+    [RequirePermission(PermissionKeys.Workflows.LegalCasesDelete)]
     public async Task<IActionResult> ArchiveFile(Guid caseId, Guid hearingId, Guid fileId, [FromBody] LegalCaseArchiveRequest request, CancellationToken cancellationToken)
     {
         var result = await service.ArchiveFileAsync(caseId, hearingId, fileId, request, cancellationToken);

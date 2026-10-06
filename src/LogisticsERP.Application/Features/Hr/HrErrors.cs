@@ -5,6 +5,9 @@ namespace LogisticsERP.Application.Features.Hr;
 
 public static class HrErrors
 {
+    public static readonly OperationError Forbidden = new(
+        "hr.forbidden", "ليس لديك صلاحية تنفيذ هذه العملية.", ErrorType.Forbidden);
+
     public static OperationError Required(string field) => new(
         $"housing.{field}_required", $"تعذر تنفيذ العملية المطلوبة.", ErrorType.Validation, field);
 

@@ -10,18 +10,18 @@ namespace LogisticsERP.Api.Controllers;
 
 [ApiController]
 [Route("api/jahez")]
-public sealed class JahezController(IJahezService service) : ControllerBase
+public sealed class JahezController(IJahezService service, IJahezResponseMapper responseMapper) : ControllerBase
 {
     [HttpPost("handovers")]
-    [RequirePermission(PermissionKeys.Jahez.HandoversManage)]
+    [RequirePermission(PermissionKeys.Jahez.HandoversCreate)]
     public Task<IActionResult> Handover([FromHeader(Name = "Idempotency-Key")] string key, JahezHandoverRequest request, CancellationToken ct) => ToAction(service.HandoverAsync(key, request, ct));
 
     [HttpPost("legacy-adoptions")]
-    [RequirePermission(PermissionKeys.Jahez.AdjustmentsManage)]
+    [RequirePermission(PermissionKeys.Jahez.AdjustmentsCreate)]
     public Task<IActionResult> Adopt([FromHeader(Name = "Idempotency-Key")] string key, JahezLegacyAdoptionRequest request, CancellationToken ct) => ToAction(service.AdoptLegacyAsync(key, request, ct));
 
     [HttpPost("handovers/{id:guid}/close")]
-    [RequirePermission(PermissionKeys.Jahez.HandoversManage)]
+    [RequirePermission(PermissionKeys.Jahez.HandoversDelete)]
     public Task<IActionResult> Close(Guid id, [FromHeader(Name = "Idempotency-Key")] string key, JahezCloseRequest request, CancellationToken ct) => ToAction(service.CloseAsync(key, id, request, ct));
 
     [HttpGet("handovers")]
@@ -78,22 +78,22 @@ public sealed class JahezController(IJahezService service) : ControllerBase
     public Task<IActionResult> GetRequest(Guid id, CancellationToken ct) => ToAction(service.GetApprovalAsync(id, ct));
 
     [HttpPost("earnings")]
-    [RequirePermission(PermissionKeys.Jahez.EarningsManage)]
+    [RequirePermission(PermissionKeys.Jahez.EarningsCreate)]
     public Task<IActionResult> Earnings([FromHeader(Name = "Idempotency-Key")] string key, JahezEarningsRequest request, CancellationToken ct) => ToAction(service.RecordEarningsAsync(key, request, ct));
 
     [HttpPost("settlements")]
-    [RequirePermission(PermissionKeys.Jahez.CollectionsManage)]
+    [RequirePermission(PermissionKeys.Jahez.CollectionsCreate)]
     public Task<IActionResult> Payment([FromHeader(Name = "Idempotency-Key")] string key, JahezPaymentRequest request, CancellationToken ct) => ToAction(service.PayAsync(key, request, ct));
 
     [HttpPost("adjustments")]
-    [RequirePermission(PermissionKeys.Jahez.AdjustmentsManage)]
+    [RequirePermission(PermissionKeys.Jahez.AdjustmentsCreate)]
     public Task<IActionResult> Adjustment([FromHeader(Name = "Idempotency-Key")] string key, JahezLedgerAdjustmentRequest request, CancellationToken ct) => ToAction(service.AdjustAsync(key, request, ct));
 
     [HttpPost("imports")]
     [Consumes("multipart/form-data")]
     [RequestSizeLimit(40 * 1024 * 1024)]
     [RequestFormLimits(MultipartBodyLengthLimit = 40 * 1024 * 1024)]
-    [RequirePermission(PermissionKeys.Jahez.ImportsManage)]
+    [RequirePermission(PermissionKeys.Jahez.ImportsCreate)]
     public async Task<IActionResult> Upload([FromHeader(Name = "Idempotency-Key")] string key, [FromForm] JahezImportKind kind,
         [FromForm] List<IFormFile> files, [FromForm] Guid? replacesBatchId, [FromForm] string? correctionReason, CancellationToken ct)
     {
@@ -110,19 +110,19 @@ public sealed class JahezController(IJahezService service) : ControllerBase
     }
 
     [HttpGet("imports/{id:guid}")]
-    [RequirePermission(PermissionKeys.Jahez.ImportsManage)]
+    [RequirePermission(PermissionKeys.Jahez.ImportsRead)]
     public Task<IActionResult> ImportPreview(Guid id, CancellationToken ct) => ToAction(service.PreviewImportAsync(id, ct));
 
     [HttpGet("imports")]
-    [RequirePermission(PermissionKeys.Jahez.ImportsManage)]
+    [RequirePermission(PermissionKeys.Jahez.ImportsRead)]
     public Task<IActionResult> Imports(int page = 1, int pageSize = 50, CancellationToken ct = default) => ToAction(service.GetImportBatchesAsync(page, pageSize, ct));
 
     [HttpPost("imports/{id:guid}/commit")]
-    [RequirePermission(PermissionKeys.Jahez.ImportsManage)]
+    [RequirePermission(PermissionKeys.Jahez.ImportsUpdate)]
     public Task<IActionResult> CommitImport(Guid id, [FromHeader(Name = "Idempotency-Key")] string key, JahezImportCommitRequest request, CancellationToken ct) => ToAction(service.CommitImportAsync(key, id, request, ct));
 
     [HttpGet("import-files/{id:guid}")]
-    [RequirePermission(PermissionKeys.Jahez.ImportsManage)]
+    [RequirePermission(PermissionKeys.Jahez.ImportsRead)]
     public async Task<IActionResult> DownloadImportFile(Guid id, CancellationToken ct)
     {
         var result = await service.GetImportFileAsync(id, ct);
@@ -160,7 +160,9 @@ public sealed class JahezController(IJahezService service) : ControllerBase
     private async Task<IActionResult> ToAction<T>(Task<Result<T>> task)
     {
         var result = await task;
-        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+        return result.IsSuccess
+            ? Ok(await responseMapper.MapAsync(result.Value, HttpContext.RequestAborted))
+            : result.ToProblem(HttpContext);
     }
 }
 

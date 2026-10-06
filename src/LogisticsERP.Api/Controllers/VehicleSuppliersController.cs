@@ -27,7 +27,7 @@ public sealed class VehicleSuppliersController(IFleetService service) : Controll
     }
 
     [HttpPost]
-    [RequirePermission(PermissionKeys.Fleet.VehiclesManage)]
+    [RequirePermission(PermissionKeys.Fleet.VehiclesCreate)]
     public async Task<IActionResult> Create([FromBody] VehicleSupplierRequest request, CancellationToken cancellationToken)
     {
         var result = await service.UpsertSupplierAsync(null, request, cancellationToken);
@@ -35,7 +35,7 @@ public sealed class VehicleSuppliersController(IFleetService service) : Controll
     }
 
     [HttpPut("{id:guid}")]
-    [RequirePermission(PermissionKeys.Fleet.VehiclesManage)]
+    [RequirePermission(PermissionKeys.Fleet.VehiclesUpdate)]
     public async Task<IActionResult> Update(Guid id, [FromBody] VehicleSupplierRequest request, CancellationToken cancellationToken)
     {
         var result = await service.UpsertSupplierAsync(id, request, cancellationToken);
@@ -43,7 +43,7 @@ public sealed class VehicleSuppliersController(IFleetService service) : Controll
     }
 
     [HttpPatch("{id:guid}/archive")]
-    [RequirePermission(PermissionKeys.Fleet.VehiclesManage)]
+    [RequirePermission(PermissionKeys.Fleet.VehiclesDelete)]
     public async Task<IActionResult> Archive(Guid id, [FromBody] ArchiveFleetRequest request, CancellationToken cancellationToken)
     {
         var result = await service.ArchiveSupplierAsync(id, request, cancellationToken);

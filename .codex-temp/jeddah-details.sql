@@ -1,0 +1,5 @@
+SELECT p.*,e.IqamaNo,e.FullNameAr,e.FullNameEn,h.Code AS HousingCode,r.Name AS RoomName FROM app.HousingResidencePeriods p JOIN app.Employees e ON e.Id=p.EmployeeId JOIN app.HousingRooms r ON r.Id=p.RoomId JOIN app.Housing h ON h.Id=r.HousingId WHERE p.EffectiveTo IS NULL;
+SELECT o.*, h.Code AS HousingCode,r.Name AS RoomName FROM app.HousingExternalOccupants o JOIN app.HousingRooms r ON r.Id=o.RoomId JOIN app.Housing h ON h.Id=r.HousingId WHERE o.IsDeleted=0;
+SELECT o.*, h.Code AS HousingCode,r.Name AS RoomName FROM app.HousingPendingOccupants o JOIN app.HousingRooms r ON r.Id=o.RoomId JOIN app.Housing h ON h.Id=r.HousingId WHERE o.IsDeleted=0;
+SELECT Id,IqamaNo,FullNameAr,FullNameEn,Status,OperatingCityId,IsEmployee FROM app.Employees WHERE IsDeleted=0;
+SELECT q.Id,q.FloorId,q.RoomId,q.Name,q.Quantity FROM app.HousingEquipment q LEFT JOIN app.HousingFloors f ON f.Id=q.FloorId LEFT JOIN app.HousingRooms r ON r.Id=q.RoomId WHERE q.IsDeleted=0 AND COALESCE(f.HousingId,r.HousingId) IN (SELECT Id FROM app.Housing WHERE CityId='019c18d5-62e1-7000-8000-000000000002');

@@ -17,17 +17,17 @@ public sealed class VehiclePlatformAccountAssignmentApiSurfaceTests
         { nameof(VehiclePlatformAccountAssignmentsController.GetAll), typeof(HttpGetAttribute), null, PermissionKeys.Fleet.AssignmentsRead },
         { nameof(VehiclePlatformAccountAssignmentsController.GetProblems), typeof(HttpGetAttribute), "problems", PermissionKeys.Fleet.AssignmentsRead },
         { nameof(VehiclePlatformAccountAssignmentsController.Get), typeof(HttpGetAttribute), "{id:guid}", PermissionKeys.Fleet.AssignmentsRead },
-        { nameof(VehiclePlatformAccountAssignmentsController.Approve), typeof(HttpPostAttribute), null, PermissionKeys.Fleet.AssignmentsManage },
-        { nameof(VehiclePlatformAccountAssignmentsController.Close), typeof(HttpPostAttribute), "{id:guid}/close", PermissionKeys.Fleet.AssignmentsManage },
+        { nameof(VehiclePlatformAccountAssignmentsController.Approve), typeof(HttpPostAttribute), null, PermissionKeys.Fleet.AssignmentsCreate },
+        { nameof(VehiclePlatformAccountAssignmentsController.Close), typeof(HttpPostAttribute), "{id:guid}/close", PermissionKeys.Fleet.AssignmentsDelete },
         { nameof(VehiclePlatformAccountAssignmentsController.GetSwitches), typeof(HttpGetAttribute), "switches", PermissionKeys.Fleet.AssignmentsRead },
         { nameof(VehiclePlatformAccountAssignmentsController.GetSwitch), typeof(HttpGetAttribute), "switches/{switchId:guid}", PermissionKeys.Fleet.AssignmentsRead },
-        { nameof(VehiclePlatformAccountAssignmentsController.Switch), typeof(HttpPostAttribute), "{id:guid}/switch", PermissionKeys.Fleet.AssignmentsManage },
-        { nameof(VehiclePlatformAccountAssignmentsController.AcceptSwitch), typeof(HttpPostAttribute), "switches/{switchId:guid}/accept", PermissionKeys.Fleet.AssignmentsManage },
+        { nameof(VehiclePlatformAccountAssignmentsController.Switch), typeof(HttpPostAttribute), "{id:guid}/switch", PermissionKeys.Fleet.AssignmentsUpdate },
+        { nameof(VehiclePlatformAccountAssignmentsController.AcceptSwitch), typeof(HttpPostAttribute), "switches/{switchId:guid}/accept", PermissionKeys.Fleet.AssignmentsUpdate },
         { nameof(VehiclePlatformAccountAssignmentsController.GetLeaseAgreements), typeof(HttpGetAttribute), "lease-agreements", PermissionKeys.Fleet.AssignmentsRead },
         { nameof(VehiclePlatformAccountAssignmentsController.GetLeaseEligibleVehicles), typeof(HttpGetAttribute), "lease-agreements/eligible-vehicles", PermissionKeys.Fleet.AssignmentsRead },
         { nameof(VehiclePlatformAccountAssignmentsController.GetLeaseAgreement), typeof(HttpGetAttribute), "lease-agreements/{agreementId:guid}", PermissionKeys.Fleet.AssignmentsRead },
-        { nameof(VehiclePlatformAccountAssignmentsController.CreateLeaseAgreement), typeof(HttpPostAttribute), "lease-agreements", PermissionKeys.Fleet.AssignmentsManage },
-        { nameof(VehiclePlatformAccountAssignmentsController.CloseLeaseAgreement), typeof(HttpPostAttribute), "lease-agreements/{agreementId:guid}/close", PermissionKeys.Fleet.AssignmentsManage }
+        { nameof(VehiclePlatformAccountAssignmentsController.CreateLeaseAgreement), typeof(HttpPostAttribute), "lease-agreements", PermissionKeys.Fleet.AssignmentsCreate },
+        { nameof(VehiclePlatformAccountAssignmentsController.CloseLeaseAgreement), typeof(HttpPostAttribute), "lease-agreements/{agreementId:guid}/close", PermissionKeys.Fleet.AssignmentsDelete }
     };
 
     [Fact]

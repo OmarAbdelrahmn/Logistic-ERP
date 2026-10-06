@@ -103,11 +103,6 @@ internal sealed partial class VehicleDailyDistanceService(
         UpsertManualVehicleDistanceRequest request,
         CancellationToken cancellationToken = default)
     {
-        if (!await support.HasPermissionAsync(PermissionKeys.Fleet.DailyDistancesManage, null, cancellationToken))
-        {
-            return Result.Failure<VehicleDailyDistanceResponse>(FleetErrors.Forbidden);
-        }
-
         var actor = support.UserId;
         if (!actor.HasValue)
         {
@@ -127,6 +122,11 @@ internal sealed partial class VehicleDailyDistanceService(
 
         var current = await dbContext.VehicleDailyDistances
             .SingleOrDefaultAsync(x => x.VehicleId == vehicleId && x.WorkDate == workDate, cancellationToken);
+
+        var permission = current?.ManualOdometerReading is null
+            ? PermissionKeys.Fleet.DailyDistancesCreate : PermissionKeys.Fleet.DailyDistancesUpdate;
+        if (!await support.HasPermissionAsync(permission, null, cancellationToken))
+            return Result.Failure<VehicleDailyDistanceResponse>(FleetErrors.Forbidden);
 
         if (current is not null && !FleetServiceSupport.MatchesRowVersion(current.RowVersion, request.RowVersion))
         {

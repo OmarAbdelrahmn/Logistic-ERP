@@ -16,17 +16,17 @@ public sealed class TagsController(ITagService service) : ControllerBase
     public Task<IActionResult> GetAll(CancellationToken cancellationToken) => ToAction(service.GetAllAsync(cancellationToken));
 
     [HttpPost]
-    [RequirePermission(PermissionKeys.Catalog.TagsManage)]
+    [RequirePermission(PermissionKeys.Catalog.TagsCreate)]
     public Task<IActionResult> Create([FromBody] TagUpsertRequest request, CancellationToken cancellationToken) =>
         ToAction(service.UpsertAsync(null, request, cancellationToken));
 
     [HttpPut("{id:guid}")]
-    [RequirePermission(PermissionKeys.Catalog.TagsManage)]
+    [RequirePermission(PermissionKeys.Catalog.TagsUpdate)]
     public Task<IActionResult> Update(Guid id, [FromBody] TagUpsertRequest request, CancellationToken cancellationToken) =>
         ToAction(service.UpsertAsync(id, request, cancellationToken));
 
     [HttpPatch("{id:guid}/archive")]
-    [RequirePermission(PermissionKeys.Catalog.TagsManage)]
+    [RequirePermission(PermissionKeys.Catalog.TagsDelete)]
     public async Task<IActionResult> Archive(Guid id, [FromBody] ArchiveRequest request, CancellationToken cancellationToken)
     {
         var result = await service.ArchiveAsync(id, request.Reason, request.RowVersion, cancellationToken);
@@ -39,7 +39,7 @@ public sealed class TagsController(ITagService service) : ControllerBase
         ToAction(service.GetAssignmentsAsync(resource, resourceId, cancellationToken));
 
     [HttpPut("assignments/{resource}/{resourceId:guid}")]
-    [RequirePermission(PermissionKeys.Catalog.TagsManage)]
+    [RequirePermission(PermissionKeys.Catalog.TagsUpdate)]
     public Task<IActionResult> ReplaceAssignments(
         string resource,
         Guid resourceId,

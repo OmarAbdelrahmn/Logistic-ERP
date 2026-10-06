@@ -52,7 +52,7 @@ internal sealed partial class JahezService
         }, ct);
 
     public Task<Result<JahezPage<JahezImportBatch>>> GetImportBatchesAsync(int page, int pageSize, CancellationToken ct = default) =>
-        ReadAsync(PermissionKeys.Jahez.ImportsManage, async () =>
+        ReadAsync(PermissionKeys.Jahez.ImportsRead, async () =>
         {
             Page(page, pageSize);
             var rows = await db.Set<JahezImportBatch>().AsNoTracking().OrderByDescending(x => x.CreatedAtUtc).ThenBy(x => x.Id)

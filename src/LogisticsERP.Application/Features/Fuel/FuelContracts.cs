@@ -86,7 +86,10 @@ public sealed record FuelMonthlyUsagePageResponse(
     int PageSize,
     int TotalCount,
     decimal TotalLiters,
-    decimal TotalAmount);
+    decimal TotalAmount,
+    int UnassignedCount,
+    decimal UnassignedTotalLiters,
+    decimal UnassignedTotalAmount);
 
 public sealed record FuelMonthlyUsageResponse(
     Guid Id,
@@ -96,10 +99,11 @@ public sealed record FuelMonthlyUsageResponse(
     string CardNumber,
     string? PlateNumberText,
     DateOnly ReportMonth,
-    Guid RiderProfileId,
-    Guid EmployeeId,
-    string RiderNameAr,
+    Guid? RiderProfileId,
+    Guid? EmployeeId,
+    string? RiderNameAr,
     string? RiderNameEn,
+    bool NeedsReview,
     decimal TotalLiters,
     decimal TotalAmount,
     decimal? AmountBeforeTax,
@@ -112,6 +116,83 @@ public sealed record FuelMonthlyUsageResponse(
     Guid LastImportId,
     DateTimeOffset? UpdatedAtUtc,
     string RowVersion);
+
+public sealed record FuelCardPeriodUsagePageResponse(
+    IReadOnlyList<FuelCardPeriodUsageResponse> Items,
+    DateOnly From,
+    DateOnly To,
+    DateOnly UsageMonthFrom,
+    DateOnly UsageMonthTo,
+    int Page,
+    int PageSize,
+    int TotalCount,
+    decimal TotalLiters,
+    decimal TotalAmount,
+    decimal UnassignedTotalLiters,
+    decimal UnassignedTotalAmount);
+
+public sealed record FuelCardPeriodUsageResponse(
+    Guid FuelCardId,
+    string Provider,
+    string ProviderNameAr,
+    string CardNumber,
+    string? PlateNumberText,
+    decimal TotalLiters,
+    decimal TotalAmount,
+    decimal UnassignedTotalLiters,
+    decimal UnassignedTotalAmount,
+    IReadOnlyList<FuelCardPeriodMonthResponse> UnassignedUsageMonths,
+    IReadOnlyList<FuelCardPeriodRiderResponse> Riders);
+
+public sealed record FuelUnassignedUsagePageResponse(
+    IReadOnlyList<FuelUnassignedUsageResponse> Items,
+    DateOnly From,
+    DateOnly To,
+    int Page,
+    int PageSize,
+    int TotalCount,
+    decimal TotalLiters,
+    decimal TotalAmount);
+
+public sealed record FuelUnassignedUsageResponse(
+    Guid UsageId,
+    Guid FuelCardId,
+    string Provider,
+    string CardNumber,
+    string? PlateNumberText,
+    string? CardNotes,
+    DateOnly ReportMonth,
+    decimal TotalLiters,
+    decimal TotalAmount,
+    int? TransactionCount,
+    DateTimeOffset? FirstTransactionAtUtc,
+    DateTimeOffset? LastTransactionAtUtc,
+    Guid LastImportId,
+    string OriginalFileName,
+    DateTimeOffset ImportedAtUtc,
+    string ReviewReason);
+
+public sealed record FuelCardPeriodRiderResponse(
+    Guid RiderProfileId,
+    Guid EmployeeId,
+    string? RiderNameAr,
+    string? RiderNameEn,
+    decimal TotalLiters,
+    decimal TotalAmount,
+    IReadOnlyList<FuelCardPeriodAssignmentResponse> Assignments,
+    IReadOnlyList<FuelCardPeriodMonthResponse> UsageMonths);
+
+public sealed record FuelCardPeriodAssignmentResponse(
+    Guid AssignmentId,
+    DateOnly EffectiveFrom,
+    DateOnly? EffectiveTo,
+    DateOnly From,
+    DateOnly To);
+
+public sealed record FuelCardPeriodMonthResponse(
+    DateOnly ReportMonth,
+    decimal TotalLiters,
+    decimal TotalAmount);
 
 public sealed record FuelImportRowError(
     int RowNumber,

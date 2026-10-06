@@ -39,6 +39,8 @@ public sealed record CreateNotificationRequest(
     IReadOnlyList<string>? PermissionKeys = null);
 
 public sealed record NotificationStateRequest(string Action, string RowVersion);
+public sealed record NotificationReadAllRequest(IReadOnlyList<string>? Permissions = null);
+public sealed record NotificationReadAllResponse(int MarkedCount, DateTimeOffset ReadAtUtc, IReadOnlyList<string> EffectivePermissions);
 public sealed record NotificationQueryRequest(IReadOnlyList<string>? Permissions = null, bool UnreadOnly = false, int PageSize = 50, string? Cursor = null);
 public sealed record NotificationFeedResponse(IReadOnlyList<NotificationResponse> Items, string? NextCursor, int UnreadCount, IReadOnlyList<string> EffectivePermissions);
 
@@ -49,6 +51,7 @@ public interface INotificationService
     Task<Result<NotificationFeedResponse>> QueryAsync(NotificationQueryRequest request, CancellationToken cancellationToken = default);
     Task<Result<NotificationResponse>> CreateAsync(CreateNotificationRequest request, CancellationToken cancellationToken = default);
     Task<Result<NotificationResponse>> ChangeStateAsync(Guid id, NotificationStateRequest request, CancellationToken cancellationToken = default);
+    Task<Result<NotificationReadAllResponse>> ReadAllAsync(NotificationReadAllRequest request, CancellationToken cancellationToken = default);
 }
 
 public sealed record AuditEntryResponse(

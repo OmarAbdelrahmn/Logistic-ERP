@@ -20,15 +20,15 @@ public sealed class PhoneSimApiSurfaceTests
         { nameof(PhoneSimsController.GetAll), typeof(HttpGetAttribute), null, PermissionKeys.Operations.PhoneSimsRead },
         { nameof(PhoneSimsController.Get), typeof(HttpGetAttribute), "{id:guid}", PermissionKeys.Operations.PhoneSimsRead },
         { nameof(PhoneSimsController.DownloadReceiptForm), typeof(HttpGetAttribute), "{id:guid}/receipt-form", PermissionKeys.Operations.PhoneSimsRead },
-        { nameof(PhoneSimsController.Create), typeof(HttpPostAttribute), null, PermissionKeys.Operations.PhoneSimsManage },
-        { nameof(PhoneSimsController.Update), typeof(HttpPutAttribute), "{id:guid}", PermissionKeys.Operations.PhoneSimsManage },
-        { nameof(PhoneSimsController.ChangeResponsibleEmployee), typeof(HttpPatchAttribute), "{id:guid}/responsible-employee", PermissionKeys.Operations.PhoneSimsManage },
-        { nameof(PhoneSimsController.ChangeStatus), typeof(HttpPatchAttribute), "{id:guid}/status", PermissionKeys.Operations.PhoneSimsManage },
-        { nameof(PhoneSimsController.Archive), typeof(HttpPatchAttribute), "{id:guid}/archive", PermissionKeys.Operations.PhoneSimsManage },
+        { nameof(PhoneSimsController.Create), typeof(HttpPostAttribute), null, PermissionKeys.Operations.PhoneSimsCreate },
+        { nameof(PhoneSimsController.Update), typeof(HttpPutAttribute), "{id:guid}", PermissionKeys.Operations.PhoneSimsUpdate },
+        { nameof(PhoneSimsController.ChangeResponsibleEmployee), typeof(HttpPatchAttribute), "{id:guid}/responsible-employee", PermissionKeys.Operations.PhoneSimsUpdate },
+        { nameof(PhoneSimsController.ChangeStatus), typeof(HttpPatchAttribute), "{id:guid}/status", PermissionKeys.Operations.PhoneSimsUpdate },
+        { nameof(PhoneSimsController.Archive), typeof(HttpPatchAttribute), "{id:guid}/archive", PermissionKeys.Operations.PhoneSimsDelete },
         { nameof(PhoneSimsController.GetResponsibilityHistory), typeof(HttpGetAttribute), "{id:guid}/responsibility-history", PermissionKeys.Operations.PhoneSimsRead },
         { nameof(PhoneSimsController.GetAssignments), typeof(HttpGetAttribute), "{id:guid}/assignments", PermissionKeys.Operations.PhoneSimsRead },
-        { nameof(PhoneSimsController.Assign), typeof(HttpPostAttribute), "{id:guid}/assignments", PermissionKeys.Operations.PhoneSimsManage },
-        { nameof(PhoneSimsController.CloseAssignment), typeof(HttpPostAttribute), "{id:guid}/assignments/{assignmentId:guid}/close", PermissionKeys.Operations.PhoneSimsManage }
+        { nameof(PhoneSimsController.Assign), typeof(HttpPostAttribute), "{id:guid}/assignments", PermissionKeys.Operations.PhoneSimsCreate },
+        { nameof(PhoneSimsController.CloseAssignment), typeof(HttpPostAttribute), "{id:guid}/assignments/{assignmentId:guid}/close", PermissionKeys.Operations.PhoneSimsDelete }
     };
 
     [Fact]
@@ -116,6 +116,6 @@ public sealed class PhoneSimApiSurfaceTests
     public void PhoneSimPermissionsAreRegistered()
     {
         Assert.Contains(PermissionKeys.Operations.PhoneSimsRead, (IEnumerable<string>)PermissionKeys.All);
-        Assert.Contains(PermissionKeys.Operations.PhoneSimsManage, (IEnumerable<string>)PermissionKeys.All);
+        Assert.Contains(PermissionKeys.Operations.PhoneSimsCreate, (IEnumerable<string>)PermissionKeys.All);
     }
 }

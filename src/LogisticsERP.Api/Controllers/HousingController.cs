@@ -42,15 +42,15 @@ public sealed class HousingController(IHousingService service) : ControllerBase
     }
 
     [HttpPost]
-    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    [RequirePermission(PermissionKeys.Operations.HousingCreate)]
     public Task<IActionResult> Create([FromBody] HousingUpsertRequest request, CancellationToken cancellationToken) => Upsert(null, request, cancellationToken);
 
     [HttpPut("{id:guid}")]
-    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    [RequirePermission(PermissionKeys.Operations.HousingUpdate)]
     public Task<IActionResult> Update(Guid id, [FromBody] HousingUpsertRequest request, CancellationToken cancellationToken) => Upsert(id, request, cancellationToken);
 
     [HttpPatch("{id:guid}/archive")]
-    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    [RequirePermission(PermissionKeys.Operations.HousingDelete)]
     public async Task<IActionResult> Archive(Guid id, [FromBody] ArchiveRequest request, CancellationToken cancellationToken)
     {
         var result = await service.ArchiveAsync(id, request, cancellationToken);
@@ -66,7 +66,7 @@ public sealed class HousingController(IHousingService service) : ControllerBase
     }
 
     [HttpPost("{id:guid}/rooms")]
-    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    [RequirePermission(PermissionKeys.Operations.HousingCreate)]
     public async Task<IActionResult> CreateRoom(
         Guid id,
         [FromBody] HousingRoomUpsertRequest request,
@@ -87,7 +87,7 @@ public sealed class HousingController(IHousingService service) : ControllerBase
     }
 
     [HttpPost("{id:guid}/floors")]
-    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    [RequirePermission(PermissionKeys.Operations.HousingCreate)]
     public async Task<IActionResult> CreateFloor(Guid id, [FromBody] HousingFloorUpsertRequest request, CancellationToken cancellationToken)
     {
         var result = await service.UpsertFloorAsync(id, null, request, cancellationToken);
@@ -95,7 +95,7 @@ public sealed class HousingController(IHousingService service) : ControllerBase
     }
 
     [HttpPut("{id:guid}/floors/{floorId:guid}")]
-    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    [RequirePermission(PermissionKeys.Operations.HousingUpdate)]
     public async Task<IActionResult> UpdateFloor(Guid id, Guid floorId, [FromBody] HousingFloorUpsertRequest request, CancellationToken cancellationToken)
     {
         var result = await service.UpsertFloorAsync(id, floorId, request, cancellationToken);
@@ -103,7 +103,7 @@ public sealed class HousingController(IHousingService service) : ControllerBase
     }
 
     [HttpDelete("floors/{floorId:guid}")]
-    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    [RequirePermission(PermissionKeys.Operations.HousingDelete)]
     public async Task<IActionResult> DeleteFloor(Guid floorId, [FromBody] ArchiveRequest request, CancellationToken cancellationToken)
     {
         var result = await service.DeleteFloorAsync(floorId, request, cancellationToken);
@@ -111,7 +111,7 @@ public sealed class HousingController(IHousingService service) : ControllerBase
     }
 
     [HttpPost("floors/{floorId:guid}/equipment")]
-    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    [RequirePermission(PermissionKeys.Operations.HousingCreate)]
     public async Task<IActionResult> CreateFloorEquipment(Guid floorId, [FromBody] HousingEquipmentUpsertRequest request, CancellationToken cancellationToken)
     {
         var result = await service.UpsertEquipmentAsync(floorId, null, null, request, cancellationToken);
@@ -119,7 +119,7 @@ public sealed class HousingController(IHousingService service) : ControllerBase
     }
 
     [HttpPut("floors/{floorId:guid}/equipment/{equipmentId:guid}")]
-    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    [RequirePermission(PermissionKeys.Operations.HousingUpdate)]
     public async Task<IActionResult> UpdateFloorEquipment(Guid floorId, Guid equipmentId, [FromBody] HousingEquipmentUpsertRequest request, CancellationToken cancellationToken)
     {
         var result = await service.UpsertEquipmentAsync(floorId, null, equipmentId, request, cancellationToken);
@@ -127,7 +127,7 @@ public sealed class HousingController(IHousingService service) : ControllerBase
     }
 
     [HttpDelete("equipment/{equipmentId:guid}")]
-    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    [RequirePermission(PermissionKeys.Operations.HousingDelete)]
     public async Task<IActionResult> DeleteEquipment(Guid equipmentId, CancellationToken cancellationToken)
     {
         var result = await service.DeleteEquipmentAsync(equipmentId, cancellationToken);
@@ -143,7 +143,7 @@ public sealed class HousingController(IHousingService service) : ControllerBase
     }
 
     [HttpPost("{id:guid}/residents")]
-    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    [RequirePermission(PermissionKeys.Operations.HousingCreate)]
     public async Task<IActionResult> AssignResident(Guid id, [FromBody] AssignHousingResidentRequest request, CancellationToken cancellationToken)
     {
         var result = await service.AssignResidentAsync(id, request, cancellationToken);
@@ -151,7 +151,7 @@ public sealed class HousingController(IHousingService service) : ControllerBase
     }
 
     [HttpPost("residence-periods/{periodId:guid}/close")]
-    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    [RequirePermission(PermissionKeys.Operations.HousingDelete)]
     public async Task<IActionResult> CloseResidence(Guid periodId, [FromBody] ClosePeriodRequest request, CancellationToken cancellationToken)
     {
         var result = await service.CloseResidenceAsync(periodId, request, cancellationToken);
@@ -167,7 +167,7 @@ public sealed class HousingController(IHousingService service) : ControllerBase
     }
 
     [HttpPost("{id:guid}/supervisors")]
-    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    [RequirePermission(PermissionKeys.Operations.HousingCreate)]
     public async Task<IActionResult> AssignSupervisor(Guid id, [FromBody] AssignHousingSupervisorRequest request, CancellationToken cancellationToken)
     {
         var result = await service.AssignSupervisorAsync(id, request, cancellationToken);
@@ -175,7 +175,7 @@ public sealed class HousingController(IHousingService service) : ControllerBase
     }
 
     [HttpPost("supervisor-periods/{periodId:guid}/close")]
-    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    [RequirePermission(PermissionKeys.Operations.HousingDelete)]
     public async Task<IActionResult> CloseSupervisor(Guid periodId, [FromBody] ClosePeriodRequest request, CancellationToken cancellationToken)
     {
         var result = await service.CloseSupervisorAsync(periodId, request, cancellationToken);

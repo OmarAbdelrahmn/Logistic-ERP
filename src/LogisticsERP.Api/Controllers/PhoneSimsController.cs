@@ -58,7 +58,7 @@ public sealed class PhoneSimsController(IPhoneSimService service) : ControllerBa
     [HttpPost]
     [Consumes("multipart/form-data")]
     [RequestSizeLimit(11 * 1024 * 1024)]
-    [RequirePermission(PermissionKeys.Operations.PhoneSimsManage)]
+    [RequirePermission(PermissionKeys.Operations.PhoneSimsCreate)]
     public async Task<IActionResult> Create(
         [FromForm] CreatePhoneSimForm form,
         CancellationToken cancellationToken)
@@ -81,7 +81,7 @@ public sealed class PhoneSimsController(IPhoneSimService service) : ControllerBa
     }
 
     [HttpPut("{id:guid}")]
-    [RequirePermission(PermissionKeys.Operations.PhoneSimsManage)]
+    [RequirePermission(PermissionKeys.Operations.PhoneSimsUpdate)]
     public async Task<IActionResult> Update(
         Guid id,
         [FromBody] UpdatePhoneSimRequest request,
@@ -92,7 +92,7 @@ public sealed class PhoneSimsController(IPhoneSimService service) : ControllerBa
     }
 
     [HttpPatch("{id:guid}/responsible-employee")]
-    [RequirePermission(PermissionKeys.Operations.PhoneSimsManage)]
+    [RequirePermission(PermissionKeys.Operations.PhoneSimsUpdate)]
     public async Task<IActionResult> ChangeResponsibleEmployee(
         Guid id,
         [FromBody] ChangePhoneSimResponsibleEmployeeRequest request,
@@ -103,7 +103,7 @@ public sealed class PhoneSimsController(IPhoneSimService service) : ControllerBa
     }
 
     [HttpPatch("{id:guid}/status")]
-    [RequirePermission(PermissionKeys.Operations.PhoneSimsManage)]
+    [RequirePermission(PermissionKeys.Operations.PhoneSimsUpdate)]
     public async Task<IActionResult> ChangeStatus(
         Guid id,
         [FromBody] ChangePhoneSimStatusRequest request,
@@ -114,7 +114,7 @@ public sealed class PhoneSimsController(IPhoneSimService service) : ControllerBa
     }
 
     [HttpPatch("{id:guid}/archive")]
-    [RequirePermission(PermissionKeys.Operations.PhoneSimsManage)]
+    [RequirePermission(PermissionKeys.Operations.PhoneSimsDelete)]
     public async Task<IActionResult> Archive(
         Guid id,
         [FromBody] ArchivePhoneSimRequest request,
@@ -145,7 +145,7 @@ public sealed class PhoneSimsController(IPhoneSimService service) : ControllerBa
     }
 
     [HttpPost("{id:guid}/assignments")]
-    [RequirePermission(PermissionKeys.Operations.PhoneSimsManage)]
+    [RequirePermission(PermissionKeys.Operations.PhoneSimsCreate)]
     public async Task<IActionResult> Assign(
         Guid id,
         [FromBody] AssignPhoneSimRequest request,
@@ -156,7 +156,7 @@ public sealed class PhoneSimsController(IPhoneSimService service) : ControllerBa
     }
 
     [HttpPost("{id:guid}/assignments/{assignmentId:guid}/close")]
-    [RequirePermission(PermissionKeys.Operations.PhoneSimsManage)]
+    [RequirePermission(PermissionKeys.Operations.PhoneSimsDelete)]
     public async Task<IActionResult> CloseAssignment(
         Guid id,
         Guid assignmentId,

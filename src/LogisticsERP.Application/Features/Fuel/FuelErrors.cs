@@ -46,6 +46,9 @@ public static class FuelErrors
     public static readonly OperationError InvalidDateRange = new(
         "fuel.invalid_date_range", "نطاق تاريخ الإسناد غير صالح.", ErrorType.Validation);
 
+    public static readonly OperationError InvalidReportPeriod = new(
+        "fuel.invalid_report_period", "حدد فترة صحيحة لا تتجاوز 36 شهرًا.", ErrorType.Validation);
+
     public static readonly OperationError InvalidFile = new(
         "fuel.invalid_file", "ملف الوقود غير صالح أو لا يطابق تنسيق بترو أب أو سيارة أب.", ErrorType.Validation, "file");
 

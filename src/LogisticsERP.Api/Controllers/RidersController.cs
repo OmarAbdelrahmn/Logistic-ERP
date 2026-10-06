@@ -27,7 +27,7 @@ public sealed class RidersController(IWorkforceService service) : ControllerBase
     }
 
     [HttpPut("{riderProfileId:guid}")]
-    [RequirePermission(PermissionKeys.Workforce.RidersManage)]
+    [RequirePermission(PermissionKeys.Workforce.RidersUpdate)]
     public async Task<IActionResult> Update(Guid riderProfileId, [FromBody] RiderProfileUpsertRequest request, CancellationToken cancellationToken)
     {
         var result = await service.UpdateRiderProfileAsync(riderProfileId, request, cancellationToken);

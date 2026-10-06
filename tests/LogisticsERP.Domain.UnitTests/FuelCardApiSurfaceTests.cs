@@ -18,13 +18,14 @@ public sealed class FuelCardApiSurfaceTests
     {
         { nameof(FuelCardsController.GetCards), typeof(HttpGetAttribute), null, PermissionKeys.Fuel.Read },
         { nameof(FuelCardsController.GetCard), typeof(HttpGetAttribute), "{id:guid}", PermissionKeys.Fuel.Read },
-        { nameof(FuelCardsController.CreateCard), typeof(HttpPostAttribute), null, PermissionKeys.Fuel.Manage },
-        { nameof(FuelCardsController.SetSponsor), typeof(HttpPutAttribute), "{id:guid}/sponsor", PermissionKeys.Fuel.Manage },
-        { nameof(FuelCardsController.SetCity), typeof(HttpPutAttribute), "{id:guid}/city", PermissionKeys.Fuel.Manage },
+        { nameof(FuelCardsController.CreateCard), typeof(HttpPostAttribute), null, PermissionKeys.Fuel.Create },
+        { nameof(FuelCardsController.SetSponsor), typeof(HttpPutAttribute), "{id:guid}/sponsor", PermissionKeys.Fuel.Update },
+        { nameof(FuelCardsController.SetCity), typeof(HttpPutAttribute), "{id:guid}/city", PermissionKeys.Fuel.Update },
         { nameof(FuelCardsController.GetAssignments), typeof(HttpGetAttribute), "{id:guid}/assignments", PermissionKeys.Fuel.Read },
-        { nameof(FuelCardsController.AssignRider), typeof(HttpPostAttribute), "{id:guid}/assignments", PermissionKeys.Fuel.Manage },
-        { nameof(FuelCardsController.StopRider), typeof(HttpPostAttribute), "{id:guid}/stop-rider", PermissionKeys.Fuel.Manage },
+        { nameof(FuelCardsController.AssignRider), typeof(HttpPostAttribute), "{id:guid}/assignments", PermissionKeys.Fuel.Update },
+        { nameof(FuelCardsController.StopRider), typeof(HttpPostAttribute), "{id:guid}/stop-rider", PermissionKeys.Fuel.Delete },
         { nameof(FuelCardsController.GetMonthlyUsage), typeof(HttpGetAttribute), "monthly-usage", PermissionKeys.Fuel.Read },
+        { nameof(FuelCardsController.GetPeriodUsage), typeof(HttpGetAttribute), "period-usage", PermissionKeys.Fuel.Read },
         { nameof(FuelCardsController.Import), typeof(HttpPostAttribute), "imports", PermissionKeys.Fuel.Import },
         { nameof(FuelCardsController.GetImports), typeof(HttpGetAttribute), "imports", PermissionKeys.Fuel.Read }
     };
@@ -79,7 +80,7 @@ public sealed class FuelCardApiSurfaceTests
         Assert.Equal(typeof(Guid), typeof(FuelCardMonthlyUsage).GetProperty(nameof(FuelCardMonthlyUsage.EmployeeId))!.PropertyType);
         Assert.NotNull(typeof(FuelCardMonthlyUsage).GetProperty(nameof(FuelCardMonthlyUsage.ReportMonth)));
         Assert.Contains(PermissionKeys.Fuel.Read, (IEnumerable<string>)PermissionKeys.All);
-        Assert.Contains(PermissionKeys.Fuel.Manage, (IEnumerable<string>)PermissionKeys.All);
+        Assert.Contains(PermissionKeys.Fuel.Create, (IEnumerable<string>)PermissionKeys.All);
         Assert.Contains(PermissionKeys.Fuel.Import, (IEnumerable<string>)PermissionKeys.All);
 
         var method = typeof(FuelCardsController).GetMethod(nameof(FuelCardsController.Import))!;
@@ -102,5 +103,14 @@ public sealed class FuelCardApiSurfaceTests
             new DateOnly(2026, 8, 1),
             new DateOnly(2026, 8, 31),
             new DateOnly(2026, 9, 1)));
+    }
+
+    [Theory]
+    [InlineData(" B W 203 ", "BW203")]
+    [InlineData("B\u00A0W\t203", "BW203")]
+    [InlineData("ب ب و ٨٣٥", "ببو٨٣٥")]
+    public void StoredCardNumbersHaveNoWhitespace(string input, string expected)
+    {
+        Assert.Equal(expected, FuelCardRules.RemoveCardNumberWhitespace(input));
     }
 }

@@ -19,7 +19,7 @@ public sealed class CompanyProfileController(ICompanyProfileService service) : C
     }
 
     [HttpPut]
-    [RequirePermission(PermissionKeys.Catalog.CompanyProfileManage)]
+    [RequirePermission(PermissionKeys.Catalog.CompanyProfileUpdate)]
     public async Task<IActionResult> Update([FromBody] UpdateCompanyProfileRequest request, CancellationToken cancellationToken)
     {
         var result = await service.UpdateAsync(request, cancellationToken);

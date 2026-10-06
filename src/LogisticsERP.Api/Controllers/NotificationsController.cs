@@ -38,10 +38,18 @@ public sealed class NotificationsController(INotificationService service) : Cont
     }
 
     [HttpPost]
-    [RequirePermission(PermissionKeys.Reporting.NotificationsManage)]
+    [RequirePermission(PermissionKeys.Reporting.NotificationsCreate)]
     public async Task<IActionResult> Create([FromBody] CreateNotificationRequest request, CancellationToken cancellationToken)
     {
         var result = await service.CreateAsync(request, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpPost("read-all")]
+    [RequirePermission(PermissionKeys.Reporting.NotificationsRead)]
+    public async Task<IActionResult> ReadAll([FromBody] NotificationReadAllRequest request, CancellationToken cancellationToken)
+    {
+        var result = await service.ReadAllAsync(request, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 

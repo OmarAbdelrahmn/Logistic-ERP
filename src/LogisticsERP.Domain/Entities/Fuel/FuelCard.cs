@@ -30,8 +30,8 @@ public sealed class FuelCardRiderAssignment : TemporalPeriodEntity
 public sealed class FuelCardMonthlyUsage : AuditableEntity
 {
     public Guid FuelCardId { get; set; }
-    public Guid RiderProfileId { get; set; }
-    public Guid EmployeeId { get; set; }
+    public Guid? RiderProfileId { get; set; }
+    public Guid? EmployeeId { get; set; }
     public DateOnly ReportMonth { get; set; }
     public decimal TotalLiters { get; set; }
     public decimal TotalAmount { get; set; }

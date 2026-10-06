@@ -15,11 +15,11 @@ public sealed class HrWorkflowsController(IHrWorkflowService service) : Controll
     public Task<IActionResult> LeaveTypes(CancellationToken cancellationToken) => ToAction(service.GetLeaveTypesAsync(cancellationToken));
 
     [HttpPost("leave-types")]
-    [RequirePermission(PermissionKeys.Workflows.LeaveRequestsManage)]
+    [RequirePermission(PermissionKeys.Workflows.LeaveRequestsCreate)]
     public Task<IActionResult> CreateLeaveType([FromBody] LeaveTypeUpsertRequest request, CancellationToken cancellationToken) => ToAction(service.UpsertLeaveTypeAsync(null, request, cancellationToken));
 
     [HttpPut("leave-types/{id:guid}")]
-    [RequirePermission(PermissionKeys.Workflows.LeaveRequestsManage)]
+    [RequirePermission(PermissionKeys.Workflows.LeaveRequestsUpdate)]
     public Task<IActionResult> UpdateLeaveType(Guid id, [FromBody] LeaveTypeUpsertRequest request, CancellationToken cancellationToken) => ToAction(service.UpsertLeaveTypeAsync(id, request, cancellationToken));
 
     [HttpGet("leave-approval-workflows")]
@@ -27,11 +27,11 @@ public sealed class HrWorkflowsController(IHrWorkflowService service) : Controll
     public Task<IActionResult> LeaveWorkflows(CancellationToken cancellationToken) => ToAction(service.GetLeaveWorkflowsAsync(cancellationToken));
 
     [HttpPost("leave-approval-workflows")]
-    [RequirePermission(PermissionKeys.Workflows.LeaveRequestsManage)]
+    [RequirePermission(PermissionKeys.Workflows.LeaveRequestsCreate)]
     public Task<IActionResult> CreateLeaveWorkflow([FromBody] LeaveWorkflowUpsertRequest request, CancellationToken cancellationToken) => ToAction(service.UpsertLeaveWorkflowAsync(null, request, cancellationToken));
 
     [HttpPut("leave-approval-workflows/{id:guid}")]
-    [RequirePermission(PermissionKeys.Workflows.LeaveRequestsManage)]
+    [RequirePermission(PermissionKeys.Workflows.LeaveRequestsUpdate)]
     public Task<IActionResult> UpdateLeaveWorkflow(Guid id, [FromBody] LeaveWorkflowUpsertRequest request, CancellationToken cancellationToken) => ToAction(service.UpsertLeaveWorkflowAsync(id, request, cancellationToken));
 
     [HttpGet("leave-requests")]
@@ -39,15 +39,15 @@ public sealed class HrWorkflowsController(IHrWorkflowService service) : Controll
     public Task<IActionResult> LeaveRequests([FromQuery] Guid? employeeId, CancellationToken cancellationToken) => ToAction(service.GetLeaveRequestsAsync(employeeId, cancellationToken));
 
     [HttpPost("leave-requests")]
-    [RequirePermission(PermissionKeys.Workflows.LeaveRequestsManage)]
+    [RequirePermission(PermissionKeys.Workflows.LeaveRequestsCreate)]
     public Task<IActionResult> CreateLeaveRequest([FromBody] LeaveRequestUpsertRequest request, CancellationToken cancellationToken) => ToAction(service.UpsertLeaveRequestAsync(null, request, cancellationToken));
 
     [HttpPut("leave-requests/{id:guid}")]
-    [RequirePermission(PermissionKeys.Workflows.LeaveRequestsManage)]
+    [RequirePermission(PermissionKeys.Workflows.LeaveRequestsUpdate)]
     public Task<IActionResult> UpdateLeaveRequest(Guid id, [FromBody] LeaveRequestUpsertRequest request, CancellationToken cancellationToken) => ToAction(service.UpsertLeaveRequestAsync(id, request, cancellationToken));
 
     [HttpPost("leave-requests/{id:guid}/transitions")]
-    [RequirePermission(PermissionKeys.Workflows.LeaveRequestsManage)]
+    [RequirePermission(PermissionKeys.Workflows.LeaveRequestsUpdate)]
     public Task<IActionResult> TransitionLeave(Guid id, [FromBody] LeaveTransitionRequest request, CancellationToken cancellationToken)
     {
         var action = request.Action.Trim().ToLowerInvariant();
@@ -79,7 +79,7 @@ public sealed class HrWorkflowsController(IHrWorkflowService service) : Controll
         ToAction(service.GetLeaveDateChangesAsync(id, cancellationToken));
 
     [HttpPost("leave-requests/{id:guid}/date-change-requests")]
-    [RequirePermission(PermissionKeys.Workflows.LeaveRequestsManage)]
+    [RequirePermission(PermissionKeys.Workflows.LeaveRequestsUpdate)]
     public Task<IActionResult> RequestDateChange(Guid id, [FromBody] LeaveDateChangeCreateRequest request, CancellationToken cancellationToken) =>
         ToAction(service.RequestLeaveDateChangeAsync(id, request, cancellationToken));
 
@@ -94,7 +94,7 @@ public sealed class HrWorkflowsController(IHrWorkflowService service) : Controll
         ToAction(service.GetLeaveCancellationsAsync(id, cancellationToken));
 
     [HttpPost("leave-requests/{id:guid}/cancellation-requests")]
-    [RequirePermission(PermissionKeys.Workflows.LeaveRequestsManage)]
+    [RequirePermission(PermissionKeys.Workflows.LeaveRequestsDelete)]
     public Task<IActionResult> RequestCancellation(Guid id, [FromBody] LeaveCancellationCreateRequest request, CancellationToken cancellationToken) =>
         ToAction(service.RequestLeaveCancellationAsync(id, request, cancellationToken));
 
@@ -108,15 +108,15 @@ public sealed class HrWorkflowsController(IHrWorkflowService service) : Controll
     public Task<IActionResult> AbsenceCases([FromQuery] Guid? employeeId, CancellationToken cancellationToken) => ToAction(service.GetAbsenceCasesAsync(employeeId, cancellationToken));
 
     [HttpPost("absence-cases")]
-    [RequirePermission(PermissionKeys.Workflows.AbsenceCasesManage)]
+    [RequirePermission(PermissionKeys.Workflows.AbsenceCasesCreate)]
     public Task<IActionResult> CreateAbsenceCase([FromBody] AbsenceCaseUpsertRequest request, CancellationToken cancellationToken) => ToAction(service.UpsertAbsenceCaseAsync(null, request, cancellationToken));
 
     [HttpPut("absence-cases/{id:guid}")]
-    [RequirePermission(PermissionKeys.Workflows.AbsenceCasesManage)]
+    [RequirePermission(PermissionKeys.Workflows.AbsenceCasesUpdate)]
     public Task<IActionResult> UpdateAbsenceCase(Guid id, [FromBody] AbsenceCaseUpsertRequest request, CancellationToken cancellationToken) => ToAction(service.UpsertAbsenceCaseAsync(id, request, cancellationToken));
 
     [HttpPost("absence-cases/{id:guid}/transitions")]
-    [RequirePermission(PermissionKeys.Workflows.AbsenceCasesManage)]
+    [Microsoft.AspNetCore.Authorization.Authorize]
     public Task<IActionResult> TransitionAbsenceCase(Guid id, [FromBody] AbsenceCaseTransitionRequest request, CancellationToken cancellationToken) => ToAction(service.TransitionAbsenceCaseAsync(id, request, cancellationToken));
 
     [HttpGet("employee-status-change-requests")]
@@ -124,7 +124,7 @@ public sealed class HrWorkflowsController(IHrWorkflowService service) : Controll
     public Task<IActionResult> StatusChanges([FromQuery] Guid? employeeId, CancellationToken cancellationToken) => ToAction(service.GetStatusChangeRequestsAsync(employeeId, cancellationToken));
 
     [HttpPost("employee-status-change-requests")]
-    [RequirePermission(PermissionKeys.Workflows.EmployeeStatusChangesManage)]
+    [RequirePermission(PermissionKeys.Workflows.EmployeeStatusChangesCreate)]
     public Task<IActionResult> CreateStatusChange([FromBody] EmployeeStatusChangeCreateRequest request, CancellationToken cancellationToken) => ToAction(service.CreateStatusChangeRequestAsync(request, cancellationToken));
 
     [HttpPost("employee-status-change-requests/{id:guid}/resolve")]

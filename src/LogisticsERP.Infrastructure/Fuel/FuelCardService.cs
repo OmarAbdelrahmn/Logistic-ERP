@@ -109,7 +109,7 @@ internal sealed partial class FuelCardService(
         CreateFuelCardRequest request,
         CancellationToken cancellationToken = default)
     {
-        if (!await HasPermissionAsync(PermissionKeys.Fuel.Manage, cancellationToken))
+        if (!await HasPermissionAsync(PermissionKeys.Fuel.Create, cancellationToken))
         {
             return Result.Failure<FuelCardResponse>(FuelErrors.Forbidden);
         }
@@ -117,7 +117,8 @@ internal sealed partial class FuelCardService(
         {
             return Result.Failure<FuelCardResponse>(FuelErrors.InvalidProvider);
         }
-        if (!ValidRequiredText(request.CardNumber, 100)
+        var cardNumber = request.CardNumber is null ? null : FuelCardRules.RemoveCardNumberWhitespace(request.CardNumber);
+        if (!ValidRequiredText(cardNumber, 100)
             || !ValidOptionalText(request.PlateNumberText, 100)
             || !ValidOptionalText(request.Notes, 4000))
         {
@@ -130,10 +131,10 @@ internal sealed partial class FuelCardService(
             return Result.Failure<FuelCardResponse>(FuelErrors.OperatingCityNotFound);
 
         string normalizedCardNumber;
-        var identifierType = FuelCardRules.DetectIdentifierType(request.CardNumber);
+        var identifierType = FuelCardRules.DetectIdentifierType(cardNumber!);
         try
         {
-            normalizedCardNumber = FuelCardRules.NormalizeCardNumber(request.CardNumber, identifierType);
+            normalizedCardNumber = FuelCardRules.NormalizeCardNumber(cardNumber!, identifierType);
         }
         catch (ArgumentException)
         {
@@ -154,7 +155,7 @@ internal sealed partial class FuelCardService(
             OperatingCityId = request.OperatingCityId,
             Provider = provider,
             IdentifierType = identifierType,
-            CardNumber = request.CardNumber.Trim(),
+            CardNumber = cardNumber!,
             NormalizedCardNumber = normalizedCardNumber,
             PlateNumberText = plate,
             NormalizedPlateNumber = plate is null ? null : PlateNumberRules.CanonicalKey(plate),
@@ -171,7 +172,7 @@ internal sealed partial class FuelCardService(
     public async Task<Result<FuelCardResponse>> SetSponsorAsync(
         Guid id, SetFuelCardSponsorRequest request, CancellationToken cancellationToken = default)
     {
-        if (!await HasPermissionAsync(PermissionKeys.Fuel.Manage, cancellationToken))
+        if (!await HasPermissionAsync(PermissionKeys.Fuel.Update, cancellationToken))
             return Result.Failure<FuelCardResponse>(FuelErrors.Forbidden);
         var card = await dbContext.FuelCards.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (card is null)
@@ -191,7 +192,7 @@ internal sealed partial class FuelCardService(
     public async Task<Result<FuelCardResponse>> SetCityAsync(
         Guid id, SetFuelCardCityRequest request, CancellationToken cancellationToken = default)
     {
-        if (!await HasPermissionAsync(PermissionKeys.Fuel.Manage, cancellationToken))
+        if (!await HasPermissionAsync(PermissionKeys.Fuel.Update, cancellationToken))
             return Result.Failure<FuelCardResponse>(FuelErrors.Forbidden);
         var card = await dbContext.FuelCards.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (card is null)
@@ -231,7 +232,7 @@ internal sealed partial class FuelCardService(
         AssignFuelCardRiderRequest request,
         CancellationToken cancellationToken = default)
     {
-        if (!await HasPermissionAsync(PermissionKeys.Fuel.Manage, cancellationToken))
+        if (!await HasPermissionAsync(PermissionKeys.Fuel.Update, cancellationToken))
         {
             return Result.Failure<FuelCardAssignmentResponse>(FuelErrors.Forbidden);
         }
@@ -281,8 +282,9 @@ internal sealed partial class FuelCardService(
         var usageRidersInMonth = await dbContext.FuelCardMonthlyUsages
             .Where(x =>
             x.FuelCardId == id
-            && x.ReportMonth == month)
-            .Select(x => x.RiderProfileId)
+            && x.ReportMonth == month
+            && x.RiderProfileId != null)
+            .Select(x => x.RiderProfileId!.Value)
             .ToArrayAsync(cancellationToken);
         if (!FuelCardRules.CanUseRiderForMonth(
                 request.RiderProfileId,
@@ -324,7 +326,7 @@ internal sealed partial class FuelCardService(
         StopFuelCardRiderRequest request,
         CancellationToken cancellationToken = default)
     {
-        if (!await HasPermissionAsync(PermissionKeys.Fuel.Manage, cancellationToken))
+        if (!await HasPermissionAsync(PermissionKeys.Fuel.Delete, cancellationToken))
         {
             return Result.Failure<FuelCardAssignmentResponse>(FuelErrors.Forbidden);
         }
@@ -388,19 +390,18 @@ internal sealed partial class FuelCardService(
         page = Math.Max(1, page);
         pageSize = Math.Clamp(pageSize <= 0 ? 100 : pageSize, 1, 300);
         var cards = dbContext.FuelCards.IgnoreQueryFilters().AsNoTracking();
-        var riders = dbContext.RiderProfiles.IgnoreQueryFilters().AsNoTracking();
         var employees = dbContext.Employees.IgnoreQueryFilters().AsNoTracking();
         var query = from usage in dbContext.FuelCardMonthlyUsages.AsNoTracking()
                     join card in cards on usage.FuelCardId equals card.Id
-                    join rider in riders on usage.RiderProfileId equals rider.Id
-                    join employee in employees on usage.EmployeeId equals employee.Id
+                    join employee in employees on usage.EmployeeId equals employee.Id into employeeGroup
+                    from employee in employeeGroup.DefaultIfEmpty()
                     where usage.ReportMonth == month
                     select new
                     {
                         Usage = usage,
                         Card = card,
-                        RiderNameAr = employee.FullNameAr,
-                        RiderNameEn = employee.FullNameEn
+                        RiderNameAr = employee == null ? null : employee.FullNameAr,
+                        RiderNameEn = employee == null ? null : employee.FullNameEn
                     };
 
         if (!string.IsNullOrWhiteSpace(provider))
@@ -421,7 +422,7 @@ internal sealed partial class FuelCardService(
             query = query.Where(x =>
                 x.Card.CardNumber.Contains(term)
                 || x.Card.PlateNumberText != null && x.Card.PlateNumberText.Contains(term)
-                || x.RiderNameAr.Contains(term)
+                || x.RiderNameAr != null && x.RiderNameAr.Contains(term)
                 || x.RiderNameEn != null && x.RiderNameEn.Contains(term));
         }
 
@@ -431,7 +432,10 @@ internal sealed partial class FuelCardService(
             {
                 TotalCount = group.Count(),
                 TotalLiters = group.Sum(x => x.Usage.TotalLiters),
-                TotalAmount = group.Sum(x => x.Usage.TotalAmount)
+                TotalAmount = group.Sum(x => x.Usage.TotalAmount),
+                UnassignedCount = group.Count(x => x.Usage.RiderProfileId == null),
+                UnassignedTotalLiters = group.Sum(x => x.Usage.RiderProfileId == null ? x.Usage.TotalLiters : 0m),
+                UnassignedTotalAmount = group.Sum(x => x.Usage.RiderProfileId == null ? x.Usage.TotalAmount : 0m)
             })
             .SingleOrDefaultAsync(cancellationToken);
         var rows = await query
@@ -452,14 +456,15 @@ internal sealed partial class FuelCardService(
             pageSize,
             totals?.TotalCount ?? 0,
             totals?.TotalLiters ?? 0m,
-            totals?.TotalAmount ?? 0m));
+            totals?.TotalAmount ?? 0m,
+            totals?.UnassignedCount ?? 0,
+            totals?.UnassignedTotalLiters ?? 0m,
+            totals?.UnassignedTotalAmount ?? 0m));
     }
 
     public async Task<Result<FuelImportResponse>> ImportAsync(
         PrivateFileUpload file,
         DateOnly? expectedMonth,
-        Guid sponsorId,
-        Guid? operatingCityId = null,
         CancellationToken cancellationToken = default)
     {
         if (!await HasPermissionAsync(PermissionKeys.Fuel.Import, cancellationToken))
@@ -470,12 +475,6 @@ internal sealed partial class FuelCardService(
         {
             return Result.Failure<FuelImportResponse>(FuelErrors.CurrentUserUnavailable);
         }
-        if (!await SponsorExistsAsync(sponsorId, cancellationToken))
-            return Result.Failure<FuelImportResponse>(FuelErrors.SponsorNotFound);
-        var cityId = operatingCityId ?? OperatingCity.JeddahId;
-        if (!await OperatingCityExistsAsync(cityId, cancellationToken))
-            return Result.Failure<FuelImportResponse>(FuelErrors.OperatingCityNotFound);
-
         var extension = Path.GetExtension(file.OriginalFileName).ToLowerInvariant();
         if (file.Length <= 0 || file.Length > MaximumImportSize || extension is not ".xls" and not ".xlsx")
         {
@@ -531,24 +530,22 @@ internal sealed partial class FuelCardService(
         {
             if (!existingCards.TryGetValue(parsed.NormalizedCardNumber, out var card))
             {
-                card = new FuelCard
-                {
-                    SponsorId = sponsorId,
-                    OperatingCityId = cityId,
-                    Provider = report.Provider,
-                    IdentifierType = parsed.IdentifierType,
-                    CardNumber = parsed.CardNumber,
-                    NormalizedCardNumber = parsed.NormalizedCardNumber
-                };
-                dbContext.FuelCards.Add(card);
-                existingCards.Add(parsed.NormalizedCardNumber, card);
-                import.CreatedCards++;
+                import.InvalidRows++;
+                errors.Add(new FuelImportRowError(
+                    parsed.FirstRowNumber,
+                    parsed.CardNumber,
+                    "card_not_found",
+                    "رقم بطاقة الوقود غير مسجل؛ سجّل البطاقة أولاً ثم أعد استيراد الاستهلاك."));
+                continue;
             }
 
             ApplySourcePlate(card, parsed.PlateNumberText);
         }
 
-        var cardIds = report.Cards
+        var matchedRows = report.Cards
+            .Where(parsed => existingCards.ContainsKey(parsed.NormalizedCardNumber))
+            .ToArray();
+        var cardIds = matchedRows
             .Select(parsed => existingCards[parsed.NormalizedCardNumber].Id)
             .Distinct()
             .ToArray();
@@ -563,7 +560,7 @@ internal sealed partial class FuelCardService(
             .Where(x => cardIds.Contains(x.FuelCardId) && x.ReportMonth == report.ReportMonth)
             .ToDictionaryAsync(x => x.FuelCardId, cancellationToken);
 
-        foreach (var parsed in report.Cards)
+        foreach (var parsed in matchedRows)
         {
             var card = existingCards[parsed.NormalizedCardNumber];
             var monthlyRiders = assignmentsByCard[card.Id]
@@ -577,8 +574,7 @@ internal sealed partial class FuelCardService(
                     parsed.FirstRowNumber,
                     parsed.CardNumber,
                     "card_not_assigned",
-                    "البطاقة غير مسندة إلى رايدر في شهر التقرير؛ أُنشئت البطاقة دون سجل استهلاك شهري."));
-                continue;
+                    "البطاقة غير مسندة إلى رايدر في شهر التقرير؛ تم حفظ الاستهلاك للمراجعة."));
             }
             if (monthlyRiders.Length > 1)
             {
@@ -591,9 +587,10 @@ internal sealed partial class FuelCardService(
                 continue;
             }
 
-            var monthlyRider = monthlyRiders[0];
+            var monthlyRider = monthlyRiders.Length == 0 ? null : monthlyRiders[0];
             var isNew = !existingMonthly.TryGetValue(card.Id, out var usage);
-            if (!isNew && usage!.RiderProfileId != monthlyRider.RiderProfileId)
+            if (!isNew && monthlyRider is not null && usage!.RiderProfileId != null
+                && usage.RiderProfileId != monthlyRider.RiderProfileId)
             {
                 import.InvalidRows++;
                 errors.Add(new FuelImportRowError(
@@ -609,8 +606,8 @@ internal sealed partial class FuelCardService(
                 FuelCardId = card.Id,
                 ReportMonth = report.ReportMonth
             };
-            usage.RiderProfileId = monthlyRider.RiderProfileId;
-            usage.EmployeeId = monthlyRider.EmployeeId;
+            usage.RiderProfileId = monthlyRider?.RiderProfileId;
+            usage.EmployeeId = monthlyRider?.EmployeeId;
             usage.TotalLiters = parsed.TotalLiters;
             usage.TotalAmount = parsed.TotalAmount;
             usage.AmountBeforeTax = parsed.AmountBeforeTax;
@@ -866,6 +863,7 @@ internal sealed partial class FuelCardService(
         row.Usage.EmployeeId,
         row.RiderNameAr,
         row.RiderNameEn,
+        row.Usage.RiderProfileId == null,
         row.Usage.TotalLiters,
         row.Usage.TotalAmount,
         row.Usage.AmountBeforeTax,
@@ -1000,6 +998,6 @@ internal sealed partial class FuelCardService(
     private sealed record MonthlyProjection(
         FuelCardMonthlyUsage Usage,
         FuelCard Card,
-        string RiderNameAr,
+        string? RiderNameAr,
         string? RiderNameEn);
 }

@@ -37,7 +37,7 @@ internal sealed partial class FuelCardService
             var lastRow = sheet.LastRowUsed()?.RowNumber() ?? 1;
             for (var row = 2; row <= lastRow; row++)
             {
-                var number = sheet.Cell(row, 1).GetString().Trim();
+                var number = FuelCardRules.RemoveCardNumberWhitespace(sheet.Cell(row, 1).GetString());
                 if (number.Length == 0 && !sheet.Row(row).CellsUsed().Any()) continue;
                 string normalized;
                 try { normalized = FuelCardRules.NormalizeCardNumber(number, FuelCardIdentifierType.InternalNumber); }

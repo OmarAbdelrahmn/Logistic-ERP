@@ -11,13 +11,11 @@ namespace LogisticsERP.Fleet.UnitTests;
 
 public sealed class GranularPermissionIsolationTests
 {
-    private static readonly string[] Keys =
-    [
-        PermissionKeys.Workforce.ExternalRidersRead, PermissionKeys.Workforce.ExternalRidersCreate,
-        PermissionKeys.Workforce.ExternalRidersUpdate, PermissionKeys.Workforce.ExternalRidersDelete,
-        PermissionKeys.Maintenance.WorkOrdersRead, PermissionKeys.Maintenance.WorkOrdersCreate,
-        PermissionKeys.Maintenance.WorkOrdersUpdate, PermissionKeys.Maintenance.WorkOrdersDelete
-    ];
+    private static readonly string[] Keys = PermissionKeys.All.Where(key =>
+        key.EndsWith(".read", StringComparison.Ordinal)
+        || key.EndsWith(".create", StringComparison.Ordinal)
+        || key.EndsWith(".update", StringComparison.Ordinal)
+        || key.EndsWith(".delete", StringComparison.Ordinal)).ToArray();
 
     public static TheoryData<string, bool> Grants => new(Keys.SelectMany(key => new[] { (key, false), (key, true) }));
 
@@ -38,14 +36,14 @@ public sealed class GranularPermissionIsolationTests
         {
             var role = new ApplicationRole { Id = Guid.CreateVersion7(), Status = RoleStatus.Active, Code = "CUSTOM", Name = "Custom" };
             identity.AddRange(role, new RolePermissionGrant { RoleId = role.Id, PermissionKey = grantedKey },
-                new UserRoleAssignment { UserId = user.Id, RoleId = role.Id, StartsAtUtc = now.AddDays(-1), GrantedByUserId = user.Id });
+                new UserRoleAssignment { UserId = user.Id, RoleId = role.Id, StartsAtUtc = now.AddDays(-1), GrantedByUserId = user.Id, IsAllHousingScope = true, IsAllClientScope = true });
         }
         else
         {
             identity.UserDirectPermissionAssignments.Add(new UserDirectPermissionAssignment
             {
                 UserId = user.Id, PermissionKey = grantedKey, Effect = PermissionEffect.Grant,
-                StartsAtUtc = now.AddDays(-1), GrantedByUserId = user.Id
+                StartsAtUtc = now.AddDays(-1), GrantedByUserId = user.Id, IsAllHousingScope = true, IsAllClientScope = true
             });
         }
         await identity.SaveChangesAsync(ct);
@@ -54,6 +52,8 @@ public sealed class GranularPermissionIsolationTests
 
         foreach (var key in Keys)
             Assert.Equal(key == grantedKey, await checker.HasPermissionAsync(user.Id, 1, key, cancellationToken: ct));
+        Assert.DoesNotContain(PermissionKeys.All, key => key.EndsWith(".manage", StringComparison.Ordinal));
+        Assert.False(await checker.HasPermissionAsync(user.Id, 1, "fuel.manage", cancellationToken: ct));
         Assert.False(await checker.HasPermissionAsync(user.Id, 1, "external_riders.manage", cancellationToken: ct));
         Assert.False(await checker.HasPermissionAsync(user.Id, 1, "maintenance.work_orders.manage", cancellationToken: ct));
         if (throughRole)
@@ -61,7 +61,7 @@ public sealed class GranularPermissionIsolationTests
             identity.UserDirectPermissionAssignments.Add(new UserDirectPermissionAssignment
             {
                 UserId = user.Id, PermissionKey = grantedKey, Effect = PermissionEffect.Deny,
-                StartsAtUtc = now.AddDays(-1), GrantedByUserId = user.Id
+                StartsAtUtc = now.AddDays(-1), GrantedByUserId = user.Id, IsAllHousingScope = true, IsAllClientScope = true
             });
         }
         else

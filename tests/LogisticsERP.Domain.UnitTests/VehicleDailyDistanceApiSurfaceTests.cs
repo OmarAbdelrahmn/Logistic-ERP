@@ -18,7 +18,6 @@ public sealed class VehicleDailyDistanceApiSurfaceTests
     public static TheoryData<string, Type, string?, string> Endpoints => new()
     {
         { nameof(VehicleDailyDistancesController.GetDaily), typeof(HttpGetAttribute), null, PermissionKeys.Fleet.DailyDistancesRead },
-        { nameof(VehicleDailyDistancesController.UpsertManual), typeof(HttpPutAttribute), "{vehicleId:guid}/{workDate}", PermissionKeys.Fleet.DailyDistancesManage },
         { nameof(VehicleDailyDistancesController.ImportGps), typeof(HttpPostAttribute), "gps-import", PermissionKeys.Fleet.DailyDistancesImport },
         { nameof(VehicleDailyDistancesController.GetImports), typeof(HttpGetAttribute), "gps-imports", PermissionKeys.Fleet.DailyDistancesRead }
     };
@@ -47,7 +46,7 @@ public sealed class VehicleDailyDistanceApiSurfaceTests
     public void PermissionsAndContractsExposeGpsAndManualWorkflow()
     {
         Assert.Contains(PermissionKeys.Fleet.DailyDistancesRead, (IEnumerable<string>)PermissionKeys.All);
-        Assert.Contains(PermissionKeys.Fleet.DailyDistancesManage, (IEnumerable<string>)PermissionKeys.All);
+        Assert.Contains(PermissionKeys.Fleet.DailyDistancesCreate, (IEnumerable<string>)PermissionKeys.All);
         Assert.Contains(PermissionKeys.Fleet.DailyDistancesImport, (IEnumerable<string>)PermissionKeys.All);
         Assert.NotNull(typeof(VehicleDailyDistanceResponse).GetProperty(nameof(VehicleDailyDistanceResponse.GpsDistanceKm)));
         Assert.NotNull(typeof(VehicleDailyDistanceResponse).GetProperty(nameof(VehicleDailyDistanceResponse.ManualOdometerReading)));

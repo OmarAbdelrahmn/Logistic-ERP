@@ -150,7 +150,7 @@ internal sealed partial class JahezService
         }, ct);
 
     public Task<Result<JahezEarningsStatement>> RecordEarningsAsync(string key, JahezEarningsRequest request, CancellationToken ct = default) =>
-        ExecuteAsync(key, "earnings", request, PermissionKeys.Jahez.EarningsManage, async () =>
+        ExecuteAsync(key, "earnings", request, PermissionKeys.Jahez.EarningsCreate, async () =>
         {
             Reason(request.Reason);
             var h = await Handover(request.HandoverId, ct);
@@ -184,7 +184,7 @@ internal sealed partial class JahezService
         }, ct);
 
     public Task<Result<JahezRiderSettlement>> PayAsync(string key, JahezPaymentRequest request, CancellationToken ct = default) =>
-        ExecuteAsync(key, "payment", request, PermissionKeys.Jahez.CollectionsManage, async () =>
+        ExecuteAsync(key, "payment", request, PermissionKeys.Jahez.CollectionsCreate, async () =>
         {
             Reason(request.Reason);
             decimal[] amounts = [request.FeePayment, request.DebtPayment, request.CommissionPayment];
@@ -228,7 +228,7 @@ internal sealed partial class JahezService
     }
 
     public Task<Result<JahezLedgerEntry>> AdjustAsync(string key, JahezLedgerAdjustmentRequest request, CancellationToken ct = default) =>
-        ExecuteAsync(key, "adjustment", request, PermissionKeys.Jahez.AdjustmentsManage, async () =>
+        ExecuteAsync(key, "adjustment", request, PermissionKeys.Jahez.AdjustmentsCreate, async () =>
         {
             Reason(request.Reason);
             Require(Enum.IsDefined(request.Bucket) && request.Amount != 0 && Math.Abs(request.Amount) <= 1_000_000_000m

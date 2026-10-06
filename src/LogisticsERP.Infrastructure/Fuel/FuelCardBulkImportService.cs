@@ -14,13 +14,10 @@ namespace LogisticsERP.Infrastructure.Fuel;
 internal sealed class FuelCardBulkImportService(ApplicationDbContext dbContext) : IFuelCardBulkImportService
 {
     public async Task<Result<FuelCardBulkImportResponse>> ImportAsync(
-        Stream content, bool validateOnly, Guid? operatingCityId = null, CancellationToken cancellationToken = default)
+        Stream content, bool validateOnly, CancellationToken cancellationToken = default)
     {
         if (content is null || !content.CanRead)
             return Result.Failure<FuelCardBulkImportResponse>(FuelErrors.InvalidFile);
-        var cityId = operatingCityId ?? OperatingCity.JeddahId;
-        if (cityId == Guid.Empty || !await dbContext.OperatingCities.AsNoTracking().AnyAsync(x => x.Id == cityId, cancellationToken))
-            return Result.Failure<FuelCardBulkImportResponse>(FuelErrors.OperatingCityNotFound);
 
         List<ParsedRow> rows;
         try
@@ -36,6 +33,12 @@ internal sealed class FuelCardBulkImportService(ApplicationDbContext dbContext) 
         var sponsorsBy70 = sponsors
             .GroupBy(sponsor => Normalize70Number(sponsor.EmployerIdentityNumber), StringComparer.Ordinal)
             .ToDictionary(group => group.Key, group => group.First(), StringComparer.Ordinal);
+        var cities = await (from operating in dbContext.OperatingCities.AsNoTracking()
+                            join global in dbContext.GlobalCities.AsNoTracking()
+                                on operating.GlobalCityId equals global.Id
+                            where operating.Status == CatalogStatus.Active && global.Status == CatalogStatus.Active
+                            select new { operating.Id, global.NameAr, global.NameEn })
+            .ToArrayAsync(cancellationToken);
         var cardNumbers = rows.Select(row => row.NormalizedCardNumber)
             .Where(number => number.Length > 0).Distinct(StringComparer.Ordinal).ToArray();
         var existing = await dbContext.FuelCards.AsNoTracking()
@@ -75,6 +78,16 @@ internal sealed class FuelCardBulkImportService(ApplicationDbContext dbContext) 
                 issues.Add(new(row.RowNumber, row.CardNumber, "رقم البطاقة مكرر لدى شركة الوقود نفسها في الملف."));
                 continue;
             }
+            var cityName = NormalizeHeader(row.CityName);
+            var city = cityName.Length == 0
+                ? cities.FirstOrDefault(item => item.Id == OperatingCity.JeddahId)
+                : cities.FirstOrDefault(item =>
+                    NormalizeHeader(item.NameAr) == cityName || NormalizeHeader(item.NameEn) == cityName);
+            if (city is null)
+            {
+                issues.Add(new(row.RowNumber, row.CardNumber, $"مدينة التشغيل '{row.CityName}' غير موجودة أو غير مفعلة."));
+                continue;
+            }
 
             var isExisting = existingByKey.TryGetValue((provider, row.NormalizedCardNumber), out var existingCard);
             if (isExisting && existingCard!.SponsorId != sponsor.Id)
@@ -84,7 +97,7 @@ internal sealed class FuelCardBulkImportService(ApplicationDbContext dbContext) 
             }
             previews.Add(new(row.RowNumber, row.CardNumber, sponsor70, sponsor.Id,
                 sponsor.RegistryNameAr, row.CompanyName, provider.ToString(), !isExisting,
-                isExisting ? existingCard!.OperatingCityId : cityId));
+                isExisting ? existingCard!.OperatingCityId : city.Id));
             if (isExisting)
             {
                 existingCount++;
@@ -93,7 +106,7 @@ internal sealed class FuelCardBulkImportService(ApplicationDbContext dbContext) 
             newCards.Add(new FuelCard
             {
                 SponsorId = sponsor.Id,
-                OperatingCityId = cityId,
+                OperatingCityId = city.Id,
                 Provider = provider,
                 IdentifierType = FuelCardIdentifierType.InternalNumber,
                 CardNumber = row.CardNumber,
@@ -126,25 +139,27 @@ internal sealed class FuelCardBulkImportService(ApplicationDbContext dbContext) 
             ?? throw new InvalidDataException("The workbook has no worksheet.");
         var headers = sheet.Row(1).CellsUsed()
             .ToDictionary(cell => NormalizeHeader(cell.GetString()), cell => cell.Address.ColumnNumber);
-        if (headers.Count != 3 || !headers.TryGetValue("number", out var numberColumn))
+        if (headers.Count is not (3 or 4) || !headers.TryGetValue("number", out var numberColumn))
             throw new InvalidDataException("The workbook headers are invalid.");
         var sponsorColumn = headers.FirstOrDefault(pair => pair.Key is
             "sponsor70number" or "70number" or "رقمالكفيل70" or "رقم70").Value;
         var companyColumn = headers.FirstOrDefault(pair => pair.Key is "companyname" or "اسمالشركة").Value;
-        if (sponsorColumn == 0 || companyColumn == 0)
+        var cityColumn = headers.FirstOrDefault(pair => pair.Key is "cityname" or "اسمالمدينة" or "مدينةالتشغيل").Value;
+        if (sponsorColumn == 0 || companyColumn == 0 || (headers.Count == 4 && cityColumn == 0))
             throw new InvalidDataException("The workbook headers are invalid.");
 
         var rows = new List<ParsedRow>();
         for (var rowNumber = 2; rowNumber <= (sheet.LastRowUsed()?.RowNumber() ?? 1); rowNumber++)
         {
             if (!sheet.Row(rowNumber).CellsUsed().Any()) continue;
-            var cardNumber = sheet.Cell(rowNumber, numberColumn).GetString().Trim();
+            var cardNumber = FuelCardRules.RemoveCardNumberWhitespace(sheet.Cell(rowNumber, numberColumn).GetString());
             string normalized;
             try { normalized = FuelCardRules.NormalizeCardNumber(cardNumber, FuelCardIdentifierType.InternalNumber); }
             catch (ArgumentException) { normalized = ""; }
             rows.Add(new ParsedRow(rowNumber, cardNumber, normalized,
                 sheet.Cell(rowNumber, sponsorColumn).GetString().Trim(),
-                sheet.Cell(rowNumber, companyColumn).GetString().Trim()));
+                sheet.Cell(rowNumber, companyColumn).GetString().Trim(),
+                cityColumn == 0 ? "" : sheet.Cell(rowNumber, cityColumn).GetString().Trim()));
         }
         return rows;
     }
@@ -172,5 +187,5 @@ internal sealed class FuelCardBulkImportService(ApplicationDbContext dbContext) 
     }
 
     private sealed record ParsedRow(int RowNumber, string CardNumber, string NormalizedCardNumber,
-        string Sponsor70Number, string CompanyName);
+        string Sponsor70Number, string CompanyName, string CityName);
 }

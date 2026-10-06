@@ -19,7 +19,7 @@ public sealed class RoomsController(IHousingService service) : ControllerBase
     }
 
     [HttpPut("{id:guid}")]
-    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    [RequirePermission(PermissionKeys.Operations.HousingUpdate)]
     public async Task<IActionResult> Update(
         Guid id,
         [FromBody] HousingRoomUpsertRequest request,
@@ -30,7 +30,7 @@ public sealed class RoomsController(IHousingService service) : ControllerBase
     }
 
     [HttpDelete("{id:guid}")]
-    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    [RequirePermission(PermissionKeys.Operations.HousingDelete)]
     public async Task<IActionResult> Archive(
         Guid id,
         [FromBody] ArchiveHousingRoomRequest request,
@@ -41,7 +41,7 @@ public sealed class RoomsController(IHousingService service) : ControllerBase
     }
 
     [HttpPost("{id:guid}/occupants/employees")]
-    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    [RequirePermission(PermissionKeys.Operations.HousingCreate)]
     public async Task<IActionResult> AssignEmployee(
         Guid id,
         [FromBody] AssignRoomEmployeeRequest request,
@@ -52,7 +52,7 @@ public sealed class RoomsController(IHousingService service) : ControllerBase
     }
 
     [HttpPost("{id:guid}/occupants/riders")]
-    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    [RequirePermission(PermissionKeys.Operations.HousingCreate)]
     public async Task<IActionResult> AssignRider(
         Guid id,
         [FromBody] AssignRoomRiderRequest request,
@@ -63,7 +63,7 @@ public sealed class RoomsController(IHousingService service) : ControllerBase
     }
 
     [HttpPost("{id:guid}/occupants/iqama")]
-    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    [RequirePermission(PermissionKeys.Operations.HousingCreate)]
     public async Task<IActionResult> AssignByIqama(Guid id, [FromBody] AssignRoomByIqamaRequest request, CancellationToken cancellationToken)
     {
         var result = await service.AssignByIqamaToRoomAsync(id, request, cancellationToken);
@@ -71,7 +71,7 @@ public sealed class RoomsController(IHousingService service) : ControllerBase
     }
 
     [HttpPost("{id:guid}/equipment")]
-    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    [RequirePermission(PermissionKeys.Operations.HousingCreate)]
     public async Task<IActionResult> CreateEquipment(Guid id, [FromBody] HousingEquipmentUpsertRequest request, CancellationToken cancellationToken)
     {
         var result = await service.UpsertEquipmentAsync(null, id, null, request, cancellationToken);
@@ -79,7 +79,7 @@ public sealed class RoomsController(IHousingService service) : ControllerBase
     }
 
     [HttpPut("{id:guid}/equipment/{equipmentId:guid}")]
-    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    [RequirePermission(PermissionKeys.Operations.HousingUpdate)]
     public async Task<IActionResult> UpdateEquipment(Guid id, Guid equipmentId, [FromBody] HousingEquipmentUpsertRequest request, CancellationToken cancellationToken)
     {
         var result = await service.UpsertEquipmentAsync(null, id, equipmentId, request, cancellationToken);
@@ -87,7 +87,7 @@ public sealed class RoomsController(IHousingService service) : ControllerBase
     }
 
     [HttpPost("{id:guid}/occupants/external")]
-    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    [RequirePermission(PermissionKeys.Operations.HousingCreate)]
     public async Task<IActionResult> CreateExternalOccupant(Guid id, [FromBody] HousingExternalOccupantUpsertRequest request, CancellationToken cancellationToken)
     {
         var result = await service.UpsertExternalOccupantAsync(null, id, request, cancellationToken);
@@ -95,7 +95,7 @@ public sealed class RoomsController(IHousingService service) : ControllerBase
     }
 
     [HttpPut("occupants/external/{occupantId:guid}")]
-    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    [RequirePermission(PermissionKeys.Operations.HousingUpdate)]
     public async Task<IActionResult> UpdateExternalOccupant(Guid occupantId, [FromBody] HousingExternalOccupantUpsertRequest request, CancellationToken cancellationToken)
     {
         if (request.RoomId is not { } roomId) return BadRequest("roomId is required.");
@@ -104,7 +104,7 @@ public sealed class RoomsController(IHousingService service) : ControllerBase
     }
 
     [HttpDelete("occupants/external/{occupantId:guid}")]
-    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    [RequirePermission(PermissionKeys.Operations.HousingDelete)]
     public async Task<IActionResult> DeleteExternalOccupant(Guid occupantId, CancellationToken cancellationToken)
     {
         var result = await service.DeleteExternalOccupantAsync(occupantId, cancellationToken);
@@ -112,7 +112,7 @@ public sealed class RoomsController(IHousingService service) : ControllerBase
     }
 
     [HttpPost("occupants/pending/{pendingId:guid}/resolve")]
-    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    [RequirePermission(PermissionKeys.Operations.HousingUpdate)]
     public async Task<IActionResult> ResolvePendingOccupant(Guid pendingId, [FromBody] ResolvePendingOccupantRequest request, CancellationToken cancellationToken)
     {
         var result = await service.ResolvePendingOccupantAsync(pendingId, request.EffectiveFrom, cancellationToken);
@@ -120,7 +120,7 @@ public sealed class RoomsController(IHousingService service) : ControllerBase
     }
 
     [HttpDelete("occupants/pending/{pendingId:guid}")]
-    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    [RequirePermission(PermissionKeys.Operations.HousingDelete)]
     public async Task<IActionResult> DeletePendingOccupant(Guid pendingId, CancellationToken cancellationToken)
     {
         var result = await service.DeletePendingOccupantAsync(pendingId, cancellationToken);
@@ -128,7 +128,7 @@ public sealed class RoomsController(IHousingService service) : ControllerBase
     }
 
     [HttpPost("occupants/{occupancyPeriodId:guid}/move")]
-    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    [RequirePermission(PermissionKeys.Operations.HousingUpdate)]
     public async Task<IActionResult> MoveOccupant(
         Guid occupancyPeriodId,
         [FromBody] MoveRoomOccupantRequest request,
@@ -139,7 +139,7 @@ public sealed class RoomsController(IHousingService service) : ControllerBase
     }
 
     [HttpPost("occupants/{occupancyPeriodId:guid}/remove")]
-    [RequirePermission(PermissionKeys.Operations.HousingManage)]
+    [RequirePermission(PermissionKeys.Operations.HousingDelete)]
     public async Task<IActionResult> RemoveOccupant(
         Guid occupancyPeriodId,
         [FromBody] RemoveRoomOccupantRequest request,

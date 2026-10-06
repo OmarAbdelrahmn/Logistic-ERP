@@ -100,9 +100,9 @@ internal sealed class NotificationService(
         return Result.Success(effective.Order(StringComparer.Ordinal).ToArray());
     }
 
-    private IQueryable<Notification> VisibleQuery(IReadOnlyList<string> effectivePermissions, bool includePersonal)
+    private IQueryable<Notification> VisibleQuery(IReadOnlyList<string> effectivePermissions, bool includePersonal, DateTimeOffset? atUtc = null)
     {
-        var now = timeProvider.GetUtcNow();
+        var now = atUtc ?? timeProvider.GetUtcNow();
         var userId = currentUser.UserId!.Value;
         return NotificationPermissionFilter.Apply(dbContext.Notifications.AsNoTracking().Where(item => item.RecipientUserId == userId
             && item.VisibleAtUtc <= now && (item.ExpiresAtUtc == null || item.ExpiresAtUtc > now) && item.ArchivedAtUtc == null), effectivePermissions, includePersonal);
@@ -144,6 +144,49 @@ internal sealed class NotificationService(
         try { await dbContext.SaveChangesAsync(cancellationToken); }
         catch (DbUpdateException) { return Result.Failure<NotificationResponse>(SystemErrors.Conflict); }
         return Result.Success(ToResponse(item));
+    }
+
+    public async Task<Result<NotificationReadAllResponse>> ReadAllAsync(
+        NotificationReadAllRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var effective = await ResolvePermissionsAsync(request.Permissions, cancellationToken);
+        if (effective.IsFailure) return Result.Failure<NotificationReadAllResponse>(effective.Error);
+        var now = timeProvider.GetUtcNow();
+        try
+        {
+            return await dbContext.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
+            {
+                dbContext.ChangeTracker.Clear();
+                await using var transaction = dbContext.Database.IsRelational()
+                    ? await dbContext.Database.BeginTransactionAsync(cancellationToken) : null;
+                var query = VisibleQuery(effective.Value!, request.Permissions is null, now)
+                    .AsTracking().Where(item => item.ReadAtUtc == null);
+                var markedCount = 0;
+                while (true)
+                {
+                    // Keep each tracked batch bounded while retaining per-notification audit and rowversion updates.
+                    var batch = await query.OrderBy(item => item.Id).Take(200).ToArrayAsync(cancellationToken);
+                    if (batch.Length == 0) break;
+                    foreach (var item in batch) item.ReadAtUtc = now;
+                    await dbContext.SaveChangesAsync(cancellationToken);
+                    markedCount += batch.Length;
+                    dbContext.ChangeTracker.Clear();
+                }
+                if (transaction is not null) await transaction.CommitAsync(cancellationToken);
+                return Result.Success(new NotificationReadAllResponse(markedCount, now, effective.Value!));
+            });
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            dbContext.ChangeTracker.Clear();
+            return Result.Failure<NotificationReadAllResponse>(SystemErrors.ConcurrencyConflict);
+        }
+        catch
+        {
+            dbContext.ChangeTracker.Clear();
+            throw;
+        }
     }
 
     public async Task<Result<NotificationResponse>> ChangeStateAsync(

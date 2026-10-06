@@ -53,11 +53,27 @@ public interface IFuelCardService
         int pageSize,
         CancellationToken cancellationToken = default);
 
+    Task<Result<FuelCardPeriodUsagePageResponse>> GetPeriodUsageAsync(
+        DateOnly startDate,
+        DateOnly endDate,
+        string? provider,
+        string? search,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default);
+
+    Task<Result<FuelUnassignedUsagePageResponse>> GetUnassignedUsageAsync(
+        DateOnly startDate,
+        DateOnly endDate,
+        string? provider,
+        string? search,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default);
+
     Task<Result<FuelImportResponse>> ImportAsync(
         PrivateFileUpload file,
         DateOnly? expectedMonth,
-        Guid sponsorId,
-        Guid? operatingCityId = null,
         CancellationToken cancellationToken = default);
 
     Task<Result<FuelCardNumberImportResponse>> ImportCardNumbersAsync(

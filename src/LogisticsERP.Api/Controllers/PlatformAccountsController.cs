@@ -21,7 +21,6 @@ public sealed class PlatformAccountsController(ISimplePlatformService service) :
         [FromQuery] Guid? actualRiderProfileId,
         [FromQuery] string? status,
         [FromQuery] string? paymentModel,
-        [FromQuery] Guid? dashboardSponsorId,
         [FromQuery] bool currentOnly = false,
         [FromQuery] bool includeArchived = false,
         CancellationToken cancellationToken = default) =>
@@ -36,7 +35,6 @@ public sealed class PlatformAccountsController(ISimplePlatformService service) :
             paymentModel,
             currentOnly,
             includeArchived,
-            dashboardSponsorId,
             cancellationToken));
 
     [HttpGet("{id:guid}")]
@@ -45,14 +43,14 @@ public sealed class PlatformAccountsController(ISimplePlatformService service) :
         ToAction(service.GetAccountAsync(id, cancellationToken));
 
     [HttpPost]
-    [RequirePermission(PermissionKeys.Operations.PlatformAccountsManage)]
+    [RequirePermission(PermissionKeys.Operations.PlatformAccountsCreate)]
     public Task<IActionResult> Create(
         [FromBody] SimplePlatformAccountUpsertRequest request,
         CancellationToken cancellationToken) =>
         ToAction(service.CreateAccountAsync(request, cancellationToken));
 
     [HttpPut("{id:guid}")]
-    [RequirePermission(PermissionKeys.Operations.PlatformAccountsManage)]
+    [RequirePermission(PermissionKeys.Operations.PlatformAccountsUpdate)]
     public Task<IActionResult> Update(
         Guid id,
         [FromBody] SimplePlatformAccountUpsertRequest request,
@@ -60,7 +58,7 @@ public sealed class PlatformAccountsController(ISimplePlatformService service) :
         ToAction(service.UpdateAccountAsync(id, request, cancellationToken));
 
     [HttpPost("{id:guid}/assign")]
-    [RequirePermission(PermissionKeys.Operations.PlatformAssignmentsManage)]
+    [RequirePermission(PermissionKeys.Operations.PlatformAssignmentsCreate)]
     public Task<IActionResult> Assign(
         Guid id,
         [FromBody] AssignSimplePlatformAccountRequest request,
@@ -68,7 +66,7 @@ public sealed class PlatformAccountsController(ISimplePlatformService service) :
         ToAction(service.AssignAccountAsync(id, request, cancellationToken));
 
     [HttpPost("{id:guid}/release")]
-    [RequirePermission(PermissionKeys.Operations.PlatformAssignmentsManage)]
+    [RequirePermission(PermissionKeys.Operations.PlatformAssignmentsDelete)]
     public Task<IActionResult> Release(
         Guid id,
         [FromBody] ReleaseSimplePlatformAccountRequest request,

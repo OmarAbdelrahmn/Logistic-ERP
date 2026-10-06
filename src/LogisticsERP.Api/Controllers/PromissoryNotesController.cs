@@ -19,15 +19,15 @@ public sealed class PromissoryNotesController(IComplianceService service) : Cont
     }
 
     [HttpPost("employee/{employeeId:guid}")]
-    [RequirePermission(PermissionKeys.Compliance.PromissoryNotesManage)]
+    [RequirePermission(PermissionKeys.Compliance.PromissoryNotesCreate)]
     public Task<IActionResult> Create(Guid employeeId, [FromBody] PromissoryNoteUpsertRequest request, CancellationToken cancellationToken) => Upsert(employeeId, null, request, cancellationToken);
 
     [HttpPut("employee/{employeeId:guid}/{id:guid}")]
-    [RequirePermission(PermissionKeys.Compliance.PromissoryNotesManage)]
+    [RequirePermission(PermissionKeys.Compliance.PromissoryNotesUpdate)]
     public Task<IActionResult> Update(Guid employeeId, Guid id, [FromBody] PromissoryNoteUpsertRequest request, CancellationToken cancellationToken) => Upsert(employeeId, id, request, cancellationToken);
 
     [HttpPatch("{id:guid}/archive")]
-    [RequirePermission(PermissionKeys.Compliance.PromissoryNotesManage)]
+    [RequirePermission(PermissionKeys.Compliance.PromissoryNotesDelete)]
     public async Task<IActionResult> Archive(Guid id, [FromBody] ArchiveRequest request, CancellationToken cancellationToken)
     {
         var result = await service.ArchiveAsync("promissory-note", id, request, cancellationToken);
