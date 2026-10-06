@@ -83,6 +83,11 @@ public sealed class HrWorkflowsController(IHrWorkflowService service) : Controll
     public Task<IActionResult> RequestDateChange(Guid id, [FromBody] LeaveDateChangeCreateRequest request, CancellationToken cancellationToken) =>
         ToAction(service.RequestLeaveDateChangeAsync(id, request, cancellationToken));
 
+    [HttpPost("leave-requests/{id:guid}/extension-requests")]
+    [RequirePermission(PermissionKeys.Workflows.LeaveRequestsUpdate)]
+    public Task<IActionResult> RequestExtension(Guid id, [FromBody] LeaveExtensionCreateRequest request, CancellationToken cancellationToken) =>
+        ToAction(service.RequestLeaveExtensionAsync(id, request, cancellationToken));
+
     [HttpPost("leave-requests/{id:guid}/date-change-requests/{changeId:guid}/resolve")]
     [RequirePermission(PermissionKeys.Workflows.LeaveRequestsApprove)]
     public Task<IActionResult> ResolveDateChange(Guid id, Guid changeId, [FromBody] LeaveChangeResolveRequest request, CancellationToken cancellationToken) =>

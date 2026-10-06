@@ -38,6 +38,7 @@ public sealed record LeaveRequestResponse(Guid Id, string RequestNumber, Guid Em
     string RowVersion);
 
 public sealed record LeaveDateChangeCreateRequest(DateOnly RequestedStartDate, DateOnly RequestedEndDate, string Reason);
+public sealed record LeaveExtensionCreateRequest(DateOnly NewEndDate, string Reason, string RowVersion);
 public sealed record LeaveChangeResolveRequest(bool Approve, string ResolutionReason, string RowVersion);
 public sealed record LeaveDateChangeResponse(
     Guid Id,
@@ -99,6 +100,7 @@ public interface IHrWorkflowService
     Task<Result<LeaveRequestResponse>> TransitionLeaveAsync(Guid id, LeaveTransitionRequest request, CancellationToken cancellationToken = default);
     Task<Result<IReadOnlyList<LeaveDateChangeResponse>>> GetLeaveDateChangesAsync(Guid leaveRequestId, CancellationToken cancellationToken = default);
     Task<Result<LeaveDateChangeResponse>> RequestLeaveDateChangeAsync(Guid leaveRequestId, LeaveDateChangeCreateRequest request, CancellationToken cancellationToken = default);
+    Task<Result<LeaveDateChangeResponse>> RequestLeaveExtensionAsync(Guid leaveRequestId, LeaveExtensionCreateRequest request, CancellationToken cancellationToken = default);
     Task<Result<LeaveDateChangeResponse>> ResolveLeaveDateChangeAsync(Guid leaveRequestId, Guid changeId, LeaveChangeResolveRequest request, CancellationToken cancellationToken = default);
     Task<Result<IReadOnlyList<LeaveCancellationResponse>>> GetLeaveCancellationsAsync(Guid leaveRequestId, CancellationToken cancellationToken = default);
     Task<Result<LeaveCancellationResponse>> RequestLeaveCancellationAsync(Guid leaveRequestId, LeaveCancellationCreateRequest request, CancellationToken cancellationToken = default);

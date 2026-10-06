@@ -271,16 +271,47 @@ internal sealed class HrWorkflowService(
         LeaveDateChangeCreateRequest request,
         CancellationToken cancellationToken = default)
     {
+        var leave = await dbContext.LeaveRequests.SingleOrDefaultAsync(item => item.Id == leaveRequestId, cancellationToken);
+        if (leave is null) return Result.Failure<LeaveDateChangeResponse>(HrErrors.NotFound);
+        return await CreateLeaveDateChangeAsync(leave, request, cancellationToken);
+    }
+
+    public async Task<Result<LeaveDateChangeResponse>> RequestLeaveExtensionAsync(
+        Guid leaveRequestId,
+        LeaveExtensionCreateRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var leave = await dbContext.LeaveRequests.SingleOrDefaultAsync(item => item.Id == leaveRequestId, cancellationToken);
+        if (leave is null) return Result.Failure<LeaveDateChangeResponse>(HrErrors.NotFound);
+        if (!HrServiceSupport.MatchesRowVersion(leave.RowVersion, request.RowVersion))
+            return Result.Failure<LeaveDateChangeResponse>(HrErrors.ConcurrencyConflict);
+        if (leave.Status != LeaveWorkflowStatus.Active)
+            return Result.Failure<LeaveDateChangeResponse>(HrErrors.Conflict);
+        if (request.NewEndDate <= leave.EndDate)
+            return Result.Failure<LeaveDateChangeResponse>(HrErrors.InvalidRequest);
+        return await CreateLeaveDateChangeAsync(leave,
+            new LeaveDateChangeCreateRequest(leave.StartDate, request.NewEndDate, request.Reason), cancellationToken);
+    }
+
+    private async Task<Result<LeaveDateChangeResponse>> CreateLeaveDateChangeAsync(
+        LeaveRequest leave,
+        LeaveDateChangeCreateRequest request,
+        CancellationToken cancellationToken)
+    {
         if (currentUser.UserId is not { } userId
             || request.RequestedEndDate < request.RequestedStartDate
             || string.IsNullOrWhiteSpace(request.Reason))
             return Result.Failure<LeaveDateChangeResponse>(HrErrors.InvalidRequest);
-        var leave = await dbContext.LeaveRequests.SingleOrDefaultAsync(item => item.Id == leaveRequestId, cancellationToken);
-        if (leave is null) return Result.Failure<LeaveDateChangeResponse>(HrErrors.NotFound);
         if (leave.Status is not (LeaveWorkflowStatus.Approved or LeaveWorkflowStatus.Active))
             return Result.Failure<LeaveDateChangeResponse>(HrErrors.Conflict);
+        var maximumDays = await dbContext.LeaveTypes.AsNoTracking()
+            .Where(item => item.Id == leave.LeaveTypeId)
+            .Select(item => item.MaximumCalendarDays)
+            .SingleOrDefaultAsync(cancellationToken);
+        if (maximumDays is not null && request.RequestedEndDate.DayNumber - request.RequestedStartDate.DayNumber + 1 > maximumDays)
+            return Result.Failure<LeaveDateChangeResponse>(HrErrors.InvalidRequest);
         if (await dbContext.LeaveDateChangeRequests.AnyAsync(
-            item => item.LeaveRequestId == leaveRequestId && item.Status == LeaveChangeRequestStatus.Pending,
+            item => item.LeaveRequestId == leave.Id && item.Status == LeaveChangeRequestStatus.Pending,
             cancellationToken))
             return Result.Failure<LeaveDateChangeResponse>(HrErrors.Conflict);
         var overlap = await dbContext.LeaveRequests.AnyAsync(item => item.Id != leave.Id
@@ -325,6 +356,15 @@ internal sealed class HrWorkflowService(
         var leave = await dbContext.LeaveRequests.SingleAsync(item => item.Id == leaveRequestId, cancellationToken);
         if (request.Approve)
         {
+            if (leave.Status is not (LeaveWorkflowStatus.Approved or LeaveWorkflowStatus.Active)
+                || leave.StartDate != change.PreviousStartDate || leave.EndDate != change.PreviousEndDate)
+                return Result.Failure<LeaveDateChangeResponse>(HrErrors.Conflict);
+            var maximumDays = await dbContext.LeaveTypes.AsNoTracking()
+                .Where(item => item.Id == leave.LeaveTypeId)
+                .Select(item => item.MaximumCalendarDays)
+                .SingleOrDefaultAsync(cancellationToken);
+            if (maximumDays is not null && change.RequestedEndDate.DayNumber - change.RequestedStartDate.DayNumber + 1 > maximumDays)
+                return Result.Failure<LeaveDateChangeResponse>(HrErrors.InvalidRequest);
             var overlap = await dbContext.LeaveRequests.AnyAsync(item => item.Id != leave.Id
                 && item.EmployeeId == leave.EmployeeId
                 && item.Status != LeaveWorkflowStatus.Cancelled && item.Status != LeaveWorkflowStatus.Rejected
@@ -334,7 +374,7 @@ internal sealed class HrWorkflowService(
             leave.StartDate = change.RequestedStartDate;
             leave.EndDate = change.RequestedEndDate;
             leave.CalendarDays = change.RequestedEndDate.DayNumber - change.RequestedStartDate.DayNumber + 1;
-            if (leave.ExpectedReturnDate < leave.EndDate)
+            if (leave.ExpectedReturnDate <= leave.EndDate)
                 leave.ExpectedReturnDate = leave.EndDate.AddDays(1);
             change.Status = LeaveChangeRequestStatus.Approved;
         }

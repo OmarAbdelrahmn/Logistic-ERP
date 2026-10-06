@@ -384,6 +384,28 @@ Permission: `leave_requests.manage`.
 
 Allowed only while leave status is `Approved` or `Active`. Only one pending date-change request is allowed. The requested dates cannot overlap another eligible leave record for the employee.
 
+### Extend an active vacation
+
+Show an **Extend vacation** action for a leave request with status `Active`. Ask for a new end date and reason, then send:
+
+```http
+POST /api/hr-workflows/leave-requests/{leaveRequestId}/extension-requests
+```
+
+Permission: `leave_requests.update`.
+
+```json
+{
+  "newEndDate": "2026-10-20",
+  "reason": "Additional time needed",
+  "rowVersion": "current leave request rowVersion"
+}
+```
+
+`newEndDate` must be later than the current end date. The original start date stays the same. The total duration must fit the leave type's `maximumCalendarDays`, and the extension cannot overlap another leave. The endpoint returns a pending `LeaveDateChangeResponse`; it does not change the vacation dates immediately. Only one date-change or extension request may be pending for a vacation.
+
+Display extension requests in the existing date-change history. Resolve them using the date-change resolution endpoint below. On approval, the leave end date, calendar days, and expected return date are updated. A changed or completed vacation cannot receive approval for an older extension request. Refresh the leave request and date-change list after submitting or resolving an extension.
+
 ### Resolve date change
 
 ```http
@@ -615,4 +637,3 @@ All errors use `ProblemDetails` and include `errorCode` and `correlationId`.
 2. Refetch date-change/cancellation lists after creating or resolving their respective requests.
 3. Refetch document list after upload, new-version upload, metadata update, or archive.
 4. Send the latest `rowVersion` for updates and resolution operations; on `409`, refetch the resource before retrying.
-
