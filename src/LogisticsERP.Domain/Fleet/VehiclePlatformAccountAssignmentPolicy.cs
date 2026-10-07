@@ -29,8 +29,8 @@ public static class VehiclePlatformAccountAssignmentPolicy
 
     public static bool IsSponsorCompatible(
         Guid? vehicleSponsorId,
-        Guid accountSponsorId,
+        Guid? accountSponsorId,
         bool hasApplicableLeaseAgreement) =>
-        vehicleSponsorId.HasValue
-        && (vehicleSponsorId.Value == accountSponsorId || hasApplicableLeaseAgreement);
+        vehicleSponsorId.HasValue && accountSponsorId.HasValue
+        && (vehicleSponsorId.Value == accountSponsorId.Value || hasApplicableLeaseAgreement);
 }

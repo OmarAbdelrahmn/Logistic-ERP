@@ -383,7 +383,7 @@ internal sealed class SimplePlatformService(
 
         var assignment = new RiderClientAssignment
         {
-            RiderProfileId = actualRider.RiderProfileId,
+            RiderProfileId = actualRider.RiderProfileId!.Value,
             ClientContractId = contract.Id,
             PlatformRiderAccountId = account.Id,
             PaymentModel = account.PaymentModel,
@@ -591,7 +591,7 @@ internal sealed class SimplePlatformService(
             .ToArrayAsync(cancellationToken);
 
         return Result.Success(new RiderPlatformHistoryResponse(
-            rider.RiderProfileId,
+            rider.RiderProfileId!.Value,
             rider.EmployeeId,
             rider.NameAr,
             rider.NameEn,
@@ -857,7 +857,8 @@ internal sealed class SimplePlatformService(
                join platform in platforms on account.ClientPlatformId equals platform.Id
                join operatingCity in operatingCities on account.OperatingCityId equals operatingCity.Id
                join city in cities on operatingCity.GlobalCityId equals city.Id
-               join sponsor in sponsors on account.SponsorId equals sponsor.Id
+               join sponsorRow in sponsors on account.SponsorId equals (Guid?)sponsorRow.Id into sponsorRows
+               from sponsor in sponsorRows.DefaultIfEmpty()
                orderby platform.NameAr, account.ExternalAccountId
                select new AccountProjection(
                    account,
@@ -866,8 +867,8 @@ internal sealed class SimplePlatformService(
                    platform.NameEn,
                    city.NameAr,
                    city.NameEn,
-                   sponsor.RegistryNameAr,
-                   sponsor.RegistryNameEn);
+                   sponsor == null ? "خارج الكفالة" : sponsor.RegistryNameAr,
+                   sponsor == null ? null : sponsor.RegistryNameEn);
     }
 
     private async Task<Dictionary<Guid, OwnerProjection>> LoadOwnersAsync(
@@ -879,11 +880,12 @@ internal sealed class SimplePlatformService(
             return [];
         }
 
-        var rows = await (from rider in dbContext.RiderProfiles.AsNoTracking()
-                          join employee in dbContext.Employees.AsNoTracking() on rider.EmployeeId equals employee.Id
+        var rows = await (from employee in dbContext.Employees.AsNoTracking()
+                          join riderRow in dbContext.RiderProfiles.AsNoTracking() on employee.Id equals riderRow.EmployeeId into riderRows
+                          from rider in riderRows.DefaultIfEmpty()
                           where employeeIds.Contains(employee.Id)
                           select new OwnerProjection(
-                              rider.Id,
+                              rider == null ? null : rider.Id,
                               employee.Id,
                               employee.FullNameAr,
                               employee.FullNameEn))
@@ -892,11 +894,12 @@ internal sealed class SimplePlatformService(
     }
 
     private async Task<OwnerProjection?> LoadOwnerAsync(Guid employeeId, CancellationToken cancellationToken) =>
-        await (from rider in dbContext.RiderProfiles.AsNoTracking()
-               join employee in dbContext.Employees.AsNoTracking() on rider.EmployeeId equals employee.Id
+        await (from employee in dbContext.Employees.AsNoTracking()
+               join riderRow in dbContext.RiderProfiles.AsNoTracking() on employee.Id equals riderRow.EmployeeId into riderRows
+               from rider in riderRows.DefaultIfEmpty()
                where employee.Id == employeeId
                select new OwnerProjection(
-                   rider.Id,
+                   rider == null ? null : rider.Id,
                    employee.Id,
                    employee.FullNameAr,
                    employee.FullNameEn))
@@ -1031,10 +1034,10 @@ internal sealed class SimplePlatformService(
         }
 
         registration.RegisteredEmployeeId = owner.EmployeeId;
-        registration.RiderProfileId = owner.RiderProfileId;
+        registration.RiderProfileId = owner.RiderProfileId!.Value;
         registration.ClientPlatformId = account.ClientPlatformId;
         registration.ClientContractId = contractId;
-        registration.SponsorId = account.SponsorId;
+        registration.SponsorId = account.SponsorId ?? throw new InvalidOperationException("An account outside sponsorship cannot be registered as sponsored.");
         registration.OperatingCityId = account.OperatingCityId;
         registration.RegistrationType = PlatformRegistrationType.Sponsored;
         registration.Status = PlatformAccountRegistrationStatus.Activated;
@@ -1248,7 +1251,7 @@ internal sealed class SimplePlatformService(
         string? SponsorNameEn);
 
     private sealed record OwnerProjection(
-        Guid RiderProfileId,
+        Guid? RiderProfileId,
         Guid EmployeeId,
         string NameAr,
         string? NameEn);

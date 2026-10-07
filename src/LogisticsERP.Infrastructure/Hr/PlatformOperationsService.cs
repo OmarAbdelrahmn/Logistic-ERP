@@ -125,13 +125,15 @@ internal sealed class PlatformOperationsService(
                           from employee in employees.DefaultIfEmpty()
                           join operatingCity in dbContext.OperatingCities.AsNoTracking() on account.OperatingCityId equals operatingCity.Id
                           join city in dbContext.GlobalCities.AsNoTracking() on operatingCity.GlobalCityId equals city.Id
-                          join sponsor in dbContext.Sponsors.AsNoTracking() on account.SponsorId equals sponsor.Id
+                          join sponsorRow in dbContext.Sponsors.AsNoTracking() on account.SponsorId equals (Guid?)sponsorRow.Id into sponsorRows
+                          from sponsor in sponsorRows.DefaultIfEmpty()
                           where (platformId == null || account.ClientPlatformId == platformId)
                               && (sponsorId == null || account.SponsorId == sponsorId)
                           orderby platform.NameAr, account.ExternalAccountId
                           select new AccountProjection(account, platform.NameAr,
                               employee == null ? null : employee.FullNameAr, city.NameAr,
-                              sponsor.RegistryNameAr, sponsor.RegistryNameEn))
+                              sponsor == null ? "خارج الكفالة" : sponsor.RegistryNameAr,
+                              sponsor == null ? null : sponsor.RegistryNameEn))
             .ToArrayAsync(cancellationToken);
         return Result.Success<IReadOnlyList<PlatformAccountResponse>>(rows.Select(ToAccount).ToArray());
     }

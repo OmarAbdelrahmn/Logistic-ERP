@@ -836,7 +836,7 @@ internal sealed class VehiclePlatformAccountAssignmentService(
                 item.LesseeSponsorId))
             .ToDictionary(group => group.Key, group => group.First().AgreementId);
         var agreementIdsByAssignment = rows
-            .Where(row => row.Vehicle.SponsorId.HasValue
+            .Where(row => row.Vehicle.SponsorId.HasValue && row.Account.SponsorId.HasValue
                 && row.Vehicle.SponsorId.Value != row.Account.SponsorId)
             .Select(row => new
             {
@@ -845,7 +845,7 @@ internal sealed class VehiclePlatformAccountAssignmentService(
                     row.Vehicle.Id,
                     row.Account.ClientPlatformId,
                     row.Vehicle.SponsorId!.Value,
-                    row.Account.SponsorId)
+                    row.Account.SponsorId!.Value)
             })
             .Where(item => agreementsByEligibility.ContainsKey(item.Key))
             .ToDictionary(item => item.Id, item => agreementsByEligibility[item.Key]);
@@ -878,7 +878,9 @@ internal sealed class VehiclePlatformAccountAssignmentService(
             if (!maximum.HasValue)
                 Add(problems, row, "UnsupportedVehicleType", "No platform-account capacity rule is configured for this vehicle type.", "Car or Motorcycle", row.Vehicle.VehicleType.ToString());
 
-            if (row.Vehicle.SponsorId is null)
+            if (row.Account.SponsorId is null)
+                Add(problems, row, "AccountOutsideSponsorship", "An account outside sponsorship cannot be assigned to a sponsored vehicle.", "Sponsored account", "Outside sponsorship");
+            else if (row.Vehicle.SponsorId is null)
                 Add(problems, row, "VehicleSponsorMissing", "The vehicle has no sponsor while the platform account has a required sponsor.", row.Account.SponsorId.ToString(), null);
             else
             {
@@ -886,7 +888,7 @@ internal sealed class VehiclePlatformAccountAssignmentService(
                     row.Vehicle.Id,
                     row.Account.ClientPlatformId,
                     row.Vehicle.SponsorId.Value,
-                    row.Account.SponsorId));
+                    row.Account.SponsorId.Value));
                 if (!VehiclePlatformAccountAssignmentPolicy.IsSponsorCompatible(
                         row.Vehicle.SponsorId,
                         row.Account.SponsorId,
@@ -1003,7 +1005,8 @@ internal sealed class VehiclePlatformAccountAssignmentService(
                           join vehicle in vehicles on assignment.VehicleId equals vehicle.Id
                           join account in accounts on assignment.PlatformRiderAccountId equals account.Id
                           join platform in platforms on account.ClientPlatformId equals platform.Id
-                          join accountSponsor in sponsors on account.SponsorId equals accountSponsor.Id
+                          join accountSponsorRow in sponsors on account.SponsorId equals (Guid?)accountSponsorRow.Id into accountSponsors
+                          from accountSponsor in accountSponsors.DefaultIfEmpty()
                           join accountOperatingCity in operatingCities on account.OperatingCityId equals accountOperatingCity.Id
                           join accountCity in cities on accountOperatingCity.GlobalCityId equals accountCity.Id
                           join vehicleSponsorRow in sponsors on vehicle.SponsorId equals (Guid?)vehicleSponsorRow.Id into vehicleSponsors
@@ -1024,7 +1027,7 @@ internal sealed class VehiclePlatformAccountAssignmentService(
                               Account = account,
                               PlatformCode = platform.Code,
                               PlatformNameAr = platform.NameAr,
-                              AccountSponsorNameAr = accountSponsor.RegistryNameAr,
+                              AccountSponsorNameAr = accountSponsor == null ? "خارج الكفالة" : accountSponsor.RegistryNameAr,
                               AccountCityNameAr = accountCity.NameAr,
                                VehicleSponsorNameAr = vehicleSponsor == null ? null : vehicleSponsor.RegistryNameAr,
                                VehicleCityNameAr = vehicleCity == null ? null : vehicleCity.NameAr,
