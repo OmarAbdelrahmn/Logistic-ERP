@@ -1,12 +1,12 @@
 import json
+import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 root = Path(__file__).parent
 source = json.loads((root/'fuel-assignment-source.json').read_text(encoding='utf-8'))
-db = json.loads((root/'fuel-db-before.json').read_text(encoding='utf-8-sig'))
+db = json.loads((root/(sys.argv[1] if len(sys.argv)>1 else 'fuel-db-before.json')).read_text(encoding='utf-8-sig'))
 cards, people, assignments, usage = db[1:5]
-print('DATABASE', db[0], 'SCHEMA', db[5], 'ACTOR', db[6])
-rows = source[0]['rows'][1:]
+rows = [r for r in source[0]['rows'][1:] if r['values'][0] != 'BW218']
 by_card = defaultdict(list)
 for row in rows:
     by_card[row['values'][0]].append(row)
@@ -22,7 +22,7 @@ for row in rows:
     if len(employees)!=1: issues.append('employee_matches_'+str(len(employees)))
     if len(employees)==1:
         if not employees[0]['RiderProfileId'] or employees[0]['RiderDeleted']: issues.append('no_active_rider_profile')
-        if employees[0]['IsEmployee'] or employees[0]['Status']!=1: issues.append('rider_ineligible')
+        if employees[0]['IsEmployee'] or employees[0]['Status']!=3: issues.append('rider_ineligible')
     if active:
         issues.append('already_assigned' if len(employees)==1 and active[0]['RiderProfileId']==employees[0]['RiderProfileId'] else 'card_assigned_to_other')
     result = dict(row=row['row'],card=card,iqama=str(iqama),name=name,issues=issues,cards=matches,employees=employees,active=active)
@@ -30,5 +30,5 @@ for row in rows:
 (root/'fuel-reconciliation.json').write_text(json.dumps(results, ensure_ascii=False, indent=2),encoding='utf-8')
 print('SUMMARY',dict(Counter(tuple(r['issues']) for r in results)))
 print('SOURCE_DUPLICATES', [dict(card=card,rows=[r['row'] for r in group],iqamas=[r['values'][1] for r in group]) for card,group in by_card.items() if len(group)>1])
-print('EXCEPTIONS',json.dumps([r for r in results if r['issues']],ensure_ascii=False))
+print('EXCEPTIONS',json.dumps([{k:r[k] for k in ['row','card','iqama','name','issues']} for r in results if r['issues'] and r['issues']!=['already_assigned']],ensure_ascii=False))
 print('ROWS',len(rows),'UNIQUE_CARD_IQAMA',len({(r['values'][0],r['values'][1]) for r in rows}))

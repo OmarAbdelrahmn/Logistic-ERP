@@ -29,7 +29,7 @@ When `oldVehicleCondition` is not `Good=2`, `metadata` must also contain `condit
 
 ### `POST /api/vehicle-assignments/{assignmentId}/renew-permission`
 
-Updates the permission date/reference for an assignment. Requires `Idempotency-Key`.
+Updates the permission date/reference for an active assignment. Renewal is allowed at any time, even when the current permit has substantial time remaining. `permissionStartsOn` may be before, equal to, or after the previous permit expiry; no proximity-to-expiry rule applies. The new expiry is calculated from the supplied start date using the existing permit-duration rule. Requires `Idempotency-Key`, the assignment's current `rowVersion`, a permit reference, and a nonblank reason.
 
 ```json
 {

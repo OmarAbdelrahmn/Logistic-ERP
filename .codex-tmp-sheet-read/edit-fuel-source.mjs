@@ -1,0 +1,11 @@
+import fs from 'node:fs/promises';
+import { FileBlob, SpreadsheetFile } from '@oai/artifact-tool';
+const source = 'C:/Users/omarf/OneDrive/Documents/ChatGPT/Logistic ERP/outputs/fuel-card-assignment-20261006/التسكين.xlsx';
+const wb = await SpreadsheetFile.importXlsx(await FileBlob.load(source));
+console.log((await wb.inspect({kind:'workbook,sheet,table',maxChars:3500,tableMaxRows:3,tableMaxCols:4})).ndjson);
+const image = await wb.render({sheetName:'ورقة1',range:'A54:C61',scale:1.5,format:'png'});
+await fs.writeFile('.codex-temp/fuel-source-after.png',new Uint8Array(await image.arrayBuffer()));
+console.log((await wb.inspect({kind:'table',range:"'ورقة1'!A54:C61",tableMaxRows:8,tableMaxCols:3,maxChars:2000})).ndjson);
+console.log((await wb.inspect({kind:'match',searchTerm:'BW218',options:{maxResults:10}})).ndjson);
+console.log((await wb.inspect({kind:'match',searchTerm:'#REF!|#DIV/0!|#VALUE!|#NAME\\?|#N/A|#NUM!|#NULL!|#SPILL!|#CALC!',options:{useRegex:true,maxResults:10}})).ndjson);
+process.exit(0);

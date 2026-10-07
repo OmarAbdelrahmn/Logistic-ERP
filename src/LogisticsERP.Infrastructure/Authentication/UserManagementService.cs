@@ -38,7 +38,7 @@ internal sealed class UserManagementService(
             .ThenBy(user => user.UserName)
             .Take(500)
             .ToListAsync(cancellationToken);
-        return Result.Success<IReadOnlyList<ManagedUserResponse>>(users.Select(ToResponse).ToArray());
+        return Result.Success<IReadOnlyList<ManagedUserResponse>>(await ToResponsesAsync(users, cancellationToken));
     }
 
     public async Task<Result<IReadOnlyList<ManagedUserResponse>>> GetArchivedUsersAsync(
@@ -65,7 +65,7 @@ internal sealed class UserManagementService(
             .ThenBy(user => user.UserName)
             .Take(500)
             .ToListAsync(cancellationToken);
-        return Result.Success<IReadOnlyList<ManagedUserResponse>>(users.Select(ToResponse).ToArray());
+        return Result.Success<IReadOnlyList<ManagedUserResponse>>(await ToResponsesAsync(users, cancellationToken));
     }
 
     public async Task<Result<ManagedUserResponse>> GetUserAsync(Guid userId, CancellationToken cancellationToken = default)
@@ -73,7 +73,7 @@ internal sealed class UserManagementService(
         var user = await FindUserAsync(userId, cancellationToken);
         return user is null
             ? Result.Failure<ManagedUserResponse>(UserManagementErrors.NotFound)
-            : Result.Success(ToResponse(user));
+            : Result.Success(await ToResponseAsync(user, cancellationToken));
     }
 
     public async Task<Result<CreatedManagedUserResponse>> CreateUserAsync(
@@ -254,7 +254,7 @@ internal sealed class UserManagementService(
         await transaction.CommitAsync(cancellationToken);
 
         return Result.Success(new CreatedManagedUserResponse(
-            ToResponse(user),
+            await ToResponseAsync(user, cancellationToken),
             await BuildAuthorizationResponseAsync(user.Id, cancellationToken)));
     }
 
@@ -295,7 +295,7 @@ internal sealed class UserManagementService(
         user.EmployeeId = request.EmployeeId;
         user.ConcurrencyStamp = Guid.NewGuid().ToString();
         await identityDbContext.SaveChangesAsync(cancellationToken);
-        return Result.Success(ToResponse(user));
+        return Result.Success(await ToResponseAsync(user, cancellationToken));
     }
 
     public async Task<Result<ManagedUserResponse>> UpdateStatusAsync(Guid userId, UpdateManagedUserStatusRequest request, CancellationToken cancellationToken = default)
@@ -328,7 +328,7 @@ internal sealed class UserManagementService(
         user.Status = status;
         user.LockoutEnd = status == UserAccountStatus.Locked ? now.AddYears(10) : null;
         await RevokeSessionsAndIncrementAuthorizationAsync(user, actorId, request.Reason ?? $"Account status changed to {status}.", now, cancellationToken);
-        return Result.Success(ToResponse(user));
+        return Result.Success(await ToResponseAsync(user, cancellationToken));
     }
 
     public async Task<Result> ResetPasswordAsync(Guid userId, ResetManagedUserPasswordRequest request, CancellationToken cancellationToken = default)
@@ -573,7 +573,7 @@ internal sealed class UserManagementService(
         user.AuthorizationVersion++;
         await identityDbContext.SaveChangesAsync(cancellationToken);
         sessionValidator.InvalidateUser(user.Id);
-        return Result.Success(ToResponse(user));
+        return Result.Success(await ToResponseAsync(user, cancellationToken));
     }
 
     public async Task<Result<IReadOnlyList<ManagedRoleResponse>>> GetRolesAsync(CancellationToken cancellationToken = default)
@@ -1214,8 +1214,49 @@ internal sealed class UserManagementService(
         !string.IsNullOrWhiteSpace(supplied) && Convert.TryFromBase64String(supplied, new Span<byte>(new byte[rowVersion.Length]), out _)
         && string.Equals(Convert.ToBase64String(rowVersion), supplied, StringComparison.Ordinal);
 
-    private static ManagedUserResponse ToResponse(ApplicationUser user) => new(
-        user.Id, user.EmployeeId, user.UserName ?? string.Empty, user.Email, user.PhoneNumber,
+    private async Task<IReadOnlyList<ManagedUserResponse>> ToResponsesAsync(
+        IReadOnlyCollection<ApplicationUser> users,
+        CancellationToken cancellationToken)
+    {
+        var employeeIds = users.Where(user => user.EmployeeId.HasValue)
+            .Select(user => user.EmployeeId!.Value)
+            .Distinct()
+            .ToArray();
+        var employees = employeeIds.Length == 0
+            ? new Dictionary<Guid, ManagedUserEmployeeSummaryResponse>()
+            : await applicationDbContext.Employees
+                .IgnoreQueryFilters()
+                .AsNoTracking()
+                .Where(employee => employeeIds.Contains(employee.Id))
+                .Select(employee => new ManagedUserEmployeeSummaryResponse(
+                    employee.Id,
+                    employee.FullNameAr,
+                    employee.FullNameEn,
+                    null))
+                .ToDictionaryAsync(employee => employee.Id, cancellationToken);
+
+        return users.Select(user => ToResponse(
+            user,
+            user.EmployeeId is Guid employeeId && employees.TryGetValue(employeeId, out var employee)
+                ? employee
+                : null)).ToArray();
+    }
+
+    private async Task<ManagedUserResponse> ToResponseAsync(ApplicationUser user, CancellationToken cancellationToken)
+    {
+        var employee = user.EmployeeId is Guid employeeId
+            ? await applicationDbContext.Employees
+                .IgnoreQueryFilters()
+                .AsNoTracking()
+                .Where(item => item.Id == employeeId)
+                .Select(item => new ManagedUserEmployeeSummaryResponse(item.Id, item.FullNameAr, item.FullNameEn, null))
+                .SingleOrDefaultAsync(cancellationToken)
+            : null;
+        return ToResponse(user, employee);
+    }
+
+    private static ManagedUserResponse ToResponse(ApplicationUser user, ManagedUserEmployeeSummaryResponse? employee) => new(
+        user.Id, user.EmployeeId, employee, user.UserName ?? string.Empty, user.Email, user.PhoneNumber,
         user.DisplayNameAr, user.DisplayNameEn, user.ProfileImageUrl, user.Status.ToString(), user.RequiresPasswordChange,
         user.IsDevelopmentOnly, user.LastLoginAtUtc, user.LastActivityAtUtc, user.CreatedAtUtc,
         Convert.ToBase64String(user.RowVersion));

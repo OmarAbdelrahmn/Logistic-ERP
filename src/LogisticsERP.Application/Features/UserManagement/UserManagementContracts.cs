@@ -5,6 +5,7 @@ namespace LogisticsERP.Application.Features.UserManagement;
 public sealed record ManagedUserResponse(
     Guid Id,
     Guid? EmployeeId,
+    ManagedUserEmployeeSummaryResponse? Employee,
     string UserName,
     string? Email,
     string? PhoneNumber,
@@ -18,6 +19,12 @@ public sealed record ManagedUserResponse(
     DateTimeOffset? LastActivityAtUtc,
     DateTimeOffset CreatedAtUtc,
     string RowVersion);
+
+public sealed record ManagedUserEmployeeSummaryResponse(
+    Guid Id,
+    string FullNameAr,
+    string? FullNameEn,
+    string? EmployeeNumber);
 
 public sealed record CreateManagedUserRequest(
     string UserName,

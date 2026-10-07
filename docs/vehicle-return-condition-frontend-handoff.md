@@ -8,6 +8,10 @@ The backend saves the vehicle return, blocking issue, responsibility assessment,
 
 ## Frontend request changes
 
+Vehicle returns accept any nonnegative integer `endOdometer`, including a reading below the vehicle's current odometer, its handover reading, or earlier readings. Remove comparisons against those readings and use `min=0` in the return form. The entered reading is saved in the completed assignment and odometer history. A lower return reading does not reduce the vehicle's current odometer or tracked mileage. This applies to both ordinary returns and returns with a condition report.
+
+Deploy the frontend and backend changes and apply application migration `20261006155322_AllowLowerVehicleReturnOdometer`. The incremental idempotent SQL is in `database/scripts/allow-lower-vehicle-return-odometer.sql`; it changes only the assignment odometer constraint and records the migration. The previous constraint rejects a return reading below the handover reading even after API validation succeeds. Restoring the old constraint requires reconciling any newly accepted lower return readings first.
+
 1. Add `category` and `severity` inside every non-good `conditionReport`; both are now required and are stored exactly as selected by the frontend.
 2. For a non-good return, continue sending the report in multipart `metadata` to `/api/vehicle-assignments/return-with-condition-report` with one or two `evidenceFiles`.
 3. For a switch, add optional `conditionReport` to `SwitchVehicleRequest` and add the multipart `evidenceFiles` collection alongside the existing `promissoryFiles`.

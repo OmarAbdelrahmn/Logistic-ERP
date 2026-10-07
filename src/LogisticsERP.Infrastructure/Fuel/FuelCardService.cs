@@ -361,8 +361,6 @@ internal sealed partial class FuelCardService(
 
         assignment.EffectiveTo = request.EffectiveTo;
         assignment.EndReason = request.Reason.Trim();
-        assignment.ClosedAtUtc = timeProvider.GetUtcNow();
-        assignment.ClosedByUserId = currentUser.UserId.Value;
         var save = await SaveAsync(cancellationToken);
         if (save.IsFailure)
         {

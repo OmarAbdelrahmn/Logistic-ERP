@@ -260,7 +260,7 @@ internal sealed class RiderVehicleAssignmentConfiguration : IEntityTypeConfigura
         builder.ToTable(table =>
         {
             table.HasCheckConstraint("CK_RiderVehicleAssignments_TimeRange", "[EndedAtUtc] IS NULL OR [EndedAtUtc] >= [StartedAtUtc]");
-            table.HasCheckConstraint("CK_RiderVehicleAssignments_Odometer", "[StartOdometer] >= 0 AND ([EndOdometer] IS NULL OR [EndOdometer] >= [StartOdometer] OR [CorrectionReason] IS NOT NULL)");
+            table.HasCheckConstraint("CK_RiderVehicleAssignments_Odometer", "[StartOdometer] >= 0 AND ([EndOdometer] IS NULL OR [EndOdometer] >= 0)");
             table.HasCheckConstraint("CK_RiderVehicleAssignments_StartFuel", "[StartFuelLevelPercentage] IS NULL OR [StartFuelLevelPercentage] BETWEEN 0 AND 100");
             table.HasCheckConstraint("CK_RiderVehicleAssignments_EndFuel", "[EndFuelLevelPercentage] IS NULL OR [EndFuelLevelPercentage] BETWEEN 0 AND 100");
             table.HasCheckConstraint("CK_RiderVehicleAssignments_Permission", "[PermissionEndsOn] IS NULL OR [PermissionStartsOn] IS NULL OR [PermissionEndsOn] >= [PermissionStartsOn]");

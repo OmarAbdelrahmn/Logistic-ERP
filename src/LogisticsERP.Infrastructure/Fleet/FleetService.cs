@@ -675,7 +675,7 @@ internal sealed partial class FleetService(
         if (assignment is null) { CleanupIssueEvidence(staged); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.NotFound); }
         var vehicle = await dbContext.Vehicles.SingleAsync(x => x.Id == assignment.VehicleId, cancellationToken);
         if (!await support.HasVehiclePermissionAsync(vehicle, PermissionKeys.Fleet.AssignmentsDelete, cancellationToken)) { CleanupIssueEvidence(staged); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.Forbidden); }
-        if (!FleetServiceSupport.MatchesRowVersion(assignment.RowVersion, request.RowVersion) || request.EndedAtUtc < assignment.StartedAtUtc || request.EndOdometer < assignment.StartOdometer || !ValidFuel(request.EndFuelLevelPercentage)) { CleanupIssueEvidence(staged); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.InvalidRequest); }
+        if (!FleetServiceSupport.MatchesRowVersion(assignment.RowVersion, request.RowVersion) || request.EndedAtUtc < assignment.StartedAtUtc || request.EndOdometer < 0 || !ValidFuel(request.EndFuelLevelPercentage)) { CleanupIssueEvidence(staged); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.InvalidRequest); }
         try
         {
             return await dbContext.ExecuteTransactionAsync(async _ =>
@@ -874,7 +874,7 @@ internal sealed partial class FleetService(
         if (assignment is null) return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.NotFound);
         var vehicle = await dbContext.Vehicles.SingleAsync(x => x.Id == assignment.VehicleId, cancellationToken);
         if (!await support.HasVehiclePermissionAsync(vehicle, PermissionKeys.Fleet.AssignmentsUpdate, cancellationToken)) return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.Forbidden);
-        if (!FleetServiceSupport.MatchesRowVersion(assignment.RowVersion, request.RowVersion) || assignment.PermissionEndsOn.HasValue && request.PermissionStartsOn <= assignment.PermissionEndsOn.Value || string.IsNullOrWhiteSpace(request.PermissionReference) || string.IsNullOrWhiteSpace(request.Reason)) return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.InvalidRequest);
+        if (!FleetServiceSupport.MatchesRowVersion(assignment.RowVersion, request.RowVersion) || string.IsNullOrWhiteSpace(request.PermissionReference) || string.IsNullOrWhiteSpace(request.Reason)) return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.InvalidRequest);
         var actor = support.UserId;
         if (!actor.HasValue) return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.CurrentUserUnavailable);
         assignment.PermissionStartsOn = request.PermissionStartsOn; assignment.PermissionEndsOn = FleetBusinessRules.PermitEnd(request.PermissionStartsOn); assignment.PermissionReference = request.PermissionReference.Trim();
@@ -1575,7 +1575,11 @@ internal sealed partial class FleetService(
     private void EndAssignment(RiderVehicleAssignment assignment, Vehicle vehicle, DateTimeOffset endedAt, long odometer, VehicleCondition condition, byte? fuel, string reason, Guid actor, RiderVehicleAssignmentEventType eventType)
     {
         assignment.EndedAtUtc = endedAt; assignment.EndLocationSnapshot = assignment.StartLocationSnapshot; assignment.EndOdometer = odometer; assignment.EndVehicleCondition = condition; assignment.EndFuelLevelPercentage = fuel; assignment.Status = RiderVehicleAssignmentStatus.Completed; assignment.CompletionReason = reason.Trim(); assignment.EndedByUserId = actor;
-        vehicle.CurrentAssignmentId = null; VehicleMileageRules.ApplyVerifiedReading(vehicle, Math.Max(vehicle.CurrentOdometer, odometer), endedAt);
+        vehicle.CurrentAssignmentId = null;
+        if (odometer >= vehicle.CurrentOdometer && odometer >= vehicle.TrackedDistanceKm)
+        {
+            VehicleMileageRules.ApplyVerifiedReading(vehicle, odometer, endedAt);
+        }
         dbContext.RiderVehicleAssignmentEvents.Add(NewAssignmentEvent(assignment.Id, assignment.OperationId, eventType, endedAt, actor, reason));
         dbContext.VehicleOdometerReadings.Add(NewOdometer(vehicle.Id, odometer, endedAt, VehicleOdometerSourceType.AssignmentReturn, assignment.Id, reason));
     }
