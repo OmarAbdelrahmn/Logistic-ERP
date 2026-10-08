@@ -495,6 +495,8 @@ public sealed record DirectOilChangeRequest(
     string? Notes,
     string VehicleRowVersion);
 
+public sealed record CorrectCompletedOilChangeVehicleRequest(Guid VehicleId, string Reason);
+
 public sealed record DirectOilInventoryLocationResponse(
     Guid InventoryLocationId,
     Guid MaintenanceLocationId,

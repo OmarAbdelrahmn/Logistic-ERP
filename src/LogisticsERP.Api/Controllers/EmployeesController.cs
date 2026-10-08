@@ -26,6 +26,22 @@ public sealed class EmployeesController(IWorkforceService service) : ControllerB
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 
+    [HttpGet("{employeeId:guid}/vehicle-profile")]
+    [RequirePermission(PermissionKeys.Fleet.AssignmentsCreate)]
+    public async Task<IActionResult> GetVehicleProfile(Guid employeeId, CancellationToken cancellationToken)
+    {
+        var result = await service.GetVehicleProfileAsync(employeeId, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpPut("{employeeId:guid}/vehicle-profile")]
+    [RequirePermission(PermissionKeys.Fleet.AssignmentsCreate)]
+    public async Task<IActionResult> EnsureVehicleProfile(Guid employeeId, CancellationToken cancellationToken)
+    {
+        var result = await service.EnsureVehicleProfileAsync(employeeId, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
     [HttpPost]
     [RequirePermission(PermissionKeys.Workforce.EmployeesCreate)]
     public async Task<IActionResult> Create([FromBody] EmployeeUpsertRequest request, CancellationToken cancellationToken)

@@ -570,7 +570,7 @@ internal sealed partial class FleetService(
         var permitStart = FleetBusinessRules.RiyadhDate(request.StartedAtUtc);
         if (vehicle.CurrentOperationalStatus != VehicleOperationalStatus.Available || vehicle.CurrentAssignmentId.HasValue || !FleetBusinessRules.IsCoreIdentityReady(vehicle) || request.StartOdometer < vehicle.CurrentOdometer || !ValidFuel(request.StartFuelLevelPercentage) || string.IsNullOrWhiteSpace(request.PermissionReference)) { CleanupStaged(staged); return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.VehicleUnavailable); }
         var rider = await dbContext.RiderProfiles.AsNoTracking().SingleOrDefaultAsync(x => x.Id == request.RiderProfileId, cancellationToken);
-        if (rider is null || !await dbContext.Employees.AnyAsync(x => x.Id == rider.EmployeeId && !x.IsEmployee && x.Status == EmployeeStatus.Active, cancellationToken))
+        if (rider is null || !await dbContext.Employees.AnyAsync(x => x.Id == rider.EmployeeId && x.Status == EmployeeStatus.Active, cancellationToken))
         {
             CleanupStaged(staged);
             return Result.Failure<RiderVehicleAssignmentResponse>(FleetErrors.RiderUnavailable);

@@ -91,8 +91,10 @@ public sealed class VehicleTakeWithoutFilesTests
         Assert.Equal(3, await db.RiderPromissoryFiles.CountAsync(cancellationToken));
     }
 
-    [Fact]
-    public async Task TakeAndSwitchSucceedWithoutExistingOrUploadedPromissoryFiles()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task TakeAndSwitchSucceedWithoutExistingOrUploadedPromissoryFiles(bool isEmployee)
     {
         var cancellationToken = TestContext.Current.CancellationToken;
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
@@ -101,7 +103,7 @@ public sealed class VehicleTakeWithoutFilesTests
             .AddInterceptors(new TestRowVersionInterceptor())
             .Options;
         await using var db = new ApplicationDbContext(options);
-        var employee = new Employee { FullNameAr = "Test rider", IsEmployee = false, Status = EmployeeStatus.Active };
+        var employee = new Employee { FullNameAr = "Test rider", IsEmployee = isEmployee, Status = EmployeeStatus.Active };
         var rider = new RiderProfile { EmployeeId = employee.Id };
         var vehicle = new Vehicle
         {

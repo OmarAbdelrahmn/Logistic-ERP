@@ -1,0 +1,162 @@
+{
+  "database": "db67927",
+  "scope": "pre-replacement snapshot",
+  "files": [
+    {
+      "file": "app.PlatformAccountCredentialVersions.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "rows": 0
+    },
+    {
+      "file": "app.PlatformAccountRegistrations.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "rows": 0
+    },
+    {
+      "file": "app.PlatformRiderAccounts.json",
+      "bytes": 3248,
+      "sha256": "85e2d86167caff9fa45bd3c20017a22dddeb78c14104c5f90b9b04bd7d424953",
+      "rows": 4
+    },
+    {
+      "file": "app.PlatformRiderAccountTags.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "rows": 0
+    },
+    {
+      "file": "app.RiderAssignmentEvents.json",
+      "bytes": 2503,
+      "sha256": "70d87eaa9fd46ba76e1204c392c5caba483d3d12cd1028926b744e5cc5c919d9",
+      "rows": 6
+    },
+    {
+      "file": "app.RiderClientAssignments.json",
+      "bytes": 3643,
+      "sha256": "7e018ea9ab6ea4c7dc76265aef5ec0d94090783571276ecd6c6e238c4f7a54cb",
+      "rows": 4
+    },
+    {
+      "file": "app.VehiclePlatformAccountAssignments.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "rows": 0
+    },
+    {
+      "file": "app.VehiclePlatformAccountSwitches.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "rows": 0
+    },
+    {
+      "file": "jahez.JahezAccountFee.json",
+      "bytes": 1733,
+      "sha256": "5b4f380984821a06a9064d7b66e59e0911651642900bf5100ffe4ba9efcf8429",
+      "rows": 4
+    },
+    {
+      "file": "jahez.JahezAccountHandover.json",
+      "bytes": 3043,
+      "sha256": "9d3ee0289d60f015104ca3b5b0599392b378549243ca135b08b23046b17a9fc5",
+      "rows": 4
+    },
+    {
+      "file": "jahez.JahezApprovalDecision.json",
+      "bytes": 778,
+      "sha256": "a1cfa9f3b46c0c303ea35b6884c3a2add956db2830f09998769272f0d9838cc0",
+      "rows": 2
+    },
+    {
+      "file": "jahez.JahezApprovalRequest.json",
+      "bytes": 1505,
+      "sha256": "75419848cacd3e3f41a6f58af35545f48627f71e9244eb832985bad7dea6659c",
+      "rows": 2
+    },
+    {
+      "file": "jahez.JahezCashboxEntry.json",
+      "bytes": 1999,
+      "sha256": "f1b199861c190e44d8195ed0f2c88ef99f47b37ccf87a3874414863052e8860e",
+      "rows": 3
+    },
+    {
+      "file": "jahez.JahezCashboxHandover.json",
+      "bytes": 1657,
+      "sha256": "52344926211b165a021674ba08b462526bd2fd1e357aed03b53180a60017aa32",
+      "rows": 2
+    },
+    {
+      "file": "jahez.JahezCommandReceipt.json",
+      "bytes": 2664963,
+      "sha256": "890ae9d877fea375081dc1d6899d0a2f1756c71c0c8d1e4163e3ee89c6e63029",
+      "rows": 18
+    },
+    {
+      "file": "jahez.JahezCommissionPolicyPeriod.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "rows": 0
+    },
+    {
+      "file": "jahez.JahezDailyDispatch.json",
+      "bytes": 717,
+      "sha256": "e11c5a520fb9c81a6a021c069858be8b3666320c96307b43743c72ad15f3c81f",
+      "rows": 2
+    },
+    {
+      "file": "jahez.JahezEarningsStatement.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "rows": 0
+    },
+    {
+      "file": "jahez.JahezImportBatch.json",
+      "bytes": 2423,
+      "sha256": "0038228d1c1e90f2740191458e6cc1cb6667d91a4d7935c5c859bfab3a1e9cf2",
+      "rows": 4
+    },
+    {
+      "file": "jahez.JahezImportFile.json",
+      "bytes": 143230,
+      "sha256": "0a55884fcdf23371842539bc99bc2dab574793c0968d1a56211af9ea86613bfb",
+      "rows": 4
+    },
+    {
+      "file": "jahez.JahezImportRow.json",
+      "bytes": 815312,
+      "sha256": "c2de7936f077bd70304532de3c89aa2e6b06f59bd7be99d4c88f40efa7fd8e65",
+      "rows": 1558
+    },
+    {
+      "file": "jahez.JahezLedgerEntry.json",
+      "bytes": 4254,
+      "sha256": "fde9cd77d0621277b9e80c6f612de90e8fec547c0f4d9c53ed16fe300396018c",
+      "rows": 9
+    },
+    {
+      "file": "jahez.JahezReminderState.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "rows": 0
+    },
+    {
+      "file": "jahez.JahezRiderSettlement.json",
+      "bytes": 1378,
+      "sha256": "fc5cf9e238ada78a2dd080d5283d7910483d77c652a16984918c441d6fdb869b",
+      "rows": 3
+    },
+    {
+      "file": "jahez.JahezTransaction.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "rows": 0
+    },
+    {
+      "file": "previous-hosted-api.zip",
+      "bytes": 84652459,
+      "sha256": "0ce808bf7d74e8ad7a7b10ecf341f5a78c431b7f09c33f3b208eeafed4f61329",
+      "rows": null
+    }
+  ]
+}

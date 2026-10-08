@@ -547,6 +547,8 @@ Send a unique `Idempotency-Key` header for each upload attempt; reuse it when re
 
 Starts an assignment. This is `multipart/form-data` because promissory-note files may be uploaded with the command. The JSON command is sent as a string in the `metadata` form field. The `promissoryFiles` form fields are optional.
 
+For an administrative employee who needs a vehicle, first use `GET /api/employees/{employeeId}/vehicle-profile`. It returns `{ "employeeId": "...", "isEmployee": true, "exists": false, "riderProfileId": null }` when the employee has no profile. Call `PUT` on the same URL, with no request body, to create the minimal profile or return the existing one. Both endpoints require `fleet.assignments.create`; a missing employee returns `404`. The `PUT` is idempotent and does not change the employee's `isEmployee` role. Use its `riderProfileId` in the take request. The employee must still have `Active` status to take a vehicle. Administrative employees with vehicle profiles remain absent from the dedicated rider list.
+
 The assignment links any existing active promissory-note files and newly uploaded files. A rider with no promissory files can take a vehicle without uploading one. The combined total cannot exceed three.
 
 Required header: `Idempotency-Key`.

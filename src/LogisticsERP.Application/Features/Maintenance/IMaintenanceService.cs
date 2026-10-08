@@ -46,6 +46,7 @@ public interface IMaintenanceService
     Task<Result<MaintenancePlanResponse>> UpsertPlanAsync(Guid? id, MaintenancePlanRequest request, CancellationToken cancellationToken = default);
     Task<Result<OilChangeResponse>> CompleteOilChangeAsync(Guid workOrderId, CompleteOilChangeRequest request, CancellationToken cancellationToken = default);
     Task<Result<OilChangeResponse>> CompleteDirectOilChangeAsync(Guid vehicleId, DirectOilChangeRequest request, string idempotencyKey, CancellationToken cancellationToken = default);
+    Task<Result<OilChangeResponse>> CorrectCompletedOilChangeVehicleAsync(Guid oilChangeId, CorrectCompletedOilChangeVehicleRequest request, CancellationToken cancellationToken = default);
     Task<Result<IReadOnlyList<DirectOilInventoryLocationResponse>>> GetDirectOilInventoryLocationsAsync(CancellationToken cancellationToken = default);
     Task<Result<IReadOnlyList<DirectOilBarrelResponse>>> GetDirectOilBarrelsAsync(Guid inventoryLocationId, Guid inventoryItemId, VehicleType? vehicleType = null, CancellationToken cancellationToken = default);
     Task<Result<IReadOnlyList<OilChangeReportResponse>>> GetOilChangesAsync(Guid? vehicleId, CancellationToken cancellationToken = default);

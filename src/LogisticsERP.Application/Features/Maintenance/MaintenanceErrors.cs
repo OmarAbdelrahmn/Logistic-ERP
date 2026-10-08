@@ -50,4 +50,6 @@ public static class MaintenanceErrors
     public static readonly OperationError LaborCostExternalVehiclesOnly = new("maintenance.labor_cost_external_vehicles_only", "تكلفة أجور اليد والعمالة مخصصة للمركبات الخارجية فقط.", ErrorType.Validation, "laborCost");
     public static readonly OperationError OilChangeIdempotencyRequired = new("maintenance.oil_change_idempotency_required", "مطلوب مفتاح عدم تكرار العملية Idempotency-Key.", ErrorType.Validation);
     public static readonly OperationError OilChangeIdempotencyConflict = new("maintenance.oil_change_idempotency_conflict", "استُخدم مفتاح عدم التكرار لعملية تغيير زيت مختلفة.", ErrorType.Conflict);
+    public static readonly OperationError OilChangeCorrectionWorkOrder = new("maintenance.oil_change_correction_work_order", "لا يمكن تغيير مركبة عملية تغيير زيت مرتبطة بأمر صيانة من هذا المسار.", ErrorType.Conflict);
+    public static readonly OperationError OilChangeCorrectionVehicleType = new("maintenance.oil_change_correction_vehicle_type", "يجب أن تكون المركبة الجديدة من النوع نفسه للمركبة الأصلية.", ErrorType.Validation, "vehicleId");
 }

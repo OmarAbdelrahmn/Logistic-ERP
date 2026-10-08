@@ -42,6 +42,8 @@ public sealed record EmployeeDetailsResponse(
     IReadOnlyList<EmployeeWorkHistoryResponse> WorkHistory,
     HousingResponse? Housing);
 
+public sealed record EmployeeVehicleProfileResponse(Guid EmployeeId, bool IsEmployee, bool Exists, Guid? RiderProfileId);
+
 public sealed record EmployeeResponse(
     Guid Id,
     string? IqamaNo,

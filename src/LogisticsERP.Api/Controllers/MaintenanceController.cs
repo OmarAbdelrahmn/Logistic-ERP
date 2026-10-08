@@ -4,6 +4,7 @@ using LogisticsERP.Application.Authorization;
 using LogisticsERP.Application.Features.Maintenance;
 using LogisticsERP.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace LogisticsERP.Api.Controllers;
 
@@ -57,6 +58,15 @@ public sealed class MaintenanceController(IMaintenanceService service) : Control
     public async Task<IActionResult> CompleteDirectOilChange(Guid vehicleId, [FromBody] DirectOilChangeRequest request, [FromHeader(Name = "Idempotency-Key")] string? idempotencyKey, CancellationToken cancellationToken)
     {
         var result = await service.CompleteDirectOilChangeAsync(vehicleId, request, idempotencyKey ?? string.Empty, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpPut("oil-changes/{id:guid}/vehicle")]
+    [Authorize(Roles = SystemRoles.SystemAdmin)]
+    [RequirePermission(PermissionKeys.Maintenance.OilComplete)]
+    public async Task<IActionResult> CorrectCompletedOilChangeVehicle(Guid id, [FromBody] CorrectCompletedOilChangeVehicleRequest request, CancellationToken cancellationToken)
+    {
+        var result = await service.CorrectCompletedOilChangeVehicleAsync(id, request, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 

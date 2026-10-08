@@ -20,6 +20,37 @@ public sealed class OilBarrelVehicleTypeTests
     private static readonly DateTimeOffset Now = new(2026, 10, 1, 9, 0, 0, TimeSpan.Zero);
 
     [Fact]
+    public async Task CompletedOilChangeVehicleCorrectionRejectsAnotherTypeAndWorkOrderRecords()
+    {
+        await using var db = CreateContext();
+        var (service, car, motorcycle, item, _) = await SeedAsync(db);
+        var direct = new OilChangeOperation
+        {
+            VehicleId = car.Id, VehicleTypeSnapshot = VehicleType.Car,
+            OilInventoryItemId = item.Id, OilMaterialUsageId = Guid.NewGuid(),
+            PerformedAtUtc = Now, OdometerAtChange = 100, OilQuantityLiters = 3.5m
+        };
+        var workOrder = new OilChangeOperation
+        {
+            VehicleId = car.Id, MaintenanceWorkOrderId = Guid.NewGuid(), VehicleTypeSnapshot = VehicleType.Car,
+            OilInventoryItemId = item.Id, OilMaterialUsageId = Guid.NewGuid(),
+            PerformedAtUtc = Now, OdometerAtChange = 100, OilQuantityLiters = 3.5m
+        };
+        db.OilChangeOperations.AddRange(direct, workOrder);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        var differentType = await service.CorrectCompletedOilChangeVehicleAsync(direct.Id,
+            new(motorcycle.Id, "Wrong vehicle selected"), TestContext.Current.CancellationToken);
+        var linkedWorkOrder = await service.CorrectCompletedOilChangeVehicleAsync(workOrder.Id,
+            new(motorcycle.Id, "Wrong vehicle selected"), TestContext.Current.CancellationToken);
+
+        Assert.Equal(MaintenanceErrors.OilChangeCorrectionVehicleType.Code, differentType.Error.Code);
+        Assert.Equal(MaintenanceErrors.OilChangeCorrectionWorkOrder.Code, linkedWorkOrder.Error.Code);
+        Assert.Equal(car.Id, direct.VehicleId);
+        Assert.Empty(db.AuditEntries);
+    }
+
+    [Fact]
     public async Task TwoTypesCanOpenAndEachConsumesItsOwnBarrelAndCostLayer()
     {
         await using var db = CreateContext();

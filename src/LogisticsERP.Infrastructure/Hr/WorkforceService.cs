@@ -117,6 +117,47 @@ internal sealed class WorkforceService(
             : Result.Success(await BuildEmployeeDetailsAsync(employee, cancellationToken));
     }
 
+    public async Task<Result<EmployeeVehicleProfileResponse>> GetVehicleProfileAsync(Guid employeeId, CancellationToken cancellationToken = default)
+    {
+        var employee = await dbContext.Employees.AsNoTracking().SingleOrDefaultAsync(item => item.Id == employeeId, cancellationToken);
+        if (employee is null) return Result.Failure<EmployeeVehicleProfileResponse>(HrErrors.NotFound);
+        var profileId = await dbContext.RiderProfiles.AsNoTracking()
+            .Where(item => item.EmployeeId == employeeId)
+            .Select(item => (Guid?)item.Id)
+            .SingleOrDefaultAsync(cancellationToken);
+        return Result.Success(new EmployeeVehicleProfileResponse(employeeId, employee.IsEmployee, profileId.HasValue, profileId));
+    }
+
+    public async Task<Result<EmployeeVehicleProfileResponse>> EnsureVehicleProfileAsync(Guid employeeId, CancellationToken cancellationToken = default)
+    {
+        var employee = await dbContext.Employees.AsNoTracking().SingleOrDefaultAsync(item => item.Id == employeeId, cancellationToken);
+        if (employee is null) return Result.Failure<EmployeeVehicleProfileResponse>(HrErrors.NotFound);
+        var profileId = await dbContext.RiderProfiles.AsNoTracking()
+            .Where(item => item.EmployeeId == employeeId)
+            .Select(item => (Guid?)item.Id)
+            .SingleOrDefaultAsync(cancellationToken);
+        if (profileId.HasValue)
+            return Result.Success(new EmployeeVehicleProfileResponse(employeeId, employee.IsEmployee, true, profileId));
+
+        var profile = new RiderProfile { EmployeeId = employeeId };
+        dbContext.RiderProfiles.Add(profile);
+        try
+        {
+            await dbContext.SaveChangesAsync(cancellationToken);
+            profileId = profile.Id;
+        }
+        catch (DbUpdateException)
+        {
+            dbContext.Entry(profile).State = EntityState.Detached;
+            profileId = await dbContext.RiderProfiles.AsNoTracking()
+                .Where(item => item.EmployeeId == employeeId)
+                .Select(item => (Guid?)item.Id)
+                .SingleOrDefaultAsync(cancellationToken);
+            if (!profileId.HasValue) return Result.Failure<EmployeeVehicleProfileResponse>(HrErrors.Conflict);
+        }
+        return Result.Success(new EmployeeVehicleProfileResponse(employeeId, employee.IsEmployee, true, profileId));
+    }
+
     public async Task<Result<EmployeeDetailsResponse>> CreateEmployeeAsync(EmployeeUpsertRequest request, CancellationToken cancellationToken = default)
     {
         var validation = await ValidateRequestAsync(request, null, cancellationToken);

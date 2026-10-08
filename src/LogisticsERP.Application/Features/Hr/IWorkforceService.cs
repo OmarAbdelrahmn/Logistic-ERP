@@ -6,6 +6,8 @@ public interface IWorkforceService
 {
     Task<Result<IReadOnlyList<EmployeeListItemResponse>>> GetEmployeesAsync(CancellationToken cancellationToken = default);
     Task<Result<EmployeeDetailsResponse>> GetEmployeeAsync(Guid employeeId, CancellationToken cancellationToken = default);
+    Task<Result<EmployeeVehicleProfileResponse>> GetVehicleProfileAsync(Guid employeeId, CancellationToken cancellationToken = default);
+    Task<Result<EmployeeVehicleProfileResponse>> EnsureVehicleProfileAsync(Guid employeeId, CancellationToken cancellationToken = default);
     Task<Result<EmployeeDetailsResponse>> CreateEmployeeAsync(EmployeeUpsertRequest request, CancellationToken cancellationToken = default);
     Task<Result<EmployeeDetailsResponse>> UpdateEmployeeAsync(Guid employeeId, EmployeeUpsertRequest request, CancellationToken cancellationToken = default);
     Task<Result> ArchiveEmployeeAsync(Guid employeeId, ArchiveRequest request, CancellationToken cancellationToken = default);

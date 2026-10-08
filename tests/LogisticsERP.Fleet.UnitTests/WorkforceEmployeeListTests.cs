@@ -14,6 +14,37 @@ namespace LogisticsERP.Fleet.UnitTests;
 public sealed class WorkforceEmployeeListTests
 {
     [Fact]
+    public async Task VehicleProfileCanBeCreatedForAdministrativeEmployeeWithoutChangingRole()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var db = CreateContext();
+        await using var identity = CreateIdentityContext();
+        var employee = CreatePerson("1234567890", "Administrative employee", true, EmployeeRelationshipType.SponsoredInternal);
+        employee.Status = EmployeeStatus.Active;
+        db.Employees.Add(employee);
+        await db.SaveChangesAsync(ct);
+        var service = new WorkforceService(db, identity, new TestCurrentUser());
+
+        var before = await service.GetVehicleProfileAsync(employee.Id, ct);
+        Assert.True(before.IsSuccess);
+        Assert.False(before.Value!.Exists);
+        Assert.Null(before.Value.RiderProfileId);
+
+        var created = await service.EnsureVehicleProfileAsync(employee.Id, ct);
+        var repeated = await service.EnsureVehicleProfileAsync(employee.Id, ct);
+        var after = await service.GetVehicleProfileAsync(employee.Id, ct);
+
+        Assert.True(created.IsSuccess, created.Error.Description);
+        Assert.True(created.Value!.IsEmployee);
+        Assert.True(created.Value.Exists);
+        Assert.NotNull(created.Value.RiderProfileId);
+        Assert.Equal(created.Value.RiderProfileId, repeated.Value!.RiderProfileId);
+        Assert.Equal(created.Value.RiderProfileId, after.Value!.RiderProfileId);
+        Assert.True((await db.Employees.SingleAsync(ct)).IsEmployee);
+        Assert.Single(await db.RiderProfiles.ToArrayAsync(ct));
+    }
+
+    [Fact]
     public async Task EmployeeListIncludesExternalRidersAndDedicatedListRemainsAvailable()
     {
         var cancellationToken = TestContext.Current.CancellationToken;
