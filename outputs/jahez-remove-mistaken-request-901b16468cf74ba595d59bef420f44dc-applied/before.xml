@@ -1,0 +1,96 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="HandoverId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="Kind" type="xs:int" minOccurs="0" />
+                <xs:element name="Status" type="xs:int" minOccurs="0" />
+                <xs:element name="RequestedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="TargetAccountId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="WaiverAmount" type="xs:decimal" minOccurs="0" />
+                <xs:element name="FromDate" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="ToDate" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="EffectiveAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="Reason" type="xs:string" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="UpdatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="UpdatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RowVersion" type="xs:base64Binary" minOccurs="0" />
+                <xs:element name="IsDeleted" type="xs:boolean" minOccurs="0" />
+                <xs:element name="DeletedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="DeletedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DeletionReason" type="xs:string" minOccurs="0" />
+                <xs:element name="AdjustmentTarget" type="xs:int" minOccurs="0" />
+                <xs:element name="DebtAdjustment" type="xs:decimal" minOccurs="0" />
+                <xs:element name="OperationId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="ProposedCommission" type="xs:decimal" minOccurs="0" />
+                <xs:element name="ProposedNet" type="xs:decimal" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="Status" type="xs:int" minOccurs="0" />
+                <xs:element name="Net" type="xs:decimal" minOccurs="0" />
+                <xs:element name="Commission" type="xs:decimal" minOccurs="0" />
+                <xs:element name="Remaining" type="xs:decimal" minOccurs="0" />
+                <xs:element name="Fund" type="xs:int" minOccurs="0" />
+                <xs:element name="ExecutedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="RowVersion" type="xs:base64Binary" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table2">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="MovementCount" type="xs:long" minOccurs="0" />
+                <xs:element name="MovementAmount" type="xs:decimal" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <Id>01a14eb0-eb73-73f8-9284-56a936381181</Id>
+    <HandoverId>0e04d982-d863-4436-aa26-f05302537755</HandoverId>
+    <Kind>5</Kind>
+    <Status>4</Status>
+    <RequestedByUserId>019c18d5-62e1-7000-c000-000000000001</RequestedByUserId>
+    <WaiverAmount>0.000000</WaiverAmount>
+    <Reason>طلب مراجعة وتعديل التصفية للعملية #01a14e94</Reason>
+    <CreatedAtUtc>2026-10-18T11:06:19.9598187Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-18T11:11:15.0440589Z</UpdatedAtUtc>
+    <RowVersion>AAAAAAAC8T0=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <AdjustmentTarget>1</AdjustmentTarget>
+    <OperationId>01a14e94-839d-7b17-a42a-a8ae2c9d6130</OperationId>
+    <ProposedCommission>465.00</ProposedCommission>
+    <ProposedNet>-395.01</ProposedNet>
+  </Table>
+  <Table1>
+    <Id>01a14e94-839d-7b17-a42a-a8ae2c9d6130</Id>
+    <Status>3</Status>
+    <Net>-395.01</Net>
+    <Commission>465.00</Commission>
+    <Remaining>69.99</Remaining>
+    <Fund>2</Fund>
+    <ExecutedAtUtc>2026-10-18T11:15:25.1576225Z</ExecutedAtUtc>
+    <RowVersion>AAAAAAAC8VI=</RowVersion>
+  </Table1>
+  <Table2>
+    <MovementCount>1</MovementCount>
+    <MovementAmount>69.99</MovementAmount>
+  </Table2>
+</NewDataSet>

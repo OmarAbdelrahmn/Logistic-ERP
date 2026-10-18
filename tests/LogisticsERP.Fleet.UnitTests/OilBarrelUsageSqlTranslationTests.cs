@@ -51,7 +51,13 @@ public sealed class OilBarrelUsageSqlTranslationTests
                 foreach (var column in select.Split(','))
                 {
                     var name = column[(column.LastIndexOf('[') + 1)..column.LastIndexOf(']')];
-                    var property = typeof(OilBarrel).GetProperty(name)!;
+                    var property = typeof(OilBarrel).GetProperty(name);
+                    if (property is null)
+                    {
+                        table.Columns.Add(name, typeof(int));
+                        values.Add(DBNull.Value);
+                        continue;
+                    }
                     table.Columns.Add(name, Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType);
                     values.Add(property.GetValue(barrel) ?? DBNull.Value);
                 }

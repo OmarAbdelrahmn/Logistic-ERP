@@ -13,7 +13,7 @@ internal sealed partial class MaintenanceService
     {
         if (currentUser.UserId is null)
             return Result.Failure<OilBarrelResponse>(MaintenanceErrors.CurrentUserUnavailable);
-        if (!IsOilBarrelVehicleType(request.AllowedVehicleType))
+        if (!IsOilBarrelScope(request.AllowedVehicleType, request.AllowBothVehicleTypes))
             return Result.Failure<OilBarrelResponse>(MaintenanceErrors.InvalidOilBarrelVehicleType);
         var barrel = await dbContext.OilBarrels.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (barrel is null) return Result.Failure<OilBarrelResponse>(MaintenanceErrors.NotFound);
@@ -22,18 +22,21 @@ internal sealed partial class MaintenanceService
         // This endpoint classifies barrels that were already open before this feature.
         // New barrels choose their type in OpenOilBarrelAsync.
         if (barrel.Status != OilBarrelStatus.Open
-            || barrel.AllowedVehicleType.HasValue && barrel.AllowedVehicleType != request.AllowedVehicleType)
+            || (barrel.AllowedVehicleType.HasValue || barrel.AllowBothVehicleTypes)
+                && (barrel.AllowedVehicleType != request.AllowedVehicleType || barrel.AllowBothVehicleTypes != request.AllowBothVehicleTypes))
             return Result.Failure<OilBarrelResponse>(MaintenanceErrors.OilBarrelVehicleTypeLocked);
         var item = await dbContext.InventoryItems.AsNoTracking()
             .SingleOrDefaultAsync(x => x.Id == barrel.InventoryItemId, cancellationToken);
-        if (item is null || !InventoryItemVehicleCompatibility.Allows(item.CompatibleVehicleTypesMask, request.AllowedVehicleType))
+        if (item is null || !IsOilItemCompatible(item.CompatibleVehicleTypesMask, request.AllowedVehicleType, request.AllowBothVehicleTypes))
             return Result.Failure<OilBarrelResponse>(MaintenanceErrors.IncompatibleVehicleType);
         if (barrel.Status == OilBarrelStatus.Open && await dbContext.OilBarrels.AnyAsync(x =>
             x.Id != id && x.InventoryLocationId == barrel.InventoryLocationId
             && x.InventoryItemId == barrel.InventoryItemId && x.Status == OilBarrelStatus.Open
-            && x.AllowedVehicleType == request.AllowedVehicleType, cancellationToken))
+            && (request.AllowBothVehicleTypes || x.AllowBothVehicleTypes || x.AllowedVehicleType == null
+                || x.AllowedVehicleType == request.AllowedVehicleType), cancellationToken))
             return Result.Failure<OilBarrelResponse>(MaintenanceErrors.InvalidOilBarrel);
         barrel.AllowedVehicleType = request.AllowedVehicleType;
+        barrel.AllowBothVehicleTypes = request.AllowBothVehicleTypes;
         try { await dbContext.SaveChangesAsync(cancellationToken); }
         catch (DbUpdateConcurrencyException) { return Result.Failure<OilBarrelResponse>(MaintenanceErrors.ConcurrencyConflict); }
         catch (DbUpdateException) { return Result.Failure<OilBarrelResponse>(MaintenanceErrors.ConcurrencyConflict); }

@@ -1,0 +1,557 @@
+{
+  "sourceRows": 329,
+  "workingRows": 146,
+  "workingReady": 111,
+  "workingBlocked": 35,
+  "issueRows": 36,
+  "counts": {
+    "User cell contains a label, not an iqama": 14,
+    "Registered owner not found": 1,
+    "User iqama not found": 10,
+    "Registered owner has no rider profile": 9,
+    "User already assigned to SHIFTZ 2618863134": 1,
+    "Duplicate owner/city/sponsor conflicts with account 279581 when available": 1
+  },
+  "issues": [
+    {
+      "row": 6,
+      "externalId": "214258",
+      "ownerIqama": "2584539486",
+      "sponsor": "أكسبرس",
+      "city": "Jeddah",
+      "vehicleType": "سيارة",
+      "sourceStatus": "يعمل",
+      "userIqama": null,
+      "userRaw": "PrimeX Gate Logistics8",
+      "phone": "0532437359",
+      "reasons": [
+        "User cell contains a label, not an iqama"
+      ]
+    },
+    {
+      "row": 9,
+      "externalId": "215469",
+      "ownerIqama": "2616040024",
+      "sponsor": "أكسبرس",
+      "city": "Jeddah",
+      "vehicleType": "سيارة",
+      "sourceStatus": "يعمل",
+      "userIqama": null,
+      "userRaw": "PrimeX Gate Logistics5",
+      "phone": "0578565179",
+      "reasons": [
+        "User cell contains a label, not an iqama"
+      ]
+    },
+    {
+      "row": 20,
+      "externalId": "255527",
+      "ownerIqama": "2629274197",
+      "sponsor": "أكسبرس",
+      "city": "Jeddah",
+      "vehicleType": "سيارة",
+      "sourceStatus": "يعمل",
+      "userIqama": "2526331299",
+      "userRaw": "2526331299",
+      "phone": "0543194742",
+      "reasons": [
+        "Registered owner not found"
+      ]
+    },
+    {
+      "row": 21,
+      "externalId": "214267",
+      "ownerIqama": "2561010998",
+      "sponsor": "أكسبرس",
+      "city": "Jeddah",
+      "vehicleType": "سيارة",
+      "sourceStatus": "يعمل",
+      "userIqama": "2572126197",
+      "userRaw": "2572126197",
+      "phone": "0541182296",
+      "reasons": [
+        "User iqama not found"
+      ]
+    },
+    {
+      "row": 22,
+      "externalId": "214288",
+      "ownerIqama": "2510059021",
+      "sponsor": "أكسبرس",
+      "city": "Jeddah",
+      "vehicleType": "سيارة",
+      "sourceStatus": "يعمل",
+      "userIqama": null,
+      "userRaw": "PrimeX Gate Logistics12",
+      "phone": "0510130651",
+      "reasons": [
+        "User cell contains a label, not an iqama"
+      ]
+    },
+    {
+      "row": 24,
+      "externalId": "214235",
+      "ownerIqama": "2531302228",
+      "sponsor": "أكسبرس",
+      "city": "Jeddah",
+      "vehicleType": "سيارة",
+      "sourceStatus": "يعمل",
+      "userIqama": null,
+      "userRaw": "PrimeX Gate Logistics7",
+      "phone": "0578756197",
+      "reasons": [
+        "User cell contains a label, not an iqama"
+      ]
+    },
+    {
+      "row": 25,
+      "externalId": "215473",
+      "ownerIqama": "2602293777",
+      "sponsor": "أكسبرس",
+      "city": "Jeddah",
+      "vehicleType": "سيارة",
+      "sourceStatus": "يعمل",
+      "userIqama": "2642066043",
+      "userRaw": "2642066043",
+      "phone": "0571166051",
+      "reasons": [
+        "Registered owner has no rider profile"
+      ]
+    },
+    {
+      "row": 28,
+      "externalId": "215746",
+      "ownerIqama": "2285099194",
+      "sponsor": "أكسبرس",
+      "city": "Jeddah",
+      "vehicleType": "سيارة",
+      "sourceStatus": "يعمل",
+      "userIqama": "2492838038",
+      "userRaw": "2492838038",
+      "phone": "0548633914",
+      "reasons": [
+        "User already assigned to SHIFTZ 2618863134"
+      ]
+    },
+    {
+      "row": 29,
+      "externalId": "215728",
+      "ownerIqama": "2608760977",
+      "sponsor": "أكسبرس",
+      "city": "Jeddah",
+      "vehicleType": "سيارة",
+      "sourceStatus": "يعمل",
+      "userIqama": null,
+      "userRaw": "PrimeX Gate Logistics6",
+      "phone": "0575483402",
+      "reasons": [
+        "User cell contains a label, not an iqama"
+      ]
+    },
+    {
+      "row": 34,
+      "externalId": "214310",
+      "ownerIqama": "2621484548",
+      "sponsor": "أكسبرس",
+      "city": "Jeddah",
+      "vehicleType": "سيارة",
+      "sourceStatus": "يعمل",
+      "userIqama": null,
+      "userRaw": "PrimeX Gate Logistics3",
+      "phone": "0557334968",
+      "reasons": [
+        "User cell contains a label, not an iqama"
+      ]
+    },
+    {
+      "row": 37,
+      "externalId": "215776",
+      "ownerIqama": "2545269660",
+      "sponsor": "أكسبرس",
+      "city": "Jeddah",
+      "vehicleType": "سيارة",
+      "sourceStatus": "يعمل",
+      "userIqama": null,
+      "userRaw": "PrimeX Gate Logistics9",
+      "phone": "0530412438",
+      "reasons": [
+        "User cell contains a label, not an iqama"
+      ]
+    },
+    {
+      "row": 38,
+      "externalId": "215723",
+      "ownerIqama": "2512025293",
+      "sponsor": "أكسبرس",
+      "city": "Jeddah",
+      "vehicleType": "سيارة",
+      "sourceStatus": "يعمل",
+      "userIqama": null,
+      "userRaw": "PrimeX Gate Logistics11",
+      "phone": "0511925315",
+      "reasons": [
+        "User cell contains a label, not an iqama"
+      ]
+    },
+    {
+      "row": 105,
+      "externalId": "215339",
+      "ownerIqama": "2555284278",
+      "sponsor": "البوابة",
+      "city": "Jeddah",
+      "vehicleType": "دباب",
+      "sourceStatus": "يعمل",
+      "userIqama": null,
+      "userRaw": "خارجي - عبدالله 1",
+      "phone": "0545038175",
+      "reasons": [
+        "User cell contains a label, not an iqama"
+      ]
+    },
+    {
+      "row": 106,
+      "externalId": "246088",
+      "ownerIqama": "2623790736",
+      "sponsor": "البوابة",
+      "city": "Jeddah",
+      "vehicleType": "دباب",
+      "sourceStatus": "يعمل",
+      "userIqama": null,
+      "userRaw": "خارجي - عبدالله 2",
+      "phone": "0545269541",
+      "reasons": [
+        "User cell contains a label, not an iqama"
+      ]
+    },
+    {
+      "row": 107,
+      "externalId": "215331",
+      "ownerIqama": "2591952755",
+      "sponsor": "البوابة",
+      "city": "Jeddah",
+      "vehicleType": "دباب",
+      "sourceStatus": "يعمل",
+      "userIqama": null,
+      "userRaw": "خارجي - عبدالله 3",
+      "phone": "0567416401",
+      "reasons": [
+        "User cell contains a label, not an iqama"
+      ]
+    },
+    {
+      "row": 108,
+      "externalId": "282111",
+      "ownerIqama": "2566240384",
+      "sponsor": "البوابة",
+      "city": "Jeddah",
+      "vehicleType": "دباب",
+      "sourceStatus": "يعمل",
+      "userIqama": "2643876978",
+      "userRaw": "2643876978",
+      "phone": "0561567803",
+      "reasons": [
+        "User iqama not found"
+      ]
+    },
+    {
+      "row": 109,
+      "externalId": "282007",
+      "ownerIqama": "2580972970",
+      "sponsor": "البوابة",
+      "city": "Jeddah",
+      "vehicleType": "دباب",
+      "sourceStatus": "يعمل",
+      "userIqama": "2643877190",
+      "userRaw": "2643877190",
+      "phone": "0569340944",
+      "reasons": [
+        "User iqama not found"
+      ]
+    },
+    {
+      "row": 110,
+      "externalId": "267219",
+      "ownerIqama": "2555828033",
+      "sponsor": "البوابة",
+      "city": "Jeddah",
+      "vehicleType": "دباب",
+      "sourceStatus": "يعمل",
+      "userIqama": "2606876676",
+      "userRaw": "2606876676",
+      "phone": "0566515195",
+      "reasons": [
+        "User iqama not found"
+      ]
+    },
+    {
+      "row": 125,
+      "externalId": "267208",
+      "ownerIqama": "2598672570",
+      "sponsor": "البوابة",
+      "city": "Jeddah",
+      "vehicleType": "دباب",
+      "sourceStatus": "يعمل",
+      "userIqama": "2511950970",
+      "userRaw": "2511950970",
+      "phone": "0569852464",
+      "reasons": [
+        "User iqama not found"
+      ]
+    },
+    {
+      "row": 126,
+      "externalId": "279558",
+      "ownerIqama": "2588796272",
+      "sponsor": "البوابة",
+      "city": "Jeddah",
+      "vehicleType": "دباب",
+      "sourceStatus": "يعمل",
+      "userIqama": "2592875260",
+      "userRaw": "2592875260",
+      "phone": "0578125203",
+      "reasons": [
+        "User iqama not found"
+      ]
+    },
+    {
+      "row": 127,
+      "externalId": "267205",
+      "ownerIqama": "2594172286",
+      "sponsor": "البوابة",
+      "city": "Jeddah",
+      "vehicleType": "دباب",
+      "sourceStatus": "يعمل",
+      "userIqama": "2577962166",
+      "userRaw": "2577962166",
+      "phone": "0565548743",
+      "reasons": [
+        "User iqama not found"
+      ]
+    },
+    {
+      "row": 150,
+      "externalId": "246105",
+      "ownerIqama": "2596459871",
+      "sponsor": "البوابة",
+      "city": "Jeddah",
+      "vehicleType": "سيارة",
+      "sourceStatus": "يعمل",
+      "userIqama": "2439619392",
+      "userRaw": "2439619392",
+      "phone": "0543588112",
+      "reasons": [
+        "Registered owner has no rider profile"
+      ]
+    },
+    {
+      "row": 155,
+      "externalId": "246102",
+      "ownerIqama": "2540773997",
+      "sponsor": "البوابة",
+      "city": "Jeddah",
+      "vehicleType": "سيارة",
+      "sourceStatus": "يعمل",
+      "userIqama": "2104887514",
+      "userRaw": "2104887514",
+      "phone": "0552500990",
+      "reasons": [
+        "Registered owner has no rider profile"
+      ]
+    },
+    {
+      "row": 157,
+      "externalId": "246091",
+      "ownerIqama": "2602833002",
+      "sponsor": "البوابة",
+      "city": "Jeddah",
+      "vehicleType": "سيارة",
+      "sourceStatus": "يعمل",
+      "userIqama": null,
+      "userRaw": "PrimeX Gate Logistics2",
+      "phone": "0539886271",
+      "reasons": [
+        "User cell contains a label, not an iqama"
+      ]
+    },
+    {
+      "row": 159,
+      "externalId": "246093",
+      "ownerIqama": "2600262071",
+      "sponsor": "البوابة",
+      "city": "Jeddah",
+      "vehicleType": "سيارة",
+      "sourceStatus": "يعمل",
+      "userIqama": "2201893878",
+      "userRaw": "2201893878",
+      "phone": "0500950270",
+      "reasons": [
+        "User iqama not found"
+      ]
+    },
+    {
+      "row": 160,
+      "externalId": "246092",
+      "ownerIqama": "2601656255",
+      "sponsor": "البوابة",
+      "city": "Jeddah",
+      "vehicleType": "سيارة",
+      "sourceStatus": "يعمل",
+      "userIqama": "2174196580",
+      "userRaw": "2174196580",
+      "phone": "0530236680",
+      "reasons": [
+        "Registered owner has no rider profile"
+      ]
+    },
+    {
+      "row": 161,
+      "externalId": "215817",
+      "ownerIqama": "2430010302",
+      "sponsor": "البوابة",
+      "city": "Jeddah",
+      "vehicleType": "سيارة",
+      "sourceStatus": "يعمل",
+      "userIqama": "2528001262",
+      "userRaw": "2528001262",
+      "phone": "0563767913",
+      "reasons": [
+        "User iqama not found"
+      ]
+    },
+    {
+      "row": 162,
+      "externalId": "246116",
+      "ownerIqama": "2615898232",
+      "sponsor": "البوابة",
+      "city": "Jeddah",
+      "vehicleType": "سيارة",
+      "sourceStatus": "يعمل",
+      "userIqama": null,
+      "userRaw": "PrimeX Gate Logistics4",
+      "phone": "0542437824",
+      "reasons": [
+        "User cell contains a label, not an iqama"
+      ]
+    },
+    {
+      "row": 165,
+      "externalId": "214753",
+      "ownerIqama": "2603760543",
+      "sponsor": "البوابة",
+      "city": "Jeddah",
+      "vehicleType": "سيارة",
+      "sourceStatus": "يعمل",
+      "userIqama": "2522187547",
+      "userRaw": "2522187547",
+      "phone": "0592335916",
+      "reasons": [
+        "User iqama not found"
+      ]
+    },
+    {
+      "row": 166,
+      "externalId": "77230",
+      "ownerIqama": "2582720773",
+      "sponsor": "البوابة",
+      "city": "Jeddah",
+      "vehicleType": "دباب",
+      "sourceStatus": "يعمل",
+      "userIqama": null,
+      "userRaw": "PrimeX Gate Logistics1",
+      "phone": "0571130308",
+      "reasons": [
+        "User cell contains a label, not an iqama"
+      ]
+    },
+    {
+      "row": 186,
+      "externalId": "66689",
+      "ownerIqama": "2577660661",
+      "sponsor": "البوابة",
+      "city": "Jeddah",
+      "vehicleType": "سيارة",
+      "sourceStatus": "لايعمل",
+      "userIqama": null,
+      "userRaw": "0",
+      "phone": "0",
+      "reasons": [
+        "Duplicate owner/city/sponsor conflicts with account 279581 when available"
+      ]
+    },
+    {
+      "row": 239,
+      "externalId": "222872",
+      "ownerIqama": "2589621826",
+      "sponsor": "أكسبرس",
+      "city": "Riyadh",
+      "vehicleType": "سيارة",
+      "sourceStatus": "يعمل",
+      "userIqama": "2536722909",
+      "userRaw": "2536722909",
+      "phone": "0564926978",
+      "reasons": [
+        "Registered owner has no rider profile"
+      ]
+    },
+    {
+      "row": 248,
+      "externalId": "272574",
+      "ownerIqama": "2619269471",
+      "sponsor": "أكسبرس",
+      "city": "Riyadh",
+      "vehicleType": "سيارة",
+      "sourceStatus": "يعمل",
+      "userIqama": "2529584548",
+      "userRaw": "2529584548",
+      "phone": "0539676115",
+      "reasons": [
+        "Registered owner has no rider profile"
+      ]
+    },
+    {
+      "row": 249,
+      "externalId": "272573",
+      "ownerIqama": "2614137541",
+      "sponsor": "أكسبرس",
+      "city": "Riyadh",
+      "vehicleType": "سيارة",
+      "sourceStatus": "يعمل",
+      "userIqama": "2514822994",
+      "userRaw": "2514822994",
+      "phone": "0540292673",
+      "reasons": [
+        "Registered owner has no rider profile"
+      ]
+    },
+    {
+      "row": 261,
+      "externalId": "215450",
+      "ownerIqama": "2535376723",
+      "sponsor": "أكسبرس",
+      "city": "Riyadh",
+      "vehicleType": "سيارة",
+      "sourceStatus": "يعمل",
+      "userIqama": "2602776805",
+      "userRaw": "2602776805",
+      "phone": "0506140267",
+      "reasons": [
+        "Registered owner has no rider profile"
+      ]
+    },
+    {
+      "row": 270,
+      "externalId": "215707",
+      "ownerIqama": "2599679483",
+      "sponsor": "أكسبرس",
+      "city": "Riyadh",
+      "vehicleType": "سيارة",
+      "sourceStatus": "يعمل",
+      "userIqama": "2604120929",
+      "userRaw": "2604120929",
+      "phone": "0510097529",
+      "reasons": [
+        "Registered owner has no rider profile"
+      ]
+    }
+  ]
+}

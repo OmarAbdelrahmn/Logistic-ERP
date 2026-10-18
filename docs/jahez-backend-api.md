@@ -1,5 +1,9 @@
 # وحدة جاهز: التشغيل وواجهات Backend
 
+> Current 11 October 2026 contract, including debt freeze/transfer/clearance/paid confirmation: [full API reference](jahez-full-api-reference.md), [frontend changelog](jahez-frontend-changelog-and-spec.md), and [TypeScript contracts](jahez-api-contracts.ts). Historical examples below may omit the new fields; use the current contract for integration.
+
+أضيفت إجراءات نقل المديونية للمندوب وتجميد الحساب وتأكيد تصفيته وسداد المندوب، مع ملخص إجمالي المديونية. التفاصيل والطلبات وحقول الحالة في [جاهز: المديونية والتجميد وتصفية الحساب](jahez-debt-freeze-and-clearance-ar.md).
+
 تنفيذ Backend فقط. تستخدم الوحدة منصة `ClientPlatform.Code = JAHEZ`، وحسابات المنصات والمندوبين والإسنادات الحالية. لا يوجد اتصال مباشر بمنصة جاهز، ولا تعديل للملفات الأصلية، ولا واجهة مستخدم ضمن هذا التغيير.
 
 ## الحساب والمندوب والكفلاء
@@ -38,9 +42,9 @@
 
 | الطريقة والمسار بعد `/api/jahez` | الاستخدام | الصلاحية |
 |---|---|---|
-| POST `/handovers` | استلام ورسوم 200 ودفعة أولى اختيارية | jahez.handovers.manage |
-| POST `/legacy-adoptions` | تهيئة إسناد قائم وأرصدة افتتاحية موثقة | jahez.adjustments.manage |
-| POST `/handovers/{id}/close` | إنهاء الاستخدام وتثبيت عمولته | jahez.handovers.manage |
+| POST `/handovers` | استلام ورسوم 200 ودفعة أولى اختيارية | jahez.handovers.create |
+| POST `/legacy-adoptions` | تهيئة إسناد قائم وأرصدة افتتاحية موثقة | jahez.adjustments.create |
+| POST `/handovers/{id}/close` | إنهاء الاستخدام وتثبيت عمولته | jahez.handovers.delete |
 | GET `/handovers?accountId=&riderId=` | فترات الاستلام | jahez.read |
 | GET `/handovers/{id}/balance?through=2026-10-06` | معاينة الرصيد والتصفية | jahez.read |
 | GET `/debts?riderId=&overdueOnly=true` | كشوف المديونيات والمتأخرين، بما فيهم المستخدم السابق | jahez.read |
@@ -53,13 +57,13 @@
 | GET `/requests?status=1` و`/requests/{id}` | الطلب والقرارات | jahez.read |
 | POST `/requests/{id}/decision` | موافقة أو رفض | jahez.read + jahez.requests.approve؛ التصفير يحتاج jahez.resets.approve |
 | POST `/requests/{id}/cancel` | إلغاء المعلق بواسطة مقدمه | jahez.requests.create |
-| POST `/earnings` | تفاصيل أرباح فترة النسبة | jahez.earnings.manage |
-| POST `/settlements` | قبض وتوزيع على البنود الثلاثة | jahez.collections.manage |
-| POST `/adjustments` | تسوية موثقة أو عكس استحقاق | jahez.adjustments.manage |
-| POST `/imports` | رفع ومعاينة ملفات multipart | jahez.imports.manage |
-| GET `/imports` و`/imports/{id}` | سجل الدفعات ومعاينتها | jahez.imports.manage |
-| POST `/imports/{id}/commit` | ترحيل بعد حل المشكلات | jahez.imports.manage |
-| GET `/import-files/{id}` | تنزيل الملف الأصلي المحفوظ | jahez.imports.manage |
+| POST `/earnings` | تفاصيل أرباح فترة النسبة | jahez.earnings.create |
+| POST `/settlements` | قبض وتوزيع على البنود الثلاثة | jahez.collections.create |
+| POST `/adjustments` | تسوية موثقة أو عكس استحقاق | jahez.adjustments.create |
+| POST `/imports` | رفع ومعاينة ملفات multipart | jahez.imports.create |
+| GET `/imports` و`/imports/{id}` | سجل الدفعات ومعاينتها | jahez.imports.read |
+| POST `/imports/{id}/commit` | ترحيل بعد حل المشكلات | jahez.imports.update |
+| GET `/import-files/{id}` | تنزيل الملف الأصلي المحفوظ | jahez.imports.read |
 | GET `/dispatches?from=2026-10-02&to=2026-10-02&riderId=` | طلبات المستخدم الفعلي | jahez.read |
 | GET `/cashbox` | رصيد كل قسم والمتاح والمحجوز | jahez.cashbox.read |
 | GET `/cashbox/entries?cashboxHandoverId=` | المقبوضات وربطها بالتسليم | jahez.cashbox.read |

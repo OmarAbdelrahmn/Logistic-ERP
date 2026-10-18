@@ -1,0 +1,72 @@
+{
+  "items": [
+    {
+      "accountId": "00000000-0000-4000-8000-000000000010",
+      "externalAccountId": "CHEFZ-A",
+      "reportIdNumber": "SAMPLE-1",
+      "accountType": "FullTime",
+      "commissionRate": 0,
+      "dailyFee": 25,
+      "hasPassword": false,
+      "rowVersion": "AAAAAAAAAAE=",
+      "sponsorId": "00000000-0000-4000-8000-000000000002",
+      "operatingCityId": "00000000-0000-4000-8000-000000000003",
+      "vehicleType": "Car",
+      "dashboardStatus": "active",
+      "status": "Assigned",
+      "statusReason": null,
+      "accountRowVersion": "AAAAAAAAAAI=",
+      "isOperationallyBlocked": false,
+      "operationalBlockReason": null
+    },
+    {
+      "accountId": "00000000-0000-4000-8000-000000000011",
+      "externalAccountId": "CHEFZ-B",
+      "reportIdNumber": "SAMPLE-2",
+      "accountType": "FullTime",
+      "commissionRate": 0,
+      "dailyFee": 25,
+      "hasPassword": false,
+      "rowVersion": "AAAAAAAAAAE=",
+      "sponsorId": "00000000-0000-4000-8000-000000000002",
+      "operatingCityId": "00000000-0000-4000-8000-000000000003",
+      "vehicleType": "Car",
+      "dashboardStatus": "active",
+      "status": "Assigned",
+      "statusReason": null,
+      "accountRowVersion": "AAAAAAAAAAI=",
+      "isOperationallyBlocked": false,
+      "operationalBlockReason": null
+    }
+  ],
+  "page": 1,
+  "pageSize": 50,
+  "totalCount": 2,
+  "summary": {
+    "total": 2,
+    "taken": 2,
+    "notTaken": 0,
+    "available": 0,
+    "assigned": 2,
+    "suspended": 0,
+    "retired": 0,
+    "archived": 0
+  },
+  "sponsors": [
+    {
+      "sponsorId": "00000000-0000-4000-8000-000000000002",
+      "sponsorNameAr": "كفيل تجريبي",
+      "sponsorNameEn": "Example sponsor",
+      "counts": {
+        "total": 2,
+        "taken": 2,
+        "notTaken": 0,
+        "available": 0,
+        "assigned": 2,
+        "suspended": 0,
+        "retired": 0,
+        "archived": 0
+      }
+    }
+  ]
+}

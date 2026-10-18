@@ -1,0 +1,25 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="DeletedSettlements" type="xs:int" minOccurs="0" />
+                <xs:element name="DeletedOrderImports" type="xs:int" minOccurs="0" />
+                <xs:element name="CorrelationId" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <DeletedSettlements>241</DeletedSettlements>
+    <DeletedOrderImports>3</DeletedOrderImports>
+    <CorrelationId>chefz-settlement-reset-ef3ce7dec15b44cc8c00e6cc23fe74fa</CorrelationId>
+  </Table>
+</NewDataSet>

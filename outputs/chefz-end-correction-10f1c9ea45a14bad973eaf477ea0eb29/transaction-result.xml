@@ -1,0 +1,25 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="BeforeJson" type="xs:string" minOccurs="0" />
+                <xs:element name="AfterJson" type="xs:string" minOccurs="0" />
+                <xs:element name="CorrelationId" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <BeforeJson>{"Id":"CE52E580-07B7-4476-9711-8A48DB7039BB","PlatformRiderAccountId":"CCC819CD-58FD-4EED-B32C-E046F4288326","EffectiveFrom":"2026-10-01","EffectiveTo":"2026-10-06","Status":3}</BeforeJson>
+    <AfterJson>{"Id":"CE52E580-07B7-4476-9711-8A48DB7039BB","PlatformRiderAccountId":"CCC819CD-58FD-4EED-B32C-E046F4288326","EffectiveFrom":"2026-10-01","EffectiveTo":"2026-10-07","Status":3}</AfterJson>
+    <CorrelationId>chefz-end-correction-10f1c9ea45a14bad973eaf477ea0eb29</CorrelationId>
+  </Table>
+</NewDataSet>

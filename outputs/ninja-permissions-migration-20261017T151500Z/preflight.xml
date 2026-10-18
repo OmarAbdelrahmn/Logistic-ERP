@@ -1,0 +1,123 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="MigrationId" type="xs:string" minOccurs="0" />
+                <xs:element name="ProductVersion" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="MigrationId" type="xs:string" minOccurs="0" />
+                <xs:element name="ProductVersion" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table2">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="Key" type="xs:string" minOccurs="0" />
+                <xs:element name="Category" type="xs:string" minOccurs="0" />
+                <xs:element name="NameAr" type="xs:string" minOccurs="0" />
+                <xs:element name="NameEn" type="xs:string" minOccurs="0" />
+                <xs:element name="DescriptionAr" type="xs:string" minOccurs="0" />
+                <xs:element name="DescriptionEn" type="xs:string" minOccurs="0" />
+                <xs:element name="RequiresHousingScope" type="xs:boolean" minOccurs="0" />
+                <xs:element name="RequiresClientScope" type="xs:boolean" minOccurs="0" />
+                <xs:element name="IsSensitive" type="xs:boolean" minOccurs="0" />
+                <xs:element name="IsHighTrust" type="xs:boolean" minOccurs="0" />
+                <xs:element name="GrantabilityRule" type="xs:string" minOccurs="0" />
+                <xs:element name="Version" type="xs:int" minOccurs="0" />
+                <xs:element name="IsDeprecated" type="xs:boolean" minOccurs="0" />
+                <xs:element name="ReplacementKey" type="xs:string" minOccurs="0" />
+                <xs:element name="DisplayOrder" type="xs:int" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="UpdatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="UpdatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RowVersion" type="xs:base64Binary" minOccurs="0" />
+                <xs:element name="IsDeleted" type="xs:boolean" minOccurs="0" />
+                <xs:element name="DeletedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="DeletedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DeletionReason" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table3">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RoleId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="PermissionKey" type="xs:string" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="UpdatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="UpdatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="IsDeleted" type="xs:boolean" minOccurs="0" />
+                <xs:element name="DeletedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="DeletedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DeletionReason" type="xs:string" minOccurs="0" />
+                <xs:element name="RowVersion" type="xs:base64Binary" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table4">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="UserName" type="xs:string" minOccurs="0" />
+                <xs:element name="RoleName" type="xs:string" minOccurs="0" />
+                <xs:element name="IsAllClientScope" type="xs:boolean" minOccurs="0" />
+                <xs:element name="StartsAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="ExpiresAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table4>
+    <UserName>Omar</UserName>
+    <RoleName>HR_MANGER</RoleName>
+    <IsAllClientScope>true</IsAllClientScope>
+    <StartsAtUtc>2026-10-03T16:18:03.2986672Z</StartsAtUtc>
+  </Table4>
+  <Table4>
+    <UserName>Omar</UserName>
+    <RoleName>TRAFFIC_MANAGER</RoleName>
+    <IsAllClientScope>true</IsAllClientScope>
+    <StartsAtUtc>2026-10-03T16:18:03.2986672Z</StartsAtUtc>
+  </Table4>
+  <Table4>
+    <UserName>Omar</UserName>
+    <RoleName>SYSTEM_ADMIN</RoleName>
+    <IsAllClientScope>true</IsAllClientScope>
+    <StartsAtUtc>2026-10-03T16:18:03.2986672Z</StartsAtUtc>
+  </Table4>
+  <Table4>
+    <UserName>Omar</UserName>
+    <RoleName>APPLICATION_MANAGER</RoleName>
+    <IsAllClientScope>true</IsAllClientScope>
+    <StartsAtUtc>2026-10-03T16:18:03.2986672Z</StartsAtUtc>
+  </Table4>
+  <Table4>
+    <UserName>Omar</UserName>
+    <RoleName>MANAGER_01</RoleName>
+    <IsAllClientScope>true</IsAllClientScope>
+    <StartsAtUtc>2026-10-03T16:18:03.2986672Z</StartsAtUtc>
+  </Table4>
+  <Table4>
+    <UserName>Omar</UserName>
+    <RoleName>ACCOUNT_MANAGER</RoleName>
+    <IsAllClientScope>true</IsAllClientScope>
+    <StartsAtUtc>2026-10-03T16:18:03.2986672Z</StartsAtUtc>
+  </Table4>
+</NewDataSet>

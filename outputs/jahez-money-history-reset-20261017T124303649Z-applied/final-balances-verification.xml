@@ -1,0 +1,67 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="AccountsPreserved" type="xs:int" minOccurs="0" />
+                <xs:element name="ActiveSessionsPreserved" type="xs:int" minOccurs="0" />
+                <xs:element name="ApprovalRequests" type="xs:int" minOccurs="0" />
+                <xs:element name="ApprovalDecisions" type="xs:int" minOccurs="0" />
+                <xs:element name="Operations" type="xs:int" minOccurs="0" />
+                <xs:element name="LedgerEntries" type="xs:int" minOccurs="0" />
+                <xs:element name="ImportRows" type="xs:int" minOccurs="0" />
+                <xs:element name="InvalidResetSessions" type="xs:int" minOccurs="0" />
+                <xs:element name="AccruedCommission" type="xs:int" minOccurs="0" />
+                <xs:element name="LedgerBalance" type="xs:decimal" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Fund" type="xs:int" minOccurs="0" />
+                <xs:element name="Received" type="xs:decimal" minOccurs="0" />
+                <xs:element name="Paid" type="xs:decimal" minOccurs="0" />
+                <xs:element name="Balance" type="xs:decimal" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <AccountsPreserved>382</AccountsPreserved>
+    <ActiveSessionsPreserved>298</ActiveSessionsPreserved>
+    <ApprovalRequests>0</ApprovalRequests>
+    <ApprovalDecisions>0</ApprovalDecisions>
+    <Operations>0</Operations>
+    <LedgerEntries>0</LedgerEntries>
+    <ImportRows>0</ImportRows>
+    <InvalidResetSessions>0</InvalidResetSessions>
+    <AccruedCommission>0</AccruedCommission>
+    <LedgerBalance>0.000000</LedgerBalance>
+  </Table>
+  <Table1>
+    <Fund>1</Fund>
+    <Received>0.00</Received>
+    <Paid>0.00</Paid>
+    <Balance>0.00</Balance>
+  </Table1>
+  <Table1>
+    <Fund>2</Fund>
+    <Received>0.00</Received>
+    <Paid>0.00</Paid>
+    <Balance>0.00</Balance>
+  </Table1>
+  <Table1>
+    <Fund>3</Fund>
+    <Received>0.00</Received>
+    <Paid>0.00</Paid>
+    <Balance>0.00</Balance>
+  </Table1>
+</NewDataSet>

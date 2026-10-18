@@ -1,0 +1,201 @@
+{
+  "files": [
+    {
+      "file": "2151034 Albawaba Almokbela (8).xlsx",
+      "sha256": "6F9DE399C84DD320FD8290E43F4B5005DD94C99E185F41BED4FFC849F7681B45",
+      "exactHashMatches": 1,
+      "importIds": [
+        "01a149c2-8e1c-7a9d-956a-7ddfab26cc0d"
+      ],
+      "rows": 5067,
+      "drivers": 141,
+      "dates": [
+        "2026-10-01",
+        "2026-10-15"
+      ],
+      "sourceTotals": {
+        "DeliveryFees": "117096",
+        "Tips": "953",
+        "Compensation": "961",
+        "Bonuses": "0",
+        "Deductions": "3365.0"
+      },
+      "commissionColumnSum": "0",
+      "cashColumnSum": "0",
+      "storedTotals": {
+        "DeliveryFees": "117096.00",
+        "Tips": "953.00",
+        "Compensation": "961.00",
+        "Bonuses": "0",
+        "Deductions": "3365.00",
+        "VatAmount": "17564.40",
+        "GrossEarnings": "98080.60",
+        "CompanyAmount": "16044.11",
+        "RiderAmount": "82036.49",
+        "SourceRows": "5067"
+      },
+      "expectedSettlementCount": 143,
+      "storedSettlementCount": 143,
+      "distinctRiders": 138,
+      "sourceIssues": [],
+      "mismatches": [
+        {
+          "driver": "2591985425",
+          "differences": {
+            "CompanyAmount": {
+              "expected": "175",
+              "stored": "150.00"
+            },
+            "RiderAmount": {
+              "expected": "371.70",
+              "stored": "396.70"
+            },
+            "AssignedDays": {
+              "expected": 7,
+              "stored": 6
+            }
+          }
+        }
+      ],
+      "missingSettlements": [],
+      "accountTypes": {
+        "1": {
+          "accounts": 120,
+          "settlements": 121,
+          "assignedDays": 1667,
+          "DeliveryFees": "66517.00",
+          "VatAmount": "9977.55",
+          "GrossEarnings": "54959.95",
+          "CompanyAmount": "8244.11",
+          "RiderAmount": "46715.84"
+        },
+        "2": {
+          "accounts": 21,
+          "settlements": 22,
+          "assignedDays": 313,
+          "DeliveryFees": "50579.00",
+          "VatAmount": "7586.85",
+          "GrossEarnings": "43120.65",
+          "CompanyAmount": "7800.00",
+          "RiderAmount": "35320.65"
+        }
+      },
+      "vatIfInclusive": "15273.38",
+      "netIncreaseIfVatInclusive": "2291.02",
+      "negativeRiders": [
+        {
+          "driver": "2537012359",
+          "name": "خالد طه عبد الرؤف البلبيسي",
+          "net": "-66.70",
+          "company": "-10.01",
+          "rider": "-56.69",
+          "days": 13
+        },
+        {
+          "driver": "2535636027",
+          "name": "البراء رايد احمد بربوه",
+          "net": "-7.05",
+          "company": "-1.06",
+          "rider": "-5.99",
+          "days": 15
+        },
+        {
+          "driver": "2577524115",
+          "name": "على عزيز الدين ثابت حسن",
+          "net": "-58.15",
+          "company": "-8.72",
+          "rider": "-49.43",
+          "days": 3
+        }
+      ]
+    },
+    {
+      "file": "2151351 Albawaabah Farei (8).xlsx",
+      "sha256": "F03F3F3E3220D22529491AE1A87D1136416D8336A9FB8073ACEDB930D15D897C",
+      "exactHashMatches": 1,
+      "importIds": [
+        "01a149c3-f79a-7d1d-beb0-bb8a766a149c"
+      ],
+      "rows": 4048,
+      "drivers": 88,
+      "dates": [
+        "2026-10-01",
+        "2026-10-15"
+      ],
+      "sourceTotals": {
+        "DeliveryFees": "93517",
+        "Tips": "1032",
+        "Compensation": "664",
+        "Bonuses": "0",
+        "Deductions": "2789"
+      },
+      "commissionColumnSum": "0",
+      "cashColumnSum": "66.75",
+      "storedTotals": {
+        "DeliveryFees": "93517.00",
+        "Tips": "1032.00",
+        "Compensation": "664.00",
+        "Bonuses": "0",
+        "Deductions": "2789.00",
+        "VatAmount": "14027.55",
+        "GrossEarnings": "78396.45",
+        "CompanyAmount": "12408.78",
+        "RiderAmount": "65987.67",
+        "SourceRows": "4048"
+      },
+      "expectedSettlementCount": 88,
+      "storedSettlementCount": 88,
+      "distinctRiders": 86,
+      "sourceIssues": [],
+      "mismatches": [],
+      "missingSettlements": [],
+      "accountTypes": {
+        "1": {
+          "accounts": 67,
+          "settlements": 67,
+          "assignedDays": 962,
+          "DeliveryFees": "37347.00",
+          "VatAmount": "5602.05",
+          "GrossEarnings": "31057.95",
+          "CompanyAmount": "4658.78",
+          "RiderAmount": "26399.17"
+        },
+        "2": {
+          "accounts": 21,
+          "settlements": 21,
+          "assignedDays": 310,
+          "DeliveryFees": "56170.00",
+          "VatAmount": "8425.50",
+          "GrossEarnings": "47338.50",
+          "CompanyAmount": "7750.00",
+          "RiderAmount": "39588.50"
+        }
+      },
+      "vatIfInclusive": "12197.85",
+      "netIncreaseIfVatInclusive": "1829.70",
+      "negativeRiders": [
+        {
+          "driver": "2560773141",
+          "name": "مصطفى رفاعي على احمد",
+          "net": "23.80",
+          "company": "375",
+          "rider": "-351.20",
+          "days": 15
+        }
+      ]
+    }
+  ],
+  "crossFileDuplicateOrders": 0,
+  "invalidArithmetic": [
+    {
+      "InvalidArithmetic": 0
+    }
+  ],
+  "duplicateSettlements": [],
+  "readAt": [
+    {
+      "DatabaseName": "db67927",
+      "ReadAtUtc": "2026-10-17T15:47:07.6655404"
+    }
+  ]
+}

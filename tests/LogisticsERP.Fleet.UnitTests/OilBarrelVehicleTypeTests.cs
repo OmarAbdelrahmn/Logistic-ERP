@@ -20,6 +20,194 @@ public sealed class OilBarrelVehicleTypeTests
     private static readonly DateTimeOffset Now = new(2026, 10, 1, 9, 0, 0, TimeSpan.Zero);
 
     [Fact]
+    public async Task SqlServerMigrationWriteOffConcurrencyAndSharedScopeConstraints()
+    {
+        Assert.SkipUnless(Environment.GetEnvironmentVariable("LOGISTICS_OIL_SQL_TESTS") == "1",
+            "Set LOGISTICS_OIL_SQL_TESTS=1 on Windows with LocalDB to run this isolated database test.");
+        var ct = TestContext.Current.CancellationToken;
+        var databaseName = "LogisticsERP_OilTest_" + Guid.NewGuid().ToString("N");
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseSqlServer($"Server=(localdb)\\MSSQLLocalDB;Database={databaseName};Trusted_Connection=True;TrustServerCertificate=True",
+                sql => sql.MigrationsHistoryTable("__ApplicationMigrationsHistory", "migration")).Options;
+        await using var db = new ApplicationDbContext(options);
+        try
+        {
+            await db.Database.MigrateAsync(ct);
+            Assert.False(db.Database.HasPendingModelChanges());
+            var location = await db.InventoryLocations.SingleAsync(x => x.Id == InventoryLocation.JeddahWarehouseInventoryId, ct);
+            var item = new InventoryItem { Sku = "OIL-TEST", NormalizedSku = "OIL-TEST", NameAr = "Test", NameEn = "Test",
+                ItemType = InventoryItemType.Oil, BaseUnitOfMeasure = InventoryUnitOfMeasure.Liter,
+                PurchaseUnitOfMeasure = InventoryUnitOfMeasure.Liter };
+            db.InventoryItems.Add(item);
+            var barrel = AddBarrel(db, item, location, VehicleType.Car, 25, 10, 1, open: true);
+            var next = AddBarrel(db, item, location, null, 208, 10, 2);
+            var bike = AddBarrel(db, item, location, VehicleType.Motorcycle, 10, 10, 3, open: true);
+            await db.SaveChangesAsync(ct);
+            // A shared barrel overlaps both existing dedicated scopes at the database level.
+            next.Status = OilBarrelStatus.Open;
+            next.OpenedAtUtc = Now;
+            next.AllowBothVehicleTypes = true;
+            await Assert.ThrowsAsync<DbUpdateException>(() => db.SaveChangesAsync(ct));
+            db.ChangeTracker.Clear();
+            var originalVersion = Version(barrel);
+            var request = new RecordOilBarrelMissingRequest(Now, 15, OilBarrelMissingReason.Missing, "Count discrepancy", originalVersion);
+            await using var first = new ApplicationDbContext(options);
+            await using var second = new ApplicationDbContext(options);
+            var results = await Task.WhenAll(
+                new MaintenanceService(first, new TestUser(), TimeProvider.System, new NoFiles()).RecordOilBarrelMissingAsync(barrel.Id, request, ct),
+                new MaintenanceService(second, new TestUser(), TimeProvider.System, new NoFiles()).RecordOilBarrelMissingAsync(barrel.Id, request, ct));
+            var success = Assert.Single(results, x => x.IsSuccess);
+            Assert.Equal(MaintenanceErrors.ConcurrencyConflict.Code, Assert.Single(results, x => x.IsFailure).Error.Code);
+            Assert.Single(await db.OilBarrelLosses.ToArrayAsync(ct));
+            var service = new MaintenanceService(db, new TestUser(), TimeProvider.System, new NoFiles());
+            var completed = await service.RecordOilBarrelMissingAsync(barrel.Id,
+                request with { QuantityLiters = 10, RowVersion = success.Value!.Barrel.RowVersion }, ct);
+            Assert.Equal(OilBarrelStatus.Depleted, completed.Value!.Barrel.Status);
+            Assert.Equal(0m, completed.Value.Barrel.RemainingLiters);
+            Assert.Equal(25m, completed.Value.Barrel.RecordedMissingLiters);
+            Assert.Equal(0m, (await db.StockCostLayers.AsNoTracking().SingleAsync(x => x.Id == barrel.StockCostLayerId, ct)).RemainingQuantity);
+            Assert.Equal(218m, (await db.StockBalances.AsNoTracking().SingleAsync(ct)).QuantityOnHand);
+            Assert.Equal(2, await db.StockMovements.CountAsync(ct));
+            Assert.Equal(2, await db.StockCostAllocations.CountAsync(ct));
+            var history = await service.GetOilBarrelMissingHistoryAsync(barrel.Id, 1, 1, ct);
+            Assert.Equal(25m, history.Value!.TotalMissingLiters);
+            Assert.Equal(250m, history.Value.TotalCostAmount);
+            Assert.Single(history.Value.Entries);
+            Assert.True((await service.OpenOilBarrelAsync(next.Id, new(Now, Version(next), VehicleType.Car), ct)).Value!.Opened);
+            Assert.Equal(OilBarrelStatus.Open, (await db.OilBarrels.AsNoTracking().SingleAsync(x => x.Id == bike.Id, ct)).Status);
+        }
+        finally
+        {
+            await db.Database.EnsureDeletedAsync(CancellationToken.None);
+        }
+    }
+
+    [Fact]
+    public async Task SharedBarrelSuppliesBothTypesAndAppearsInBothPickers()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var db = CreateContext();
+        var (service, car, motorcycle, item, location) = await SeedAsync(db);
+        var barrel = AddBarrel(db, item, location, null, 25, 10, 1);
+        await db.SaveChangesAsync(ct);
+        var opened = await service.OpenOilBarrelAsync(barrel.Id, new(Now, Version(barrel), null, true), ct);
+        Assert.True(opened.Value!.Opened);
+        Assert.True(opened.Value.Barrel.AllowBothVehicleTypes);
+        foreach (var type in new[] { VehicleType.Car, VehicleType.Motorcycle })
+        {
+            var picker = await service.GetDirectOilBarrelsAsync(location.Id, item.Id, type, ct);
+            Assert.True(Assert.Single(picker.Value!).AllowBothVehicleTypes);
+            Assert.Single((await service.GetOilBarrelsAsync(location.Id, item.Id, "Open", type, ct)).Value!);
+        }
+        Assert.True((await service.CompleteDirectOilChangeAsync(car.Id, Request(car, item, location), "shared-car", ct)).IsSuccess);
+        Assert.True((await service.CompleteDirectOilChangeAsync(motorcycle.Id, Request(motorcycle, item, location), "shared-bike", ct)).IsSuccess);
+        Assert.Equal(20.5m, barrel.RemainingLiters);
+        Assert.Null(barrel.AllowedVehicleType);
+        Assert.True(barrel.AllowBothVehicleTypes);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task SharedAndDedicatedBarrelsCannotOverlap(bool sharedFirst)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var db = CreateContext();
+        var (service, _, _, item, location) = await SeedAsync(db);
+        var first = AddBarrel(db, item, location, null, 10, 10, 1);
+        var second = AddBarrel(db, item, location, null, 10, 10, 2);
+        await db.SaveChangesAsync(ct);
+        Assert.True((await service.OpenOilBarrelAsync(first.Id,
+            new(Now, Version(first), sharedFirst ? null : VehicleType.Car, sharedFirst), ct)).Value!.Opened);
+        var blocked = await service.OpenOilBarrelAsync(second.Id,
+            new(Now, Version(second), sharedFirst ? VehicleType.Car : null, !sharedFirst), ct);
+        Assert.True(blocked.Value!.HasPreviousBarrelWarning);
+        Assert.False(blocked.Value.Opened);
+        Assert.Equal(10m, blocked.Value.PreviousOpenBarrelsRemainingLiters);
+    }
+
+    [Fact]
+    public async Task FullWarehouseWriteOffDepletesBarrelBalancesAndAllowsNextOpening()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var db = CreateContext();
+        var (service, _, _, item, location) = await SeedAsync(db);
+        var barrel = AddBarrel(db, item, location, VehicleType.Car, 25, 10, 1, open: true);
+        var next = AddBarrel(db, item, location, null, 208, 12, 2);
+        await db.SaveChangesAsync(ct);
+        var originalVersion = Version(barrel);
+        var request = new RecordOilBarrelMissingRequest(Now, 25, OilBarrelMissingReason.Missing, "Physical stock is missing", originalVersion);
+        var written = await service.RecordOilBarrelMissingAsync(barrel.Id, request, ct);
+        Assert.True(written.IsSuccess, written.Error.Description);
+        Assert.Equal(0m, written.Value!.Barrel.RemainingLiters);
+        Assert.Equal(0m, written.Value.Barrel.ConsumedLiters);
+        Assert.Equal(0m, written.Value.Barrel.RecordedLossLiters);
+        Assert.Equal(25m, written.Value.Barrel.RecordedMissingLiters);
+        Assert.Equal(OilBarrelStatus.Depleted, written.Value.Barrel.Status);
+        Assert.Equal(Now, written.Value.Barrel.DepletedAtUtc);
+        Assert.Equal(location.Id, written.Value.Entry.ResponsibleInventoryLocationId);
+        Assert.Equal(250m, written.Value.Entry.CostAmount);
+        Assert.NotEqual(originalVersion, written.Value.Barrel.RowVersion);
+        Assert.Equal(0m, (await db.StockCostLayers.SingleAsync(x => x.Id == barrel.StockCostLayerId, ct)).RemainingQuantity);
+        Assert.Equal(208m, (await db.StockBalances.SingleAsync(ct)).QuantityOnHand);
+        Assert.Single(db.StockMovements);
+        Assert.Single(db.StockCostAllocations);
+        var replay = await service.RecordOilBarrelMissingAsync(barrel.Id, request, ct);
+        Assert.Equal(MaintenanceErrors.ConcurrencyConflict.Code, replay.Error.Code);
+        Assert.Single(db.OilBarrelLosses);
+        var history = await service.GetOilBarrelMissingHistoryAsync(barrel.Id, 1, 1, ct);
+        Assert.Equal(25m, history.Value!.TotalMissingLiters);
+        Assert.Equal(250m, history.Value.TotalCostAmount);
+        Assert.Single(history.Value.Entries);
+        Assert.True((await service.OpenOilBarrelAsync(next.Id,
+            new(Now, Version(next), VehicleType.Car), ct)).Value!.Opened);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    [InlineData(26)]
+    [InlineData(0.0001)]
+    public async Task InvalidWriteOffDoesNotChangeAnyStock(decimal quantity)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var db = CreateContext();
+        var (service, _, _, item, location) = await SeedAsync(db);
+        var barrel = AddBarrel(db, item, location, VehicleType.Car, 25, 10, 1, open: true);
+        await db.SaveChangesAsync(ct);
+        var result = await service.RecordOilBarrelMissingAsync(barrel.Id,
+            new(Now, quantity, OilBarrelMissingReason.Theft, "Missing stock", Version(barrel)), ct);
+        Assert.True(result.IsFailure);
+        Assert.Equal(25m, (await db.OilBarrels.SingleAsync(ct)).RemainingLiters);
+        Assert.Equal(25m, (await db.StockBalances.SingleAsync(ct)).QuantityOnHand);
+        Assert.Empty(db.OilBarrelLosses);
+        Assert.Empty(db.StockMovements);
+    }
+
+    [Fact]
+    public async Task WarehouseWriteOffDoesNotConsumeNormalLossAllowance()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var db = CreateContext();
+        var (service, _, _, item, location) = await SeedAsync(db);
+        var barrel = AddBarrel(db, item, location, VehicleType.Car, 25, 10, 1, open: true);
+        await db.SaveChangesAsync(ct);
+        var loss = await service.RecordOilBarrelLossAsync(barrel.Id, new(Now, 1, "Normal loss", Version(barrel)), ct);
+        Assert.Equal(MaintenanceErrors.OilLossAllowanceExceeded.Code, loss.Error.Code);
+        var missing = await service.RecordOilBarrelMissingAsync(barrel.Id,
+            new(Now, 5, OilBarrelMissingReason.Wasted, "Spilled", Version(barrel)), ct);
+        Assert.True(missing.IsSuccess);
+        var normal = await service.RecordOilBarrelLossAsync(barrel.Id,
+            new(Now, 0.5m, "Normal loss", missing.Value!.Barrel.RowVersion), ct);
+        Assert.True(normal.IsSuccess, normal.Error.Description);
+        Assert.Equal(19.5m, normal.Value!.BarrelRemainingLiters);
+        Assert.Equal(0m, normal.Value.BarrelRemainingLossAllowanceLiters);
+        var history = await service.GetOilBarrelMissingHistoryAsync(barrel.Id, 1, 50, ct);
+        Assert.Equal(5m, history.Value!.TotalMissingLiters);
+        Assert.Single(history.Value.Entries);
+    }
+
+    [Fact]
     public async Task CompletedOilChangeVehicleCorrectionRejectsAnotherTypeAndWorkOrderRecords()
     {
         await using var db = CreateContext();
@@ -429,6 +617,8 @@ public sealed class OilBarrelVehicleTypeTests
         var layer = new StockCostLayer { InventoryItemId = item.Id, InventoryLocationId = location.Id,
             ReceivedAtUtc = Now.AddDays(sequence - 10), OriginalSequence = sequence,
             OriginalQuantity = quantity, RemainingQuantity = quantity, UnitCost = unitCost };
+        layer.BaseUnitOfMeasure = InventoryUnitOfMeasure.Liter;
+        layer.OriginalTotalCost = quantity * unitCost;
         var barrel = new OilBarrel { BarrelNumber = $"OB-{sequence}", InventoryItemId = item.Id,
             InventoryLocationId = location.Id, StockCostLayerId = layer.Id, AllowedVehicleType = type,
             NominalCapacityLiters = quantity, RemainingLiters = quantity,

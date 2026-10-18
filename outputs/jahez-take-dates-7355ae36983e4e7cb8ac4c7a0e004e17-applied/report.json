@@ -1,0 +1,122 @@
+[
+  {
+    "Account": "404654",
+    "TakeDate": "2026-09-30",
+    "Result": "Updated"
+  },
+  {
+    "Account": "404899",
+    "TakeDate": "2026-09-13",
+    "Result": "Updated"
+  },
+  {
+    "Account": "404986",
+    "TakeDate": "2026-09-17",
+    "Result": "Already matched"
+  },
+  {
+    "Account": "404997",
+    "TakeDate": "2026-09-22",
+    "Result": "Already matched"
+  },
+  {
+    "Account": "405092",
+    "TakeDate": "2026-09-13",
+    "Result": "Updated"
+  },
+  {
+    "Account": "408132",
+    "TakeDate": "2026-09-23",
+    "Result": "Updated"
+  },
+  {
+    "Account": "415808",
+    "TakeDate": "2026-09-28",
+    "Result": "Already matched"
+  },
+  {
+    "Account": "456434",
+    "TakeDate": "2026-09-21",
+    "Result": "Already matched"
+  },
+  {
+    "Account": "459705",
+    "TakeDate": "2026-09-27",
+    "Result": "Updated"
+  },
+  {
+    "Account": "460739",
+    "TakeDate": "2026-09-02",
+    "Result": "Already matched"
+  },
+  {
+    "Account": "472433",
+    "TakeDate": "2026-09-24",
+    "Result": "Updated"
+  },
+  {
+    "Account": "472829",
+    "TakeDate": "2026-09-21",
+    "Result": "Updated"
+  },
+  {
+    "Account": "473007",
+    "TakeDate": "2026-09-08",
+    "Result": "Already matched"
+  },
+  {
+    "Account": "474572",
+    "TakeDate": "2026-10-16",
+    "Result": "Updated"
+  },
+  {
+    "Account": "474831",
+    "TakeDate": "2026-09-23",
+    "Result": "Updated"
+  },
+  {
+    "Account": "476832",
+    "TakeDate": "2026-09-03",
+    "Result": "Already matched"
+  },
+  {
+    "Account": "482679",
+    "TakeDate": "2026-09-28",
+    "Result": "Updated"
+  },
+  {
+    "Account": "483905",
+    "TakeDate": "2026-09-28",
+    "Result": "Already matched"
+  },
+  {
+    "Account": "484490",
+    "TakeDate": "2026-09-26",
+    "Result": "Updated"
+  },
+  {
+    "Account": "491304",
+    "TakeDate": "2026-09-16",
+    "Result": "Already matched"
+  },
+  {
+    "Account": "491309",
+    "TakeDate": "2026-09-10",
+    "Result": "Updated"
+  },
+  {
+    "Account": "492374",
+    "TakeDate": "2026-09-08",
+    "Result": "Updated"
+  },
+  {
+    "Account": "493593",
+    "TakeDate": "2026-09-14",
+    "Result": "Already matched"
+  },
+  {
+    "Account": "498897",
+    "TakeDate": "2026-09-18",
+    "Result": "Updated"
+  }
+]

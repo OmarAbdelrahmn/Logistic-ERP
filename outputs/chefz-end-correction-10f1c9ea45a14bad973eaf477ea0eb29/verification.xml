@@ -1,0 +1,46 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="EffectiveFrom" type="xs:string" minOccurs="0" />
+                <xs:element name="EffectiveTo" type="xs:string" minOccurs="0" />
+                <xs:element name="Status" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Action" type="xs:string" minOccurs="0" />
+                <xs:element name="BeforeJson" type="xs:string" minOccurs="0" />
+                <xs:element name="AfterJson" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <Id>ce52e580-07b7-4476-9711-8a48db7039bb</Id>
+    <EffectiveFrom>2026-10-01</EffectiveFrom>
+    <EffectiveTo>2026-10-07</EffectiveTo>
+    <Status>3</Status>
+  </Table>
+  <Table>
+    <Id>0acffaea-fb38-42a8-bf02-6ef3ce233eea</Id>
+    <EffectiveFrom>2026-10-10</EffectiveFrom>
+    <Status>2</Status>
+  </Table>
+  <Table1>
+    <Action>ChefzAssignmentEndDateCorrection</Action>
+    <BeforeJson>{"Id":"CE52E580-07B7-4476-9711-8A48DB7039BB","PlatformRiderAccountId":"CCC819CD-58FD-4EED-B32C-E046F4288326","EffectiveFrom":"2026-10-01","EffectiveTo":"2026-10-06","Status":3}</BeforeJson>
+    <AfterJson>{"Id":"CE52E580-07B7-4476-9711-8A48DB7039BB","PlatformRiderAccountId":"CCC819CD-58FD-4EED-B32C-E046F4288326","EffectiveFrom":"2026-10-01","EffectiveTo":"2026-10-07","Status":3}</AfterJson>
+  </Table1>
+</NewDataSet>

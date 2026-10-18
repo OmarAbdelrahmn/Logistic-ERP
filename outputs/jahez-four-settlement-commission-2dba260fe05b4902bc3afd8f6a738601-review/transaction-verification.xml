@@ -1,0 +1,45 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Account" type="xs:string" minOccurs="0" />
+                <xs:element name="LastSettlementDate" type="xs:string" minOccurs="0" />
+                <xs:element name="LastCommissionDate" type="xs:string" minOccurs="0" />
+                <xs:element name="NextCommissionStartsOn" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <Account>420509</Account>
+    <LastSettlementDate>2026-10-11</LastSettlementDate>
+    <LastCommissionDate>2026-10-11</LastCommissionDate>
+    <NextCommissionStartsOn>2026-10-12</NextCommissionStartsOn>
+  </Table>
+  <Table>
+    <Account>456420</Account>
+    <LastSettlementDate>2026-10-12</LastSettlementDate>
+    <LastCommissionDate>2026-10-12</LastCommissionDate>
+    <NextCommissionStartsOn>2026-10-13</NextCommissionStartsOn>
+  </Table>
+  <Table>
+    <Account>476885</Account>
+    <LastSettlementDate>2026-10-12</LastSettlementDate>
+    <LastCommissionDate>2026-10-12</LastCommissionDate>
+    <NextCommissionStartsOn>2026-10-13</NextCommissionStartsOn>
+  </Table>
+  <Table>
+    <Account>491306</Account>
+    <LastSettlementDate>2026-10-14</LastSettlementDate>
+    <LastCommissionDate>2026-10-14</LastCommissionDate>
+    <NextCommissionStartsOn>2026-10-15</NextCommissionStartsOn>
+  </Table>
+</NewDataSet>

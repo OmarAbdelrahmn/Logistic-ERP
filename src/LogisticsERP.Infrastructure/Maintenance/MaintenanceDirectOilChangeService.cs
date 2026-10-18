@@ -34,11 +34,11 @@ internal sealed partial class MaintenanceService
         var barrels = await dbContext.OilBarrels.AsNoTracking()
             .Where(x => x.InventoryLocationId == inventoryLocationId && x.InventoryItemId == inventoryItemId &&
                 (x.Status == OilBarrelStatus.Open || x.Status == OilBarrelStatus.Sealed)
-                && (!vehicleType.HasValue || x.AllowedVehicleType == vehicleType
+                && (!vehicleType.HasValue || x.AllowedVehicleType == vehicleType || x.AllowBothVehicleTypes
                     || x.Status == OilBarrelStatus.Sealed && x.AllowedVehicleType == null))
             .OrderBy(x => x.PackageSequence)
             .Select(x => new DirectOilBarrelResponse(x.Id, x.BarrelNumber, x.InventoryLocationId,
-                x.InventoryItemId, x.Status, x.RemainingLiters, x.AllowedVehicleType))
+                x.InventoryItemId, x.Status, x.RemainingLiters, x.AllowedVehicleType, x.AllowBothVehicleTypes))
             .ToArrayAsync(cancellationToken);
         return Result.Success<IReadOnlyList<DirectOilBarrelResponse>>(barrels);
     }

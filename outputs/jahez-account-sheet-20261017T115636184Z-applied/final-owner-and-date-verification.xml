@@ -1,0 +1,45 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Checks">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="CheckName" type="xs:string" minOccurs="0" />
+                <xs:element name="Mismatches" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Totals">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="TotalJahezAccounts" type="xs:int" minOccurs="0" />
+                <xs:element name="Available" type="xs:int" minOccurs="0" />
+                <xs:element name="Assigned" type="xs:int" minOccurs="0" />
+                <xs:element name="Suspended" type="xs:int" minOccurs="0" />
+                <xs:element name="Retired" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Checks>
+    <CheckName>Employee dashboard owners without a rider profile</CheckName>
+    <Mismatches>0</Mismatches>
+  </Checks>
+  <Checks>
+    <CheckName>Nine user-corrected dates</CheckName>
+    <Mismatches>0</Mismatches>
+  </Checks>
+  <Totals>
+    <TotalJahezAccounts>382</TotalJahezAccounts>
+    <Available>37</Available>
+    <Assigned>298</Assigned>
+    <Suspended>46</Suspended>
+    <Retired>1</Retired>
+  </Totals>
+</NewDataSet>

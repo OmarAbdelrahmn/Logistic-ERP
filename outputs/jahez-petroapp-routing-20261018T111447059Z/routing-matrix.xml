@@ -1,0 +1,92 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Fund" type="xs:int" minOccurs="0" />
+                <xs:element name="Direction" type="xs:int" minOccurs="0" />
+                <xs:element name="Purpose" type="xs:int" minOccurs="0" />
+                <xs:element name="Expected" type="xs:int" minOccurs="0" />
+                <xs:element name="Allowed" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <Fund>2</Fund>
+    <Direction>1</Direction>
+    <Purpose>1</Purpose>
+    <Expected>1</Expected>
+    <Allowed>1</Allowed>
+  </Table>
+  <Table>
+    <Fund>2</Fund>
+    <Direction>1</Direction>
+    <Purpose>2</Purpose>
+    <Expected>1</Expected>
+    <Allowed>1</Allowed>
+  </Table>
+  <Table>
+    <Fund>2</Fund>
+    <Direction>2</Direction>
+    <Purpose>1</Purpose>
+    <Expected>0</Expected>
+    <Allowed>0</Allowed>
+  </Table>
+  <Table>
+    <Fund>2</Fund>
+    <Direction>2</Direction>
+    <Purpose>2</Purpose>
+    <Expected>0</Expected>
+    <Allowed>0</Allowed>
+  </Table>
+  <Table>
+    <Fund>2</Fund>
+    <Direction>1</Direction>
+    <Purpose>3</Purpose>
+    <Expected>0</Expected>
+    <Allowed>0</Allowed>
+  </Table>
+  <Table>
+    <Fund>2</Fund>
+    <Direction>1</Direction>
+    <Purpose>4</Purpose>
+    <Expected>0</Expected>
+    <Allowed>0</Allowed>
+  </Table>
+  <Table>
+    <Fund>1</Fund>
+    <Direction>1</Direction>
+    <Purpose>1</Purpose>
+    <Expected>1</Expected>
+    <Allowed>1</Allowed>
+  </Table>
+  <Table>
+    <Fund>1</Fund>
+    <Direction>2</Direction>
+    <Purpose>1</Purpose>
+    <Expected>1</Expected>
+    <Allowed>1</Allowed>
+  </Table>
+  <Table>
+    <Fund>3</Fund>
+    <Direction>1</Direction>
+    <Purpose>1</Purpose>
+    <Expected>0</Expected>
+    <Allowed>0</Allowed>
+  </Table>
+  <Table>
+    <Fund>3</Fund>
+    <Direction>2</Direction>
+    <Purpose>1</Purpose>
+    <Expected>1</Expected>
+    <Allowed>1</Allowed>
+  </Table>
+</NewDataSet>

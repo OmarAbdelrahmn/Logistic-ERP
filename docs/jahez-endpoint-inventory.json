@@ -1,0 +1,182 @@
+[
+  {
+    "method": "POST",
+    "path": "/api/jahez/handovers",
+    "permission": "jahez.handovers.create"
+  },
+  {
+    "method": "POST",
+    "path": "/api/jahez/legacy-adoptions",
+    "permission": "jahez.adjustments.create"
+  },
+  {
+    "method": "POST",
+    "path": "/api/jahez/handovers/{id}/close",
+    "permission": "jahez.handovers.delete"
+  },
+  {
+    "method": "POST",
+    "path": "/api/jahez/handovers/{id}/freeze",
+    "permission": "jahez.resets.approve"
+  },
+  {
+    "method": "POST",
+    "path": "/api/jahez/handovers/{id}/transfer-debt",
+    "permission": "jahez.resets.approve"
+  },
+  {
+    "method": "POST",
+    "path": "/api/jahez/handovers/{id}/clear-account",
+    "permission": "jahez.resets.approve"
+  },
+  {
+    "method": "POST",
+    "path": "/api/jahez/handovers/{id}/confirm-paid",
+    "permission": "jahez.collections.create"
+  },
+  {
+    "method": "GET",
+    "path": "/api/jahez/riders/{riderId}/debt-summary",
+    "permission": "jahez.read"
+  },
+  {
+    "method": "GET",
+    "path": "/api/jahez/handovers",
+    "permission": "jahez.read"
+  },
+  {
+    "method": "GET",
+    "path": "/api/jahez/handovers/{id}/balance",
+    "permission": "jahez.read"
+  },
+  {
+    "method": "GET",
+    "path": "/api/jahez/debts",
+    "permission": "jahez.read"
+  },
+  {
+    "method": "GET",
+    "path": "/api/jahez/ledger",
+    "permission": "jahez.read"
+  },
+  {
+    "method": "GET",
+    "path": "/api/jahez/handovers/{id}/fee",
+    "permission": "jahez.read"
+  },
+  {
+    "method": "GET",
+    "path": "/api/jahez/handovers/{id}/settlements",
+    "permission": "jahez.read"
+  },
+  {
+    "method": "GET",
+    "path": "/api/jahez/handovers/{id}/earnings",
+    "permission": "jahez.read"
+  },
+  {
+    "method": "GET",
+    "path": "/api/jahez/handovers/{id}/commission-policies",
+    "permission": "jahez.read"
+  },
+  {
+    "method": "POST",
+    "path": "/api/jahez/requests",
+    "permission": "jahez.requests.create"
+  },
+  {
+    "method": "POST",
+    "path": "/api/jahez/requests/{id}/decision",
+    "permission": "jahez.read"
+  },
+  {
+    "method": "POST",
+    "path": "/api/jahez/requests/{id}/cancel",
+    "permission": "jahez.requests.create"
+  },
+  {
+    "method": "GET",
+    "path": "/api/jahez/requests",
+    "permission": "jahez.read"
+  },
+  {
+    "method": "GET",
+    "path": "/api/jahez/requests/{id}",
+    "permission": "jahez.read"
+  },
+  {
+    "method": "POST",
+    "path": "/api/jahez/earnings",
+    "permission": "jahez.earnings.create"
+  },
+  {
+    "method": "POST",
+    "path": "/api/jahez/settlements",
+    "permission": "jahez.collections.create"
+  },
+  {
+    "method": "POST",
+    "path": "/api/jahez/adjustments",
+    "permission": "jahez.adjustments.create"
+  },
+  {
+    "method": "POST",
+    "path": "/api/jahez/imports",
+    "permission": "jahez.imports.create"
+  },
+  {
+    "method": "GET",
+    "path": "/api/jahez/imports/{id}",
+    "permission": "jahez.imports.read"
+  },
+  {
+    "method": "GET",
+    "path": "/api/jahez/imports",
+    "permission": "jahez.imports.read"
+  },
+  {
+    "method": "POST",
+    "path": "/api/jahez/imports/{id}/commit",
+    "permission": "jahez.imports.update"
+  },
+  {
+    "method": "GET",
+    "path": "/api/jahez/import-files/{id}",
+    "permission": "jahez.imports.read"
+  },
+  {
+    "method": "GET",
+    "path": "/api/jahez/dispatches",
+    "permission": "jahez.read"
+  },
+  {
+    "method": "GET",
+    "path": "/api/jahez/cashbox",
+    "permission": "jahez.cashbox.read"
+  },
+  {
+    "method": "GET",
+    "path": "/api/jahez/cashbox/handovers",
+    "permission": "jahez.cashbox.read"
+  },
+  {
+    "method": "GET",
+    "path": "/api/jahez/cashbox/entries",
+    "permission": "jahez.cashbox.read"
+  },
+  {
+    "method": "POST",
+    "path": "/api/jahez/cashbox/handovers",
+    "permission": "jahez.cashbox.submit"
+  },
+  {
+    "method": "POST",
+    "path": "/api/jahez/cashbox/handovers/{id}/confirm",
+    "permission": "jahez.cashbox.confirm"
+  },
+  {
+    "method": "POST",
+    "path": "/api/jahez/cashbox/handovers/{id}/decision",
+    "permission": "jahez.cashbox.approve"
+  }
+]

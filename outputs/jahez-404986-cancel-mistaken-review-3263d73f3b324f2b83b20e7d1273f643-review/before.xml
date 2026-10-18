@@ -1,0 +1,161 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="HandoverId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="Mode" type="xs:int" minOccurs="0" />
+                <xs:element name="Status" type="xs:int" minOccurs="0" />
+                <xs:element name="PaymentStatus" type="xs:int" minOccurs="0" />
+                <xs:element name="ThroughDate" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="EffectiveAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="Net" type="xs:decimal" minOccurs="0" />
+                <xs:element name="Commission" type="xs:decimal" minOccurs="0" />
+                <xs:element name="CalculatedCommission" type="xs:decimal" minOccurs="0" />
+                <xs:element name="Remaining" type="xs:decimal" minOccurs="0" />
+                <xs:element name="CalculationJson" type="xs:string" minOccurs="0" />
+                <xs:element name="Fund" type="xs:int" minOccurs="0" />
+                <xs:element name="Purpose" type="xs:int" minOccurs="0" />
+                <xs:element name="TransferToRider" type="xs:boolean" minOccurs="0" />
+                <xs:element name="PaymentReference" type="xs:string" minOccurs="0" />
+                <xs:element name="Reason" type="xs:string" minOccurs="0" />
+                <xs:element name="ApprovedRequestId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="ExecutedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="ExecutedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="UpdatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="UpdatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RowVersion" type="xs:base64Binary" minOccurs="0" />
+                <xs:element name="IsDeleted" type="xs:boolean" minOccurs="0" />
+                <xs:element name="DeletedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="DeletedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DeletionReason" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="HandoverId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="Kind" type="xs:int" minOccurs="0" />
+                <xs:element name="Status" type="xs:int" minOccurs="0" />
+                <xs:element name="RequestedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="TargetAccountId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="WaiverAmount" type="xs:decimal" minOccurs="0" />
+                <xs:element name="FromDate" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="ToDate" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="EffectiveAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="Reason" type="xs:string" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="UpdatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="UpdatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RowVersion" type="xs:base64Binary" minOccurs="0" />
+                <xs:element name="IsDeleted" type="xs:boolean" minOccurs="0" />
+                <xs:element name="DeletedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="DeletedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DeletionReason" type="xs:string" minOccurs="0" />
+                <xs:element name="AdjustmentTarget" type="xs:int" minOccurs="0" />
+                <xs:element name="DebtAdjustment" type="xs:decimal" minOccurs="0" />
+                <xs:element name="OperationId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="ProposedCommission" type="xs:decimal" minOccurs="0" />
+                <xs:element name="ProposedNet" type="xs:decimal" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table2">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="PlatformRiderAccountId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RiderProfileId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RiderClientAssignmentId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="StartedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="EndedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CommissionStartsOn" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="CommissionPostedThrough" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="LastSettlementPaymentAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="Reason" type="xs:string" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="UpdatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="UpdatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RowVersion" type="xs:base64Binary" minOccurs="0" />
+                <xs:element name="IsDeleted" type="xs:boolean" minOccurs="0" />
+                <xs:element name="DeletedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="DeletedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DeletionReason" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <Id>01a14e94-839d-7b17-a42a-a8ae2c9d6130</Id>
+    <HandoverId>0e04d982-d863-4436-aa26-f05302537755</HandoverId>
+    <Mode>1</Mode>
+    <Status>2</Status>
+    <PaymentStatus>1</PaymentStatus>
+    <ThroughDate>2026-10-18T00:00:00+03:00</ThroughDate>
+    <EffectiveAtUtc>2026-10-18T07:33:00Z</EffectiveAtUtc>
+    <Net>-395.01</Net>
+    <Commission>465.00</Commission>
+    <CalculatedCommission>465.00</CalculatedCommission>
+    <Remaining>69.99</Remaining>
+    <CalculationJson>{"Accrual":[{"Kind":"Daily","FromDate":"2026-09-18","ToDate":"2026-10-18","DailyRate":15,"Amount":465}],"UnpaidCommission":0.000000}</CalculationJson>
+    <Fund>2</Fund>
+    <Purpose>1</Purpose>
+    <TransferToRider>false</TransferToRider>
+    <PaymentReference>JHZ/2026/10/00440</PaymentReference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-18T10:35:18.3025245Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-18T11:06:19.9598187Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAAC8So=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table>
+  <Table1>
+    <Id>01a14eb0-eb73-73f8-9284-56a936381181</Id>
+    <HandoverId>0e04d982-d863-4436-aa26-f05302537755</HandoverId>
+    <Kind>5</Kind>
+    <Status>1</Status>
+    <RequestedByUserId>019c18d5-62e1-7000-c000-000000000001</RequestedByUserId>
+    <WaiverAmount>0.000000</WaiverAmount>
+    <Reason>طلب مراجعة وتعديل التصفية للعملية #01a14e94</Reason>
+    <CreatedAtUtc>2026-10-18T11:06:19.9598187Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <RowVersion>AAAAAAAC8Ss=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <AdjustmentTarget>1</AdjustmentTarget>
+    <OperationId>01a14e94-839d-7b17-a42a-a8ae2c9d6130</OperationId>
+    <ProposedCommission>465.00</ProposedCommission>
+    <ProposedNet>-395.01</ProposedNet>
+  </Table1>
+  <Table2>
+    <Id>0e04d982-d863-4436-aa26-f05302537755</Id>
+    <PlatformRiderAccountId>f9c9e42b-562e-4bf5-a7db-7095fe91c972</PlatformRiderAccountId>
+    <RiderProfileId>01a0bf9d-e0a6-7642-995d-f826790e8833</RiderProfileId>
+    <RiderClientAssignmentId>5242e332-dd96-4bc7-8a4a-176d5ef60a5a</RiderClientAssignmentId>
+    <StartedAtUtc>2026-09-17T00:00:00+03:00</StartedAtUtc>
+    <CommissionStartsOn>2026-09-17T00:00:00+03:00</CommissionStartsOn>
+    <CommissionPostedThrough>2026-09-17T00:00:00+03:00</CommissionPostedThrough>
+    <LastSettlementPaymentAtUtc>2026-09-16T21:00:00Z</LastSettlementPaymentAtUtc>
+    <Reason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</Reason>
+    <CreatedAtUtc>2026-10-17T11:57:04.6071116Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-17T16:03:44.4861038Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAAC4Y4=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table2>
+</NewDataSet>

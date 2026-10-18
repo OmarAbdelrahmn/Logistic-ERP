@@ -1,5 +1,7 @@
 # Oil barrels: vehicle type and usage
 
+Updated 2026-10-10: see [warehouse write-offs and shared-use handoff](oil-barrel-missing-and-shared-frontend-handoff.md) for the new Both option, missing/wasted/theft endpoints, warehouse responsibility, and updated filtering and opening rules. That document supersedes the two-choice restrictions below.
+
 ## Choose the type when opening
 
 The **Open barrel / فتح البرميل** dialog must require one choice, with no default selection:

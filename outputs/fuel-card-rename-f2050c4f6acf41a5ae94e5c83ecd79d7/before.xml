@@ -1,0 +1,91 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="Provider" type="xs:int" minOccurs="0" />
+                <xs:element name="IdentifierType" type="xs:int" minOccurs="0" />
+                <xs:element name="CardNumber" type="xs:string" minOccurs="0" />
+                <xs:element name="NormalizedCardNumber" type="xs:string" minOccurs="0" />
+                <xs:element name="PlateNumberText" type="xs:string" minOccurs="0" />
+                <xs:element name="NormalizedPlateNumber" type="xs:string" minOccurs="0" />
+                <xs:element name="Notes" type="xs:string" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="UpdatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="UpdatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RowVersion" type="xs:base64Binary" minOccurs="0" />
+                <xs:element name="IsDeleted" type="xs:boolean" minOccurs="0" />
+                <xs:element name="DeletedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="DeletedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DeletionReason" type="xs:string" minOccurs="0" />
+                <xs:element name="SponsorId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="OperatingCityId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="ModuleKey" type="xs:string" minOccurs="0" />
+                <xs:element name="Version" type="xs:long" minOccurs="0" />
+                <xs:element name="LastChangedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="UpdatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="UpdatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RowVersion" type="xs:base64Binary" minOccurs="0" />
+                <xs:element name="IsDeleted" type="xs:boolean" minOccurs="0" />
+                <xs:element name="DeletedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="DeletedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DeletionReason" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <Id>01a10b3c-19d1-75f4-bcb0-aa43e891a6dc</Id>
+    <Provider>1</Provider>
+    <IdentifierType>1</IdentifierType>
+    <CardNumber>2318SKA</CardNumber>
+    <NormalizedCardNumber>2318SKA</NormalizedCardNumber>
+    <CreatedAtUtc>2026-10-05T08:44:10.6338097Z</CreatedAtUtc>
+    <RowVersion>AAAAAAABSY0=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000003</OperatingCityId>
+  </Table>
+  <Table>
+    <Id>01a10b3c-19d0-7f72-b14f-c28cffeace4a</Id>
+    <Provider>1</Provider>
+    <IdentifierType>1</IdentifierType>
+    <CardNumber>2323SKA</CardNumber>
+    <NormalizedCardNumber>2323SKA</NormalizedCardNumber>
+    <CreatedAtUtc>2026-10-05T08:44:10.6338097Z</CreatedAtUtc>
+    <RowVersion>AAAAAAABSZI=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000003</OperatingCityId>
+  </Table>
+  <Table1>
+    <Id>01a0e382-ef51-773b-90f8-d23d349a71d3</Id>
+    <ModuleKey>fuel</ModuleKey>
+    <Version>435</Version>
+    <LastChangedAtUtc>2026-10-17T12:48:27.9605054Z</LastChangedAtUtc>
+    <CreatedAtUtc>2026-09-27T15:36:44.1135854Z</CreatedAtUtc>
+    <CreatedByUserId>5e8dbbf5-f4a8-447d-d933-08df10cc8271</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-17T12:48:27.965172Z</UpdatedAtUtc>
+    <UpdatedByUserId>5c6297de-12c7-4c4d-48f1-08df1e342ba7</UpdatedByUserId>
+    <RowVersion>AAAAAAAC07A=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table1>
+</NewDataSet>

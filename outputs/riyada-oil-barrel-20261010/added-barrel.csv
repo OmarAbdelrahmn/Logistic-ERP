@@ -1,0 +1,2 @@
+"Id","BarrelNumber","InventoryLocationNameAr","InventoryLocationCode","Status","NominalCapacityLiters","RemainingLiters","UnitCostPerLiter","TotalCost","AllowedVehicleType","AllowBothVehicleTypes","StockCostLayerId","StockMovementId","WarehouseOilQuantityOnHand"
+"5694a585-22eb-475a-84b6-7776b889b0f9","OB-20261010-5694A585","مخزون ورشة الرياض","RIYADH_WORKSHOP_STOCK","1","208.000","208.000","8.894231","1850.00","","False","d5e85593-7717-4abc-b2ce-de05bfd93930","79f87358-7cff-4498-ae0c-b6c6bb835b17","208.000"

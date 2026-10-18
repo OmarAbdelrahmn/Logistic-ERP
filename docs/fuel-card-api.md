@@ -219,7 +219,7 @@ UI rules:
 - `effectiveFrom` cannot be after today in Riyadh.
 - A card cannot have two active assignments.
 - A card cannot belong to two different riders in the same calendar month, even if the first assignment was stopped mid-month.
-- The rider must be an active rider and not an office employee.
+- The selected person must have a rider profile and an `Active` employee status. `IsEmployee = true` does not prevent fuel-card assignment.
 - After success, invalidate the card list, card detail, assignment history, and affected monthly queries.
 
 Important conflicts are `fuel.active_assignment_conflict`, `fuel.monthly_rider_conflict`, and `fuel.rider_unavailable`.

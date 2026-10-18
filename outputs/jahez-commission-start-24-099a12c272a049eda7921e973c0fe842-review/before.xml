@@ -1,0 +1,451 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Sessions">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="PlatformRiderAccountId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RiderProfileId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RiderClientAssignmentId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="StartedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="EndedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CommissionStartsOn" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="CommissionPostedThrough" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="LastSettlementPaymentAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="Reason" type="xs:string" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="UpdatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="UpdatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RowVersion" type="xs:base64Binary" minOccurs="0" />
+                <xs:element name="IsDeleted" type="xs:boolean" minOccurs="0" />
+                <xs:element name="DeletedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="DeletedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DeletionReason" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="DatasetVersions">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="ModuleKey" type="xs:string" minOccurs="0" />
+                <xs:element name="Version" type="xs:long" minOccurs="0" />
+                <xs:element name="LastChangedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="UpdatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="UpdatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RowVersion" type="xs:base64Binary" minOccurs="0" />
+                <xs:element name="IsDeleted" type="xs:boolean" minOccurs="0" />
+                <xs:element name="DeletedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="DeletedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DeletionReason" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Sessions>
+    <Id>32ef559b-eb55-4812-a829-089d80b48385</Id>
+    <PlatformRiderAccountId>555f3dad-9a72-4dac-9c08-b4f1c1cd3d69</PlatformRiderAccountId>
+    <RiderProfileId>01a0bf9d-e0a7-704e-87a5-a5a58ce0ac0b</RiderProfileId>
+    <RiderClientAssignmentId>14759cc0-739b-47da-a3b5-a6d931162a0d</RiderClientAssignmentId>
+    <StartedAtUtc>2026-09-23T21:00:00Z</StartedAtUtc>
+    <CommissionStartsOn>2026-10-18T00:00:00+03:00</CommissionStartsOn>
+    <LastSettlementPaymentAtUtc>2026-09-23T21:00:00Z</LastSettlementPaymentAtUtc>
+    <Reason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</Reason>
+    <CreatedAtUtc>2026-10-17T11:57:04.6071116Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-17T14:14:31.5536135Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAAC3bo=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Sessions>
+  <Sessions>
+    <Id>9e0566d5-c81d-4af9-a3c5-11209258ad3f</Id>
+    <PlatformRiderAccountId>01fd7282-83c4-45a7-bea8-d30a2c40d275</PlatformRiderAccountId>
+    <RiderProfileId>01a0f1a4-95cd-7ab2-955a-1a0abe6ec31e</RiderProfileId>
+    <RiderClientAssignmentId>4996811f-f980-4dfb-bcf4-9b39e227fbfc</RiderClientAssignmentId>
+    <StartedAtUtc>2026-09-07T21:00:00Z</StartedAtUtc>
+    <CommissionStartsOn>2026-10-18T00:00:00+03:00</CommissionStartsOn>
+    <LastSettlementPaymentAtUtc>2026-09-07T21:00:00Z</LastSettlementPaymentAtUtc>
+    <Reason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</Reason>
+    <CreatedAtUtc>2026-10-17T11:57:04.6071116Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-17T14:14:31.5536135Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAAC3bs=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Sessions>
+  <Sessions>
+    <Id>4e916ba1-463a-449c-b704-2715c6f4b6e5</Id>
+    <PlatformRiderAccountId>1c4eba73-c767-4fcb-b50f-e16066fb6f2e</PlatformRiderAccountId>
+    <RiderProfileId>01a0bf9d-e0a3-7224-99d1-a558c6b83a7a</RiderProfileId>
+    <RiderClientAssignmentId>5ab4d24b-ee6f-42bb-84e8-dd9044cdc00a</RiderClientAssignmentId>
+    <StartedAtUtc>2026-09-22T00:00:00+03:00</StartedAtUtc>
+    <CommissionStartsOn>2026-10-18T00:00:00+03:00</CommissionStartsOn>
+    <LastSettlementPaymentAtUtc>2026-09-21T21:00:00Z</LastSettlementPaymentAtUtc>
+    <Reason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</Reason>
+    <CreatedAtUtc>2026-10-17T11:57:04.6071116Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-17T14:14:31.5536135Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAAC3bw=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Sessions>
+  <Sessions>
+    <Id>8853ae08-c32c-45cc-ab89-371e372d5561</Id>
+    <PlatformRiderAccountId>027e6503-294e-4320-98d4-18831f62a1b0</PlatformRiderAccountId>
+    <RiderProfileId>01a0bf9d-e0a3-7cae-8d3d-713b3217276c</RiderProfileId>
+    <RiderClientAssignmentId>28472ae9-7a7e-4645-abd5-c6a1b41ed313</RiderClientAssignmentId>
+    <StartedAtUtc>2026-09-20T21:00:00Z</StartedAtUtc>
+    <CommissionStartsOn>2026-10-18T00:00:00+03:00</CommissionStartsOn>
+    <LastSettlementPaymentAtUtc>2026-09-20T21:00:00Z</LastSettlementPaymentAtUtc>
+    <Reason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</Reason>
+    <CreatedAtUtc>2026-10-17T11:57:04.6071116Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-17T14:14:31.5536135Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAAC3b0=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Sessions>
+  <Sessions>
+    <Id>476acde9-3ec6-405e-896e-562447227cee</Id>
+    <PlatformRiderAccountId>12fa7632-1bf8-42c1-be35-3cee2ed3fca4</PlatformRiderAccountId>
+    <RiderProfileId>01a12a2b-e2f9-755c-ae25-9c52dcae15c6</RiderProfileId>
+    <RiderClientAssignmentId>fe251eea-6003-4ea0-b565-e1a4337e7251</RiderClientAssignmentId>
+    <StartedAtUtc>2026-09-28T00:00:00+03:00</StartedAtUtc>
+    <CommissionStartsOn>2026-10-18T00:00:00+03:00</CommissionStartsOn>
+    <LastSettlementPaymentAtUtc>2026-09-27T21:00:00Z</LastSettlementPaymentAtUtc>
+    <Reason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</Reason>
+    <CreatedAtUtc>2026-10-17T11:57:04.6071116Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-17T14:14:31.5536135Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAAC3b4=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Sessions>
+  <Sessions>
+    <Id>020c523d-bfd4-46b3-a231-5957b14b1aed</Id>
+    <PlatformRiderAccountId>c5004ad2-e321-403c-92cd-902fb34232a7</PlatformRiderAccountId>
+    <RiderProfileId>01a0bf9d-e0a4-75f3-9ada-80d23fd9e6c2</RiderProfileId>
+    <RiderClientAssignmentId>f7914c28-d30e-4629-8660-f5da9f79cd4c</RiderClientAssignmentId>
+    <StartedAtUtc>2026-09-08T00:00:00+03:00</StartedAtUtc>
+    <CommissionStartsOn>2026-10-18T00:00:00+03:00</CommissionStartsOn>
+    <LastSettlementPaymentAtUtc>2026-09-07T21:00:00Z</LastSettlementPaymentAtUtc>
+    <Reason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</Reason>
+    <CreatedAtUtc>2026-10-17T11:57:04.6071116Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-17T14:14:31.5536135Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAAC3b8=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Sessions>
+  <Sessions>
+    <Id>e0e52bd1-cf85-4049-a45a-6d31b47724ec</Id>
+    <PlatformRiderAccountId>d809e8fa-105d-4f4c-ae57-1f8b525b13b0</PlatformRiderAccountId>
+    <RiderProfileId>01a0f19b-e6b0-763d-a029-ced1209f8e75</RiderProfileId>
+    <RiderClientAssignmentId>c3af04f0-2939-4893-8ac0-099da18963f0</RiderClientAssignmentId>
+    <StartedAtUtc>2026-09-22T21:00:00Z</StartedAtUtc>
+    <CommissionStartsOn>2026-10-18T00:00:00+03:00</CommissionStartsOn>
+    <LastSettlementPaymentAtUtc>2026-09-22T21:00:00Z</LastSettlementPaymentAtUtc>
+    <Reason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</Reason>
+    <CreatedAtUtc>2026-10-17T11:57:04.6071116Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-17T14:14:31.5536135Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAAC3cA=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Sessions>
+  <Sessions>
+    <Id>ec68b3ae-5554-4c35-a98d-7071ebe66df0</Id>
+    <PlatformRiderAccountId>ae2477b5-7657-44d5-935e-e0e1d7396c10</PlatformRiderAccountId>
+    <RiderProfileId>01a0bf9d-e0a3-7b14-91ec-979ac0b657f3</RiderProfileId>
+    <RiderClientAssignmentId>c3e7d1e4-db2f-4e7b-b9e4-bfe25c49c004</RiderClientAssignmentId>
+    <StartedAtUtc>2026-09-27T21:00:00Z</StartedAtUtc>
+    <CommissionStartsOn>2026-10-18T00:00:00+03:00</CommissionStartsOn>
+    <LastSettlementPaymentAtUtc>2026-09-27T21:00:00Z</LastSettlementPaymentAtUtc>
+    <Reason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</Reason>
+    <CreatedAtUtc>2026-10-17T11:57:04.6071116Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-17T14:14:31.5536135Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAAC3cE=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Sessions>
+  <Sessions>
+    <Id>bbf90249-6904-40a3-a162-773a53afdc65</Id>
+    <PlatformRiderAccountId>098d5cfb-4075-4313-ad0e-f2e3d017dbdd</PlatformRiderAccountId>
+    <RiderProfileId>01a0bf9d-e09a-7fad-a225-46fb9427422a</RiderProfileId>
+    <RiderClientAssignmentId>c4cd86e8-aea8-4e92-b91d-1b0cdb10698b</RiderClientAssignmentId>
+    <StartedAtUtc>2026-09-12T21:00:00Z</StartedAtUtc>
+    <CommissionStartsOn>2026-10-18T00:00:00+03:00</CommissionStartsOn>
+    <LastSettlementPaymentAtUtc>2026-09-12T21:00:00Z</LastSettlementPaymentAtUtc>
+    <Reason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</Reason>
+    <CreatedAtUtc>2026-10-17T11:57:04.6071116Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-17T14:14:31.5536135Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAAC3cI=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Sessions>
+  <Sessions>
+    <Id>25c8a27b-61d4-4255-8c57-7dbaf763179e</Id>
+    <PlatformRiderAccountId>cfe269d0-a0a6-4897-817f-b8be02264c96</PlatformRiderAccountId>
+    <RiderProfileId>01a12a29-3ce7-7224-850a-7f4888d21b63</RiderProfileId>
+    <RiderClientAssignmentId>859511f4-614b-4e32-9b85-05badbe6a6a7</RiderClientAssignmentId>
+    <StartedAtUtc>2026-09-22T21:00:00Z</StartedAtUtc>
+    <CommissionStartsOn>2026-10-18T00:00:00+03:00</CommissionStartsOn>
+    <LastSettlementPaymentAtUtc>2026-09-22T21:00:00Z</LastSettlementPaymentAtUtc>
+    <Reason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</Reason>
+    <CreatedAtUtc>2026-10-17T11:57:04.6071116Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-17T14:14:31.5536135Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAAC3cM=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Sessions>
+  <Sessions>
+    <Id>d5195612-a5ee-4f83-b081-82b1f5569f39</Id>
+    <PlatformRiderAccountId>19707386-bb5a-41ef-980c-e4c5b715d314</PlatformRiderAccountId>
+    <RiderProfileId>01a0bf9d-e0a4-7224-b201-6751babae361</RiderProfileId>
+    <RiderClientAssignmentId>1c2a2853-18de-4cbd-99cf-d062999463f0</RiderClientAssignmentId>
+    <StartedAtUtc>2026-09-16T00:00:00+03:00</StartedAtUtc>
+    <CommissionStartsOn>2026-10-18T00:00:00+03:00</CommissionStartsOn>
+    <LastSettlementPaymentAtUtc>2026-09-15T21:00:00Z</LastSettlementPaymentAtUtc>
+    <Reason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</Reason>
+    <CreatedAtUtc>2026-10-17T11:57:04.6071116Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-17T14:14:31.5536135Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAAC3cQ=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Sessions>
+  <Sessions>
+    <Id>4679a728-59d3-4e35-be09-89c2e2910a51</Id>
+    <PlatformRiderAccountId>fa484e11-27d0-4f43-a7d6-434b6d511daf</PlatformRiderAccountId>
+    <RiderProfileId>01a0bf9d-e0a4-7d32-9605-9950fc27be17</RiderProfileId>
+    <RiderClientAssignmentId>7c10bc8a-80c9-46c7-861d-131e7fff98d0</RiderClientAssignmentId>
+    <StartedAtUtc>2026-10-15T21:00:00Z</StartedAtUtc>
+    <CommissionStartsOn>2026-10-18T00:00:00+03:00</CommissionStartsOn>
+    <LastSettlementPaymentAtUtc>2026-10-15T21:00:00Z</LastSettlementPaymentAtUtc>
+    <Reason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</Reason>
+    <CreatedAtUtc>2026-10-17T11:57:04.6071116Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-17T14:14:31.5536135Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAAC3cU=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Sessions>
+  <Sessions>
+    <Id>70a58b6f-dd62-448f-8141-89f23e809f31</Id>
+    <PlatformRiderAccountId>7b549a60-81d3-47af-9d4a-014d85cba630</PlatformRiderAccountId>
+    <RiderProfileId>01a0bf9d-e0a6-758c-a1f7-fc811007bbbe</RiderProfileId>
+    <RiderClientAssignmentId>8e6cc837-0d25-46e4-8cef-685f33657aa8</RiderClientAssignmentId>
+    <StartedAtUtc>2026-09-21T00:00:00+03:00</StartedAtUtc>
+    <CommissionStartsOn>2026-10-18T00:00:00+03:00</CommissionStartsOn>
+    <LastSettlementPaymentAtUtc>2026-09-20T21:00:00Z</LastSettlementPaymentAtUtc>
+    <Reason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</Reason>
+    <CreatedAtUtc>2026-10-17T11:57:04.6071116Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-17T14:14:31.5536135Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAAC3cY=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Sessions>
+  <Sessions>
+    <Id>74b696e9-3573-47c9-b2ab-8abfdd68f362</Id>
+    <PlatformRiderAccountId>22a25cd6-a1f6-4e40-8551-e313278cc18a</PlatformRiderAccountId>
+    <RiderProfileId>01a0bf9d-e0a6-7b8a-b0d1-ce8e480b006a</RiderProfileId>
+    <RiderClientAssignmentId>03ce2582-a63a-4fc9-bda7-df0d9935ead1</RiderClientAssignmentId>
+    <StartedAtUtc>2026-09-17T21:00:00Z</StartedAtUtc>
+    <CommissionStartsOn>2026-10-18T00:00:00+03:00</CommissionStartsOn>
+    <LastSettlementPaymentAtUtc>2026-09-17T21:00:00Z</LastSettlementPaymentAtUtc>
+    <Reason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</Reason>
+    <CreatedAtUtc>2026-10-17T11:57:04.6071116Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-17T14:14:31.5536135Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAAC3cc=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Sessions>
+  <Sessions>
+    <Id>b9111152-7a8b-4933-9764-92df978881fd</Id>
+    <PlatformRiderAccountId>ee28bea5-7f9e-4fd3-aa45-298ea63e8af8</PlatformRiderAccountId>
+    <RiderProfileId>01a0f1a2-399e-77b8-80f1-7dd4c0f5e696</RiderProfileId>
+    <RiderClientAssignmentId>dc504051-92f4-4f00-8477-9d3dab0235c8</RiderClientAssignmentId>
+    <StartedAtUtc>2026-09-25T21:00:00Z</StartedAtUtc>
+    <CommissionStartsOn>2026-10-18T00:00:00+03:00</CommissionStartsOn>
+    <LastSettlementPaymentAtUtc>2026-09-25T21:00:00Z</LastSettlementPaymentAtUtc>
+    <Reason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</Reason>
+    <CreatedAtUtc>2026-10-17T11:57:04.6071116Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-17T14:14:31.5536135Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAAC3cg=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Sessions>
+  <Sessions>
+    <Id>59cf1f02-2033-486e-a6c3-9ce3d8ad666f</Id>
+    <PlatformRiderAccountId>196a2a75-de62-4757-80da-0a13beb12b85</PlatformRiderAccountId>
+    <RiderProfileId>01a0bf9d-e0a7-7a3f-8ea0-cda60ce6696d</RiderProfileId>
+    <RiderClientAssignmentId>b5378ecf-c2bd-4677-a0df-76db45014f4c</RiderClientAssignmentId>
+    <StartedAtUtc>2026-09-03T00:00:00+03:00</StartedAtUtc>
+    <CommissionStartsOn>2026-10-18T00:00:00+03:00</CommissionStartsOn>
+    <LastSettlementPaymentAtUtc>2026-09-02T21:00:00Z</LastSettlementPaymentAtUtc>
+    <Reason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</Reason>
+    <CreatedAtUtc>2026-10-17T11:57:04.6071116Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-17T14:14:31.5536135Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAAC3ck=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Sessions>
+  <Sessions>
+    <Id>b8783a1e-a8e4-4cad-970e-a160d1ed8b34</Id>
+    <PlatformRiderAccountId>2eaded07-4f35-47a4-8dae-462707f00fe9</PlatformRiderAccountId>
+    <RiderProfileId>01a0bf9d-e0a4-7c40-9dcd-31e1a9943f60</RiderProfileId>
+    <RiderClientAssignmentId>13d48175-0520-4c23-8b83-4c645e57e704</RiderClientAssignmentId>
+    <StartedAtUtc>2026-09-12T21:00:00Z</StartedAtUtc>
+    <CommissionStartsOn>2026-10-18T00:00:00+03:00</CommissionStartsOn>
+    <LastSettlementPaymentAtUtc>2026-09-12T21:00:00Z</LastSettlementPaymentAtUtc>
+    <Reason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</Reason>
+    <CreatedAtUtc>2026-10-17T11:57:04.6071116Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-17T14:14:31.5536135Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAAC3co=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Sessions>
+  <Sessions>
+    <Id>d3dc1fc0-24df-4bf8-a5ca-af0dc75eb2f1</Id>
+    <PlatformRiderAccountId>33f7f35c-4824-48bb-a026-7815754020aa</PlatformRiderAccountId>
+    <RiderProfileId>01a0bf9d-e0a3-7703-8b07-1b0720c1bc7d</RiderProfileId>
+    <RiderClientAssignmentId>2d733714-f868-4f59-980e-6b50b66d8716</RiderClientAssignmentId>
+    <StartedAtUtc>2026-09-28T00:00:00+03:00</StartedAtUtc>
+    <CommissionStartsOn>2026-10-18T00:00:00+03:00</CommissionStartsOn>
+    <LastSettlementPaymentAtUtc>2026-09-27T21:00:00Z</LastSettlementPaymentAtUtc>
+    <Reason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</Reason>
+    <CreatedAtUtc>2026-10-17T11:57:04.6071116Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-17T14:14:31.5536135Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAAC3cs=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Sessions>
+  <Sessions>
+    <Id>affe91ca-030b-40bb-aed2-b41362776349</Id>
+    <PlatformRiderAccountId>32c9c771-7352-45b5-9eed-c8088d554307</PlatformRiderAccountId>
+    <RiderProfileId>01a0bf9d-e0a3-7392-9703-07b748146261</RiderProfileId>
+    <RiderClientAssignmentId>57df6ef4-379e-4119-9646-f75f179e7cd1</RiderClientAssignmentId>
+    <StartedAtUtc>2026-09-02T00:00:00+03:00</StartedAtUtc>
+    <CommissionStartsOn>2026-10-18T00:00:00+03:00</CommissionStartsOn>
+    <LastSettlementPaymentAtUtc>2026-09-01T21:00:00Z</LastSettlementPaymentAtUtc>
+    <Reason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</Reason>
+    <CreatedAtUtc>2026-10-17T11:57:04.6071116Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-17T14:14:31.5536135Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAAC3cw=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Sessions>
+  <Sessions>
+    <Id>567b4dd4-b468-4a75-a018-ba09ec56fd56</Id>
+    <PlatformRiderAccountId>a7f369aa-2e47-4334-8e49-50272dbefb4a</PlatformRiderAccountId>
+    <RiderProfileId>01a0bf9d-e0a5-7cbe-a810-5be32d1304ac</RiderProfileId>
+    <RiderClientAssignmentId>a3983597-93e7-414f-9ced-062e94250a60</RiderClientAssignmentId>
+    <StartedAtUtc>2026-09-26T21:00:00Z</StartedAtUtc>
+    <CommissionStartsOn>2026-10-18T00:00:00+03:00</CommissionStartsOn>
+    <LastSettlementPaymentAtUtc>2026-09-26T21:00:00Z</LastSettlementPaymentAtUtc>
+    <Reason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</Reason>
+    <CreatedAtUtc>2026-10-17T11:57:04.6071116Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-17T14:14:31.5536135Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAAC3c0=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Sessions>
+  <Sessions>
+    <Id>01a141b1-fb25-7dc4-8b06-c5d71283bd0e</Id>
+    <PlatformRiderAccountId>3c7497b5-d5a0-4614-9cd1-313e1d663d62</PlatformRiderAccountId>
+    <RiderProfileId>01a09667-03d1-7b30-9e7f-9c4f347509b4</RiderProfileId>
+    <RiderClientAssignmentId>01a141b1-fb0c-7745-90de-10a58b84bb84</RiderClientAssignmentId>
+    <StartedAtUtc>2026-09-29T21:00:00Z</StartedAtUtc>
+    <CommissionStartsOn>2026-10-18T00:00:00+03:00</CommissionStartsOn>
+    <LastSettlementPaymentAtUtc>2026-09-29T21:00:00Z</LastSettlementPaymentAtUtc>
+    <Reason>تسليم جديد للعمل</Reason>
+    <CreatedAtUtc>2026-10-15T22:32:25.8340597Z</CreatedAtUtc>
+    <CreatedByUserId>b1de8de7-7ad4-4f08-f387-08df1173e0a7</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-17T14:14:31.5536135Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAAC3c4=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Sessions>
+  <Sessions>
+    <Id>c8c80108-32dc-4a87-89d4-cccb297c080e</Id>
+    <PlatformRiderAccountId>daf20017-9233-4441-a1df-68fd1dcfcfc9</PlatformRiderAccountId>
+    <RiderProfileId>01a0bf9d-e0a6-7491-808b-3c0aa6a2b83c</RiderProfileId>
+    <RiderClientAssignmentId>b684ee3f-21c5-4f26-9dbf-603a19f578db</RiderClientAssignmentId>
+    <StartedAtUtc>2026-09-09T21:00:00Z</StartedAtUtc>
+    <CommissionStartsOn>2026-10-18T00:00:00+03:00</CommissionStartsOn>
+    <LastSettlementPaymentAtUtc>2026-09-09T21:00:00Z</LastSettlementPaymentAtUtc>
+    <Reason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</Reason>
+    <CreatedAtUtc>2026-10-17T11:57:04.6071116Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-17T14:14:31.5536135Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAAC3c8=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Sessions>
+  <Sessions>
+    <Id>79e9dc82-ef4d-43aa-9be6-e15bca8c7571</Id>
+    <PlatformRiderAccountId>80478319-42d4-47d3-98e8-d4ba26af0aa0</PlatformRiderAccountId>
+    <RiderProfileId>01a0bf9d-e0a6-70cf-a161-e2e82305d80d</RiderProfileId>
+    <RiderClientAssignmentId>9c0dc0cd-b0c2-40d7-966d-09e45185afd3</RiderClientAssignmentId>
+    <StartedAtUtc>2026-09-14T00:00:00+03:00</StartedAtUtc>
+    <CommissionStartsOn>2026-10-18T00:00:00+03:00</CommissionStartsOn>
+    <LastSettlementPaymentAtUtc>2026-09-13T21:00:00Z</LastSettlementPaymentAtUtc>
+    <Reason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</Reason>
+    <CreatedAtUtc>2026-10-17T11:57:04.6071116Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-17T14:14:31.5536135Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAAC3dA=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Sessions>
+  <Sessions>
+    <Id>0e04d982-d863-4436-aa26-f05302537755</Id>
+    <PlatformRiderAccountId>f9c9e42b-562e-4bf5-a7db-7095fe91c972</PlatformRiderAccountId>
+    <RiderProfileId>01a0bf9d-e0a6-7642-995d-f826790e8833</RiderProfileId>
+    <RiderClientAssignmentId>5242e332-dd96-4bc7-8a4a-176d5ef60a5a</RiderClientAssignmentId>
+    <StartedAtUtc>2026-09-17T00:00:00+03:00</StartedAtUtc>
+    <CommissionStartsOn>2026-10-18T00:00:00+03:00</CommissionStartsOn>
+    <LastSettlementPaymentAtUtc>2026-09-16T21:00:00Z</LastSettlementPaymentAtUtc>
+    <Reason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</Reason>
+    <CreatedAtUtc>2026-10-17T11:57:04.6071116Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-17T14:14:31.5536135Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAAC3dE=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Sessions>
+  <DatasetVersions>
+    <Id>01a10681-712e-7b26-93e0-8f9df3b1a024</Id>
+    <ModuleKey>jahez</ModuleKey>
+    <Version>159</Version>
+    <LastChangedAtUtc>2026-10-17T14:14:31.5536135Z</LastChangedAtUtc>
+    <CreatedAtUtc>2026-10-04T10:41:48.8464462Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-17T14:14:31.5536135Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAAC3dI=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </DatasetVersions>
+</NewDataSet>

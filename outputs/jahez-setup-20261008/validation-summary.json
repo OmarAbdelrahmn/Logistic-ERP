@@ -1,0 +1,14 @@
+{
+  "assigned_source_rows": 304,
+  "future_settlement_date": 176,
+  "blank_fees": 300,
+  "negative_cached_commission": 195,
+  "rider_match": 19,
+  "settlement_before_handover": 26,
+  "unassigned_source_rows": 76,
+  "future_handover_date": 10,
+  "blank_debt": 34,
+  "invalid_handover_date": 6,
+  "account_not_available": 3,
+  "rider_account_limit": 3
+}

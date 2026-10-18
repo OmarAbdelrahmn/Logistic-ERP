@@ -259,13 +259,13 @@ internal sealed partial class FuelCardService(
             from riderProfile in dbContext.RiderProfiles.AsNoTracking()
             join employee in dbContext.Employees.AsNoTracking() on riderProfile.EmployeeId equals employee.Id
             where riderProfile.Id == request.RiderProfileId
-            select new RiderEligibility(riderProfile.EmployeeId, employee.IsEmployee, employee.Status))
+            select new RiderEligibility(riderProfile.EmployeeId, employee.Status))
             .SingleOrDefaultAsync(cancellationToken);
         if (rider is null)
         {
             return Result.Failure<FuelCardAssignmentResponse>(FuelErrors.RiderNotFound);
         }
-        if (rider.IsEmployee || rider.Status != EmployeeStatus.Active)
+        if (rider.Status != EmployeeStatus.Active)
         {
             return Result.Failure<FuelCardAssignmentResponse>(FuelErrors.RiderUnavailable);
         }
@@ -978,7 +978,7 @@ internal sealed partial class FuelCardService(
         catch (FormatException) { return false; }
     }
 
-    private sealed record RiderEligibility(Guid EmployeeId, bool IsEmployee, EmployeeStatus Status);
+    private sealed record RiderEligibility(Guid EmployeeId, EmployeeStatus Status);
     private sealed record AssignmentProjection(
         FuelCardRiderAssignment Assignment,
         string CardNumber,

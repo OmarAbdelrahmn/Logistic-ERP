@@ -4,6 +4,24 @@ namespace LogisticsERP.Application.Authorization;
 
 public static class PermissionKeys
 {
+    public static class Ninja
+    {
+        public const string Read = "ninja.read";
+        public const string AccountsUpdate = "ninja.accounts.update";
+        public const string AssignmentsCreate = "ninja.assignments.create";
+        public const string AssignmentsDelete = "ninja.assignments.delete";
+        public const string CredentialsRotate = "ninja.credentials.rotate";
+        public const string PerformanceImport = "ninja.performance.import";
+        public const string DeductionsImport = "ninja.deductions.import";
+    }
+
+    public static class Chefz
+    {
+        public const string Read = "chefz.read";
+        public const string AccountsUpdate = "chefz.accounts.update";
+        public const string PerformanceImport = "chefz.performance.import";
+        public const string SettlementsCreate = "chefz.settlements.create";
+    }
     public static class Security
     {
         public const string UsersRead = "users.read";
@@ -306,6 +324,9 @@ public static class PermissionKeys
 
     public static FrozenSet<string> All { get; } = new[]
     {
+        Ninja.Read, Ninja.AccountsUpdate, Ninja.AssignmentsCreate, Ninja.AssignmentsDelete,
+        Ninja.CredentialsRotate, Ninja.PerformanceImport, Ninja.DeductionsImport,
+        Chefz.Read, Chefz.AccountsUpdate, Chefz.PerformanceImport, Chefz.SettlementsCreate,
         Security.UsersRead,
         Security.UsersCreate,
         Security.UsersUpdate,
@@ -550,5 +571,5 @@ public static class PermissionKeys
         HrForms.TemplatesCreate,
         HrForms.TemplatesUpdate,
         HrForms.TemplatesDelete
-    }.ToFrozenSet(StringComparer.Ordinal);
+    }.Concat(LogisticsERP.Application.Features.Jahez.JahezWorkflowPermissions.All).ToFrozenSet(StringComparer.Ordinal);
 }

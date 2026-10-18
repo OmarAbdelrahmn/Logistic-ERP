@@ -220,11 +220,13 @@ public sealed record OilBarrelResponse(
     DateTimeOffset? OpenedAtUtc,
     DateTimeOffset? DepletedAtUtc,
     string RowVersion,
-    VehicleType? AllowedVehicleType = null);
+    VehicleType? AllowedVehicleType = null,
+    bool AllowBothVehicleTypes = false,
+    decimal RecordedMissingLiters = 0);
 
-public sealed record OpenOilBarrelRequest(DateTimeOffset OpenedAtUtc, string RowVersion, VehicleType AllowedVehicleType);
+public sealed record OpenOilBarrelRequest(DateTimeOffset OpenedAtUtc, string RowVersion, VehicleType? AllowedVehicleType, bool AllowBothVehicleTypes = false);
 
-public sealed record SetOilBarrelVehicleTypeRequest(VehicleType AllowedVehicleType, string RowVersion);
+public sealed record SetOilBarrelVehicleTypeRequest(VehicleType? AllowedVehicleType, string RowVersion, bool AllowBothVehicleTypes = false);
 
 public sealed record OilBarrelVehicleUsageResponse(
     Guid? VehicleId, Guid? ExternalWorkOrderId, string? AssetNumber,
@@ -250,6 +252,21 @@ public sealed record RecordOilBarrelLossRequest(
     decimal QuantityLiters,
     string Reason,
     string RowVersion);
+
+public sealed record RecordOilBarrelMissingRequest(
+    DateTimeOffset OccurredAtUtc, decimal QuantityLiters, OilBarrelMissingReason MissingReason,
+    string Reason, string RowVersion);
+
+public sealed record OilBarrelMissingEntryResponse(
+    Guid Id, Guid OilBarrelId, Guid ResponsibleInventoryLocationId,
+    DateTimeOffset OccurredAtUtc, decimal QuantityLiters, decimal CostAmount,
+    OilBarrelMissingReason MissingReason, string Reason, Guid RecordedByUserId,
+    DateTimeOffset RecordedAtUtc, Guid StockMovementId);
+
+public sealed record OilBarrelMissingResponse(OilBarrelMissingEntryResponse Entry, OilBarrelResponse Barrel);
+public sealed record OilBarrelMissingHistoryResponse(
+    Guid OilBarrelId, decimal TotalMissingLiters, decimal TotalCostAmount,
+    IReadOnlyList<OilBarrelMissingEntryResponse> Entries, int Page, int PageSize, int TotalCount);
 
 public sealed record OilBarrelLossResponse(
     Guid Id,
@@ -510,7 +527,8 @@ public sealed record DirectOilBarrelResponse(
     Guid InventoryItemId,
     OilBarrelStatus Status,
     decimal RemainingLiters,
-    VehicleType? AllowedVehicleType = null);
+    VehicleType? AllowedVehicleType = null,
+    bool AllowBothVehicleTypes = false);
 
 public sealed record OilChangeResponse(
     Guid Id,

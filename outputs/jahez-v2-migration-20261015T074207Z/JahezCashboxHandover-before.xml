@@ -1,0 +1,74 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="BusinessDate" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="Status" type="xs:int" minOccurs="0" />
+                <xs:element name="FeeAmount" type="xs:decimal" minOccurs="0" />
+                <xs:element name="SettlementAmount" type="xs:decimal" minOccurs="0" />
+                <xs:element name="AccountantFeeAmount" type="xs:decimal" minOccurs="0" />
+                <xs:element name="AccountantSettlementAmount" type="xs:decimal" minOccurs="0" />
+                <xs:element name="RequestedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="AccountantUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="ApprovedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="ConfirmedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="DecidedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="Reason" type="xs:string" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="UpdatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="UpdatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="IsDeleted" type="xs:boolean" minOccurs="0" />
+                <xs:element name="DeletedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="DeletedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DeletionReason" type="xs:string" minOccurs="0" />
+                <xs:element name="ConfirmationReason" type="xs:string" minOccurs="0" />
+                <xs:element name="DecisionReason" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <Id>01a106b6-0e32-7bd2-a9b6-79cdb619d7d1</Id>
+    <BusinessDate>2026-10-04T00:00:00+03:00</BusinessDate>
+    <Status>1</Status>
+    <FeeAmount>200.000000</FeeAmount>
+    <SettlementAmount>0.000000</SettlementAmount>
+    <RequestedByUserId>019c18d5-62e1-7000-c000-000000000001</RequestedByUserId>
+    <Reason>تصفية</Reason>
+    <CreatedAtUtc>2026-10-04T11:39:16.9572253Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <IsDeleted>false</IsDeleted>
+  </Table>
+  <Table>
+    <Id>01a111b8-4238-7344-ae46-8ed37095586a</Id>
+    <BusinessDate>2026-10-06T00:00:00+03:00</BusinessDate>
+    <Status>3</Status>
+    <FeeAmount>200.000000</FeeAmount>
+    <SettlementAmount>0.000000</SettlementAmount>
+    <AccountantFeeAmount>200.000000</AccountantFeeAmount>
+    <AccountantSettlementAmount>0.000000</AccountantSettlementAmount>
+    <RequestedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</RequestedByUserId>
+    <AccountantUserId>019c18d5-62e1-7000-c000-000000000001</AccountantUserId>
+    <ApprovedByUserId>b1de8de7-7ad4-4f08-f387-08df1173e0a7</ApprovedByUserId>
+    <ConfirmedAtUtc>2026-10-06T14:58:15.1368159Z</ConfirmedAtUtc>
+    <DecidedAtUtc>2026-10-06T17:26:14.0330499Z</DecidedAtUtc>
+    <Reason>تصفية</Reason>
+    <CreatedAtUtc>2026-10-06T14:57:30.7244545Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-06T17:26:14.0578119Z</UpdatedAtUtc>
+    <UpdatedByUserId>b1de8de7-7ad4-4f08-f387-08df1173e0a7</UpdatedByUserId>
+    <IsDeleted>false</IsDeleted>
+    <ConfirmationReason>مطابقة وعد واستلام مبالغ الصندوق</ConfirmationReason>
+    <DecisionReason>اعتماد تسليم الصندوق وإخلاء العهدة</DecisionReason>
+  </Table>
+</NewDataSet>

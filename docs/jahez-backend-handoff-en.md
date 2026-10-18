@@ -1,5 +1,7 @@
 # Jahez backend: complete implementation and API handoff
 
+> Current 11 October 2026 contract, including debt freeze/transfer/clearance/paid confirmation: [full API reference](jahez-full-api-reference.md), [frontend changelog](jahez-frontend-changelog-and-spec.md), and [TypeScript contracts](jahez-api-contracts.ts). Historical examples below may omit the new fields; use the current contract for integration.
+
 **Scope:** Backend implementation in Logistics ERP, current as of 4 October 2026. This document is self-contained for backend operators and frontend/API integrators. The Jahez module manages account handovers, rider fees, commission, imported platform debt, settlements, approvals, a two-section cashbox, daily accountant handoffs, dispatch counts, and overdue reminders. It uses the existing platform-account, rider, assignment, authorization, and notification infrastructure. It does not call Jahez's external API or provide a frontend.
 
 ## 1. Core identities and prerequisites
@@ -49,14 +51,14 @@ Example conflict response:
 | Permission | Purpose |
 |---|---|
 | `jahez.read` | Handovers, balances, debts, ledger, requests, dispatch reports |
-| `jahez.handovers.manage` | New handovers and normal close |
-| `jahez.collections.manage` | Rider collections and settlements |
+| `jahez.handovers.create / jahez.handovers.delete` | New handovers and normal close |
+| `jahez.collections.create` | Rider collections and settlements |
 | `jahez.requests.create` | Create/cancel approval requests |
 | `jahez.requests.approve` | Decide fee, switch, and percentage requests |
 | `jahez.resets.approve` | Decide reset requests |
-| `jahez.earnings.manage` | Manual percentage earnings |
-| `jahez.imports.manage` | Upload, preview, commit, and download imports |
-| `jahez.adjustments.manage` | Ledger adjustments and legacy adoption |
+| `jahez.earnings.create` | Manual percentage earnings |
+| `jahez.imports.create / jahez.imports.read / jahez.imports.update` | Upload, preview, commit, and download imports |
+| `jahez.adjustments.create` | Ledger adjustments and legacy adoption |
 | `jahez.cashbox.read` | Cashbox balances and history |
 | `jahez.cashbox.submit` | Start accountant handoff |
 | `jahez.cashbox.confirm` | Confirm receipt as accountant |
@@ -142,9 +144,9 @@ In the tables, `{id}` means the UUID named in the Request column. For GET lists,
 
 | Method and route | Request | HTTP 200 response | Permission |
 |---|---|---|---|
-| `POST /api/jahez/handovers` | `HandoverRequest` below | `Handover`; use returned `id` as `handoverId` | `jahez.handovers.manage` |
-| `POST /api/jahez/legacy-adoptions` | `LegacyAdoptionRequest` below | `Handover` with `isLegacy: true` | `jahez.adjustments.manage` |
-| `POST /api/jahez/handovers/{id}/close` | `{id}=handoverId`; `CloseRequest` | `Handover` with `endedAtUtc` | `jahez.handovers.manage` |
+| `POST /api/jahez/handovers` | `HandoverRequest` below | `Handover`; use returned `id` as `handoverId` | `jahez.handovers.create` |
+| `POST /api/jahez/legacy-adoptions` | `LegacyAdoptionRequest` below | `Handover` with `isLegacy: true` | `jahez.adjustments.create` |
+| `POST /api/jahez/handovers/{id}/close` | `{id}=handoverId`; `CloseRequest` | `Handover` with `endedAtUtc` | `jahez.handovers.delete` |
 | `GET /api/jahez/handovers` | Query `accountId?`, `riderId?`, `page?`, `pageSize?` | `Page<Handover>` | `jahez.read` |
 | `GET /api/jahez/handovers/{id}/balance` | `{id}=handoverId`; required query `through=yyyy-MM-dd` | `Balance` | `jahez.read` |
 | `GET /api/jahez/debts` | Query `riderId?`, `overdueOnly?` (default false), `page?`, `pageSize?` | `Page<Balance>`; includes old closed handovers' debts | `jahez.read` |
@@ -218,9 +220,9 @@ The free-switch target must be a different available Jahez account. For switch/r
 
 | Method and route | Request | HTTP 200 response | Permission |
 |---|---|---|---|
-| `POST /api/jahez/earnings` | `EarningsRequest` | `Earnings` + History metadata | `jahez.earnings.manage` |
-| `POST /api/jahez/settlements` | `PaymentRequest` | `Settlement` + History metadata | `jahez.collections.manage` |
-| `POST /api/jahez/adjustments` | `LedgerAdjustmentRequest` | `LedgerEntry` + History metadata | `jahez.adjustments.manage` |
+| `POST /api/jahez/earnings` | `EarningsRequest` | `Earnings` + History metadata | `jahez.earnings.create` |
+| `POST /api/jahez/settlements` | `PaymentRequest` | `Settlement` + History metadata | `jahez.collections.create` |
+| `POST /api/jahez/adjustments` | `LedgerAdjustmentRequest` | `LedgerEntry` + History metadata | `jahez.adjustments.create` |
 
 ```json
 {"handoverId":"33333333-3333-3333-3333-333333333333","fromDate":"2026-10-02","toDate":"2026-10-03","totalDeliveryPrice":1000,"totalPenalties":20,"totalCashAmount":100,"totalDriverDebit":10,"totalServiceDeduction":5,"totalDriverCredit":50,"totalBonuses":30,"totalTips":10,"totalFreeOrders":5,"reason":"Manually entered Jahez earnings","supersedesId":null}
@@ -248,11 +250,11 @@ The example creates SAR 50 in account fees and SAR 130 in cashbox settlements. I
 
 | Method and route | Request | HTTP 200 response | Permission |
 |---|---|---|---|
-| `POST /api/jahez/imports` | Multipart `kind`, one or more repeated `files`, optional `replacesBatchId`, `correctionReason` | `ImportPreview` with `committed: false` | `jahez.imports.manage` |
-| `GET /api/jahez/imports` | Query `page?`, `pageSize?` | `Page<ImportBatch>` | `jahez.imports.manage` |
-| `GET /api/jahez/imports/{id}` | `{id}=batchId` | Refreshed `ImportPreview` with current binding/overlap issues | `jahez.imports.manage` |
-| `POST /api/jahez/imports/{id}/commit` | `{id}=batchId`; `{}` or `ImportCommitRequest` | `ImportPreview` with `committed: true` | `jahez.imports.manage` |
-| `GET /api/jahez/import-files/{id}` | `{id}=files[].id` from preview | Original XLSX bytes; XLSX content type and original filename | `jahez.imports.manage` |
+| `POST /api/jahez/imports` | Multipart `kind`, one or more repeated `files`, optional `replacesBatchId`, `correctionReason` | `ImportPreview` with `committed: false` | `jahez.imports.create` |
+| `GET /api/jahez/imports` | Query `page?`, `pageSize?` | `Page<ImportBatch>` | `jahez.imports.read` |
+| `GET /api/jahez/imports/{id}` | `{id}=batchId` | Refreshed `ImportPreview` with current binding/overlap issues | `jahez.imports.read` |
+| `POST /api/jahez/imports/{id}/commit` | `{id}=batchId`; `{}` or `ImportCommitRequest` | `ImportPreview` with `committed: true` | `jahez.imports.update` |
+| `GET /api/jahez/import-files/{id}` | `{id}=files[].id` from preview | Original XLSX bytes; XLSX content type and original filename | `jahez.imports.read` |
 | `GET /api/jahez/dispatches` | Required `from=yyyy-MM-dd`, `to=yyyy-MM-dd`; optional `riderId`, `page`, `pageSize` | `Page<Dispatch>` attributed to actual riders | `jahez.read` |
 
 Upload 1–10 XLSX files **of the same kind** in one batch. Each file is at most 10 MB; all files together at most 30 MB; a batch may contain at most 50,000 rows. The required sheet headings can appear in a different column order. Required cells cannot contain Excel formulas. Original file bytes, each row number, source values, and six-decimal financial precision are retained.
@@ -335,11 +337,11 @@ The Jahez handover uses an existing platform account and its `sponsorId`. These 
 |---|---|---|---|
 | `GET /api/platform-accounts` | Optional `accountId`, `platformId`, `operatingCityId`, `sponsorId`, `ownerRiderProfileId`, `actualRiderProfileId`, `status`, `paymentModel`, `currentOnly`, `includeArchived` | `SimplePlatformAccountResponse[]` | `platform_accounts.read` |
 | `GET /api/platform-accounts/{id}` | Platform account ID | `SimplePlatformAccountResponse` | `platform_accounts.read` |
-| `POST /api/platform-accounts` | `SimplePlatformAccountUpsertRequest` | `SimplePlatformAccountResponse` | `platform_accounts.manage` |
-| `PUT /api/platform-accounts/{id}` | Same request plus current `rowVersion` | `SimplePlatformAccountResponse` | `platform_accounts.manage` |
+| `POST /api/platform-accounts` | `SimplePlatformAccountUpsertRequest` | `SimplePlatformAccountResponse` | `platform_accounts.create` |
+| `PUT /api/platform-accounts/{id}` | Same request plus current `rowVersion` | `SimplePlatformAccountResponse` | `platform_accounts.update` |
 | `GET /api/platform-operations/accounts` | Optional `platformId`, `sponsorId` | `PlatformAccountResponse[]` | `platform_accounts.read` |
-| `POST /api/platform-operations/accounts` | `PlatformAccountUpsertRequest` | `PlatformAccountResponse` | `platform_accounts.manage` |
-| `PUT /api/platform-operations/accounts/{id}` | Same request plus current `rowVersion` | `PlatformAccountResponse` | `platform_accounts.manage` |
+| `POST /api/platform-operations/accounts` | `PlatformAccountUpsertRequest` | `PlatformAccountResponse` | `platform_accounts.create` |
+| `PUT /api/platform-operations/accounts/{id}` | Same request plus current `rowVersion` | `PlatformAccountResponse` | `platform_accounts.update` |
 
 Simple API account creation body (use actual catalog IDs):
 

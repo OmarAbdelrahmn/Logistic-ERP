@@ -197,6 +197,7 @@ public sealed class PurchaseReceiptAttachment : HistoryEntity
 
 public sealed class OilBarrel : AuditableEntity
 {
+    public bool AllowBothVehicleTypes { get; set; }
     public VehicleType? AllowedVehicleType { get; set; }
     public string BarrelNumber { get; set; } = string.Empty;
     public Guid? PurchaseReceiptLineId { get; set; }
@@ -209,6 +210,7 @@ public sealed class OilBarrel : AuditableEntity
     public decimal UnitCostPerLiter { get; set; }
     public decimal MaximumAllowedLossLiters { get; set; }
     public decimal RecordedLossLiters { get; set; }
+    public decimal RecordedMissingLiters { get; set; }
     public OilBarrelStatus Status { get; set; } = OilBarrelStatus.Sealed;
     public DateTimeOffset? OpenedAtUtc { get; set; }
     public Guid? OpenedByUserId { get; set; }
@@ -226,6 +228,8 @@ public sealed class OilBarrelUsageAllocation : HistoryEntity
 
 public sealed class OilBarrelLoss : HistoryEntity
 {
+    public OilBarrelMissingReason? MissingReason { get; set; }
+    public Guid? ResponsibleInventoryLocationId { get; set; }
     public Guid OilBarrelId { get; set; }
     public DateTimeOffset OccurredAtUtc { get; set; }
     public decimal QuantityLiters { get; set; }

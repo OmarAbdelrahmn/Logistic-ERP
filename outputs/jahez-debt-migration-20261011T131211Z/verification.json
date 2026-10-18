@@ -1,0 +1,100 @@
+{
+  "Database": "db67927",
+  "Server": "db67927.public.databaseasp.net",
+  "Migration": "20261011122817_AddJahezDebtFreezeAndClearance",
+  "ScriptSha256": "04626FC7203E8B0E08AB401B85162F87D7AC0AF96439DEBC75FF7A4EC9F39A4D",
+  "OriginalHandoverValuesPreserved": true,
+  "FinancialLedgerPreserved": true,
+  "Verification": [
+    {
+      "ResultSet": 0,
+      "Rows": [
+        {
+          "MigrationId": "20261011122817_AddJahezDebtFreezeAndClearance",
+          "ProductVersion": "10.0.11"
+        }
+      ]
+    },
+    {
+      "ResultSet": 1,
+      "Rows": [
+        {
+          "name": "AccountClearedAtUtc",
+          "SqlType": "datetimeoffset",
+          "max_length": 10,
+          "is_nullable": true
+        },
+        {
+          "name": "DebtPaidAtUtc",
+          "SqlType": "datetimeoffset",
+          "max_length": 10,
+          "is_nullable": true
+        },
+        {
+          "name": "DebtStatus",
+          "SqlType": "int",
+          "max_length": 4,
+          "is_nullable": false
+        },
+        {
+          "name": "ExternalClearanceReference",
+          "SqlType": "nvarchar",
+          "max_length": 1000,
+          "is_nullable": true
+        },
+        {
+          "name": "FrozenAtUtc",
+          "SqlType": "datetimeoffset",
+          "max_length": 10,
+          "is_nullable": true
+        }
+      ]
+    },
+    {
+      "ResultSet": 2,
+      "Rows": [
+        {
+          "name": "CK_JahezHandover_DebtStatus",
+          "is_disabled": false,
+          "is_not_trusted": false
+        },
+        {
+          "name": "CK_JahezHandover_FrozenRange",
+          "is_disabled": false,
+          "is_not_trusted": false
+        },
+        {
+          "name": "CK_JahezLedger_StatusAmount",
+          "is_disabled": false,
+          "is_not_trusted": false
+        }
+      ]
+    },
+    {
+      "ResultSet": 3,
+      "Rows": [
+        {
+          "DebtStatus": 1,
+          "PeriodCount": 300
+        }
+      ]
+    },
+    {
+      "ResultSet": 4,
+      "Rows": [
+        {
+          "LedgerCount": 844,
+          "SignedLedgerTotal": 245166.926000
+        }
+      ]
+    },
+    {
+      "ResultSet": 5,
+      "Rows": [
+        {
+          "VerifiedAtUtc": "2026-10-11T13:12:14.2450935"
+        }
+      ]
+    }
+  ]
+}

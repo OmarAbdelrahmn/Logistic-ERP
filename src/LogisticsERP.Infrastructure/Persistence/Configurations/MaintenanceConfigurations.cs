@@ -326,6 +326,12 @@ internal sealed class OilBarrelConfiguration : IEntityTypeConfiguration<OilBarre
         builder.Property(x => x.UnitCostPerLiter).HasPrecision(18, 6);
         builder.Property(x => x.MaximumAllowedLossLiters).HasPrecision(18, 3);
         builder.Property(x => x.RecordedLossLiters).HasPrecision(18, 3);
+        builder.Property(x => x.RecordedMissingLiters).HasPrecision(18, 3);
+        builder.Property(x => x.AllowBothVehicleTypes).HasDefaultValue(false);
+        builder.Property<int?>("OpenCarSlot").HasComputedColumnSql(
+            "CASE WHEN [AllowBothVehicleTypes] = 1 OR [AllowedVehicleType] IS NULL OR [AllowedVehicleType] = 2 THEN 1 ELSE NULL END", stored: true);
+        builder.Property<int?>("OpenMotorcycleSlot").HasComputedColumnSql(
+            "CASE WHEN [AllowBothVehicleTypes] = 1 OR [AllowedVehicleType] IS NULL OR [AllowedVehicleType] = 1 THEN 1 ELSE NULL END", stored: true);
         builder.HasOne<PurchaseReceiptLine>().WithMany().HasForeignKey(x => x.PurchaseReceiptLineId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<InventoryItem>().WithMany().HasForeignKey(x => x.InventoryItemId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<InventoryLocation>().WithMany().HasForeignKey(x => x.InventoryLocationId).OnDelete(DeleteBehavior.Restrict);
@@ -333,12 +339,16 @@ internal sealed class OilBarrelConfiguration : IEntityTypeConfiguration<OilBarre
         builder.HasIndex(x => x.BarrelNumber).IsUnique();
         builder.HasIndex(x => new { x.InventoryLocationId, x.InventoryItemId, x.Status, x.OpenedAtUtc });
         builder.HasIndex(x => new { x.InventoryLocationId, x.InventoryItemId, x.AllowedVehicleType }).IsUnique().HasFilter("[Status] = 2 AND [IsDeleted] = 0");
+        builder.HasIndex(nameof(OilBarrel.InventoryLocationId), nameof(OilBarrel.InventoryItemId), "OpenCarSlot")
+            .IsUnique().HasFilter("[Status] = 2 AND [IsDeleted] = 0");
+        builder.HasIndex(nameof(OilBarrel.InventoryLocationId), nameof(OilBarrel.InventoryItemId), "OpenMotorcycleSlot")
+            .IsUnique().HasFilter("[Status] = 2 AND [IsDeleted] = 0");
         builder.HasIndex(x => new { x.PurchaseReceiptLineId, x.PackageSequence }).IsUnique().HasFilter("[PurchaseReceiptLineId] IS NOT NULL AND [IsDeleted] = 0");
         builder.ToTable(table =>
         {
-            table.HasCheckConstraint("CK_OilBarrels_Quantities", "[NominalCapacityLiters] > 0 AND [RemainingLiters] >= 0 AND [RemainingLiters] <= [NominalCapacityLiters] AND [UnitCostPerLiter] >= 0 AND [MaximumAllowedLossLiters] = ROUND([NominalCapacityLiters] * 0.02, 3) AND [RecordedLossLiters] >= 0 AND [RecordedLossLiters] <= [MaximumAllowedLossLiters]");
+            table.HasCheckConstraint("CK_OilBarrels_Quantities", "[NominalCapacityLiters] > 0 AND [RemainingLiters] >= 0 AND [RemainingLiters] <= [NominalCapacityLiters] AND [UnitCostPerLiter] >= 0 AND [MaximumAllowedLossLiters] = ROUND([NominalCapacityLiters] * 0.02, 3) AND [RecordedLossLiters] >= 0 AND [RecordedLossLiters] <= [MaximumAllowedLossLiters] AND [RecordedMissingLiters] >= 0 AND [RemainingLiters] + [RecordedLossLiters] + [RecordedMissingLiters] <= [NominalCapacityLiters]");
             table.HasCheckConstraint("CK_OilBarrels_Status", "([Status] = 1 AND [OpenedAtUtc] IS NULL AND [RemainingLiters] > 0) OR ([Status] = 2 AND [OpenedAtUtc] IS NOT NULL AND [RemainingLiters] > 0) OR ([Status] = 3 AND [OpenedAtUtc] IS NOT NULL AND [RemainingLiters] = 0) OR [Status] = 4");
-            table.HasCheckConstraint("CK_OilBarrels_AllowedVehicleType", "[AllowedVehicleType] IS NULL OR [AllowedVehicleType] IN (1, 2)");
+            table.HasCheckConstraint("CK_OilBarrels_AllowedVehicleType", "([AllowBothVehicleTypes] = 1 AND [AllowedVehicleType] IS NULL) OR ([AllowBothVehicleTypes] = 0 AND ([AllowedVehicleType] IS NULL OR [AllowedVehicleType] IN (1, 2)))");
         });
     }
 }
@@ -366,10 +376,11 @@ internal sealed class OilBarrelLossConfiguration : IEntityTypeConfiguration<OilB
         builder.Property(x => x.CostAmount).HasPrecision(18, 2);
         builder.Property(x => x.Reason).HasMaxLength(1000).IsRequired();
         builder.HasOne<OilBarrel>().WithMany().HasForeignKey(x => x.OilBarrelId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<InventoryLocation>().WithMany().HasForeignKey(x => x.ResponsibleInventoryLocationId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<StockMovement>().WithMany().HasForeignKey(x => x.StockMovementId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<StockMovementLine>().WithMany().HasForeignKey(x => x.StockMovementLineId).OnDelete(DeleteBehavior.Restrict);
         builder.HasIndex(x => new { x.OilBarrelId, x.OccurredAtUtc });
-        builder.ToTable(table => table.HasCheckConstraint("CK_OilBarrelLosses_Values", "[QuantityLiters] > 0 AND [CostAmount] >= 0"));
+        builder.ToTable(table => table.HasCheckConstraint("CK_OilBarrelLosses_Values", "[QuantityLiters] > 0 AND [CostAmount] >= 0 AND (([MissingReason] IS NULL AND [ResponsibleInventoryLocationId] IS NULL) OR ([MissingReason] IS NOT NULL AND [MissingReason] IN (1, 2, 3) AND [ResponsibleInventoryLocationId] IS NOT NULL))"));
     }
 }
 

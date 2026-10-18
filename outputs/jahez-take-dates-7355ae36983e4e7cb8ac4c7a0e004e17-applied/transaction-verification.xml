@@ -1,0 +1,158 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Account" type="xs:string" minOccurs="0" />
+                <xs:element name="TakeDate" type="xs:string" minOccurs="0" />
+                <xs:element name="Result" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="SessionsUpdated" type="xs:int" minOccurs="0" />
+                <xs:element name="AssignmentsUpdated" type="xs:int" minOccurs="0" />
+                <xs:element name="AccountsVerified" type="xs:int" minOccurs="0" />
+                <xs:element name="AlreadyMatched" type="xs:int" minOccurs="0" />
+                <xs:element name="AuditEntries" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <Account>404654</Account>
+    <TakeDate>2026-09-30</TakeDate>
+    <Result>Updated</Result>
+  </Table>
+  <Table>
+    <Account>404899</Account>
+    <TakeDate>2026-09-13</TakeDate>
+    <Result>Updated</Result>
+  </Table>
+  <Table>
+    <Account>404986</Account>
+    <TakeDate>2026-09-17</TakeDate>
+    <Result>Already matched</Result>
+  </Table>
+  <Table>
+    <Account>404997</Account>
+    <TakeDate>2026-09-22</TakeDate>
+    <Result>Already matched</Result>
+  </Table>
+  <Table>
+    <Account>405092</Account>
+    <TakeDate>2026-09-13</TakeDate>
+    <Result>Updated</Result>
+  </Table>
+  <Table>
+    <Account>408132</Account>
+    <TakeDate>2026-09-23</TakeDate>
+    <Result>Updated</Result>
+  </Table>
+  <Table>
+    <Account>415808</Account>
+    <TakeDate>2026-09-28</TakeDate>
+    <Result>Already matched</Result>
+  </Table>
+  <Table>
+    <Account>456434</Account>
+    <TakeDate>2026-09-21</TakeDate>
+    <Result>Already matched</Result>
+  </Table>
+  <Table>
+    <Account>459705</Account>
+    <TakeDate>2026-09-27</TakeDate>
+    <Result>Updated</Result>
+  </Table>
+  <Table>
+    <Account>460739</Account>
+    <TakeDate>2026-09-02</TakeDate>
+    <Result>Already matched</Result>
+  </Table>
+  <Table>
+    <Account>472433</Account>
+    <TakeDate>2026-09-24</TakeDate>
+    <Result>Updated</Result>
+  </Table>
+  <Table>
+    <Account>472829</Account>
+    <TakeDate>2026-09-21</TakeDate>
+    <Result>Updated</Result>
+  </Table>
+  <Table>
+    <Account>473007</Account>
+    <TakeDate>2026-09-08</TakeDate>
+    <Result>Already matched</Result>
+  </Table>
+  <Table>
+    <Account>474572</Account>
+    <TakeDate>2026-10-16</TakeDate>
+    <Result>Updated</Result>
+  </Table>
+  <Table>
+    <Account>474831</Account>
+    <TakeDate>2026-09-23</TakeDate>
+    <Result>Updated</Result>
+  </Table>
+  <Table>
+    <Account>476832</Account>
+    <TakeDate>2026-09-03</TakeDate>
+    <Result>Already matched</Result>
+  </Table>
+  <Table>
+    <Account>482679</Account>
+    <TakeDate>2026-09-28</TakeDate>
+    <Result>Updated</Result>
+  </Table>
+  <Table>
+    <Account>483905</Account>
+    <TakeDate>2026-09-28</TakeDate>
+    <Result>Already matched</Result>
+  </Table>
+  <Table>
+    <Account>484490</Account>
+    <TakeDate>2026-09-26</TakeDate>
+    <Result>Updated</Result>
+  </Table>
+  <Table>
+    <Account>491304</Account>
+    <TakeDate>2026-09-16</TakeDate>
+    <Result>Already matched</Result>
+  </Table>
+  <Table>
+    <Account>491309</Account>
+    <TakeDate>2026-09-10</TakeDate>
+    <Result>Updated</Result>
+  </Table>
+  <Table>
+    <Account>492374</Account>
+    <TakeDate>2026-09-08</TakeDate>
+    <Result>Updated</Result>
+  </Table>
+  <Table>
+    <Account>493593</Account>
+    <TakeDate>2026-09-14</TakeDate>
+    <Result>Already matched</Result>
+  </Table>
+  <Table>
+    <Account>498897</Account>
+    <TakeDate>2026-09-18</TakeDate>
+    <Result>Updated</Result>
+  </Table>
+  <Table1>
+    <SessionsUpdated>14</SessionsUpdated>
+    <AssignmentsUpdated>14</AssignmentsUpdated>
+    <AccountsVerified>24</AccountsVerified>
+    <AlreadyMatched>10</AlreadyMatched>
+    <AuditEntries>28</AuditEntries>
+  </Table1>
+</NewDataSet>

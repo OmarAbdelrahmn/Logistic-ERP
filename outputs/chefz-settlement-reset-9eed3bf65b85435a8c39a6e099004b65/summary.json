@@ -1,0 +1,32 @@
+{
+  "Action": "ChefzSettlementHistoryReset",
+  "CorrelationId": "chefz-settlement-reset-9eed3bf65b85435a8c39a6e099004b65",
+  "DeletedSettlements": 241,
+  "DeletedOrderImports": 3,
+  "RemainingSettlements": 0,
+  "RemainingOrderImports": 0,
+  "Backup": "C:\\Users\\omarf\\OneDrive\\Documents\\ChatGPT\\Logistic ERP\\outputs\\chefz-settlement-reset-9eed3bf65b85435a8c39a6e099004b65\\before.xml",
+  "Preserved": [
+    {
+      "Count": 464,
+      "Kind": "ChefzAccountDetails"
+    },
+    {
+      "Count": 2319,
+      "Kind": "ChefzDailyPerformance"
+    },
+    {
+      "Count": 15,
+      "Kind": "ChefzPerformanceImports"
+    },
+    {
+      "Count": 1845,
+      "Kind": "PlatformRiderAccounts"
+    },
+    {
+      "Count": 716,
+      "Kind": "RiderClientAssignments"
+    }
+  ],
+  "VatCodeDeployment": "Not performed by this reset"
+}

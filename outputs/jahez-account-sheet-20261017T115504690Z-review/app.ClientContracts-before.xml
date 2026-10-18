@@ -1,0 +1,78 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="ClientPlatformId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="Code" type="xs:string" minOccurs="0" />
+                <xs:element name="DisplayNameAr" type="xs:string" minOccurs="0" />
+                <xs:element name="DisplayNameEn" type="xs:string" minOccurs="0" />
+                <xs:element name="ExternalBusinessAccountId" type="xs:string" minOccurs="0" />
+                <xs:element name="StartDate" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="EndDate" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="Status" type="xs:int" minOccurs="0" />
+                <xs:element name="StatusReason" type="xs:string" minOccurs="0" />
+                <xs:element name="ContactName" type="xs:string" minOccurs="0" />
+                <xs:element name="ContactPhone" type="xs:string" minOccurs="0" />
+                <xs:element name="ContactEmail" type="xs:string" minOccurs="0" />
+                <xs:element name="Notes" type="xs:string" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="UpdatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="UpdatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RowVersion" type="xs:base64Binary" minOccurs="0" />
+                <xs:element name="IsDeleted" type="xs:boolean" minOccurs="0" />
+                <xs:element name="DeletedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="DeletedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DeletionReason" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <Id>01a13935-9d8e-796d-8c87-6a204495c3c3</Id>
+    <ClientPlatformId>01a02a0d-845d-7bd6-b829-84caf8badc7f</ClientPlatformId>
+    <Code>SYS-01a02a0d845d7bd6b82984caf8ba</Code>
+    <DisplayNameAr>تشغيل نينجا</DisplayNameAr>
+    <DisplayNameEn>Ninja operations</DisplayNameEn>
+    <Status>2</Status>
+    <Notes>System-managed contract used by the simplified platform API.</Notes>
+    <CreatedAtUtc>2026-10-14T07:04:59.6831714Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <RowVersion>AAAAAAACdGc=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table>
+  <Table>
+    <Id>01a10681-7081-7f17-93a9-90f085469645</Id>
+    <ClientPlatformId>01a02a0d-845c-7e0b-aa0c-3cd6246785d2</ClientPlatformId>
+    <Code>JAHEZ-OPERATIONS</Code>
+    <DisplayNameAr>تشغيل جاهز</DisplayNameAr>
+    <DisplayNameEn>Jahez operations</DisplayNameEn>
+    <Status>2</Status>
+    <CreatedAtUtc>2026-10-04T10:41:48.8464462Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <RowVersion>AAAAAAABLUk=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table>
+  <Table>
+    <Id>01a125e8-4d17-73bf-9df8-9c76851c76ef</Id>
+    <ClientPlatformId>01a02a0d-845d-7535-ac25-1e1f0c8e5808</ClientPlatformId>
+    <Code>SYS-01a02a0d845d7535ac251e1f0c8e</Code>
+    <DisplayNameAr>تشغيل شفز</DisplayNameAr>
+    <DisplayNameEn>Shiftz operations</DisplayNameEn>
+    <Status>2</Status>
+    <Notes>System-managed contract used by the simplified platform API.</Notes>
+    <CreatedAtUtc>2026-10-10T13:02:23.6701996Z</CreatedAtUtc>
+    <CreatedByUserId>21ef2bdf-fd57-43d7-029f-08df1415392a</CreatedByUserId>
+    <RowVersion>AAAAAAAB/OY=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table>
+</NewDataSet>

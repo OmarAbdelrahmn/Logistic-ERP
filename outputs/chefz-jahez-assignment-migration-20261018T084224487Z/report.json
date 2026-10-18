@@ -1,0 +1,20 @@
+{
+  "Server": "db67927.public.databaseasp.net",
+  "Database": "db67927",
+  "VerifiedAtUtc": "2026-10-18T08:42:26.7629410Z",
+  "Migration": "20261018083620_AllowChefzAndJahezRiderAssignments",
+  "PreviouslyApplied": false,
+  "PostCommitVerified": true,
+  "ExistingAssignmentRowsPreserved": true,
+  "ExistingAssignmentIndexesPreserved": true,
+  "PermittedSlots": [
+    1,
+    2,
+    3
+  ],
+  "AssignmentCount": 716,
+  "OpenAssignments": 704,
+  "ExistingRidersAboveNewCaps": 5,
+  "ScriptSha256": "EC2A2189C1EC62486B3915209A64B1D8596201B22C2E57C54A3BD8D4A226CF45",
+  "EvidenceDirectory": "C:\\Users\\omarf\\OneDrive\\Documents\\ChatGPT\\Logistic ERP\\outputs\\chefz-jahez-assignment-migration-20261018T084224487Z"
+}

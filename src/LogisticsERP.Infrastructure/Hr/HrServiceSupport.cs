@@ -113,6 +113,7 @@ internal sealed record ProtectedPlatformCredential(byte[] Ciphertext, byte[] Non
 internal interface IPlatformCredentialProtector
 {
     ProtectedPlatformCredential Protect(string value);
+    string Unprotect(ProtectedPlatformCredential value);
 }
 
 internal sealed class PlatformCredentialProtector : IPlatformCredentialProtector
@@ -137,6 +138,18 @@ internal sealed class PlatformCredentialProtector : IPlatformCredentialProtector
         aes.Encrypt(nonce, plaintext, ciphertext, tag);
         CryptographicOperations.ZeroMemory(plaintext);
         return new ProtectedPlatformCredential(ciphertext, nonce, tag);
+    }
+
+    public string Unprotect(ProtectedPlatformCredential value)
+    {
+        var plaintext = new byte[value.Ciphertext.Length];
+        try
+        {
+            using var aes = new AesGcm(encryptionKey.Value, value.AuthenticationTag.Length);
+            aes.Decrypt(value.Nonce, value.Ciphertext, value.AuthenticationTag, plaintext);
+            return Encoding.UTF8.GetString(plaintext);
+        }
+        finally { CryptographicOperations.ZeroMemory(plaintext); }
     }
 }
 

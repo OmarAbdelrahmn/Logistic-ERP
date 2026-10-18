@@ -1,0 +1,49 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Accounts" type="xs:long" minOccurs="0" />
+                <xs:element name="Assignments" type="xs:long" minOccurs="0" />
+                <xs:element name="CredentialVersions" type="xs:long" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="TableName" type="xs:string" minOccurs="0" />
+                <xs:element name="Records" type="xs:long" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <Accounts>301</Accounts>
+    <Assignments>107</Assignments>
+    <CredentialVersions>0</CredentialVersions>
+  </Table>
+  <Table1>
+    <TableName>NinjaAccountDetails</TableName>
+    <Records>301</Records>
+  </Table1>
+  <Table1>
+    <TableName>NinjaDailyDeductions</TableName>
+    <Records>0</Records>
+  </Table1>
+  <Table1>
+    <TableName>NinjaDailyImports</TableName>
+    <Records>0</Records>
+  </Table1>
+  <Table1>
+    <TableName>NinjaDailyPerformance</TableName>
+    <Records>0</Records>
+  </Table1>
+</NewDataSet>

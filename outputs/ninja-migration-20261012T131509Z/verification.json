@@ -1,0 +1,16 @@
+{
+  "Server": "db67927.public.databaseasp.net",
+  "Database": "db67927",
+  "Migration": "20261012130259_AddNinjaAccountsDailyPerformanceAndDeductions",
+  "ScriptSha256": "CF22EE88B21DBFA4B84593BCC4EFE01384E6E3840B1629C0C81C0754D36E2A10",
+  "VerifiedAtUtc": "2026-10-12T13:15:09.9326630Z",
+  "Tables": 4,
+  "TrustedForeignKeys": 9,
+  "TrustedCheckConstraints": 2,
+  "UniqueIndexes": 4,
+  "ExistingAccountsPreserved": true,
+  "ExistingAssignmentsPreserved": true,
+  "ExistingCredentialsPreserved": true,
+  "ReportRowsInserted": 0,
+  "NinjaAccounts": 0
+}

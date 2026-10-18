@@ -1,0 +1,14 @@
+﻿row,account,riderIqama,sourceDate,reason
+9,420509,2215204666,2026-10-11,Exceeds the global two-account rider limit; account selection needed.
+41,456454,2539354528,2026-10-11,User confirmed: keep the account Suspended and leave the listed rider assignment pending.
+68,458394,2626069906,2026-10-15,User confirmed: keep the account Suspended and leave the listed rider assignment pending.
+82,476885,2501676890,2026-10-12,Exceeds the global two-account rider limit; account selection needed.
+176,399990,2630669634,2026-10-05,Current rider differs and existing fee receipts/settlement requests are linked. Current assignment and financial history preserved.
+207,404654,2546390671,2026-10-08,Current rider differs and existing fee receipts/settlement requests are linked. Current assignment and financial history preserved.
+213,404719,2608130296,2026-10-13,Current rider differs and existing fee receipts/settlement requests are linked. Current assignment and financial history preserved.
+275,491306,2501676890,2026-10-14,Exceeds the global two-account rider limit; account selection needed.
+318,457195,#N/A,,Source rider is missing or invalid (#N/A). No handover/last clearance date supplied.
+322,458167,2501676890,2026-10-01,Exceeds the global two-account rider limit; account selection needed.
+335,459049,2215204666,2026-10-05,Exceeds the global two-account rider limit; account selection needed.
+350,457357,2460730217,2026-10-15,User confirmed: keep the account Suspended and leave the listed rider assignment pending.
+377,456420,2462687274,2026-10-12,Exceeds the global two-account rider limit; account selection needed.

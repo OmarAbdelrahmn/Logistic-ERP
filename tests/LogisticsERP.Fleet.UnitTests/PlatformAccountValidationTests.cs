@@ -146,6 +146,87 @@ public sealed class PlatformAccountValidationTests
         Assert.Single(db.PlatformRiderAccounts.Local);
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task EmployeeWithProfileCanOwnAndUpdateAnAccountWithoutChangingRole(bool legacy)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var db = CreateContext();
+        var request = SeedReferences(db);
+        var employee = Assert.Single(db.Employees.Local);
+        employee.IsEmployee = true;
+        await db.SaveChangesAsync(ct);
+
+        var compatibility = new PlatformOperationsService(db, new TestCurrentUser(), TimeProvider.System, null!);
+        if (legacy)
+        {
+            var created = await compatibility.UpsertAccountAsync(null, LegacyRequest(null, null), ct);
+            Assert.True(created.IsSuccess, created.Error.Description);
+        }
+        else
+        {
+            var created = await Service(db).CreateAccountAsync(request, ct);
+            Assert.True(created.IsSuccess, created.Error.Description);
+        }
+        var account = await db.PlatformRiderAccounts.SingleAsync(ct);
+        Assert.Equal(employee.Id, account.RegisteredEmployeeId);
+        account.RowVersion = [1];
+        await db.SaveChangesAsync(ct);
+        if (legacy)
+        {
+            var updated = await compatibility.UpsertAccountAsync(account.Id, LegacyRequest("Employee owns this account", "AQ=="), ct);
+            Assert.True(updated.IsSuccess, updated.Error.Description);
+        }
+        else
+        {
+            var updated = await Service(db).UpdateAccountAsync(account.Id,
+                request with { Notes = "Employee owns this account", RowVersion = "AQ==" }, ct);
+            Assert.True(updated.IsSuccess, updated.Error.Description);
+        }
+        Assert.Equal("Employee owns this account", account.OperationalNotes);
+        Assert.True(employee.IsEmployee);
+        Assert.Empty(await db.EmployeeWorkHistory.ToArrayAsync(ct));
+
+        PlatformAccountUpsertRequest LegacyRequest(string? notes, string? rowVersion) => new(
+            request.PlatformId, employee.Id, request.OperatingCityId, request.SponsorId, request.Code,
+            request.ExternalAccountId, null, request.PaymentModel, request.Status, null, null, null, null, null, notes, rowVersion);
+    }
+
+    [Theory]
+    [InlineData(true, false)]
+    [InlineData(false, false)]
+    [InlineData(true, true)]
+    [InlineData(false, true)]
+    public async Task DeletedEmployeeOrProfileCannotOwnAnAccount(bool deleteEmployee, bool legacy)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var db = CreateContext();
+        var request = SeedReferences(db);
+        var employee = Assert.Single(db.Employees.Local);
+        employee.IsEmployee = true;
+        if (deleteEmployee) employee.IsDeleted = true;
+        else Assert.Single(db.RiderProfiles.Local).IsDeleted = true;
+        await db.SaveChangesAsync(ct);
+
+        if (legacy)
+        {
+            var result = await new PlatformOperationsService(db, new TestCurrentUser(), TimeProvider.System, null!)
+                .UpsertAccountAsync(null, new(request.PlatformId, employee.Id, request.OperatingCityId, request.SponsorId,
+                    request.Code, request.ExternalAccountId, null, request.PaymentModel, request.Status,
+                    null, null, null, null, null, null, null), ct);
+            Assert.Equal(HrErrors.NotFound.Code, result.Error.Code);
+        }
+        else
+        {
+            var result = await Service(db).CreateAccountAsync(request, ct);
+            Assert.True(result.IsFailure);
+            Assert.Equal("ownerRiderProfileId", result.Error.Field);
+        }
+        Assert.Empty(await db.PlatformRiderAccounts.ToArrayAsync(ct));
+        Assert.False(db.ChangeTracker.HasChanges());
+    }
+
     private static SimplePlatformAccountUpsertRequest SeedReferences(ApplicationDbContext db)
     {
         var platform = new ClientPlatform();

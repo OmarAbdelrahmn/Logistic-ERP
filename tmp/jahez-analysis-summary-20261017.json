@@ -1,0 +1,269 @@
+{
+  "accounts": 380,
+  "statuses": {
+    "Inactive": 46,
+    "Active": 334
+  },
+  "ownerLinkMismatches": 0,
+  "existingJahezAssignments": 3,
+  "existingVehicleLinks": 0,
+  "ownerSponsorMismatchCount": 87,
+  "profilesNeeded": 19,
+  "profileStatuses": {
+    "(True, 3)": 15,
+    "(True, 5)": 3,
+    "(True, 6)": 1
+  },
+  "overCapacity": [
+    {
+      "iqama": "2215204666",
+      "sourceAccounts": [
+        "420509",
+        "459049"
+      ],
+      "otherAssignments": [
+        {
+          "account": "1A4446BC-41E6-40BD-8075-6B10D017C017",
+          "platform": "01A02A0D-845D-7535-AC25-1E1F0C8E5808",
+          "slot": 1
+        }
+      ]
+    },
+    {
+      "iqama": "2501676890",
+      "sourceAccounts": [
+        "476885",
+        "491306",
+        "458167"
+      ],
+      "otherAssignments": []
+    },
+    {
+      "iqama": "2462687274",
+      "sourceAccounts": [
+        "456420"
+      ],
+      "otherAssignments": [
+        {
+          "account": "4B8FF647-2ECA-415E-9C67-C25351651F4E",
+          "platform": "01A02A0D-845D-7535-AC25-1E1F0C8E5808",
+          "slot": 2
+        },
+        {
+          "account": "B48051EC-35C9-4B24-82ED-3371FB1401B1",
+          "platform": "01A02A0D-845D-7535-AC25-1E1F0C8E5808",
+          "slot": 1
+        }
+      ]
+    }
+  ],
+  "issues": [
+    {
+      "row": 8,
+      "account": "405057",
+      "ownerIqama": "2567539735",
+      "riderIqama": "2252413543",
+      "date": "2026-10-15",
+      "serial": "410101120",
+      "riderIsEmployee": false,
+      "riderStatus": 3,
+      "issues": [
+        "AccountMissingOrAmbiguous"
+      ]
+    },
+    {
+      "row": 41,
+      "account": "456454",
+      "ownerIqama": "2594172450",
+      "riderIqama": "2539354528",
+      "date": "2026-10-11",
+      "serial": "947506020",
+      "riderIsEmployee": false,
+      "riderStatus": 3,
+      "issues": [
+        "InactiveWithRider"
+      ]
+    },
+    {
+      "row": 68,
+      "account": "458394",
+      "ownerIqama": "2564153589",
+      "riderIqama": "2626069906",
+      "date": "2026-10-15",
+      "serial": "410947020",
+      "riderIsEmployee": false,
+      "riderStatus": 3,
+      "issues": [
+        "InactiveWithRider"
+      ]
+    },
+    {
+      "row": 161,
+      "account": "472969",
+      "ownerIqama": "2584449017",
+      "riderIqama": "2473493316",
+      "date": "2026-10-08",
+      "serial": "720438120",
+      "riderIsEmployee": false,
+      "riderStatus": 3,
+      "issues": [
+        "VehicleMissingOrAmbiguous"
+      ]
+    },
+    {
+      "row": 168,
+      "account": "472484",
+      "ownerIqama": "2581625023",
+      "riderIqama": "2094360605",
+      "date": "2026-10-12",
+      "serial": "720438120",
+      "riderIsEmployee": false,
+      "riderStatus": 3,
+      "issues": [
+        "VehicleMissingOrAmbiguous"
+      ]
+    },
+    {
+      "row": 214,
+      "account": "405009",
+      "ownerIqama": "2534974882",
+      "riderIqama": null,
+      "date": null,
+      "serial": "467229810",
+      "riderIsEmployee": null,
+      "riderStatus": null,
+      "issues": [
+        "AccountMissingOrAmbiguous"
+      ]
+    },
+    {
+      "row": 244,
+      "account": "472526",
+      "ownerIqama": "2256734357",
+      "riderIqama": "2185603384",
+      "date": "2026-10-15",
+      "serial": "400604220",
+      "riderIsEmployee": false,
+      "riderStatus": 3,
+      "issues": [
+        "VehicleMissingOrAmbiguous"
+      ]
+    },
+    {
+      "row": 318,
+      "account": "457195",
+      "ownerIqama": "2599679483",
+      "riderIqama": "#N/A",
+      "date": null,
+      "serial": "592223220",
+      "riderIsEmployee": null,
+      "riderStatus": null,
+      "issues": [
+        "RiderMissingOrAmbiguous",
+        "MissingDate",
+        "InactiveWithRider"
+      ]
+    },
+    {
+      "row": 350,
+      "account": "457357",
+      "ownerIqama": "2560200442",
+      "riderIqama": "2460730217",
+      "date": "2026-10-15",
+      "serial": "486123220",
+      "riderIsEmployee": false,
+      "riderStatus": 3,
+      "issues": [
+        "InactiveWithRider"
+      ]
+    }
+  ],
+  "contracts": [
+    {
+      "Id": "01A13935-9D8E-796D-8C87-6A204495C3C3",
+      "ClientPlatformId": "01A02A0D-845D-7BD6-B829-84CAF8BADC7F",
+      "Code": "SYS-01a02a0d845d7bd6b82984caf8ba",
+      "DisplayNameAr": "تشغيل نينجا",
+      "DisplayNameEn": "Ninja operations",
+      "Status": 2,
+      "Notes": "System-managed contract used by the simplified platform API.",
+      "CreatedAtUtc": "2026-10-14T07:04:59.6831714Z",
+      "CreatedByUserId": "019C18D5-62E1-7000-C000-000000000001",
+      "RowVersion": "AAAAAAACdGc=",
+      "IsDeleted": false
+    },
+    {
+      "Id": "01A10681-7081-7F17-93A9-90F085469645",
+      "ClientPlatformId": "01A02A0D-845C-7E0B-AA0C-3CD6246785D2",
+      "Code": "JAHEZ-OPERATIONS",
+      "DisplayNameAr": "تشغيل جاهز",
+      "DisplayNameEn": "Jahez operations",
+      "Status": 2,
+      "CreatedAtUtc": "2026-10-04T10:41:48.8464462Z",
+      "CreatedByUserId": "019C18D5-62E1-7000-C000-000000000001",
+      "RowVersion": "AAAAAAABLUk=",
+      "IsDeleted": false
+    },
+    {
+      "Id": "01A125E8-4D17-73BF-9DF8-9C76851C76EF",
+      "ClientPlatformId": "01A02A0D-845D-7535-AC25-1E1F0C8E5808",
+      "Code": "SYS-01a02a0d845d7535ac251e1f0c8e",
+      "DisplayNameAr": "تشغيل شفز",
+      "DisplayNameEn": "Shiftz operations",
+      "Status": 2,
+      "Notes": "System-managed contract used by the simplified platform API.",
+      "CreatedAtUtc": "2026-10-10T13:02:23.6701996Z",
+      "CreatedByUserId": "21EF2BDF-FD57-43D7-029F-08DF1415392A",
+      "RowVersion": "AAAAAAAB/OY=",
+      "IsDeleted": false
+    }
+  ],
+  "sponsors": [
+    {
+      "Id": "019C18D5-62E1-7000-8000-000000000040",
+      "CompanyProfileId": "019C18D5-62E1-7000-8000-000000000001",
+      "EmployerIdentityNumber": "7038745530",
+      "RegistryNameAr": "البوابة المقبلة للتجارة",
+      "UnifiedNationalNumber": "7038745530",
+      "SponsorType": 1,
+      "Status": 1,
+      "ActiveFrom": "2026-01-01",
+      "CreatedAtUtc": "2026-01-01T00:00:00Z",
+      "UpdatedAtUtc": "2026-09-13T12:02:33.5316666Z",
+      "UpdatedByUserId": "B1DE8DE7-7AD4-4F08-F387-08DF1173E0A7",
+      "RowVersion": "AAAAAAAAGFE=",
+      "IsDeleted": false
+    },
+    {
+      "Id": "019C18D5-62E1-7000-8000-000000000041",
+      "CompanyProfileId": "019C18D5-62E1-7000-8000-000000000001",
+      "EmployerIdentityNumber": "7015658094",
+      "RegistryNameAr": "البوابا الموكبلا",
+      "UnifiedNationalNumber": "7015658094",
+      "SponsorType": 2,
+      "Status": 1,
+      "ActiveFrom": "2026-01-01",
+      "CreatedAtUtc": "2026-01-01T00:00:00Z",
+      "UpdatedAtUtc": "2026-09-13T12:01:41.6584326Z",
+      "UpdatedByUserId": "B1DE8DE7-7AD4-4F08-F387-08DF1173E0A7",
+      "RowVersion": "AAAAAAAAGE8=",
+      "IsDeleted": false
+    },
+    {
+      "Id": "019C18D5-62E1-7000-8000-000000000042",
+      "CompanyProfileId": "019C18D5-62E1-7000-8000-000000000001",
+      "EmployerIdentityNumber": "7034861059",
+      "RegistryNameAr": "اكسبرس جايت",
+      "UnifiedNationalNumber": "7034861059",
+      "SponsorType": 2,
+      "Status": 1,
+      "ActiveFrom": "2026-01-01",
+      "ActiveTo": "2027-06-18",
+      "CreatedAtUtc": "2026-01-01T00:00:00Z",
+      "UpdatedAtUtc": "2026-09-13T12:01:31.9861997Z",
+      "UpdatedByUserId": "B1DE8DE7-7AD4-4F08-F387-08DF1173E0A7",
+      "RowVersion": "AAAAAAAAGE0=",
+      "IsDeleted": false
+    }
+  ]
+}

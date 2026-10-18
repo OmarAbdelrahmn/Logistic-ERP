@@ -1,0 +1,109 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Key" type="xs:string" minOccurs="0" />
+                <xs:element name="RequiresClientScope" type="xs:boolean" minOccurs="0" />
+                <xs:element name="IsDeprecated" type="xs:boolean" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="RoleName" type="xs:string" minOccurs="0" />
+                <xs:element name="PermissionKey" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table2">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="UserName" type="xs:string" minOccurs="0" />
+                <xs:element name="ActiveAllClientAdministrator" type="xs:boolean" minOccurs="0" />
+                <xs:element name="ApplicableNinjaDeny" type="xs:boolean" minOccurs="0" />
+                <xs:element name="VerifiedNinjaPermissions" type="xs:int" minOccurs="0" />
+                <xs:element name="VerifiedAtUtc" type="xs:dateTime" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <Key>ninja.accounts.update</Key>
+    <RequiresClientScope>true</RequiresClientScope>
+    <IsDeprecated>false</IsDeprecated>
+  </Table>
+  <Table>
+    <Key>ninja.assignments.create</Key>
+    <RequiresClientScope>true</RequiresClientScope>
+    <IsDeprecated>false</IsDeprecated>
+  </Table>
+  <Table>
+    <Key>ninja.assignments.delete</Key>
+    <RequiresClientScope>true</RequiresClientScope>
+    <IsDeprecated>false</IsDeprecated>
+  </Table>
+  <Table>
+    <Key>ninja.credentials.rotate</Key>
+    <RequiresClientScope>true</RequiresClientScope>
+    <IsDeprecated>false</IsDeprecated>
+  </Table>
+  <Table>
+    <Key>ninja.deductions.import</Key>
+    <RequiresClientScope>true</RequiresClientScope>
+    <IsDeprecated>false</IsDeprecated>
+  </Table>
+  <Table>
+    <Key>ninja.performance.import</Key>
+    <RequiresClientScope>true</RequiresClientScope>
+    <IsDeprecated>false</IsDeprecated>
+  </Table>
+  <Table>
+    <Key>ninja.read</Key>
+    <RequiresClientScope>true</RequiresClientScope>
+    <IsDeprecated>false</IsDeprecated>
+  </Table>
+  <Table1>
+    <RoleName>SYSTEM_ADMIN</RoleName>
+    <PermissionKey>ninja.accounts.update</PermissionKey>
+  </Table1>
+  <Table1>
+    <RoleName>SYSTEM_ADMIN</RoleName>
+    <PermissionKey>ninja.assignments.create</PermissionKey>
+  </Table1>
+  <Table1>
+    <RoleName>SYSTEM_ADMIN</RoleName>
+    <PermissionKey>ninja.assignments.delete</PermissionKey>
+  </Table1>
+  <Table1>
+    <RoleName>SYSTEM_ADMIN</RoleName>
+    <PermissionKey>ninja.credentials.rotate</PermissionKey>
+  </Table1>
+  <Table1>
+    <RoleName>SYSTEM_ADMIN</RoleName>
+    <PermissionKey>ninja.deductions.import</PermissionKey>
+  </Table1>
+  <Table1>
+    <RoleName>SYSTEM_ADMIN</RoleName>
+    <PermissionKey>ninja.performance.import</PermissionKey>
+  </Table1>
+  <Table1>
+    <RoleName>SYSTEM_ADMIN</RoleName>
+    <PermissionKey>ninja.read</PermissionKey>
+  </Table1>
+  <Table2>
+    <UserName>Omar</UserName>
+    <ActiveAllClientAdministrator>true</ActiveAllClientAdministrator>
+    <ApplicableNinjaDeny>false</ApplicableNinjaDeny>
+    <VerifiedNinjaPermissions>7</VerifiedNinjaPermissions>
+    <VerifiedAtUtc>2026-10-17T15:15:00.6498644+03:00</VerifiedAtUtc>
+  </Table2>
+</NewDataSet>

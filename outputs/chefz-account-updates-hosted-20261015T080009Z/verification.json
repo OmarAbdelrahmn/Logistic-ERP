@@ -1,0 +1,307 @@
+{
+  "Server": "db67927.public.databaseasp.net",
+  "Database": "db67927",
+  "VerifiedAtUtc": "2026-10-15T08:00:08.0985398Z",
+  "VerificationOnly": true,
+  "DatabaseWritesPerformed": false,
+  "NewChefzMigrationRequired": false,
+  "Compatible": true,
+  "SqlSha256": "AABB7E85C1E95C5F9FBE5A9E583D4999F1A43F5BF22D41CA882462CCFEB15901",
+  "Tables": {
+    "CompatibilityChecks": [
+      {
+        "CheckName": "Chefz core migration",
+        "Passed": 1
+      },
+      {
+        "CheckName": "Chefz reports migration",
+        "Passed": 1
+      },
+      {
+        "CheckName": "Chefz money import migration",
+        "Passed": 1
+      },
+      {
+        "CheckName": "Chefz permission migration",
+        "Passed": 1
+      },
+      {
+        "CheckName": "Account rowversion",
+        "Passed": 1
+      },
+      {
+        "CheckName": "Assignment slots column",
+        "Passed": 1
+      },
+      {
+        "CheckName": "Slots one and two constraint",
+        "Passed": 1
+      },
+      {
+        "CheckName": "No unique rider-only index",
+        "Passed": 1
+      },
+      {
+        "CheckName": "Unique active rider slots",
+        "Passed": 1
+      },
+      {
+        "CheckName": "Unique active account",
+        "Passed": 1
+      },
+      {
+        "CheckName": "One salary account constraint",
+        "Passed": 1
+      },
+      {
+        "CheckName": "Unique report ID mapping",
+        "Passed": 1
+      },
+      {
+        "CheckName": "Daily account-date uniqueness",
+        "Passed": 1
+      },
+      {
+        "CheckName": "Money assignment-period uniqueness",
+        "Passed": 1
+      },
+      {
+        "CheckName": "Money file hash uniqueness",
+        "Passed": 1
+      },
+      {
+        "CheckName": "Trusted money calculation constraint",
+        "Passed": 1
+      },
+      {
+        "CheckName": "Operational block dependency",
+        "Passed": 1
+      },
+      {
+        "CheckName": "Chefz permission definitions",
+        "Passed": 1
+      },
+      {
+        "CheckName": "System admin Chefz grants",
+        "Passed": 1
+      }
+    ],
+    "AssignmentIndexes": [
+      {
+        "name": "IX_RiderClientAssignments_ClientContractId_Status",
+        "is_unique": false,
+        "is_disabled": false,
+        "has_filter": false,
+        "filter_definition": null
+      },
+      {
+        "name": "IX_RiderClientAssignments_IsDeleted",
+        "is_unique": false,
+        "is_disabled": false,
+        "has_filter": false,
+        "filter_definition": null
+      },
+      {
+        "name": "IX_RiderClientAssignments_PlatformRiderAccountId",
+        "is_unique": true,
+        "is_disabled": false,
+        "has_filter": true,
+        "filter_definition": "([EffectiveTo] IS NULL AND [IsDeleted]=(0))"
+      },
+      {
+        "name": "IX_RiderClientAssignments_PlatformRiderAccountId_EffectiveFrom",
+        "is_unique": false,
+        "is_disabled": false,
+        "has_filter": false,
+        "filter_definition": null
+      },
+      {
+        "name": "IX_RiderClientAssignments_RiderProfileId",
+        "is_unique": false,
+        "is_disabled": false,
+        "has_filter": true,
+        "filter_definition": "([EffectiveTo] IS NULL AND [IsDeleted]=(0))"
+      },
+      {
+        "name": "IX_RiderClientAssignments_RiderProfileId_EffectiveFrom",
+        "is_unique": false,
+        "is_disabled": false,
+        "has_filter": false,
+        "filter_definition": null
+      },
+      {
+        "name": "IX_RiderClientAssignments_RiderProfileId_PaymentModel",
+        "is_unique": true,
+        "is_disabled": false,
+        "has_filter": true,
+        "filter_definition": "([EffectiveTo] IS NULL AND [PaymentModel]=(2) AND [IsDeleted]=(0))"
+      },
+      {
+        "name": "IX_RiderClientAssignments_RiderProfileId_RiderAccountSlot",
+        "is_unique": true,
+        "is_disabled": false,
+        "has_filter": true,
+        "filter_definition": "([EffectiveTo] IS NULL AND [IsDeleted]=(0))"
+      },
+      {
+        "name": "PK_RiderClientAssignments",
+        "is_unique": true,
+        "is_disabled": false,
+        "has_filter": false,
+        "filter_definition": null
+      }
+    ],
+    "AssignmentConstraints": [
+      {
+        "name": "CK_RiderClientAssignments_BackdatedReason",
+        "definition": "([WasBackdated]=(0) OR [BackdatedReason] IS NOT NULL)",
+        "is_disabled": false,
+        "is_not_trusted": false
+      },
+      {
+        "name": "CK_RiderClientAssignments_EffectiveRange",
+        "definition": "([EffectiveTo] IS NULL OR [EffectiveTo]>=[EffectiveFrom])",
+        "is_disabled": false,
+        "is_not_trusted": false
+      },
+      {
+        "name": "CK_RiderClientAssignments_PaymentModel",
+        "definition": "([PaymentModel]=(2) OR [PaymentModel]=(1))",
+        "is_disabled": false,
+        "is_not_trusted": false
+      },
+      {
+        "name": "CK_RiderClientAssignments_RiderAccountSlot",
+        "definition": "([RiderAccountSlot]=(2) OR [RiderAccountSlot]=(1))",
+        "is_disabled": false,
+        "is_not_trusted": false
+      }
+    ],
+    "ChefzMigrations": [
+      {
+        "MigrationId": "20261010112122_AddChefzAccountsSettlementsAndPerformance",
+        "ProductVersion": "10.0.11"
+      },
+      {
+        "MigrationId": "20261011191524_AddChefzWorkbookReportsAndStatistics",
+        "ProductVersion": "10.0.11"
+      },
+      {
+        "MigrationId": "20261012093719_AddChefzOrderSettlementImports",
+        "ProductVersion": "10.0.11"
+      },
+      {
+        "MigrationId": "20261015072958_AddJahezWorkflowV2",
+        "ProductVersion": "10.0.11"
+      }
+    ],
+    "IdentityMigrations": [
+      {
+        "MigrationId": "20261010112140_GrantChefzPermissions",
+        "ProductVersion": "10.0.11"
+      },
+      {
+        "MigrationId": "20261015072948_GrantJahezWorkflowPermissions",
+        "ProductVersion": "10.0.11"
+      }
+    ],
+    "Platforms": [
+      {
+        "Id": "01a02a0d-845d-7535-ac25-1e1f0c8e5808",
+        "Code": "SHIFTZ",
+        "NameAr": "شفز",
+        "NonDeletedAccounts": 465
+      }
+    ],
+    "AccountStatuses": [
+      {
+        "Status": 1,
+        "Accounts": 77,
+        "Taken": 0
+      },
+      {
+        "Status": 2,
+        "Accounts": 216,
+        "Taken": 216
+      },
+      {
+        "Status": 3,
+        "Accounts": 172,
+        "Taken": 0
+      }
+    ],
+    "RiderAccountCounts": [
+      {
+        "AccountsPerRider": 1,
+        "Riders": 216
+      }
+    ],
+    "DataHealth": [
+      {
+        "DuplicateOpenAccountAssignments": 0,
+        "DuplicateOpenRiderSlots": 0,
+        "InvalidSettlementArithmetic": 0
+      }
+    ],
+    "FinancialTotals": [
+      {
+        "Settlements": 0,
+        "NetEarnings": 0.00,
+        "CompanyAmount": 0.00,
+        "RiderAmount": 0.00,
+        "OrderImports": 0
+      }
+    ],
+    "PerformanceTotals": [
+      {
+        "PerformanceRows": 149,
+        "PerformanceImports": 1
+      }
+    ],
+    "Permissions": [
+      {
+        "Key": "chefz.accounts.update",
+        "RequiresClientScope": true,
+        "IsDeleted": false
+      },
+      {
+        "Key": "chefz.performance.import",
+        "RequiresClientScope": true,
+        "IsDeleted": false
+      },
+      {
+        "Key": "chefz.read",
+        "RequiresClientScope": true,
+        "IsDeleted": false
+      },
+      {
+        "Key": "chefz.settlements.create",
+        "RequiresClientScope": true,
+        "IsDeleted": false
+      }
+    ],
+    "SystemAdminGrants": [
+      {
+        "PermissionKey": "chefz.accounts.update",
+        "IsDeleted": false
+      },
+      {
+        "PermissionKey": "chefz.performance.import",
+        "IsDeleted": false
+      },
+      {
+        "PermissionKey": "chefz.read",
+        "IsDeleted": false
+      },
+      {
+        "PermissionKey": "chefz.settlements.create",
+        "IsDeleted": false
+      }
+    ],
+    "VerifiedTime": [
+      {
+        "VerifiedAtUtc": "2026-10-15T08:00:08.0985398"
+      }
+    ]
+  }
+}

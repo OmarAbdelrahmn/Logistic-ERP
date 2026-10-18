@@ -1,0 +1,42 @@
+[
+  {
+    "Table": "JahezCommissionPolicyPeriod",
+    "Count": 0
+  },
+  {
+    "Table": "JahezCashboxEntry",
+    "Count": 0
+  },
+  {
+    "Table": "JahezDailyDispatch",
+    "Count": 0
+  },
+  {
+    "Table": "JahezTransaction",
+    "Count": 0
+  },
+  {
+    "Table": "JahezAccountFee",
+    "Count": 12
+  },
+  {
+    "Table": "JahezApprovalRequest",
+    "Count": 0
+  },
+  {
+    "Table": "JahezEarningsStatement",
+    "Count": 0
+  },
+  {
+    "Table": "JahezLedgerEntry",
+    "Count": 36
+  },
+  {
+    "Table": "JahezReminderState",
+    "Count": 0
+  },
+  {
+    "Table": "JahezRiderSettlement",
+    "Count": 0
+  }
+]

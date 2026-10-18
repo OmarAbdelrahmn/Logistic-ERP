@@ -1,0 +1,124 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="Kind" type="xs:int" minOccurs="0" />
+                <xs:element name="ContentHash" type="xs:string" minOccurs="0" />
+                <xs:element name="UploadedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="CommittedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="ReplacesBatchId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="CorrectionReason" type="xs:string" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="UpdatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="UpdatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RowVersion" type="xs:base64Binary" minOccurs="0" />
+                <xs:element name="IsDeleted" type="xs:boolean" minOccurs="0" />
+                <xs:element name="DeletedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="DeletedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DeletionReason" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <Id>01a116c7-87e0-7d29-bfcc-2b56b620e9e9</Id>
+    <Kind>1</Kind>
+    <ContentHash>E7BCF135873D52CDC4151EF0124641F4DEB255C3A6E0F63719B79B462B6D51C7</ContentHash>
+    <UploadedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</UploadedByUserId>
+    <CorrectionReason>تصحيح واستبدال ملفات الدفعة السابقة</CorrectionReason>
+    <CreatedAtUtc>2026-10-07T14:32:19.5822974Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+    <RowVersion>AAAAAAAByO8=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table>
+  <Table>
+    <Id>01a107ba-5722-779b-9460-41338574065b</Id>
+    <Kind>1</Kind>
+    <ContentHash>4C266F8575415F380A8EF937A53D08359FE14061685B0792223E8E780EF288AE</ContentHash>
+    <UploadedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</UploadedByUserId>
+    <CorrectionReason>تصحيح واستبدال ملفات الدفعة السابقة</CorrectionReason>
+    <CreatedAtUtc>2026-10-04T16:23:36.2290318Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+    <RowVersion>AAAAAAABOos=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table>
+  <Table>
+    <Id>01a111be-71b1-7cfc-ba64-53c09861c16a</Id>
+    <Kind>2</Kind>
+    <ContentHash>23A41F8D729F959C2000A57C6BBDD2AE3EC60BA60E650F3206765DA9E0A77230</ContentHash>
+    <UploadedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</UploadedByUserId>
+    <CommittedAtUtc>2026-10-06T15:05:59.8417331Z</CommittedAtUtc>
+    <CorrectionReason>تصحيح واستبدال ملفات الدفعة السابقة</CorrectionReason>
+    <CreatedAtUtc>2026-10-06T15:04:16.9411866Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-06T15:05:59.8520289Z</UpdatedAtUtc>
+    <UpdatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</UpdatedByUserId>
+    <RowVersion>AAAAAAABmws=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table>
+  <Table>
+    <Id>01a12ae7-5fc8-7e0b-9134-553b4e69a644</Id>
+    <Kind>1</Kind>
+    <ContentHash>7259AC1A73ED1FD14089B1191BCE784106E6DB1D2D0251414DBD5220A3CF3F3E</ContentHash>
+    <UploadedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</UploadedByUserId>
+    <CorrectionReason>تصحيح واستبدال ملفات الدفعة السابقة</CorrectionReason>
+    <CreatedAtUtc>2026-10-11T12:19:32.4916557Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+    <RowVersion>AAAAAAACJbg=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table>
+  <Table>
+    <Id>01a12a13-b408-7424-bab5-8a7ab53040c6</Id>
+    <Kind>1</Kind>
+    <ContentHash>3599660B51DDB64212A40A8AA43151024D78620B803F48FBCBF0FA403FE4369B</ContentHash>
+    <UploadedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</UploadedByUserId>
+    <CorrectionReason>تصحيح واستبدال ملفات الدفعة السابقة</CorrectionReason>
+    <CreatedAtUtc>2026-10-11T08:28:18.0696693Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+    <RowVersion>AAAAAAACGl4=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table>
+  <Table>
+    <Id>01a111c1-c49e-7e1c-b246-afeeeb8da554</Id>
+    <Kind>2</Kind>
+    <ContentHash>49EC1A651DBA7BE08E593F3388E8EB253B5C205D4A0CA68D3AECC35131CBFC96</ContentHash>
+    <UploadedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</UploadedByUserId>
+    <CorrectionReason>تصحيح واستبدال ملفات الدفعة السابقة</CorrectionReason>
+    <CreatedAtUtc>2026-10-06T15:07:53.9012226Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+    <RowVersion>AAAAAAABmxo=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table>
+  <Table>
+    <Id>01a111c0-e0fa-7ffc-ac56-d737fbbc5610</Id>
+    <Kind>2</Kind>
+    <ContentHash>943AC467BC7B410C3756C107DDC5D9210F1ED598C5B4DD0940F132B6812EE5BB</ContentHash>
+    <UploadedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</UploadedByUserId>
+    <CorrectionReason>تصحيح واستبدال ملفات الدفعة السابقة</CorrectionReason>
+    <CreatedAtUtc>2026-10-06T15:06:55.6530021Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+    <RowVersion>AAAAAAABmxQ=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table>
+  <Table>
+    <Id>01a12b46-8be0-7364-a094-d890e5c40983</Id>
+    <Kind>1</Kind>
+    <ContentHash>E6BCAFF2F9365FE4C2D5E1270FA2EAB9DE7D464822AEA2A041F4AE592048A39F</ContentHash>
+    <UploadedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</UploadedByUserId>
+    <CorrectionReason>تصحيح واستبدال ملفات الدفعة السابقة</CorrectionReason>
+    <CreatedAtUtc>2026-10-11T14:03:27.5742428Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+    <RowVersion>AAAAAAACKOs=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table>
+</NewDataSet>

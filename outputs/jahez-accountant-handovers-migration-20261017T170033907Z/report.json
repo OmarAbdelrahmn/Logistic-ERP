@@ -1,0 +1,17 @@
+{
+  "Server": "db67927.public.databaseasp.net",
+  "Database": "db67927",
+  "VerifiedAtUtc": "2026-10-17T17:00:34.9047647Z",
+  "Migration": "20261017165534_AddJahezV2AccountantHandovers",
+  "PreviouslyApplied": false,
+  "PostCommitVerified": true,
+  "ExistingFinancialRowsPreserved": true,
+  "ExistingPlatformAccountsPreserved": true,
+  "MoneyMovements": 5,
+  "LedgerEntries": 19,
+  "PlatformAccounts": 1845,
+  "CashboxHandovers": 0,
+  "CashboxHandoverMovements": 0,
+  "ScriptSha256": "1747F378356324374DDAB55E4931A4B46C231343FD1A14144BE0BB0CAF3AAFDB",
+  "EvidenceDirectory": "C:\\Users\\omarf\\OneDrive\\Documents\\ChatGPT\\Logistic ERP\\outputs\\jahez-accountant-handovers-migration-20261017T170033907Z"
+}

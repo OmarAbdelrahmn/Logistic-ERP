@@ -1,0 +1,76 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="HandoverId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="Kind" type="xs:int" minOccurs="0" />
+                <xs:element name="Status" type="xs:int" minOccurs="0" />
+                <xs:element name="RequestedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="TargetAccountId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="WaiverAmount" type="xs:decimal" minOccurs="0" />
+                <xs:element name="FromDate" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="ToDate" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="EffectiveAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="Reason" type="xs:string" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="UpdatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="UpdatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RowVersion" type="xs:base64Binary" minOccurs="0" />
+                <xs:element name="IsDeleted" type="xs:boolean" minOccurs="0" />
+                <xs:element name="DeletedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="DeletedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DeletionReason" type="xs:string" minOccurs="0" />
+                <xs:element name="AdjustmentTarget" type="xs:int" minOccurs="0" />
+                <xs:element name="DebtAdjustment" type="xs:decimal" minOccurs="0" />
+                <xs:element name="OperationId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="ProposedCommission" type="xs:decimal" minOccurs="0" />
+                <xs:element name="ProposedNet" type="xs:decimal" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <Id>01a141b4-2c43-7e58-b0b1-7af00276e1e5</Id>
+    <HandoverId>01a141b1-fb25-7dc4-8b06-c5d71283bd0e</HandoverId>
+    <Kind>5</Kind>
+    <Status>1</Status>
+    <RequestedByUserId>b1de8de7-7ad4-4f08-f387-08df1173e0a7</RequestedByUserId>
+    <WaiverAmount>0.000000</WaiverAmount>
+    <Reason>طلب مراجعة وتعديل التصفية للعملية #01a141b3</Reason>
+    <CreatedAtUtc>2026-10-15T22:34:49.3362095Z</CreatedAtUtc>
+    <CreatedByUserId>b1de8de7-7ad4-4f08-f387-08df1173e0a7</CreatedByUserId>
+    <RowVersion>AAAAAAACqTo=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <AdjustmentTarget>1</AdjustmentTarget>
+    <OperationId>01a141b3-e6d9-75ba-ad68-429318713b80</OperationId>
+    <ProposedCommission>225.00</ProposedCommission>
+    <ProposedNet>150.00</ProposedNet>
+  </Table>
+  <Table>
+    <Id>01a141ba-6915-754e-b84b-cf62ee6f9e37</Id>
+    <HandoverId>01a141b9-aa98-70f8-a7e6-d99e51025d89</HandoverId>
+    <Kind>5</Kind>
+    <Status>1</Status>
+    <RequestedByUserId>b1de8de7-7ad4-4f08-f387-08df1173e0a7</RequestedByUserId>
+    <WaiverAmount>0.000000</WaiverAmount>
+    <Reason>طلب مراجعة وتعديل التصفية للعملية #01a141ba</Reason>
+    <CreatedAtUtc>2026-10-15T22:41:38.07296Z</CreatedAtUtc>
+    <CreatedByUserId>b1de8de7-7ad4-4f08-f387-08df1173e0a7</CreatedByUserId>
+    <RowVersion>AAAAAAACqUs=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <AdjustmentTarget>1</AdjustmentTarget>
+    <OperationId>01a141ba-5c34-7ace-90e6-6e87b5133767</OperationId>
+    <ProposedCommission>225.00</ProposedCommission>
+    <ProposedNet>1000.00</ProposedNet>
+  </Table>
+</NewDataSet>

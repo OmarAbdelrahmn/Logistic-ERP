@@ -2,6 +2,8 @@
 
 Frontend integration reference for the current workforce API.
 
+For employees who need a profile for platform accounts while keeping `isEmployee: true`, use `PUT /api/employees/{employeeId}/rider-profile`. See [employee rider-profile API](employee-rider-profile-api.md) for its response, permissions, and editing workflow.
+
 ## Base rules
 
 - Base URL: `/api`

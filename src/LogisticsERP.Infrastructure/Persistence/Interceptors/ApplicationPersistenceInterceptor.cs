@@ -1,6 +1,7 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using LogisticsERP.Application.Abstractions.Authentication;
 using LogisticsERP.Domain.Common;
+using LogisticsERP.Domain.Entities.Chefz;
 using LogisticsERP.Domain.Entities.Jahez;
 using LogisticsERP.Domain.Entities.System;
 using Microsoft.AspNetCore.Http;
@@ -34,6 +35,19 @@ internal sealed class ApplicationPersistenceInterceptor(
         "SecurityStamp",
         "ConcurrencyStamp",
         "DefinitionJson"
+    };
+    private static readonly HashSet<string> ChefzPerformanceCorrectionProperties = new(StringComparer.Ordinal)
+    {
+        nameof(ChefzDailyPerformance.RiderClientAssignmentId),
+        nameof(ChefzDailyPerformance.RiderProfileId),
+        nameof(ChefzDailyPerformance.ImportId),
+        nameof(ChefzDailyPerformance.ReportIdNumber),
+        nameof(ChefzDailyPerformance.SourceRowNumber),
+        nameof(ChefzDailyPerformance.TotalValidOffers),
+        nameof(ChefzDailyPerformance.AcceptedOffers),
+        nameof(ChefzDailyPerformance.DeclinedOffers),
+        nameof(ChefzDailyPerformance.MissedOffers),
+        nameof(ChefzDailyPerformance.AcceptanceRate)
     };
 
     public override InterceptionResult<int> SavingChanges(
@@ -83,6 +97,29 @@ internal sealed class ApplicationPersistenceInterceptor(
 
     private void ApplyEntityRules(EntityEntry<Entity> entry, DateTimeOffset now)
     {
+        if (entry.State is EntityState.Modified or EntityState.Deleted)
+        {
+            if (entry.Entity is JahezCashboxHandover && (entry.State == EntityState.Deleted
+                || entry.Property(nameof(JahezCashboxHandover.Status)).OriginalValue is not JahezCashboxHandoverStatus.Pending
+                || entry.Properties.Any(x => x.IsModified && x.Metadata.Name is not
+                    (nameof(JahezCashboxHandover.Status) or nameof(JahezCashboxHandover.AccountantUserId)
+                    or nameof(JahezCashboxHandover.ConfirmedAtUtc) or nameof(JahezCashboxHandover.ConfirmationReason)
+                    or nameof(JahezCashboxHandover.CancelledAtUtc) or nameof(JahezCashboxHandover.CancellationReason)
+                    or nameof(JahezCashboxHandover.RowVersion)))))
+                throw new InvalidOperationException("Cashbox handover snapshots are immutable and can only be confirmed or cancelled once.");
+            if (entry.Entity is JahezOperation && entry.Property(nameof(JahezOperation.Status)).OriginalValue is JahezOperationStatus.Executed
+                && !IsJahezPaymentMethodCorrection(entry))
+                throw new InvalidOperationException("Executed Jahez operations are immutable.");
+            if (entry.Entity is JahezApprovalRequest
+                && entry.Property(nameof(JahezApprovalRequest.Status)).OriginalValue is JahezApprovalStatus original
+                && original != JahezApprovalStatus.Pending)
+                throw new InvalidOperationException("Decided Jahez workflow requests are immutable.");
+            if (entry.Entity is JahezTransferredDebt && (entry.State == EntityState.Deleted
+                || entry.Property(nameof(JahezTransferredDebt.PaidAtUtc)).OriginalValue is not null
+                || entry.Properties.Any(x => x.IsModified && x.Metadata.Name is not (nameof(JahezTransferredDebt.PaidAtUtc)
+                    or nameof(JahezTransferredDebt.PaidByUserId) or nameof(JahezTransferredDebt.RowVersion)))))
+                throw new InvalidOperationException("Transferred debt permits one full repayment only.");
+        }
         if (entry.Entity is AuditableEntity auditable)
         {
             if (entry.State == EntityState.Added)
@@ -161,6 +198,13 @@ internal sealed class ApplicationPersistenceInterceptor(
 
             if (entry.State == EntityState.Modified)
             {
+                if (IsJahezPaymentMethodCorrection(entry)) return;
+                // Daily performance is corrected by reupload; preserve its account/day and creation identity.
+                // Other history records remain append-only except the payout metadata correction above.
+                if (history is ChefzDailyPerformance && entry.Properties
+                    .Where(property => property.IsModified)
+                    .All(property => ChefzPerformanceCorrectionProperties.Contains(property.Metadata.Name)))
+                    return;
                 throw new InvalidOperationException("History records are append-only and cannot be modified.");
             }
 
@@ -173,6 +217,28 @@ internal sealed class ApplicationPersistenceInterceptor(
         {
             throw new InvalidOperationException($"Hard deletion is prohibited for {entry.Metadata.ClrType.Name}.");
         }
+    }
+
+    // Executed payouts permit cash/bank metadata corrections only. Amounts, ownership,
+    // execution identity and creation identity remain protected by the history policy.
+    private static bool IsJahezPaymentMethodCorrection(EntityEntry<Entity> entry)
+    {
+        if (entry.State != EntityState.Modified) return false;
+        if (entry.Entity is JahezOperation operation)
+            return operation.Status == JahezOperationStatus.Executed
+                && operation.PaymentStatus == JahezOperationPaymentStatus.Paid && operation.Remaining < 0
+                && !operation.TransferToRider
+                && operation.Fund is JahezMoneyFund.Cashbox or JahezMoneyFund.Bank
+                && entry.Property(nameof(JahezOperation.Fund)).OriginalValue is JahezMoneyFund.Cashbox or JahezMoneyFund.Bank
+                && entry.Properties.Where(x => x.IsModified).All(x => x.Metadata.Name is
+                    nameof(JahezOperation.Fund) or nameof(JahezOperation.PaymentReference));
+        if (entry.Entity is JahezMoneyMovement movement)
+            return movement.OperationId.HasValue && movement.Direction == JahezMoneyDirection.Disbursement
+                && movement.Fund is JahezMoneyFund.Cashbox or JahezMoneyFund.Bank
+                && entry.Property(nameof(JahezMoneyMovement.Fund)).OriginalValue is JahezMoneyFund.Cashbox or JahezMoneyFund.Bank
+                && entry.Properties.Where(x => x.IsModified).All(x => x.Metadata.Name is
+                    nameof(JahezMoneyMovement.Fund) or nameof(JahezMoneyMovement.Reference));
+        return false;
     }
 
     private IEnumerable<AuditEntry> CreateAuditEntries(

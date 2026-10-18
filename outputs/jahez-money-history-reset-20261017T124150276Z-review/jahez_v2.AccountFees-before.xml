@@ -1,0 +1,61 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="HandoverId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="Amount" type="xs:decimal" minOccurs="0" />
+                <xs:element name="WaivedAmount" type="xs:decimal" minOccurs="0" />
+                <xs:element name="ApprovalRequestId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="UpdatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="UpdatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RowVersion" type="xs:base64Binary" minOccurs="0" />
+                <xs:element name="IsDeleted" type="xs:boolean" minOccurs="0" />
+                <xs:element name="DeletedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="DeletedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DeletionReason" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <Id>01a141b9-aa98-7e44-a179-02d7b86288d1</Id>
+    <HandoverId>01a141b9-aa98-70f8-a7e6-d99e51025d89</HandoverId>
+    <Amount>200.000000</Amount>
+    <WaivedAmount>0.000000</WaivedAmount>
+    <CreatedAtUtc>2026-10-15T22:40:49.3086011Z</CreatedAtUtc>
+    <CreatedByUserId>b1de8de7-7ad4-4f08-f387-08df1173e0a7</CreatedByUserId>
+    <RowVersion>AAAAAAACqUQ=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table>
+  <Table>
+    <Id>01a141b1-fb3a-73af-b2be-977296a06851</Id>
+    <HandoverId>01a141b1-fb25-7dc4-8b06-c5d71283bd0e</HandoverId>
+    <Amount>200.000000</Amount>
+    <WaivedAmount>0.000000</WaivedAmount>
+    <CreatedAtUtc>2026-10-15T22:32:25.8340597Z</CreatedAtUtc>
+    <CreatedByUserId>b1de8de7-7ad4-4f08-f387-08df1173e0a7</CreatedByUserId>
+    <RowVersion>AAAAAAACqTM=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table>
+  <Table>
+    <Id>01a141bb-2872-720a-b257-af9fb777269a</Id>
+    <HandoverId>01a141bb-2872-7641-9401-1a8e4912f304</HandoverId>
+    <Amount>200.000000</Amount>
+    <WaivedAmount>0.000000</WaivedAmount>
+    <CreatedAtUtc>2026-10-15T22:42:27.0621573Z</CreatedAtUtc>
+    <CreatedByUserId>b1de8de7-7ad4-4f08-f387-08df1173e0a7</CreatedByUserId>
+    <RowVersion>AAAAAAACqVI=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table>
+</NewDataSet>

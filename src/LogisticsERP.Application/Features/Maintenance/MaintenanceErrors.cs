@@ -23,7 +23,7 @@ public static class MaintenanceErrors
     public static readonly OperationError FileMissing = new("maintenance.bill_file_missing", "ملف الفاتورة غير موجود.", ErrorType.NotFound);
     public static readonly OperationError AlreadyReversed = new("maintenance.already_reversed", "تم عكس هذه العملية مسبقًا.", ErrorType.Conflict);
     public static readonly OperationError InvalidOilBarrel = new("maintenance.invalid_oil_barrel", "برميل الزيت غير صالح لهذه العملية.", ErrorType.Validation, "oilBarrelId");
-    public static readonly OperationError InvalidOilBarrelVehicleType = new("maintenance.invalid_oil_barrel_vehicle_type", "حدد السيارات أو الدراجات النارية فقط للبرميل.", ErrorType.Validation, "allowedVehicleType");
+    public static readonly OperationError InvalidOilBarrelVehicleType = new("maintenance.invalid_oil_barrel_vehicle_type", "حدد السيارات فقط أو الدراجات النارية فقط أو كليهما للبرميل.", ErrorType.Validation, "allowedVehicleType");
     public static readonly OperationError OilBarrelVehicleTypeMismatch = new("maintenance.oil_barrel_vehicle_type_mismatch", "برميل الزيت غير مخصص لنوع المركبة المختار، أو لم يتم تحديد نوع المركبة للبرميل.", ErrorType.Conflict, "oilBarrelId");
     public static readonly OperationError OilBarrelVehicleTypeLocked = new("maintenance.oil_barrel_vehicle_type_locked", "لا يمكن تغيير نوع المركبة لبرميل تم فتحه وتخصيصه بالفعل.", ErrorType.Conflict, "allowedVehicleType");
     public static readonly OperationError OilLossAllowanceExceeded = new("maintenance.oil_loss_allowance_exceeded", "الفقد المسجل يتجاوز نسبة 2% المسموحة للبرميل.", ErrorType.Validation, "quantityLiters");

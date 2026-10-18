@@ -72,7 +72,11 @@ public sealed record SimplePlatformAssignmentResponse(
     string? BackdatedReason,
     Guid AssignedByUserId,
     Guid? EndedByUserId,
-    string RowVersion);
+    string RowVersion)
+{
+    public bool IsOperationallyBlocked { get; init; }
+    public string? OperationalBlockReason { get; init; }
+}
 
 public sealed record SimplePlatformCredentialVersionResponse(
     Guid Id,

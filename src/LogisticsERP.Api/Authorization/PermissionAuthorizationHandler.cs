@@ -32,6 +32,27 @@ internal sealed class PermissionAuthorizationHandler(IPermissionChecker permissi
         }
 
         PermissionScope? scope = null;
+        if (requirement.PermissionKey.StartsWith("ninja.", StringComparison.Ordinal)
+            || context.Resource is HttpContext httpContext && httpContext.Request.Path.StartsWithSegments("/api/ninja"))
+        {
+            var platformId = await dbContext.ClientPlatforms.AsNoTracking().Where(x => x.Code == "NINJA")
+                .Select(x => (Guid?)x.Id).SingleOrDefaultAsync(
+                    context.Resource is HttpContext requestContext ? requestContext.RequestAborted : CancellationToken.None);
+            if (!platformId.HasValue) return;
+            scope = new PermissionScope(AccessScopeType.ClientPlatform, platformId.Value);
+        }
+        else if (requirement.PermissionKey.StartsWith("chefz.", StringComparison.Ordinal))
+        {
+            var platformIds = await dbContext.ClientPlatforms.AsNoTracking()
+                .Where(x => x.Code == "CHEFZ" || x.Code == "THECHEFZ" || x.Code == "CHEFSZ" || x.Code == "SHIFTZ")
+                .Select(x => x.Id).ToArrayAsync();
+            if (platformIds.Length == 0) return;
+            foreach (var platformId in platformIds)
+                if (!await permissionChecker.HasPermissionAsync(userId, authorizationVersion,
+                    requirement.PermissionKey, new PermissionScope(AccessScopeType.ClientPlatform, platformId))) return;
+            context.Succeed(requirement);
+            return;
+        }
         if (requirement.PermissionKey.StartsWith("jahez.", StringComparison.Ordinal))
         {
             var platformId = await dbContext.ClientPlatforms.AsNoTracking().Where(x => x.Code == "JAHEZ")

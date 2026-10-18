@@ -2,15 +2,13 @@ using LogisticsERP.Domain.Common;
 
 namespace LogisticsERP.Domain.Entities.Jahez;
 
-public enum JahezApprovalKind { FeeException = 1, FreeSwitch = 2, PercentageCommission = 3, ResetAccount = 4 }
+public enum JahezApprovalKind { FeeException = 1, FreeSwitch = 2, PercentageCommission = 3, ResetAccount = 4, Adjustment = 5 }
 public enum JahezApprovalStatus { Pending = 1, Approved = 2, Rejected = 3, Cancelled = 4 }
 public enum JahezLedgerBucket { AccountFees = 1, PlatformDebt = 2, Commission = 3 }
-public enum JahezLedgerKind { Charge = 1, Payment = 2, Adjustment = 3, Transfer = 4, OpeningBalance = 5 }
-public enum JahezCashboxSection { AccountFees = 1, Settlements = 2 }
-public enum JahezCashboxHandoverStatus { Pending = 1, AccountantConfirmed = 2, Approved = 3, Rejected = 4 }
+public enum JahezLedgerKind { Charge = 1, Payment = 2, Adjustment = 3, Transfer = 4, OpeningBalance = 5, StatusChange = 6 }
 public enum JahezImportKind { Transactions = 1, DailyDispatches = 2 }
 
-public sealed class JahezAccountHandover : AuditableEntity
+public sealed class JahezAccountSession : AuditableEntity
 {
     public Guid PlatformRiderAccountId { get; set; }
     public Guid RiderProfileId { get; set; }
@@ -20,8 +18,6 @@ public sealed class JahezAccountHandover : AuditableEntity
     public DateOnly CommissionStartsOn { get; set; }
     public DateOnly? CommissionPostedThrough { get; set; }
     public DateTimeOffset? LastSettlementPaymentAtUtc { get; set; }
-    public bool IsLegacy { get; set; }
-    public bool DebtTransferred { get; set; }
     public string Reason { get; set; } = string.Empty;
 }
 
@@ -35,6 +31,11 @@ public sealed class JahezAccountFee : AuditableEntity
 
 public sealed class JahezApprovalRequest : AuditableEntity
 {
+    public Guid? OperationId { get; set; }
+    public JahezAdjustmentTarget? AdjustmentTarget { get; set; }
+    public decimal? ProposedNet { get; set; }
+    public decimal? ProposedCommission { get; set; }
+    public decimal? DebtAdjustment { get; set; }
     public Guid HandoverId { get; set; }
     public JahezApprovalKind Kind { get; set; }
     public JahezApprovalStatus Status { get; set; }
@@ -45,11 +46,11 @@ public sealed class JahezApprovalRequest : AuditableEntity
     public DateOnly? ToDate { get; set; }
     public DateTimeOffset? EffectiveAtUtc { get; set; }
     public string Reason { get; set; } = string.Empty;
-    public string? ExternalResetReference { get; set; }
 }
 
 public sealed class JahezApprovalDecision : HistoryEntity
 {
+    public string? DecisionJson { get; set; }
     public Guid RequestId { get; set; }
     public Guid ActorUserId { get; set; }
     public JahezApprovalStatus Status { get; set; }
@@ -140,18 +141,6 @@ public sealed class JahezDailyDispatch : HistoryEntity
     public string? AllocationReason { get; set; }
 }
 
-public sealed class JahezRiderSettlement : HistoryEntity
-{
-    public Guid HandoverId { get; set; }
-    public DateOnly ThroughDate { get; set; }
-    public DateTimeOffset RecordedAtUtc { get; set; }
-    public Guid CollectedByUserId { get; set; }
-    public decimal FeePayment { get; set; }
-    public decimal DebtPayment { get; set; }
-    public decimal CommissionPayment { get; set; }
-    public bool CountsAsSettlement { get; set; }
-    public string Reason { get; set; } = string.Empty;
-}
 
 // Signed receivable: charges are positive, payments/credits are negative.
 // Transfer entries carry zero: obligations stay on their original rider and handover.
@@ -170,34 +159,7 @@ public sealed class JahezLedgerEntry : HistoryEntity
     public string? CalculationJson { get; set; }
 }
 
-public sealed class JahezCashboxEntry : AuditableEntity
-{
-    public Guid SettlementId { get; set; }
-    public Guid HandoverId { get; set; }
-    public JahezCashboxSection Section { get; set; }
-    public decimal Amount { get; set; }
-    public Guid CollectedByUserId { get; set; }
-    public DateTimeOffset ReceivedAtUtc { get; set; }
-    public Guid? CashboxHandoverId { get; set; }
-}
 
-public sealed class JahezCashboxHandover : AuditableEntity
-{
-    public DateOnly BusinessDate { get; set; }
-    public JahezCashboxHandoverStatus Status { get; set; }
-    public decimal FeeAmount { get; set; }
-    public decimal SettlementAmount { get; set; }
-    public decimal? AccountantFeeAmount { get; set; }
-    public decimal? AccountantSettlementAmount { get; set; }
-    public Guid RequestedByUserId { get; set; }
-    public Guid? AccountantUserId { get; set; }
-    public Guid? ApprovedByUserId { get; set; }
-    public DateTimeOffset? ConfirmedAtUtc { get; set; }
-    public DateTimeOffset? DecidedAtUtc { get; set; }
-    public string Reason { get; set; } = string.Empty;
-    public string? ConfirmationReason { get; set; }
-    public string? DecisionReason { get; set; }
-}
 
 public sealed class JahezReminderState : AuditableEntity
 {

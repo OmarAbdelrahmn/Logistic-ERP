@@ -1,0 +1,99 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Checks">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="CheckName" type="xs:string" minOccurs="0" />
+                <xs:element name="Mismatches" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Checks>
+    <CheckName>Account count</CheckName>
+    <Mismatches>0</Mismatches>
+  </Checks>
+  <Checks>
+    <CheckName>Account values</CheckName>
+    <Mismatches>0</Mismatches>
+  </Checks>
+  <Checks>
+    <CheckName>Owner iqama links</CheckName>
+    <Mismatches>0</Mismatches>
+  </Checks>
+  <Checks>
+    <CheckName>Phone/detail values</CheckName>
+    <Mismatches>0</Mismatches>
+  </Checks>
+  <Checks>
+    <CheckName>Detail count</CheckName>
+    <Mismatches>0</Mismatches>
+  </Checks>
+  <Checks>
+    <CheckName>Assignment count</CheckName>
+    <Mismatches>0</Mismatches>
+  </Checks>
+  <Checks>
+    <CheckName>Assignment values</CheckName>
+    <Mismatches>0</Mismatches>
+  </Checks>
+  <Checks>
+    <CheckName>User iqama links</CheckName>
+    <Mismatches>0</Mismatches>
+  </Checks>
+  <Checks>
+    <CheckName>Ownership registration values</CheckName>
+    <Mismatches>0</Mismatches>
+  </Checks>
+  <Checks>
+    <CheckName>Registration count</CheckName>
+    <Mismatches>0</Mismatches>
+  </Checks>
+  <Checks>
+    <CheckName>Assignment events</CheckName>
+    <Mismatches>0</Mismatches>
+  </Checks>
+  <Checks>
+    <CheckName>Skipped accounts absent</CheckName>
+    <Mismatches>0</Mismatches>
+  </Checks>
+  <Checks>
+    <CheckName>Non-assigned rows remain unassigned</CheckName>
+    <Mismatches>0</Mismatches>
+  </Checks>
+  <Checks>
+    <CheckName>One active account per selected rider</CheckName>
+    <Mismatches>0</Mismatches>
+  </Checks>
+  <Checks>
+    <CheckName>Contract</CheckName>
+    <Mismatches>0</Mismatches>
+  </Checks>
+  <Checks>
+    <CheckName>Summary audit receipt</CheckName>
+    <Mismatches>0</Mismatches>
+  </Checks>
+  <Checks>
+    <CheckName>Account audit count</CheckName>
+    <Mismatches>0</Mismatches>
+  </Checks>
+  <Checks>
+    <CheckName>Assignment audit count</CheckName>
+    <Mismatches>0</Mismatches>
+  </Checks>
+  <Checks>
+    <CheckName>No Ninja credentials created</CheckName>
+    <Mismatches>0</Mismatches>
+  </Checks>
+  <Checks>
+    <CheckName>No Ninja daily reports imported</CheckName>
+    <Mismatches>0</Mismatches>
+  </Checks>
+</NewDataSet>

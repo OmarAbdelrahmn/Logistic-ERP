@@ -1,0 +1,77 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="HandoverCount" type="xs:long" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="HandoverMovementCount" type="xs:long" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table2">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="MovementCount" type="xs:long" minOccurs="0" />
+                <xs:element name="MovementAmount" type="xs:decimal" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table3">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="LedgerCount" type="xs:long" minOccurs="0" />
+                <xs:element name="LedgerAmount" type="xs:decimal" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table4">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="AccountCount" type="xs:long" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table5">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="MigrationId" type="xs:string" minOccurs="0" />
+                <xs:element name="ProductVersion" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <HandoverCount>0</HandoverCount>
+  </Table>
+  <Table1>
+    <HandoverMovementCount>0</HandoverMovementCount>
+  </Table1>
+  <Table2>
+    <MovementCount>5</MovementCount>
+    <MovementAmount>1150.42</MovementAmount>
+  </Table2>
+  <Table3>
+    <LedgerCount>19</LedgerCount>
+    <LedgerAmount>600.000000</LedgerAmount>
+  </Table3>
+  <Table4>
+    <AccountCount>1845</AccountCount>
+  </Table4>
+  <Table5>
+    <MigrationId>20261017165534_AddJahezV2AccountantHandovers</MigrationId>
+    <ProductVersion>10.0.11</ProductVersion>
+  </Table5>
+</NewDataSet>

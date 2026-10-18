@@ -23,6 +23,8 @@ public interface IMaintenanceService
     Task<Result<OilBarrelResponse>> SetOilBarrelVehicleTypeAsync(Guid id, SetOilBarrelVehicleTypeRequest request, CancellationToken cancellationToken = default);
     Task<Result<OilBarrelUsageResponse>> GetOilBarrelUsageAsync(Guid id, int page, int pageSize, CancellationToken cancellationToken = default);
     Task<Result<OilBarrelLossResponse>> RecordOilBarrelLossAsync(Guid id, RecordOilBarrelLossRequest request, CancellationToken cancellationToken = default);
+    Task<Result<OilBarrelMissingResponse>> RecordOilBarrelMissingAsync(Guid id, RecordOilBarrelMissingRequest request, CancellationToken cancellationToken = default);
+    Task<Result<OilBarrelMissingHistoryResponse>> GetOilBarrelMissingHistoryAsync(Guid id, int page, int pageSize, CancellationToken cancellationToken = default);
     Task<Result<StockTransferResponse>> PostTransferAsync(PostStockTransferRequest request, CancellationToken cancellationToken = default);
     Task<Result<SupplierReturnResponse>> PostSupplierReturnAsync(PostSupplierReturnRequest request, CancellationToken cancellationToken = default);
     Task<Result<RiderInventoryIssueResponse>> PostRiderIssueAsync(PostRiderInventoryIssueRequest request, CancellationToken cancellationToken = default);

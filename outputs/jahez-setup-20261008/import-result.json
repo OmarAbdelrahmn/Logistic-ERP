@@ -1,0 +1,15 @@
+{
+  "ExpectedAssignments": 199,
+  "Handovers": 199,
+  "ActiveAssignments": 199,
+  "OpeningEntries": 597,
+  "OpeningDebt": 77309.838,
+  "OpeningFees": 0.0,
+  "OpeningCommission": 113850.0,
+  "CashReceiptsCreated": 0,
+  "PaymentReceiptsCreated": 0,
+  "AssignmentDateMismatches": 0,
+  "BalanceMismatches": 0,
+  "OtherActiveAssignments": 0,
+  "RidersOverLimit": 0
+}

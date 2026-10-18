@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Logistics ERP — جاهز",
-    "description": "كل واجهات /api/jahez الفعلية. الأمثلة توضيحية؛ اقرأ docs/jahez-endpoints-handoff-ar.md لأشكال الاستجابة الكاملة. اضبط baseUrl وaccessToken وUUIDs قبل التنفيذ. استدعاءات POST تستخدم مفتاح عدم تكرار جديدًا؛ استعمل المفتاح نفسه فقط عند إعادة محاولة نفس الطلب. لا تشغل أمثلة التحصيل/الترحيل على قاعدة التشغيل إلا بقيم فعلية مؤكدة.",
+    "description": "Full collection of all 36 current /api/jahez routes, including the five debt workflow additions. Contract and permissions: docs/jahez-full-api-reference.md. Frontend implementation requirements: docs/jahez-frontend-changelog-and-spec.md. Set baseUrl/accessToken and real identifiers. POST examples generate a fresh key on Send; to retry an uncertain result, replace that header with the ORIGINAL Idempotency-Key and keep the same actor/body. Success responses are 200; file downloads are binary XLSX. Examples do not constitute real receipts or external Jahez clearance.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -80,7 +80,7 @@
                 "handovers"
               ]
             },
-            "description": "الطلب: Query اختياري `accountId`, `riderId`, `page`, `pageSize`\n\nاستجابة 200: `{ \"items\": Handover[], \"page\":1, \"pageSize\":50 }`\n\nالصلاحية: `jahez.read`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md"
+            "description": "الطلب: Query اختياري `accountId`, `riderId`, `page`, `pageSize`\n\nاستجابة 200: `{ \"items\": Handover[], \"page\":1, \"pageSize\":50 }`\n\nالصلاحية: `jahez.read`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-full-api-reference.md"
           },
           "response": []
         },
@@ -109,7 +109,7 @@
                 "handovers"
               ]
             },
-            "description": "الطلب: جسم `HandoverRequest` بالمثال أعلاه؛ `initialFeePayment` من 0 إلى 200 بالهللة، و`feeApprovalRequestId` إن أرسل يجب أن يكون `null`\n\nاستجابة 200: `Handover`؛ `id` هو `handoverId` لبقية العمليات\n\nالصلاحية: `jahez.handovers.manage`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md",
+            "description": "الطلب: جسم `HandoverRequest` بالمثال أعلاه؛ `initialFeePayment` من 0 إلى 200 بالهللة، و`feeApprovalRequestId` إن أرسل يجب أن يكون `null`\n\nاستجابة 200: `Handover`؛ `id` هو `handoverId` لبقية العمليات\n\nالصلاحية: `jahez.handovers.create`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-full-api-reference.md",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"accountId\": \"{{accountId}}\",\n  \"riderProfileId\": \"{{riderProfileId}}\",\n  \"effectiveAtUtc\": \"2026-10-01T08:00:00+03:00\",\n  \"reason\": \"تسليم حساب جاهز\",\n  \"initialFeePayment\": 80,\n  \"feeApprovalRequestId\": null\n}",
@@ -147,7 +147,7 @@
                 "legacy-adoptions"
               ]
             },
-            "description": "الطلب: جسم `LegacyAdoptionRequest` أدناه؛ `assignmentId` لإسناد جاهز قديم نشط\n\nاستجابة 200: `Handover` مع `isLegacy:true`\n\nالصلاحية: `jahez.adjustments.manage`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md",
+            "description": "الطلب: جسم `LegacyAdoptionRequest` أدناه؛ `assignmentId` لإسناد جاهز قديم نشط\n\nاستجابة 200: `Handover` مع `isLegacy:true`\n\nالصلاحية: `jahez.adjustments.create`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-full-api-reference.md",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"assignmentId\": \"{{assignmentId}}\",\n  \"financialStartOn\": \"2026-10-01\",\n  \"openingDebt\": 500,\n  \"openingFees\": 70,\n  \"openingCommission\": 30,\n  \"reason\": \"تهيئة رصيد قديم موثق\"\n}",
@@ -187,7 +187,7 @@
                 "close"
               ]
             },
-            "description": "الطلب: `{id}` = `handoverId`، جسم `CloseRequest` أدناه\n\nاستجابة 200: `Handover` مع `endedAtUtc` وتثبيت العمولة حتى يوم الإغلاق\n\nالصلاحية: `jahez.handovers.manage`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md",
+            "description": "الطلب: `{id}` = `handoverId`، جسم `CloseRequest` أدناه\n\nاستجابة 200: `Handover` مع `endedAtUtc` وتثبيت العمولة حتى يوم الإغلاق\n\nالصلاحية: `jahez.handovers.delete`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-full-api-reference.md",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"effectiveAtUtc\": \"2026-10-03T08:00:00+03:00\",\n  \"reason\": \"إغلاق فترة استخدام الحساب\"\n}",
@@ -224,7 +224,7 @@
                 }
               ]
             },
-            "description": "الطلب: `{id}` = `handoverId`؛ `through` مطلوب، حتى اليوم ولا يسبق تاريخ عمولة/تصفية مثبتة\n\nاستجابة 200: `Balance`؛ مثال كامل أدناه\n\nالصلاحية: `jahez.read`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md"
+            "description": "الطلب: `{id}` = `handoverId`؛ `through` مطلوب، حتى اليوم ولا يسبق تاريخ عمولة/تصفية مثبتة\n\nاستجابة 200: `Balance`؛ مثال كامل أدناه\n\nالصلاحية: `jahez.read`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-full-api-reference.md\n\nthrough is REQUIRED; send the current Riyadh business date for present-day operations."
           },
           "response": []
         },
@@ -246,7 +246,7 @@
                 "fee"
               ]
             },
-            "description": "الطلب: `{id}` = `handoverId`\n\nاستجابة 200: `Fee` مع حقول Auditable\n\nالصلاحية: `jahez.read`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md"
+            "description": "الطلب: `{id}` = `handoverId`\n\nاستجابة 200: `Fee` مع حقول Auditable\n\nالصلاحية: `jahez.read`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-full-api-reference.md"
           },
           "response": []
         },
@@ -268,7 +268,7 @@
                 "settlements"
               ]
             },
-            "description": "الطلب: `{id}` = `handoverId`, Query `page`, `pageSize`\n\nاستجابة 200: `{ \"items\": Settlement[], \"page\":1, \"pageSize\":50 }`\n\nالصلاحية: `jahez.read`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md"
+            "description": "الطلب: `{id}` = `handoverId`, Query `page`, `pageSize`\n\nاستجابة 200: `{ \"items\": Settlement[], \"page\":1, \"pageSize\":50 }`\n\nالصلاحية: `jahez.read`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-full-api-reference.md"
           },
           "response": []
         },
@@ -290,7 +290,7 @@
                 "earnings"
               ]
             },
-            "description": "الطلب: `{id}` = `handoverId`, Query `page`, `pageSize`\n\nاستجابة 200: `{ \"items\": Earnings[], \"page\":1, \"pageSize\":50 }`\n\nالصلاحية: `jahez.read`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md"
+            "description": "الطلب: `{id}` = `handoverId`, Query `page`, `pageSize`\n\nاستجابة 200: `{ \"items\": Earnings[], \"page\":1, \"pageSize\":50 }`\n\nالصلاحية: `jahez.read`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-full-api-reference.md"
           },
           "response": []
         },
@@ -312,7 +312,7 @@
                 "commission-policies"
               ]
             },
-            "description": "الطلب: `{id}` = `handoverId`, Query `page`, `pageSize`\n\nاستجابة 200: `{ \"items\": CommissionPolicy[], \"page\":1, \"pageSize\":50 }`\n\nالصلاحية: `jahez.read`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md"
+            "description": "الطلب: `{id}` = `handoverId`, Query `page`, `pageSize`\n\nاستجابة 200: `{ \"items\": CommissionPolicy[], \"page\":1, \"pageSize\":50 }`\n\nالصلاحية: `jahez.read`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-full-api-reference.md"
           },
           "response": []
         },
@@ -332,7 +332,7 @@
                 "debts"
               ]
             },
-            "description": "الطلب: Query `riderId?`, `overdueOnly=false`, `page=1`, `pageSize=50`\n\nاستجابة 200: `{ \"items\": Balance[], \"page\":1, \"pageSize\":50 }`؛ تشمل ديون الإسنادات المغلقة\n\nالصلاحية: `jahez.read`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md"
+            "description": "الطلب: Query `riderId?`, `overdueOnly=false`, `page=1`, `pageSize=50`\n\nاستجابة 200: `{ \"items\": Balance[], \"page\":1, \"pageSize\":50 }`؛ تشمل ديون الإسنادات المغلقة\n\nالصلاحية: `jahez.read`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-full-api-reference.md"
           },
           "response": []
         },
@@ -352,7 +352,7 @@
                 "ledger"
               ]
             },
-            "description": "الطلب: Query `riderId?`, `handoverId?`, `page`, `pageSize`\n\nاستجابة 200: `{ \"items\": LedgerEntry[], \"page\":1, \"pageSize\":50 }`\n\nالصلاحية: `jahez.read`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md"
+            "description": "الطلب: Query `riderId?`, `handoverId?`, `page`, `pageSize`\n\nاستجابة 200: `{ \"items\": LedgerEntry[], \"page\":1, \"pageSize\":50 }`\n\nالصلاحية: `jahez.read`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-full-api-reference.md"
           },
           "response": []
         }
@@ -377,7 +377,7 @@
                 "requests"
               ]
             },
-            "description": "الطلب: `status?` من 1 إلى 4، `page`, `pageSize`\n\nاستجابة 200: `{ \"items\": ApprovalRequest[], \"page\":1, \"pageSize\":50 }`؛ عناصر القائمة لا تحتوي قرارات\n\nالصلاحية: `jahez.read`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md"
+            "description": "الطلب: `status?` من 1 إلى 4، `page`, `pageSize`\n\nاستجابة 200: `{ \"items\": ApprovalRequest[], \"page\":1, \"pageSize\":50 }`؛ عناصر القائمة لا تحتوي قرارات\n\nالصلاحية: `jahez.read`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-full-api-reference.md"
           },
           "response": []
         },
@@ -406,7 +406,7 @@
                 "requests"
               ]
             },
-            "description": "الطلب: `ApprovalCreateRequest`؛ `handoverId`, `kind`, `reason`، وباقي الحقول حسب النوع أدناه\n\nاستجابة 200: `ApprovalResponse` وحالة `request.status=1` و`decisions=[]`\n\nالصلاحية: `jahez.requests.create`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md",
+            "description": "الطلب: `ApprovalCreateRequest`؛ `handoverId`, `kind`, `reason`، وباقي الحقول حسب النوع أدناه\n\nاستجابة 200: `ApprovalResponse` وحالة `request.status=1` و`decisions=[]`\n\nالصلاحية: `jahez.requests.create`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-full-api-reference.md",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"handoverId\": \"{{handoverId}}\",\n  \"kind\": 1,\n  \"reason\": \"استثناء رسوم موثق\",\n  \"waiverAmount\": 50\n}",
@@ -446,7 +446,7 @@
                 "decision"
               ]
             },
-            "description": "الطلب: `{id}` = `approvalRequestId`، `DecisionRequest`\n\nاستجابة 200: `ApprovalResponse` محدث؛ بعد الموافقة status=2 والرفض status=3\n\nالصلاحية: `jahez.read` عند الـController؛ الخدمة تتطلب `jahez.requests.approve` أو `jahez.resets.approve` للتصفير\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md",
+            "description": "الطلب: `{id}` = `approvalRequestId`، `DecisionRequest`\n\nاستجابة 200: `ApprovalResponse` محدث؛ بعد الموافقة status=2 والرفض status=3\n\nالصلاحية: `jahez.read` عند الـController؛ الخدمة تتطلب `jahez.requests.approve` أو `jahez.resets.approve` للتصفير\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-full-api-reference.md\n\nResponse is {request, decisions}; decisions contains the new decision. GET details returns full decision history. Actor must differ from requester.",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"approve\": true,\n  \"reason\": \"تم التحقق واعتماد الطلب\"\n}",
@@ -486,7 +486,7 @@
                 "cancel"
               ]
             },
-            "description": "الطلب: `{id}` = `approvalRequestId`، جسم `{ \"reason\":\"لم يعد مطلوبًا\" }`\n\nاستجابة 200: `ApprovalResponse` مع status=4 وقرار إلغاء\n\nالصلاحية: `jahez.requests.create`، والمقدم نفسه فقط\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md",
+            "description": "الطلب: `{id}` = `approvalRequestId`، جسم `{ \"reason\":\"لم يعد مطلوبًا\" }`\n\nاستجابة 200: `ApprovalResponse` مع status=4 وقرار إلغاء\n\nالصلاحية: `jahez.requests.create`، والمقدم نفسه فقط\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-full-api-reference.md",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"reason\": \"لم يعد مطلوبًا\"\n}",
@@ -516,7 +516,7 @@
                 "{{approvalRequestId}}"
               ]
             },
-            "description": "الطلب: `{id}` = `approvalRequestId`\n\nاستجابة 200: `ApprovalResponse` مع تاريخ القرار\n\nالصلاحية: `jahez.read`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md"
+            "description": "الطلب: `{id}` = `approvalRequestId`\n\nاستجابة 200: `ApprovalResponse` مع تاريخ القرار\n\nالصلاحية: `jahez.read`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-full-api-reference.md"
           },
           "response": []
         }
@@ -550,7 +550,7 @@
                 "earnings"
               ]
             },
-            "description": "الطلب: `EarningsRequest` بكل البنود التسعة صراحةً؛ `supersedesId?` لتصحيح بيان لم يُثبت\n\nاستجابة 200: `Earnings` + History\n\nالصلاحية: `jahez.earnings.manage`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md",
+            "description": "الطلب: `EarningsRequest` بكل البنود التسعة صراحةً؛ `supersedesId?` لتصحيح بيان لم يُثبت\n\nاستجابة 200: `Earnings` + History\n\nالصلاحية: `jahez.earnings.create`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-full-api-reference.md",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"handoverId\": \"{{handoverId}}\",\n  \"fromDate\": \"2026-10-02\",\n  \"toDate\": \"2026-10-03\",\n  \"totalDeliveryPrice\": 1000,\n  \"totalPenalties\": 20,\n  \"totalCashAmount\": 100,\n  \"totalDriverDebit\": 10,\n  \"totalServiceDeduction\": 5,\n  \"totalDriverCredit\": 50,\n  \"totalBonuses\": 30,\n  \"totalTips\": 10,\n  \"totalFreeOrders\": 5,\n  \"reason\": \"كشف أرباح معتمد يدويًا\",\n  \"supersedesId\": null\n}",
@@ -588,7 +588,7 @@
                 "settlements"
               ]
             },
-            "description": "الطلب: `PaymentRequest`؛ توزيع المقبوض على الرسوم والدين والعمولة\n\nاستجابة 200: `Settlement` + History\n\nالصلاحية: `jahez.collections.manage`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md",
+            "description": "الطلب: `PaymentRequest`؛ توزيع المقبوض على الرسوم والدين والعمولة\n\nاستجابة 200: `Settlement` + History\n\nالصلاحية: `jahez.collections.create`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-full-api-reference.md",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"handoverId\": \"{{handoverId}}\",\n  \"throughDate\": \"2026-10-03\",\n  \"feePayment\": 50,\n  \"debtPayment\": 100,\n  \"commissionPayment\": 30,\n  \"countsAsSettlement\": true,\n  \"reason\": \"دفعة تصفية جزئية\"\n}",
@@ -626,7 +626,7 @@
                 "adjustments"
               ]
             },
-            "description": "الطلب: `LedgerAdjustmentRequest`؛ مبلغ موقع موجب لزيادة الدين أو سالب لتخفيضه، `reversesEntryId?`\n\nاستجابة 200: `LedgerEntry` + History؛ لا ينشئ قبضًا\n\nالصلاحية: `jahez.adjustments.manage`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md",
+            "description": "الطلب: `LedgerAdjustmentRequest`؛ مبلغ موقع موجب لزيادة الدين أو سالب لتخفيضه، `reversesEntryId?`\n\nاستجابة 200: `LedgerEntry` + History؛ لا ينشئ قبضًا\n\nالصلاحية: `jahez.adjustments.create`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-full-api-reference.md",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"handoverId\": \"{{handoverId}}\",\n  \"bucket\": 2,\n  \"amount\": -25,\n  \"reason\": \"تصحيح مديونية موثق\",\n  \"reversesEntryId\": null\n}",
@@ -660,7 +660,7 @@
                 "imports"
               ]
             },
-            "description": "الطلب: `page`, `pageSize`\n\nاستجابة 200: `{ \"items\": ImportBatch[], \"page\":1, \"pageSize\":50 }`\n\nالصلاحية: `jahez.imports.manage`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md"
+            "description": "الطلب: `page`, `pageSize`\n\nاستجابة 200: `{ \"items\": ImportBatch[], \"page\":1, \"pageSize\":50 }`\n\nالصلاحية: `jahez.imports.read`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-full-api-reference.md"
           },
           "response": []
         },
@@ -685,7 +685,7 @@
                 "imports"
               ]
             },
-            "description": "الطلب: `multipart/form-data`: `kind` = 1 للحركات أو 2 للطلبات، حقل `files` مكرر لكل ملف XLSX، `replacesBatchId?`, `correctionReason?`\n\nاستجابة 200: `ImportPreview` محفوظة، `committed:false`\n\nالصلاحية: `jahez.imports.manage`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md",
+            "description": "الطلب: `multipart/form-data`: `kind` = 1 للحركات أو 2 للطلبات، حقل `files` مكرر لكل ملف XLSX، `replacesBatchId?`, `correctionReason?`\n\nاستجابة 200: `ImportPreview` محفوظة، `committed:false`\n\nالصلاحية: `jahez.imports.create`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-full-api-reference.md",
             "body": {
               "mode": "formdata",
               "formdata": [
@@ -721,7 +721,7 @@
                 "{{batchId}}"
               ]
             },
-            "description": "الطلب: `{id}` = `batchId`\n\nاستجابة 200: `ImportPreview` حديثة مع مشكلات الربط والتداخل\n\nالصلاحية: `jahez.imports.manage`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md"
+            "description": "الطلب: `{id}` = `batchId`\n\nاستجابة 200: `ImportPreview` حديثة مع مشكلات الربط والتداخل\n\nالصلاحية: `jahez.imports.read`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-full-api-reference.md"
           },
           "response": []
         },
@@ -752,7 +752,7 @@
                 "commit"
               ]
             },
-            "description": "الطلب: `{id}` = `batchId`، جسم `{}` للحركات أو `ImportCommitRequest` للطلبات الملتبسة\n\nاستجابة 200: `ImportPreview` مع `committed:true`\n\nالصلاحية: `jahez.imports.manage`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md",
+            "description": "الطلب: `{id}` = `batchId`، جسم `{}` للحركات أو `ImportCommitRequest` للطلبات الملتبسة\n\nاستجابة 200: `ImportPreview` مع `committed:true`\n\nالصلاحية: `jahez.imports.update`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-full-api-reference.md",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"allocations\": []\n}",
@@ -782,7 +782,7 @@
                 "{{fileId}}"
               ]
             },
-            "description": "الطلب: `{id}` = `files[].id` من المعاينة\n\nاستجابة 200: بايتات ملف XLSX، `Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`، واسم الملف الأصلي للتنزيل\n\nالصلاحية: `jahez.imports.manage`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md"
+            "description": "الطلب: `{id}` = `files[].id` من المعاينة\n\nاستجابة 200: بايتات ملف XLSX، `Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`، واسم الملف الأصلي للتنزيل\n\nالصلاحية: `jahez.imports.read`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-full-api-reference.md"
           },
           "response": []
         },
@@ -812,7 +812,7 @@
                 }
               ]
             },
-            "description": "الطلب: `from`, `to` مطلوبان، `riderId?`, `page`, `pageSize`\n\nاستجابة 200: `{ \"items\": Dispatch[], \"page\":1, \"pageSize\":50 }`\n\nالصلاحية: `jahez.read`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md"
+            "description": "الطلب: `from`, `to` مطلوبان، `riderId?`, `page`, `pageSize`\n\nاستجابة 200: `{ \"items\": Dispatch[], \"page\":1, \"pageSize\":50 }`\n\nالصلاحية: `jahez.read`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-full-api-reference.md"
           },
           "response": []
         }
@@ -837,7 +837,7 @@
                 "cashbox"
               ]
             },
-            "description": "الطلب: بلا Query\n\nاستجابة 200: `CashboxBalance`\n\nالصلاحية: `jahez.cashbox.read`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md"
+            "description": "الطلب: بلا Query\n\nاستجابة 200: `CashboxBalance`\n\nالصلاحية: `jahez.cashbox.read`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-full-api-reference.md"
           },
           "response": []
         },
@@ -858,7 +858,7 @@
                 "handovers"
               ]
             },
-            "description": "الطلب: `page`, `pageSize`\n\nاستجابة 200: `{ \"items\": CashboxHandover[], \"page\":1, \"pageSize\":50 }`\n\nالصلاحية: `jahez.cashbox.read`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md"
+            "description": "الطلب: `page`, `pageSize`\n\nاستجابة 200: `{ \"items\": CashboxHandover[], \"page\":1, \"pageSize\":50 }`\n\nالصلاحية: `jahez.cashbox.read`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-full-api-reference.md"
           },
           "response": []
         },
@@ -888,7 +888,7 @@
                 "handovers"
               ]
             },
-            "description": "الطلب: `CashboxCreateRequest`\n\nاستجابة 200: `CashboxHandover` بحالة 1\n\nالصلاحية: `jahez.cashbox.submit`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md",
+            "description": "الطلب: `CashboxCreateRequest`\n\nاستجابة 200: `CashboxHandover` بحالة 1\n\nالصلاحية: `jahez.cashbox.submit`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-full-api-reference.md",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"businessDate\": \"2026-10-03\",\n  \"reason\": \"تسليم اليومية للمحاسب\"\n}",
@@ -929,7 +929,7 @@
                 "confirm"
               ]
             },
-            "description": "الطلب: `{id}` = معرف تسليم الصندوق، `AccountantConfirmRequest`\n\nاستجابة 200: `CashboxHandover` بحالة 2؛ يجب تطابق كل قسم\n\nالصلاحية: `jahez.cashbox.confirm`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md",
+            "description": "الطلب: `{id}` = معرف تسليم الصندوق، `AccountantConfirmRequest`\n\nاستجابة 200: `CashboxHandover` بحالة 2؛ يجب تطابق كل قسم\n\nالصلاحية: `jahez.cashbox.confirm`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-full-api-reference.md",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"feeAmount\": 130,\n  \"settlementAmount\": 130,\n  \"reason\": \"تم استلام ومطابقة القسمين\"\n}",
@@ -970,7 +970,7 @@
                 "decision"
               ]
             },
-            "description": "الطلب: `{id}` = معرف تسليم الصندوق، `DecisionRequest` نفسه المستخدم للموافقات\n\nاستجابة 200: `CashboxHandover` بحالة 3 للموافقة أو 4 للرفض\n\nالصلاحية: `jahez.cashbox.approve`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md",
+            "description": "الطلب: `{id}` = معرف تسليم الصندوق، `DecisionRequest` نفسه المستخدم للموافقات\n\nاستجابة 200: `CashboxHandover` بحالة 3 للموافقة أو 4 للرفض\n\nالصلاحية: `jahez.cashbox.approve`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-full-api-reference.md",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"approve\": true,\n  \"reason\": \"اعتماد التسليم بعد تأكيد المحاسب\"\n}",
@@ -1000,7 +1000,194 @@
                 "entries"
               ]
             },
-            "description": "الطلب: `cashboxHandoverId?`, `page`, `pageSize`\n\nاستجابة 200: `{ \"items\": CashboxEntry[], \"page\":1, \"pageSize\":50 }`\n\nالصلاحية: `jahez.cashbox.read`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-endpoints-handoff-ar.md"
+            "description": "الطلب: `cashboxHandoverId?`, `page`, `pageSize`\n\nاستجابة 200: `{ \"items\": CashboxEntry[], \"page\":1, \"pageSize\":50 }`\n\nالصلاحية: `jahez.cashbox.read`\n\nالتفاصيل والأمثلة الكاملة: docs/jahez-full-api-reference.md"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "المديونية والتجميد وتصفية الحساب",
+      "item": [
+        {
+          "name": "إجمالي مديونية المندوب",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/jahez/riders/{{riderProfileId}}/debt-summary",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jahez",
+                "riders",
+                "{{riderProfileId}}",
+                "debt-summary"
+              ]
+            },
+            "description": "الصلاحية: jahez.read. التفاصيل والردود: docs/jahez-debt-freeze-and-clearance-ar.md\n\nFull contract: docs/jahez-full-api-reference.md"
+          },
+          "response": []
+        },
+        {
+          "name": "نقل المديونية للمندوب وتحرير الحساب",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "value": "application/json",
+                "key": "Content-Type"
+              },
+              {
+                "value": "{{$guid}}",
+                "key": "Idempotency-Key"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/jahez/handovers/{{handoverId}}/transfer-debt",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jahez",
+                "handovers",
+                "{{handoverId}}",
+                "transfer-debt"
+              ]
+            },
+            "description": "الصلاحية: jahez.resets.approve. التفاصيل والردود: docs/jahez-debt-freeze-and-clearance-ar.md\n\nFull contract: docs/jahez-full-api-reference.md",
+            "body": {
+              "raw": "{\r\n  \"reason\": \"نقل مديونية المندوب بعد مغادرته\",\r\n  \"externalClearanceReference\": \"JAHEZ-RESET-123\",\r\n  \"effectiveAtUtc\": \"2026-10-11T12:00:00+03:00\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "mode": "raw"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "تجميد الحساب وإيقاف العمولة",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "value": "application/json",
+                "key": "Content-Type"
+              },
+              {
+                "value": "{{$guid}}",
+                "key": "Idempotency-Key"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/jahez/handovers/{{handoverId}}/freeze",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jahez",
+                "handovers",
+                "{{handoverId}}",
+                "freeze"
+              ]
+            },
+            "description": "الصلاحية: jahez.resets.approve. التفاصيل والردود: docs/jahez-debt-freeze-and-clearance-ar.md\n\nFull contract: docs/jahez-full-api-reference.md",
+            "body": {
+              "raw": "{\r\n  \"reason\": \"الحساب لم تتم تصفيته\",\r\n  \"effectiveAtUtc\": \"2026-10-11T12:00:00+03:00\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "mode": "raw"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "تصفية الحساب المجمد مع جاهز",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "value": "application/json",
+                "key": "Content-Type"
+              },
+              {
+                "value": "{{$guid}}",
+                "key": "Idempotency-Key"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/jahez/handovers/{{handoverId}}/clear-account",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jahez",
+                "handovers",
+                "{{handoverId}}",
+                "clear-account"
+              ]
+            },
+            "description": "الصلاحية: jahez.resets.approve. التفاصيل والردود: docs/jahez-debt-freeze-and-clearance-ar.md\n\nFull contract: docs/jahez-full-api-reference.md",
+            "body": {
+              "raw": "{\r\n  \"reason\": \"تمت تصفية الحساب مع جاهز وتبقى مديونية المندوب\",\r\n  \"externalClearanceReference\": \"JAHEZ-CLEAR-456\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "mode": "raw"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "تأكيد سداد المندوب بعد التحصيل",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "value": "application/json",
+                "key": "Content-Type"
+              },
+              {
+                "value": "{{$guid}}",
+                "key": "Idempotency-Key"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/jahez/handovers/{{handoverId}}/confirm-paid",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jahez",
+                "handovers",
+                "{{handoverId}}",
+                "confirm-paid"
+              ]
+            },
+            "description": "الصلاحية: jahez.collections.create. التفاصيل والردود: docs/jahez-debt-freeze-and-clearance-ar.md\n\nFull contract: docs/jahez-full-api-reference.md",
+            "body": {
+              "raw": "{\r\n  \"reason\": \"سداد جميع المستحقات\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "mode": "raw"
+            }
           },
           "response": []
         }

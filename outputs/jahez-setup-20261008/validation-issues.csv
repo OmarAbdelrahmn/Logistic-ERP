@@ -1,0 +1,773 @@
+﻿sheet_row,account,iqama,issue,detail
+2,399990,2630669634,future_settlement_date,2026-12-07
+2,399990,2630669634,blank_fees,Zero or unknown needs clarification
+2,399990,2630669634,negative_cached_commission,-915
+3,404654,2546390671,rider_match,0
+3,404654,2546390671,future_settlement_date,2026-12-08
+3,404654,2546390671,blank_fees,Zero or unknown needs clarification
+3,404654,2546390671,negative_cached_commission,-930
+4,404719,2608130296,future_settlement_date,2026-12-07
+4,404719,2608130296,blank_fees,Zero or unknown needs clarification
+4,404719,2608130296,negative_cached_commission,-915
+5,404730,2383672181,settlement_before_handover,2026-09-13 < 2026-09-26
+5,404730,2383672181,blank_fees,Zero or unknown needs clarification
+6,404755,2449533955,future_settlement_date,2026-11-08
+6,404755,2449533955,blank_fees,Zero or unknown needs clarification
+6,404755,2449533955,negative_cached_commission,-480
+8,404826,2473759443,future_settlement_date,2026-12-07
+8,404826,2473759443,blank_fees,Zero or unknown needs clarification
+8,404826,2473759443,negative_cached_commission,-915
+10,404899,2153420639,future_handover_date,2027-01-08
+10,404899,2153420639,settlement_before_handover,2026-08-25 < 2027-01-08
+10,404899,2153420639,blank_fees,Zero or unknown needs clarification
+11,404912,2410991877,blank_fees,Zero or unknown needs clarification
+12,404913,2566185399,future_settlement_date,2026-12-08
+12,404913,2566185399,blank_fees,Zero or unknown needs clarification
+12,404913,2566185399,negative_cached_commission,-930
+13,404938,2545002996,future_settlement_date,2026-12-09
+13,404938,2545002996,blank_fees,Zero or unknown needs clarification
+13,404938,2545002996,negative_cached_commission,-945
+14,404953,2493115683,future_settlement_date,2026-12-08
+14,404953,2493115683,blank_fees,Zero or unknown needs clarification
+14,404953,2493115683,negative_cached_commission,-930
+15,404955,2546415825,blank_fees,Zero or unknown needs clarification
+16,404965,2274020839,blank_debt,Zero or unknown needs clarification
+16,404965,2274020839,blank_fees,Zero or unknown needs clarification
+17,404986,2398634598,future_settlement_date,2026-12-07
+17,404986,2398634598,blank_fees,Zero or unknown needs clarification
+17,404986,2398634598,negative_cached_commission,-915
+18,404997,2629795036,future_settlement_date,2026-10-09
+18,404997,2629795036,blank_fees,Zero or unknown needs clarification
+18,404997,2629795036,negative_cached_commission,-30
+19,405003,2422907911,future_settlement_date,2026-11-07
+19,405003,2422907911,blank_fees,Zero or unknown needs clarification
+19,405003,2422907911,negative_cached_commission,-465
+21,405015,2351125121,future_settlement_date,2026-12-08
+21,405015,2351125121,blank_fees,Zero or unknown needs clarification
+21,405015,2351125121,negative_cached_commission,-930
+24,405051,2233725940,blank_fees,Zero or unknown needs clarification
+25,405054,2561345170,blank_fees,Zero or unknown needs clarification
+27,405060,2135017529,blank_fees,Zero or unknown needs clarification
+28,405062,2634243394,rider_match,0
+28,405062,2634243394,future_settlement_date,2026-12-08
+28,405062,2634243394,blank_fees,Zero or unknown needs clarification
+28,405062,2634243394,negative_cached_commission,-930
+29,405092,2544182716,blank_fees,Zero or unknown needs clarification
+30,405136,2553651965,future_settlement_date,2026-12-08
+30,405136,2553651965,blank_fees,Zero or unknown needs clarification
+30,405136,2553651965,negative_cached_commission,-930
+31,405138,2327478232,invalid_handover_date,21-04-0-2026
+31,405138,2327478232,blank_fees,Zero or unknown needs clarification
+33,405166,2473101745,future_settlement_date,2026-12-08
+33,405166,2473101745,blank_fees,Zero or unknown needs clarification
+33,405166,2473101745,negative_cached_commission,-930
+35,405606,2627146620,future_settlement_date,2026-12-08
+35,405606,2627146620,blank_fees,Zero or unknown needs clarification
+35,405606,2627146620,negative_cached_commission,-930
+36,408130,2455942439,future_settlement_date,2026-11-09
+36,408130,2455942439,blank_fees,Zero or unknown needs clarification
+36,408130,2455942439,negative_cached_commission,-495
+37,408132,2398004149,future_settlement_date,2026-10-09
+37,408132,2398004149,blank_fees,Zero or unknown needs clarification
+37,408132,2398004149,negative_cached_commission,-30
+39,408967,2627643626,blank_fees,Zero or unknown needs clarification
+39,408967,2627643626,negative_cached_commission,-15
+40,410898,2194026965,future_settlement_date,2026-12-07
+40,410898,2194026965,blank_fees,Zero or unknown needs clarification
+40,410898,2194026965,negative_cached_commission,-915
+41,412384,2537862290,future_settlement_date,2026-12-07
+41,412384,2537862290,blank_fees,Zero or unknown needs clarification
+41,412384,2537862290,negative_cached_commission,-915
+42,412390,2630110753,future_settlement_date,2026-11-09
+42,412390,2630110753,blank_fees,Zero or unknown needs clarification
+42,412390,2630110753,negative_cached_commission,-495
+43,413343,2561219672,settlement_before_handover,2026-09-20 < 2026-09-21
+43,413343,2561219672,blank_fees,Zero or unknown needs clarification
+45,415808,2566501421,rider_match,0
+45,415808,2566501421,future_settlement_date,2026-11-08
+45,415808,2566501421,blank_fees,Zero or unknown needs clarification
+45,415808,2566501421,negative_cached_commission,-480
+47,417746,2581193212,future_settlement_date,2026-12-08
+47,417746,2581193212,blank_fees,Zero or unknown needs clarification
+47,417746,2581193212,negative_cached_commission,-930
+48,417748,2456944384,future_settlement_date,2026-12-08
+48,417748,2456944384,blank_fees,Zero or unknown needs clarification
+48,417748,2456944384,negative_cached_commission,-930
+51,418843,2575182759,future_settlement_date,2026-11-09
+51,418843,2575182759,blank_fees,Zero or unknown needs clarification
+51,418843,2575182759,negative_cached_commission,-495
+52,420486,2474296718,future_settlement_date,2026-11-08
+52,420486,2474296718,blank_fees,Zero or unknown needs clarification
+52,420486,2474296718,negative_cached_commission,-480
+53,420489,2261443051,future_settlement_date,2026-12-08
+53,420489,2261443051,blank_fees,Zero or unknown needs clarification
+53,420489,2261443051,negative_cached_commission,-930
+54,420509,2141698692,blank_fees,Zero or unknown needs clarification
+55,420515,2180006187,future_settlement_date,2026-12-08
+55,420515,2180006187,blank_fees,Zero or unknown needs clarification
+55,420515,2180006187,negative_cached_commission,-930
+56,420719,2561348513,future_settlement_date,2026-12-07
+56,420719,2561348513,blank_fees,Zero or unknown needs clarification
+56,420719,2561348513,negative_cached_commission,-915
+58,422587,2564959662,settlement_before_handover,2026-08-26 < 2026-10-01
+58,422587,2564959662,blank_fees,Zero or unknown needs clarification
+59,422596,2538655826,future_settlement_date,2026-12-08
+59,422596,2538655826,blank_fees,Zero or unknown needs clarification
+59,422596,2538655826,negative_cached_commission,-930
+61,444954,2474649866,blank_debt,Zero or unknown needs clarification
+61,444954,2474649866,blank_fees,Zero or unknown needs clarification
+61,444954,2474649866,negative_cached_commission,-15
+62,456389,2282145040,future_settlement_date,2026-12-07
+62,456389,2282145040,blank_fees,Zero or unknown needs clarification
+62,456389,2282145040,negative_cached_commission,-915
+64,456420,2462687274,future_settlement_date,2026-12-07
+64,456420,2462687274,blank_fees,Zero or unknown needs clarification
+64,456420,2462687274,negative_cached_commission,-915
+65,456422,2258329818,blank_fees,Zero or unknown needs clarification
+66,456424,2507300982,future_settlement_date,2026-12-07
+66,456424,2507300982,blank_fees,Zero or unknown needs clarification
+66,456424,2507300982,negative_cached_commission,-915
+67,456425,2451750372,future_settlement_date,2026-12-07
+67,456425,2451750372,blank_fees,Zero or unknown needs clarification
+67,456425,2451750372,negative_cached_commission,-915
+68,456433,2609649831,rider_match,0
+68,456433,2609649831,settlement_before_handover,2026-09-19 < 2026-10-03
+68,456433,2609649831,blank_fees,Zero or unknown needs clarification
+69,456434,2345361451,blank_fees,Zero or unknown needs clarification
+71,456439,2539646279,future_settlement_date,2026-12-09
+71,456439,2539646279,blank_fees,Zero or unknown needs clarification
+71,456439,2539646279,negative_cached_commission,-945
+74,456454,2539354528,account_not_available,status=4
+74,456454,2539354528,future_settlement_date,2026-12-08
+74,456454,2539354528,blank_fees,Zero or unknown needs clarification
+74,456454,2539354528,negative_cached_commission,-930
+75,456465,2490594039,future_settlement_date,2026-12-07
+75,456465,2490594039,blank_debt,Zero or unknown needs clarification
+75,456465,2490594039,blank_fees,Zero or unknown needs clarification
+75,456465,2490594039,negative_cached_commission,-915
+76,456469,2381900998,future_settlement_date,2026-12-08
+76,456469,2381900998,blank_debt,Zero or unknown needs clarification
+76,456469,2381900998,blank_fees,Zero or unknown needs clarification
+76,456469,2381900998,negative_cached_commission,-930
+78,457151,2495780088,future_settlement_date,2026-12-09
+78,457151,2495780088,blank_fees,Zero or unknown needs clarification
+78,457151,2495780088,negative_cached_commission,-945
+79,457156,2287475244,future_settlement_date,2026-12-09
+79,457156,2287475244,blank_fees,Zero or unknown needs clarification
+79,457156,2287475244,negative_cached_commission,-945
+82,457210,2578916450,future_settlement_date,2026-12-07
+82,457210,2578916450,blank_fees,Zero or unknown needs clarification
+82,457210,2578916450,negative_cached_commission,-915
+84,457354,2309757371,blank_debt,Zero or unknown needs clarification
+84,457354,2309757371,blank_fees,Zero or unknown needs clarification
+85,457357,2533760084,blank_fees,Zero or unknown needs clarification
+85,457357,2533760084,negative_cached_commission,-15
+86,457362,2566975286,future_settlement_date,2026-12-09
+86,457362,2566975286,blank_fees,Zero or unknown needs clarification
+86,457362,2566975286,negative_cached_commission,-945
+87,457377,2177252992,future_settlement_date,2026-11-08
+87,457377,2177252992,blank_fees,Zero or unknown needs clarification
+87,457377,2177252992,negative_cached_commission,-480
+88,457386,2554879433,future_settlement_date,2026-10-09
+88,457386,2554879433,blank_fees,Zero or unknown needs clarification
+88,457386,2554879433,negative_cached_commission,-30
+89,457390,2552747590,account_not_available,status=4
+89,457390,2552747590,future_handover_date,2026-11-07
+89,457390,2552747590,future_settlement_date,2026-11-07
+89,457390,2552747590,blank_fees,Zero or unknown needs clarification
+89,457390,2552747590,negative_cached_commission,-465
+90,457548,2379284215,blank_fees,Zero or unknown needs clarification
+91,457550,2575729971,future_settlement_date,2026-11-07
+91,457550,2575729971,blank_fees,Zero or unknown needs clarification
+91,457550,2575729971,negative_cached_commission,-465
+92,457565,2578580280,future_settlement_date,2026-12-08
+92,457565,2578580280,blank_fees,Zero or unknown needs clarification
+92,457565,2578580280,negative_cached_commission,-930
+93,457640,2548832969,blank_fees,Zero or unknown needs clarification
+93,457640,2548832969,negative_cached_commission,-15
+94,457705,2563406137,future_settlement_date,2026-12-08
+94,457705,2563406137,blank_fees,Zero or unknown needs clarification
+94,457705,2563406137,negative_cached_commission,-930
+95,458167,2501676890,rider_account_limit,source=3; existing=0
+95,458167,2501676890,settlement_before_handover,2026-09-14 < 2026-09-26
+95,458167,2501676890,blank_debt,Zero or unknown needs clarification
+95,458167,2501676890,blank_fees,Zero or unknown needs clarification
+96,458199,2622826952,future_settlement_date,2026-11-07
+96,458199,2622826952,blank_debt,Zero or unknown needs clarification
+96,458199,2622826952,blank_fees,Zero or unknown needs clarification
+96,458199,2622826952,negative_cached_commission,-465
+98,458320,2444759225,future_settlement_date,2026-12-07
+98,458320,2444759225,blank_fees,Zero or unknown needs clarification
+98,458320,2444759225,negative_cached_commission,-915
+99,458393,2293175259,blank_fees,Zero or unknown needs clarification
+101,458399,2164770220,blank_fees,Zero or unknown needs clarification
+102,458408,2443206541,future_settlement_date,2026-11-07
+102,458408,2443206541,blank_fees,Zero or unknown needs clarification
+102,458408,2443206541,negative_cached_commission,-465
+103,458410,2323697256,future_settlement_date,2026-11-08
+103,458410,2323697256,blank_fees,Zero or unknown needs clarification
+103,458410,2323697256,negative_cached_commission,-480
+104,458435,24547529209,rider_match,0
+104,458435,24547529209,future_settlement_date,2026-12-09
+104,458435,24547529209,blank_debt,Zero or unknown needs clarification
+104,458435,24547529209,blank_fees,Zero or unknown needs clarification
+104,458435,24547529209,negative_cached_commission,-945
+106,458451,2442917163,future_settlement_date,2026-12-08
+106,458451,2442917163,blank_fees,Zero or unknown needs clarification
+106,458451,2442917163,negative_cached_commission,-930
+107,458455,2484710500,future_settlement_date,2026-10-09
+107,458455,2484710500,blank_fees,Zero or unknown needs clarification
+107,458455,2484710500,negative_cached_commission,-30
+108,458564,2447093879,future_settlement_date,2026-12-08
+108,458564,2447093879,blank_fees,Zero or unknown needs clarification
+108,458564,2447093879,negative_cached_commission,-930
+109,458565,2309847701,future_settlement_date,2026-12-08
+109,458565,2309847701,blank_fees,Zero or unknown needs clarification
+109,458565,2309847701,negative_cached_commission,-930
+111,458580,2311703892,future_settlement_date,2026-12-07
+111,458580,2311703892,blank_fees,Zero or unknown needs clarification
+111,458580,2311703892,negative_cached_commission,-915
+112,458626,2392896524,future_settlement_date,2026-12-07
+112,458626,2392896524,blank_fees,Zero or unknown needs clarification
+112,458626,2392896524,negative_cached_commission,-915
+113,458638,2481358477,blank_fees,Zero or unknown needs clarification
+116,459051,2511793404,rider_match,0
+116,459051,2511793404,settlement_before_handover,2026-08-25 < 2026-10-06
+116,459051,2511793404,blank_fees,Zero or unknown needs clarification
+117,459370,2140415098,future_settlement_date,2026-12-07
+117,459370,2140415098,blank_fees,Zero or unknown needs clarification
+117,459370,2140415098,negative_cached_commission,-915
+118,459403,2556711519,blank_fees,Zero or unknown needs clarification
+118,459403,2556711519,negative_cached_commission,-15
+119,459488,2160304511,blank_fees,Zero or unknown needs clarification
+119,459488,2160304511,negative_cached_commission,-15
+120,459518,2628739373,future_settlement_date,2026-11-07
+120,459518,2628739373,negative_cached_commission,-465
+122,459586,2368947715,blank_fees,Zero or unknown needs clarification
+123,459598,2332358486,future_settlement_date,2026-12-07
+123,459598,2332358486,blank_fees,Zero or unknown needs clarification
+123,459598,2332358486,negative_cached_commission,-915
+124,459630,2377553132,future_settlement_date,2026-12-09
+124,459630,2377553132,blank_fees,Zero or unknown needs clarification
+124,459630,2377553132,negative_cached_commission,-945
+125,459705,2484058231,invalid_handover_date,00:00:00
+125,459705,2484058231,future_settlement_date,2026-10-09
+125,459705,2484058231,blank_fees,Zero or unknown needs clarification
+125,459705,2484058231,negative_cached_commission,-30
+128,460136,2412109908,blank_fees,Zero or unknown needs clarification
+129,460257,205542655,rider_match,0
+129,460257,205542655,future_settlement_date,2026-12-08
+129,460257,205542655,blank_fees,Zero or unknown needs clarification
+129,460257,205542655,negative_cached_commission,-930
+130,460347,2520112968,blank_debt,Zero or unknown needs clarification
+130,460347,2520112968,blank_fees,Zero or unknown needs clarification
+130,460347,2520112968,negative_cached_commission,-15
+131,460550,2523468359,future_settlement_date,2026-11-07
+131,460550,2523468359,blank_fees,Zero or unknown needs clarification
+131,460550,2523468359,negative_cached_commission,-465
+132,460555,2540504848,future_handover_date,2027-01-08
+132,460555,2540504848,settlement_before_handover,2026-09-15 < 2027-01-08
+132,460555,2540504848,blank_fees,Zero or unknown needs clarification
+133,460574,2594318947,future_settlement_date,2026-11-08
+133,460574,2594318947,blank_fees,Zero or unknown needs clarification
+133,460574,2594318947,negative_cached_commission,-480
+134,460580,2641400904,blank_fees,Zero or unknown needs clarification
+134,460580,2641400904,negative_cached_commission,-15
+135,460646,2644185379,rider_match,0
+135,460646,2644185379,settlement_before_handover,2026-09-27 < 2026-10-01
+135,460646,2644185379,blank_fees,Zero or unknown needs clarification
+136,460660,2529294791,future_settlement_date,2026-12-09
+136,460660,2529294791,blank_fees,Zero or unknown needs clarification
+136,460660,2529294791,negative_cached_commission,-945
+138,460666,2636894244,future_settlement_date,2026-11-07
+138,460666,2636894244,blank_fees,Zero or unknown needs clarification
+138,460666,2636894244,negative_cached_commission,-465
+140,460714,2511797637,blank_fees,Zero or unknown needs clarification
+141,460739,2596461208,future_settlement_date,2026-11-07
+141,460739,2596461208,blank_fees,Zero or unknown needs clarification
+141,460739,2596461208,negative_cached_commission,-465
+142,460848,2501384982,blank_fees,Zero or unknown needs clarification
+143,460850,2365819677,blank_fees,Zero or unknown needs clarification
+143,460850,2365819677,negative_cached_commission,-15
+144,460901,2519856336,future_settlement_date,2026-10-09
+144,460901,2519856336,blank_fees,Zero or unknown needs clarification
+144,460901,2519856336,negative_cached_commission,-30
+145,460995,2192779144,future_settlement_date,2026-12-08
+145,460995,2192779144,blank_fees,Zero or unknown needs clarification
+145,460995,2192779144,negative_cached_commission,-930
+146,461497,2484748898,blank_fees,Zero or unknown needs clarification
+147,463444,2484934159,future_settlement_date,2026-12-09
+147,463444,2484934159,blank_fees,Zero or unknown needs clarification
+147,463444,2484934159,negative_cached_commission,-945
+148,463445,2287475244,blank_fees,Zero or unknown needs clarification
+150,463519,2365863295,future_settlement_date,2026-11-08
+150,463519,2365863295,blank_fees,Zero or unknown needs clarification
+150,463519,2365863295,negative_cached_commission,-480
+151,463555,2550042564,blank_fees,Zero or unknown needs clarification
+154,463578,2520781705,future_settlement_date,2026-11-07
+154,463578,2520781705,blank_fees,Zero or unknown needs clarification
+154,463578,2520781705,negative_cached_commission,-465
+155,463691,2541848608,future_settlement_date,2026-12-08
+155,463691,2541848608,blank_fees,Zero or unknown needs clarification
+155,463691,2541848608,negative_cached_commission,-930
+156,463707,2402101642,settlement_before_handover,2026-09-21 < 2026-10-08
+156,463707,2402101642,blank_debt,Zero or unknown needs clarification
+156,463707,2402101642,blank_fees,Zero or unknown needs clarification
+158,463786,2609697558,blank_fees,Zero or unknown needs clarification
+158,463786,2609697558,negative_cached_commission,-15
+159,463999,2329547265,future_settlement_date,2026-12-09
+159,463999,2329547265,blank_fees,Zero or unknown needs clarification
+159,463999,2329547265,negative_cached_commission,-945
+161,470523,2538531704,future_settlement_date,2026-11-08
+161,470523,2538531704,blank_fees,Zero or unknown needs clarification
+161,470523,2538531704,negative_cached_commission,-480
+162,470544,2454697117,future_handover_date,2026-11-04
+162,470544,2454697117,settlement_before_handover,2026-08-23 < 2026-11-04
+162,470544,2454697117,blank_fees,Zero or unknown needs clarification
+163,470581,2501795211,blank_fees,Zero or unknown needs clarification
+164,470589,2529222123,blank_fees,Zero or unknown needs clarification
+165,470646,2585900828,future_settlement_date,2026-12-08
+165,470646,2585900828,blank_debt,Zero or unknown needs clarification
+165,470646,2585900828,blank_fees,Zero or unknown needs clarification
+165,470646,2585900828,negative_cached_commission,-930
+166,470648,2423393640,blank_debt,Zero or unknown needs clarification
+166,470648,2423393640,blank_fees,Zero or unknown needs clarification
+166,470648,2423393640,negative_cached_commission,-15
+167,471091,2399340690,future_settlement_date,2026-11-08
+167,471091,2399340690,blank_fees,Zero or unknown needs clarification
+167,471091,2399340690,negative_cached_commission,-480
+168,471160,2183135306,blank_fees,Zero or unknown needs clarification
+169,471171,2571511639,blank_fees,Zero or unknown needs clarification
+170,472404,2555025184,blank_fees,Zero or unknown needs clarification
+170,472404,2555025184,negative_cached_commission,-15
+171,472406,2618126268,blank_fees,Zero or unknown needs clarification
+171,472406,2618126268,negative_cached_commission,-15
+172,472407,2346979236,future_settlement_date,2026-12-08
+172,472407,2346979236,blank_fees,Zero or unknown needs clarification
+172,472407,2346979236,negative_cached_commission,-930
+173,472408,2177252992,future_settlement_date,2026-10-09
+173,472408,2177252992,blank_debt,Zero or unknown needs clarification
+173,472408,2177252992,blank_fees,Zero or unknown needs clarification
+173,472408,2177252992,negative_cached_commission,-30
+176,472412,2582392409,future_settlement_date,2026-12-08
+176,472412,2582392409,blank_fees,Zero or unknown needs clarification
+176,472412,2582392409,negative_cached_commission,-930
+177,472413,2120143991,future_settlement_date,2026-12-08
+177,472413,2120143991,blank_debt,Zero or unknown needs clarification
+177,472413,2120143991,blank_fees,Zero or unknown needs clarification
+177,472413,2120143991,negative_cached_commission,-930
+178,472414,2591462615,blank_fees,Zero or unknown needs clarification
+179,472415,2240484226,blank_fees,Zero or unknown needs clarification
+180,472420,2604657706,future_settlement_date,2026-12-07
+180,472420,2604657706,blank_fees,Zero or unknown needs clarification
+180,472420,2604657706,negative_cached_commission,-915
+181,472423,2622826952,future_settlement_date,2026-12-08
+181,472423,2622826952,blank_fees,Zero or unknown needs clarification
+181,472423,2622826952,negative_cached_commission,-930
+182,472426,2363563509,future_settlement_date,2026-12-07
+182,472426,2363563509,blank_fees,Zero or unknown needs clarification
+182,472426,2363563509,negative_cached_commission,-915
+183,472427,2480600655,future_settlement_date,2026-11-09
+183,472427,2480600655,blank_fees,Zero or unknown needs clarification
+183,472427,2480600655,negative_cached_commission,-495
+185,472429,2052480239,future_settlement_date,2026-12-08
+185,472429,2052480239,blank_fees,Zero or unknown needs clarification
+185,472429,2052480239,negative_cached_commission,-930
+186,472430,2517742678,future_settlement_date,2026-11-09
+186,472430,2517742678,negative_cached_commission,-495
+187,472431,2481072508,future_handover_date,2027-01-08
+187,472431,2481072508,future_settlement_date,2026-10-09
+187,472431,2481072508,settlement_before_handover,2026-10-09 < 2027-01-08
+187,472431,2481072508,blank_fees,Zero or unknown needs clarification
+187,472431,2481072508,negative_cached_commission,-30
+189,472433,2123417863,blank_fees,Zero or unknown needs clarification
+190,472434,2492876780,future_settlement_date,2026-12-07
+190,472434,2492876780,blank_fees,Zero or unknown needs clarification
+190,472434,2492876780,negative_cached_commission,-915
+191,472477,2535062091,blank_fees,Zero or unknown needs clarification
+192,472478,2526435561,future_settlement_date,2026-12-07
+192,472478,2526435561,blank_fees,Zero or unknown needs clarification
+192,472478,2526435561,negative_cached_commission,-915
+193,472479,2524794647,future_settlement_date,2026-11-07
+193,472479,2524794647,blank_debt,Zero or unknown needs clarification
+193,472479,2524794647,blank_fees,Zero or unknown needs clarification
+193,472479,2524794647,negative_cached_commission,-465
+194,472482,2581193212,blank_fees,Zero or unknown needs clarification
+195,472484,2094360605,future_settlement_date,2026-11-09
+195,472484,2094360605,blank_fees,Zero or unknown needs clarification
+195,472484,2094360605,negative_cached_commission,-495
+196,472486,2597270327,rider_match,0
+196,472486,2597270327,blank_fees,Zero or unknown needs clarification
+198,472526,2185603384,future_settlement_date,2026-10-09
+198,472526,2185603384,blank_debt,Zero or unknown needs clarification
+198,472526,2185603384,blank_fees,Zero or unknown needs clarification
+198,472526,2185603384,negative_cached_commission,-30
+199,472551,2343630998,blank_fees,Zero or unknown needs clarification
+200,472552,2302146481,future_settlement_date,2026-12-07
+200,472552,2302146481,blank_fees,Zero or unknown needs clarification
+200,472552,2302146481,negative_cached_commission,-915
+201,472614,2431811088,blank_fees,Zero or unknown needs clarification
+204,472761,2483346082,future_settlement_date,2026-11-07
+204,472761,2483346082,blank_fees,Zero or unknown needs clarification
+204,472761,2483346082,negative_cached_commission,-465
+205,472769,2261194126,blank_fees,Zero or unknown needs clarification
+206,472776,2607914005,future_settlement_date,2026-11-07
+206,472776,2607914005,blank_fees,Zero or unknown needs clarification
+206,472776,2607914005,negative_cached_commission,-465
+207,472786,2193168305,future_settlement_date,2026-10-09
+207,472786,2193168305,blank_fees,Zero or unknown needs clarification
+207,472786,2193168305,negative_cached_commission,-30
+208,472811,2582932139,blank_fees,Zero or unknown needs clarification
+209,472816,2637229424,future_settlement_date,2026-12-07
+209,472816,2637229424,blank_fees,Zero or unknown needs clarification
+209,472816,2637229424,negative_cached_commission,-915
+211,472824,2503624427,future_settlement_date,2026-11-09
+211,472824,2503624427,blank_fees,Zero or unknown needs clarification
+211,472824,2503624427,negative_cached_commission,-495
+212,472828,2472751524,future_settlement_date,2026-12-07
+212,472828,2472751524,blank_fees,Zero or unknown needs clarification
+212,472828,2472751524,negative_cached_commission,-915
+213,472829,2575509761,blank_fees,Zero or unknown needs clarification
+215,472837,2348702958,future_settlement_date,2026-12-07
+215,472837,2348702958,blank_fees,Zero or unknown needs clarification
+215,472837,2348702958,negative_cached_commission,-915
+217,472843,2521946745,account_not_available,status=4
+217,472843,2521946745,future_settlement_date,2026-12-08
+217,472843,2521946745,blank_fees,Zero or unknown needs clarification
+217,472843,2521946745,negative_cached_commission,-930
+218,472844,2569251677,future_handover_date,2026-11-06
+218,472844,2569251677,future_settlement_date,2026-12-07
+218,472844,2569251677,blank_fees,Zero or unknown needs clarification
+218,472844,2569251677,negative_cached_commission,-915
+219,472845,2460324177,blank_fees,Zero or unknown needs clarification
+219,472845,2460324177,negative_cached_commission,-15
+221,472851,2381958483,blank_fees,Zero or unknown needs clarification
+223,472853,2164753675,rider_match,0
+223,472853,2164753675,future_settlement_date,2026-12-09
+223,472853,2164753675,blank_fees,Zero or unknown needs clarification
+223,472853,2164753675,negative_cached_commission,-945
+224,472854,2436155150,blank_fees,Zero or unknown needs clarification
+225,472968,2529645315,future_settlement_date,2026-11-08
+225,472968,2529645315,blank_fees,Zero or unknown needs clarification
+225,472968,2529645315,negative_cached_commission,-480
+226,472969,2473493316,future_settlement_date,2026-12-07
+226,472969,2473493316,blank_debt,Zero or unknown needs clarification
+226,472969,2473493316,blank_fees,Zero or unknown needs clarification
+226,472969,2473493316,negative_cached_commission,-915
+227,472971,2624518953,future_settlement_date,2026-11-08
+227,472971,2624518953,blank_debt,Zero or unknown needs clarification
+227,472971,2624518953,blank_fees,Zero or unknown needs clarification
+227,472971,2624518953,negative_cached_commission,-480
+228,473003,2580974133,future_settlement_date,2026-12-08
+228,473003,2580974133,blank_fees,Zero or unknown needs clarification
+228,473003,2580974133,negative_cached_commission,-930
+229,473007,2549383723,blank_fees,Zero or unknown needs clarification
+230,473009,2503043552,blank_fees,Zero or unknown needs clarification
+230,473009,2503043552,negative_cached_commission,-15
+231,473016,2246864272,future_settlement_date,2026-12-07
+231,473016,2246864272,blank_fees,Zero or unknown needs clarification
+231,473016,2246864272,negative_cached_commission,-915
+232,474564,2518862285,future_settlement_date,2026-12-08
+232,474564,2518862285,blank_debt,Zero or unknown needs clarification
+232,474564,2518862285,blank_fees,Zero or unknown needs clarification
+232,474564,2518862285,negative_cached_commission,-930
+233,474572,2554614657,future_settlement_date,2026-12-08
+233,474572,2554614657,blank_fees,Zero or unknown needs clarification
+233,474572,2554614657,negative_cached_commission,-930
+235,474574,2196499160,future_settlement_date,2026-12-08
+235,474574,2196499160,blank_fees,Zero or unknown needs clarification
+235,474574,2196499160,negative_cached_commission,-930
+237,474576,2513217311,future_settlement_date,2026-11-08
+237,474576,2513217311,blank_fees,Zero or unknown needs clarification
+237,474576,2513217311,negative_cached_commission,-480
+238,474612,2339976413,future_settlement_date,2026-12-08
+238,474612,2339976413,blank_fees,Zero or unknown needs clarification
+238,474612,2339976413,negative_cached_commission,-930
+239,474642,2022845651,future_handover_date,2026-11-06
+239,474642,2022845651,future_settlement_date,2026-11-07
+239,474642,2022845651,blank_fees,Zero or unknown needs clarification
+239,474642,2022845651,negative_cached_commission,-465
+240,474657,2530908231,future_settlement_date,2026-12-07
+240,474657,2530908231,blank_fees,Zero or unknown needs clarification
+240,474657,2530908231,negative_cached_commission,-915
+242,474682,2502662972,future_settlement_date,2026-12-08
+242,474682,2502662972,blank_debt,Zero or unknown needs clarification
+242,474682,2502662972,blank_fees,Zero or unknown needs clarification
+242,474682,2502662972,negative_cached_commission,-930
+243,474690,2347059640,blank_fees,Zero or unknown needs clarification
+244,474696,2621415997,blank_debt,Zero or unknown needs clarification
+244,474696,2621415997,blank_fees,Zero or unknown needs clarification
+245,474701,2426068322,settlement_before_handover,2026-09-08 < 2026-09-10
+245,474701,2426068322,blank_fees,Zero or unknown needs clarification
+246,474739,2527687046,blank_fees,Zero or unknown needs clarification
+247,474743,2190465589,future_settlement_date,2026-11-09
+247,474743,2190465589,blank_fees,Zero or unknown needs clarification
+247,474743,2190465589,negative_cached_commission,-495
+248,474777,2456252739,rider_match,0
+248,474777,2456252739,future_settlement_date,2026-12-09
+248,474777,2456252739,blank_fees,Zero or unknown needs clarification
+248,474777,2456252739,negative_cached_commission,-945
+250,474780,2476594508,future_settlement_date,2026-10-09
+250,474780,2476594508,blank_fees,Zero or unknown needs clarification
+250,474780,2476594508,negative_cached_commission,-30
+251,474781,2513722070,blank_debt,Zero or unknown needs clarification
+251,474781,2513722070,blank_fees,Zero or unknown needs clarification
+251,474781,2513722070,negative_cached_commission,-15
+252,474784,2512927407,blank_fees,Zero or unknown needs clarification
+253,474795,2335129470,future_settlement_date,2026-10-09
+253,474795,2335129470,blank_fees,Zero or unknown needs clarification
+253,474795,2335129470,negative_cached_commission,-30
+255,474814,2520063369,future_settlement_date,2026-12-09
+255,474814,2520063369,blank_debt,Zero or unknown needs clarification
+255,474814,2520063369,blank_fees,Zero or unknown needs clarification
+255,474814,2520063369,negative_cached_commission,-945
+256,474818,2343043002,blank_fees,Zero or unknown needs clarification
+257,474820,2624498941,settlement_before_handover,2026-09-09 < 2026-10-06
+257,474820,2624498941,blank_fees,Zero or unknown needs clarification
+258,474831,2519139063,rider_match,0
+258,474831,2519139063,future_settlement_date,2026-11-08
+258,474831,2519139063,blank_fees,Zero or unknown needs clarification
+258,474831,2519139063,negative_cached_commission,-480
+260,474834,2513721676,future_settlement_date,2026-12-08
+260,474834,2513721676,blank_fees,Zero or unknown needs clarification
+260,474834,2513721676,negative_cached_commission,-930
+261,474954,2562289088,settlement_before_handover,2026-08-27 < 2026-10-01
+261,474954,2562289088,blank_debt,Zero or unknown needs clarification
+261,474954,2562289088,blank_fees,Zero or unknown needs clarification
+263,474974,2439340569,future_settlement_date,2026-11-07
+263,474974,2439340569,blank_debt,Zero or unknown needs clarification
+263,474974,2439340569,blank_fees,Zero or unknown needs clarification
+263,474974,2439340569,negative_cached_commission,-465
+264,474979,2518086513,future_handover_date,2026-11-03
+264,474979,2518086513,future_settlement_date,2026-11-08
+264,474979,2518086513,blank_fees,Zero or unknown needs clarification
+264,474979,2518086513,negative_cached_commission,-480
+265,474985,2203705559,settlement_before_handover,2026-09-16 < 2026-09-17
+265,474985,2203705559,blank_fees,Zero or unknown needs clarification
+266,475046,2328728585,invalid_handover_date,21-04-0-2026
+266,475046,2328728585,blank_fees,Zero or unknown needs clarification
+267,475051,2461084192,future_settlement_date,2026-12-07
+267,475051,2461084192,blank_fees,Zero or unknown needs clarification
+267,475051,2461084192,negative_cached_commission,-915
+268,475086,2591115890,future_settlement_date,2026-11-07
+268,475086,2591115890,blank_fees,Zero or unknown needs clarification
+268,475086,2591115890,negative_cached_commission,-465
+269,475128,2575808882,future_settlement_date,2026-12-07
+269,475128,2575808882,blank_fees,Zero or unknown needs clarification
+269,475128,2575808882,negative_cached_commission,-915
+270,475147,2644481661,future_settlement_date,2026-12-08
+270,475147,2644481661,blank_fees,Zero or unknown needs clarification
+270,475147,2644481661,negative_cached_commission,-930
+271,475162,2432176796,future_handover_date,2026-11-04
+271,475162,2432176796,settlement_before_handover,2026-09-20 < 2026-11-04
+271,475162,2432176796,blank_debt,Zero or unknown needs clarification
+271,475162,2432176796,blank_fees,Zero or unknown needs clarification
+272,475259,2481153019,rider_match,0
+272,475259,2481153019,future_settlement_date,2026-10-09
+272,475259,2481153019,blank_fees,Zero or unknown needs clarification
+272,475259,2481153019,negative_cached_commission,-30
+273,475262,2319377681,future_settlement_date,2026-12-08
+273,475262,2319377681,blank_fees,Zero or unknown needs clarification
+273,475262,2319377681,negative_cached_commission,-930
+274,475263,2525563058,future_settlement_date,2026-11-07
+274,475263,2525563058,blank_fees,Zero or unknown needs clarification
+274,475263,2525563058,negative_cached_commission,-465
+276,476518,2489971925,future_settlement_date,2026-12-07
+276,476518,2489971925,blank_fees,Zero or unknown needs clarification
+276,476518,2489971925,negative_cached_commission,-915
+277,476593,2404951234,future_settlement_date,2026-12-08
+277,476593,2404951234,blank_fees,Zero or unknown needs clarification
+277,476593,2404951234,negative_cached_commission,-930
+278,476657,2480600655,blank_fees,Zero or unknown needs clarification
+279,476757,2466186695,blank_debt,Zero or unknown needs clarification
+279,476757,2466186695,blank_fees,Zero or unknown needs clarification
+281,476832,2059179057,future_settlement_date,2026-12-08
+281,476832,2059179057,blank_fees,Zero or unknown needs clarification
+281,476832,2059179057,negative_cached_commission,-930
+282,476833,2157084688,future_settlement_date,2026-11-08
+282,476833,2157084688,blank_debt,Zero or unknown needs clarification
+282,476833,2157084688,blank_fees,Zero or unknown needs clarification
+282,476833,2157084688,negative_cached_commission,-480
+284,476842,2237495946,blank_fees,Zero or unknown needs clarification
+285,476885,2501676890,rider_account_limit,source=3; existing=0
+285,476885,2501676890,future_settlement_date,2026-11-09
+285,476885,2501676890,blank_fees,Zero or unknown needs clarification
+285,476885,2501676890,negative_cached_commission,-495
+286,478626,2320114669,future_settlement_date,2026-12-07
+286,478626,2320114669,blank_debt,Zero or unknown needs clarification
+286,478626,2320114669,blank_fees,Zero or unknown needs clarification
+286,478626,2320114669,negative_cached_commission,-915
+287,478675,2378413948,future_settlement_date,2026-11-08
+287,478675,2378413948,blank_fees,Zero or unknown needs clarification
+287,478675,2378413948,negative_cached_commission,-480
+288,478874,2496067360,future_settlement_date,2026-12-07
+288,478874,2496067360,blank_fees,Zero or unknown needs clarification
+288,478874,2496067360,negative_cached_commission,-915
+289,478876,2464941919,future_settlement_date,2026-12-09
+289,478876,2464941919,blank_fees,Zero or unknown needs clarification
+289,478876,2464941919,negative_cached_commission,-945
+291,478878,2609741679,future_settlement_date,2026-12-07
+291,478878,2609741679,blank_fees,Zero or unknown needs clarification
+291,478878,2609741679,negative_cached_commission,-915
+292,478885,2399760459,blank_debt,Zero or unknown needs clarification
+292,478885,2399760459,blank_fees,Zero or unknown needs clarification
+293,478887,2573861925,blank_fees,Zero or unknown needs clarification
+293,478887,2573861925,negative_cached_commission,-15
+294,482465,2616329757,future_settlement_date,2026-12-07
+294,482465,2616329757,blank_fees,Zero or unknown needs clarification
+294,482465,2616329757,negative_cached_commission,-915
+295,482478,2453846913,settlement_before_handover,2026-09-23 < 2026-10-08
+295,482478,2453846913,blank_fees,Zero or unknown needs clarification
+296,482480,2516566730,blank_fees,Zero or unknown needs clarification
+296,482480,2516566730,negative_cached_commission,-15
+297,482490,2446920734,rider_match,0
+297,482490,2446920734,future_settlement_date,2026-11-09
+297,482490,2446920734,blank_fees,Zero or unknown needs clarification
+297,482490,2446920734,negative_cached_commission,-495
+298,482679,2581509300,blank_fees,Zero or unknown needs clarification
+299,483170,2544385020,future_settlement_date,2026-11-09
+299,483170,2544385020,blank_fees,Zero or unknown needs clarification
+299,483170,2544385020,negative_cached_commission,-495
+300,483201,2135017529,future_settlement_date,2026-11-07
+300,483201,2135017529,blank_debt,Zero or unknown needs clarification
+300,483201,2135017529,blank_fees,Zero or unknown needs clarification
+300,483201,2135017529,negative_cached_commission,-465
+301,483651,2518863499,blank_fees,Zero or unknown needs clarification
+302,483905,2591840737,blank_fees,Zero or unknown needs clarification
+304,483910,2506174750,blank_fees,Zero or unknown needs clarification
+305,483913,2520399441,blank_fees,Zero or unknown needs clarification
+306,484129,2492970377,future_settlement_date,2026-11-08
+306,484129,2492970377,blank_fees,Zero or unknown needs clarification
+306,484129,2492970377,negative_cached_commission,-480
+307,484135,2453917664,future_settlement_date,2026-12-07
+307,484135,2453917664,blank_debt,Zero or unknown needs clarification
+307,484135,2453917664,negative_cached_commission,-915
+308,484340,2550384131,future_settlement_date,2026-11-07
+308,484340,2550384131,blank_fees,Zero or unknown needs clarification
+308,484340,2550384131,negative_cached_commission,-465
+310,484490,2486377753,future_settlement_date,2026-12-08
+310,484490,2486377753,blank_fees,Zero or unknown needs clarification
+310,484490,2486377753,negative_cached_commission,-930
+311,484491,2481328595,future_settlement_date,2026-11-08
+311,484491,2481328595,blank_fees,Zero or unknown needs clarification
+311,484491,2481328595,negative_cached_commission,-480
+312,484492,2516966013,future_settlement_date,2026-11-07
+312,484492,2516966013,blank_fees,Zero or unknown needs clarification
+312,484492,2516966013,negative_cached_commission,-465
+313,484496,2560192961,future_settlement_date,2026-11-07
+313,484496,2560192961,blank_fees,Zero or unknown needs clarification
+313,484496,2560192961,negative_cached_commission,-465
+314,484694,2429361757,future_settlement_date,2026-12-07
+314,484694,2429361757,blank_fees,Zero or unknown needs clarification
+314,484694,2429361757,negative_cached_commission,-915
+316,484705,2632595688,blank_fees,Zero or unknown needs clarification
+317,484722,2222421428,blank_fees,Zero or unknown needs clarification
+318,485202,2503143238,future_settlement_date,2026-11-09
+318,485202,2503143238,blank_fees,Zero or unknown needs clarification
+318,485202,2503143238,negative_cached_commission,-495
+319,485211,2566975427,blank_fees,Zero or unknown needs clarification
+323,485289,2510021047,future_settlement_date,2026-12-07
+323,485289,2510021047,blank_debt,Zero or unknown needs clarification
+323,485289,2510021047,blank_fees,Zero or unknown needs clarification
+323,485289,2510021047,negative_cached_commission,-915
+324,485297,2624519324,future_settlement_date,2026-11-08
+324,485297,2624519324,blank_fees,Zero or unknown needs clarification
+324,485297,2624519324,negative_cached_commission,-480
+326,485301,2583623943,rider_match,0
+326,485301,2583623943,blank_fees,Zero or unknown needs clarification
+327,485304,2397342524,future_settlement_date,2026-12-08
+327,485304,2397342524,blank_fees,Zero or unknown needs clarification
+327,485304,2397342524,negative_cached_commission,-930
+328,485320,2215204666,future_settlement_date,2026-12-08
+328,485320,2215204666,blank_fees,Zero or unknown needs clarification
+328,485320,2215204666,negative_cached_commission,-930
+329,485550,2589829817,future_settlement_date,2026-11-09
+329,485550,2589829817,blank_fees,Zero or unknown needs clarification
+329,485550,2589829817,negative_cached_commission,-495
+331,491274,2495294247,future_settlement_date,2026-11-08
+331,491274,2495294247,blank_debt,Zero or unknown needs clarification
+331,491274,2495294247,blank_fees,Zero or unknown needs clarification
+331,491274,2495294247,negative_cached_commission,-480
+332,491295,2611899036,blank_fees,Zero or unknown needs clarification
+335,491298,2586306736,blank_fees,Zero or unknown needs clarification
+336,491299,2544857929,invalid_handover_date,1/8/20207
+336,491299,2544857929,blank_fees,Zero or unknown needs clarification
+340,491304,2560996049,blank_fees,Zero or unknown needs clarification
+341,491306,2501676890,rider_account_limit,source=3; existing=0
+341,491306,2501676890,settlement_before_handover,2026-08-30 < 2026-09-26
+341,491306,2501676890,blank_fees,Zero or unknown needs clarification
+342,491309,2332813019,future_settlement_date,2026-10-09
+342,491309,2332813019,blank_fees,Zero or unknown needs clarification
+342,491309,2332813019,negative_cached_commission,-30
+343,491310,2445874981,future_settlement_date,2026-11-08
+343,491310,2445874981,blank_fees,Zero or unknown needs clarification
+343,491310,2445874981,negative_cached_commission,-480
+344,491311,2576938480,future_settlement_date,2026-11-07
+344,491311,2576938480,blank_fees,Zero or unknown needs clarification
+344,491311,2576938480,negative_cached_commission,-465
+345,491575,2581145212,future_settlement_date,2026-12-09
+345,491575,2581145212,blank_fees,Zero or unknown needs clarification
+345,491575,2581145212,negative_cached_commission,-945
+346,491576,211460933,rider_match,0
+346,491576,211460933,future_settlement_date,2026-11-08
+346,491576,211460933,blank_fees,Zero or unknown needs clarification
+346,491576,211460933,negative_cached_commission,-480
+347,491577,2551283084,blank_fees,Zero or unknown needs clarification
+347,491577,2551283084,negative_cached_commission,-15
+348,492231,2470579158,future_settlement_date,2026-11-08
+348,492231,2470579158,blank_fees,Zero or unknown needs clarification
+348,492231,2470579158,negative_cached_commission,-480
+349,492232,2539518684,future_settlement_date,2026-12-08
+349,492232,2539518684,blank_fees,Zero or unknown needs clarification
+349,492232,2539518684,negative_cached_commission,-930
+350,492234,2534448556,blank_fees,Zero or unknown needs clarification
+351,492235,2295800425,future_settlement_date,2026-12-08
+351,492235,2295800425,blank_fees,Zero or unknown needs clarification
+351,492235,2295800425,negative_cached_commission,-930
+352,492240,2459496176,settlement_before_handover,2026-09-14 < 2026-10-07
+352,492240,2459496176,blank_fees,Zero or unknown needs clarification
+353,492241,2638216628,future_handover_date,2027-01-08
+353,492241,2638216628,future_settlement_date,2026-10-09
+353,492241,2638216628,settlement_before_handover,2026-10-09 < 2027-01-08
+353,492241,2638216628,blank_fees,Zero or unknown needs clarification
+353,492241,2638216628,negative_cached_commission,-30
+354,492323,2602320000,rider_match,0
+354,492323,2602320000,future_settlement_date,2026-12-09
+354,492323,2602320000,blank_fees,Zero or unknown needs clarification
+354,492323,2602320000,negative_cached_commission,-945
+355,492330,2611888393,future_settlement_date,2026-12-09
+355,492330,2611888393,blank_fees,Zero or unknown needs clarification
+355,492330,2611888393,negative_cached_commission,-945
+356,492374,2518003385,blank_fees,Zero or unknown needs clarification
+357,493592,2518010505,blank_fees,Zero or unknown needs clarification
+358,493593,2193407992,blank_fees,Zero or unknown needs clarification
+359,494298,2632138232,settlement_before_handover,2026-08-31 < 2026-10-06
+359,494298,2632138232,blank_fees,Zero or unknown needs clarification
+360,494299,2584020586,blank_fees,Zero or unknown needs clarification
+361,498844,2626784520,blank_fees,Zero or unknown needs clarification
+362,498845,2138732330,blank_fees,Zero or unknown needs clarification
+363,498846,2511665214,invalid_handover_date,00:00:00
+363,498846,2511665214,blank_fees,Zero or unknown needs clarification
+364,498848,2631095862,blank_fees,Zero or unknown needs clarification
+365,498895,2288352103,settlement_before_handover,2026-08-10 < 2026-09-17
+365,498895,2288352103,blank_fees,Zero or unknown needs clarification
+366,498897,2316647599,blank_fees,Zero or unknown needs clarification
+367,498898,2573956220,blank_fees,Zero or unknown needs clarification
+368,499116,2555935887,blank_fees,Zero or unknown needs clarification
+369,499117,2522815642,settlement_before_handover,2026-01-10 < 2026-05-25
+369,499117,2522815642,blank_fees,Zero or unknown needs clarification
+370,499118,2510343631,blank_fees,Zero or unknown needs clarification
+371,499120,2339692424,blank_fees,Zero or unknown needs clarification
+372,499122,2527413104,blank_fees,Zero or unknown needs clarification
+373,499308,2623611718,blank_fees,Zero or unknown needs clarification
+374,499550,2514944897,settlement_before_handover,2026-09-19 < 2026-10-04
+375,499551,2474277312,rider_match,0
+375,499551,2474277312,blank_fees,Zero or unknown needs clarification
+376,499552,2426155913,invalid_handover_date,6/7/20026
+376,499552,2426155913,blank_fees,Zero or unknown needs clarification
+378,499580,2356322129,blank_fees,Zero or unknown needs clarification
+379,499581,2596368981,rider_match,0
+379,499581,2596368981,settlement_before_handover,2026-09-19 < 2026-10-03
+379,499581,2596368981,blank_fees,Zero or unknown needs clarification
+380,499583,2472345533,blank_fees,Zero or unknown needs clarification
+381,499584,2193883655,blank_fees,Zero or unknown needs clarification

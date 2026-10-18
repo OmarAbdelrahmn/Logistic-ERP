@@ -1,0 +1,91 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RecipientUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="EventType" type="xs:string" minOccurs="0" />
+                <xs:element name="Severity" type="xs:int" minOccurs="0" />
+                <xs:element name="TitleAr" type="xs:string" minOccurs="0" />
+                <xs:element name="TitleEn" type="xs:string" minOccurs="0" />
+                <xs:element name="BodyAr" type="xs:string" minOccurs="0" />
+                <xs:element name="BodyEn" type="xs:string" minOccurs="0" />
+                <xs:element name="SourceEntityType" type="xs:string" minOccurs="0" />
+                <xs:element name="SourceEntityId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DeepLink" type="xs:string" minOccurs="0" />
+                <xs:element name="ScopeSnapshotJson" type="xs:string" minOccurs="0" />
+                <xs:element name="DeduplicationKey" type="xs:string" minOccurs="0" />
+                <xs:element name="VisibleAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="ExpiresAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="ReadAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="AcknowledgedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="AcknowledgedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="ArchivedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="ArchivedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="UpdatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="UpdatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RowVersion" type="xs:base64Binary" minOccurs="0" />
+                <xs:element name="IsDeleted" type="xs:boolean" minOccurs="0" />
+                <xs:element name="DeletedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="DeletedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DeletionReason" type="xs:string" minOccurs="0" />
+                <xs:element name="AudiencePermissionKeysJson" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <Id>01a11243-140a-76d8-bb4b-0a6bbabd5e37</Id>
+    <RecipientUserId>b1de8de7-7ad4-4f08-f387-08df1173e0a7</RecipientUserId>
+    <EventType>jahez.approval.decided</EventType>
+    <Severity>1</Severity>
+    <TitleAr>قرار طلب جاهز</TitleAr>
+    <TitleEn>Jahez request decision</TitleEn>
+    <BodyAr>تم اعتماد طلبك: اعتماد الطلب وفق الضوابط والسياسات المالية</BodyAr>
+    <BodyEn>Request Approved: اعتماد الطلب وفق الضوابط والسياسات المالية</BodyEn>
+    <SourceEntityType>JahezApprovalRequest</SourceEntityType>
+    <SourceEntityId>01a11241-a0a8-7b9b-b9b5-5e6d0e44cc8c</SourceEntityId>
+    <DeepLink>/jahez/requests/01a11241-a0a8-7b9b-b9b5-5e6d0e44cc8c</DeepLink>
+    <DeduplicationKey>jahez:decision:01a11241a0a87b9bb9b55e6d0e44cc8c</DeduplicationKey>
+    <VisibleAtUtc>2026-10-06T17:29:08.3621436Z</VisibleAtUtc>
+    <ReadAtUtc>2026-10-07T10:42:40.9787821Z</ReadAtUtc>
+    <CreatedAtUtc>2026-10-06T17:29:08.3777366Z</CreatedAtUtc>
+    <CreatedByUserId>5e8dbbf5-f4a8-447d-d933-08df10cc8271</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-07T10:42:40.985144Z</UpdatedAtUtc>
+    <UpdatedByUserId>b1de8de7-7ad4-4f08-f387-08df1173e0a7</UpdatedByUserId>
+    <RowVersion>AAAAAAABsGA=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table>
+  <Table>
+    <Id>01a1123e-90c0-7f02-87ea-22184cefe548</Id>
+    <RecipientUserId>019c18d5-62e1-7000-c000-000000000001</RecipientUserId>
+    <EventType>jahez.approval.decided</EventType>
+    <Severity>1</Severity>
+    <TitleAr>قرار طلب جاهز</TitleAr>
+    <TitleEn>Jahez request decision</TitleEn>
+    <BodyAr>تم رفض طلبك: رفض الطلب لعدم استيفاء الشروط</BodyAr>
+    <BodyEn>Request Rejected: رفض الطلب لعدم استيفاء الشروط</BodyEn>
+    <SourceEntityType>JahezApprovalRequest</SourceEntityType>
+    <SourceEntityId>01a106aa-0bf3-771e-b828-4de52eeae8e5</SourceEntityId>
+    <DeepLink>/jahez/requests/01a106aa-0bf3-771e-b828-4de52eeae8e5</DeepLink>
+    <DeduplicationKey>jahez:decision:01a106aa0bf3771eb8284de52eeae8e5</DeduplicationKey>
+    <VisibleAtUtc>2026-10-06T17:24:12.6093191Z</VisibleAtUtc>
+    <ReadAtUtc>2026-10-07T07:01:44.0039565Z</ReadAtUtc>
+    <CreatedAtUtc>2026-10-06T17:24:12.6258637Z</CreatedAtUtc>
+    <CreatedByUserId>5e8dbbf5-f4a8-447d-d933-08df10cc8271</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-07T07:01:44.0436778Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAABqmY=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table>
+</NewDataSet>

@@ -1,0 +1,1129 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Accounts">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="ClientPlatformId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="Code" type="xs:string" minOccurs="0" />
+                <xs:element name="ExternalAccountId" type="xs:string" minOccurs="0" />
+                <xs:element name="UserName" type="xs:string" minOccurs="0" />
+                <xs:element name="Status" type="xs:int" minOccurs="0" />
+                <xs:element name="StatusReason" type="xs:string" minOccurs="0" />
+                <xs:element name="AcquisitionDate" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="StartDate" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="EndDate" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="OwnershipNotes" type="xs:string" minOccurs="0" />
+                <xs:element name="OperationalNotes" type="xs:string" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="UpdatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="UpdatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RowVersion" type="xs:base64Binary" minOccurs="0" />
+                <xs:element name="IsDeleted" type="xs:boolean" minOccurs="0" />
+                <xs:element name="DeletedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="DeletedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DeletionReason" type="xs:string" minOccurs="0" />
+                <xs:element name="OperatingCityId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RegisteredEmployeeId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="PaymentModel" type="xs:int" minOccurs="0" />
+                <xs:element name="SponsorId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="DatasetVersions">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="ModuleKey" type="xs:string" minOccurs="0" />
+                <xs:element name="Version" type="xs:long" minOccurs="0" />
+                <xs:element name="LastChangedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="UpdatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="UpdatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RowVersion" type="xs:base64Binary" minOccurs="0" />
+                <xs:element name="IsDeleted" type="xs:boolean" minOccurs="0" />
+                <xs:element name="DeletedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="DeletedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DeletionReason" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Sponsors">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="EmployerIdentityNumber" type="xs:string" minOccurs="0" />
+                <xs:element name="RegistryNameAr" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="UpdatedAccounts">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="AccountId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="Account" type="xs:string" minOccurs="0" />
+                <xs:element name="PreviousSponsor" type="xs:string" minOccurs="0" />
+                <xs:element name="NewSponsor" type="xs:string" minOccurs="0" />
+                <xs:element name="SponsorName" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Accounts>
+    <Id>a8b30114-8a2e-49ad-87e6-44d826de2370</Id>
+    <ClientPlatformId>01a02a0d-845c-7e0b-aa0c-3cd6246785d2</ClientPlatformId>
+    <Code>JHZ-491258</Code>
+    <ExternalAccountId>491258</ExternalAccountId>
+    <Status>1</Status>
+    <StatusReason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</StatusReason>
+    <OwnershipNotes>Registered owner iqama: 2630230577; source sheet row: 358</OwnershipNotes>
+    <OperationalNotes>Original vehicle type: سيارة</OperationalNotes>
+    <CreatedAtUtc>2026-10-07T14:19:35.4095078+02:00</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-17T11:57:04.6071116Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAACyAQ=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000003</OperatingCityId>
+    <RegisteredEmployeeId>01a09667-03da-7f0c-a446-8f778859ab5b</RegisteredEmployeeId>
+    <PaymentModel>1</PaymentModel>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+  </Accounts>
+  <Accounts>
+    <Id>60377cb5-b49a-48fe-b139-b2667649e7c6</Id>
+    <ClientPlatformId>01a02a0d-845c-7e0b-aa0c-3cd6246785d2</ClientPlatformId>
+    <Code>JHZ-491274</Code>
+    <ExternalAccountId>491274</ExternalAccountId>
+    <Status>2</Status>
+    <StatusReason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</StatusReason>
+    <OwnershipNotes>Registered owner iqama: 2630898415; source sheet row: 350</OwnershipNotes>
+    <OperationalNotes>Original vehicle type: سيارة</OperationalNotes>
+    <CreatedAtUtc>2026-10-07T14:19:35.4095078+02:00</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-17T11:57:04.6071116Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAACyF8=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000005</OperatingCityId>
+    <RegisteredEmployeeId>01a09667-03db-7ede-b0bd-8603cc9d6dc5</RegisteredEmployeeId>
+    <PaymentModel>1</PaymentModel>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+  </Accounts>
+  <Accounts>
+    <Id>48f481c4-e1e4-4470-8133-193b2ef94b7a</Id>
+    <ClientPlatformId>01a02a0d-845c-7e0b-aa0c-3cd6246785d2</ClientPlatformId>
+    <Code>JHZ-491295</Code>
+    <ExternalAccountId>491295</ExternalAccountId>
+    <Status>2</Status>
+    <StatusReason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</StatusReason>
+    <OwnershipNotes>Registered owner iqama: 2627814672; source sheet row: 368</OwnershipNotes>
+    <OperationalNotes>Original vehicle type: سيارة</OperationalNotes>
+    <CreatedAtUtc>2026-10-07T14:19:35.4095078+02:00</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-17T11:57:04.6071116Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAACx+M=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000005</OperatingCityId>
+    <RegisteredEmployeeId>01a09667-03db-77ab-812e-af14de5f7ef1</RegisteredEmployeeId>
+    <PaymentModel>1</PaymentModel>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+  </Accounts>
+  <Accounts>
+    <Id>14669814-302c-48e4-99e3-a62ee51fa28b</Id>
+    <ClientPlatformId>01a02a0d-845c-7e0b-aa0c-3cd6246785d2</ClientPlatformId>
+    <Code>JHZ-491296</Code>
+    <ExternalAccountId>491296</ExternalAccountId>
+    <Status>2</Status>
+    <StatusReason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</StatusReason>
+    <OwnershipNotes>Registered owner iqama: 2630314744; source sheet row: 356</OwnershipNotes>
+    <OperationalNotes>Original vehicle type: سيارة</OperationalNotes>
+    <CreatedAtUtc>2026-10-07T14:19:35.4095078+02:00</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-17T11:57:04.6071116Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAACyFc=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000005</OperatingCityId>
+    <RegisteredEmployeeId>01a09667-03db-7efa-a433-3ffbe8d26902</RegisteredEmployeeId>
+    <PaymentModel>1</PaymentModel>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+  </Accounts>
+  <Accounts>
+    <Id>58872213-a104-4a3e-8509-c844f70e9432</Id>
+    <ClientPlatformId>01a02a0d-845c-7e0b-aa0c-3cd6246785d2</ClientPlatformId>
+    <Code>JHZ-491297</Code>
+    <ExternalAccountId>491297</ExternalAccountId>
+    <Status>1</Status>
+    <StatusReason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</StatusReason>
+    <OwnershipNotes>Registered owner iqama: 2633076621; source sheet row: 349</OwnershipNotes>
+    <OperationalNotes>Original vehicle type: سيارة</OperationalNotes>
+    <CreatedAtUtc>2026-10-07T14:19:35.4095078+02:00</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-17T11:57:04.6071116Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAACyG0=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000005</OperatingCityId>
+    <RegisteredEmployeeId>01a09667-03da-75ac-b8cb-db1a8653b37d</RegisteredEmployeeId>
+    <PaymentModel>1</PaymentModel>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+  </Accounts>
+  <Accounts>
+    <Id>49547139-4bfa-43ca-894d-9bfa531ac88f</Id>
+    <ClientPlatformId>01a02a0d-845c-7e0b-aa0c-3cd6246785d2</ClientPlatformId>
+    <Code>JHZ-491298</Code>
+    <ExternalAccountId>491298</ExternalAccountId>
+    <Status>2</Status>
+    <StatusReason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</StatusReason>
+    <OwnershipNotes>Registered owner iqama: 2630343412; source sheet row: 352</OwnershipNotes>
+    <OperationalNotes>Original vehicle type: سيارة</OperationalNotes>
+    <CreatedAtUtc>2026-10-07T14:19:35.4095078+02:00</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-17T11:57:04.6071116Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAACyE8=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000005</OperatingCityId>
+    <RegisteredEmployeeId>01a09667-03db-7fed-b3c4-678c24ad7cc0</RegisteredEmployeeId>
+    <PaymentModel>1</PaymentModel>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+  </Accounts>
+  <Accounts>
+    <Id>e5914946-3c45-4a27-8afe-cff0126d74f2</Id>
+    <ClientPlatformId>01a02a0d-845c-7e0b-aa0c-3cd6246785d2</ClientPlatformId>
+    <Code>JHZ-491299</Code>
+    <ExternalAccountId>491299</ExternalAccountId>
+    <Status>2</Status>
+    <StatusReason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</StatusReason>
+    <OwnershipNotes>Registered owner iqama: 2629019411; source sheet row: 363</OwnershipNotes>
+    <OperationalNotes>Original vehicle type: سيارة</OperationalNotes>
+    <CreatedAtUtc>2026-10-07T14:19:35.4095078+02:00</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-17T11:57:04.6071116Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAACyHI=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000005</OperatingCityId>
+    <RegisteredEmployeeId>01a09667-03db-72e8-b498-730732b0d2bd</RegisteredEmployeeId>
+    <PaymentModel>1</PaymentModel>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+  </Accounts>
+  <Accounts>
+    <Id>00908edc-4df5-4ec5-8b53-1b8fc84a289d</Id>
+    <ClientPlatformId>01a02a0d-845c-7e0b-aa0c-3cd6246785d2</ClientPlatformId>
+    <Code>JHZ-491300</Code>
+    <ExternalAccountId>491300</ExternalAccountId>
+    <Status>2</Status>
+    <StatusReason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</StatusReason>
+    <OwnershipNotes>Registered owner iqama: 2630564751; source sheet row: 351</OwnershipNotes>
+    <OperationalNotes>Original vehicle type: سيارة</OperationalNotes>
+    <CreatedAtUtc>2026-10-07T14:19:35.4095078+02:00</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-17T11:57:04.6071116Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAACx+Y=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000005</OperatingCityId>
+    <RegisteredEmployeeId>01a09667-03db-73bc-bfef-8b17ecbe8007</RegisteredEmployeeId>
+    <PaymentModel>1</PaymentModel>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+  </Accounts>
+  <Accounts>
+    <Id>26715e3d-ad2a-4423-a281-d00e9a0607cd</Id>
+    <ClientPlatformId>01a02a0d-845c-7e0b-aa0c-3cd6246785d2</ClientPlatformId>
+    <Code>JHZ-491301</Code>
+    <ExternalAccountId>491301</ExternalAccountId>
+    <Status>3</Status>
+    <StatusReason>October source dashboard is Inactive; suspended for possible future reactivation.</StatusReason>
+    <OwnershipNotes>Registered owner iqama: 2630315410; source sheet row: 355</OwnershipNotes>
+    <OperationalNotes>Original vehicle type: سيارة</OperationalNotes>
+    <CreatedAtUtc>2026-10-07T14:19:35.4095078+02:00</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-17T11:57:04.6071116Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAACyHM=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000005</OperatingCityId>
+    <RegisteredEmployeeId>01a09667-03db-799f-860b-5f04b9c02d26</RegisteredEmployeeId>
+    <PaymentModel>1</PaymentModel>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+  </Accounts>
+  <Accounts>
+    <Id>300020ab-6ed5-4e28-8569-af87b588e7c2</Id>
+    <ClientPlatformId>01a02a0d-845c-7e0b-aa0c-3cd6246785d2</ClientPlatformId>
+    <Code>JHZ-491302</Code>
+    <ExternalAccountId>491302</ExternalAccountId>
+    <Status>3</Status>
+    <StatusReason>October source dashboard is Inactive; suspended for possible future reactivation.</StatusReason>
+    <OwnershipNotes>Registered owner iqama: 2627732189; source sheet row: 370</OwnershipNotes>
+    <OperationalNotes>Original vehicle type: سيارة</OperationalNotes>
+    <CreatedAtUtc>2026-10-07T14:19:35.4095078+02:00</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-17T11:57:04.6071116Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAACyFw=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000005</OperatingCityId>
+    <RegisteredEmployeeId>01a09667-03db-7419-93f9-1bdeca6fa6a3</RegisteredEmployeeId>
+    <PaymentModel>1</PaymentModel>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+  </Accounts>
+  <Accounts>
+    <Id>19707386-bb5a-41ef-980c-e4c5b715d314</Id>
+    <ClientPlatformId>01a02a0d-845c-7e0b-aa0c-3cd6246785d2</ClientPlatformId>
+    <Code>JHZ-491304</Code>
+    <ExternalAccountId>491304</ExternalAccountId>
+    <Status>2</Status>
+    <StatusReason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</StatusReason>
+    <OwnershipNotes>Registered owner iqama: 2629565173; source sheet row: 359</OwnershipNotes>
+    <OperationalNotes>Original vehicle type: سيارة</OperationalNotes>
+    <CreatedAtUtc>2026-10-07T14:19:35.4095078+02:00</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-17T11:57:04.6071116Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAACyI8=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000005</OperatingCityId>
+    <RegisteredEmployeeId>01a09667-03db-7e36-abd1-91751d18f7d0</RegisteredEmployeeId>
+    <PaymentModel>1</PaymentModel>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+  </Accounts>
+  <Accounts>
+    <Id>226427a7-d441-4082-927f-6019a6d9651c</Id>
+    <ClientPlatformId>01a02a0d-845c-7e0b-aa0c-3cd6246785d2</ClientPlatformId>
+    <Code>JHZ-491306</Code>
+    <ExternalAccountId>491306</ExternalAccountId>
+    <Status>2</Status>
+    <StatusReason>October roster reconciled; rider import pending a documented date, capacity, status or existing-payment conflict.</StatusReason>
+    <OwnershipNotes>Registered owner iqama: 2624402620; source sheet row: 372</OwnershipNotes>
+    <OperationalNotes>Original vehicle type: سيارة</OperationalNotes>
+    <CreatedAtUtc>2026-10-07T14:19:35.4095078+02:00</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-18T09:26:39.1687203Z</UpdatedAtUtc>
+    <UpdatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</UpdatedByUserId>
+    <RowVersion>AAAAAAAC7bc=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000005</OperatingCityId>
+    <RegisteredEmployeeId>01a09667-03da-75ce-90a0-061167514028</RegisteredEmployeeId>
+    <PaymentModel>1</PaymentModel>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+  </Accounts>
+  <Accounts>
+    <Id>daf20017-9233-4441-a1df-68fd1dcfcfc9</Id>
+    <ClientPlatformId>01a02a0d-845c-7e0b-aa0c-3cd6246785d2</ClientPlatformId>
+    <Code>JHZ-491309</Code>
+    <ExternalAccountId>491309</ExternalAccountId>
+    <Status>2</Status>
+    <StatusReason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</StatusReason>
+    <OwnershipNotes>Registered owner iqama: 2627732478; source sheet row: 369</OwnershipNotes>
+    <OperationalNotes>Original vehicle type: سيارة</OperationalNotes>
+    <CreatedAtUtc>2026-10-07T14:19:35.4095078+02:00</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-17T11:57:04.6071116Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAACyCE=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000005</OperatingCityId>
+    <RegisteredEmployeeId>01a09667-03db-7148-b3d7-25c2c8e62afa</RegisteredEmployeeId>
+    <PaymentModel>1</PaymentModel>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+  </Accounts>
+  <Accounts>
+    <Id>1f1e54f0-4b8b-4af2-a845-3e53d1bc81d2</Id>
+    <ClientPlatformId>01a02a0d-845c-7e0b-aa0c-3cd6246785d2</ClientPlatformId>
+    <Code>JHZ-491310</Code>
+    <ExternalAccountId>491310</ExternalAccountId>
+    <Status>2</Status>
+    <StatusReason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</StatusReason>
+    <OwnershipNotes>Registered owner iqama: 2627962364; source sheet row: 365</OwnershipNotes>
+    <OperationalNotes>Original vehicle type: سيارة</OperationalNotes>
+    <CreatedAtUtc>2026-10-07T14:19:35.4095078+02:00</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-17T11:57:04.6071116Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAACx/8=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000005</OperatingCityId>
+    <RegisteredEmployeeId>01a09667-03db-7394-923d-63556fac3d5d</RegisteredEmployeeId>
+    <PaymentModel>1</PaymentModel>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+  </Accounts>
+  <Accounts>
+    <Id>427a6b7d-e54a-4671-8382-8c6bebf152ca</Id>
+    <ClientPlatformId>01a02a0d-845c-7e0b-aa0c-3cd6246785d2</ClientPlatformId>
+    <Code>JHZ-491311</Code>
+    <ExternalAccountId>491311</ExternalAccountId>
+    <Status>2</Status>
+    <StatusReason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</StatusReason>
+    <OwnershipNotes>Registered owner iqama: 2629018488; source sheet row: 364</OwnershipNotes>
+    <OperationalNotes>Original vehicle type: سيارة</OperationalNotes>
+    <CreatedAtUtc>2026-10-07T14:19:35.4095078+02:00</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-17T11:57:04.6071116Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAACyD8=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000005</OperatingCityId>
+    <RegisteredEmployeeId>01a09667-03db-766b-b897-6c004f39c11e</RegisteredEmployeeId>
+    <PaymentModel>1</PaymentModel>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+  </Accounts>
+  <Accounts>
+    <Id>4890bd24-de1b-423b-b493-b4b4977337e5</Id>
+    <ClientPlatformId>01a02a0d-845c-7e0b-aa0c-3cd6246785d2</ClientPlatformId>
+    <Code>JHZ-491575</Code>
+    <ExternalAccountId>491575</ExternalAccountId>
+    <Status>2</Status>
+    <StatusReason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</StatusReason>
+    <OwnershipNotes>Registered owner iqama: 2629565009; source sheet row: 360</OwnershipNotes>
+    <OperationalNotes>Original vehicle type: سيارة</OperationalNotes>
+    <CreatedAtUtc>2026-10-07T14:19:35.4095078+02:00</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-17T11:57:04.6071116Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAACyGI=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000005</OperatingCityId>
+    <RegisteredEmployeeId>01a09667-03db-709f-a677-ae2647a6de09</RegisteredEmployeeId>
+    <PaymentModel>1</PaymentModel>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+  </Accounts>
+  <Accounts>
+    <Id>084a744c-bd94-4c70-b481-457a0396a1a7</Id>
+    <ClientPlatformId>01a02a0d-845c-7e0b-aa0c-3cd6246785d2</ClientPlatformId>
+    <Code>JHZ-491576</Code>
+    <ExternalAccountId>491576</ExternalAccountId>
+    <Status>2</Status>
+    <StatusReason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</StatusReason>
+    <OwnershipNotes>Registered owner iqama: 2630314611; source sheet row: 357</OwnershipNotes>
+    <OperationalNotes>Original vehicle type: سيارة</OperationalNotes>
+    <CreatedAtUtc>2026-10-07T14:19:35.4095078+02:00</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-17T11:57:04.6071116Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAACyAU=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000005</OperatingCityId>
+    <RegisteredEmployeeId>01a09667-03db-7510-8369-0cc969f39baa</RegisteredEmployeeId>
+    <PaymentModel>1</PaymentModel>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+  </Accounts>
+  <Accounts>
+    <Id>92064d52-658f-4a70-9435-d7eb2eea4ce0</Id>
+    <ClientPlatformId>01a02a0d-845c-7e0b-aa0c-3cd6246785d2</ClientPlatformId>
+    <Code>JHZ-491577</Code>
+    <ExternalAccountId>491577</ExternalAccountId>
+    <Status>2</Status>
+    <StatusReason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</StatusReason>
+    <OwnershipNotes>Registered owner iqama: 2602433449; source sheet row: 377</OwnershipNotes>
+    <OperationalNotes>Original vehicle type: سيارة</OperationalNotes>
+    <CreatedAtUtc>2026-10-07T14:19:35.4095078+02:00</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-17T11:57:04.6071116Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAACyIE=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000005</OperatingCityId>
+    <RegisteredEmployeeId>01a09667-03da-7ebe-b66f-3dedc360a7d6</RegisteredEmployeeId>
+    <PaymentModel>1</PaymentModel>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+  </Accounts>
+  <Accounts>
+    <Id>37b9d0b6-4845-4bed-9e61-d12b44e80c1c</Id>
+    <ClientPlatformId>01a02a0d-845c-7e0b-aa0c-3cd6246785d2</ClientPlatformId>
+    <Code>JHZ-498844</Code>
+    <ExternalAccountId>498844</ExternalAccountId>
+    <Status>1</Status>
+    <StatusReason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</StatusReason>
+    <OwnershipNotes>Registered owner iqama: 2629273505; source sheet row: 362</OwnershipNotes>
+    <OperationalNotes>Original vehicle type: سيارة</OperationalNotes>
+    <CreatedAtUtc>2026-10-07T14:19:35.4095078+02:00</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-17T13:07:12.9402697Z</UpdatedAtUtc>
+    <UpdatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</UpdatedByUserId>
+    <RowVersion>AAAAAAAC1qQ=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000003</OperatingCityId>
+    <RegisteredEmployeeId>01a09667-03db-77f8-a132-9c655a0224a4</RegisteredEmployeeId>
+    <PaymentModel>1</PaymentModel>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+  </Accounts>
+  <Accounts>
+    <Id>5141bfd9-9245-4abf-98a8-3f90c88e7ad5</Id>
+    <ClientPlatformId>01a02a0d-845c-7e0b-aa0c-3cd6246785d2</ClientPlatformId>
+    <Code>JHZ-498845</Code>
+    <ExternalAccountId>498845</ExternalAccountId>
+    <Status>2</Status>
+    <StatusReason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</StatusReason>
+    <OwnershipNotes>Registered owner iqama: 2592789974; source sheet row: 378</OwnershipNotes>
+    <OperationalNotes>Original vehicle type: سيارة</OperationalNotes>
+    <CreatedAtUtc>2026-10-07T14:19:35.4095078+02:00</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-17T11:57:04.6071116Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAACyAI=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000003</OperatingCityId>
+    <RegisteredEmployeeId>01a09667-03da-7d11-8875-69d643db0b4d</RegisteredEmployeeId>
+    <PaymentModel>1</PaymentModel>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+  </Accounts>
+  <Accounts>
+    <Id>d515ead9-dd4b-43c1-9a60-672389dd14cc</Id>
+    <ClientPlatformId>01a02a0d-845c-7e0b-aa0c-3cd6246785d2</ClientPlatformId>
+    <Code>JHZ-498846</Code>
+    <ExternalAccountId>498846</ExternalAccountId>
+    <Status>2</Status>
+    <StatusReason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</StatusReason>
+    <OwnershipNotes>Registered owner iqama: 2636655421; source sheet row: 344</OwnershipNotes>
+    <OperationalNotes>Original vehicle type: سيارة</OperationalNotes>
+    <CreatedAtUtc>2026-10-07T14:19:35.4095078+02:00</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-17T11:57:04.6071116Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAACyCA=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000005</OperatingCityId>
+    <RegisteredEmployeeId>01a09667-03db-702b-94d5-d30d97440b47</RegisteredEmployeeId>
+    <PaymentModel>1</PaymentModel>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+  </Accounts>
+  <Accounts>
+    <Id>a029d71c-b11b-4512-b0c6-908a81f37e72</Id>
+    <ClientPlatformId>01a02a0d-845c-7e0b-aa0c-3cd6246785d2</ClientPlatformId>
+    <Code>JHZ-498848</Code>
+    <ExternalAccountId>498848</ExternalAccountId>
+    <Status>2</Status>
+    <StatusReason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</StatusReason>
+    <OwnershipNotes>Registered owner iqama: 2612570016; source sheet row: 375</OwnershipNotes>
+    <OperationalNotes>Original vehicle type: سيارة</OperationalNotes>
+    <CreatedAtUtc>2026-10-07T14:19:35.4095078+02:00</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-17T11:57:04.6071116Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAACyEs=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000005</OperatingCityId>
+    <RegisteredEmployeeId>01a09667-03da-7d42-aa55-72daedb0c9ef</RegisteredEmployeeId>
+    <PaymentModel>1</PaymentModel>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+  </Accounts>
+  <Accounts>
+    <Id>f8c26ba4-12d7-4c01-a797-a227f3ad4760</Id>
+    <ClientPlatformId>01a02a0d-845c-7e0b-aa0c-3cd6246785d2</ClientPlatformId>
+    <Code>JHZ-498895</Code>
+    <ExternalAccountId>498895</ExternalAccountId>
+    <Status>2</Status>
+    <StatusReason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</StatusReason>
+    <OwnershipNotes>Registered owner iqama: 2640150187; source sheet row: 343</OwnershipNotes>
+    <OperationalNotes>Original vehicle type: سيارة</OperationalNotes>
+    <CreatedAtUtc>2026-10-07T14:19:35.4095078+02:00</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-17T11:57:04.6071116Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAACyFI=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000005</OperatingCityId>
+    <RegisteredEmployeeId>01a09667-03db-7060-bfa1-ab47bfab22e9</RegisteredEmployeeId>
+    <PaymentModel>1</PaymentModel>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+  </Accounts>
+  <Accounts>
+    <Id>22a25cd6-a1f6-4e40-8551-e313278cc18a</Id>
+    <ClientPlatformId>01a02a0d-845c-7e0b-aa0c-3cd6246785d2</ClientPlatformId>
+    <Code>JHZ-498897</Code>
+    <ExternalAccountId>498897</ExternalAccountId>
+    <Status>2</Status>
+    <StatusReason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</StatusReason>
+    <OwnershipNotes>Registered owner iqama: 2627814839; source sheet row: 366</OwnershipNotes>
+    <OperationalNotes>Original vehicle type: سيارة</OperationalNotes>
+    <CreatedAtUtc>2026-10-07T14:19:35.4095078+02:00</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-17T11:57:04.6071116Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAACyIY=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000005</OperatingCityId>
+    <RegisteredEmployeeId>01a09667-03db-70fe-85ef-d0733c0ba7f3</RegisteredEmployeeId>
+    <PaymentModel>1</PaymentModel>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+  </Accounts>
+  <Accounts>
+    <Id>91976373-a66d-4b58-b8bf-f58034ea26e0</Id>
+    <ClientPlatformId>01a02a0d-845c-7e0b-aa0c-3cd6246785d2</ClientPlatformId>
+    <Code>JHZ-498898</Code>
+    <ExternalAccountId>498898</ExternalAccountId>
+    <Status>2</Status>
+    <StatusReason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</StatusReason>
+    <OwnershipNotes>Registered owner iqama: 2636655173; source sheet row: 345</OwnershipNotes>
+    <OperationalNotes>Original vehicle type: سيارة</OperationalNotes>
+    <CreatedAtUtc>2026-10-07T14:19:35.4095078+02:00</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-17T11:57:04.6071116Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAACyJI=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000005</OperatingCityId>
+    <RegisteredEmployeeId>01a09667-03db-7d29-b4ee-b35e6ad3c6b5</RegisteredEmployeeId>
+    <PaymentModel>1</PaymentModel>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+  </Accounts>
+  <Accounts>
+    <Id>ef7b9d3d-386d-4f50-bb1a-5ef8975e32c0</Id>
+    <ClientPlatformId>01a02a0d-845c-7e0b-aa0c-3cd6246785d2</ClientPlatformId>
+    <Code>JHZ-499116</Code>
+    <ExternalAccountId>499116</ExternalAccountId>
+    <Status>2</Status>
+    <StatusReason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</StatusReason>
+    <OwnershipNotes>Registered owner iqama: 2576804195; source sheet row: 379</OwnershipNotes>
+    <OperationalNotes>Original vehicle type: سيارة</OperationalNotes>
+    <CreatedAtUtc>2026-10-07T14:19:35.4095078+02:00</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-17T11:57:04.6071116Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAACyB0=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000003</OperatingCityId>
+    <RegisteredEmployeeId>01a09667-03da-78a7-9327-8ceb88d87282</RegisteredEmployeeId>
+    <PaymentModel>1</PaymentModel>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+  </Accounts>
+  <Accounts>
+    <Id>69de907a-2b33-4528-8f00-8fb44206c128</Id>
+    <ClientPlatformId>01a02a0d-845c-7e0b-aa0c-3cd6246785d2</ClientPlatformId>
+    <Code>JHZ-499117</Code>
+    <ExternalAccountId>499117</ExternalAccountId>
+    <Status>2</Status>
+    <StatusReason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</StatusReason>
+    <OwnershipNotes>Registered owner iqama: 2630343289; source sheet row: 353</OwnershipNotes>
+    <OperationalNotes>Original vehicle type: سيارة</OperationalNotes>
+    <CreatedAtUtc>2026-10-07T14:19:35.4095078+02:00</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-17T11:57:04.6071116Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAACyEc=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000003</OperatingCityId>
+    <RegisteredEmployeeId>01a09667-03db-71cb-a9da-8fb86d55efb7</RegisteredEmployeeId>
+    <PaymentModel>1</PaymentModel>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+  </Accounts>
+  <Accounts>
+    <Id>78d4a3e9-4ce2-48db-b9d2-6b660073a8c6</Id>
+    <ClientPlatformId>01a02a0d-845c-7e0b-aa0c-3cd6246785d2</ClientPlatformId>
+    <Code>JHZ-499118</Code>
+    <ExternalAccountId>499118</ExternalAccountId>
+    <Status>2</Status>
+    <StatusReason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</StatusReason>
+    <OwnershipNotes>Registered owner iqama: 2626317412; source sheet row: 371</OwnershipNotes>
+    <OperationalNotes>Original vehicle type: سيارة</OperationalNotes>
+    <CreatedAtUtc>2026-10-07T14:19:35.4095078+02:00</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-17T11:57:04.6071116Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAACyCI=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000003</OperatingCityId>
+    <RegisteredEmployeeId>01a09667-03da-7443-9528-5efe07ffa21a</RegisteredEmployeeId>
+    <PaymentModel>1</PaymentModel>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+  </Accounts>
+  <Accounts>
+    <Id>e9d5ced2-89b0-4aa3-99e7-b604cd64bebc</Id>
+    <ClientPlatformId>01a02a0d-845c-7e0b-aa0c-3cd6246785d2</ClientPlatformId>
+    <Code>JHZ-499120</Code>
+    <ExternalAccountId>499120</ExternalAccountId>
+    <Status>2</Status>
+    <StatusReason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</StatusReason>
+    <OwnershipNotes>Registered owner iqama: 2629287588; source sheet row: 361</OwnershipNotes>
+    <OperationalNotes>Original vehicle type: سيارة</OperationalNotes>
+    <CreatedAtUtc>2026-10-07T14:19:35.4095078+02:00</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-17T11:57:04.6071116Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAACyGM=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000003</OperatingCityId>
+    <RegisteredEmployeeId>01a09667-03db-7d0c-8f04-1957609feaf9</RegisteredEmployeeId>
+    <PaymentModel>1</PaymentModel>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+  </Accounts>
+  <Accounts>
+    <Id>36fdb57a-c3e2-418b-880c-bdb8f5a83ba2</Id>
+    <ClientPlatformId>01a02a0d-845c-7e0b-aa0c-3cd6246785d2</ClientPlatformId>
+    <Code>JHZ-499122</Code>
+    <ExternalAccountId>499122</ExternalAccountId>
+    <Status>2</Status>
+    <StatusReason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</StatusReason>
+    <OwnershipNotes>Registered owner iqama: 2623569254; source sheet row: 373</OwnershipNotes>
+    <OperationalNotes>Original vehicle type: سيارة</OperationalNotes>
+    <CreatedAtUtc>2026-10-07T14:19:35.4095078+02:00</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-17T11:57:04.6071116Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAACyGc=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000003</OperatingCityId>
+    <RegisteredEmployeeId>01a09667-03da-71f3-91f4-cf2b64d44f1d</RegisteredEmployeeId>
+    <PaymentModel>1</PaymentModel>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+  </Accounts>
+  <Accounts>
+    <Id>d915f8b2-ee0c-4f3c-b36f-db7f4dc58fa1</Id>
+    <ClientPlatformId>01a02a0d-845c-7e0b-aa0c-3cd6246785d2</ClientPlatformId>
+    <Code>JHZ-499308</Code>
+    <ExternalAccountId>499308</ExternalAccountId>
+    <Status>2</Status>
+    <StatusReason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</StatusReason>
+    <OwnershipNotes>Registered owner iqama: 2627814763; source sheet row: 367</OwnershipNotes>
+    <OperationalNotes>Original vehicle type: سيارة</OperationalNotes>
+    <CreatedAtUtc>2026-10-07T14:19:35.4095078+02:00</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-17T11:57:04.6071116Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAACyH4=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000003</OperatingCityId>
+    <RegisteredEmployeeId>01a09667-03db-70aa-8ba6-c4b6a568be1b</RegisteredEmployeeId>
+    <PaymentModel>1</PaymentModel>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+  </Accounts>
+  <Accounts>
+    <Id>7748d85c-3a35-4383-86c3-854d30f43f0b</Id>
+    <ClientPlatformId>01a02a0d-845c-7e0b-aa0c-3cd6246785d2</ClientPlatformId>
+    <Code>JHZ-499550</Code>
+    <ExternalAccountId>499550</ExternalAccountId>
+    <Status>2</Status>
+    <StatusReason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</StatusReason>
+    <OwnershipNotes>Registered owner iqama: 2618729475; source sheet row: 374</OwnershipNotes>
+    <OperationalNotes>Original vehicle type: سيارة</OperationalNotes>
+    <CreatedAtUtc>2026-10-07T14:19:35.4095078+02:00</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-17T11:57:04.6071116Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAACyDw=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000003</OperatingCityId>
+    <RegisteredEmployeeId>01a09667-03da-726c-ae34-9ebdbc6385e6</RegisteredEmployeeId>
+    <PaymentModel>1</PaymentModel>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+  </Accounts>
+  <Accounts>
+    <Id>89b4b68f-a5c8-45e9-8fe8-dd9ce4634e8d</Id>
+    <ClientPlatformId>01a02a0d-845c-7e0b-aa0c-3cd6246785d2</ClientPlatformId>
+    <Code>JHZ-499551</Code>
+    <ExternalAccountId>499551</ExternalAccountId>
+    <Status>2</Status>
+    <StatusReason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</StatusReason>
+    <OwnershipNotes>Registered owner iqama: 2630315881; source sheet row: 354</OwnershipNotes>
+    <OperationalNotes>Original vehicle type: سيارة</OperationalNotes>
+    <CreatedAtUtc>2026-10-07T14:19:35.4095078+02:00</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-17T11:57:04.6071116Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAACyII=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000003</OperatingCityId>
+    <RegisteredEmployeeId>01a09667-03db-70a2-a52b-0c838429ec19</RegisteredEmployeeId>
+    <PaymentModel>1</PaymentModel>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+  </Accounts>
+  <Accounts>
+    <Id>5327ff01-7d10-4f8a-9557-d9eff9083e52</Id>
+    <ClientPlatformId>01a02a0d-845c-7e0b-aa0c-3cd6246785d2</ClientPlatformId>
+    <Code>JHZ-499552</Code>
+    <ExternalAccountId>499552</ExternalAccountId>
+    <Status>2</Status>
+    <StatusReason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</StatusReason>
+    <OwnershipNotes>Registered owner iqama: 2633076662; source sheet row: 348</OwnershipNotes>
+    <OperationalNotes>Original vehicle type: سيارة</OperationalNotes>
+    <CreatedAtUtc>2026-10-07T14:19:35.4095078+02:00</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-17T11:57:04.6071116Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAACyHw=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000005</OperatingCityId>
+    <RegisteredEmployeeId>01a09667-03db-74d4-82d7-e9a929384b06</RegisteredEmployeeId>
+    <PaymentModel>1</PaymentModel>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+  </Accounts>
+  <Accounts>
+    <Id>5e91db27-b858-4480-a98e-0079a07b8ac8</Id>
+    <ClientPlatformId>01a02a0d-845c-7e0b-aa0c-3cd6246785d2</ClientPlatformId>
+    <Code>JHZ-499572</Code>
+    <ExternalAccountId>499572</ExternalAccountId>
+    <Status>2</Status>
+    <StatusReason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</StatusReason>
+    <OwnershipNotes>Registered owner iqama: 2610794063; source sheet row: 376</OwnershipNotes>
+    <OperationalNotes>Original vehicle type: سيارة</OperationalNotes>
+    <CreatedAtUtc>2026-10-07T14:19:35.4095078+02:00</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-17T11:57:04.6071116Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAACx9c=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000005</OperatingCityId>
+    <RegisteredEmployeeId>01a09667-03da-7380-bf2e-6c3456d6d882</RegisteredEmployeeId>
+    <PaymentModel>1</PaymentModel>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+  </Accounts>
+  <Accounts>
+    <Id>7dcbe0a1-ed6a-47cc-9bab-852502171698</Id>
+    <ClientPlatformId>01a02a0d-845c-7e0b-aa0c-3cd6246785d2</ClientPlatformId>
+    <Code>JHZ-499580</Code>
+    <ExternalAccountId>499580</ExternalAccountId>
+    <Status>2</Status>
+    <StatusReason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</StatusReason>
+    <OwnershipNotes>Registered owner iqama: 2576050401; source sheet row: 380</OwnershipNotes>
+    <OperationalNotes>Original vehicle type: سيارة</OperationalNotes>
+    <CreatedAtUtc>2026-10-07T14:19:35.4095078+02:00</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-17T11:57:04.6071116Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAACyDs=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000005</OperatingCityId>
+    <RegisteredEmployeeId>01a09667-03da-7a7b-a8b0-a54cbf0c6a62</RegisteredEmployeeId>
+    <PaymentModel>1</PaymentModel>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+  </Accounts>
+  <Accounts>
+    <Id>c05e191d-82fe-476a-8810-247750f27677</Id>
+    <ClientPlatformId>01a02a0d-845c-7e0b-aa0c-3cd6246785d2</ClientPlatformId>
+    <Code>JHZ-499581</Code>
+    <ExternalAccountId>499581</ExternalAccountId>
+    <Status>2</Status>
+    <StatusReason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</StatusReason>
+    <OwnershipNotes>Registered owner iqama: 2519259358; source sheet row: 381</OwnershipNotes>
+    <OperationalNotes>Original vehicle type: سيارة</OperationalNotes>
+    <CreatedAtUtc>2026-10-07T14:19:35.4095078+02:00</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-17T11:57:04.6071116Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAACx+0=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000003</OperatingCityId>
+    <RegisteredEmployeeId>01a09667-03da-7e44-9fc1-725845fcc925</RegisteredEmployeeId>
+    <PaymentModel>1</PaymentModel>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+  </Accounts>
+  <Accounts>
+    <Id>3ae0d869-487b-4223-ae20-f595f0d0570e</Id>
+    <ClientPlatformId>01a02a0d-845c-7e0b-aa0c-3cd6246785d2</ClientPlatformId>
+    <Code>JHZ-499583</Code>
+    <ExternalAccountId>499583</ExternalAccountId>
+    <Status>2</Status>
+    <StatusReason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</StatusReason>
+    <OwnershipNotes>Registered owner iqama: 2636062651; source sheet row: 346</OwnershipNotes>
+    <OperationalNotes>Original vehicle type: سيارة</OperationalNotes>
+    <CreatedAtUtc>2026-10-07T14:19:35.4095078+02:00</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-17T11:57:04.6071116Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAACyJM=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000003</OperatingCityId>
+    <RegisteredEmployeeId>01a09667-03db-7da6-9526-87af71cf7f10</RegisteredEmployeeId>
+    <PaymentModel>1</PaymentModel>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+  </Accounts>
+  <Accounts>
+    <Id>2339d41e-75e3-47d2-a513-ce76ba42f129</Id>
+    <ClientPlatformId>01a02a0d-845c-7e0b-aa0c-3cd6246785d2</ClientPlatformId>
+    <Code>JHZ-499584</Code>
+    <ExternalAccountId>499584</ExternalAccountId>
+    <Status>2</Status>
+    <StatusReason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</StatusReason>
+    <OwnershipNotes>Registered owner iqama: 2636062180; source sheet row: 347</OwnershipNotes>
+    <OperationalNotes>Original vehicle type: سيارة</OperationalNotes>
+    <CreatedAtUtc>2026-10-07T14:19:35.4095078+02:00</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-17T11:57:04.6071116Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAACyHE=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000003</OperatingCityId>
+    <RegisteredEmployeeId>01a09667-03db-731b-8000-9356b672ca92</RegisteredEmployeeId>
+    <PaymentModel>1</PaymentModel>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+  </Accounts>
+  <DatasetVersions>
+    <Id>01a1067d-6004-76cb-95fd-715629f6abba</Id>
+    <ModuleKey>platform-operations</ModuleKey>
+    <Version>127</Version>
+    <LastChangedAtUtc>2026-10-18T10:12:26.9309256Z</LastChangedAtUtc>
+    <CreatedAtUtc>2026-10-04T10:37:22.308281Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-18T10:12:26.9329307Z</UpdatedAtUtc>
+    <UpdatedByUserId>21ef2bdf-fd57-43d7-029f-08df1415392a</UpdatedByUserId>
+    <RowVersion>AAAAAAAC8Ik=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </DatasetVersions>
+  <DatasetVersions>
+    <Id>01a10681-712e-7b26-93e0-8f9df3b1a024</Id>
+    <ModuleKey>jahez</ModuleKey>
+    <Version>272</Version>
+    <LastChangedAtUtc>2026-10-18T12:22:49.2128337Z</LastChangedAtUtc>
+    <CreatedAtUtc>2026-10-04T10:41:48.8464462Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-18T12:22:49.212904Z</UpdatedAtUtc>
+    <UpdatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</UpdatedByUserId>
+    <RowVersion>AAAAAAAC8qk=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </DatasetVersions>
+  <Sponsors>
+    <Id>019c18d5-62e1-7000-8000-000000000040</Id>
+    <EmployerIdentityNumber>7038745530</EmployerIdentityNumber>
+    <RegistryNameAr>البوابة المقبلة للتجارة</RegistryNameAr>
+  </Sponsors>
+  <Sponsors>
+    <Id>019c18d5-62e1-7000-8000-000000000041</Id>
+    <EmployerIdentityNumber>7015658094</EmployerIdentityNumber>
+    <RegistryNameAr>البوابا الموكبلا</RegistryNameAr>
+  </Sponsors>
+  <UpdatedAccounts>
+    <AccountId>a8b30114-8a2e-49ad-87e6-44d826de2370</AccountId>
+    <Account>491258</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>60377cb5-b49a-48fe-b139-b2667649e7c6</AccountId>
+    <Account>491274</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>48f481c4-e1e4-4470-8133-193b2ef94b7a</AccountId>
+    <Account>491295</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>14669814-302c-48e4-99e3-a62ee51fa28b</AccountId>
+    <Account>491296</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>58872213-a104-4a3e-8509-c844f70e9432</AccountId>
+    <Account>491297</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>49547139-4bfa-43ca-894d-9bfa531ac88f</AccountId>
+    <Account>491298</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>e5914946-3c45-4a27-8afe-cff0126d74f2</AccountId>
+    <Account>491299</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>00908edc-4df5-4ec5-8b53-1b8fc84a289d</AccountId>
+    <Account>491300</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>26715e3d-ad2a-4423-a281-d00e9a0607cd</AccountId>
+    <Account>491301</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>300020ab-6ed5-4e28-8569-af87b588e7c2</AccountId>
+    <Account>491302</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>19707386-bb5a-41ef-980c-e4c5b715d314</AccountId>
+    <Account>491304</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>226427a7-d441-4082-927f-6019a6d9651c</AccountId>
+    <Account>491306</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>daf20017-9233-4441-a1df-68fd1dcfcfc9</AccountId>
+    <Account>491309</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>1f1e54f0-4b8b-4af2-a845-3e53d1bc81d2</AccountId>
+    <Account>491310</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>427a6b7d-e54a-4671-8382-8c6bebf152ca</AccountId>
+    <Account>491311</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>4890bd24-de1b-423b-b493-b4b4977337e5</AccountId>
+    <Account>491575</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>084a744c-bd94-4c70-b481-457a0396a1a7</AccountId>
+    <Account>491576</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>92064d52-658f-4a70-9435-d7eb2eea4ce0</AccountId>
+    <Account>491577</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>37b9d0b6-4845-4bed-9e61-d12b44e80c1c</AccountId>
+    <Account>498844</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>5141bfd9-9245-4abf-98a8-3f90c88e7ad5</AccountId>
+    <Account>498845</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>d515ead9-dd4b-43c1-9a60-672389dd14cc</AccountId>
+    <Account>498846</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>a029d71c-b11b-4512-b0c6-908a81f37e72</AccountId>
+    <Account>498848</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>f8c26ba4-12d7-4c01-a797-a227f3ad4760</AccountId>
+    <Account>498895</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>22a25cd6-a1f6-4e40-8551-e313278cc18a</AccountId>
+    <Account>498897</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>91976373-a66d-4b58-b8bf-f58034ea26e0</AccountId>
+    <Account>498898</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>ef7b9d3d-386d-4f50-bb1a-5ef8975e32c0</AccountId>
+    <Account>499116</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>69de907a-2b33-4528-8f00-8fb44206c128</AccountId>
+    <Account>499117</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>78d4a3e9-4ce2-48db-b9d2-6b660073a8c6</AccountId>
+    <Account>499118</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>e9d5ced2-89b0-4aa3-99e7-b604cd64bebc</AccountId>
+    <Account>499120</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>36fdb57a-c3e2-418b-880c-bdb8f5a83ba2</AccountId>
+    <Account>499122</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>d915f8b2-ee0c-4f3c-b36f-db7f4dc58fa1</AccountId>
+    <Account>499308</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>7748d85c-3a35-4383-86c3-854d30f43f0b</AccountId>
+    <Account>499550</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>89b4b68f-a5c8-45e9-8fe8-dd9ce4634e8d</AccountId>
+    <Account>499551</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>5327ff01-7d10-4f8a-9557-d9eff9083e52</AccountId>
+    <Account>499552</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>5e91db27-b858-4480-a98e-0079a07b8ac8</AccountId>
+    <Account>499572</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>7dcbe0a1-ed6a-47cc-9bab-852502171698</AccountId>
+    <Account>499580</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>c05e191d-82fe-476a-8810-247750f27677</AccountId>
+    <Account>499581</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>3ae0d869-487b-4223-ae20-f595f0d0570e</AccountId>
+    <Account>499583</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>2339d41e-75e3-47d2-a513-ce76ba42f129</AccountId>
+    <Account>499584</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+</NewDataSet>

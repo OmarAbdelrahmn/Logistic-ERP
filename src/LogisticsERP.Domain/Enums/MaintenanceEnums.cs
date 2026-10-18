@@ -40,3 +40,4 @@ public enum ExternalFinancialSourceType
 public enum WorkshopPaymentMethod { Cash = 1, Card = 2, BankTransfer = 3, Other = 4 }
 public enum WorkshopPaymentStatus { Unpaid = 1, PartiallyPaid = 2, Paid = 3, Refunded = 4 }
 public enum OilBarrelStatus { Sealed = 1, Open = 2, Depleted = 3, Returned = 4 }
+public enum OilBarrelMissingReason { Missing = 1, Wasted = 2, Theft = 3 }

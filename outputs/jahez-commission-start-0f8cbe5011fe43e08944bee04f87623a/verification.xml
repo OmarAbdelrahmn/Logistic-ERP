@@ -1,0 +1,40 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="CommissionStartsOn" type="xs:string" minOccurs="0" />
+                <xs:element name="CommissionPostedThrough" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="RiyadhSettlementDate" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Action" type="xs:string" minOccurs="0" />
+                <xs:element name="BeforeJson" type="xs:string" minOccurs="0" />
+                <xs:element name="AfterJson" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <Id>bc886558-35a7-403c-b59f-3a64ce47a02a</Id>
+    <CommissionStartsOn>2026-09-17</CommissionStartsOn>
+    <RiyadhSettlementDate>2026-09-15</RiyadhSettlementDate>
+  </Table>
+  <Table1>
+    <Action>JahezCommissionStartDateCorrection</Action>
+    <BeforeJson>{"Id":"BC886558-35A7-403C-B59F-3A64CE47A02A","PlatformRiderAccountId":"37B9D0B6-4845-4BED-9E61-D12B44E80C1C","CommissionStartsOn":"2026-09-15"}</BeforeJson>
+    <AfterJson>{"Id":"BC886558-35A7-403C-B59F-3A64CE47A02A","PlatformRiderAccountId":"37B9D0B6-4845-4BED-9E61-D12B44E80C1C","CommissionStartsOn":"2026-09-17"}</AfterJson>
+  </Table1>
+</NewDataSet>

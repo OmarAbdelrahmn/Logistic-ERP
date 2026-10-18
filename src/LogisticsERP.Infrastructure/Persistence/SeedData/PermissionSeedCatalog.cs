@@ -21,6 +21,17 @@ internal static class PermissionSeedCatalog
 {
     public static IReadOnlyList<PermissionSeed> All { get; } =
     [
+        Create(310, PermissionKeys.Ninja.Read, "Ninja", "عرض نينجا", "Read Ninja", "عرض حسابات وتقارير وأداء وخصومات ومراجعات ملفات نينجا.", "Read Ninja accounts, reports, performance, deductions and sheet reviews.", clientScope: true, sensitive: true),
+        Create(311, PermissionKeys.Ninja.AccountsUpdate, "Ninja", "تعديل حسابات نينجا", "Edit Ninja accounts", "تعديل حالة ورقم هاتف الحساب ورفع مراجعات الملفات وتعديل ملاحظاتها.", "Update Ninja account status and phone, upload sheet reviews and edit their notes.", clientScope: true, sensitive: true),
+        Create(312, PermissionKeys.Ninja.AssignmentsCreate, "Ninja", "تسليم حسابات نينجا", "Assign Ninja accounts", "تسليم حساب نينجا للمندوب الفعلي.", "Assign a Ninja account to its actual rider.", clientScope: true, sensitive: true),
+        Create(313, PermissionKeys.Ninja.AssignmentsDelete, "Ninja", "استلام حسابات نينجا", "Return Ninja accounts", "استلام حساب نينجا وإنهاء تكليفه.", "Return a Ninja account and close its assignment.", clientScope: true, sensitive: true),
+        Create(314, PermissionKeys.Ninja.CredentialsRotate, "Ninja", "تغيير كلمات مرور نينجا", "Change Ninja passwords", "تغيير كلمة مرور حساب نينجا ضمن سياسة مهلة التغيير.", "Change Ninja account passwords subject to the cooldown policy.", clientScope: true, sensitive: true),
+        Create(315, PermissionKeys.Ninja.PerformanceImport, "Ninja", "استيراد أداء نينجا", "Import Ninja performance", "استيراد الأداء اليومي لمندوبي نينجا.", "Import Ninja daily rider performance.", clientScope: true, sensitive: true),
+        Create(316, PermissionKeys.Ninja.DeductionsImport, "Ninja", "استيراد خصومات نينجا", "Import Ninja deductions", "استيراد الخصومات اليومية لمندوبي نينجا.", "Import Ninja daily rider deductions.", clientScope: true, sensitive: true),
+        Create(306, PermissionKeys.Chefz.Read, "Chefz", "عرض شيفز", "Read Chefz", "عرض حسابات وأداء وتصفيات شيفز.", "Read Chefz accounts, performance and settlements.", clientScope: true, sensitive: true),
+        Create(307, PermissionKeys.Chefz.AccountsUpdate, "Chefz", "تعديل حسابات شيفز", "Edit Chefz accounts", "تحديد نوع الحساب ورقم الهوية في شيفز.", "Configure Chefz account type and report identity.", clientScope: true, sensitive: true),
+        Create(308, PermissionKeys.Chefz.PerformanceImport, "Chefz", "استيراد أداء شيفز", "Import Chefz performance", "استيراد أداء المندوب اليومي.", "Import daily rider performance.", clientScope: true, sensitive: true),
+        Create(309, PermissionKeys.Chefz.SettlementsCreate, "Chefz", "إنشاء تصفيات شيفز", "Create Chefz settlements", "حفظ تصفيات محافظ شيفز نصف الشهرية.", "Save half-month Chefz wallet settlements.", clientScope: true, sensitive: true),
         Create(1, PermissionKeys.Security.UsersRead, "Security", "عرض المستخدمين", "Read users", "عرض حسابات المستخدمين وحالتها.", "View user accounts and their status.", sensitive: true),
         Create(2, PermissionKeys.Security.UsersCreate, "Security", "إنشاء المستخدمين", "Create users", "إنشاء حسابات مستخدمين جديدة.", "Create new user accounts.", sensitive: true, highTrust: true),
         Create(3, PermissionKeys.Security.UsersUpdate, "Security", "تعديل المستخدمين", "Update users", "تعديل حالة وبيانات حسابات المستخدمين.", "Update user account details and status.", sensitive: true, highTrust: true),
@@ -274,7 +285,15 @@ internal static class PermissionSeedCatalog
         Create(303, PermissionKeys.Maintenance.CustomerLaborChargesRead, "Maintenance", "عرض مصنعية العميل", "Read customer labor charges", "عرض مصنعية العميل ضمن النطاق المصرح به.", "Read customer labor charges within the authorized scope.", sensitive: true),
         Create(304, PermissionKeys.Maintenance.MechanicLaborPaymentsRead, "Maintenance", "عرض أجرة الميكانيكي", "Read mechanic labor payments", "عرض أجرة الميكانيكي ضمن النطاق المصرح به.", "Read mechanic labor payments within the authorized scope.", sensitive: true),
         Create(305, PermissionKeys.Inventory.ReturnsRead, "Inventory", "عرض مرتجعات المورد", "Read supplier returns", "عرض مرتجعات المورد ضمن النطاق المصرح به.", "Read supplier returns within the authorized scope.", sensitive: true),
+    .. LogisticsERP.Application.Features.Jahez.JahezWorkflowPermissions.All.Select((key, i) =>
+        Create(700 + i, key, "Jahez", WorkflowName(i), key, WorkflowName(i), key,
+            clientScope: true, sensitive: true, highTrust: key.EndsWith(".approve", StringComparison.Ordinal)))
     ];
+
+    private static string WorkflowName(int index) => new[] { "سحب حساب جاهز", "تنفيذ تصفية جاهز", "تسجيل قبض رسوم جاهز",
+        "تحديث حالة حساب جاهز", "قبض أموال جاهز", "صرف أموال جاهز", "تعديل المديونية الإدارية", "تأكيد سداد المستحق المرحل",
+        "طلب إعفاء رسوم", "اعتماد إعفاء رسوم", "طلب تبديل حساب", "اعتماد تبديل حساب", "طلب ترحيل مستحق", "اعتماد ترحيل مستحق",
+        "طلب سياسة عمولة", "اعتماد سياسة عمولة", "طلب تعديل تصفية أو مديونية", "اعتماد تعديل تصفية أو مديونية" }[index];
 
     private static PermissionSeed Create(
         int displayOrder,

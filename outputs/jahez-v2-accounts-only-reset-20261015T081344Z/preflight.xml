@@ -1,0 +1,115 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="AccountCount" type="xs:long" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="AssignmentCount" type="xs:long" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table2">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="CredentialCount" type="xs:long" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table3">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="name" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table4">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="MigrationId" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <AccountCount>380</AccountCount>
+  </Table>
+  <Table1>
+    <AssignmentCount>289</AssignmentCount>
+  </Table1>
+  <Table2>
+    <CredentialCount>0</CredentialCount>
+  </Table2>
+  <Table3>
+    <name>JahezAccountFee</name>
+  </Table3>
+  <Table3>
+    <name>JahezAccountHandover</name>
+  </Table3>
+  <Table3>
+    <name>JahezApprovalDecision</name>
+  </Table3>
+  <Table3>
+    <name>JahezApprovalRequest</name>
+  </Table3>
+  <Table3>
+    <name>JahezCashboxEntry</name>
+  </Table3>
+  <Table3>
+    <name>JahezCashboxHandover</name>
+  </Table3>
+  <Table3>
+    <name>JahezCommandReceipt</name>
+  </Table3>
+  <Table3>
+    <name>JahezCommissionPolicyPeriod</name>
+  </Table3>
+  <Table3>
+    <name>JahezDailyDispatch</name>
+  </Table3>
+  <Table3>
+    <name>JahezEarningsStatement</name>
+  </Table3>
+  <Table3>
+    <name>JahezImportBatch</name>
+  </Table3>
+  <Table3>
+    <name>JahezImportFile</name>
+  </Table3>
+  <Table3>
+    <name>JahezImportRow</name>
+  </Table3>
+  <Table3>
+    <name>JahezLedgerEntry</name>
+  </Table3>
+  <Table3>
+    <name>JahezMoneyMovement</name>
+  </Table3>
+  <Table3>
+    <name>JahezOperation</name>
+  </Table3>
+  <Table3>
+    <name>JahezReminderState</name>
+  </Table3>
+  <Table3>
+    <name>JahezRiderSettlement</name>
+  </Table3>
+  <Table3>
+    <name>JahezTransaction</name>
+  </Table3>
+  <Table3>
+    <name>JahezTransferredDebt</name>
+  </Table3>
+</NewDataSet>

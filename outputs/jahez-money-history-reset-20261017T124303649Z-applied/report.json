@@ -1,0 +1,31 @@
+{
+  "Applied": true,
+  "VerifiedAtUtc": "2026-10-17T12:43:29.8445648Z",
+  "ResetThroughRiyadhDate": "2026-10-17",
+  "CommissionResumesOn": "2026-10-18",
+  "Before": {
+    "AccountFees": 3,
+    "AccountingEntries": 6,
+    "AccountSessions": 298,
+    "CommandReceipts": 11,
+    "CommissionPolicies": 0,
+    "DailyOrders": 0,
+    "EarningsStatements": 0,
+    "ImportBatches": 2,
+    "ImportFiles": 2,
+    "ImportRows": 3484,
+    "MoneyMovements": 3,
+    "Operations": 4,
+    "PlatformTransactions": 0,
+    "RequestDecisions": 0,
+    "Requests": 2,
+    "SettlementReminders": 0,
+    "TransferredDebts": 0
+  },
+  "EmptyFinancialHistoryTables": 16,
+  "PreservedSessions": 298,
+  "ProtectedTablesVerified": 24,
+  "OtherPlatformDataPreserved": true,
+  "BackupDirectory": "C:\\Users\\omarf\\OneDrive\\Documents\\ChatGPT\\Logistic ERP\\outputs\\jahez-money-history-reset-20261017T124303649Z-applied",
+  "SqlSha256": "569E9CEC93A5B0CFFDF0DBF91DC8101E60557D13B369F5A462170548A9BAF1F5"
+}

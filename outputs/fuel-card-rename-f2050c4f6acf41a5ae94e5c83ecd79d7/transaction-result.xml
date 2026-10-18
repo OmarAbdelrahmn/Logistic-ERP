@@ -1,0 +1,33 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="OldNumber" type="xs:string" minOccurs="0" />
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="CardNumber" type="xs:string" minOccurs="0" />
+                <xs:element name="NormalizedCardNumber" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <OldNumber>2318SKA</OldNumber>
+    <Id>01a10b3c-19d1-75f4-bcb0-aa43e891a6dc</Id>
+    <CardNumber>2318SXA</CardNumber>
+    <NormalizedCardNumber>2318SXA</NormalizedCardNumber>
+  </Table>
+  <Table>
+    <OldNumber>2323SKA</OldNumber>
+    <Id>01a10b3c-19d0-7f72-b14f-c28cffeace4a</Id>
+    <CardNumber>2323SXA</CardNumber>
+    <NormalizedCardNumber>2323SXA</NormalizedCardNumber>
+  </Table>
+</NewDataSet>

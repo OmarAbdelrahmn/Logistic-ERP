@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="84dcba13-0da6-48d7-8e76-d0e10988cb35" name="omarf@OMAR 2026-10-17 18:50:08" runUser="OMAR\omarf" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-17T18:50:08.1107619+03:00" queuing="2026-10-17T18:50:08.1107626+03:00" start="2026-10-17T18:49:47.1131512+03:00" finish="2026-10-17T18:50:13.4337999+03:00" />
+  <TestSettings name="default" id="98ac1357-45cd-427f-b0de-6982fbf2c3d4">
+    <Deployment runDeploymentRoot="omarf_OMAR_2026-10-17_18_50_08" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="c2231851-55e6-48f1-9a0e-b8c5d81845af" testId="314d395a-218b-be83-216f-d48299d7cf4d" testName="LogisticsERP.Fleet.UnitTests.ChefzWorkflowTests.UploadedOctoberOrderFilesReconcileReadOnly(fileName: &quot;2151034 Albawaba Almokbela (8).xlsx&quot;, count: 5067, fees: 117096, tips: 953, compensation: 961, deductions: 3365, net: 98080.6, company: 16044.11, rider: 82036.49, companyChangeAfterAssignmentCorrection: 25)" computerName="OMAR" duration="00:00:05.1785895" startTime="2026-10-17T18:50:08.0765998+03:00" endTime="2026-10-17T18:50:13.2555872+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c2231851-55e6-48f1-9a0e-b8c5d81845af" />
+    <UnitTestResult executionId="d116538e-fdd7-4d16-a06f-a06762ded13d" testId="9df41ee8-27a1-59f7-ce95-f4566ba6f3f4" testName="LogisticsERP.Fleet.UnitTests.ChefzWorkflowTests.UploadedOctoberOrderFilesReconcileReadOnly(fileName: &quot;2151351 Albawaabah Farei (8).xlsx&quot;, count: 4048, fees: 93517, tips: 1032, compensation: 664, deductions: 2789, net: 78396.45, company: 12408.78, rider: 65987.67, companyChangeAfterAssignmentCorrection: 0)" computerName="OMAR" duration="00:00:15.6753536" startTime="2026-10-17T18:49:52.3728994+03:00" endTime="2026-10-17T18:50:08.0640313+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d116538e-fdd7-4d16-a06f-a06762ded13d" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="LogisticsERP.Fleet.UnitTests.ChefzWorkflowTests.UploadedOctoberOrderFilesReconcileReadOnly(fileName: &quot;2151351 Albawaabah Farei (8).xlsx&quot;, count: 4048, fees: 93517, tips: 1032, compensation: 664, deductions: 2789, net: 78396.45, company: 12408.78, rider: 65987.67, companyChangeAfterAssignmentCorrection: 0)" storage="c:\users\omarf\onedrive\documents\chatgpt\logistic erp\tests\logisticserp.fleet.unittests\bin\debug\net10.0\logisticserp.fleet.unittests.dll" id="9df41ee8-27a1-59f7-ce95-f4566ba6f3f4">
+      <Execution id="d116538e-fdd7-4d16-a06f-a06762ded13d" />
+      <TestMethod codeBase="C:\Users\omarf\OneDrive\Documents\ChatGPT\Logistic ERP\tests\LogisticsERP.Fleet.UnitTests\bin\Debug\net10.0\LogisticsERP.Fleet.UnitTests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="LogisticsERP.Fleet.UnitTests.ChefzWorkflowTests" name="UploadedOctoberOrderFilesReconcileReadOnly" />
+    </UnitTest>
+    <UnitTest name="LogisticsERP.Fleet.UnitTests.ChefzWorkflowTests.UploadedOctoberOrderFilesReconcileReadOnly(fileName: &quot;2151034 Albawaba Almokbela (8).xlsx&quot;, count: 5067, fees: 117096, tips: 953, compensation: 961, deductions: 3365, net: 98080.6, company: 16044.11, rider: 82036.49, companyChangeAfterAssignmentCorrection: 25)" storage="c:\users\omarf\onedrive\documents\chatgpt\logistic erp\tests\logisticserp.fleet.unittests\bin\debug\net10.0\logisticserp.fleet.unittests.dll" id="314d395a-218b-be83-216f-d48299d7cf4d">
+      <Execution id="c2231851-55e6-48f1-9a0e-b8c5d81845af" />
+      <TestMethod codeBase="C:\Users\omarf\OneDrive\Documents\ChatGPT\Logistic ERP\tests\LogisticsERP.Fleet.UnitTests\bin\Debug\net10.0\LogisticsERP.Fleet.UnitTests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="LogisticsERP.Fleet.UnitTests.ChefzWorkflowTests" name="UploadedOctoberOrderFilesReconcileReadOnly" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="314d395a-218b-be83-216f-d48299d7cf4d" executionId="c2231851-55e6-48f1-9a0e-b8c5d81845af" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9df41ee8-27a1-59f7-ce95-f4566ba6f3f4" executionId="d116538e-fdd7-4d16-a06f-a06762ded13d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="2" executed="2" passed="2" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v4.0.0+05679a7ab5 (64-bit .NET 10.0.13)&#xD;
+[xUnit.net 00:00:01.25]   Discovering: LogisticsERP.Fleet.UnitTests&#xD;
+[xUnit.net 00:00:02.84]   Discovered:  LogisticsERP.Fleet.UnitTests&#xD;
+[xUnit.net 00:00:03.54]   Starting:    LogisticsERP.Fleet.UnitTests&#xD;
+[xUnit.net 00:00:24.57]   Finished:    LogisticsERP.Fleet.UnitTests (ID = 'e2e50b53004e98b32993286df87884206bfa0e5eae9780d27f0c21b8fcae7fff')&#xD;
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>

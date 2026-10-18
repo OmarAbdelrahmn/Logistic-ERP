@@ -4,6 +4,17 @@ namespace LogisticsERP.Application.Features.Hr;
 
 public static class PlatformAccountErrors
 {
+    public static OperationError OwnerProfileRequired(Guid accountId, Guid employeeId) => new(
+        "platform.account_owner_profile_required",
+        "لا يوجد ملف مندوب لمالك الحساب المسجل. أنشئ الملف التشغيلي للمالك ثم أعد محاولة الإسناد.",
+        ErrorType.Conflict,
+        "ownerRiderProfileId",
+        new Dictionary<string, object?>
+        {
+            ["accountId"] = accountId,
+            ["registeredEmployeeId"] = employeeId
+        });
+
     public static OperationError Required(string field, string label) =>
         Validation("platform.account_required_field", field, $"حقل {label} مطلوب.");
 

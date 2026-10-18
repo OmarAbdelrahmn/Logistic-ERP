@@ -50,6 +50,9 @@ public sealed class MaintenanceApiSurfaceTests
         AssertEndpointPermission(nameof(MaintenanceInventoryController.GetOilBarrelUsage), PermissionKeys.Inventory.CostLayersRead, typeof(MaintenanceInventoryController));
         AssertEndpointPermission(nameof(MaintenanceInventoryController.GetOilBarrelUsage), PermissionKeys.Maintenance.OilRead, typeof(MaintenanceInventoryController));
         AssertEndpointPermission(nameof(MaintenanceInventoryController.RecordOilBarrelLoss), PermissionKeys.Inventory.StockAdjust, typeof(MaintenanceInventoryController));
+        AssertEndpointPermission(nameof(MaintenanceInventoryController.RecordOilBarrelMissing), PermissionKeys.Inventory.StockAdjust, typeof(MaintenanceInventoryController));
+        AssertEndpointPermission(nameof(MaintenanceInventoryController.GetOilBarrelMissingHistory), PermissionKeys.Inventory.StockRead, typeof(MaintenanceInventoryController));
+        AssertEndpointPermission(nameof(MaintenanceInventoryController.GetOilBarrelMissingHistory), PermissionKeys.Inventory.CostLayersRead, typeof(MaintenanceInventoryController));
         Assert.NotNull(typeof(OilBarrel).GetProperty(nameof(OilBarrel.RemainingLiters)));
         Assert.NotNull(typeof(OilBarrel).GetProperty(nameof(OilBarrel.UnitCostPerLiter)));
         Assert.NotNull(typeof(OilBarrel).GetProperty(nameof(OilBarrel.MaximumAllowedLossLiters)));

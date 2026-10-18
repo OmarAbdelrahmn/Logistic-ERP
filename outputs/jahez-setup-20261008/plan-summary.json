@@ -1,0 +1,20 @@
+{
+  "ready": 199,
+  "pending": 105,
+  "unassigned": 76,
+  "openingDebt": "77309.838000",
+  "openingFees": "0.000000",
+  "openingCommission": "113850",
+  "pendingReasons": {
+    "Last settlement precedes handover after date correction": 73,
+    "Rider Iqama not found | Last settlement precedes handover after date correction": 13,
+    "Handover still future after approved day/month correction: 2027-01-08 | Last settlement precedes handover after date correction": 4,
+    "Account is not available (status 4) | Last settlement precedes handover after date correction": 2,
+    "Account is not available (status 4)": 1,
+    "Rider exceeds two-account limit | Last settlement precedes handover after date correction": 2,
+    "Rider Iqama not found": 6,
+    "Missing or invalid handover date: 00:00:00": 2,
+    "Rider exceeds two-account limit": 1,
+    "Missing or invalid handover date: 1/8/20207": 1
+  }
+}

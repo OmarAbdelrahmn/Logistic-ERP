@@ -13,6 +13,98 @@ namespace LogisticsERP.Fleet.UnitTests;
 
 public sealed class WorkforceEmployeeListTests
 {
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task EmployeeRiderProfileProvisioningIsIdempotentAndPreservesEmployeeData(bool existingProfile)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var db = CreateContext();
+        await using var identity = CreateIdentityContext();
+        var employee = CreatePerson("1234567890", "Account owner employee", true, EmployeeRelationshipType.SponsoredInternal);
+        employee.WorkingForMeAs = "Accountant";
+        employee.SponsorId = Guid.NewGuid();
+        employee.HireDate = new(2026, 1, 1);
+        employee.RowVersion = [2];
+        db.Employees.Add(employee);
+        if (existingProfile)
+            db.RiderProfiles.Add(new RiderProfile { EmployeeId = employee.Id, OperationalNotes = "Keep notes", TShirtSize = TShirtSize.Large });
+        await db.SaveChangesAsync(ct);
+        db.ChangeTracker.Clear();
+        var service = new WorkforceService(db, identity, new TestCurrentUser());
+        var before = (await service.GetEmployeeAsync(employee.Id, ct)).Value!;
+
+        var created = await service.EnsureRiderProfileAsync(employee.Id, ct);
+        var repeated = await service.EnsureRiderProfileAsync(employee.Id, ct);
+
+        Assert.True(created.IsSuccess, created.Error.Description);
+        Assert.True(repeated.IsSuccess, repeated.Error.Description);
+        Assert.Equal(before.Employee, created.Value!.Employee);
+        Assert.True(created.Value.Employee.IsEmployee);
+        Assert.Equal(created.Value.Rider!.Id, repeated.Value!.Rider!.Id);
+        Assert.Equal(employee.Id, created.Value.Rider.EmployeeId);
+        Assert.Equal(existingProfile ? "Keep notes" : null, created.Value.Rider.OperationalNotes);
+        Assert.Equal(existingProfile ? "Large" : null, created.Value.Rider.TShirtSize);
+        Assert.Single(await db.RiderProfiles.ToArrayAsync(ct));
+        Assert.Empty(await db.EmployeeWorkHistory.ToArrayAsync(ct));
+        Assert.Empty((await service.GetRidersAsync(null, ct)).Value!);
+        Assert.Equal(created.Value.Rider.Id, Assert.Single((await service.GetEmployeesAsync(ct)).Value!).RiderProfileId);
+        Assert.False(db.ChangeTracker.HasChanges());
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task MissingOrDeletedEmployeeCannotBeProvisioned(bool deletedEmployee)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var db = CreateContext();
+        await using var identity = CreateIdentityContext();
+        var employee = CreatePerson("1234567890", "Deleted employee", true, EmployeeRelationshipType.SponsoredInternal);
+        if (deletedEmployee)
+        {
+            employee.IsDeleted = true;
+            db.Employees.Add(employee);
+            await db.SaveChangesAsync(ct);
+        }
+
+        var result = await new WorkforceService(db, identity, new TestCurrentUser()).EnsureRiderProfileAsync(employee.Id, ct);
+
+        Assert.Equal(HrErrors.NotFound.Code, result.Error.Code);
+        Assert.Empty(await db.RiderProfiles.ToArrayAsync(ct));
+        Assert.False(db.ChangeTracker.HasChanges());
+    }
+
+    [Fact]
+    public async Task ProfileDataCanBeManagedWhileThePersonRemainsAnEmployee()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var db = CreateContext();
+        await using var identity = CreateIdentityContext();
+        var employee = CreatePerson("1234567890", "Employee", true, EmployeeRelationshipType.SponsoredInternal);
+        db.Employees.Add(employee);
+        await db.SaveChangesAsync(ct);
+        var service = new WorkforceService(db, identity, new TestCurrentUser());
+        var provisioned = await service.EnsureRiderProfileAsync(employee.Id, ct);
+        var profile = await db.RiderProfiles.SingleAsync(ct);
+        profile.RowVersion = [1];
+        await db.SaveChangesAsync(ct);
+
+        var stale = await service.UpdateRiderProfileAsync(profile.Id, new("Large", "Stale update", "Ag=="), ct);
+        Assert.Equal(HrErrors.ConcurrencyConflict.Code, stale.Error.Code);
+        Assert.Null(profile.OperationalNotes);
+        Assert.False(db.ChangeTracker.HasChanges());
+        var updated = await service.UpdateRiderProfileAsync(profile.Id, new("Large", " Account owner ", "AQ=="), ct);
+
+        Assert.True(updated.IsSuccess, updated.Error.Description);
+        Assert.Equal(provisioned.Value!.Rider!.Id, updated.Value!.Id);
+        Assert.Equal("Large", updated.Value.TShirtSize);
+        Assert.Equal("Account owner", updated.Value.OperationalNotes);
+        Assert.True((await db.Employees.SingleAsync(ct)).IsEmployee);
+        Assert.Equal(EmployeeStatus.Terminated, employee.Status);
+        Assert.Empty(await db.EmployeeWorkHistory.ToArrayAsync(ct));
+    }
+
     [Fact]
     public async Task VehicleProfileCanBeCreatedForAdministrativeEmployeeWithoutChangingRole()
     {

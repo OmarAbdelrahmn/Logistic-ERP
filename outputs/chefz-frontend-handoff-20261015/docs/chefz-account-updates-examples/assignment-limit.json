@@ -1,0 +1,39 @@
+{
+  "type": "https://httpstatuses.com/409",
+  "title": "Conflict",
+  "status": 409,
+  "detail": "The rider already has the maximum number of active Chefz accounts.",
+  "errorCode": "platform.rider_account_limit_reached",
+  "correlationId": "synthetic-example",
+  "field": "actualRiderProfileId",
+  "assignmentLimit": {
+    "riderProfileId": "00000000-0000-4000-8000-000000000001",
+    "requestedAccountId": "00000000-0000-4000-8000-000000000012",
+    "requestedPaymentModel": "PayPerOrder",
+    "maximumActiveAccounts": 2,
+    "maximumSalaryAccounts": 1,
+    "activeAccounts": [
+      {
+        "assignmentId": "00000000-0000-4000-8000-000000000020",
+        "accountId": "00000000-0000-4000-8000-000000000010",
+        "platformId": "00000000-0000-4000-8000-000000000004",
+        "platformCode": "SHIFTZ",
+        "platformNameAr": "شفز",
+        "platformNameEn": "Chefz",
+        "externalAccountId": "CHEFZ-A",
+        "paymentModel": "PayPerOrder"
+      },
+      {
+        "assignmentId": "00000000-0000-4000-8000-000000000021",
+        "accountId": "00000000-0000-4000-8000-000000000011",
+        "platformId": "00000000-0000-4000-8000-000000000004",
+        "platformCode": "SHIFTZ",
+        "platformNameAr": "شفز",
+        "platformNameEn": "Chefz",
+        "externalAccountId": "CHEFZ-B",
+        "paymentModel": "PayPerOrder"
+      }
+    ],
+    "allowedPaymentModels": []
+  }
+}

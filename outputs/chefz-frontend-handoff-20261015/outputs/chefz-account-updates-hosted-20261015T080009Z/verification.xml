@@ -1,0 +1,397 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="CompatibilityChecks">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="CheckName" type="xs:string" minOccurs="0" />
+                <xs:element name="Passed" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="AssignmentIndexes">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="name" type="xs:string" minOccurs="0" />
+                <xs:element name="is_unique" type="xs:boolean" minOccurs="0" />
+                <xs:element name="is_disabled" type="xs:boolean" minOccurs="0" />
+                <xs:element name="has_filter" type="xs:boolean" minOccurs="0" />
+                <xs:element name="filter_definition" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="AssignmentConstraints">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="name" type="xs:string" minOccurs="0" />
+                <xs:element name="definition" type="xs:string" minOccurs="0" />
+                <xs:element name="is_disabled" type="xs:boolean" minOccurs="0" />
+                <xs:element name="is_not_trusted" type="xs:boolean" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="ChefzMigrations">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="MigrationId" type="xs:string" minOccurs="0" />
+                <xs:element name="ProductVersion" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="IdentityMigrations">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="MigrationId" type="xs:string" minOccurs="0" />
+                <xs:element name="ProductVersion" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Platforms">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="Code" type="xs:string" minOccurs="0" />
+                <xs:element name="NameAr" type="xs:string" minOccurs="0" />
+                <xs:element name="NonDeletedAccounts" type="xs:long" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="AccountStatuses">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Status" type="xs:int" minOccurs="0" />
+                <xs:element name="Accounts" type="xs:long" minOccurs="0" />
+                <xs:element name="Taken" type="xs:long" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="RiderAccountCounts">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="AccountsPerRider" type="xs:long" minOccurs="0" />
+                <xs:element name="Riders" type="xs:long" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="DataHealth">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="DuplicateOpenAccountAssignments" type="xs:long" minOccurs="0" />
+                <xs:element name="DuplicateOpenRiderSlots" type="xs:long" minOccurs="0" />
+                <xs:element name="InvalidSettlementArithmetic" type="xs:long" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="FinancialTotals">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Settlements" type="xs:long" minOccurs="0" />
+                <xs:element name="NetEarnings" type="xs:decimal" minOccurs="0" />
+                <xs:element name="CompanyAmount" type="xs:decimal" minOccurs="0" />
+                <xs:element name="RiderAmount" type="xs:decimal" minOccurs="0" />
+                <xs:element name="OrderImports" type="xs:long" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="PerformanceTotals">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="PerformanceRows" type="xs:long" minOccurs="0" />
+                <xs:element name="PerformanceImports" type="xs:long" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Permissions">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Key" type="xs:string" minOccurs="0" />
+                <xs:element name="RequiresClientScope" type="xs:boolean" minOccurs="0" />
+                <xs:element name="IsDeleted" type="xs:boolean" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="SystemAdminGrants">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="PermissionKey" type="xs:string" minOccurs="0" />
+                <xs:element name="IsDeleted" type="xs:boolean" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="VerifiedTime">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="VerifiedAtUtc" type="xs:dateTime" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <CompatibilityChecks>
+    <CheckName>Chefz core migration</CheckName>
+    <Passed>1</Passed>
+  </CompatibilityChecks>
+  <CompatibilityChecks>
+    <CheckName>Chefz reports migration</CheckName>
+    <Passed>1</Passed>
+  </CompatibilityChecks>
+  <CompatibilityChecks>
+    <CheckName>Chefz money import migration</CheckName>
+    <Passed>1</Passed>
+  </CompatibilityChecks>
+  <CompatibilityChecks>
+    <CheckName>Chefz permission migration</CheckName>
+    <Passed>1</Passed>
+  </CompatibilityChecks>
+  <CompatibilityChecks>
+    <CheckName>Account rowversion</CheckName>
+    <Passed>1</Passed>
+  </CompatibilityChecks>
+  <CompatibilityChecks>
+    <CheckName>Assignment slots column</CheckName>
+    <Passed>1</Passed>
+  </CompatibilityChecks>
+  <CompatibilityChecks>
+    <CheckName>Slots one and two constraint</CheckName>
+    <Passed>1</Passed>
+  </CompatibilityChecks>
+  <CompatibilityChecks>
+    <CheckName>No unique rider-only index</CheckName>
+    <Passed>1</Passed>
+  </CompatibilityChecks>
+  <CompatibilityChecks>
+    <CheckName>Unique active rider slots</CheckName>
+    <Passed>1</Passed>
+  </CompatibilityChecks>
+  <CompatibilityChecks>
+    <CheckName>Unique active account</CheckName>
+    <Passed>1</Passed>
+  </CompatibilityChecks>
+  <CompatibilityChecks>
+    <CheckName>One salary account constraint</CheckName>
+    <Passed>1</Passed>
+  </CompatibilityChecks>
+  <CompatibilityChecks>
+    <CheckName>Unique report ID mapping</CheckName>
+    <Passed>1</Passed>
+  </CompatibilityChecks>
+  <CompatibilityChecks>
+    <CheckName>Daily account-date uniqueness</CheckName>
+    <Passed>1</Passed>
+  </CompatibilityChecks>
+  <CompatibilityChecks>
+    <CheckName>Money assignment-period uniqueness</CheckName>
+    <Passed>1</Passed>
+  </CompatibilityChecks>
+  <CompatibilityChecks>
+    <CheckName>Money file hash uniqueness</CheckName>
+    <Passed>1</Passed>
+  </CompatibilityChecks>
+  <CompatibilityChecks>
+    <CheckName>Trusted money calculation constraint</CheckName>
+    <Passed>1</Passed>
+  </CompatibilityChecks>
+  <CompatibilityChecks>
+    <CheckName>Operational block dependency</CheckName>
+    <Passed>1</Passed>
+  </CompatibilityChecks>
+  <CompatibilityChecks>
+    <CheckName>Chefz permission definitions</CheckName>
+    <Passed>1</Passed>
+  </CompatibilityChecks>
+  <CompatibilityChecks>
+    <CheckName>System admin Chefz grants</CheckName>
+    <Passed>1</Passed>
+  </CompatibilityChecks>
+  <AssignmentIndexes>
+    <name>IX_RiderClientAssignments_ClientContractId_Status</name>
+    <is_unique>false</is_unique>
+    <is_disabled>false</is_disabled>
+    <has_filter>false</has_filter>
+  </AssignmentIndexes>
+  <AssignmentIndexes>
+    <name>IX_RiderClientAssignments_IsDeleted</name>
+    <is_unique>false</is_unique>
+    <is_disabled>false</is_disabled>
+    <has_filter>false</has_filter>
+  </AssignmentIndexes>
+  <AssignmentIndexes>
+    <name>IX_RiderClientAssignments_PlatformRiderAccountId</name>
+    <is_unique>true</is_unique>
+    <is_disabled>false</is_disabled>
+    <has_filter>true</has_filter>
+    <filter_definition>([EffectiveTo] IS NULL AND [IsDeleted]=(0))</filter_definition>
+  </AssignmentIndexes>
+  <AssignmentIndexes>
+    <name>IX_RiderClientAssignments_PlatformRiderAccountId_EffectiveFrom</name>
+    <is_unique>false</is_unique>
+    <is_disabled>false</is_disabled>
+    <has_filter>false</has_filter>
+  </AssignmentIndexes>
+  <AssignmentIndexes>
+    <name>IX_RiderClientAssignments_RiderProfileId</name>
+    <is_unique>false</is_unique>
+    <is_disabled>false</is_disabled>
+    <has_filter>true</has_filter>
+    <filter_definition>([EffectiveTo] IS NULL AND [IsDeleted]=(0))</filter_definition>
+  </AssignmentIndexes>
+  <AssignmentIndexes>
+    <name>IX_RiderClientAssignments_RiderProfileId_EffectiveFrom</name>
+    <is_unique>false</is_unique>
+    <is_disabled>false</is_disabled>
+    <has_filter>false</has_filter>
+  </AssignmentIndexes>
+  <AssignmentIndexes>
+    <name>IX_RiderClientAssignments_RiderProfileId_PaymentModel</name>
+    <is_unique>true</is_unique>
+    <is_disabled>false</is_disabled>
+    <has_filter>true</has_filter>
+    <filter_definition>([EffectiveTo] IS NULL AND [PaymentModel]=(2) AND [IsDeleted]=(0))</filter_definition>
+  </AssignmentIndexes>
+  <AssignmentIndexes>
+    <name>IX_RiderClientAssignments_RiderProfileId_RiderAccountSlot</name>
+    <is_unique>true</is_unique>
+    <is_disabled>false</is_disabled>
+    <has_filter>true</has_filter>
+    <filter_definition>([EffectiveTo] IS NULL AND [IsDeleted]=(0))</filter_definition>
+  </AssignmentIndexes>
+  <AssignmentIndexes>
+    <name>PK_RiderClientAssignments</name>
+    <is_unique>true</is_unique>
+    <is_disabled>false</is_disabled>
+    <has_filter>false</has_filter>
+  </AssignmentIndexes>
+  <AssignmentConstraints>
+    <name>CK_RiderClientAssignments_BackdatedReason</name>
+    <definition>([WasBackdated]=(0) OR [BackdatedReason] IS NOT NULL)</definition>
+    <is_disabled>false</is_disabled>
+    <is_not_trusted>false</is_not_trusted>
+  </AssignmentConstraints>
+  <AssignmentConstraints>
+    <name>CK_RiderClientAssignments_EffectiveRange</name>
+    <definition>([EffectiveTo] IS NULL OR [EffectiveTo]&gt;=[EffectiveFrom])</definition>
+    <is_disabled>false</is_disabled>
+    <is_not_trusted>false</is_not_trusted>
+  </AssignmentConstraints>
+  <AssignmentConstraints>
+    <name>CK_RiderClientAssignments_PaymentModel</name>
+    <definition>([PaymentModel]=(2) OR [PaymentModel]=(1))</definition>
+    <is_disabled>false</is_disabled>
+    <is_not_trusted>false</is_not_trusted>
+  </AssignmentConstraints>
+  <AssignmentConstraints>
+    <name>CK_RiderClientAssignments_RiderAccountSlot</name>
+    <definition>([RiderAccountSlot]=(2) OR [RiderAccountSlot]=(1))</definition>
+    <is_disabled>false</is_disabled>
+    <is_not_trusted>false</is_not_trusted>
+  </AssignmentConstraints>
+  <ChefzMigrations>
+    <MigrationId>20261010112122_AddChefzAccountsSettlementsAndPerformance</MigrationId>
+    <ProductVersion>10.0.11</ProductVersion>
+  </ChefzMigrations>
+  <ChefzMigrations>
+    <MigrationId>20261011191524_AddChefzWorkbookReportsAndStatistics</MigrationId>
+    <ProductVersion>10.0.11</ProductVersion>
+  </ChefzMigrations>
+  <ChefzMigrations>
+    <MigrationId>20261012093719_AddChefzOrderSettlementImports</MigrationId>
+    <ProductVersion>10.0.11</ProductVersion>
+  </ChefzMigrations>
+  <ChefzMigrations>
+    <MigrationId>20261015072958_AddJahezWorkflowV2</MigrationId>
+    <ProductVersion>10.0.11</ProductVersion>
+  </ChefzMigrations>
+  <IdentityMigrations>
+    <MigrationId>20261010112140_GrantChefzPermissions</MigrationId>
+    <ProductVersion>10.0.11</ProductVersion>
+  </IdentityMigrations>
+  <IdentityMigrations>
+    <MigrationId>20261015072948_GrantJahezWorkflowPermissions</MigrationId>
+    <ProductVersion>10.0.11</ProductVersion>
+  </IdentityMigrations>
+  <Platforms>
+    <Id>01a02a0d-845d-7535-ac25-1e1f0c8e5808</Id>
+    <Code>SHIFTZ</Code>
+    <NameAr>شفز</NameAr>
+    <NonDeletedAccounts>465</NonDeletedAccounts>
+  </Platforms>
+  <AccountStatuses>
+    <Status>1</Status>
+    <Accounts>77</Accounts>
+    <Taken>0</Taken>
+  </AccountStatuses>
+  <AccountStatuses>
+    <Status>2</Status>
+    <Accounts>216</Accounts>
+    <Taken>216</Taken>
+  </AccountStatuses>
+  <AccountStatuses>
+    <Status>3</Status>
+    <Accounts>172</Accounts>
+    <Taken>0</Taken>
+  </AccountStatuses>
+  <RiderAccountCounts>
+    <AccountsPerRider>1</AccountsPerRider>
+    <Riders>216</Riders>
+  </RiderAccountCounts>
+  <DataHealth>
+    <DuplicateOpenAccountAssignments>0</DuplicateOpenAccountAssignments>
+    <DuplicateOpenRiderSlots>0</DuplicateOpenRiderSlots>
+    <InvalidSettlementArithmetic>0</InvalidSettlementArithmetic>
+  </DataHealth>
+  <FinancialTotals>
+    <Settlements>0</Settlements>
+    <NetEarnings>0.00</NetEarnings>
+    <CompanyAmount>0.00</CompanyAmount>
+    <RiderAmount>0.00</RiderAmount>
+    <OrderImports>0</OrderImports>
+  </FinancialTotals>
+  <PerformanceTotals>
+    <PerformanceRows>149</PerformanceRows>
+    <PerformanceImports>1</PerformanceImports>
+  </PerformanceTotals>
+  <Permissions>
+    <Key>chefz.accounts.update</Key>
+    <RequiresClientScope>true</RequiresClientScope>
+    <IsDeleted>false</IsDeleted>
+  </Permissions>
+  <Permissions>
+    <Key>chefz.performance.import</Key>
+    <RequiresClientScope>true</RequiresClientScope>
+    <IsDeleted>false</IsDeleted>
+  </Permissions>
+  <Permissions>
+    <Key>chefz.read</Key>
+    <RequiresClientScope>true</RequiresClientScope>
+    <IsDeleted>false</IsDeleted>
+  </Permissions>
+  <Permissions>
+    <Key>chefz.settlements.create</Key>
+    <RequiresClientScope>true</RequiresClientScope>
+    <IsDeleted>false</IsDeleted>
+  </Permissions>
+  <SystemAdminGrants>
+    <PermissionKey>chefz.accounts.update</PermissionKey>
+    <IsDeleted>false</IsDeleted>
+  </SystemAdminGrants>
+  <SystemAdminGrants>
+    <PermissionKey>chefz.performance.import</PermissionKey>
+    <IsDeleted>false</IsDeleted>
+  </SystemAdminGrants>
+  <SystemAdminGrants>
+    <PermissionKey>chefz.read</PermissionKey>
+    <IsDeleted>false</IsDeleted>
+  </SystemAdminGrants>
+  <SystemAdminGrants>
+    <PermissionKey>chefz.settlements.create</PermissionKey>
+    <IsDeleted>false</IsDeleted>
+  </SystemAdminGrants>
+  <VerifiedTime>
+    <VerifiedAtUtc>2026-10-15T08:00:08.0985398+03:00</VerifiedAtUtc>
+  </VerifiedTime>
+</NewDataSet>

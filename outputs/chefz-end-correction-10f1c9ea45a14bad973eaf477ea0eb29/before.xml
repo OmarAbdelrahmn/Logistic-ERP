@@ -1,0 +1,125 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RiderProfileId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="ClientContractId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="PlatformRiderAccountId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="EffectiveFrom" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="EffectiveTo" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="Status" type="xs:int" minOccurs="0" />
+                <xs:element name="StartReason" type="xs:string" minOccurs="0" />
+                <xs:element name="EndReason" type="xs:string" minOccurs="0" />
+                <xs:element name="OperationalAgreementReference" type="xs:string" minOccurs="0" />
+                <xs:element name="OperationalAgreementNotes" type="xs:string" minOccurs="0" />
+                <xs:element name="AssignedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="EndedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="WasBackdated" type="xs:boolean" minOccurs="0" />
+                <xs:element name="BackdatedReason" type="xs:string" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="UpdatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="UpdatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RowVersion" type="xs:base64Binary" minOccurs="0" />
+                <xs:element name="IsDeleted" type="xs:boolean" minOccurs="0" />
+                <xs:element name="DeletedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="DeletedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DeletionReason" type="xs:string" minOccurs="0" />
+                <xs:element name="PaymentModel" type="xs:int" minOccurs="0" />
+                <xs:element name="RiderAccountSlot" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="ModuleKey" type="xs:string" minOccurs="0" />
+                <xs:element name="Version" type="xs:long" minOccurs="0" />
+                <xs:element name="LastChangedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="UpdatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="UpdatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RowVersion" type="xs:base64Binary" minOccurs="0" />
+                <xs:element name="IsDeleted" type="xs:boolean" minOccurs="0" />
+                <xs:element name="DeletedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="DeletedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DeletionReason" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <Id>ce52e580-07b7-4476-9711-8a48db7039bb</Id>
+    <RiderProfileId>01a0bf9d-e09f-729a-a267-efeb49f7f0a4</RiderProfileId>
+    <ClientContractId>01a125e8-4d17-73bf-9df8-9c76851c76ef</ClientContractId>
+    <PlatformRiderAccountId>ccc819cd-58fd-4eed-b32c-e046f4288326</PlatformRiderAccountId>
+    <EffectiveFrom>2026-10-01T00:00:00+03:00</EffectiveFrom>
+    <EffectiveTo>2026-10-06T00:00:00+03:00</EffectiveTo>
+    <Status>3</Status>
+    <StartReason>Completed historical assignment supplied by user; October dates confirmed.</StartReason>
+    <EndReason>Completed assignment from بدلاء الدوره; October return dates confirmed by user.</EndReason>
+    <AssignedByUserId>019c18d5-62e1-7000-c000-000000000001</AssignedByUserId>
+    <EndedByUserId>019c18d5-62e1-7000-c000-000000000001</EndedByUserId>
+    <WasBackdated>true</WasBackdated>
+    <BackdatedReason>Workbook handover date supplied and confirmed by user.</BackdatedReason>
+    <CreatedAtUtc>2026-10-15T12:36:04.6054531Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <RowVersion>AAAAAAACoVA=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <PaymentModel>1</PaymentModel>
+    <RiderAccountSlot>1</RiderAccountSlot>
+  </Table>
+  <Table>
+    <Id>0acffaea-fb38-42a8-bf02-6ef3ce233eea</Id>
+    <RiderProfileId>01a124fb-348f-7a41-9cb7-65b8bd6efb7b</RiderProfileId>
+    <ClientContractId>01a125e8-4d17-73bf-9df8-9c76851c76ef</ClientContractId>
+    <PlatformRiderAccountId>ccc819cd-58fd-4eed-b32c-e046f4288326</PlatformRiderAccountId>
+    <EffectiveFrom>2026-10-10T00:00:00+03:00</EffectiveFrom>
+    <Status>2</Status>
+    <StartReason>Chefz rider sheet import matched by owner and user iqama.</StartReason>
+    <AssignedByUserId>019c18d5-62e1-7000-c000-000000000001</AssignedByUserId>
+    <WasBackdated>true</WasBackdated>
+    <BackdatedReason>Sheet handover date supplied by user.</BackdatedReason>
+    <CreatedAtUtc>2026-10-13T11:21:51.8811507Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <RowVersion>AAAAAAACXjA=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <PaymentModel>1</PaymentModel>
+    <RiderAccountSlot>1</RiderAccountSlot>
+  </Table>
+  <Table1>
+    <Id>01a1067d-6004-76cb-95fd-715629f6abba</Id>
+    <ModuleKey>platform-operations</ModuleKey>
+    <Version>98</Version>
+    <LastChangedAtUtc>2026-10-17T12:06:52.8762172Z</LastChangedAtUtc>
+    <CreatedAtUtc>2026-10-04T10:37:22.308281Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-17T12:06:52.8771677Z</UpdatedAtUtc>
+    <UpdatedByUserId>21ef2bdf-fd57-43d7-029f-08df1415392a</UpdatedByUserId>
+    <RowVersion>AAAAAAACzVA=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table1>
+  <Table1>
+    <Id>01a125a7-52ee-7106-8a4e-f95d1cc8724b</Id>
+    <ModuleKey>chefz</ModuleKey>
+    <Version>19</Version>
+    <LastChangedAtUtc>2026-10-17T12:30:33.3378586Z</LastChangedAtUtc>
+    <CreatedAtUtc>2026-10-10T11:51:25.1799442Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-17T12:30:33.3394745Z</UpdatedAtUtc>
+    <UpdatedByUserId>21ef2bdf-fd57-43d7-029f-08df1415392a</UpdatedByUserId>
+    <RowVersion>AAAAAAACzhA=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table1>
+</NewDataSet>

@@ -1,0 +1,33 @@
+{
+  "Server": "db67927.public.databaseasp.net",
+  "Database": "db67927",
+  "AppliedAtUtc": "2026-10-15T07:42:17.0576431Z",
+  "ApplicationMigration": "20261015072958_AddJahezWorkflowV2",
+  "IdentityMigration": "20261015072948_GrantJahezWorkflowPermissions",
+  "ProtectedTablesPreserved": [
+    "JahezAccountHandover",
+    "JahezAccountFee",
+    "JahezApprovalRequest",
+    "JahezApprovalDecision",
+    "JahezCommissionPolicyPeriod",
+    "JahezEarningsStatement",
+    "JahezLedgerEntry",
+    "JahezRiderSettlement",
+    "JahezCashboxEntry",
+    "JahezCashboxHandover"
+  ],
+  "ScriptHashes": [
+    {
+      "Sha256": "F98323D196373CABF5996AEB7A616212EDB4F094130D8E5F0C0F5313DFED5591",
+      "Name": "jahez-v2-application.sql"
+    },
+    {
+      "Sha256": "DC4F7D1AC0A11A7864213C6306B1A19B9FE97C08AE95649E62D098C3649D69E1",
+      "Name": "jahez-v2-identity.sql"
+    }
+  ],
+  "LegacyReceipts": 1,
+  "MigratedReceipts": 1,
+  "LegacyAmount": 362.000000,
+  "MigratedAmount": 362.00
+}

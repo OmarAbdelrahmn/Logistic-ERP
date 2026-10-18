@@ -1,0 +1,328 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Vehicles">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="AssetNumber" type="xs:string" minOccurs="0" />
+                <xs:element name="NormalizedAssetNumber" type="xs:string" minOccurs="0" />
+                <xs:element name="PlateNumberAr" type="xs:string" minOccurs="0" />
+                <xs:element name="NormalizedPlateNumberAr" type="xs:string" minOccurs="0" />
+                <xs:element name="PlateNumberEn" type="xs:string" minOccurs="0" />
+                <xs:element name="NormalizedPlateNumberEn" type="xs:string" minOccurs="0" />
+                <xs:element name="PlateLettersAr" type="xs:string" minOccurs="0" />
+                <xs:element name="PlateLettersEn" type="xs:string" minOccurs="0" />
+                <xs:element name="PlateDigits" type="xs:string" minOccurs="0" />
+                <xs:element name="Vin" type="xs:string" minOccurs="0" />
+                <xs:element name="ChassisNumber" type="xs:string" minOccurs="0" />
+                <xs:element name="EngineNumber" type="xs:string" minOccurs="0" />
+                <xs:element name="VehicleManufacturerId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="VehicleModelId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="ModelYear" type="xs:int" minOccurs="0" />
+                <xs:element name="VehicleType" type="xs:int" minOccurs="0" />
+                <xs:element name="FuelType" type="xs:int" minOccurs="0" />
+                <xs:element name="TransmissionType" type="xs:int" minOccurs="0" />
+                <xs:element name="ColorAr" type="xs:string" minOccurs="0" />
+                <xs:element name="ColorEn" type="xs:string" minOccurs="0" />
+                <xs:element name="OwnershipType" type="xs:int" minOccurs="0" />
+                <xs:element name="OwnerName" type="xs:string" minOccurs="0" />
+                <xs:element name="AcquisitionDate" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="LeaseReference" type="xs:string" minOccurs="0" />
+                <xs:element name="CurrentOdometer" type="xs:long" minOccurs="0" />
+                <xs:element name="LastOdometerAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CurrentOperationalStatus" type="xs:int" minOccurs="0" />
+                <xs:element name="CurrentAssignmentId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DecommissionedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="DecommissionReason" type="xs:string" minOccurs="0" />
+                <xs:element name="Notes" type="xs:string" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="UpdatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="UpdatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RowVersion" type="xs:base64Binary" minOccurs="0" />
+                <xs:element name="IsDeleted" type="xs:boolean" minOccurs="0" />
+                <xs:element name="DeletedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="DeletedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DeletionReason" type="xs:string" minOccurs="0" />
+                <xs:element name="OperatingCityId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="SponsorId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="NormalizedChassisNumber" type="xs:string" minOccurs="0" />
+                <xs:element name="NormalizedSerialNumber" type="xs:string" minOccurs="0" />
+                <xs:element name="PurchasedFromSupplierId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RegistrationType" type="xs:int" minOccurs="0" />
+                <xs:element name="SerialNumber" type="xs:string" minOccurs="0" />
+                <xs:element name="TrackedDistanceKm" type="xs:decimal" minOccurs="0" />
+                <xs:element name="RegisteredOwnerSupplierId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RegisteredOwnerSponsorId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="HistoryCounts">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="PlateNumberAr" type="xs:string" minOccurs="0" />
+                <xs:element name="OdometerHistoryRows" type="xs:int" minOccurs="0" />
+                <xs:element name="DailyDistanceRows" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="DatasetVersion">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="ModuleKey" type="xs:string" minOccurs="0" />
+                <xs:element name="Version" type="xs:long" minOccurs="0" />
+                <xs:element name="LastChangedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="UpdatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="UpdatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RowVersion" type="xs:base64Binary" minOccurs="0" />
+                <xs:element name="IsDeleted" type="xs:boolean" minOccurs="0" />
+                <xs:element name="DeletedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="DeletedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DeletionReason" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Vehicles>
+    <Id>01a0aed7-0d95-7c56-a7c2-cdd6708d63f6</Id>
+    <AssetNumber>VEH-CDD6708D63F6</AssetNumber>
+    <NormalizedAssetNumber>VEHCDD6708D63F6</NormalizedAssetNumber>
+    <PlateNumberAr>ح ب 1031</PlateNumberAr>
+    <NormalizedPlateNumberAr>حب1031</NormalizedPlateNumberAr>
+    <PlateNumberEn>J B 1031</PlateNumberEn>
+    <NormalizedPlateNumberEn>JB1031</NormalizedPlateNumberEn>
+    <PlateLettersAr>ح ب</PlateLettersAr>
+    <PlateLettersEn>J B</PlateLettersEn>
+    <PlateDigits>1031</PlateDigits>
+    <ChassisNumber>MD2A21BX5RWC44803</ChassisNumber>
+    <VehicleManufacturerId>01a0aed7-0ca6-708a-8c86-3a7bd30125fd</VehicleManufacturerId>
+    <VehicleModelId>01a0aed7-0ca6-77b8-bacc-594731814438</VehicleModelId>
+    <ModelYear>2024</ModelYear>
+    <VehicleType>1</VehicleType>
+    <FuelType>1</FuelType>
+    <TransmissionType>3</TransmissionType>
+    <ColorAr>احمر</ColorAr>
+    <OwnershipType>1</OwnershipType>
+    <CurrentOdometer>99895</CurrentOdometer>
+    <LastOdometerAtUtc>2026-10-04T06:46:00Z</LastOdometerAtUtc>
+    <CurrentOperationalStatus>2</CurrentOperationalStatus>
+    <CurrentAssignmentId>01a0e6fc-0289-7978-adb8-70b1f6b4f816</CurrentAssignmentId>
+    <Notes>Imported from جميع2 المركبات.xlsx, worksheet row 190.</Notes>
+    <CreatedAtUtc>2026-09-17T10:08:44.6074067Z</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-04T06:46:30.9345408Z</UpdatedAtUtc>
+    <UpdatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</UpdatedByUserId>
+    <RowVersion>AAAAAAABKZ0=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000003</OperatingCityId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <NormalizedChassisNumber>MD2A21BX5RWC44803</NormalizedChassisNumber>
+    <NormalizedSerialNumber>605035120</NormalizedSerialNumber>
+    <RegistrationType>7</RegistrationType>
+    <SerialNumber>605035120</SerialNumber>
+    <TrackedDistanceKm>99895.00</TrackedDistanceKm>
+    <RegisteredOwnerSponsorId>019c18d5-62e1-7000-8000-000000000041</RegisteredOwnerSponsorId>
+  </Vehicles>
+  <Vehicles>
+    <Id>01a0aed7-0d92-73ef-94c7-73b4ff88c5bf</Id>
+    <AssetNumber>VEH-73B4FF88C5BF</AssetNumber>
+    <NormalizedAssetNumber>VEH73B4FF88C5BF</NormalizedAssetNumber>
+    <PlateNumberAr>ك ع 851</PlateNumberAr>
+    <NormalizedPlateNumberAr>كع851</NormalizedPlateNumberAr>
+    <PlateNumberEn>K E 851</PlateNumberEn>
+    <NormalizedPlateNumberEn>KE851</NormalizedPlateNumberEn>
+    <PlateLettersAr>ك ع</PlateLettersAr>
+    <PlateLettersEn>K E</PlateLettersEn>
+    <PlateDigits>851</PlateDigits>
+    <ChassisNumber>MD2A21BX7RWH47133</ChassisNumber>
+    <VehicleManufacturerId>01a0aed7-0ca7-7163-82dc-b1720a32aa30</VehicleManufacturerId>
+    <VehicleModelId>01a0aed7-0ca7-739c-ae7a-02542093b4b4</VehicleModelId>
+    <ModelYear>2024</ModelYear>
+    <VehicleType>1</VehicleType>
+    <FuelType>1</FuelType>
+    <TransmissionType>3</TransmissionType>
+    <ColorAr>اسود</ColorAr>
+    <OwnershipType>1</OwnershipType>
+    <CurrentOdometer>100080</CurrentOdometer>
+    <LastOdometerAtUtc>2026-10-12T20:59:59.9999999Z</LastOdometerAtUtc>
+    <CurrentOperationalStatus>2</CurrentOperationalStatus>
+    <CurrentAssignmentId>01a0e6fc-0350-767e-8cae-e9633d835858</CurrentAssignmentId>
+    <Notes>Imported from جميع2 المركبات.xlsx, worksheet row 32.</Notes>
+    <CreatedAtUtc>2026-09-17T10:08:44.6074067Z</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-13T08:39:18.3443812Z</UpdatedAtUtc>
+    <UpdatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</UpdatedByUserId>
+    <RowVersion>AAAAAAACU+k=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000003</OperatingCityId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <NormalizedChassisNumber>MD2A21BX7RWH47133</NormalizedChassisNumber>
+    <NormalizedSerialNumber>261765020</NormalizedSerialNumber>
+    <RegistrationType>7</RegistrationType>
+    <SerialNumber>261765020</SerialNumber>
+    <TrackedDistanceKm>100080.41</TrackedDistanceKm>
+    <RegisteredOwnerSponsorId>019c18d5-62e1-7000-8000-000000000041</RegisteredOwnerSponsorId>
+  </Vehicles>
+  <Vehicles>
+    <Id>01a0aed7-0d95-7936-b2e3-7da12b0c0c95</Id>
+    <AssetNumber>VEH-7DA12B0C0C95</AssetNumber>
+    <NormalizedAssetNumber>VEH7DA12B0C0C95</NormalizedAssetNumber>
+    <PlateNumberAr>ح ب 1034</PlateNumberAr>
+    <NormalizedPlateNumberAr>حب1034</NormalizedPlateNumberAr>
+    <PlateNumberEn>J B 1034</PlateNumberEn>
+    <NormalizedPlateNumberEn>JB1034</NormalizedPlateNumberEn>
+    <PlateLettersAr>ح ب</PlateLettersAr>
+    <PlateLettersEn>J B</PlateLettersEn>
+    <PlateDigits>1034</PlateDigits>
+    <ChassisNumber>MD2A21BX5RWC43888</ChassisNumber>
+    <VehicleManufacturerId>01a0aed7-0ca6-708a-8c86-3a7bd30125fd</VehicleManufacturerId>
+    <VehicleModelId>01a0aed7-0ca6-77b8-bacc-594731814438</VehicleModelId>
+    <ModelYear>2024</ModelYear>
+    <VehicleType>1</VehicleType>
+    <FuelType>1</FuelType>
+    <TransmissionType>3</TransmissionType>
+    <ColorAr>احمر</ColorAr>
+    <OwnershipType>1</OwnershipType>
+    <CurrentOdometer>598735</CurrentOdometer>
+    <LastOdometerAtUtc>2026-10-12T20:59:59.9999999Z</LastOdometerAtUtc>
+    <CurrentOperationalStatus>2</CurrentOperationalStatus>
+    <CurrentAssignmentId>01a12643-ce20-7992-b04f-02726293dbf8</CurrentAssignmentId>
+    <Notes>Imported from جميع2 المركبات.xlsx, worksheet row 217.</Notes>
+    <CreatedAtUtc>2026-09-17T10:08:44.6074067Z</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-13T06:36:30.3255143Z</UpdatedAtUtc>
+    <UpdatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</UpdatedByUserId>
+    <RowVersion>AAAAAAACUyM=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000003</OperatingCityId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <NormalizedChassisNumber>MD2A21BX5RWC43888</NormalizedChassisNumber>
+    <NormalizedSerialNumber>864035120</NormalizedSerialNumber>
+    <RegistrationType>7</RegistrationType>
+    <SerialNumber>864035120</SerialNumber>
+    <TrackedDistanceKm>598735.00</TrackedDistanceKm>
+    <RegisteredOwnerSponsorId>019c18d5-62e1-7000-8000-000000000041</RegisteredOwnerSponsorId>
+  </Vehicles>
+  <Vehicles>
+    <Id>01a0aed7-0d92-78e9-b91f-e629680fde7f</Id>
+    <AssetNumber>VEH-E629680FDE7F</AssetNumber>
+    <NormalizedAssetNumber>VEHE629680FDE7F</NormalizedAssetNumber>
+    <PlateNumberAr>د ب 9966</PlateNumberAr>
+    <NormalizedPlateNumberAr>دب9966</NormalizedPlateNumberAr>
+    <PlateNumberEn>D B 9966</PlateNumberEn>
+    <NormalizedPlateNumberEn>DB9966</NormalizedPlateNumberEn>
+    <PlateLettersAr>د ب</PlateLettersAr>
+    <PlateLettersEn>D B</PlateLettersEn>
+    <PlateDigits>9966</PlateDigits>
+    <ChassisNumber>MD2A21BX5RWC43633</ChassisNumber>
+    <VehicleManufacturerId>01a0aed7-0ca6-708a-8c86-3a7bd30125fd</VehicleManufacturerId>
+    <VehicleModelId>01a0aed7-0ca6-77b8-bacc-594731814438</VehicleModelId>
+    <ModelYear>2024</ModelYear>
+    <VehicleType>1</VehicleType>
+    <FuelType>1</FuelType>
+    <TransmissionType>3</TransmissionType>
+    <ColorAr>اسود</ColorAr>
+    <OwnershipType>1</OwnershipType>
+    <CurrentOdometer>99989</CurrentOdometer>
+    <LastOdometerAtUtc>2026-10-09T20:59:59.9999999Z</LastOdometerAtUtc>
+    <CurrentOperationalStatus>2</CurrentOperationalStatus>
+    <CurrentAssignmentId>01a0e6fc-032d-7841-a67a-756a7dd9e244</CurrentAssignmentId>
+    <Notes>Imported from جميع2 المركبات.xlsx, worksheet row 37.</Notes>
+    <CreatedAtUtc>2026-09-17T10:08:44.6074067Z</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-11T03:47:05.0965982Z</UpdatedAtUtc>
+    <UpdatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</UpdatedByUserId>
+    <RowVersion>AAAAAAACGLQ=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000003</OperatingCityId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <NormalizedChassisNumber>MD2A21BX5RWC43633</NormalizedChassisNumber>
+    <NormalizedSerialNumber>255043120</NormalizedSerialNumber>
+    <RegistrationType>7</RegistrationType>
+    <SerialNumber>255043120</SerialNumber>
+    <TrackedDistanceKm>99989.00</TrackedDistanceKm>
+    <RegisteredOwnerSponsorId>019c18d5-62e1-7000-8000-000000000041</RegisteredOwnerSponsorId>
+  </Vehicles>
+  <Vehicles>
+    <Id>01a0aed7-0d93-706a-8b6c-18d1d94c19bd</Id>
+    <AssetNumber>VEH-18D1D94C19BD</AssetNumber>
+    <NormalizedAssetNumber>VEH18D1D94C19BD</NormalizedAssetNumber>
+    <PlateNumberAr>ه ا 3048</PlateNumberAr>
+    <NormalizedPlateNumberAr>ها3048</NormalizedPlateNumberAr>
+    <PlateNumberEn>H A 3048</PlateNumberEn>
+    <NormalizedPlateNumberEn>HA3048</NormalizedPlateNumberEn>
+    <PlateLettersAr>ه ا</PlateLettersAr>
+    <PlateLettersEn>H A</PlateLettersEn>
+    <PlateDigits>3048</PlateDigits>
+    <ChassisNumber>MD2A21BX7SWG48625</ChassisNumber>
+    <VehicleManufacturerId>01a0aed7-0ca6-708a-8c86-3a7bd30125fd</VehicleManufacturerId>
+    <VehicleModelId>01a0aed7-0ca6-77b8-bacc-594731814438</VehicleModelId>
+    <ModelYear>2025</ModelYear>
+    <VehicleType>1</VehicleType>
+    <FuelType>1</FuelType>
+    <TransmissionType>3</TransmissionType>
+    <ColorAr>احمر</ColorAr>
+    <OwnershipType>1</OwnershipType>
+    <CurrentOdometer>99907</CurrentOdometer>
+    <LastOdometerAtUtc>2026-10-07T20:59:59.9999999Z</LastOdometerAtUtc>
+    <CurrentOperationalStatus>2</CurrentOperationalStatus>
+    <CurrentAssignmentId>01a0e6fc-0278-7c21-8715-ed4a7dda7f66</CurrentAssignmentId>
+    <Notes>Imported from جميع2 المركبات.xlsx, worksheet row 87.</Notes>
+    <CreatedAtUtc>2026-09-17T10:08:44.6074067Z</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-08T10:46:14.7131032Z</UpdatedAtUtc>
+    <UpdatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</UpdatedByUserId>
+    <RowVersion>AAAAAAAB2sQ=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000003</OperatingCityId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <NormalizedChassisNumber>MD2A21BX7SWG48625</NormalizedChassisNumber>
+    <NormalizedSerialNumber>282973220</NormalizedSerialNumber>
+    <RegistrationType>7</RegistrationType>
+    <SerialNumber>282973220</SerialNumber>
+    <TrackedDistanceKm>99907.00</TrackedDistanceKm>
+    <RegisteredOwnerSponsorId>019c18d5-62e1-7000-8000-000000000041</RegisteredOwnerSponsorId>
+  </Vehicles>
+  <HistoryCounts>
+    <PlateNumberAr>ح ب 1031</PlateNumberAr>
+    <OdometerHistoryRows>10</OdometerHistoryRows>
+    <DailyDistanceRows>6</DailyDistanceRows>
+  </HistoryCounts>
+  <HistoryCounts>
+    <PlateNumberAr>ك ع 851</PlateNumberAr>
+    <OdometerHistoryRows>13</OdometerHistoryRows>
+    <DailyDistanceRows>11</DailyDistanceRows>
+  </HistoryCounts>
+  <HistoryCounts>
+    <PlateNumberAr>ح ب 1034</PlateNumberAr>
+    <OdometerHistoryRows>7</OdometerHistoryRows>
+    <DailyDistanceRows>1</DailyDistanceRows>
+  </HistoryCounts>
+  <HistoryCounts>
+    <PlateNumberAr>د ب 9966</PlateNumberAr>
+    <OdometerHistoryRows>17</OdometerHistoryRows>
+    <DailyDistanceRows>10</DailyDistanceRows>
+  </HistoryCounts>
+  <HistoryCounts>
+    <PlateNumberAr>ه ا 3048</PlateNumberAr>
+    <OdometerHistoryRows>18</OdometerHistoryRows>
+    <DailyDistanceRows>11</DailyDistanceRows>
+  </HistoryCounts>
+  <DatasetVersion>
+    <Id>01a0ae4c-8a28-7126-a6c3-81c291b99252</Id>
+    <ModuleKey>fleet</ModuleKey>
+    <Version>4370</Version>
+    <LastChangedAtUtc>2026-10-13T14:33:44.2941055Z</LastChangedAtUtc>
+    <CreatedAtUtc>2026-09-17T07:37:26.8251763Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-13T14:33:44.2954678Z</UpdatedAtUtc>
+    <UpdatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</UpdatedByUserId>
+    <RowVersion>AAAAAAACZC8=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </DatasetVersion>
+</NewDataSet>

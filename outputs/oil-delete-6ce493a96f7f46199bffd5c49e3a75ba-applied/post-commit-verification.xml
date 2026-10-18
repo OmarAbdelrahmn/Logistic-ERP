@@ -1,0 +1,107 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="RemainingDeletedOperations" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="AuditCount" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table2">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="ReversalCount" type="xs:int" minOccurs="0" />
+                <xs:element name="RestoredLiters" type="xs:decimal" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table3">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="PlateNumberAr" type="xs:string" minOccurs="0" />
+                <xs:element name="LastCompletedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="LastCompletedOdometer" type="xs:long" minOccurs="0" />
+                <xs:element name="ComputedStatus" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <RemainingDeletedOperations>0</RemainingDeletedOperations>
+  </Table>
+  <Table1>
+    <AuditCount>10</AuditCount>
+  </Table1>
+  <Table2>
+    <ReversalCount>10</ReversalCount>
+    <RestoredLiters>10.000</RestoredLiters>
+  </Table2>
+  <Table3>
+    <PlateNumberAr>ر ا 1423</PlateNumberAr>
+    <LastCompletedAtUtc>2026-10-07T12:37:00Z</LastCompletedAtUtc>
+    <LastCompletedOdometer>28120</LastCompletedOdometer>
+    <ComputedStatus>2</ComputedStatus>
+  </Table3>
+  <Table3>
+    <PlateNumberAr>ه ا 3048</PlateNumberAr>
+    <LastCompletedAtUtc>2026-10-09T14:29:00Z</LastCompletedAtUtc>
+    <LastCompletedOdometer>381</LastCompletedOdometer>
+    <ComputedStatus>3</ComputedStatus>
+  </Table3>
+  <Table3>
+    <PlateNumberAr>ح ب 1027</PlateNumberAr>
+    <LastCompletedAtUtc>2026-10-07T13:05:00Z</LastCompletedAtUtc>
+    <LastCompletedOdometer>87731</LastCompletedOdometer>
+    <ComputedStatus>3</ComputedStatus>
+  </Table3>
+  <Table3>
+    <PlateNumberAr>ح ا 6162</PlateNumberAr>
+    <LastCompletedAtUtc>2026-10-07T09:26:00Z</LastCompletedAtUtc>
+    <LastCompletedOdometer>93466</LastCompletedOdometer>
+    <ComputedStatus>3</ComputedStatus>
+  </Table3>
+  <Table3>
+    <PlateNumberAr>ه ا 2986</PlateNumberAr>
+    <LastCompletedAtUtc>2026-10-07T12:43:00Z</LastCompletedAtUtc>
+    <LastCompletedOdometer>66274</LastCompletedOdometer>
+    <ComputedStatus>3</ComputedStatus>
+  </Table3>
+  <Table3>
+    <PlateNumberAr>ه ا 5811</PlateNumberAr>
+    <LastCompletedAtUtc>2026-10-07T12:44:00Z</LastCompletedAtUtc>
+    <LastCompletedOdometer>35994</LastCompletedOdometer>
+    <ComputedStatus>1</ComputedStatus>
+  </Table3>
+  <Table3>
+    <PlateNumberAr>ر ا 1609</PlateNumberAr>
+    <LastCompletedAtUtc>2026-10-07T12:42:00Z</LastCompletedAtUtc>
+    <LastCompletedOdometer>36471</LastCompletedOdometer>
+    <ComputedStatus>2</ComputedStatus>
+  </Table3>
+  <Table3>
+    <PlateNumberAr>ر ا 1389</PlateNumberAr>
+    <LastCompletedAtUtc>2026-10-09T05:59:00Z</LastCompletedAtUtc>
+    <LastCompletedOdometer>50969</LastCompletedOdometer>
+    <ComputedStatus>2</ComputedStatus>
+  </Table3>
+  <Table3>
+    <PlateNumberAr>ه ا 2362</PlateNumberAr>
+    <LastCompletedAtUtc>2026-10-07T13:02:00Z</LastCompletedAtUtc>
+    <LastCompletedOdometer>76179</LastCompletedOdometer>
+    <ComputedStatus>3</ComputedStatus>
+  </Table3>
+</NewDataSet>

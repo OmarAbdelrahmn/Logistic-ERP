@@ -1,0 +1,103 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="HandoverId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="Bucket" type="xs:int" minOccurs="0" />
+                <xs:element name="Kind" type="xs:int" minOccurs="0" />
+                <xs:element name="Amount" type="xs:decimal" minOccurs="0" />
+                <xs:element name="SourceId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="ReversesEntryId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="OccurredAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="Reason" type="xs:string" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="CalculationJson" type="xs:string" minOccurs="0" />
+                <xs:element name="FromDate" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="ThroughDate" type="xs:dateTime" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <Id>01a141bb-2874-7b92-aaa8-0491e5bdddbd</Id>
+    <HandoverId>01a141bb-2872-7641-9401-1a8e4912f304</HandoverId>
+    <Bucket>1</Bucket>
+    <Kind>2</Kind>
+    <Amount>-100.000000</Amount>
+    <SourceId>01a141bb-2874-73cd-a164-5d2115469576</SourceId>
+    <OccurredAtUtc>2026-10-15T22:42:27.0601708Z</OccurredAtUtc>
+    <Reason>تسليم جديد للعمل</Reason>
+    <CreatedAtUtc>2026-10-15T22:42:27.0621573Z</CreatedAtUtc>
+    <CreatedByUserId>b1de8de7-7ad4-4f08-f387-08df1173e0a7</CreatedByUserId>
+  </Table>
+  <Table>
+    <Id>01a141bb-2872-703b-a362-3becaf0e73f4</Id>
+    <HandoverId>01a141bb-2872-7641-9401-1a8e4912f304</HandoverId>
+    <Bucket>1</Bucket>
+    <Kind>1</Kind>
+    <Amount>200.000000</Amount>
+    <SourceId>01a141bb-2872-720a-b257-af9fb777269a</SourceId>
+    <OccurredAtUtc>2026-10-15T22:42:27.0585243Z</OccurredAtUtc>
+    <Reason>تسليم جديد للعمل</Reason>
+    <CreatedAtUtc>2026-10-15T22:42:27.0621573Z</CreatedAtUtc>
+    <CreatedByUserId>b1de8de7-7ad4-4f08-f387-08df1173e0a7</CreatedByUserId>
+  </Table>
+  <Table>
+    <Id>01a141b9-aa98-7d31-b618-77398cb74859</Id>
+    <HandoverId>01a141b9-aa98-70f8-a7e6-d99e51025d89</HandoverId>
+    <Bucket>1</Bucket>
+    <Kind>1</Kind>
+    <Amount>200.000000</Amount>
+    <SourceId>01a141b9-aa98-7e44-a179-02d7b86288d1</SourceId>
+    <OccurredAtUtc>2026-10-15T22:40:49.3048097Z</OccurredAtUtc>
+    <Reason>تسليم جديد للعمل</Reason>
+    <CreatedAtUtc>2026-10-15T22:40:49.3086011Z</CreatedAtUtc>
+    <CreatedByUserId>b1de8de7-7ad4-4f08-f387-08df1173e0a7</CreatedByUserId>
+  </Table>
+  <Table>
+    <Id>01a141b9-aa9a-7eb5-bbe4-e645dcd7c501</Id>
+    <HandoverId>01a141b9-aa98-70f8-a7e6-d99e51025d89</HandoverId>
+    <Bucket>1</Bucket>
+    <Kind>2</Kind>
+    <Amount>-200.000000</Amount>
+    <SourceId>01a141b9-aa9a-7afb-b905-894e69d7483c</SourceId>
+    <OccurredAtUtc>2026-10-15T22:40:49.3060892Z</OccurredAtUtc>
+    <Reason>تسليم جديد للعمل</Reason>
+    <CreatedAtUtc>2026-10-15T22:40:49.3086011Z</CreatedAtUtc>
+    <CreatedByUserId>b1de8de7-7ad4-4f08-f387-08df1173e0a7</CreatedByUserId>
+  </Table>
+  <Table>
+    <Id>01a141b1-fb47-7ebb-9a18-ea775ee4610f</Id>
+    <HandoverId>01a141b1-fb25-7dc4-8b06-c5d71283bd0e</HandoverId>
+    <Bucket>1</Bucket>
+    <Kind>1</Kind>
+    <Amount>200.000000</Amount>
+    <SourceId>01a141b1-fb3a-73af-b2be-977296a06851</SourceId>
+    <OccurredAtUtc>2026-10-15T22:32:25.6717129Z</OccurredAtUtc>
+    <Reason>تسليم جديد للعمل</Reason>
+    <CreatedAtUtc>2026-10-15T22:32:25.8340597Z</CreatedAtUtc>
+    <CreatedByUserId>b1de8de7-7ad4-4f08-f387-08df1173e0a7</CreatedByUserId>
+  </Table>
+  <Table>
+    <Id>01a141b1-fb7c-7163-939b-fc9834602f34</Id>
+    <HandoverId>01a141b1-fb25-7dc4-8b06-c5d71283bd0e</HandoverId>
+    <Bucket>1</Bucket>
+    <Kind>2</Kind>
+    <Amount>-200.000000</Amount>
+    <SourceId>01a141b1-fb6c-71af-acf2-c5e2107df4a2</SourceId>
+    <OccurredAtUtc>2026-10-15T22:32:25.7247108Z</OccurredAtUtc>
+    <Reason>تسليم جديد للعمل</Reason>
+    <CreatedAtUtc>2026-10-15T22:32:25.8340597Z</CreatedAtUtc>
+    <CreatedByUserId>b1de8de7-7ad4-4f08-f387-08df1173e0a7</CreatedByUserId>
+  </Table>
+</NewDataSet>

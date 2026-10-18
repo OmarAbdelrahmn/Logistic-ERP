@@ -1,0 +1,1 @@
+[{"name":"CK_JahezMoney_Routing","definition":"([Direction]=(1) AND ([Fund]=(1) OR [Fund]=(2) AND ([Purpose]=(2) OR [Purpose]=(1))) OR [Direction]=(2) AND ([Fund]=(3) OR [Fund]=(1)) AND [Purpose]<>(2))","is_disabled":false,"is_not_trusted":false}]

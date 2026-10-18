@@ -1,0 +1,14 @@
+{
+  "Database": "db67927",
+  "Server": "db67927.public.databaseasp.net",
+  "AppliedAtUtc": "2026-10-15T08:16:17.9007639Z",
+  "Migration": "20261015080537_ResetJahezToAccountsOnlyV2",
+  "AccountsPreserved": 380,
+  "AccountsWithOwners": 380,
+  "RemovedAssignments": 289,
+  "RemovedCredentials": 0,
+  "OldJahezSchemaRemoved": true,
+  "EmptyV2Tables": 17,
+  "OtherPlatformDataPreserved": true,
+  "ScriptSha256": "35F9F0C4221F9AD5974196B742867BA271146CB39C74094A5E8D6B76E74D355A"
+}

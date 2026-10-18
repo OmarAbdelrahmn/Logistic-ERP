@@ -1,4 +1,5 @@
-using LogisticsERP.Application.Features.Jahez;
+﻿using LogisticsERP.Application.Features.Jahez;
+using LogisticsERP.Domain.Chefz;
 using System.Text.Json;
 using LogisticsERP.Application.Abstractions.Authentication;
 using LogisticsERP.Application.Common.Results;
@@ -224,7 +225,11 @@ internal sealed class SimplePlatformService(
 
         var status = ParseEnum<PlatformRiderAccountStatus>(request.Status);
         var paymentModel = ParseEnum<PlatformAccountPaymentModel>(request.PaymentModel);
-        if (await dbContext.Set<LogisticsERP.Domain.Entities.Jahez.JahezAccountHandover>().AnyAsync(x => x.PlatformRiderAccountId == entity.Id, cancellationToken)
+        var isNinja = await dbContext.ClientPlatforms.AnyAsync(p => p.Id == entity.ClientPlatformId && p.Code == "NINJA", cancellationToken);
+        if (isNinja && (status != entity.Status || entity.ClientPlatformId != request.PlatformId
+            || HrServiceSupport.TrimOrNull(request.StatusReason) != entity.StatusReason))
+            return Result.Failure<SimplePlatformAccountResponse>(LogisticsERP.Application.Features.Ninja.NinjaErrors.UseNinjaWorkflow);
+        if (await dbContext.Set<LogisticsERP.Domain.Entities.Jahez.JahezAccountSession>().AnyAsync(x => x.PlatformRiderAccountId == entity.Id, cancellationToken)
             && (entity.ClientPlatformId != request.PlatformId || entity.ExternalAccountId != request.ExternalAccountId.Trim()))
             return Result.Failure<SimplePlatformAccountResponse>(JahezErrors.Conflict("لا يمكن تغيير منصة أو رقم حساب له تاريخ مالي في جاهز."));
 
@@ -232,7 +237,10 @@ internal sealed class SimplePlatformService(
             item => item.PlatformRiderAccountId == id && item.EffectiveTo == null,
             cancellationToken);
         var hasActiveAssignment = activeAssignment is not null;
+        var isChefz = await dbContext.ClientPlatforms.AnyAsync(p => p.Id == request.PlatformId
+            && (p.Code == "CHEFZ" || p.Code == "THECHEFZ" || p.Code == "CHEFSZ" || p.Code == "SHIFTZ"), cancellationToken);
         if (hasActiveAssignment && status != PlatformRiderAccountStatus.Assigned
+                && !((isChefz || isNinja) && ChefzAccountStatusRules.IsManual(status))
             || !hasActiveAssignment && status == PlatformRiderAccountStatus.Assigned)
         {
             return Result.Failure<SimplePlatformAccountResponse>(HrErrors.Conflict);
@@ -249,13 +257,10 @@ internal sealed class SimplePlatformService(
 
         if (activeAssignment is not null && entity.PaymentModel != paymentModel)
         {
-            var otherPaymentModels = await dbContext.RiderClientAssignments
-                .Where(item => item.RiderProfileId == activeAssignment.RiderProfileId
-                    && item.Id != activeAssignment.Id
-                    && item.EffectiveTo == null)
-                .Select(item => item.PaymentModel)
+            var otherAssignments = await PlatformAssignmentPolicySupport.CurrentAssignments(dbContext, activeAssignment.RiderProfileId, activeAssignment.Id)
                 .ToArrayAsync(cancellationToken);
-            var decision = PlatformAccountAssignmentPolicy.Evaluate(otherPaymentModels, paymentModel);
+            var platformCode = await PlatformAssignmentPolicySupport.PlatformCodeAsync(dbContext, entity.Id, cancellationToken);
+            var decision = PlatformAssignmentPolicySupport.Evaluate(platformCode, otherAssignments, paymentModel);
             if (decision != PlatformAccountAssignmentDecision.Allowed)
             {
                 return Result.Failure<SimplePlatformAccountResponse>(ToAssignmentError(decision));
@@ -264,7 +269,7 @@ internal sealed class SimplePlatformService(
             activeAssignment.PaymentModel = paymentModel;
         }
 
-        if (status == PlatformRiderAccountStatus.Archived)
+        if (status == PlatformRiderAccountStatus.Archived && !isChefz && !isNinja)
         {
             if (hasActiveAssignment || !HrServiceSupport.HasText(request.ArchiveReason))
             {
@@ -304,7 +309,15 @@ internal sealed class SimplePlatformService(
     public async Task<Result<SimplePlatformAssignmentResponse>> AssignAccountAsync(
         Guid accountId,
         AssignSimplePlatformAccountRequest request,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default) =>
+        await AssignAccountCoreAsync(accountId, request, null, cancellationToken);
+
+    internal Task<Result<SimplePlatformAssignmentResponse>> AssignNinjaAccountAsync(Guid accountId,
+        AssignSimplePlatformAccountRequest request, Action stageCredentials, CancellationToken ct) =>
+        AssignAccountCoreAsync(accountId, request, stageCredentials, ct);
+
+    private async Task<Result<SimplePlatformAssignmentResponse>> AssignAccountCoreAsync(Guid accountId,
+        AssignSimplePlatformAccountRequest request, Action? stageCredentials, CancellationToken cancellationToken)
     {
         if (currentUser.UserId is not { } userId
             || request.ActualRiderProfileId == Guid.Empty
@@ -319,11 +332,16 @@ internal sealed class SimplePlatformService(
         if (account is not null && await dbContext.ClientPlatforms.AnyAsync(x => x.Id == account.ClientPlatformId && x.Code == "JAHEZ", cancellationToken))
             return Result.Failure<SimplePlatformAssignmentResponse>(JahezErrors.UseJahezWorkflow);
 
+        if (stageCredentials is null && account is not null && await dbContext.ClientPlatforms.AnyAsync(x => x.Id == account.ClientPlatformId && x.Code == "NINJA", cancellationToken))
+            return Result.Failure<SimplePlatformAssignmentResponse>(LogisticsERP.Application.Features.Ninja.NinjaErrors.UseNinjaWorkflow);
+
         if (account is null)
         {
             return Result.Failure<SimplePlatformAssignmentResponse>(HrErrors.PlatformAccountNotFound(accountId));
         }
 
+        if (await RiderOperationalBlock.IsBlocked(dbContext, request.ActualRiderProfileId, account.ClientPlatformId, cancellationToken))
+            return Result.Failure<SimplePlatformAssignmentResponse>(RiderOperationalBlock.Error);
         if (account.Status != PlatformRiderAccountStatus.Available
             || await dbContext.RiderClientAssignments.AnyAsync(
                 item => item.EffectiveTo == null && item.PlatformRiderAccountId == accountId,
@@ -343,13 +361,10 @@ internal sealed class SimplePlatformService(
                 : HrErrors.RiderProfileNotFound("actualRiderProfileId", request.ActualRiderProfileId));
         }
 
-        var activeAssignments = await dbContext.RiderClientAssignments
-            .Where(item => item.RiderProfileId == request.ActualRiderProfileId && item.EffectiveTo == null)
-            .Select(item => new { item.PaymentModel, item.RiderAccountSlot })
+        var activeAssignments = await PlatformAssignmentPolicySupport.CurrentAssignments(dbContext, request.ActualRiderProfileId)
             .ToArrayAsync(cancellationToken);
-        var assignmentDecision = PlatformAccountAssignmentPolicy.Evaluate(
-            activeAssignments.Select(item => item.PaymentModel),
-            account.PaymentModel);
+        var platformCode = await PlatformAssignmentPolicySupport.PlatformCodeAsync(dbContext, account.Id, cancellationToken);
+        var assignmentDecision = PlatformAssignmentPolicySupport.Evaluate(platformCode, activeAssignments, account.PaymentModel);
         if (assignmentDecision != PlatformAccountAssignmentDecision.Allowed)
         {
             return Result.Failure<SimplePlatformAssignmentResponse>(
@@ -360,7 +375,7 @@ internal sealed class SimplePlatformService(
                     account.PaymentModel,
                     cancellationToken));
         }
-        var riderAccountSlot = activeAssignments.Any(item => item.RiderAccountSlot == 1) ? 2 : 1;
+        var riderAccountSlot = PlatformAssignmentPolicySupport.NextSlot(activeAssignments);
 
         OwnerProjection? owner;
         if (account.RegisteredEmployeeId is { } ownerEmployeeId)
@@ -371,6 +386,11 @@ internal sealed class SimplePlatformService(
                 return Result.Failure<SimplePlatformAssignmentResponse>(
                     HrErrors.PlatformAccountOwnerNotFound(account.Id, ownerEmployeeId));
             }
+            if (owner.RiderProfileId is null)
+            {
+                return Result.Failure<SimplePlatformAssignmentResponse>(
+                    PlatformAccountErrors.OwnerProfileRequired(account.Id, ownerEmployeeId));
+            }
         }
         else
         {
@@ -378,6 +398,7 @@ internal sealed class SimplePlatformService(
             account.RegisteredEmployeeId = actualRider.EmployeeId;
         }
 
+        stageCredentials?.Invoke();
         var contract = await GetOrCreateInternalContractAsync(account.ClientPlatformId, account.Id, cancellationToken);
         await EnsureInternalRegistrationAsync(account, owner, contract.Id, cancellationToken);
 
@@ -432,7 +453,15 @@ internal sealed class SimplePlatformService(
     public async Task<Result<SimplePlatformAssignmentResponse>> ReleaseAccountAsync(
         Guid accountId,
         ReleaseSimplePlatformAccountRequest request,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default) =>
+        await ReleaseAccountCoreAsync(accountId, request, null, cancellationToken);
+
+    internal Task<Result<SimplePlatformAssignmentResponse>> ReleaseNinjaAccountAsync(Guid accountId,
+        ReleaseSimplePlatformAccountRequest request, Action stageCredentials, CancellationToken ct) =>
+        ReleaseAccountCoreAsync(accountId, request, stageCredentials, ct);
+
+    private async Task<Result<SimplePlatformAssignmentResponse>> ReleaseAccountCoreAsync(Guid accountId,
+        ReleaseSimplePlatformAccountRequest request, Action? stageCredentials, CancellationToken cancellationToken)
     {
         if (currentUser.UserId is not { } userId
             || !TryParseEnum(request.Status, out RiderAssignmentStatus status)
@@ -450,6 +479,9 @@ internal sealed class SimplePlatformService(
             cancellationToken);
         if (account is not null && await dbContext.ClientPlatforms.AnyAsync(x => x.Id == account.ClientPlatformId && x.Code == "JAHEZ", cancellationToken))
             return Result.Failure<SimplePlatformAssignmentResponse>(JahezErrors.UseJahezWorkflow);
+
+        if (stageCredentials is null && account is not null && await dbContext.ClientPlatforms.AnyAsync(x => x.Id == account.ClientPlatformId && x.Code == "NINJA", cancellationToken))
+            return Result.Failure<SimplePlatformAssignmentResponse>(LogisticsERP.Application.Features.Ninja.NinjaErrors.UseNinjaWorkflow);
 
         if (account is null || assignment is null)
         {
@@ -472,6 +504,7 @@ internal sealed class SimplePlatformService(
             return Result.Failure<SimplePlatformAssignmentResponse>(HrErrors.NotFound);
         }
 
+        stageCredentials?.Invoke();
         var fromStatus = assignment.Status;
         assignment.EffectiveTo = request.EffectiveTo;
         assignment.Status = status;
@@ -487,8 +520,17 @@ internal sealed class SimplePlatformService(
             Reason = request.Reason.Trim(),
             ChangeSnapshotJson = JsonSerializer.Serialize(new { request.EffectiveTo, Status = status.ToString() })
         });
-        account.Status = PlatformRiderAccountStatus.Available;
-        await dbContext.SaveChangesAsync(cancellationToken);
+        var isChefz = await dbContext.ClientPlatforms.AnyAsync(p => p.Id == account.ClientPlatformId
+            && (p.Code == "CHEFZ" || p.Code == "THECHEFZ" || p.Code == "CHEFSZ" || p.Code == "SHIFTZ"), cancellationToken);
+        account.Status = stageCredentials is not null ? LogisticsERP.Domain.Ninja.NinjaAccountStatusRules.AfterRelease(account.Status)
+            : isChefz ? ChefzAccountStatusRules.AfterRelease(account.Status) : PlatformRiderAccountStatus.Available;
+        if (isChefz) dbContext.Entry(account).Property(a => a.Status).IsModified = true;
+        try { await dbContext.SaveChangesAsync(cancellationToken); }
+        catch (DbUpdateConcurrencyException)
+        {
+            dbContext.ChangeTracker.Clear();
+            return Result.Failure<SimplePlatformAssignmentResponse>(HrErrors.ConcurrencyConflict);
+        }
         return Result.Success(ToAssignment(new AssignmentProjection(
             assignment,
             rider.EmployeeId,
@@ -514,6 +556,10 @@ internal sealed class SimplePlatformService(
         {
             return Result.Failure<SimplePlatformCredentialVersionResponse>(HrErrors.NotFound);
         }
+
+        if (await (from a in dbContext.PlatformRiderAccounts join p in dbContext.ClientPlatforms on a.ClientPlatformId equals p.Id
+            where a.Id == accountId && p.Code == "NINJA" select a.Id).AnyAsync(cancellationToken))
+            return Result.Failure<SimplePlatformCredentialVersionResponse>(LogisticsERP.Application.Features.Ninja.NinjaErrors.UseNinjaWorkflow);
 
         var latest = await dbContext.PlatformAccountCredentialVersions
             .Where(item => item.PlatformRiderAccountId == accountId)
@@ -767,7 +813,7 @@ internal sealed class SimplePlatformService(
 
         var owner = await LoadRiderAsync(request.OwnerRiderProfileId, false, cancellationToken);
         if (owner is null)
-            return Result.Failure<Guid>(PlatformAccountErrors.ReferenceUnavailable("ownerRiderProfileId", "مالك الحساب المحدد (يجب اختيار ملف رايدر وليس موظف مكتب)"));
+            return Result.Failure<Guid>(PlatformAccountErrors.ReferenceUnavailable("ownerRiderProfileId", "مالك الحساب المحدد (يجب اختيار ملف رايدر أو ملف موظف مرتبط)"));
         var supportedPaymentModels = await dbContext.ClientPlatforms
             .Where(item => item.Id == request.PlatformId)
             .Select(item => (SupportedPlatformPaymentModels?)item.SupportedPaymentModels)
@@ -912,7 +958,6 @@ internal sealed class SimplePlatformService(
         await (from rider in dbContext.RiderProfiles.AsNoTracking()
                join employee in dbContext.Employees.AsNoTracking() on rider.EmployeeId equals employee.Id
                where rider.Id == riderProfileId
-                   && !employee.IsEmployee
                    && (!requireActive || employee.Status == EmployeeStatus.Active)
                select new OwnerProjection(
                    rider.Id,
@@ -940,7 +985,9 @@ internal sealed class SimplePlatformService(
                         employee.FullNameAr,
                         employee.FullNameEn);
         var rows = await query.ToArrayAsync(cancellationToken);
-        return rows.Select(ToAssignment).ToArray();
+        var blocked = await RiderOperationalBlock.BlockedAssignmentIds(dbContext, rows.Select(x => x.Assignment.Id).ToArray(), cancellationToken);
+        return rows.Select(x => ToAssignment(x) with { IsOperationallyBlocked = blocked.Contains(x.Assignment.Id),
+            OperationalBlockReason = blocked.Contains(x.Assignment.Id) ? RiderOperationalBlock.Reason : null }).ToArray();
     }
 
     private async Task<ClientContract> GetOrCreateInternalContractAsync(
@@ -1037,9 +1084,9 @@ internal sealed class SimplePlatformService(
         registration.RiderProfileId = owner.RiderProfileId!.Value;
         registration.ClientPlatformId = account.ClientPlatformId;
         registration.ClientContractId = contractId;
-        registration.SponsorId = account.SponsorId ?? throw new InvalidOperationException("An account outside sponsorship cannot be registered as sponsored.");
+        registration.SponsorId = account.SponsorId;
         registration.OperatingCityId = account.OperatingCityId;
-        registration.RegistrationType = PlatformRegistrationType.Sponsored;
+        registration.RegistrationType = account.SponsorId is not null ? PlatformRegistrationType.Sponsored : PlatformRegistrationType.Freelancer;
         registration.Status = PlatformAccountRegistrationStatus.Activated;
         registration.RequestedAtUtc ??= timeProvider.GetUtcNow();
         registration.ActivatedAtUtc ??= timeProvider.GetUtcNow();
@@ -1123,9 +1170,9 @@ internal sealed class SimplePlatformService(
         CancellationToken cancellationToken)
     {
         var activeAccounts = await (from assignment in dbContext.RiderClientAssignments.AsNoTracking()
-                                    join account in dbContext.PlatformRiderAccounts.AsNoTracking()
+                                    join account in dbContext.PlatformRiderAccounts.IgnoreQueryFilters().AsNoTracking()
                                         on assignment.PlatformRiderAccountId equals account.Id
-                                    join platform in dbContext.ClientPlatforms.AsNoTracking()
+                                    join platform in dbContext.ClientPlatforms.IgnoreQueryFilters().AsNoTracking()
                                         on account.ClientPlatformId equals platform.Id
                                     where assignment.RiderProfileId == riderProfileId && assignment.EffectiveTo == null
                                     orderby assignment.PaymentModel descending, assignment.EffectiveFrom
@@ -1139,14 +1186,16 @@ internal sealed class SimplePlatformService(
                                         account.ExternalAccountId,
                                         assignment.PaymentModel.ToString()))
             .ToArrayAsync(cancellationToken);
+        var requestedPlatformCode = await PlatformAssignmentPolicySupport.PlatformCodeAsync(dbContext, requestedAccountId, cancellationToken);
+        var maximumAccounts = ChefzAccountAssignmentRules.MaximumActiveAccounts(requestedPlatformCode, activeAccounts.Select(a => a.PlatformCode));
         var details = new PlatformAssignmentLimitErrorDetail(
             riderProfileId,
             requestedAccountId,
             requestedPaymentModel.ToString(),
-            PlatformAccountAssignmentPolicy.MaximumActiveAccountsPerRider,
+            maximumAccounts,
             1,
             activeAccounts,
-            GetAllowedPaymentModels(activeAccounts));
+            GetAllowedPaymentModels(activeAccounts, requestedPlatformCode));
         return ToAssignmentError(decision) with
         {
             Details = new Dictionary<string, object?>
@@ -1221,17 +1270,12 @@ internal sealed class SimplePlatformService(
         _ => HrErrors.Conflict
     };
 
-    private static IReadOnlyList<string> GetAllowedPaymentModels(
-        ActivePlatformAccountErrorDetail[] activeAccounts)
+    private static string[] GetAllowedPaymentModels(
+        ActivePlatformAccountErrorDetail[] activeAccounts, string? requestedPlatformCode)
     {
-        if (activeAccounts.Length >= PlatformAccountAssignmentPolicy.MaximumActiveAccountsPerRider)
-        {
-            return [];
-        }
-
-        return activeAccounts.Any(item => item.PaymentModel == nameof(PlatformAccountPaymentModel.Salary))
-            ? [nameof(PlatformAccountPaymentModel.PayPerOrder)]
-            : [nameof(PlatformAccountPaymentModel.PayPerOrder), nameof(PlatformAccountPaymentModel.Salary)];
+        return Enum.GetValues<PlatformAccountPaymentModel>().Where(model => ChefzAccountAssignmentRules.Evaluate(requestedPlatformCode,
+                activeAccounts.Select(a => ((string?)a.PlatformCode, Enum.Parse<PlatformAccountPaymentModel>(a.PaymentModel))), model)
+            == PlatformAccountAssignmentDecision.Allowed).Select(model => model.ToString()).ToArray();
     }
 
     private static TEnum ParseEnum<TEnum>(string value) where TEnum : struct, Enum =>

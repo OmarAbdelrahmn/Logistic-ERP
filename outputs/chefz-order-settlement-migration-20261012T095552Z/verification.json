@@ -1,0 +1,13 @@
+{
+  "Database": "db67927",
+  "Server": "db67927.public.databaseasp.net",
+  "Migration": "20261012093719_AddChefzOrderSettlementImports",
+  "ScriptSha256": "2657DB93C7CB3854EADE88AA34EFCA77D512DA14D54C66D8D40C524CDC05148F",
+  "VerifiedAtUtc": "2026-10-12T09:55:52.8054401Z",
+  "OriginalSettlementValuesPreserved": true,
+  "OrderImportRowsInserted": 0,
+  "NewSettlementColumns": 11,
+  "TrustedCheckConstraints": 2,
+  "VerifiedIndexes": 3,
+  "TrustedImportForeignKeys": 1
+}

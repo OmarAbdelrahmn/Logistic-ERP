@@ -1,0 +1,116 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="HandoverId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="Mode" type="xs:int" minOccurs="0" />
+                <xs:element name="Status" type="xs:int" minOccurs="0" />
+                <xs:element name="PaymentStatus" type="xs:int" minOccurs="0" />
+                <xs:element name="ThroughDate" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="EffectiveAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="Net" type="xs:decimal" minOccurs="0" />
+                <xs:element name="Commission" type="xs:decimal" minOccurs="0" />
+                <xs:element name="CalculatedCommission" type="xs:decimal" minOccurs="0" />
+                <xs:element name="Remaining" type="xs:decimal" minOccurs="0" />
+                <xs:element name="CalculationJson" type="xs:string" minOccurs="0" />
+                <xs:element name="Fund" type="xs:int" minOccurs="0" />
+                <xs:element name="Purpose" type="xs:int" minOccurs="0" />
+                <xs:element name="TransferToRider" type="xs:boolean" minOccurs="0" />
+                <xs:element name="PaymentReference" type="xs:string" minOccurs="0" />
+                <xs:element name="Reason" type="xs:string" minOccurs="0" />
+                <xs:element name="ApprovedRequestId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="ExecutedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="ExecutedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="UpdatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="UpdatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RowVersion" type="xs:base64Binary" minOccurs="0" />
+                <xs:element name="IsDeleted" type="xs:boolean" minOccurs="0" />
+                <xs:element name="DeletedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="DeletedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DeletionReason" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <Id>01a141bd-75e4-7f17-9565-128e8f2f961a</Id>
+    <HandoverId>01a141bb-2872-7641-9401-1a8e4912f304</HandoverId>
+    <Mode>1</Mode>
+    <Status>1</Status>
+    <PaymentStatus>1</PaymentStatus>
+    <ThroughDate>2026-10-16T00:00:00+03:00</ThroughDate>
+    <EffectiveAtUtc>2026-10-15T22:44:00Z</EffectiveAtUtc>
+    <Net>0.00</Net>
+    <Commission>225.00</Commission>
+    <CalculatedCommission>225.00</CalculatedCommission>
+    <Remaining>225.00</Remaining>
+    <CalculationJson>{"Accrual":[{"Kind":"Daily","FromDate":"2026-10-02","ToDate":"2026-10-16","DailyRate":15,"Amount":225}],"UnpaidCommission":0.000000}</CalculationJson>
+    <Fund>1</Fund>
+    <Purpose>1</Purpose>
+    <TransferToRider>false</TransferToRider>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-15T22:44:57.9606501Z</CreatedAtUtc>
+    <CreatedByUserId>b1de8de7-7ad4-4f08-f387-08df1173e0a7</CreatedByUserId>
+    <RowVersion>AAAAAAACqVU=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table>
+  <Table>
+    <Id>01a141b3-e6d9-75ba-ad68-429318713b80</Id>
+    <HandoverId>01a141b1-fb25-7dc4-8b06-c5d71283bd0e</HandoverId>
+    <Mode>1</Mode>
+    <Status>2</Status>
+    <PaymentStatus>1</PaymentStatus>
+    <ThroughDate>2026-10-16T00:00:00+03:00</ThroughDate>
+    <EffectiveAtUtc>2026-10-15T22:33:00Z</EffectiveAtUtc>
+    <Net>150.00</Net>
+    <Commission>225.00</Commission>
+    <CalculatedCommission>225.00</CalculatedCommission>
+    <Remaining>375.00</Remaining>
+    <CalculationJson>{"Accrual":[{"Kind":"Daily","FromDate":"2026-10-02","ToDate":"2026-10-16","DailyRate":15,"Amount":225}],"UnpaidCommission":0.000000}</CalculationJson>
+    <Fund>1</Fund>
+    <Purpose>1</Purpose>
+    <TransferToRider>false</TransferToRider>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-15T22:34:31.5660025Z</CreatedAtUtc>
+    <CreatedByUserId>b1de8de7-7ad4-4f08-f387-08df1173e0a7</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-15T22:34:49.3362095Z</UpdatedAtUtc>
+    <UpdatedByUserId>b1de8de7-7ad4-4f08-f387-08df1173e0a7</UpdatedByUserId>
+    <RowVersion>AAAAAAACqTk=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table>
+  <Table>
+    <Id>01a141ba-5c34-7ace-90e6-6e87b5133767</Id>
+    <HandoverId>01a141b9-aa98-70f8-a7e6-d99e51025d89</HandoverId>
+    <Mode>1</Mode>
+    <Status>2</Status>
+    <PaymentStatus>1</PaymentStatus>
+    <ThroughDate>2026-10-16T00:00:00+03:00</ThroughDate>
+    <EffectiveAtUtc>2026-10-15T22:40:00Z</EffectiveAtUtc>
+    <Net>1000.00</Net>
+    <Commission>225.00</Commission>
+    <CalculatedCommission>225.00</CalculatedCommission>
+    <Remaining>1225.00</Remaining>
+    <CalculationJson>{"Accrual":[{"Kind":"Daily","FromDate":"2026-10-02","ToDate":"2026-10-16","DailyRate":15,"Amount":225}],"UnpaidCommission":0.000000}</CalculationJson>
+    <Fund>1</Fund>
+    <Purpose>1</Purpose>
+    <TransferToRider>false</TransferToRider>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-15T22:41:34.7741559Z</CreatedAtUtc>
+    <CreatedByUserId>b1de8de7-7ad4-4f08-f387-08df1173e0a7</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-15T22:41:38.07296Z</UpdatedAtUtc>
+    <UpdatedByUserId>b1de8de7-7ad4-4f08-f387-08df1173e0a7</UpdatedByUserId>
+    <RowVersion>AAAAAAACqUo=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table>
+</NewDataSet>

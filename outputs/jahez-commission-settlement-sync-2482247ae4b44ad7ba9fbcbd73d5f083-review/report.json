@@ -1,0 +1,210 @@
+[
+  {
+    "Account": "404654",
+    "SessionId": "01a141b1-fb25-7dc4-8b06-c5d71283bd0e",
+    "LastCommissionDate": "2026-09-30",
+    "LastSettlementDate": "2026-09-30",
+    "NextCommissionStartsOn": "2026-10-01",
+    "IsClosed": false
+  },
+  {
+    "Account": "404899",
+    "SessionId": "bbf90249-6904-40a3-a162-773a53afdc65",
+    "LastCommissionDate": "2026-09-13",
+    "LastSettlementDate": "2026-09-13",
+    "NextCommissionStartsOn": "2026-09-14",
+    "IsClosed": false
+  },
+  {
+    "Account": "404986",
+    "SessionId": "0e04d982-d863-4436-aa26-f05302537755",
+    "LastCommissionDate": "2026-09-17",
+    "LastSettlementDate": "2026-09-17",
+    "NextCommissionStartsOn": "2026-09-18",
+    "IsClosed": false
+  },
+  {
+    "Account": "404997",
+    "SessionId": "4e916ba1-463a-449c-b704-2715c6f4b6e5",
+    "LastCommissionDate": "2026-09-22",
+    "LastSettlementDate": "2026-09-22",
+    "NextCommissionStartsOn": "2026-09-23",
+    "IsClosed": false
+  },
+  {
+    "Account": "405092",
+    "SessionId": "b8783a1e-a8e4-4cad-970e-a160d1ed8b34",
+    "LastCommissionDate": "2026-09-13",
+    "LastSettlementDate": "2026-09-13",
+    "NextCommissionStartsOn": "2026-09-14",
+    "IsClosed": false
+  },
+  {
+    "Account": "408132",
+    "SessionId": "e0e52bd1-cf85-4049-a45a-6d31b47724ec",
+    "LastCommissionDate": "2026-09-23",
+    "LastSettlementDate": "2026-09-23",
+    "NextCommissionStartsOn": "2026-09-24",
+    "IsClosed": false
+  },
+  {
+    "Account": "415808",
+    "SessionId": "476acde9-3ec6-405e-896e-562447227cee",
+    "LastCommissionDate": "2026-09-28",
+    "LastSettlementDate": "2026-09-28",
+    "NextCommissionStartsOn": "2026-09-29",
+    "IsClosed": false
+  },
+  {
+    "Account": "417748",
+    "SessionId": "b56d394e-751a-41ec-83f5-68574014ef08",
+    "LastCommissionDate": "2026-10-17",
+    "LastSettlementDate": "2026-10-17",
+    "NextCommissionStartsOn": "2026-10-18",
+    "IsClosed": true
+  },
+  {
+    "Account": "456434",
+    "SessionId": "70a58b6f-dd62-448f-8141-89f23e809f31",
+    "LastCommissionDate": "2026-09-21",
+    "LastSettlementDate": "2026-09-21",
+    "NextCommissionStartsOn": "2026-09-22",
+    "IsClosed": false
+  },
+  {
+    "Account": "459705",
+    "SessionId": "567b4dd4-b468-4a75-a018-ba09ec56fd56",
+    "LastCommissionDate": "2026-09-27",
+    "LastSettlementDate": "2026-09-27",
+    "NextCommissionStartsOn": "2026-09-28",
+    "IsClosed": false
+  },
+  {
+    "Account": "460739",
+    "SessionId": "affe91ca-030b-40bb-aed2-b41362776349",
+    "LastCommissionDate": "2026-09-02",
+    "LastSettlementDate": "2026-09-02",
+    "NextCommissionStartsOn": "2026-09-03",
+    "IsClosed": false
+  },
+  {
+    "Account": "461497",
+    "SessionId": "623fd9b5-3d9f-4e72-a961-b5dd1a7ef1c2",
+    "LastCommissionDate": "2026-10-17",
+    "LastSettlementDate": "2026-10-17",
+    "NextCommissionStartsOn": "2026-10-18",
+    "IsClosed": true
+  },
+  {
+    "Account": "461497",
+    "SessionId": "01a14a2c-da8e-7fff-b304-7c8a562e7f55",
+    "LastCommissionDate": "2026-10-17",
+    "LastSettlementDate": "2026-10-17",
+    "NextCommissionStartsOn": "2026-10-18",
+    "IsClosed": true
+  },
+  {
+    "Account": "472433",
+    "SessionId": "32ef559b-eb55-4812-a829-089d80b48385",
+    "LastCommissionDate": "2026-09-24",
+    "LastSettlementDate": "2026-09-24",
+    "NextCommissionStartsOn": "2026-09-25",
+    "IsClosed": false
+  },
+  {
+    "Account": "472829",
+    "SessionId": "8853ae08-c32c-45cc-ab89-371e372d5561",
+    "LastCommissionDate": "2026-09-21",
+    "LastSettlementDate": "2026-09-21",
+    "NextCommissionStartsOn": "2026-09-22",
+    "IsClosed": false
+  },
+  {
+    "Account": "473007",
+    "SessionId": "020c523d-bfd4-46b3-a231-5957b14b1aed",
+    "LastCommissionDate": "2026-09-08",
+    "LastSettlementDate": "2026-09-08",
+    "NextCommissionStartsOn": "2026-09-09",
+    "IsClosed": false
+  },
+  {
+    "Account": "474572",
+    "SessionId": "4679a728-59d3-4e35-be09-89c2e2910a51",
+    "LastCommissionDate": "2026-10-16",
+    "LastSettlementDate": "2026-10-16",
+    "NextCommissionStartsOn": "2026-10-17",
+    "IsClosed": false
+  },
+  {
+    "Account": "474831",
+    "SessionId": "25c8a27b-61d4-4255-8c57-7dbaf763179e",
+    "LastCommissionDate": "2026-09-23",
+    "LastSettlementDate": "2026-09-23",
+    "NextCommissionStartsOn": "2026-09-24",
+    "IsClosed": false
+  },
+  {
+    "Account": "476832",
+    "SessionId": "59cf1f02-2033-486e-a6c3-9ce3d8ad666f",
+    "LastCommissionDate": "2026-09-03",
+    "LastSettlementDate": "2026-09-03",
+    "NextCommissionStartsOn": "2026-09-04",
+    "IsClosed": false
+  },
+  {
+    "Account": "482679",
+    "SessionId": "ec68b3ae-5554-4c35-a98d-7071ebe66df0",
+    "LastCommissionDate": "2026-09-28",
+    "LastSettlementDate": "2026-09-28",
+    "NextCommissionStartsOn": "2026-09-29",
+    "IsClosed": false
+  },
+  {
+    "Account": "483905",
+    "SessionId": "d3dc1fc0-24df-4bf8-a5ca-af0dc75eb2f1",
+    "LastCommissionDate": "2026-09-28",
+    "LastSettlementDate": "2026-09-28",
+    "NextCommissionStartsOn": "2026-09-29",
+    "IsClosed": false
+  },
+  {
+    "Account": "484490",
+    "SessionId": "b9111152-7a8b-4933-9764-92df978881fd",
+    "LastCommissionDate": "2026-09-26",
+    "LastSettlementDate": "2026-09-26",
+    "NextCommissionStartsOn": "2026-09-27",
+    "IsClosed": false
+  },
+  {
+    "Account": "485289",
+    "SessionId": "cdea7164-b1c7-499b-a99d-299a97ad0b50",
+    "LastCommissionDate": "2026-10-17",
+    "LastSettlementDate": "2026-10-17",
+    "NextCommissionStartsOn": "2026-10-18",
+    "IsClosed": true
+  },
+  {
+    "Account": "492374",
+    "SessionId": "9e0566d5-c81d-4af9-a3c5-11209258ad3f",
+    "LastCommissionDate": "2026-09-08",
+    "LastSettlementDate": "2026-09-08",
+    "NextCommissionStartsOn": "2026-09-09",
+    "IsClosed": false
+  },
+  {
+    "Account": "493593",
+    "SessionId": "79e9dc82-ef4d-43aa-9be6-e15bca8c7571",
+    "LastCommissionDate": "2026-09-14",
+    "LastSettlementDate": "2026-09-14",
+    "NextCommissionStartsOn": "2026-09-15",
+    "IsClosed": false
+  },
+  {
+    "Account": "498897",
+    "SessionId": "74b696e9-3573-47c9-b2ab-8abfdd68f362",
+    "LastCommissionDate": "2026-09-18",
+    "LastSettlementDate": "2026-09-18",
+    "NextCommissionStartsOn": "2026-09-19",
+    "IsClosed": false
+  }
+]

@@ -207,6 +207,8 @@ Permission: `platform_accounts.manage`
 
 `platformId`, `operatingCityId`, `ownerRiderProfileId`, `sponsorId`, `code`, `externalAccountId`, `status`, and `paymentModel` are required when creating an account. `sponsorId` must identify an active sponsor and also supplies the sponsor used by Jahez. `paymentModel` must be enabled in the selected platform's `supportedPaymentModels`. Create with `Available`, `Suspended`, or `Retired`; use the assignment action after creation to reach `Assigned`. A second usable account for the same owner, platform, city, and sponsor returns `409 Conflict`; suspended, retired, and archived accounts do not block a replacement.
 
+Employees with `isEmployee: true` can also own accounts when they have a visible rider profile. Create or retrieve that profile with `PUT /api/employees/{employeeId}/rider-profile`, then pass the returned `rider.id` as `ownerRiderProfileId`. This preserves employee status. See [employee profile API](employee-rider-profile-api.md) for provisioning and editing details.
+
 Validation failures return a specific Arabic `detail`, a stable `errorCode`, the JSON `field` name, and an `errors` map. For example, omitting `sponsorId` returns `400`:
 
 ```json
@@ -274,6 +276,8 @@ Permission: `platform_assignments.manage`
 ```
 
 The actual rider may differ from the account owner. The operation changes the account to `Assigned`, creates append-only assignment history, and automatically maintains the internal registration/contract compatibility records. The current assignment policy rejects another active account for the same actual rider.
+
+An active employee with an existing rider profile is eligible as the actual rider, including an employee whose profile was provisioned through `PUT /api/employees/{employeeId}/vehicle-profile` or `PUT /api/employees/{employeeId}/rider-profile`. The employee may retain `isEmployee: true`; assignment does not change their role or employment status. Both the rider profile and its linked employee must be visible (not soft-deleted), and the employee must have status `Active`. Inactive employees still return `platform.rider_profile_unavailable`. `RiderProfile` has no separate status or rider-start-date field, and provisioning a profile does not activate the employee. The compatibility assignment endpoint uses the same eligibility rule. Assignment history and release remain available after the employee becomes inactive. Registered owners may also be employees with a visible profile; account ownership does not require an actual-rider assignment.
 
 Response: `200 OK` with an Assignment response.
 

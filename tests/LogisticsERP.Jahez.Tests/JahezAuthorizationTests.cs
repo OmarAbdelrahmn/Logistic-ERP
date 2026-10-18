@@ -46,14 +46,15 @@ public sealed class JahezAuthorizationTests
     [Fact]
     public void EveryJahezEndpointHasARegisteredPermissionAndEveryCommandHasAnIdempotencyHeader()
     {
-        var actions = typeof(JahezController).GetMethods().Where(m => m.GetCustomAttributes<HttpMethodAttribute>().Any()).ToArray();
+        var actions = typeof(JahezWorkflowController).GetMethods().Where(m => m.GetCustomAttributes<HttpMethodAttribute>().Any()).ToArray();
         Assert.NotEmpty(actions);
         foreach (var action in actions)
         {
             var permission = Assert.Single(action.GetCustomAttributes<RequirePermissionAttribute>());
             Assert.StartsWith(AuthenticationPolicies.PermissionPrefix + "jahez.", permission.Policy, StringComparison.Ordinal);
             Assert.Empty(action.GetCustomAttributes<AllowAnonymousAttribute>());
-            if (action.GetCustomAttribute<HttpPostAttribute>() is not null)
+            if (action.Name != nameof(JahezWorkflowController.Preview) && (action.GetCustomAttribute<HttpPostAttribute>() is not null
+                || action.GetCustomAttribute<HttpPutAttribute>() is not null))
             {
                 var header = Assert.Single(action.GetParameters(), p => p.GetCustomAttribute<FromHeaderAttribute>()?.Name == "Idempotency-Key");
                 Assert.Equal(typeof(string), header.ParameterType);

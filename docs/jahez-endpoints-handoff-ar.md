@@ -1,5 +1,7 @@
 # تسليم واجهات جاهز للـFrontend
 
+> Current 11 October 2026 contract, including debt freeze/transfer/clearance/paid confirmation: [full API reference](jahez-full-api-reference.md), [frontend changelog](jahez-frontend-changelog-and-spec.md), and [TypeScript contracts](jahez-api-contracts.ts). Historical examples below may omit the new fields; use the current contract for integration.
+
 هذا العقد مبني على `JahezController` وملفات العقود والكيانات في المشروع، ومُحدَّث بتاريخ **4 أكتوبر 2026**. الحسابات تستخدم `sponsorId` الموجود فقط. طُبقت ترحيلات جاهز الأصلية على قاعدة `db67927` في 3 أكتوبر: يوجد 17 جدولًا في `jahez` و13 صلاحية و13 منحة لمدير النظام. تحديث 4 أكتوبر يزيل كفيل الداشبورد المنفصل؛ راجع [تسليم توحيد كفيل الحساب للواجهة](platform-account-sponsor-unification-frontend-handoff.md) لحالة نشر API وWorker وترحيل قاعدة البيانات. [قواعد العمل والمحاسبة](jahez-backend-api.md) و[مجموعة Postman](jahez.postman_collection.json).
 
 ## قواعد مشتركة
@@ -40,7 +42,7 @@
 | `CashboxEntry` + Auditable | `settlementId`, `handoverId`, `section` (1 رسوم، 2 تصفيات), `amount`, `collectedByUserId`, `receivedAtUtc`, `cashboxHandoverId` |
 | `CashboxHandover` + Auditable | `businessDate`, `status`, `feeAmount`, `settlementAmount`, `accountantFeeAmount`, `accountantSettlementAmount`, `requestedByUserId`, `accountantUserId`, `approvedByUserId`, `confirmedAtUtc`, `decidedAtUtc`, `reason`, `confirmationReason`, `decisionReason` |
 
-مثال كامل لإنشاء استلام وردّه. يوم الاستلام لا يبدأ عمولة 15 ريال، والمثال يخص حسابًا موجودًا وكفيل داشبورد مكتملًا:
+مثال كامل لإنشاء استلام وردّه. يوم الاستلام لا يبدأ عمولة 15 ريال، والمثال يخص حسابًا موجودًا وله كفيل حساب نشط:
 
 ```http
 POST /api/jahez/handovers
@@ -59,9 +61,9 @@ Content-Type: application/json
 
 | الطريقة والمسار | الطلب | استجابة 200 | الصلاحية |
 |---|---|---|---|
-| `POST /api/jahez/handovers` | جسم `HandoverRequest` بالمثال أعلاه؛ `initialFeePayment` من 0 إلى 200 بالهللة، و`feeApprovalRequestId` إن أرسل يجب أن يكون `null` | `Handover`؛ `id` هو `handoverId` لبقية العمليات | `jahez.handovers.manage` |
-| `POST /api/jahez/legacy-adoptions` | جسم `LegacyAdoptionRequest` أدناه؛ `assignmentId` لإسناد جاهز قديم نشط | `Handover` مع `isLegacy:true` | `jahez.adjustments.manage` |
-| `POST /api/jahez/handovers/{id}/close` | `{id}` = `handoverId`، جسم `CloseRequest` أدناه | `Handover` مع `endedAtUtc` وتثبيت العمولة حتى يوم الإغلاق | `jahez.handovers.manage` |
+| `POST /api/jahez/handovers` | جسم `HandoverRequest` بالمثال أعلاه؛ `initialFeePayment` من 0 إلى 200 بالهللة، و`feeApprovalRequestId` إن أرسل يجب أن يكون `null` | `Handover`؛ `id` هو `handoverId` لبقية العمليات | `jahez.handovers.create` |
+| `POST /api/jahez/legacy-adoptions` | جسم `LegacyAdoptionRequest` أدناه؛ `assignmentId` لإسناد جاهز قديم نشط | `Handover` مع `isLegacy:true` | `jahez.adjustments.create` |
+| `POST /api/jahez/handovers/{id}/close` | `{id}` = `handoverId`، جسم `CloseRequest` أدناه | `Handover` مع `endedAtUtc` وتثبيت العمولة حتى يوم الإغلاق | `jahez.handovers.delete` |
 | `GET /api/jahez/handovers` | Query اختياري `accountId`, `riderId`, `page`, `pageSize` | `{ "items": Handover[], "page":1, "pageSize":50 }` | `jahez.read` |
 | `GET /api/jahez/handovers/{id}/balance?through=2026-10-03` | `{id}` = `handoverId`؛ `through` مطلوب، حتى اليوم ولا يسبق تاريخ عمولة/تصفية مثبتة | `Balance`؛ مثال كامل أدناه | `jahez.read` |
 | `GET /api/jahez/debts` | Query `riderId?`, `overdueOnly=false`, `page=1`, `pageSize=50` | `{ "items": Balance[], "page":1, "pageSize":50 }`؛ تشمل ديون الإسنادات المغلقة | `jahez.read` |
@@ -133,9 +135,9 @@ Content-Type: application/json
 
 | الطريقة والمسار | الطلب | استجابة 200 | الصلاحية |
 |---|---|---|---|
-| `POST /api/jahez/earnings` | `EarningsRequest` بكل البنود التسعة صراحةً؛ `supersedesId?` لتصحيح بيان لم يُثبت | `Earnings` + History | `jahez.earnings.manage` |
-| `POST /api/jahez/settlements` | `PaymentRequest`؛ توزيع المقبوض على الرسوم والدين والعمولة | `Settlement` + History | `jahez.collections.manage` |
-| `POST /api/jahez/adjustments` | `LedgerAdjustmentRequest`؛ مبلغ موقع موجب لزيادة الدين أو سالب لتخفيضه، `reversesEntryId?` | `LedgerEntry` + History؛ لا ينشئ قبضًا | `jahez.adjustments.manage` |
+| `POST /api/jahez/earnings` | `EarningsRequest` بكل البنود التسعة صراحةً؛ `supersedesId?` لتصحيح بيان لم يُثبت | `Earnings` + History | `jahez.earnings.create` |
+| `POST /api/jahez/settlements` | `PaymentRequest`؛ توزيع المقبوض على الرسوم والدين والعمولة | `Settlement` + History | `jahez.collections.create` |
+| `POST /api/jahez/adjustments` | `LedgerAdjustmentRequest`؛ مبلغ موقع موجب لزيادة الدين أو سالب لتخفيضه، `reversesEntryId?` | `LedgerEntry` + History؛ لا ينشئ قبضًا | `jahez.adjustments.create` |
 
 ```json
 {"handoverId":"33333333-3333-3333-3333-333333333333","fromDate":"2026-10-02","toDate":"2026-10-03","totalDeliveryPrice":1000,"totalPenalties":20,"totalCashAmount":100,"totalDriverDebit":10,"totalServiceDeduction":5,"totalDriverCredit":50,"totalBonuses":30,"totalTips":10,"totalFreeOrders":5,"reason":"كشف أرباح معتمد يدويًا","supersedesId":null}
@@ -165,11 +167,11 @@ Content-Type: application/json
 
 | الطريقة والمسار | الطلب | استجابة 200 | الصلاحية |
 |---|---|---|---|
-| `POST /api/jahez/imports` | `multipart/form-data`: `kind` = 1 للحركات أو 2 للطلبات، حقل `files` مكرر لكل ملف XLSX، `replacesBatchId?`, `correctionReason?` | `ImportPreview` محفوظة، `committed:false` | `jahez.imports.manage` |
-| `GET /api/jahez/imports` | `page`, `pageSize` | `{ "items": ImportBatch[], "page":1, "pageSize":50 }` | `jahez.imports.manage` |
-| `GET /api/jahez/imports/{id}` | `{id}` = `batchId` | `ImportPreview` حديثة مع مشكلات الربط والتداخل | `jahez.imports.manage` |
-| `POST /api/jahez/imports/{id}/commit` | `{id}` = `batchId`، جسم `{}` للحركات أو `ImportCommitRequest` للطلبات الملتبسة | `ImportPreview` مع `committed:true` | `jahez.imports.manage` |
-| `GET /api/jahez/import-files/{id}` | `{id}` = `files[].id` من المعاينة | بايتات ملف XLSX، `Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`، واسم الملف الأصلي للتنزيل | `jahez.imports.manage` |
+| `POST /api/jahez/imports` | `multipart/form-data`: `kind` = 1 للحركات أو 2 للطلبات، حقل `files` مكرر لكل ملف XLSX، `replacesBatchId?`, `correctionReason?` | `ImportPreview` محفوظة، `committed:false` | `jahez.imports.create` |
+| `GET /api/jahez/imports` | `page`, `pageSize` | `{ "items": ImportBatch[], "page":1, "pageSize":50 }` | `jahez.imports.read` |
+| `GET /api/jahez/imports/{id}` | `{id}` = `batchId` | `ImportPreview` حديثة مع مشكلات الربط والتداخل | `jahez.imports.read` |
+| `POST /api/jahez/imports/{id}/commit` | `{id}` = `batchId`، جسم `{}` للحركات أو `ImportCommitRequest` للطلبات الملتبسة | `ImportPreview` مع `committed:true` | `jahez.imports.update` |
+| `GET /api/jahez/import-files/{id}` | `{id}` = `files[].id` من المعاينة | بايتات ملف XLSX، `Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`، واسم الملف الأصلي للتنزيل | `jahez.imports.read` |
 | `GET /api/jahez/dispatches?from=2026-10-02&to=2026-10-02` | `from`, `to` مطلوبان، `riderId?`, `page`, `pageSize` | `{ "items": Dispatch[], "page":1, "pageSize":50 }` | `jahez.read` |
 
 مثال رفع الملفين في **عمليتين منفصلتين** لأن لكل عملية نوعًا واحدًا. يمكن رفع عدة ملفات من النوع نفسه في عملية واحدة، حتى 10 ملفات، بحد 10MB للملف و30MB إجماليًا. اسم حقل الملفات حرفيًا `files`. استخدم الملفات المطلوبة عبر واجهة اختيار الملفات؛ لا ترسل مسارات ملفات الجهاز للمستخدم الآخر.
@@ -240,11 +242,11 @@ curl -X POST "$BASE_URL/api/jahez/imports" -H "Authorization: Bearer $TOKEN" -H 
 |---|---|---|---|
 | `GET /api/platform-accounts` | `accountId?`, `platformId?`, `operatingCityId?`, `sponsorId?`, `ownerRiderProfileId?`, `actualRiderProfileId?`, `status?`, `paymentModel?`, `currentOnly=false`, `includeArchived=false` | مصفوفة `SimplePlatformAccountResponse[]`، **وليست صفحة جاهز** | `platform_accounts.read` |
 | `GET /api/platform-accounts/{id}` | معرف الحساب | `SimplePlatformAccountResponse` | `platform_accounts.read` |
-| `POST /api/platform-accounts` | `SimplePlatformAccountUpsertRequest` أدناه، `sponsorId` مطلوب | `SimplePlatformAccountResponse` | `platform_accounts.manage` |
-| `PUT /api/platform-accounts/{id}` | جسم الإنشاء مع `rowVersion` من GET؛ أرسل `sponsorId` الموجود | `SimplePlatformAccountResponse` | `platform_accounts.manage` |
+| `POST /api/platform-accounts` | `SimplePlatformAccountUpsertRequest` أدناه، `sponsorId` مطلوب | `SimplePlatformAccountResponse` | `platform_accounts.create` |
+| `PUT /api/platform-accounts/{id}` | جسم الإنشاء مع `rowVersion` من GET؛ أرسل `sponsorId` الموجود | `SimplePlatformAccountResponse` | `platform_accounts.update` |
 | `GET /api/platform-operations/accounts` | `platformId?`, `sponsorId?` | `PlatformAccountResponse[]` | `platform_accounts.read` |
-| `POST /api/platform-operations/accounts` | `PlatformAccountUpsertRequest` أدناه، `sponsorId` مطلوب | `PlatformAccountResponse` | `platform_accounts.manage` |
-| `PUT /api/platform-operations/accounts/{id}` | جسم الإنشاء مع `rowVersion` من GET | `PlatformAccountResponse` | `platform_accounts.manage` |
+| `POST /api/platform-operations/accounts` | `PlatformAccountUpsertRequest` أدناه، `sponsorId` مطلوب | `PlatformAccountResponse` | `platform_accounts.create` |
+| `PUT /api/platform-operations/accounts/{id}` | جسم الإنشاء مع `rowVersion` من GET | `PlatformAccountResponse` | `platform_accounts.update` |
 
 مسارا الإسناد `POST /api/platform-accounts/{id}/assign` و`POST /api/platform-operations/assignments` وإغلاق الإسناد العام يرجعان تعارضًا لحساب جاهز، لضمان إنشاء الرسوم والتاريخ المالي عبر `/api/jahez/handovers` و`/close`. عند إنشاء حساب جاهز، استخدم `paymentModel:"PayPerOrder"` و`status:"Available"`. عند تحديث حساب له تاريخ مالي لا تغير `clientPlatformId`/`platformId` أو `externalAccountId`.
 

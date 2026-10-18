@@ -1,0 +1,47 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Checks">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="CheckName" type="xs:string" minOccurs="0" />
+                <xs:element name="Mismatches" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Checks>
+    <CheckName>Account owner, sponsor number and status</CheckName>
+    <Mismatches>0</Mismatches>
+  </Checks>
+  <Checks>
+    <CheckName>New owner rider profiles</CheckName>
+    <Mismatches>0</Mismatches>
+  </Checks>
+  <Checks>
+    <CheckName>Rider, assignment and both clearance dates</CheckName>
+    <Mismatches>0</Mismatches>
+  </Checks>
+  <Checks>
+    <CheckName>Vehicle serial links</CheckName>
+    <Mismatches>0</Mismatches>
+  </Checks>
+  <Checks>
+    <CheckName>Two account capacity for imported riders</CheckName>
+    <Mismatches>0</Mismatches>
+  </Checks>
+  <Checks>
+    <CheckName>No imported fee charges or receipts</CheckName>
+    <Mismatches>0</Mismatches>
+  </Checks>
+  <Checks>
+    <CheckName>Import audit record</CheckName>
+    <Mismatches>0</Mismatches>
+  </Checks>
+</NewDataSet>

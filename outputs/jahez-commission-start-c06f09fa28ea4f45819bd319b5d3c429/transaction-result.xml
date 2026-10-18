@@ -1,0 +1,25 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="BeforeJson" type="xs:string" minOccurs="0" />
+                <xs:element name="AfterJson" type="xs:string" minOccurs="0" />
+                <xs:element name="CorrelationId" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <BeforeJson>{"Id":"BC886558-35A7-403C-B59F-3A64CE47A02A","PlatformRiderAccountId":"37B9D0B6-4845-4BED-9E61-D12B44E80C1C","CommissionStartsOn":"2026-10-18"}</BeforeJson>
+    <AfterJson>{"Id":"BC886558-35A7-403C-B59F-3A64CE47A02A","PlatformRiderAccountId":"37B9D0B6-4845-4BED-9E61-D12B44E80C1C","CommissionStartsOn":"2026-09-15"}</AfterJson>
+    <CorrelationId>jahez-commission-start-c06f09fa28ea4f45819bd319b5d3c429</CorrelationId>
+  </Table>
+</NewDataSet>

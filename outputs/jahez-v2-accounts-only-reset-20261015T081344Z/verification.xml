@@ -1,0 +1,109 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Accounts" type="xs:long" minOccurs="0" />
+                <xs:element name="AccountsWithOwners" type="xs:long" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="TableName" type="xs:string" minOccurs="0" />
+                <xs:element name="RecordCount" type="xs:long" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table2">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="VerifiedAtUtc" type="xs:dateTime" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <Accounts>380</Accounts>
+    <AccountsWithOwners>380</AccountsWithOwners>
+  </Table>
+  <Table1>
+    <TableName>AccountFees</TableName>
+    <RecordCount>0</RecordCount>
+  </Table1>
+  <Table1>
+    <TableName>AccountingEntries</TableName>
+    <RecordCount>0</RecordCount>
+  </Table1>
+  <Table1>
+    <TableName>AccountSessions</TableName>
+    <RecordCount>0</RecordCount>
+  </Table1>
+  <Table1>
+    <TableName>CommandReceipts</TableName>
+    <RecordCount>0</RecordCount>
+  </Table1>
+  <Table1>
+    <TableName>CommissionPolicies</TableName>
+    <RecordCount>0</RecordCount>
+  </Table1>
+  <Table1>
+    <TableName>DailyOrders</TableName>
+    <RecordCount>0</RecordCount>
+  </Table1>
+  <Table1>
+    <TableName>EarningsStatements</TableName>
+    <RecordCount>0</RecordCount>
+  </Table1>
+  <Table1>
+    <TableName>ImportBatches</TableName>
+    <RecordCount>0</RecordCount>
+  </Table1>
+  <Table1>
+    <TableName>ImportFiles</TableName>
+    <RecordCount>0</RecordCount>
+  </Table1>
+  <Table1>
+    <TableName>ImportRows</TableName>
+    <RecordCount>0</RecordCount>
+  </Table1>
+  <Table1>
+    <TableName>MoneyMovements</TableName>
+    <RecordCount>0</RecordCount>
+  </Table1>
+  <Table1>
+    <TableName>Operations</TableName>
+    <RecordCount>0</RecordCount>
+  </Table1>
+  <Table1>
+    <TableName>PlatformTransactions</TableName>
+    <RecordCount>0</RecordCount>
+  </Table1>
+  <Table1>
+    <TableName>RequestDecisions</TableName>
+    <RecordCount>0</RecordCount>
+  </Table1>
+  <Table1>
+    <TableName>Requests</TableName>
+    <RecordCount>0</RecordCount>
+  </Table1>
+  <Table1>
+    <TableName>SettlementReminders</TableName>
+    <RecordCount>0</RecordCount>
+  </Table1>
+  <Table1>
+    <TableName>TransferredDebts</TableName>
+    <RecordCount>0</RecordCount>
+  </Table1>
+  <Table2>
+    <VerifiedAtUtc>2026-10-15T08:16:16.6771791+03:00</VerifiedAtUtc>
+  </Table2>
+</NewDataSet>

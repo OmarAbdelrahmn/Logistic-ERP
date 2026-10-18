@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 using LogisticsERP.Domain.Entities.Jahez;
 using LogisticsERP.Application.Abstractions.Persistence;
 using LogisticsERP.Domain.Common;
@@ -33,6 +33,11 @@ public sealed class ApplicationDbContext(
     : DbContext(options), IApplicationDbContext
 {
     private readonly TimeProvider _timeProvider = timeProvider ?? TimeProvider.System;
+    public DbSet<JahezOperation> JahezOperations => Set<JahezOperation>();
+    public DbSet<JahezMoneyMovement> JahezMoneyMovements => Set<JahezMoneyMovement>();
+    public DbSet<JahezTransferredDebt> JahezTransferredDebts => Set<JahezTransferredDebt>();
+    public DbSet<JahezCashboxHandover> JahezCashboxHandovers => Set<JahezCashboxHandover>();
+    public DbSet<JahezCashboxHandoverMovement> JahezCashboxHandoverMovements => Set<JahezCashboxHandoverMovement>();
 
     public DbSet<CompanyProfile> CompanyProfiles => Set<CompanyProfile>();
     public DbSet<GlobalCity> GlobalCities => Set<GlobalCity>();
@@ -87,6 +92,19 @@ public sealed class ApplicationDbContext(
     public DbSet<HousingResidencePeriod> HousingResidencePeriods => Set<HousingResidencePeriod>();
     public DbSet<ClientContract> ClientContracts => Set<ClientContract>();
     public DbSet<PlatformRiderAccount> PlatformRiderAccounts => Set<PlatformRiderAccount>();
+    public DbSet<LogisticsERP.Domain.Entities.Ninja.NinjaAccountDetails> NinjaAccountDetails => Set<LogisticsERP.Domain.Entities.Ninja.NinjaAccountDetails>();
+    public DbSet<LogisticsERP.Domain.Entities.Ninja.NinjaAccountUpdateUpload> NinjaAccountUpdateUploads => Set<LogisticsERP.Domain.Entities.Ninja.NinjaAccountUpdateUpload>();
+    public DbSet<LogisticsERP.Domain.Entities.Ninja.NinjaAccountUpdateRow> NinjaAccountUpdateRows => Set<LogisticsERP.Domain.Entities.Ninja.NinjaAccountUpdateRow>();
+    public DbSet<LogisticsERP.Domain.Entities.Ninja.NinjaDailyImport> NinjaDailyImports => Set<LogisticsERP.Domain.Entities.Ninja.NinjaDailyImport>();
+    public DbSet<LogisticsERP.Domain.Entities.Ninja.NinjaDailyPerformance> NinjaDailyPerformance => Set<LogisticsERP.Domain.Entities.Ninja.NinjaDailyPerformance>();
+    public DbSet<LogisticsERP.Domain.Entities.Ninja.NinjaDailyDeduction> NinjaDailyDeductions => Set<LogisticsERP.Domain.Entities.Ninja.NinjaDailyDeduction>();
+    public DbSet<LogisticsERP.Domain.Entities.Chefz.ChefzAccountDetails> ChefzAccountDetails => Set<LogisticsERP.Domain.Entities.Chefz.ChefzAccountDetails>();
+    public DbSet<LogisticsERP.Domain.Entities.Chefz.ChefzPerformanceSettings> ChefzPerformanceSettings => Set<LogisticsERP.Domain.Entities.Chefz.ChefzPerformanceSettings>();
+    public DbSet<LogisticsERP.Domain.Entities.Chefz.ChefzSponsorStatistics> ChefzSponsorStatistics => Set<LogisticsERP.Domain.Entities.Chefz.ChefzSponsorStatistics>();
+    public DbSet<LogisticsERP.Domain.Entities.Chefz.ChefzWalletSettlement> ChefzWalletSettlements => Set<LogisticsERP.Domain.Entities.Chefz.ChefzWalletSettlement>();
+    public DbSet<LogisticsERP.Domain.Entities.Chefz.ChefzDailyPerformance> ChefzDailyPerformance => Set<LogisticsERP.Domain.Entities.Chefz.ChefzDailyPerformance>();
+    public DbSet<LogisticsERP.Domain.Entities.Chefz.ChefzPerformanceImport> ChefzPerformanceImports => Set<LogisticsERP.Domain.Entities.Chefz.ChefzPerformanceImport>();
+    public DbSet<LogisticsERP.Domain.Entities.Chefz.ChefzOrderSettlementImport> ChefzOrderSettlementImports => Set<LogisticsERP.Domain.Entities.Chefz.ChefzOrderSettlementImport>();
     public DbSet<PlatformAccountCredentialVersion> PlatformAccountCredentialVersions => Set<PlatformAccountCredentialVersion>();
     public DbSet<RiderClientAssignment> RiderClientAssignments => Set<RiderClientAssignment>();
     public DbSet<RiderAssignmentEvent> RiderAssignmentEvents => Set<RiderAssignmentEvent>();
@@ -185,7 +203,7 @@ public sealed class ApplicationDbContext(
     public DbSet<RiderPhoneSimAssignment> RiderPhoneSimAssignments => Set<RiderPhoneSimAssignment>();
     public DbSet<PhoneSimResponsibilityChange> PhoneSimResponsibilityChanges => Set<PhoneSimResponsibilityChange>();
 
-    public DbSet<JahezAccountHandover> JahezAccountHandovers => Set<JahezAccountHandover>();
+    public DbSet<JahezAccountSession> JahezAccountSessions => Set<JahezAccountSession>();
     public DbSet<JahezAccountFee> JahezAccountFees => Set<JahezAccountFee>();
     public DbSet<JahezApprovalRequest> JahezApprovalRequests => Set<JahezApprovalRequest>();
     public DbSet<JahezApprovalDecision> JahezApprovalDecisions => Set<JahezApprovalDecision>();
@@ -196,10 +214,7 @@ public sealed class ApplicationDbContext(
     public DbSet<JahezImportRow> JahezImportRows => Set<JahezImportRow>();
     public DbSet<JahezTransaction> JahezTransactions => Set<JahezTransaction>();
     public DbSet<JahezDailyDispatch> JahezDailyDispatches => Set<JahezDailyDispatch>();
-    public DbSet<JahezRiderSettlement> JahezRiderSettlements => Set<JahezRiderSettlement>();
     public DbSet<JahezLedgerEntry> JahezLedgerEntries => Set<JahezLedgerEntry>();
-    public DbSet<JahezCashboxEntry> JahezCashboxEntries => Set<JahezCashboxEntry>();
-    public DbSet<JahezCashboxHandover> JahezCashboxHandovers => Set<JahezCashboxHandover>();
     public DbSet<JahezReminderState> JahezReminderStates => Set<JahezReminderState>();
     public DbSet<JahezCommandReceipt> JahezCommandReceipts => Set<JahezCommandReceipt>();
 
@@ -308,6 +323,8 @@ public sealed class ApplicationDbContext(
     {
         var entityNamespace = entityType.Namespace ?? string.Empty;
         if (entityNamespace.EndsWith(".Jahez", StringComparison.Ordinal)) return "jahez";
+        if (entityNamespace.EndsWith(".Chefz", StringComparison.Ordinal)) return "chefz";
+        if (entityNamespace.EndsWith(".Ninja", StringComparison.Ordinal)) return "ninja";
         if (entityNamespace.EndsWith(".Fleet", StringComparison.Ordinal)) return "fleet";
         if (entityNamespace.EndsWith(".Fuel", StringComparison.Ordinal)) return "fuel";
         if (entityNamespace.EndsWith(".Maintenance", StringComparison.Ordinal)) return "maintenance";

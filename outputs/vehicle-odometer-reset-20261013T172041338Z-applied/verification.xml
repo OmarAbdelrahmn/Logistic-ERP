@@ -1,0 +1,67 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="PlateNumberAr" type="xs:string" minOccurs="0" />
+                <xs:element name="CurrentOdometer" type="xs:long" minOccurs="0" />
+                <xs:element name="TrackedDistanceKm" type="xs:decimal" minOccurs="0" />
+                <xs:element name="LastOdometerAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="AuditRows" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <Id>01a0aed7-0d93-706a-8b6c-18d1d94c19bd</Id>
+    <PlateNumberAr>ه ا 3048</PlateNumberAr>
+    <CurrentOdometer>0</CurrentOdometer>
+    <TrackedDistanceKm>0.00</TrackedDistanceKm>
+    <LastOdometerAtUtc>2026-10-13T17:20:42.1142397Z</LastOdometerAtUtc>
+  </Table>
+  <Table>
+    <Id>01a0aed7-0d92-73ef-94c7-73b4ff88c5bf</Id>
+    <PlateNumberAr>ك ع 851</PlateNumberAr>
+    <CurrentOdometer>0</CurrentOdometer>
+    <TrackedDistanceKm>0.00</TrackedDistanceKm>
+    <LastOdometerAtUtc>2026-10-13T17:20:42.1142397Z</LastOdometerAtUtc>
+  </Table>
+  <Table>
+    <Id>01a0aed7-0d95-7936-b2e3-7da12b0c0c95</Id>
+    <PlateNumberAr>ح ب 1034</PlateNumberAr>
+    <CurrentOdometer>0</CurrentOdometer>
+    <TrackedDistanceKm>0.00</TrackedDistanceKm>
+    <LastOdometerAtUtc>2026-10-13T17:20:42.1142397Z</LastOdometerAtUtc>
+  </Table>
+  <Table>
+    <Id>01a0aed7-0d95-7c56-a7c2-cdd6708d63f6</Id>
+    <PlateNumberAr>ح ب 1031</PlateNumberAr>
+    <CurrentOdometer>0</CurrentOdometer>
+    <TrackedDistanceKm>0.00</TrackedDistanceKm>
+    <LastOdometerAtUtc>2026-10-13T17:20:42.1142397Z</LastOdometerAtUtc>
+  </Table>
+  <Table>
+    <Id>01a0aed7-0d92-78e9-b91f-e629680fde7f</Id>
+    <PlateNumberAr>د ب 9966</PlateNumberAr>
+    <CurrentOdometer>0</CurrentOdometer>
+    <TrackedDistanceKm>0.00</TrackedDistanceKm>
+    <LastOdometerAtUtc>2026-10-13T17:20:42.1142397Z</LastOdometerAtUtc>
+  </Table>
+  <Table1>
+    <AuditRows>5</AuditRows>
+  </Table1>
+</NewDataSet>

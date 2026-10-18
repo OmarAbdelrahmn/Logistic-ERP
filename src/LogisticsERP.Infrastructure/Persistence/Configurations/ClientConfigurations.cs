@@ -136,7 +136,7 @@ internal sealed class RiderClientAssignmentConfiguration : IEntityTypeConfigurat
             table.HasCheckConstraint("CK_RiderClientAssignments_EffectiveRange", "[EffectiveTo] IS NULL OR [EffectiveTo] >= [EffectiveFrom]");
             table.HasCheckConstraint("CK_RiderClientAssignments_BackdatedReason", "[WasBackdated] = 0 OR [BackdatedReason] IS NOT NULL");
             table.HasCheckConstraint("CK_RiderClientAssignments_PaymentModel", "[PaymentModel] IN (1, 2)");
-            table.HasCheckConstraint("CK_RiderClientAssignments_RiderAccountSlot", "[RiderAccountSlot] IN (1, 2)");
+            table.HasCheckConstraint("CK_RiderClientAssignments_RiderAccountSlot", "[RiderAccountSlot] IN (1, 2, 3)");
         });
     }
 }

@@ -1,0 +1,99 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="LegacyReceipts" type="xs:long" minOccurs="0" />
+                <xs:element name="Amount" type="xs:decimal" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="MigratedReceipts" type="xs:long" minOccurs="0" />
+                <xs:element name="Amount" type="xs:decimal" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table2">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Operations" type="xs:long" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table3">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="TransferredDebts" type="xs:long" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table4">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="name" type="xs:string" minOccurs="0" />
+                <xs:element name="is_disabled" type="xs:boolean" minOccurs="0" />
+                <xs:element name="is_not_trusted" type="xs:boolean" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table5">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="VerifiedAtUtc" type="xs:dateTime" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <LegacyReceipts>1</LegacyReceipts>
+    <Amount>362.000000</Amount>
+  </Table>
+  <Table1>
+    <MigratedReceipts>1</MigratedReceipts>
+    <Amount>362.00</Amount>
+  </Table1>
+  <Table2>
+    <Operations>0</Operations>
+  </Table2>
+  <Table3>
+    <TransferredDebts>0</TransferredDebts>
+  </Table3>
+  <Table4>
+    <name>CK_JahezOperation_Amounts</name>
+    <is_disabled>false</is_disabled>
+    <is_not_trusted>false</is_not_trusted>
+  </Table4>
+  <Table4>
+    <name>CK_JahezOperation_State</name>
+    <is_disabled>false</is_disabled>
+    <is_not_trusted>false</is_not_trusted>
+  </Table4>
+  <Table4>
+    <name>CK_JahezTransferredDebt_Amount</name>
+    <is_disabled>false</is_disabled>
+    <is_not_trusted>false</is_not_trusted>
+  </Table4>
+  <Table4>
+    <name>CK_JahezMoney_Amount</name>
+    <is_disabled>false</is_disabled>
+    <is_not_trusted>false</is_not_trusted>
+  </Table4>
+  <Table4>
+    <name>CK_JahezMoney_Routing</name>
+    <is_disabled>false</is_disabled>
+    <is_not_trusted>false</is_not_trusted>
+  </Table4>
+  <Table5>
+    <VerifiedAtUtc>2026-10-15T07:42:15.7229294+03:00</VerifiedAtUtc>
+  </Table5>
+</NewDataSet>

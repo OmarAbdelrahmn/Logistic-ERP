@@ -1,0 +1,43 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="HandoverId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="ThroughDate" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="RecordedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CollectedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="FeePayment" type="xs:decimal" minOccurs="0" />
+                <xs:element name="DebtPayment" type="xs:decimal" minOccurs="0" />
+                <xs:element name="CommissionPayment" type="xs:decimal" minOccurs="0" />
+                <xs:element name="CountsAsSettlement" type="xs:boolean" minOccurs="0" />
+                <xs:element name="Reason" type="xs:string" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <Id>01a12b4a-1189-7e82-80ed-0573492353b1</Id>
+    <HandoverId>05e30e39-e328-411a-817e-4be15c5ca828</HandoverId>
+    <ThroughDate>2026-10-11T00:00:00+03:00</ThroughDate>
+    <RecordedAtUtc>2026-10-11T14:07:16.873517Z</RecordedAtUtc>
+    <CollectedByUserId>5e8dbbf5-f4a8-447d-d933-08df10cc8271</CollectedByUserId>
+    <FeePayment>0.000000</FeePayment>
+    <DebtPayment>287.000000</DebtPayment>
+    <CommissionPayment>75.000000</CommissionPayment>
+    <CountsAsSettlement>true</CountsAsSettlement>
+    <Reason>تحصيل وتسوية نقدية للمندوب</Reason>
+    <CreatedAtUtc>2026-10-11T14:07:16.9123208Z</CreatedAtUtc>
+    <CreatedByUserId>5e8dbbf5-f4a8-447d-d933-08df10cc8271</CreatedByUserId>
+  </Table>
+</NewDataSet>

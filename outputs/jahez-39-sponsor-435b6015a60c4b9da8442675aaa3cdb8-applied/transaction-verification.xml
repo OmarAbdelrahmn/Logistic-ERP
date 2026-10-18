@@ -1,0 +1,295 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="UpdatedAccounts">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="AccountId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="Account" type="xs:string" minOccurs="0" />
+                <xs:element name="PreviousSponsor" type="xs:string" minOccurs="0" />
+                <xs:element name="NewSponsor" type="xs:string" minOccurs="0" />
+                <xs:element name="SponsorName" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <UpdatedAccounts>
+    <AccountId>a8b30114-8a2e-49ad-87e6-44d826de2370</AccountId>
+    <Account>491258</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>60377cb5-b49a-48fe-b139-b2667649e7c6</AccountId>
+    <Account>491274</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>48f481c4-e1e4-4470-8133-193b2ef94b7a</AccountId>
+    <Account>491295</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>14669814-302c-48e4-99e3-a62ee51fa28b</AccountId>
+    <Account>491296</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>58872213-a104-4a3e-8509-c844f70e9432</AccountId>
+    <Account>491297</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>49547139-4bfa-43ca-894d-9bfa531ac88f</AccountId>
+    <Account>491298</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>e5914946-3c45-4a27-8afe-cff0126d74f2</AccountId>
+    <Account>491299</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>00908edc-4df5-4ec5-8b53-1b8fc84a289d</AccountId>
+    <Account>491300</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>26715e3d-ad2a-4423-a281-d00e9a0607cd</AccountId>
+    <Account>491301</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>300020ab-6ed5-4e28-8569-af87b588e7c2</AccountId>
+    <Account>491302</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>19707386-bb5a-41ef-980c-e4c5b715d314</AccountId>
+    <Account>491304</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>226427a7-d441-4082-927f-6019a6d9651c</AccountId>
+    <Account>491306</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>daf20017-9233-4441-a1df-68fd1dcfcfc9</AccountId>
+    <Account>491309</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>1f1e54f0-4b8b-4af2-a845-3e53d1bc81d2</AccountId>
+    <Account>491310</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>427a6b7d-e54a-4671-8382-8c6bebf152ca</AccountId>
+    <Account>491311</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>4890bd24-de1b-423b-b493-b4b4977337e5</AccountId>
+    <Account>491575</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>084a744c-bd94-4c70-b481-457a0396a1a7</AccountId>
+    <Account>491576</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>92064d52-658f-4a70-9435-d7eb2eea4ce0</AccountId>
+    <Account>491577</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>37b9d0b6-4845-4bed-9e61-d12b44e80c1c</AccountId>
+    <Account>498844</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>5141bfd9-9245-4abf-98a8-3f90c88e7ad5</AccountId>
+    <Account>498845</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>d515ead9-dd4b-43c1-9a60-672389dd14cc</AccountId>
+    <Account>498846</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>a029d71c-b11b-4512-b0c6-908a81f37e72</AccountId>
+    <Account>498848</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>f8c26ba4-12d7-4c01-a797-a227f3ad4760</AccountId>
+    <Account>498895</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>22a25cd6-a1f6-4e40-8551-e313278cc18a</AccountId>
+    <Account>498897</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>91976373-a66d-4b58-b8bf-f58034ea26e0</AccountId>
+    <Account>498898</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>ef7b9d3d-386d-4f50-bb1a-5ef8975e32c0</AccountId>
+    <Account>499116</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>69de907a-2b33-4528-8f00-8fb44206c128</AccountId>
+    <Account>499117</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>78d4a3e9-4ce2-48db-b9d2-6b660073a8c6</AccountId>
+    <Account>499118</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>e9d5ced2-89b0-4aa3-99e7-b604cd64bebc</AccountId>
+    <Account>499120</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>36fdb57a-c3e2-418b-880c-bdb8f5a83ba2</AccountId>
+    <Account>499122</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>d915f8b2-ee0c-4f3c-b36f-db7f4dc58fa1</AccountId>
+    <Account>499308</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>7748d85c-3a35-4383-86c3-854d30f43f0b</AccountId>
+    <Account>499550</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>89b4b68f-a5c8-45e9-8fe8-dd9ce4634e8d</AccountId>
+    <Account>499551</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>5327ff01-7d10-4f8a-9557-d9eff9083e52</AccountId>
+    <Account>499552</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>5e91db27-b858-4480-a98e-0079a07b8ac8</AccountId>
+    <Account>499572</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>7dcbe0a1-ed6a-47cc-9bab-852502171698</AccountId>
+    <Account>499580</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>c05e191d-82fe-476a-8810-247750f27677</AccountId>
+    <Account>499581</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>3ae0d869-487b-4223-ae20-f595f0d0570e</AccountId>
+    <Account>499583</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+  <UpdatedAccounts>
+    <AccountId>2339d41e-75e3-47d2-a513-ce76ba42f129</AccountId>
+    <Account>499584</Account>
+    <PreviousSponsor>7015658094</PreviousSponsor>
+    <NewSponsor>7038745530</NewSponsor>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+  </UpdatedAccounts>
+</NewDataSet>

@@ -164,6 +164,24 @@ public sealed class MaintenanceInventoryController(IMaintenanceService service) 
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 
+    [HttpPost("oil-barrels/{id:guid}/missing")]
+    [RequirePermission(PermissionKeys.Inventory.StockAdjust)]
+    public async Task<IActionResult> RecordOilBarrelMissing(Guid id, [FromBody] RecordOilBarrelMissingRequest request, CancellationToken cancellationToken)
+    {
+        var result = await service.RecordOilBarrelMissingAsync(id, request, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpGet("oil-barrels/{id:guid}/missing")]
+    [RequirePermission(PermissionKeys.Inventory.StockRead)]
+    [RequirePermission(PermissionKeys.Inventory.CostLayersRead)]
+    public async Task<IActionResult> GetOilBarrelMissingHistory(Guid id, [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 50, CancellationToken cancellationToken = default)
+    {
+        var result = await service.GetOilBarrelMissingHistoryAsync(id, page, pageSize, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
     [HttpPost("transfers")]
     [RequirePermission(PermissionKeys.Inventory.StockMove)]
     public async Task<IActionResult> PostTransfer([FromBody] PostStockTransferRequest request, CancellationToken cancellationToken)

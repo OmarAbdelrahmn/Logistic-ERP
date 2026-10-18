@@ -1,0 +1,119 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="AccountSessions">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="PlatformRiderAccountId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RiderProfileId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RiderClientAssignmentId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="StartedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="EndedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CommissionStartsOn" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="CommissionPostedThrough" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="LastSettlementPaymentAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="Reason" type="xs:string" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="UpdatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="UpdatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RowVersion" type="xs:base64Binary" minOccurs="0" />
+                <xs:element name="IsDeleted" type="xs:boolean" minOccurs="0" />
+                <xs:element name="DeletedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="DeletedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DeletionReason" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="DatasetVersions">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="ModuleKey" type="xs:string" minOccurs="0" />
+                <xs:element name="Version" type="xs:long" minOccurs="0" />
+                <xs:element name="LastChangedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="UpdatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="UpdatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RowVersion" type="xs:base64Binary" minOccurs="0" />
+                <xs:element name="IsDeleted" type="xs:boolean" minOccurs="0" />
+                <xs:element name="DeletedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="DeletedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DeletionReason" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <AccountSessions>
+    <Id>01a14e50-799a-7a6a-8017-198dc1384a31</Id>
+    <PlatformRiderAccountId>22e23827-8420-4714-89f1-8d4d251d8881</PlatformRiderAccountId>
+    <RiderProfileId>01a0bf9d-e09f-773a-871e-d718058581f4</RiderProfileId>
+    <RiderClientAssignmentId>01a14e50-7999-7a6b-8afe-b2c72a6d6143</RiderClientAssignmentId>
+    <StartedAtUtc>2026-10-18T09:20:00Z</StartedAtUtc>
+    <CommissionStartsOn>2026-10-19T00:00:00+03:00</CommissionStartsOn>
+    <Reason>تسليم جديد للعمل</Reason>
+    <CreatedAtUtc>2026-10-18T09:20:59.363634Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+    <RowVersion>AAAAAAAC7Zc=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </AccountSessions>
+  <AccountSessions>
+    <Id>01a14e55-a93a-75e3-b4f9-9b4363512fbc</Id>
+    <PlatformRiderAccountId>226427a7-d441-4082-927f-6019a6d9651c</PlatformRiderAccountId>
+    <RiderProfileId>01a0bf9d-e0a5-70c8-8b88-cbd68c722d8b</RiderProfileId>
+    <RiderClientAssignmentId>01a14e55-a93a-708f-8e8d-2c779f281c3c</RiderClientAssignmentId>
+    <StartedAtUtc>2026-10-18T09:26:00Z</StartedAtUtc>
+    <CommissionStartsOn>2026-10-19T00:00:00+03:00</CommissionStartsOn>
+    <Reason>تسليم جديد للعمل</Reason>
+    <CreatedAtUtc>2026-10-18T09:26:39.1687203Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+    <RowVersion>AAAAAAAC7bk=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </AccountSessions>
+  <AccountSessions>
+    <Id>01a14e51-f9d2-726b-b2e4-9e9ee8189a16</Id>
+    <PlatformRiderAccountId>a88090b0-c1b4-41ef-aec4-0fe70d69536d</PlatformRiderAccountId>
+    <RiderProfileId>01a0bf9d-e098-79ee-960d-3bf199f17e55</RiderProfileId>
+    <RiderClientAssignmentId>01a14e51-f9d2-703a-85eb-94a948e749be</RiderClientAssignmentId>
+    <StartedAtUtc>2026-10-18T09:22:00Z</StartedAtUtc>
+    <CommissionStartsOn>2026-10-19T00:00:00+03:00</CommissionStartsOn>
+    <Reason>تسليم جديد للعمل</Reason>
+    <CreatedAtUtc>2026-10-18T09:22:37.6526544Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+    <RowVersion>AAAAAAAC7ac=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </AccountSessions>
+  <AccountSessions>
+    <Id>01a14e59-6c92-771f-ab02-aa9fcdfed811</Id>
+    <PlatformRiderAccountId>9aab2a55-9e69-43eb-8f3d-dc5340315917</PlatformRiderAccountId>
+    <RiderProfileId>01a14e58-5cf1-77aa-8018-2181b8979dc5</RiderProfileId>
+    <RiderClientAssignmentId>01a14e59-6c92-7260-9f32-69ea5f7299e1</RiderClientAssignmentId>
+    <StartedAtUtc>2026-10-18T09:30:00Z</StartedAtUtc>
+    <CommissionStartsOn>2026-10-19T00:00:00+03:00</CommissionStartsOn>
+    <Reason>تسليم جديد للعمل</Reason>
+    <CreatedAtUtc>2026-10-18T09:30:45.7807222Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+    <RowVersion>AAAAAAAC7iY=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </AccountSessions>
+  <DatasetVersions>
+    <Id>01a10681-712e-7b26-93e0-8f9df3b1a024</Id>
+    <ModuleKey>jahez</ModuleKey>
+    <Version>237</Version>
+    <LastChangedAtUtc>2026-10-18T10:14:53.3416259Z</LastChangedAtUtc>
+    <CreatedAtUtc>2026-10-04T10:41:48.8464462Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-18T10:14:53.3416684Z</UpdatedAtUtc>
+    <UpdatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</UpdatedByUserId>
+    <RowVersion>AAAAAAAC8Jc=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </DatasetVersions>
+</NewDataSet>

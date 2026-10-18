@@ -1,0 +1,142 @@
+{
+  "sourceRows": 384,
+  "uniqueAccounts": 380,
+  "duplicatesIgnored": 4,
+  "existingAccountsUpdated": 378,
+  "newAccounts": 2,
+  "ownerProfilesCreated": 19,
+  "accountSponsorChanges": 39,
+  "suspended": 46,
+  "available": 36,
+  "assigned": 298,
+  "newRiderAssignments": 295,
+  "existingRiderAssignmentsPreserved": 3,
+  "pendingRiderAssignments": 13,
+  "vehicleLinksCreated": 374,
+  "missingVehicleSerials": 3,
+  "unmatchedVehicleSerials": [
+    "400604220",
+    "720438120"
+  ],
+  "ownerHrSponsorDifferences": 87
+}
+[
+  {
+    "row": 9,
+    "account": "420509",
+    "riderIqama": "2215204666",
+    "date": "2026-10-11",
+    "reasons": [
+      "RiderAccountCapacityConflict"
+    ]
+  },
+  {
+    "row": 41,
+    "account": "456454",
+    "riderIqama": "2539354528",
+    "date": "2026-10-11",
+    "reasons": [
+      "InactiveAccountHasListedRider"
+    ]
+  },
+  {
+    "row": 68,
+    "account": "458394",
+    "riderIqama": "2626069906",
+    "date": "2026-10-15",
+    "reasons": [
+      "InactiveAccountHasListedRider"
+    ]
+  },
+  {
+    "row": 82,
+    "account": "476885",
+    "riderIqama": "2501676890",
+    "date": "2026-10-12",
+    "reasons": [
+      "RiderAccountCapacityConflict"
+    ]
+  },
+  {
+    "row": 176,
+    "account": "399990",
+    "riderIqama": "2630669634",
+    "date": "2026-10-05",
+    "reasons": [
+      "ExistingAssignmentHasDifferentRiderAndFinancialRecords"
+    ]
+  },
+  {
+    "row": 207,
+    "account": "404654",
+    "riderIqama": "2546390671",
+    "date": "2026-10-08",
+    "reasons": [
+      "ExistingAssignmentHasDifferentRiderAndFinancialRecords"
+    ]
+  },
+  {
+    "row": 213,
+    "account": "404719",
+    "riderIqama": "2608130296",
+    "date": "2026-10-13",
+    "reasons": [
+      "ExistingAssignmentHasDifferentRiderAndFinancialRecords"
+    ]
+  },
+  {
+    "row": 275,
+    "account": "491306",
+    "riderIqama": "2501676890",
+    "date": "2026-10-14",
+    "reasons": [
+      "RiderAccountCapacityConflict"
+    ]
+  },
+  {
+    "row": 318,
+    "account": "457195",
+    "riderIqama": "#N/A",
+    "date": null,
+    "reasons": [
+      "RiderMissingOrAmbiguous",
+      "MissingDate"
+    ]
+  },
+  {
+    "row": 322,
+    "account": "458167",
+    "riderIqama": "2501676890",
+    "date": "2026-10-01",
+    "reasons": [
+      "RiderAccountCapacityConflict"
+    ]
+  },
+  {
+    "row": 335,
+    "account": "459049",
+    "riderIqama": "2215204666",
+    "date": "2026-10-05",
+    "reasons": [
+      "RiderAccountCapacityConflict"
+    ]
+  },
+  {
+    "row": 350,
+    "account": "457357",
+    "riderIqama": "2460730217",
+    "date": "2026-10-15",
+    "reasons": [
+      "InactiveAccountHasListedRider"
+    ]
+  },
+  {
+    "row": 377,
+    "account": "456420",
+    "riderIqama": "2462687274",
+    "date": "2026-10-12",
+    "reasons": [
+      "RiderAccountCapacityConflict"
+    ]
+  }
+]

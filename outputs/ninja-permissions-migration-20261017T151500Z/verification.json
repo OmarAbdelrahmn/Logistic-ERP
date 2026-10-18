@@ -1,0 +1,14 @@
+{
+  "Server": "db67927.public.databaseasp.net",
+  "Database": "db67927",
+  "VerifiedAtUtc": "2026-10-17T15:15:01.3297308Z",
+  "NinjaDefinitions": 7,
+  "AdministratorNinjaGrants": 7,
+  "OmarAllSevenPermissionsVerified": true,
+  "PostCommitVerified": true,
+  "ScriptSha256": {
+    "ninja-permissions-application.sql": "2BF6E3B2AF885DA101DC5A3F09015C2315ED9141209FC7590D3C6B4B32867E4E",
+    "ninja-permissions-identity.sql": "51D39F9EAFB4A25ED8AC5DC5DC302A849E8231B0D0E8A12D61CD9FE9DD16A1EE"
+  },
+  "EvidenceDirectory": "C:\\Users\\omarf\\OneDrive\\Documents\\ChatGPT\\Logistic ERP\\outputs\\ninja-permissions-migration-20261017T151500Z"
+}

@@ -1,0 +1,33 @@
+﻿row,account,iqama,start,last_settlement,reason
+3,404654,2546390671,2026-09-30,2026-09-30,Rider Iqama not found
+10,404899,2153420639,2027-01-08,2026-08-25,Handover still future after approved day/month correction: 2027-01-08 | Last settlement precedes handover after date correction
+28,405062,2634243394,2026-10-01,2026-10-01,Rider Iqama not found
+45,415808,2566501421,2026-09-28,2026-09-28,Rider Iqama not found
+68,456433,2609649831,2026-10-03,2026-10-03,Rider Iqama not found
+74,456454,2539354528,2026-09-08,2026-09-08,Account is not available (status 4)
+89,457390,2552747590,2026-07-11,2026-07-11,Account is not available (status 4)
+95,458167,2501676890,2026-09-26,2026-09-26,Rider exceeds two-account limit
+104,458435,24547529209,2025-11-15,2026-09-12,Rider Iqama not found
+116,459051,2511793404,2026-10-06,2026-10-06,Rider Iqama not found
+125,459705,2484058231,None,2026-09-10,Missing or invalid handover date: 00:00:00
+129,460257,205542655,2026-04-16,2026-08-12,Rider Iqama not found
+132,460555,2540504848,2027-01-08,2026-09-15,Handover still future after approved day/month correction: 2027-01-08 | Last settlement precedes handover after date correction
+135,460646,2644185379,2026-10-01,2026-10-01,Rider Iqama not found
+187,472431,2481072508,2027-01-08,2026-09-10,Handover still future after approved day/month correction: 2027-01-08 | Last settlement precedes handover after date correction
+196,472486,2597270327,2026-09-28,2026-09-28,Rider Iqama not found
+217,472843,2521946745,2026-10-08,2026-10-08,Account is not available (status 4)
+223,472853,2164753675,2026-10-06,2026-10-06,Rider Iqama not found
+248,474777,2456252739,2026-07-28,2026-09-12,Rider Iqama not found
+258,474831,2519139063,2026-09-22,2026-09-22,Rider Iqama not found
+272,475259,2481153019,2026-10-01,2026-10-01,Rider Iqama not found
+285,476885,2501676890,2026-05-21,2026-09-11,Rider exceeds two-account limit
+297,482490,2446920734,2026-09-28,2026-09-28,Rider Iqama not found
+326,485301,2583623943,2026-09-26,2026-09-26,Rider Iqama not found
+336,491299,2544857929,None,2026-09-13,Missing or invalid handover date: 1/8/20207
+341,491306,2501676890,2026-09-26,2026-09-26,Rider exceeds two-account limit
+346,491576,211460933,2026-09-30,2026-09-30,Rider Iqama not found
+353,492241,2638216628,2027-01-08,2026-09-10,Handover still future after approved day/month correction: 2027-01-08 | Last settlement precedes handover after date correction
+354,492323,2602320000,2026-09-28,2026-09-28,Rider Iqama not found
+363,498846,2511665214,None,2026-09-30,Missing or invalid handover date: 00:00:00
+375,499551,2474277312,2026-09-27,2026-09-27,Rider Iqama not found
+379,499581,2596368981,2026-10-03,2026-10-03,Rider Iqama not found

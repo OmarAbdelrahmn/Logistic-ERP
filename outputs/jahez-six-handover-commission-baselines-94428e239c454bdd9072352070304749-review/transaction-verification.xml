@@ -1,0 +1,57 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Account" type="xs:string" minOccurs="0" />
+                <xs:element name="SessionId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="BaselineDate" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="NextCommissionStartsOn" type="xs:dateTime" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <Account>399990</Account>
+    <SessionId>01a141b9-aa98-70f8-a7e6-d99e51025d89</SessionId>
+    <BaselineDate>2026-10-01T00:00:00+03:00</BaselineDate>
+    <NextCommissionStartsOn>2026-10-02T00:00:00+03:00</NextCommissionStartsOn>
+  </Table>
+  <Table>
+    <Account>404719</Account>
+    <SessionId>01a141bb-2872-7641-9401-1a8e4912f304</SessionId>
+    <BaselineDate>2026-10-01T00:00:00+03:00</BaselineDate>
+    <NextCommissionStartsOn>2026-10-02T00:00:00+03:00</NextCommissionStartsOn>
+  </Table>
+  <Table>
+    <Account>417748</Account>
+    <SessionId>01a14a76-9ed2-7f6f-a1f9-26260d388752</SessionId>
+    <BaselineDate>2026-10-17T00:00:00+03:00</BaselineDate>
+    <NextCommissionStartsOn>2026-10-18T00:00:00+03:00</NextCommissionStartsOn>
+  </Table>
+  <Table>
+    <Account>458167</Account>
+    <SessionId>01a14a00-cf50-739f-b764-a34f7458bb78</SessionId>
+    <BaselineDate>2026-10-17T00:00:00+03:00</BaselineDate>
+    <NextCommissionStartsOn>2026-10-18T00:00:00+03:00</NextCommissionStartsOn>
+  </Table>
+  <Table>
+    <Account>461497</Account>
+    <SessionId>01a14a30-e02c-7270-b6c3-98ecd93f68af</SessionId>
+    <BaselineDate>2026-10-17T00:00:00+03:00</BaselineDate>
+    <NextCommissionStartsOn>2026-10-18T00:00:00+03:00</NextCommissionStartsOn>
+  </Table>
+  <Table>
+    <Account>485289</Account>
+    <SessionId>01a14a65-6013-7e13-bee5-a8f76d8df064</SessionId>
+    <BaselineDate>2026-10-17T00:00:00+03:00</BaselineDate>
+    <NextCommissionStartsOn>2026-10-18T00:00:00+03:00</NextCommissionStartsOn>
+  </Table>
+</NewDataSet>

@@ -1,0 +1,93 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="CompanyProfileId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="EmployerIdentityNumber" type="xs:string" minOccurs="0" />
+                <xs:element name="RegistryNameAr" type="xs:string" minOccurs="0" />
+                <xs:element name="RegistryNameEn" type="xs:string" minOccurs="0" />
+                <xs:element name="CommercialRegistrationNumber" type="xs:string" minOccurs="0" />
+                <xs:element name="UnifiedNationalNumber" type="xs:string" minOccurs="0" />
+                <xs:element name="SponsorType" type="xs:int" minOccurs="0" />
+                <xs:element name="Status" type="xs:int" minOccurs="0" />
+                <xs:element name="ActiveFrom" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="ActiveTo" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="ContactName" type="xs:string" minOccurs="0" />
+                <xs:element name="ContactPhone" type="xs:string" minOccurs="0" />
+                <xs:element name="ContactEmail" type="xs:string" minOccurs="0" />
+                <xs:element name="AddressBuildingNumber" type="xs:string" minOccurs="0" />
+                <xs:element name="AddressStreet" type="xs:string" minOccurs="0" />
+                <xs:element name="AddressDistrict" type="xs:string" minOccurs="0" />
+                <xs:element name="AddressCity" type="xs:string" minOccurs="0" />
+                <xs:element name="AddressPostalCode" type="xs:string" minOccurs="0" />
+                <xs:element name="AddressAdditionalNumber" type="xs:string" minOccurs="0" />
+                <xs:element name="Notes" type="xs:string" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="UpdatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="UpdatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RowVersion" type="xs:base64Binary" minOccurs="0" />
+                <xs:element name="IsDeleted" type="xs:boolean" minOccurs="0" />
+                <xs:element name="DeletedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="DeletedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DeletionReason" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <Id>019c18d5-62e1-7000-8000-000000000040</Id>
+    <CompanyProfileId>019c18d5-62e1-7000-8000-000000000001</CompanyProfileId>
+    <EmployerIdentityNumber>7038745530</EmployerIdentityNumber>
+    <RegistryNameAr>البوابة المقبلة للتجارة</RegistryNameAr>
+    <UnifiedNationalNumber>7038745530</UnifiedNationalNumber>
+    <SponsorType>1</SponsorType>
+    <Status>1</Status>
+    <ActiveFrom>2026-01-01T00:00:00+03:00</ActiveFrom>
+    <CreatedAtUtc>2026-01-01T00:00:00Z</CreatedAtUtc>
+    <UpdatedAtUtc>2026-09-13T12:02:33.5316666Z</UpdatedAtUtc>
+    <UpdatedByUserId>b1de8de7-7ad4-4f08-f387-08df1173e0a7</UpdatedByUserId>
+    <RowVersion>AAAAAAAAGFE=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table>
+  <Table>
+    <Id>019c18d5-62e1-7000-8000-000000000041</Id>
+    <CompanyProfileId>019c18d5-62e1-7000-8000-000000000001</CompanyProfileId>
+    <EmployerIdentityNumber>7015658094</EmployerIdentityNumber>
+    <RegistryNameAr>البوابا الموكبلا</RegistryNameAr>
+    <UnifiedNationalNumber>7015658094</UnifiedNationalNumber>
+    <SponsorType>2</SponsorType>
+    <Status>1</Status>
+    <ActiveFrom>2026-01-01T00:00:00+03:00</ActiveFrom>
+    <CreatedAtUtc>2026-01-01T00:00:00Z</CreatedAtUtc>
+    <UpdatedAtUtc>2026-09-13T12:01:41.6584326Z</UpdatedAtUtc>
+    <UpdatedByUserId>b1de8de7-7ad4-4f08-f387-08df1173e0a7</UpdatedByUserId>
+    <RowVersion>AAAAAAAAGE8=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table>
+  <Table>
+    <Id>019c18d5-62e1-7000-8000-000000000042</Id>
+    <CompanyProfileId>019c18d5-62e1-7000-8000-000000000001</CompanyProfileId>
+    <EmployerIdentityNumber>7034861059</EmployerIdentityNumber>
+    <RegistryNameAr>اكسبرس جايت</RegistryNameAr>
+    <UnifiedNationalNumber>7034861059</UnifiedNationalNumber>
+    <SponsorType>2</SponsorType>
+    <Status>1</Status>
+    <ActiveFrom>2026-01-01T00:00:00+03:00</ActiveFrom>
+    <ActiveTo>2027-06-18T00:00:00+03:00</ActiveTo>
+    <CreatedAtUtc>2026-01-01T00:00:00Z</CreatedAtUtc>
+    <UpdatedAtUtc>2026-09-13T12:01:31.9861997Z</UpdatedAtUtc>
+    <UpdatedByUserId>b1de8de7-7ad4-4f08-f387-08df1173e0a7</UpdatedByUserId>
+    <RowVersion>AAAAAAAAGE0=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table>
+</NewDataSet>

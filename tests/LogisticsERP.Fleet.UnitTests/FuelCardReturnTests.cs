@@ -14,6 +14,51 @@ namespace LogisticsERP.Fleet.UnitTests;
 
 public sealed class FuelCardReturnTests
 {
+    [Theory]
+    [InlineData(false, EmployeeStatus.Active, true)]
+    [InlineData(true, EmployeeStatus.Active, true)]
+    [InlineData(false, EmployeeStatus.OnLeave, false)]
+    [InlineData(true, EmployeeStatus.OnLeave, false)]
+    public async Task AssignmentRequiresActiveStatusRegardlessOfEmployeeClassification(
+        bool isEmployee, EmployeeStatus status, bool expectedSuccess)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var user = new CurrentUser();
+        var clock = new FixedClock();
+        await using var db = new ApplicationDbContext(new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseInMemoryDatabase($"FuelCardEligibility_{Guid.NewGuid():N}")
+            .AddInterceptors(new ApplicationPersistenceInterceptor(user, clock)).Options);
+        var employee = new Employee { FullNameAr = "Test person", IsEmployee = isEmployee, Status = status };
+        var rider = new RiderProfile { EmployeeId = employee.Id };
+        var card = new FuelCard
+        {
+            Provider = FuelCardProvider.PetroApp,
+            IdentifierType = FuelCardIdentifierType.InternalNumber,
+            CardNumber = "ELIGIBILITY201",
+            NormalizedCardNumber = "ELIGIBILITY201"
+        };
+        db.AddRange(employee, rider, card);
+        await db.SaveChangesAsync(ct);
+        db.ChangeTracker.Clear();
+        var service = new FuelCardService(db, user, new PermitAll(), clock);
+        var result = await service.AssignRiderAsync(card.Id,
+            new(rider.Id, new DateOnly(2026, 10, 1), "Assigned", null), ct);
+        Assert.Equal(expectedSuccess, result.IsSuccess);
+        if (expectedSuccess)
+        {
+            Assert.Equal(rider.Id, result.Value!.RiderProfileId);
+            Assert.Equal(employee.Id, result.Value.EmployeeId);
+            var assignment = await db.FuelCardRiderAssignments.SingleAsync(ct);
+            Assert.Equal(rider.Id, assignment.RiderProfileId);
+            Assert.Equal(employee.Id, assignment.EmployeeId);
+        }
+        else
+        {
+            Assert.Equal(FuelErrors.RiderUnavailable.Code, result.Error.Code);
+            Assert.Empty(db.FuelCardRiderAssignments);
+        }
+    }
+
     [Fact]
     public async Task ReturnClosesAssignmentWithPersistenceAuditAndRejectsInvalidRequests()
     {

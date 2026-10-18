@@ -1,0 +1,216 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="MigrationId" type="xs:string" minOccurs="0" />
+                <xs:element name="ProductVersion" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="name" type="xs:string" minOccurs="0" />
+                <xs:element name="SqlType" type="xs:string" minOccurs="0" />
+                <xs:element name="max_length" type="xs:short" minOccurs="0" />
+                <xs:element name="precision" type="xs:unsignedByte" minOccurs="0" />
+                <xs:element name="scale" type="xs:unsignedByte" minOccurs="0" />
+                <xs:element name="is_nullable" type="xs:boolean" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table2">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="name" type="xs:string" minOccurs="0" />
+                <xs:element name="is_disabled" type="xs:boolean" minOccurs="0" />
+                <xs:element name="is_not_trusted" type="xs:boolean" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table3">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="name" type="xs:string" minOccurs="0" />
+                <xs:element name="is_unique" type="xs:boolean" minOccurs="0" />
+                <xs:element name="is_disabled" type="xs:boolean" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table4">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="name" type="xs:string" minOccurs="0" />
+                <xs:element name="is_disabled" type="xs:boolean" minOccurs="0" />
+                <xs:element name="is_not_trusted" type="xs:boolean" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table5">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="SettlementCount" type="xs:long" minOccurs="0" />
+                <xs:element name="NetTotal" type="xs:decimal" minOccurs="0" />
+                <xs:element name="CompanyTotal" type="xs:decimal" minOccurs="0" />
+                <xs:element name="RiderTotal" type="xs:decimal" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table6">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="OrderImportCount" type="xs:long" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table7">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="VerifiedAtUtc" type="xs:dateTime" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <MigrationId>20261012093719_AddChefzOrderSettlementImports</MigrationId>
+    <ProductVersion>10.0.11</ProductVersion>
+  </Table>
+  <Table1>
+    <name>Bonuses</name>
+    <SqlType>decimal</SqlType>
+    <max_length>9</max_length>
+    <precision>18</precision>
+    <scale>2</scale>
+    <is_nullable>false</is_nullable>
+  </Table1>
+  <Table1>
+    <name>Compensation</name>
+    <SqlType>decimal</SqlType>
+    <max_length>9</max_length>
+    <precision>18</precision>
+    <scale>2</scale>
+    <is_nullable>false</is_nullable>
+  </Table1>
+  <Table1>
+    <name>Deductions</name>
+    <SqlType>decimal</SqlType>
+    <max_length>9</max_length>
+    <precision>18</precision>
+    <scale>2</scale>
+    <is_nullable>false</is_nullable>
+  </Table1>
+  <Table1>
+    <name>DeliveryFees</name>
+    <SqlType>decimal</SqlType>
+    <max_length>9</max_length>
+    <precision>18</precision>
+    <scale>2</scale>
+    <is_nullable>false</is_nullable>
+  </Table1>
+  <Table1>
+    <name>DriverId</name>
+    <SqlType>nvarchar</SqlType>
+    <max_length>200</max_length>
+    <precision>0</precision>
+    <scale>0</scale>
+    <is_nullable>false</is_nullable>
+  </Table1>
+  <Table1>
+    <name>ImportId</name>
+    <SqlType>uniqueidentifier</SqlType>
+    <max_length>16</max_length>
+    <precision>0</precision>
+    <scale>0</scale>
+    <is_nullable>true</is_nullable>
+  </Table1>
+  <Table1>
+    <name>RiderName</name>
+    <SqlType>nvarchar</SqlType>
+    <max_length>1000</max_length>
+    <precision>0</precision>
+    <scale>0</scale>
+    <is_nullable>false</is_nullable>
+  </Table1>
+  <Table1>
+    <name>Source</name>
+    <SqlType>nvarchar</SqlType>
+    <max_length>40</max_length>
+    <precision>0</precision>
+    <scale>0</scale>
+    <is_nullable>false</is_nullable>
+  </Table1>
+  <Table1>
+    <name>SourceRows</name>
+    <SqlType>int</SqlType>
+    <max_length>4</max_length>
+    <precision>10</precision>
+    <scale>0</scale>
+    <is_nullable>false</is_nullable>
+  </Table1>
+  <Table1>
+    <name>Tips</name>
+    <SqlType>decimal</SqlType>
+    <max_length>9</max_length>
+    <precision>18</precision>
+    <scale>2</scale>
+    <is_nullable>false</is_nullable>
+  </Table1>
+  <Table1>
+    <name>VatAmount</name>
+    <SqlType>decimal</SqlType>
+    <max_length>9</max_length>
+    <precision>18</precision>
+    <scale>2</scale>
+    <is_nullable>false</is_nullable>
+  </Table1>
+  <Table2>
+    <name>CK_ChefzOrderImport_Rows</name>
+    <is_disabled>false</is_disabled>
+    <is_not_trusted>false</is_not_trusted>
+  </Table2>
+  <Table2>
+    <name>CK_ChefzSettlement_Amounts</name>
+    <is_disabled>false</is_disabled>
+    <is_not_trusted>false</is_not_trusted>
+  </Table2>
+  <Table3>
+    <name>IX_WalletSettlements_RiderClientAssignmentId_PeriodFrom</name>
+    <is_unique>true</is_unique>
+    <is_disabled>false</is_disabled>
+  </Table3>
+  <Table3>
+    <name>IX_WalletSettlements_ImportId</name>
+    <is_unique>false</is_unique>
+    <is_disabled>false</is_disabled>
+  </Table3>
+  <Table3>
+    <name>IX_OrderSettlementImports_ContentHash</name>
+    <is_unique>true</is_unique>
+    <is_disabled>false</is_disabled>
+  </Table3>
+  <Table4>
+    <name>FK_WalletSettlements_OrderSettlementImports_ImportId</name>
+    <is_disabled>false</is_disabled>
+    <is_not_trusted>false</is_not_trusted>
+  </Table4>
+  <Table5>
+    <SettlementCount>0</SettlementCount>
+    <NetTotal>0.00</NetTotal>
+    <CompanyTotal>0.00</CompanyTotal>
+    <RiderTotal>0.00</RiderTotal>
+  </Table5>
+  <Table6>
+    <OrderImportCount>0</OrderImportCount>
+  </Table6>
+  <Table7>
+    <VerifiedAtUtc>2026-10-12T09:55:52.8054401+03:00</VerifiedAtUtc>
+  </Table7>
+</NewDataSet>

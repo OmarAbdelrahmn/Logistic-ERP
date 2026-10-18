@@ -1,0 +1,107 @@
+{
+  "accountId": null,
+  "riderId": "00000000-0000-4000-8000-000000000001",
+  "requestedHalves": 1,
+  "halves": [
+    {
+      "from": "2026-09-16",
+      "to": "2026-09-30",
+      "daysWithData": 1,
+      "orders": 5,
+      "acceptanceRate": 50,
+      "rating": "D",
+      "message": null
+    }
+  ],
+  "selectedSummary": {
+    "halvesWithData": 1,
+    "daysWithData": 1,
+    "orders": 5,
+    "averageOrdersPerHalf": 5,
+    "acceptanceRate": 50,
+    "rating": "D"
+  },
+  "allTimeSummary": {
+    "halvesWithData": 1,
+    "daysWithData": 1,
+    "orders": 5,
+    "averageOrdersPerHalf": 5,
+    "acceptanceRate": 50,
+    "rating": "D"
+  },
+  "daily": [
+    {
+      "date": "2026-09-20",
+      "orders": 5,
+      "validOffers": 10,
+      "missedOffers": 5,
+      "acceptanceRate": 50,
+      "rating": "D"
+    }
+  ],
+  "messages": [],
+  "accounts": [
+    {
+      "accountId": "00000000-0000-4000-8000-000000000010",
+      "externalAccountId": "CHEFZ-A",
+      "riderProfileId": "00000000-0000-4000-8000-000000000001",
+      "riderName": "مندوب تجريبي",
+      "summary": {
+        "halvesWithData": 1,
+        "daysWithData": 1,
+        "orders": 2,
+        "averageOrdersPerHalf": 2,
+        "acceptanceRate": 50,
+        "rating": "D"
+      },
+      "daily": [
+        {
+          "id": "00000000-0000-4000-8000-000000000030",
+          "accountId": "00000000-0000-4000-8000-000000000010",
+          "externalAccountId": "CHEFZ-A",
+          "assignmentId": "00000000-0000-4000-8000-000000000020",
+          "riderProfileId": "00000000-0000-4000-8000-000000000001",
+          "riderName": "مندوب تجريبي",
+          "reportDate": "2026-09-20",
+          "reportIdNumber": "SAMPLE-1",
+          "totalValidOffers": 4,
+          "acceptedOffers": 2,
+          "declinedOffers": 0,
+          "missedOffers": 2,
+          "acceptanceRate": 50
+        }
+      ]
+    },
+    {
+      "accountId": "00000000-0000-4000-8000-000000000011",
+      "externalAccountId": "CHEFZ-B",
+      "riderProfileId": "00000000-0000-4000-8000-000000000001",
+      "riderName": "مندوب تجريبي",
+      "summary": {
+        "halvesWithData": 1,
+        "daysWithData": 1,
+        "orders": 3,
+        "averageOrdersPerHalf": 3,
+        "acceptanceRate": 50,
+        "rating": "D"
+      },
+      "daily": [
+        {
+          "id": "00000000-0000-4000-8000-000000000031",
+          "accountId": "00000000-0000-4000-8000-000000000011",
+          "externalAccountId": "CHEFZ-B",
+          "assignmentId": "00000000-0000-4000-8000-000000000021",
+          "riderProfileId": "00000000-0000-4000-8000-000000000001",
+          "riderName": "مندوب تجريبي",
+          "reportDate": "2026-09-20",
+          "reportIdNumber": "SAMPLE-2",
+          "totalValidOffers": 6,
+          "acceptedOffers": 3,
+          "declinedOffers": 0,
+          "missedOffers": 3,
+          "acceptanceRate": 50
+        }
+      ]
+    }
+  ]
+}

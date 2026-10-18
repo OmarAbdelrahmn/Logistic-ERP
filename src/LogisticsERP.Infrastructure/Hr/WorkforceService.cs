@@ -158,6 +158,15 @@ internal sealed class WorkforceService(
         return Result.Success(new EmployeeVehicleProfileResponse(employeeId, employee.IsEmployee, true, profileId));
     }
 
+    public async Task<Result<EmployeeDetailsResponse>> EnsureRiderProfileAsync(Guid employeeId, CancellationToken cancellationToken = default)
+    {
+        // Vehicle assignments and platform accounts share the same profile; provisioning never changes the employee's role.
+        var result = await EnsureVehicleProfileAsync(employeeId, cancellationToken);
+        return result.IsSuccess
+            ? await GetEmployeeAsync(employeeId, cancellationToken)
+            : Result.Failure<EmployeeDetailsResponse>(result.Error);
+    }
+
     public async Task<Result<EmployeeDetailsResponse>> CreateEmployeeAsync(EmployeeUpsertRequest request, CancellationToken cancellationToken = default)
     {
         var validation = await ValidateRequestAsync(request, null, cancellationToken);

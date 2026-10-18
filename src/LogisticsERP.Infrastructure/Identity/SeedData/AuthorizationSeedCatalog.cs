@@ -6,6 +6,10 @@ internal static class AuthorizationSeedCatalog
 {
     public static IReadOnlyList<string> OriginalSystemAdminPermissions { get; } =
     [
+        PermissionKeys.Chefz.Read,
+        PermissionKeys.Chefz.AccountsUpdate,
+        PermissionKeys.Chefz.PerformanceImport,
+        PermissionKeys.Chefz.SettlementsCreate,
         PermissionKeys.Security.UsersRead,
         PermissionKeys.Security.UsersCreate,
         PermissionKeys.Security.UsersUpdate,
@@ -202,7 +206,9 @@ internal static class AuthorizationSeedCatalog
         [PermissionKeys.HrForms.TemplatesCreate] = [PermissionKeys.HrForms.TemplatesCreate, PermissionKeys.HrForms.TemplatesUpdate, PermissionKeys.HrForms.TemplatesDelete, PermissionKeys.HrForms.TemplatesRead],
     };
 
-    public static IReadOnlyList<string> SystemAdminPermissions { get; } = ExpandPermissions(OriginalSystemAdminPermissions);
+    public static IReadOnlyList<string> SystemAdminPermissions { get; } = ExpandPermissions(OriginalSystemAdminPermissions)
+        .Concat(LogisticsERP.Application.Features.Jahez.JahezWorkflowPermissions.All)
+        .Concat(PermissionKeys.All.Where(key => key.StartsWith("ninja.", StringComparison.Ordinal)).Order(StringComparer.Ordinal)).ToArray();
     public static IReadOnlyList<string> ManagerPermissions { get; } = ExpandPermissions(OriginalManagerPermissions);
 
     public static IReadOnlyList<RolePermissionSeed> RolePermissions { get; } =
@@ -252,6 +258,7 @@ internal static class AuthorizationSeedCatalog
                 && !key.StartsWith("inventory.", StringComparison.Ordinal)
                 && !key.StartsWith("legal_cases.", StringComparison.Ordinal)
                 && !key.StartsWith("external_riders.", StringComparison.Ordinal)
+                && !key.StartsWith("chefz.", StringComparison.Ordinal)
                 && !key.StartsWith("jahez.", StringComparison.Ordinal)), ref sequence);
         AddRolePermissions(seeds, SystemRoles.ManagerId,
             OriginalManagerPermissions.Except(legacyOriginalManagerPermissions).Where(key =>
@@ -302,6 +309,12 @@ internal static class AuthorizationSeedCatalog
             if (SplitActions.TryGetValue(grant.PermissionKey, out var actions))
                 AddRolePermissions(seeds, grant.RoleId, actions.Skip(1).Where(key => !seeds.Any(existing => existing.RoleId == grant.RoleId && existing.PermissionKey == key)), ref sequence);
         }
+        AddRolePermissions(seeds, SystemRoles.SystemAdminId,
+            OriginalSystemAdminPermissions.Where(key => key.StartsWith("chefz.", StringComparison.Ordinal)), ref sequence);
+        AddRolePermissions(seeds, SystemRoles.SystemAdminId,
+            LogisticsERP.Application.Features.Jahez.JahezWorkflowPermissions.All, ref sequence);
+        AddRolePermissions(seeds, SystemRoles.SystemAdminId,
+            PermissionKeys.All.Where(key => key.StartsWith("ninja.", StringComparison.Ordinal)).Order(StringComparer.Ordinal), ref sequence);
         return seeds;
     }
 

@@ -1,0 +1,2467 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="OilChanges">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="MaintenanceWorkOrderId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="PerformedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="OdometerAtChange" type="xs:long" minOccurs="0" />
+                <xs:element name="VehicleTypeSnapshot" type="xs:int" minOccurs="0" />
+                <xs:element name="OilInventoryItemId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="OilQuantityLiters" type="xs:decimal" minOccurs="0" />
+                <xs:element name="OilMaterialUsageId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="OilCost" type="xs:decimal" minOccurs="0" />
+                <xs:element name="OilFilterChanged" type="xs:boolean" minOccurs="0" />
+                <xs:element name="OilFilterInventoryItemId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="OilFilterMaterialUsageId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="OilFilterCost" type="xs:decimal" minOccurs="0" />
+                <xs:element name="LaborCost" type="xs:decimal" minOccurs="0" />
+                <xs:element name="OtherCost" type="xs:decimal" minOccurs="0" />
+                <xs:element name="TotalCost" type="xs:decimal" minOccurs="0" />
+                <xs:element name="PerformedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="Notes" type="xs:string" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="IdempotencyKey" type="xs:string" minOccurs="0" />
+                <xs:element name="RequestHash" type="xs:string" minOccurs="0" />
+                <xs:element name="VehicleId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Vehicles">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="AssetNumber" type="xs:string" minOccurs="0" />
+                <xs:element name="NormalizedAssetNumber" type="xs:string" minOccurs="0" />
+                <xs:element name="PlateNumberAr" type="xs:string" minOccurs="0" />
+                <xs:element name="NormalizedPlateNumberAr" type="xs:string" minOccurs="0" />
+                <xs:element name="PlateNumberEn" type="xs:string" minOccurs="0" />
+                <xs:element name="NormalizedPlateNumberEn" type="xs:string" minOccurs="0" />
+                <xs:element name="PlateLettersAr" type="xs:string" minOccurs="0" />
+                <xs:element name="PlateLettersEn" type="xs:string" minOccurs="0" />
+                <xs:element name="PlateDigits" type="xs:string" minOccurs="0" />
+                <xs:element name="Vin" type="xs:string" minOccurs="0" />
+                <xs:element name="ChassisNumber" type="xs:string" minOccurs="0" />
+                <xs:element name="EngineNumber" type="xs:string" minOccurs="0" />
+                <xs:element name="VehicleManufacturerId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="VehicleModelId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="ModelYear" type="xs:int" minOccurs="0" />
+                <xs:element name="VehicleType" type="xs:int" minOccurs="0" />
+                <xs:element name="FuelType" type="xs:int" minOccurs="0" />
+                <xs:element name="TransmissionType" type="xs:int" minOccurs="0" />
+                <xs:element name="ColorAr" type="xs:string" minOccurs="0" />
+                <xs:element name="ColorEn" type="xs:string" minOccurs="0" />
+                <xs:element name="OwnershipType" type="xs:int" minOccurs="0" />
+                <xs:element name="OwnerName" type="xs:string" minOccurs="0" />
+                <xs:element name="AcquisitionDate" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="LeaseReference" type="xs:string" minOccurs="0" />
+                <xs:element name="CurrentOdometer" type="xs:long" minOccurs="0" />
+                <xs:element name="LastOdometerAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CurrentOperationalStatus" type="xs:int" minOccurs="0" />
+                <xs:element name="CurrentAssignmentId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DecommissionedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="DecommissionReason" type="xs:string" minOccurs="0" />
+                <xs:element name="Notes" type="xs:string" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="UpdatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="UpdatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RowVersion" type="xs:base64Binary" minOccurs="0" />
+                <xs:element name="IsDeleted" type="xs:boolean" minOccurs="0" />
+                <xs:element name="DeletedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="DeletedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DeletionReason" type="xs:string" minOccurs="0" />
+                <xs:element name="OperatingCityId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="SponsorId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="NormalizedChassisNumber" type="xs:string" minOccurs="0" />
+                <xs:element name="NormalizedSerialNumber" type="xs:string" minOccurs="0" />
+                <xs:element name="PurchasedFromSupplierId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RegistrationType" type="xs:int" minOccurs="0" />
+                <xs:element name="SerialNumber" type="xs:string" minOccurs="0" />
+                <xs:element name="TrackedDistanceKm" type="xs:decimal" minOccurs="0" />
+                <xs:element name="RegisteredOwnerSupplierId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RegisteredOwnerSponsorId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="MaterialUsages">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="MaintenanceWorkOrderId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="InventoryItemId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="InventoryLocationId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="UsageType" type="xs:int" minOccurs="0" />
+                <xs:element name="Direction" type="xs:int" minOccurs="0" />
+                <xs:element name="Quantity" type="xs:decimal" minOccurs="0" />
+                <xs:element name="UnitOfMeasure" type="xs:int" minOccurs="0" />
+                <xs:element name="TotalCost" type="xs:decimal" minOccurs="0" />
+                <xs:element name="StockMovementId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="StockMovementLineId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="VehicleId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RiderVehicleAssignmentId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RiderProfileId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="AttributionStatus" type="xs:int" minOccurs="0" />
+                <xs:element name="UsedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="UsedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="Notes" type="xs:string" minOccurs="0" />
+                <xs:element name="ReversalOfUsageId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="CostAllocations">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="StockMovementLineId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="MaintenanceMaterialUsageId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RiderInventoryIssueLineId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="StockCostLayerId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="AllocatedQuantity" type="xs:decimal" minOccurs="0" />
+                <xs:element name="UnitCost" type="xs:decimal" minOccurs="0" />
+                <xs:element name="AllocatedCost" type="xs:decimal" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="BarrelAllocations">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="MaintenanceMaterialUsageId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="OilBarrelId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="QuantityLiters" type="xs:decimal" minOccurs="0" />
+                <xs:element name="Direction" type="xs:int" minOccurs="0" />
+                <xs:element name="ReversalOfAllocationId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="CostLayers">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="InventoryItemId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="InventoryLocationId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="SourceReceiptLineId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="SourceMovementLineId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="SourceCostLayerId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="ReceivedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="OriginalSequence" type="xs:long" minOccurs="0" />
+                <xs:element name="OriginalQuantity" type="xs:decimal" minOccurs="0" />
+                <xs:element name="RemainingQuantity" type="xs:decimal" minOccurs="0" />
+                <xs:element name="BaseUnitOfMeasure" type="xs:int" minOccurs="0" />
+                <xs:element name="UnitCost" type="xs:decimal" minOccurs="0" />
+                <xs:element name="OriginalTotalCost" type="xs:decimal" minOccurs="0" />
+                <xs:element name="LotNumber" type="xs:string" minOccurs="0" />
+                <xs:element name="ExpiryDate" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="UpdatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="UpdatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RowVersion" type="xs:base64Binary" minOccurs="0" />
+                <xs:element name="IsDeleted" type="xs:boolean" minOccurs="0" />
+                <xs:element name="DeletedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="DeletedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DeletionReason" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Barrels">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="BarrelNumber" type="xs:string" minOccurs="0" />
+                <xs:element name="PurchaseReceiptLineId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="InventoryItemId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="InventoryLocationId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="StockCostLayerId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="PackageSequence" type="xs:int" minOccurs="0" />
+                <xs:element name="NominalCapacityLiters" type="xs:decimal" minOccurs="0" />
+                <xs:element name="RemainingLiters" type="xs:decimal" minOccurs="0" />
+                <xs:element name="MaximumAllowedLossLiters" type="xs:decimal" minOccurs="0" />
+                <xs:element name="RecordedLossLiters" type="xs:decimal" minOccurs="0" />
+                <xs:element name="Status" type="xs:int" minOccurs="0" />
+                <xs:element name="OpenedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="OpenedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DepletedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="UpdatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="UpdatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RowVersion" type="xs:base64Binary" minOccurs="0" />
+                <xs:element name="IsDeleted" type="xs:boolean" minOccurs="0" />
+                <xs:element name="DeletedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="DeletedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DeletionReason" type="xs:string" minOccurs="0" />
+                <xs:element name="UnitCostPerLiter" type="xs:decimal" minOccurs="0" />
+                <xs:element name="AllowedVehicleType" type="xs:int" minOccurs="0" />
+                <xs:element name="AllowBothVehicleTypes" type="xs:boolean" minOccurs="0" />
+                <xs:element name="RecordedMissingLiters" type="xs:decimal" minOccurs="0" />
+                <xs:element name="OpenCarSlot" type="xs:int" minOccurs="0" />
+                <xs:element name="OpenMotorcycleSlot" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="StockBalances">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="InventoryItemId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="InventoryLocationId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="QuantityOnHand" type="xs:decimal" minOccurs="0" />
+                <xs:element name="QuantityReserved" type="xs:decimal" minOccurs="0" />
+                <xs:element name="ReportingAverageUnitCost" type="xs:decimal" minOccurs="0" />
+                <xs:element name="LastMovementAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="UpdatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="UpdatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RowVersion" type="xs:base64Binary" minOccurs="0" />
+                <xs:element name="IsDeleted" type="xs:boolean" minOccurs="0" />
+                <xs:element name="DeletedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="DeletedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DeletionReason" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Expenses">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="VehicleId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RiderVehicleAssignmentId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RiderProfileId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="ExpenseType" type="xs:string" minOccurs="0" />
+                <xs:element name="SourceEntityType" type="xs:string" minOccurs="0" />
+                <xs:element name="SourceEntityId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="OccurredOn" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="AmountBeforeTax" type="xs:decimal" minOccurs="0" />
+                <xs:element name="TaxAmount" type="xs:decimal" minOccurs="0" />
+                <xs:element name="TotalAmount" type="xs:decimal" minOccurs="0" />
+                <xs:element name="CurrencyCode" type="xs:string" minOccurs="0" />
+                <xs:element name="Description" type="xs:string" minOccurs="0" />
+                <xs:element name="ReversalOfExpenseId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="OdometerReadings">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="VehicleId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="Reading" type="xs:long" minOccurs="0" />
+                <xs:element name="RecordedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="SourceType" type="xs:int" minOccurs="0" />
+                <xs:element name="SourceEntityId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="EvidenceAttachmentId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="Notes" type="xs:string" minOccurs="0" />
+                <xs:element name="IsCorrection" type="xs:boolean" minOccurs="0" />
+                <xs:element name="CorrectionReason" type="xs:string" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="OilSchedules">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="VehicleId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="MaintenancePlanId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="LastCompletedWorkOrderId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="LastCompletedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="LastCompletedOdometer" type="xs:long" minOccurs="0" />
+                <xs:element name="NextDueOn" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="ReminderFromOdometer" type="xs:long" minOccurs="0" />
+                <xs:element name="MaximumDueOdometer" type="xs:long" minOccurs="0" />
+                <xs:element name="ComputedStatus" type="xs:int" minOccurs="0" />
+                <xs:element name="ComputedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="UpdatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="UpdatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RowVersion" type="xs:base64Binary" minOccurs="0" />
+                <xs:element name="IsDeleted" type="xs:boolean" minOccurs="0" />
+                <xs:element name="DeletedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="DeletedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DeletionReason" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="DatasetVersions">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="ModuleKey" type="xs:string" minOccurs="0" />
+                <xs:element name="Version" type="xs:long" minOccurs="0" />
+                <xs:element name="LastChangedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="UpdatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="UpdatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RowVersion" type="xs:base64Binary" minOccurs="0" />
+                <xs:element name="IsDeleted" type="xs:boolean" minOccurs="0" />
+                <xs:element name="DeletedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="DeletedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DeletionReason" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <OilChanges>
+    <Id>01a1390b-678a-7437-ae40-19289c6a6a87</Id>
+    <PerformedAtUtc>2026-10-10T06:13:00Z</PerformedAtUtc>
+    <OdometerAtChange>28926</OdometerAtChange>
+    <VehicleTypeSnapshot>1</VehicleTypeSnapshot>
+    <OilInventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</OilInventoryItemId>
+    <OilQuantityLiters>1.000</OilQuantityLiters>
+    <OilMaterialUsageId>01a1390b-678c-77dd-8bfc-0f9a9e2fa70a</OilMaterialUsageId>
+    <OilCost>8.89</OilCost>
+    <OilFilterChanged>false</OilFilterChanged>
+    <OilFilterCost>0.00</OilFilterCost>
+    <LaborCost>0.00</LaborCost>
+    <OtherCost>0.00</OtherCost>
+    <TotalCost>8.89</TotalCost>
+    <PerformedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</PerformedByUserId>
+    <CreatedAtUtc>2026-10-14T06:13:31.1550998Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+    <IdempotencyKey>55f6cbd3-63a4-4856-b31f-116d0f07146d</IdempotencyKey>
+    <RequestHash>04A66C84DAB25C721DE443277400C75999220016DB4CF973D2FDCD1EA0B666AE</RequestHash>
+    <VehicleId>01a0aed7-0d91-7596-b567-2f5e741fedb2</VehicleId>
+  </OilChanges>
+  <OilChanges>
+    <Id>01a13914-6ff8-765f-8163-1afb003489d7</Id>
+    <PerformedAtUtc>2026-10-11T06:22:00Z</PerformedAtUtc>
+    <OdometerAtChange>67139</OdometerAtChange>
+    <VehicleTypeSnapshot>1</VehicleTypeSnapshot>
+    <OilInventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</OilInventoryItemId>
+    <OilQuantityLiters>1.000</OilQuantityLiters>
+    <OilMaterialUsageId>01a13914-6ffa-7399-9f49-83316711411a</OilMaterialUsageId>
+    <OilCost>8.89</OilCost>
+    <OilFilterChanged>false</OilFilterChanged>
+    <OilFilterCost>0.00</OilFilterCost>
+    <LaborCost>0.00</LaborCost>
+    <OtherCost>0.00</OtherCost>
+    <TotalCost>8.89</TotalCost>
+    <PerformedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</PerformedByUserId>
+    <CreatedAtUtc>2026-10-14T06:23:23.1385997Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+    <IdempotencyKey>c1a436a2-e28c-45d0-a33e-d760eca26dae</IdempotencyKey>
+    <RequestHash>27668A06D6BFC53D999E1F29B18CEA76AB3E7ECDC5D72E7EB44E3DD8B1645AE6</RequestHash>
+    <VehicleId>01a0aed7-0d92-7dc1-9be6-abcf129a3517</VehicleId>
+  </OilChanges>
+  <OilChanges>
+    <Id>01a139a7-33db-733c-abfc-1ce8ef4ad608</Id>
+    <PerformedAtUtc>2026-10-07T09:02:00Z</PerformedAtUtc>
+    <OdometerAtChange>99576</OdometerAtChange>
+    <VehicleTypeSnapshot>1</VehicleTypeSnapshot>
+    <OilInventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</OilInventoryItemId>
+    <OilQuantityLiters>1.000</OilQuantityLiters>
+    <OilMaterialUsageId>01a139a7-33dc-7662-bf3a-a66dcbc39164</OilMaterialUsageId>
+    <OilCost>8.89</OilCost>
+    <OilFilterChanged>false</OilFilterChanged>
+    <OilFilterCost>0.00</OilFilterCost>
+    <LaborCost>0.00</LaborCost>
+    <OtherCost>0.00</OtherCost>
+    <TotalCost>8.89</TotalCost>
+    <PerformedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</PerformedByUserId>
+    <CreatedAtUtc>2026-10-14T09:03:41.5406205Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+    <IdempotencyKey>1f317081-c127-4651-b10a-9529ab1c60d6</IdempotencyKey>
+    <RequestHash>D401CB7205F145A429A3A2437D6DC10190E0A7B56D98457549F0F755AF9E636B</RequestHash>
+    <VehicleId>01a0aed7-0d93-706a-8b6c-18d1d94c19bd</VehicleId>
+  </OilChanges>
+  <OilChanges>
+    <Id>01a10597-4234-7949-9205-1f13385f8105</Id>
+    <PerformedAtUtc>2026-10-03T06:25:00Z</PerformedAtUtc>
+    <OdometerAtChange>86774</OdometerAtChange>
+    <VehicleTypeSnapshot>1</VehicleTypeSnapshot>
+    <OilInventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</OilInventoryItemId>
+    <OilQuantityLiters>1.000</OilQuantityLiters>
+    <OilMaterialUsageId>01a10597-4237-770f-b602-4af5da53c394</OilMaterialUsageId>
+    <OilCost>8.89</OilCost>
+    <OilFilterChanged>false</OilFilterChanged>
+    <OilFilterCost>0.00</OilFilterCost>
+    <LaborCost>0.00</LaborCost>
+    <OtherCost>0.00</OtherCost>
+    <TotalCost>8.89</TotalCost>
+    <PerformedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</PerformedByUserId>
+    <CreatedAtUtc>2026-10-04T06:26:01.4092243Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+    <IdempotencyKey>13079dac-9c2a-4d72-b556-dd29ea513750</IdempotencyKey>
+    <RequestHash>E397CD89E48A68725C23E531C3D28AB3AB6546FB9C7411FA8BD5F81F2D2C479B</RequestHash>
+    <VehicleId>01a0aed7-0d95-7801-b0c1-ec872932876e</VehicleId>
+  </OilChanges>
+  <OilChanges>
+    <Id>01a105aa-d6c6-7685-b58c-29ed7d1e54f8</Id>
+    <PerformedAtUtc>2026-10-04T06:46:00Z</PerformedAtUtc>
+    <OdometerAtChange>98402</OdometerAtChange>
+    <VehicleTypeSnapshot>1</VehicleTypeSnapshot>
+    <OilInventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</OilInventoryItemId>
+    <OilQuantityLiters>1.000</OilQuantityLiters>
+    <OilMaterialUsageId>01a105aa-d6c8-7604-b357-ed0656084ebc</OilMaterialUsageId>
+    <OilCost>8.89</OilCost>
+    <OilFilterChanged>false</OilFilterChanged>
+    <OilFilterCost>0.00</OilFilterCost>
+    <LaborCost>0.00</LaborCost>
+    <OtherCost>0.00</OtherCost>
+    <TotalCost>8.89</TotalCost>
+    <PerformedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</PerformedByUserId>
+    <CreatedAtUtc>2026-10-04T06:47:24.6585705Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+    <IdempotencyKey>51a42e4d-8060-4958-8bb2-a309e4a65724</IdempotencyKey>
+    <RequestHash>C4EF30639AC9F533D7D6AFFEFA2F9C4EC70A28388010EE969A247B6FC52B2B99</RequestHash>
+    <VehicleId>01a0aed7-0d93-706a-8b6c-18d1d94c19bd</VehicleId>
+  </OilChanges>
+  <OilChanges>
+    <Id>01a1057a-1fde-70f7-a325-2af05ed58cf2</Id>
+    <PerformedAtUtc>2026-10-01T05:53:00Z</PerformedAtUtc>
+    <OdometerAtChange>97518</OdometerAtChange>
+    <VehicleTypeSnapshot>1</VehicleTypeSnapshot>
+    <OilInventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</OilInventoryItemId>
+    <OilQuantityLiters>1.000</OilQuantityLiters>
+    <OilMaterialUsageId>01a1057a-1fea-738b-8674-cd9a4e7f179d</OilMaterialUsageId>
+    <OilCost>8.89</OilCost>
+    <OilFilterChanged>false</OilFilterChanged>
+    <OilFilterCost>0.00</OilFilterCost>
+    <LaborCost>0.00</LaborCost>
+    <OtherCost>0.00</OtherCost>
+    <TotalCost>8.89</TotalCost>
+    <PerformedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</PerformedByUserId>
+    <CreatedAtUtc>2026-10-04T05:54:12.1198147Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+    <IdempotencyKey>439ae605-6aa5-4bd5-a14d-885791f4f62c</IdempotencyKey>
+    <RequestHash>A9F778F84DC8E3CECF27E51DFCB99AEA42ADC6BBDD584D5458B5E2DFA71F8EA2</RequestHash>
+    <VehicleId>01a0aed7-0d93-706a-8b6c-18d1d94c19bd</VehicleId>
+  </OilChanges>
+  <OilChanges>
+    <Id>01a1354a-9f3d-7b48-bfc2-2c314e0cddfa</Id>
+    <PerformedAtUtc>2026-10-07T12:43:00Z</PerformedAtUtc>
+    <OdometerAtChange>66274</OdometerAtChange>
+    <VehicleTypeSnapshot>1</VehicleTypeSnapshot>
+    <OilInventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</OilInventoryItemId>
+    <OilQuantityLiters>1.000</OilQuantityLiters>
+    <OilMaterialUsageId>01a1354a-9f41-771b-9335-c6afb600d9d8</OilMaterialUsageId>
+    <OilCost>8.89</OilCost>
+    <OilFilterChanged>false</OilFilterChanged>
+    <OilFilterCost>0.00</OilFilterCost>
+    <LaborCost>0.00</LaborCost>
+    <OtherCost>0.00</OtherCost>
+    <TotalCost>8.89</TotalCost>
+    <PerformedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</PerformedByUserId>
+    <CreatedAtUtc>2026-10-13T12:44:05.3216807Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+    <IdempotencyKey>c2dcd140-74a6-4d82-83cb-a9343b9b1eb5</IdempotencyKey>
+    <RequestHash>67271D5DEC7C65CA2E73FC502229C8F1C05AA5A0C00497F35FDE7670315CB871</RequestHash>
+    <VehicleId>01a0aed7-0d92-7dc1-9be6-abcf129a3517</VehicleId>
+  </OilChanges>
+  <OilChanges>
+    <Id>01a139a6-9105-7515-bd24-3c3e92ea3d2f</Id>
+    <PerformedAtUtc>2026-10-07T09:02:00Z</PerformedAtUtc>
+    <OdometerAtChange>28120</OdometerAtChange>
+    <VehicleTypeSnapshot>1</VehicleTypeSnapshot>
+    <OilInventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</OilInventoryItemId>
+    <OilQuantityLiters>1.000</OilQuantityLiters>
+    <OilMaterialUsageId>01a139a6-9108-7344-8a62-a46fa74a64de</OilMaterialUsageId>
+    <OilCost>8.89</OilCost>
+    <OilFilterChanged>false</OilFilterChanged>
+    <OilFilterCost>0.00</OilFilterCost>
+    <LaborCost>0.00</LaborCost>
+    <OtherCost>0.00</OtherCost>
+    <TotalCost>8.89</TotalCost>
+    <PerformedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</PerformedByUserId>
+    <CreatedAtUtc>2026-10-14T09:02:59.8559917Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+    <IdempotencyKey>adbc642e-78f2-4d1c-9127-50685aebd1fc</IdempotencyKey>
+    <RequestHash>F517D3515C72015363D4963C482C569D59F214ADAD32FE3332D3EB413DFF52E3</RequestHash>
+    <VehicleId>01a0aed7-0d91-7596-b567-2f5e741fedb2</VehicleId>
+  </OilChanges>
+  <OilChanges>
+    <Id>01a13918-caae-7667-9f98-424ca40643b6</Id>
+    <PerformedAtUtc>2026-10-10T06:27:00Z</PerformedAtUtc>
+    <OdometerAtChange>37295</OdometerAtChange>
+    <VehicleTypeSnapshot>1</VehicleTypeSnapshot>
+    <OilInventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</OilInventoryItemId>
+    <OilQuantityLiters>1.000</OilQuantityLiters>
+    <OilMaterialUsageId>01a13918-cab1-7a44-82c4-344b4deaa9cd</OilMaterialUsageId>
+    <OilCost>8.89</OilCost>
+    <OilFilterChanged>false</OilFilterChanged>
+    <OilFilterCost>0.00</OilFilterCost>
+    <LaborCost>0.00</LaborCost>
+    <OtherCost>0.00</OtherCost>
+    <TotalCost>8.89</TotalCost>
+    <PerformedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</PerformedByUserId>
+    <CreatedAtUtc>2026-10-14T06:28:08.5086945Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+    <IdempotencyKey>9125ab07-9954-4fad-8aa1-2a3e837b4648</IdempotencyKey>
+    <RequestHash>3DCAE5F610B32DC4062EE8FFA668940DB7DD3804495293FA90A31A51473D055D</RequestHash>
+    <VehicleId>01a0aed7-0d92-7c35-b46f-7604f87db6fa</VehicleId>
+  </OilChanges>
+  <OilChanges>
+    <Id>01a13908-2127-78dc-bd33-54bde8581355</Id>
+    <PerformedAtUtc>2026-10-12T06:08:00Z</PerformedAtUtc>
+    <OdometerAtChange>1339</OdometerAtChange>
+    <VehicleTypeSnapshot>1</VehicleTypeSnapshot>
+    <OilInventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</OilInventoryItemId>
+    <OilQuantityLiters>1.000</OilQuantityLiters>
+    <OilMaterialUsageId>01a13908-212d-7d20-9973-85b0b3d493c1</OilMaterialUsageId>
+    <OilCost>8.89</OilCost>
+    <OilFilterChanged>false</OilFilterChanged>
+    <OilFilterCost>0.00</OilFilterCost>
+    <LaborCost>0.00</LaborCost>
+    <OtherCost>0.00</OtherCost>
+    <TotalCost>8.89</TotalCost>
+    <PerformedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</PerformedByUserId>
+    <CreatedAtUtc>2026-10-14T06:09:56.534658Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+    <IdempotencyKey>47660507-e6e1-4e62-8e74-81ac82fdf3d9</IdempotencyKey>
+    <RequestHash>55E8C73AE67FA8E94440A527D1D818B3083BEE97DD423EF0ADAE64BE25D72EA9</RequestHash>
+    <VehicleId>01a0aed7-0d93-706a-8b6c-18d1d94c19bd</VehicleId>
+  </OilChanges>
+  <OilChanges>
+    <Id>01a10596-5e35-7981-bfbd-55aa289f1cef</Id>
+    <PerformedAtUtc>2026-10-03T06:24:00Z</PerformedAtUtc>
+    <OdometerAtChange>27091</OdometerAtChange>
+    <VehicleTypeSnapshot>1</VehicleTypeSnapshot>
+    <OilInventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</OilInventoryItemId>
+    <OilQuantityLiters>1.000</OilQuantityLiters>
+    <OilMaterialUsageId>01a10596-5e36-734b-a0ba-f5d5e86da87a</OilMaterialUsageId>
+    <OilCost>8.89</OilCost>
+    <OilFilterChanged>false</OilFilterChanged>
+    <OilFilterCost>0.00</OilFilterCost>
+    <LaborCost>0.00</LaborCost>
+    <OtherCost>0.00</OtherCost>
+    <TotalCost>8.89</TotalCost>
+    <PerformedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</PerformedByUserId>
+    <CreatedAtUtc>2026-10-04T06:25:03.0363718Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+    <IdempotencyKey>0a94d185-a45c-4981-9a3c-8337e7c7b455</IdempotencyKey>
+    <RequestHash>72F8BC6FBBDCA7F4595A2B9ED5FFDF301DD1BF5889EAEC947DB82A11D76CBAC2</RequestHash>
+    <VehicleId>01a0aed7-0d91-7596-b567-2f5e741fedb2</VehicleId>
+  </OilChanges>
+  <OilChanges>
+    <Id>01a139a8-a85c-75d3-a98a-59357c7d54c3</Id>
+    <PerformedAtUtc>2026-10-07T09:04:00Z</PerformedAtUtc>
+    <OdometerAtChange>36471</OdometerAtChange>
+    <VehicleTypeSnapshot>1</VehicleTypeSnapshot>
+    <OilInventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</OilInventoryItemId>
+    <OilQuantityLiters>1.000</OilQuantityLiters>
+    <OilMaterialUsageId>01a139a8-a85d-77a9-9e33-3c2773cd2866</OilMaterialUsageId>
+    <OilCost>8.89</OilCost>
+    <OilFilterChanged>false</OilFilterChanged>
+    <OilFilterCost>0.00</OilFilterCost>
+    <LaborCost>0.00</LaborCost>
+    <OtherCost>0.00</OtherCost>
+    <TotalCost>8.89</TotalCost>
+    <PerformedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</PerformedByUserId>
+    <CreatedAtUtc>2026-10-14T09:05:16.8992644Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+    <IdempotencyKey>35022501-7f24-4c8e-9804-61d4860ef464</IdempotencyKey>
+    <RequestHash>0BFB8309145A69C295A1AECFC81251E2FCE17EB573D1045CD42144230B173297</RequestHash>
+    <VehicleId>01a0aed7-0d92-7c35-b46f-7604f87db6fa</VehicleId>
+  </OilChanges>
+  <OilChanges>
+    <Id>01a10591-8249-7052-843b-59c9e92ae02b</Id>
+    <PerformedAtUtc>2026-10-02T06:19:00Z</PerformedAtUtc>
+    <OdometerAtChange>75257</OdometerAtChange>
+    <VehicleTypeSnapshot>1</VehicleTypeSnapshot>
+    <OilInventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</OilInventoryItemId>
+    <OilQuantityLiters>1.000</OilQuantityLiters>
+    <OilMaterialUsageId>01a10591-824b-7514-883b-ab07f8d3d773</OilMaterialUsageId>
+    <OilCost>8.89</OilCost>
+    <OilFilterChanged>false</OilFilterChanged>
+    <OilFilterCost>0.00</OilFilterCost>
+    <LaborCost>0.00</LaborCost>
+    <OtherCost>0.00</OtherCost>
+    <TotalCost>8.89</TotalCost>
+    <PerformedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</PerformedByUserId>
+    <CreatedAtUtc>2026-10-04T06:19:44.5939767Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+    <IdempotencyKey>7765a631-5843-4b58-bac8-f645441e914a</IdempotencyKey>
+    <RequestHash>F76C8F744734946983817EC56312511262A59A35DA5196254E2C2EE4570FA25F</RequestHash>
+    <VehicleId>01a0aed7-0d96-7058-b63a-5cf87063ad34</VehicleId>
+  </OilChanges>
+  <OilChanges>
+    <Id>01a139be-4b90-7c11-a00a-5cc552715db6</Id>
+    <PerformedAtUtc>2026-10-07T09:27:00Z</PerformedAtUtc>
+    <OdometerAtChange>87731</OdometerAtChange>
+    <VehicleTypeSnapshot>1</VehicleTypeSnapshot>
+    <OilInventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</OilInventoryItemId>
+    <OilQuantityLiters>1.000</OilQuantityLiters>
+    <OilMaterialUsageId>01a139be-4b93-75bf-a2f8-fdc00a26e242</OilMaterialUsageId>
+    <OilCost>8.89</OilCost>
+    <OilFilterChanged>false</OilFilterChanged>
+    <OilFilterCost>0.00</OilFilterCost>
+    <LaborCost>0.00</LaborCost>
+    <OtherCost>0.00</OtherCost>
+    <TotalCost>8.89</TotalCost>
+    <PerformedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</PerformedByUserId>
+    <CreatedAtUtc>2026-10-14T09:28:54.9396412Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+    <IdempotencyKey>a3035bc7-fd3e-499e-8c06-30ee21e24dc3</IdempotencyKey>
+    <RequestHash>2DDD4282097ADCC5D1B668050C175968E4B2AF520A60AE99E57C7C31DF1D53F1</RequestHash>
+    <VehicleId>01a0aed7-0d95-7801-b0c1-ec872932876e</VehicleId>
+  </OilChanges>
+  <OilChanges>
+    <Id>01a139bd-438c-7888-a16a-5d6ff7f97379</Id>
+    <PerformedAtUtc>2026-10-07T09:26:00Z</PerformedAtUtc>
+    <OdometerAtChange>93466</OdometerAtChange>
+    <VehicleTypeSnapshot>1</VehicleTypeSnapshot>
+    <OilInventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</OilInventoryItemId>
+    <OilQuantityLiters>1.000</OilQuantityLiters>
+    <OilMaterialUsageId>01a139bd-438f-7400-b985-bd70250a3da1</OilMaterialUsageId>
+    <OilCost>8.89</OilCost>
+    <OilFilterChanged>false</OilFilterChanged>
+    <OilFilterCost>0.00</OilFilterCost>
+    <LaborCost>0.00</LaborCost>
+    <OtherCost>0.00</OtherCost>
+    <TotalCost>8.89</TotalCost>
+    <PerformedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</PerformedByUserId>
+    <CreatedAtUtc>2026-10-14T09:27:47.3627772Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+    <IdempotencyKey>b4336fd1-8fc4-4d27-8fc9-c6c66e013ad5</IdempotencyKey>
+    <RequestHash>0881FC4EC32AD5446A6FD9BAEBCE676F8AA06BF67D75C59D5594FAC4617BF49D</RequestHash>
+    <VehicleId>01a0aed7-0d93-7998-94d0-3bcb5e64e6de</VehicleId>
+  </OilChanges>
+  <OilChanges>
+    <Id>01a1354a-14ce-77a0-9d00-63b085b9c311</Id>
+    <PerformedAtUtc>2026-10-07T12:42:00Z</PerformedAtUtc>
+    <OdometerAtChange>36471</OdometerAtChange>
+    <VehicleTypeSnapshot>1</VehicleTypeSnapshot>
+    <OilInventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</OilInventoryItemId>
+    <OilQuantityLiters>1.000</OilQuantityLiters>
+    <OilMaterialUsageId>01a1354a-14d3-730a-9d75-2fd3511c2a65</OilMaterialUsageId>
+    <OilCost>8.89</OilCost>
+    <OilFilterChanged>false</OilFilterChanged>
+    <OilFilterCost>0.00</OilFilterCost>
+    <LaborCost>0.00</LaborCost>
+    <OtherCost>0.00</OtherCost>
+    <TotalCost>8.89</TotalCost>
+    <PerformedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</PerformedByUserId>
+    <CreatedAtUtc>2026-10-13T12:43:29.8848863Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+    <IdempotencyKey>ee916238-215a-4628-b7a2-f75e17114672</IdempotencyKey>
+    <RequestHash>4776E1D2A35081D948C8D43B9C4F355C435E0B567BECAE578211CA34265A58BA</RequestHash>
+    <VehicleId>01a0aed7-0d92-7c35-b46f-7604f87db6fa</VehicleId>
+  </OilChanges>
+  <OilChanges>
+    <Id>01a0f6f1-a45c-7630-a2f5-69c6766e89dc</Id>
+    <PerformedAtUtc>2026-10-01T10:09:00Z</PerformedAtUtc>
+    <OdometerAtChange>48680</OdometerAtChange>
+    <VehicleTypeSnapshot>1</VehicleTypeSnapshot>
+    <OilInventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</OilInventoryItemId>
+    <OilQuantityLiters>1.000</OilQuantityLiters>
+    <OilMaterialUsageId>01a0f6f1-a468-7cb5-9c13-39e524899284</OilMaterialUsageId>
+    <OilCost>8.89</OilCost>
+    <OilFilterChanged>false</OilFilterChanged>
+    <OilFilterCost>0.00</OilFilterCost>
+    <LaborCost>0.00</LaborCost>
+    <OtherCost>0.00</OtherCost>
+    <TotalCost>8.89</TotalCost>
+    <PerformedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</PerformedByUserId>
+    <CreatedAtUtc>2026-10-01T10:10:26.6112473Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+    <IdempotencyKey>d99c5a6c-dcf0-4cf2-a696-e3f5c9644efd</IdempotencyKey>
+    <RequestHash>0A562BF1F8AA722ACA0A6DF7FD97D9E6C095C0A59686DACD49E8170B6E1752E3</RequestHash>
+    <VehicleId>01a0aed7-0d92-77aa-9960-7bc1b0d992f3</VehicleId>
+  </OilChanges>
+  <OilChanges>
+    <Id>01a1355c-6652-77f1-aecb-6dffe2724380</Id>
+    <PerformedAtUtc>2026-10-07T13:02:00Z</PerformedAtUtc>
+    <OdometerAtChange>76179</OdometerAtChange>
+    <VehicleTypeSnapshot>1</VehicleTypeSnapshot>
+    <OilInventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</OilInventoryItemId>
+    <OilQuantityLiters>1.000</OilQuantityLiters>
+    <OilMaterialUsageId>01a1355c-6656-72f5-b505-1ba0378d26c0</OilMaterialUsageId>
+    <OilCost>8.89</OilCost>
+    <OilFilterChanged>false</OilFilterChanged>
+    <OilFilterCost>0.00</OilFilterCost>
+    <LaborCost>0.00</LaborCost>
+    <OtherCost>0.00</OtherCost>
+    <TotalCost>8.89</TotalCost>
+    <PerformedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</PerformedByUserId>
+    <CreatedAtUtc>2026-10-13T13:03:30.4208276Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+    <IdempotencyKey>f99254c2-9d64-41e4-bf34-b2f3ece3ea6f</IdempotencyKey>
+    <RequestHash>218CBA4739D24C6A96D84CC1269A4360071B409FE7E07F7BA09C5B00A446C530</RequestHash>
+    <VehicleId>01a0aed7-0d96-7058-b63a-5cf87063ad34</VehicleId>
+  </OilChanges>
+  <OilChanges>
+    <Id>01a1395b-974f-79e1-88f4-72de8fefbe6f</Id>
+    <PerformedAtUtc>2026-10-13T07:39:00Z</PerformedAtUtc>
+    <OdometerAtChange>51852</OdometerAtChange>
+    <VehicleTypeSnapshot>1</VehicleTypeSnapshot>
+    <OilInventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</OilInventoryItemId>
+    <OilQuantityLiters>1.000</OilQuantityLiters>
+    <OilMaterialUsageId>01a1395b-9754-77bd-afea-a26520d458b3</OilMaterialUsageId>
+    <OilCost>8.89</OilCost>
+    <OilFilterChanged>false</OilFilterChanged>
+    <OilFilterCost>0.00</OilFilterCost>
+    <LaborCost>0.00</LaborCost>
+    <OtherCost>0.00</OtherCost>
+    <TotalCost>8.89</TotalCost>
+    <PerformedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</PerformedByUserId>
+    <CreatedAtUtc>2026-10-14T07:41:06.2831414Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+    <IdempotencyKey>71771ebb-e511-4cc3-a0ea-769d94aade15</IdempotencyKey>
+    <RequestHash>4D367A44B59A7BECD77576D6B161DBBA4A1E49357EFC9497420A05CCEEC0B478</RequestHash>
+    <VehicleId>01a0aed7-0d92-77aa-9960-7bc1b0d992f3</VehicleId>
+  </OilChanges>
+  <OilChanges>
+    <Id>01a13548-0f91-7d4a-8ee6-7cf6a3fea3c3</Id>
+    <PerformedAtUtc>2026-10-07T12:38:00Z</PerformedAtUtc>
+    <OdometerAtChange>99576</OdometerAtChange>
+    <VehicleTypeSnapshot>1</VehicleTypeSnapshot>
+    <OilInventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</OilInventoryItemId>
+    <OilQuantityLiters>1.000</OilQuantityLiters>
+    <OilMaterialUsageId>01a13548-0f94-7af5-b028-54ef625db72d</OilMaterialUsageId>
+    <OilCost>8.89</OilCost>
+    <OilFilterChanged>false</OilFilterChanged>
+    <OilFilterCost>0.00</OilFilterCost>
+    <LaborCost>0.00</LaborCost>
+    <OtherCost>0.00</OtherCost>
+    <TotalCost>8.89</TotalCost>
+    <PerformedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</PerformedByUserId>
+    <CreatedAtUtc>2026-10-13T12:41:17.4704435Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+    <IdempotencyKey>a0a87326-c22d-40b5-9c0a-726f4688bd6b</IdempotencyKey>
+    <RequestHash>C7EFE08D1195276F64DAFAB4AC9106D28A029CC72512C10AC916CD498AE1B9EC</RequestHash>
+    <VehicleId>01a0aed7-0d93-706a-8b6c-18d1d94c19bd</VehicleId>
+  </OilChanges>
+  <OilChanges>
+    <Id>01a139a9-3b4e-76db-a09a-7f2668ce52d9</Id>
+    <PerformedAtUtc>2026-10-07T09:04:00Z</PerformedAtUtc>
+    <OdometerAtChange>66274</OdometerAtChange>
+    <VehicleTypeSnapshot>1</VehicleTypeSnapshot>
+    <OilInventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</OilInventoryItemId>
+    <OilQuantityLiters>1.000</OilQuantityLiters>
+    <OilMaterialUsageId>01a139a9-3b4f-737e-a31f-2ec06dce1e14</OilMaterialUsageId>
+    <OilCost>8.89</OilCost>
+    <OilFilterChanged>false</OilFilterChanged>
+    <OilFilterCost>0.00</OilFilterCost>
+    <LaborCost>0.00</LaborCost>
+    <OtherCost>0.00</OtherCost>
+    <TotalCost>8.89</TotalCost>
+    <PerformedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</PerformedByUserId>
+    <CreatedAtUtc>2026-10-14T09:05:54.5177965Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+    <IdempotencyKey>60dcdc26-8e93-47d6-ae17-72b7642745b5</IdempotencyKey>
+    <RequestHash>41FDFC2AFEF2D7DDA8030D53DD460A159D7932569AA179DC649F83FDCA97D24B</RequestHash>
+    <VehicleId>01a0aed7-0d92-7dc1-9be6-abcf129a3517</VehicleId>
+  </OilChanges>
+  <OilChanges>
+    <Id>01a139a9-e6d7-7ab4-b5f1-804d14240577</Id>
+    <PerformedAtUtc>2026-10-07T09:05:00Z</PerformedAtUtc>
+    <OdometerAtChange>35994</OdometerAtChange>
+    <VehicleTypeSnapshot>1</VehicleTypeSnapshot>
+    <OilInventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</OilInventoryItemId>
+    <OilQuantityLiters>1.000</OilQuantityLiters>
+    <OilMaterialUsageId>01a139a9-e6d8-795d-9e17-af459819d6ea</OilMaterialUsageId>
+    <OilCost>8.89</OilCost>
+    <OilFilterChanged>false</OilFilterChanged>
+    <OilFilterCost>0.00</OilFilterCost>
+    <LaborCost>0.00</LaborCost>
+    <OtherCost>0.00</OtherCost>
+    <TotalCost>8.89</TotalCost>
+    <PerformedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</PerformedByUserId>
+    <CreatedAtUtc>2026-10-14T09:06:38.4338383Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+    <IdempotencyKey>83cc0c80-34ff-4b8c-860c-f8c421f4ed37</IdempotencyKey>
+    <RequestHash>E2931229D04A1ACCBA6449EFB384CE860B0D8CE256A486A0E86FAEB661134846</RequestHash>
+    <VehicleId>01a0aed7-0d93-7a9b-b640-e19dc339672a</VehicleId>
+  </OilChanges>
+  <OilChanges>
+    <Id>01a139ab-4072-7a5e-96a2-8370a50230c6</Id>
+    <PerformedAtUtc>2026-10-07T09:07:00Z</PerformedAtUtc>
+    <OdometerAtChange>93466</OdometerAtChange>
+    <VehicleTypeSnapshot>1</VehicleTypeSnapshot>
+    <OilInventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</OilInventoryItemId>
+    <OilQuantityLiters>1.000</OilQuantityLiters>
+    <OilMaterialUsageId>01a139ab-4074-7889-99f4-e81cebcc74ae</OilMaterialUsageId>
+    <OilCost>8.89</OilCost>
+    <OilFilterChanged>false</OilFilterChanged>
+    <OilFilterCost>0.00</OilFilterCost>
+    <LaborCost>0.00</LaborCost>
+    <OtherCost>0.00</OtherCost>
+    <TotalCost>8.89</TotalCost>
+    <PerformedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</PerformedByUserId>
+    <CreatedAtUtc>2026-10-14T09:08:06.9076959Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+    <IdempotencyKey>0f12cd44-1dec-4958-854e-c8faf1d792d5</IdempotencyKey>
+    <RequestHash>396F962E9B36C25C1B9A38EFB7C531314AD0DE9205C58328B37C20951B7F2B03</RequestHash>
+    <VehicleId>01a0aed7-0d93-7998-94d0-3bcb5e64e6de</VehicleId>
+  </OilChanges>
+  <OilChanges>
+    <Id>01a13544-4cb9-7af6-977c-890e282d6924</Id>
+    <PerformedAtUtc>2026-10-07T12:36:00Z</PerformedAtUtc>
+    <OdometerAtChange>50225</OdometerAtChange>
+    <VehicleTypeSnapshot>1</VehicleTypeSnapshot>
+    <OilInventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</OilInventoryItemId>
+    <OilQuantityLiters>1.000</OilQuantityLiters>
+    <OilMaterialUsageId>01a13544-4cbb-7285-96d4-9b62b116193b</OilMaterialUsageId>
+    <OilCost>8.89</OilCost>
+    <OilFilterChanged>false</OilFilterChanged>
+    <OilFilterCost>0.00</OilFilterCost>
+    <LaborCost>0.00</LaborCost>
+    <OtherCost>0.00</OtherCost>
+    <TotalCost>8.89</TotalCost>
+    <PerformedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</PerformedByUserId>
+    <CreatedAtUtc>2026-10-13T12:37:10.9848419Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+    <IdempotencyKey>abae86ca-56b5-4071-8783-4fa818816fac</IdempotencyKey>
+    <RequestHash>F8158A69D6CA748FCC216CDEFB86371955AF54D8E86D036F4D07D4D05105FDE4</RequestHash>
+    <VehicleId>01a0aed7-0d92-77aa-9960-7bc1b0d992f3</VehicleId>
+  </OilChanges>
+  <OilChanges>
+    <Id>01a138fe-f5c2-7e35-9f3e-8d72725a414d</Id>
+    <PerformedAtUtc>2026-10-09T05:59:00Z</PerformedAtUtc>
+    <OdometerAtChange>50969</OdometerAtChange>
+    <VehicleTypeSnapshot>1</VehicleTypeSnapshot>
+    <OilInventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</OilInventoryItemId>
+    <OilQuantityLiters>1.000</OilQuantityLiters>
+    <OilMaterialUsageId>01a138fe-f5c5-787d-a2b8-8e26f411ff50</OilMaterialUsageId>
+    <OilCost>8.89</OilCost>
+    <OilFilterChanged>false</OilFilterChanged>
+    <OilFilterCost>0.00</OilFilterCost>
+    <LaborCost>0.00</LaborCost>
+    <OtherCost>0.00</OtherCost>
+    <TotalCost>8.89</TotalCost>
+    <PerformedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</PerformedByUserId>
+    <CreatedAtUtc>2026-10-14T05:59:55.6015922Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+    <IdempotencyKey>e3530eaa-a267-45f8-8538-77263f02dc72</IdempotencyKey>
+    <RequestHash>2D01F00CC6D557F35E114F95EAFCE470B97068DA3A014758AA93F5BD4B83EF1A</RequestHash>
+    <VehicleId>01a0aed7-0d92-77aa-9960-7bc1b0d992f3</VehicleId>
+  </OilChanges>
+  <OilChanges>
+    <Id>01a1059d-eec2-7871-b473-918c15ee8b6d</Id>
+    <PerformedAtUtc>2026-10-03T06:32:00Z</PerformedAtUtc>
+    <OdometerAtChange>92128</OdometerAtChange>
+    <VehicleTypeSnapshot>1</VehicleTypeSnapshot>
+    <OilInventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</OilInventoryItemId>
+    <OilQuantityLiters>1.000</OilQuantityLiters>
+    <OilMaterialUsageId>01a1059d-eec5-7ad1-9d41-c3ddc50b251d</OilMaterialUsageId>
+    <OilCost>8.89</OilCost>
+    <OilFilterChanged>false</OilFilterChanged>
+    <OilFilterCost>0.00</OilFilterCost>
+    <LaborCost>0.00</LaborCost>
+    <OtherCost>0.00</OtherCost>
+    <TotalCost>8.89</TotalCost>
+    <PerformedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</PerformedByUserId>
+    <CreatedAtUtc>2026-10-04T06:33:18.8066109Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+    <IdempotencyKey>86cf9b03-c55f-4b4c-a638-80c9a581e8fa</IdempotencyKey>
+    <RequestHash>9BA55CDDF12CAD1949DB601F2DCB6EA36BAE464C71A2916F0BDA78A1B0D4C06F</RequestHash>
+    <VehicleId>01a0aed7-0d93-7998-94d0-3bcb5e64e6de</VehicleId>
+  </OilChanges>
+  <OilChanges>
+    <Id>01a13916-7dd7-7854-8834-a4f0c8d9b37a</Id>
+    <PerformedAtUtc>2026-10-11T06:24:00Z</PerformedAtUtc>
+    <OdometerAtChange>88639</OdometerAtChange>
+    <VehicleTypeSnapshot>1</VehicleTypeSnapshot>
+    <OilInventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</OilInventoryItemId>
+    <OilQuantityLiters>1.000</OilQuantityLiters>
+    <OilMaterialUsageId>01a13916-7dda-7b58-89aa-2dc25d4ec9ec</OilMaterialUsageId>
+    <OilCost>8.89</OilCost>
+    <OilFilterChanged>false</OilFilterChanged>
+    <OilFilterCost>0.00</OilFilterCost>
+    <LaborCost>0.00</LaborCost>
+    <OtherCost>0.00</OtherCost>
+    <TotalCost>8.89</TotalCost>
+    <PerformedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</PerformedByUserId>
+    <CreatedAtUtc>2026-10-14T06:25:37.7698635Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+    <IdempotencyKey>b763a992-b55b-4d22-96d8-a18f8c473cf0</IdempotencyKey>
+    <RequestHash>650EE8376D17995616B58A1FB1232983AB18CCFFEA1C8A13BE7788FF25A172F7</RequestHash>
+    <VehicleId>01a0aed7-0d95-7801-b0c1-ec872932876e</VehicleId>
+  </OilChanges>
+  <OilChanges>
+    <Id>01a0f6e1-6b11-79b5-b6e0-a644d9647d87</Id>
+    <PerformedAtUtc>2026-09-30T09:51:00Z</PerformedAtUtc>
+    <OdometerAtChange>34750</OdometerAtChange>
+    <VehicleTypeSnapshot>1</VehicleTypeSnapshot>
+    <OilInventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</OilInventoryItemId>
+    <OilQuantityLiters>1.000</OilQuantityLiters>
+    <OilMaterialUsageId>01a0f6e1-6b14-7099-8051-971ad4c8ddb6</OilMaterialUsageId>
+    <OilCost>8.89</OilCost>
+    <OilFilterChanged>false</OilFilterChanged>
+    <OilFilterCost>0.00</OilFilterCost>
+    <LaborCost>0.00</LaborCost>
+    <OtherCost>0.00</OtherCost>
+    <TotalCost>8.89</TotalCost>
+    <PerformedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</PerformedByUserId>
+    <CreatedAtUtc>2026-10-01T09:52:43.2960321Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+    <IdempotencyKey>6e5ad516-e9d4-4907-80e5-630066cebdb6</IdempotencyKey>
+    <RequestHash>AC2B6252BC6A06EBCAA4D516ED826D1DB5A0BED185C3790118223A505DD9555A</RequestHash>
+    <VehicleId>01a0aed7-0d93-7a9b-b640-e19dc339672a</VehicleId>
+  </OilChanges>
+  <OilChanges>
+    <Id>01a139aa-7cf2-755a-b855-a955490f4883</Id>
+    <PerformedAtUtc>2026-10-07T09:06:00Z</PerformedAtUtc>
+    <OdometerAtChange>76179</OdometerAtChange>
+    <VehicleTypeSnapshot>1</VehicleTypeSnapshot>
+    <OilInventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</OilInventoryItemId>
+    <OilQuantityLiters>1.000</OilQuantityLiters>
+    <OilMaterialUsageId>01a139aa-7cf5-72f7-9d06-1996580a01d1</OilMaterialUsageId>
+    <OilCost>8.89</OilCost>
+    <OilFilterChanged>false</OilFilterChanged>
+    <OilFilterCost>0.00</OilFilterCost>
+    <LaborCost>0.00</LaborCost>
+    <OtherCost>0.00</OtherCost>
+    <TotalCost>8.89</TotalCost>
+    <PerformedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</PerformedByUserId>
+    <CreatedAtUtc>2026-10-14T09:07:16.8609366Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+    <IdempotencyKey>3f8af21c-f6b4-4543-bab2-55f345744b4d</IdempotencyKey>
+    <RequestHash>D33E26C1C62DDE0DCF0A9113C7A55DF897BA03E0094F641CEDBCF5512F220DAE</RequestHash>
+    <VehicleId>01a0aed7-0d96-7058-b63a-5cf87063ad34</VehicleId>
+  </OilChanges>
+  <OilChanges>
+    <Id>01a100aa-bca7-7243-ae65-aa6f0d27cbaf</Id>
+    <PerformedAtUtc>2026-09-30T07:28:00Z</PerformedAtUtc>
+    <OdometerAtChange>64794</OdometerAtChange>
+    <VehicleTypeSnapshot>1</VehicleTypeSnapshot>
+    <OilInventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</OilInventoryItemId>
+    <OilQuantityLiters>1.000</OilQuantityLiters>
+    <OilMaterialUsageId>01a100aa-bca9-71e0-8b2d-3577a3ee2d76</OilMaterialUsageId>
+    <OilCost>8.89</OilCost>
+    <OilFilterChanged>false</OilFilterChanged>
+    <OilFilterCost>0.00</OilFilterCost>
+    <LaborCost>0.00</LaborCost>
+    <OtherCost>0.00</OtherCost>
+    <TotalCost>8.89</TotalCost>
+    <PerformedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</PerformedByUserId>
+    <CreatedAtUtc>2026-10-03T07:29:11.8572352Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+    <IdempotencyKey>e0c28f0b-1b8a-427b-9cb2-aebc0864e32c</IdempotencyKey>
+    <RequestHash>4DB835C911F7385E9D8E36851B92AE227335B183516FEEACAEEFF0EEE4F5FBA3</RequestHash>
+    <VehicleId>01a0aed7-0d92-7dc1-9be6-abcf129a3517</VehicleId>
+  </OilChanges>
+  <OilChanges>
+    <Id>01a13544-eef1-7d76-a6c8-b7ef11cda353</Id>
+    <PerformedAtUtc>2026-10-07T12:37:00Z</PerformedAtUtc>
+    <OdometerAtChange>28120</OdometerAtChange>
+    <VehicleTypeSnapshot>1</VehicleTypeSnapshot>
+    <OilInventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</OilInventoryItemId>
+    <OilQuantityLiters>1.000</OilQuantityLiters>
+    <OilMaterialUsageId>01a13544-ef00-74a8-b8c2-e76ae04dc0e1</OilMaterialUsageId>
+    <OilCost>8.89</OilCost>
+    <OilFilterChanged>false</OilFilterChanged>
+    <OilFilterCost>0.00</OilFilterCost>
+    <LaborCost>0.00</LaborCost>
+    <OtherCost>0.00</OtherCost>
+    <TotalCost>8.89</TotalCost>
+    <PerformedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</PerformedByUserId>
+    <CreatedAtUtc>2026-10-13T12:37:52.5640191Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+    <IdempotencyKey>58714abb-38c1-471c-9868-a7e1a5b42290</IdempotencyKey>
+    <RequestHash>EFF10798D4E831ADC062E90FB573FC81640145305E1E4B55F341365A65504D07</RequestHash>
+    <VehicleId>01a0aed7-0d91-7596-b567-2f5e741fedb2</VehicleId>
+  </OilChanges>
+  <OilChanges>
+    <Id>01a1355d-0850-7c5f-b792-bdb3cb0d57e8</Id>
+    <PerformedAtUtc>2026-10-07T13:03:00Z</PerformedAtUtc>
+    <OdometerAtChange>93466</OdometerAtChange>
+    <VehicleTypeSnapshot>1</VehicleTypeSnapshot>
+    <OilInventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</OilInventoryItemId>
+    <OilQuantityLiters>1.000</OilQuantityLiters>
+    <OilMaterialUsageId>01a1355d-0851-7d46-b76d-0041091af07b</OilMaterialUsageId>
+    <OilCost>8.89</OilCost>
+    <OilFilterChanged>false</OilFilterChanged>
+    <OilFilterCost>0.00</OilFilterCost>
+    <LaborCost>0.00</LaborCost>
+    <OtherCost>0.00</OtherCost>
+    <TotalCost>8.89</TotalCost>
+    <PerformedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</PerformedByUserId>
+    <CreatedAtUtc>2026-10-13T13:04:11.8651407Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+    <IdempotencyKey>53a8fdfe-7d8d-4660-90f4-d8eefe74d112</IdempotencyKey>
+    <RequestHash>66D57492B1119CE41233493D699A123F3530CBC35E3381554C20FE8335C199A0</RequestHash>
+    <VehicleId>01a0aed7-0d93-7998-94d0-3bcb5e64e6de</VehicleId>
+  </OilChanges>
+  <OilChanges>
+    <Id>01a135ac-8ddc-7b9d-a0bb-c4a15f6d1230</Id>
+    <PerformedAtUtc>2026-10-09T14:29:00Z</PerformedAtUtc>
+    <OdometerAtChange>381</OdometerAtChange>
+    <VehicleTypeSnapshot>1</VehicleTypeSnapshot>
+    <OilInventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</OilInventoryItemId>
+    <OilQuantityLiters>1.000</OilQuantityLiters>
+    <OilMaterialUsageId>01a135ac-8de0-7db7-a59f-a3fa4a8b6b16</OilMaterialUsageId>
+    <OilCost>8.89</OilCost>
+    <OilFilterChanged>false</OilFilterChanged>
+    <OilFilterCost>0.00</OilFilterCost>
+    <LaborCost>0.00</LaborCost>
+    <OtherCost>0.00</OtherCost>
+    <TotalCost>8.89</TotalCost>
+    <PerformedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</PerformedByUserId>
+    <CreatedAtUtc>2026-10-13T14:31:03.4046806Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+    <IdempotencyKey>0533f1a5-a97e-404f-b520-9a477597cfbb</IdempotencyKey>
+    <RequestHash>A10FB138E18B432AB311474A321B95A67FA4991B6B935C32BBBBD986DF2699DC</RequestHash>
+    <VehicleId>01a0aed7-0d93-706a-8b6c-18d1d94c19bd</VehicleId>
+  </OilChanges>
+  <OilChanges>
+    <Id>01a1355e-5dda-7d9c-b0d6-c864f785dfef</Id>
+    <PerformedAtUtc>2026-10-07T13:05:00Z</PerformedAtUtc>
+    <OdometerAtChange>87731</OdometerAtChange>
+    <VehicleTypeSnapshot>1</VehicleTypeSnapshot>
+    <OilInventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</OilInventoryItemId>
+    <OilQuantityLiters>1.000</OilQuantityLiters>
+    <OilMaterialUsageId>01a1355e-5de6-75a4-b774-024461f600c4</OilMaterialUsageId>
+    <OilCost>8.89</OilCost>
+    <OilFilterChanged>false</OilFilterChanged>
+    <OilFilterCost>0.00</OilFilterCost>
+    <LaborCost>0.00</LaborCost>
+    <OtherCost>0.00</OtherCost>
+    <TotalCost>8.89</TotalCost>
+    <PerformedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</PerformedByUserId>
+    <CreatedAtUtc>2026-10-13T13:05:39.3527874Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+    <IdempotencyKey>a14679e2-b2e8-4a06-bf26-4a68f45e81d5</IdempotencyKey>
+    <RequestHash>5554B65D17EB1F555E41178A59EFA4FF47AEADC79E8215AEA8542C661D9A79D1</RequestHash>
+    <VehicleId>01a0aed7-0d95-7801-b0c1-ec872932876e</VehicleId>
+  </OilChanges>
+  <OilChanges>
+    <Id>01a105a9-4896-7561-918f-d42e2f1bd047</Id>
+    <PerformedAtUtc>2026-10-03T06:45:00Z</PerformedAtUtc>
+    <OdometerAtChange>49458</OdometerAtChange>
+    <VehicleTypeSnapshot>1</VehicleTypeSnapshot>
+    <OilInventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</OilInventoryItemId>
+    <OilQuantityLiters>1.000</OilQuantityLiters>
+    <OilMaterialUsageId>01a105a9-4898-7297-8471-dd39a9084e9c</OilMaterialUsageId>
+    <OilCost>8.89</OilCost>
+    <OilFilterChanged>false</OilFilterChanged>
+    <OilFilterCost>0.00</OilFilterCost>
+    <LaborCost>0.00</LaborCost>
+    <OtherCost>0.00</OtherCost>
+    <TotalCost>8.89</TotalCost>
+    <PerformedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</PerformedByUserId>
+    <CreatedAtUtc>2026-10-04T06:45:42.6872433Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+    <IdempotencyKey>bc590dcf-e20f-4dfa-8ec1-17150dc49318</IdempotencyKey>
+    <RequestHash>AFEB7CFD64356BE8F0980574DDD92929129F6A721151778997E673F07E671876</RequestHash>
+    <VehicleId>01a0aed7-0d92-77aa-9960-7bc1b0d992f3</VehicleId>
+  </OilChanges>
+  <OilChanges>
+    <Id>01a139a5-f441-7e8d-a03f-dae53973422e</Id>
+    <PerformedAtUtc>2026-10-07T09:01:00Z</PerformedAtUtc>
+    <OdometerAtChange>50225</OdometerAtChange>
+    <VehicleTypeSnapshot>1</VehicleTypeSnapshot>
+    <OilInventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</OilInventoryItemId>
+    <OilQuantityLiters>1.000</OilQuantityLiters>
+    <OilMaterialUsageId>01a139a5-f445-77e8-b827-cf0f8b1d8c6a</OilMaterialUsageId>
+    <OilCost>8.89</OilCost>
+    <OilFilterChanged>false</OilFilterChanged>
+    <OilFilterCost>0.00</OilFilterCost>
+    <LaborCost>0.00</LaborCost>
+    <OtherCost>0.00</OtherCost>
+    <TotalCost>8.89</TotalCost>
+    <PerformedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</PerformedByUserId>
+    <CreatedAtUtc>2026-10-14T09:02:19.7399799Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+    <IdempotencyKey>53481e60-390c-46ab-b0af-4be5d60b3d68</IdempotencyKey>
+    <RequestHash>6CC80FC60BA0863AF3C05A1A1FC9D667F12EAC4A321A33A175A505E48CF04A80</RequestHash>
+    <VehicleId>01a0aed7-0d92-77aa-9960-7bc1b0d992f3</VehicleId>
+  </OilChanges>
+  <OilChanges>
+    <Id>01a13914-b9f2-7327-98b4-e21da151462a</Id>
+    <PerformedAtUtc>2026-10-11T06:22:00Z</PerformedAtUtc>
+    <OdometerAtChange>77125</OdometerAtChange>
+    <VehicleTypeSnapshot>1</VehicleTypeSnapshot>
+    <OilInventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</OilInventoryItemId>
+    <OilQuantityLiters>1.000</OilQuantityLiters>
+    <OilMaterialUsageId>01a13914-b9f4-7cbe-a23f-9bade4d0b7ae</OilMaterialUsageId>
+    <OilCost>8.89</OilCost>
+    <OilFilterChanged>false</OilFilterChanged>
+    <OilFilterCost>0.00</OilFilterCost>
+    <LaborCost>0.00</LaborCost>
+    <OtherCost>0.00</OtherCost>
+    <TotalCost>8.89</TotalCost>
+    <PerformedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</PerformedByUserId>
+    <CreatedAtUtc>2026-10-14T06:23:42.0791934Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+    <IdempotencyKey>5ec64608-5547-4037-9348-0a4e88a08946</IdempotencyKey>
+    <RequestHash>F2508C5500F0C699F8199A64D0C6F337433E8288F034A51704C65ED387A0EF0D</RequestHash>
+    <VehicleId>01a0aed7-0d96-7058-b63a-5cf87063ad34</VehicleId>
+  </OilChanges>
+  <OilChanges>
+    <Id>01a13911-ca21-74de-b67a-f53c97746de7</Id>
+    <PerformedAtUtc>2026-10-11T06:19:00Z</PerformedAtUtc>
+    <OdometerAtChange>94828</OdometerAtChange>
+    <VehicleTypeSnapshot>1</VehicleTypeSnapshot>
+    <OilInventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</OilInventoryItemId>
+    <OilQuantityLiters>1.000</OilQuantityLiters>
+    <OilMaterialUsageId>01a13911-ca23-7753-9acd-4f41ceeb108e</OilMaterialUsageId>
+    <OilCost>8.89</OilCost>
+    <OilFilterChanged>false</OilFilterChanged>
+    <OilFilterCost>0.00</OilFilterCost>
+    <LaborCost>0.00</LaborCost>
+    <OtherCost>0.00</OtherCost>
+    <TotalCost>8.89</TotalCost>
+    <PerformedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</PerformedByUserId>
+    <CreatedAtUtc>2026-10-14T06:20:29.611597Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+    <IdempotencyKey>c241e520-a1bb-4583-863e-cb51a047309f</IdempotencyKey>
+    <RequestHash>8260E180B454800D35A63C2F24513C647897D79FEC1FB98E2226FF02A277B67D</RequestHash>
+    <VehicleId>01a0aed7-0d93-7998-94d0-3bcb5e64e6de</VehicleId>
+  </OilChanges>
+  <OilChanges>
+    <Id>01a1390d-51c2-714f-9082-f8b1c812cf3b</Id>
+    <PerformedAtUtc>2026-10-10T06:15:00Z</PerformedAtUtc>
+    <OdometerAtChange>36557</OdometerAtChange>
+    <VehicleTypeSnapshot>1</VehicleTypeSnapshot>
+    <OilInventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</OilInventoryItemId>
+    <OilQuantityLiters>1.000</OilQuantityLiters>
+    <OilMaterialUsageId>01a1390d-51c4-70ff-9daa-2abf840aa998</OilMaterialUsageId>
+    <OilCost>8.89</OilCost>
+    <OilFilterChanged>false</OilFilterChanged>
+    <OilFilterCost>0.00</OilFilterCost>
+    <LaborCost>0.00</LaborCost>
+    <OtherCost>0.00</OtherCost>
+    <TotalCost>8.89</TotalCost>
+    <PerformedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</PerformedByUserId>
+    <CreatedAtUtc>2026-10-14T06:15:36.6513968Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+    <IdempotencyKey>687a0190-d84a-4124-9408-c450890bd8b9</IdempotencyKey>
+    <RequestHash>E1EBE2C6A19C907BDDB000EE78B5B11E696C4806448EB8787636CD05324CD1B3</RequestHash>
+    <VehicleId>01a0aed7-0d93-7a9b-b640-e19dc339672a</VehicleId>
+  </OilChanges>
+  <OilChanges>
+    <Id>01a10787-ee18-7bcd-8188-fe0c27e23dd0</Id>
+    <PerformedAtUtc>2026-10-04T15:28:00Z</PerformedAtUtc>
+    <OdometerAtChange>65659</OdometerAtChange>
+    <VehicleTypeSnapshot>1</VehicleTypeSnapshot>
+    <OilInventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</OilInventoryItemId>
+    <OilQuantityLiters>1.000</OilQuantityLiters>
+    <OilMaterialUsageId>01a10787-ee1b-74f7-b224-66782bdd0fbf</OilMaterialUsageId>
+    <OilCost>8.89</OilCost>
+    <OilFilterChanged>false</OilFilterChanged>
+    <OilFilterCost>0.00</OilFilterCost>
+    <LaborCost>0.00</LaborCost>
+    <OtherCost>0.00</OtherCost>
+    <TotalCost>8.89</TotalCost>
+    <PerformedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</PerformedByUserId>
+    <CreatedAtUtc>2026-10-04T15:28:31.2694882Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+    <IdempotencyKey>dcb2949f-1ad7-4c08-ae32-5974a7ad4c3b</IdempotencyKey>
+    <RequestHash>F9D3D1D6E3334B0DA1AF422CAB3447E8B8DCD10742214D1E4C7CB112C1FCCE09</RequestHash>
+    <VehicleId>01a0aed7-0d92-7dc1-9be6-abcf129a3517</VehicleId>
+  </OilChanges>
+  <OilChanges>
+    <Id>01a1354b-3a87-7cca-a75d-ff361f840596</Id>
+    <PerformedAtUtc>2026-10-07T12:44:00Z</PerformedAtUtc>
+    <OdometerAtChange>35994</OdometerAtChange>
+    <VehicleTypeSnapshot>1</VehicleTypeSnapshot>
+    <OilInventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</OilInventoryItemId>
+    <OilQuantityLiters>1.000</OilQuantityLiters>
+    <OilMaterialUsageId>01a1354b-3a8a-7aa2-bfeb-22a11f4110c4</OilMaterialUsageId>
+    <OilCost>8.89</OilCost>
+    <OilFilterChanged>false</OilFilterChanged>
+    <OilFilterCost>0.00</OilFilterCost>
+    <LaborCost>0.00</LaborCost>
+    <OtherCost>0.00</OtherCost>
+    <TotalCost>8.89</TotalCost>
+    <PerformedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</PerformedByUserId>
+    <CreatedAtUtc>2026-10-13T12:44:45.0748345Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+    <IdempotencyKey>b15666a2-bfea-4eb6-82a8-e6df64277f0c</IdempotencyKey>
+    <RequestHash>E4FAFFAF4BB15ABBD4764ED402B61FC056D34E30310DC1D598678DE9994386E8</RequestHash>
+    <VehicleId>01a0aed7-0d93-7a9b-b640-e19dc339672a</VehicleId>
+  </OilChanges>
+  <Vehicles>
+    <Id>01a0aed7-0d93-706a-8b6c-18d1d94c19bd</Id>
+    <AssetNumber>VEH-18D1D94C19BD</AssetNumber>
+    <NormalizedAssetNumber>VEH18D1D94C19BD</NormalizedAssetNumber>
+    <PlateNumberAr>ه ا 3048</PlateNumberAr>
+    <NormalizedPlateNumberAr>ها3048</NormalizedPlateNumberAr>
+    <PlateNumberEn>H A 3048</PlateNumberEn>
+    <NormalizedPlateNumberEn>HA3048</NormalizedPlateNumberEn>
+    <PlateLettersAr>ه ا</PlateLettersAr>
+    <PlateLettersEn>H A</PlateLettersEn>
+    <PlateDigits>3048</PlateDigits>
+    <ChassisNumber>MD2A21BX7SWG48625</ChassisNumber>
+    <VehicleManufacturerId>01a0aed7-0ca6-708a-8c86-3a7bd30125fd</VehicleManufacturerId>
+    <VehicleModelId>01a0aed7-0ca6-77b8-bacc-594731814438</VehicleModelId>
+    <ModelYear>2025</ModelYear>
+    <VehicleType>1</VehicleType>
+    <FuelType>1</FuelType>
+    <TransmissionType>3</TransmissionType>
+    <ColorAr>احمر</ColorAr>
+    <OwnershipType>1</OwnershipType>
+    <CurrentOdometer>99576</CurrentOdometer>
+    <LastOdometerAtUtc>2026-10-07T09:02:00Z</LastOdometerAtUtc>
+    <CurrentOperationalStatus>2</CurrentOperationalStatus>
+    <CurrentAssignmentId>01a0e6fc-0278-7c21-8715-ed4a7dda7f66</CurrentAssignmentId>
+    <Notes>Imported from جميع2 المركبات.xlsx, worksheet row 87.</Notes>
+    <CreatedAtUtc>2026-09-17T10:08:44.6074067Z</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-14T09:03:41.5406205Z</UpdatedAtUtc>
+    <UpdatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</UpdatedByUserId>
+    <RowVersion>AAAAAAACeLE=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000003</OperatingCityId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <NormalizedChassisNumber>MD2A21BX7SWG48625</NormalizedChassisNumber>
+    <NormalizedSerialNumber>282973220</NormalizedSerialNumber>
+    <RegistrationType>7</RegistrationType>
+    <SerialNumber>282973220</SerialNumber>
+    <TrackedDistanceKm>99576.00</TrackedDistanceKm>
+    <RegisteredOwnerSponsorId>019c18d5-62e1-7000-8000-000000000041</RegisteredOwnerSponsorId>
+  </Vehicles>
+  <Vehicles>
+    <Id>01a0aed7-0d91-7596-b567-2f5e741fedb2</Id>
+    <AssetNumber>VEH-2F5E741FEDB2</AssetNumber>
+    <NormalizedAssetNumber>VEH2F5E741FEDB2</NormalizedAssetNumber>
+    <PlateNumberAr>ر ا 1423</PlateNumberAr>
+    <NormalizedPlateNumberAr>را1423</NormalizedPlateNumberAr>
+    <PlateNumberEn>R A 1423</PlateNumberEn>
+    <NormalizedPlateNumberEn>RA1423</NormalizedPlateNumberEn>
+    <PlateLettersAr>ر ا</PlateLettersAr>
+    <PlateLettersEn>R A</PlateLettersEn>
+    <PlateDigits>1423</PlateDigits>
+    <ChassisNumber>MD2A21BX7RWA44308</ChassisNumber>
+    <VehicleManufacturerId>01a0aed7-0ca7-7163-82dc-b1720a32aa30</VehicleManufacturerId>
+    <VehicleModelId>01a0aed7-0ca7-739c-ae7a-02542093b4b4</VehicleModelId>
+    <ModelYear>2024</ModelYear>
+    <VehicleType>1</VehicleType>
+    <FuelType>1</FuelType>
+    <TransmissionType>3</TransmissionType>
+    <ColorAr>اسود</ColorAr>
+    <OwnershipType>1</OwnershipType>
+    <CurrentOdometer>28926</CurrentOdometer>
+    <LastOdometerAtUtc>2026-10-10T06:13:00Z</LastOdometerAtUtc>
+    <CurrentOperationalStatus>2</CurrentOperationalStatus>
+    <CurrentAssignmentId>01a0e6fc-0309-7534-8543-77a1d1143230</CurrentAssignmentId>
+    <Notes>Imported from جميع2 المركبات.xlsx, worksheet row 16.</Notes>
+    <CreatedAtUtc>2026-09-17T10:08:44.6074067Z</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-14T06:13:31.1550998Z</UpdatedAtUtc>
+    <UpdatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</UpdatedByUserId>
+    <RowVersion>AAAAAAACa8c=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000003</OperatingCityId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <NormalizedChassisNumber>MD2A21BX7RWA44308</NormalizedChassisNumber>
+    <NormalizedSerialNumber>703189020</NormalizedSerialNumber>
+    <RegistrationType>7</RegistrationType>
+    <SerialNumber>703189020</SerialNumber>
+    <TrackedDistanceKm>28926.00</TrackedDistanceKm>
+    <RegisteredOwnerSponsorId>019c18d5-62e1-7000-8000-000000000041</RegisteredOwnerSponsorId>
+  </Vehicles>
+  <Vehicles>
+    <Id>01a0aed7-0d93-7998-94d0-3bcb5e64e6de</Id>
+    <AssetNumber>VEH-3BCB5E64E6DE</AssetNumber>
+    <NormalizedAssetNumber>VEH3BCB5E64E6DE</NormalizedAssetNumber>
+    <PlateNumberAr>ح ا 6162</PlateNumberAr>
+    <NormalizedPlateNumberAr>حا6162</NormalizedPlateNumberAr>
+    <PlateNumberEn>J A 6162</PlateNumberEn>
+    <NormalizedPlateNumberEn>JA6162</NormalizedPlateNumberEn>
+    <PlateLettersAr>ح ا</PlateLettersAr>
+    <PlateLettersEn>J A</PlateLettersEn>
+    <PlateDigits>6162</PlateDigits>
+    <ChassisNumber>MD2A21BX4RWE86012</ChassisNumber>
+    <VehicleManufacturerId>01a0aed7-0ca6-708a-8c86-3a7bd30125fd</VehicleManufacturerId>
+    <VehicleModelId>01a0aed7-0ca6-77b8-bacc-594731814438</VehicleModelId>
+    <ModelYear>2024</ModelYear>
+    <VehicleType>1</VehicleType>
+    <FuelType>1</FuelType>
+    <TransmissionType>3</TransmissionType>
+    <ColorAr>اسود</ColorAr>
+    <OwnershipType>1</OwnershipType>
+    <CurrentOdometer>94828</CurrentOdometer>
+    <LastOdometerAtUtc>2026-10-11T06:19:00Z</LastOdometerAtUtc>
+    <CurrentOperationalStatus>2</CurrentOperationalStatus>
+    <CurrentAssignmentId>01a0ee10-eb02-7a54-8c16-d2f26f71ab35</CurrentAssignmentId>
+    <Notes>Imported from جميع2 المركبات.xlsx, worksheet row 108.</Notes>
+    <CreatedAtUtc>2026-09-17T10:08:44.6074067Z</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-14T06:20:29.611597Z</UpdatedAtUtc>
+    <UpdatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</UpdatedByUserId>
+    <RowVersion>AAAAAAACbCA=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000003</OperatingCityId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <NormalizedChassisNumber>MD2A21BX4RWE86012</NormalizedChassisNumber>
+    <NormalizedSerialNumber>761032020</NormalizedSerialNumber>
+    <RegistrationType>7</RegistrationType>
+    <SerialNumber>761032020</SerialNumber>
+    <TrackedDistanceKm>94828.00</TrackedDistanceKm>
+    <RegisteredOwnerSponsorId>019c18d5-62e1-7000-8000-000000000041</RegisteredOwnerSponsorId>
+  </Vehicles>
+  <Vehicles>
+    <Id>01a0aed7-0d96-7058-b63a-5cf87063ad34</Id>
+    <AssetNumber>VEH-5CF87063AD34</AssetNumber>
+    <NormalizedAssetNumber>VEH5CF87063AD34</NormalizedAssetNumber>
+    <PlateNumberAr>ه ا 2362</PlateNumberAr>
+    <NormalizedPlateNumberAr>ها2362</NormalizedPlateNumberAr>
+    <PlateNumberEn>H A 2362</PlateNumberEn>
+    <NormalizedPlateNumberEn>HA2362</NormalizedPlateNumberEn>
+    <PlateLettersAr>ه ا</PlateLettersAr>
+    <PlateLettersEn>H A</PlateLettersEn>
+    <PlateDigits>2362</PlateDigits>
+    <ChassisNumber>MD2A21BX4SWG46444</ChassisNumber>
+    <VehicleManufacturerId>01a0aed7-0ca6-708a-8c86-3a7bd30125fd</VehicleManufacturerId>
+    <VehicleModelId>01a0aed7-0ca6-77b8-bacc-594731814438</VehicleModelId>
+    <ModelYear>2025</ModelYear>
+    <VehicleType>1</VehicleType>
+    <FuelType>1</FuelType>
+    <TransmissionType>3</TransmissionType>
+    <ColorAr>اسود</ColorAr>
+    <OwnershipType>1</OwnershipType>
+    <CurrentOdometer>78105</CurrentOdometer>
+    <LastOdometerAtUtc>2026-10-15T20:59:59.9999999Z</LastOdometerAtUtc>
+    <CurrentOperationalStatus>2</CurrentOperationalStatus>
+    <CurrentAssignmentId>01a0e6fc-0391-7a55-8582-550f58fc3830</CurrentAssignmentId>
+    <Notes>Imported from جميع2 المركبات.xlsx, worksheet row 239.</Notes>
+    <CreatedAtUtc>2026-09-17T10:08:44.6074067Z</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-17T07:46:30.1039923Z</UpdatedAtUtc>
+    <UpdatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</UpdatedByUserId>
+    <RowVersion>AAAAAAACuT4=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000003</OperatingCityId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <NormalizedChassisNumber>MD2A21BX4SWG46444</NormalizedChassisNumber>
+    <NormalizedSerialNumber>42642220</NormalizedSerialNumber>
+    <RegistrationType>7</RegistrationType>
+    <SerialNumber>42642220</SerialNumber>
+    <TrackedDistanceKm>78105.00</TrackedDistanceKm>
+    <RegisteredOwnerSponsorId>019c18d5-62e1-7000-8000-000000000041</RegisteredOwnerSponsorId>
+  </Vehicles>
+  <Vehicles>
+    <Id>01a0aed7-0d92-7c35-b46f-7604f87db6fa</Id>
+    <AssetNumber>VEH-7604F87DB6FA</AssetNumber>
+    <NormalizedAssetNumber>VEH7604F87DB6FA</NormalizedAssetNumber>
+    <PlateNumberAr>ر ا 1609</PlateNumberAr>
+    <NormalizedPlateNumberAr>را1609</NormalizedPlateNumberAr>
+    <PlateNumberEn>R A 1609</PlateNumberEn>
+    <NormalizedPlateNumberEn>RA1609</NormalizedPlateNumberEn>
+    <PlateLettersAr>ر ا</PlateLettersAr>
+    <PlateLettersEn>R A</PlateLettersEn>
+    <PlateDigits>1609</PlateDigits>
+    <ChassisNumber>MD2A21BX6RWA44333</ChassisNumber>
+    <VehicleManufacturerId>01a0aed7-0ca7-7163-82dc-b1720a32aa30</VehicleManufacturerId>
+    <VehicleModelId>01a0aed7-0ca7-739c-ae7a-02542093b4b4</VehicleModelId>
+    <ModelYear>2024</ModelYear>
+    <VehicleType>1</VehicleType>
+    <FuelType>1</FuelType>
+    <TransmissionType>3</TransmissionType>
+    <ColorAr>اسود</ColorAr>
+    <OwnershipType>1</OwnershipType>
+    <CurrentOdometer>37295</CurrentOdometer>
+    <LastOdometerAtUtc>2026-10-10T06:27:00Z</LastOdometerAtUtc>
+    <CurrentOperationalStatus>2</CurrentOperationalStatus>
+    <CurrentAssignmentId>01a0e6fc-01a2-706f-a332-7f5df9ddf3c3</CurrentAssignmentId>
+    <Notes>Imported from جميع2 المركبات.xlsx, worksheet row 67.</Notes>
+    <CreatedAtUtc>2026-09-17T10:08:44.6074067Z</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-14T06:28:08.5086945Z</UpdatedAtUtc>
+    <UpdatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</UpdatedByUserId>
+    <RowVersion>AAAAAAACbJ8=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000003</OperatingCityId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <NormalizedChassisNumber>MD2A21BX6RWA44333</NormalizedChassisNumber>
+    <NormalizedSerialNumber>649400120</NormalizedSerialNumber>
+    <RegistrationType>7</RegistrationType>
+    <SerialNumber>649400120</SerialNumber>
+    <TrackedDistanceKm>37295.00</TrackedDistanceKm>
+    <RegisteredOwnerSponsorId>019c18d5-62e1-7000-8000-000000000041</RegisteredOwnerSponsorId>
+  </Vehicles>
+  <Vehicles>
+    <Id>01a0aed7-0d92-77aa-9960-7bc1b0d992f3</Id>
+    <AssetNumber>VEH-7BC1B0D992F3</AssetNumber>
+    <NormalizedAssetNumber>VEH7BC1B0D992F3</NormalizedAssetNumber>
+    <PlateNumberAr>ر ا 1389</PlateNumberAr>
+    <NormalizedPlateNumberAr>را1389</NormalizedPlateNumberAr>
+    <PlateNumberEn>R A 1389</PlateNumberEn>
+    <NormalizedPlateNumberEn>RA1389</NormalizedPlateNumberEn>
+    <PlateLettersAr>ر ا</PlateLettersAr>
+    <PlateLettersEn>R A</PlateLettersEn>
+    <PlateDigits>1389</PlateDigits>
+    <ChassisNumber>MD2A21BXXRWA44254</ChassisNumber>
+    <VehicleManufacturerId>01a0aed7-0ca7-7163-82dc-b1720a32aa30</VehicleManufacturerId>
+    <VehicleModelId>01a0aed7-0ca7-739c-ae7a-02542093b4b4</VehicleModelId>
+    <ModelYear>2024</ModelYear>
+    <VehicleType>1</VehicleType>
+    <FuelType>1</FuelType>
+    <TransmissionType>3</TransmissionType>
+    <ColorAr>اسود</ColorAr>
+    <OwnershipType>1</OwnershipType>
+    <CurrentOdometer>51852</CurrentOdometer>
+    <LastOdometerAtUtc>2026-10-13T07:39:00Z</LastOdometerAtUtc>
+    <CurrentOperationalStatus>2</CurrentOperationalStatus>
+    <CurrentAssignmentId>01a0e6fc-020a-7ce5-bff1-a0d45702bd20</CurrentAssignmentId>
+    <Notes>Imported from جميع2 المركبات.xlsx, worksheet row 60.</Notes>
+    <CreatedAtUtc>2026-09-17T10:08:44.6074067Z</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-14T07:41:06.2831414Z</UpdatedAtUtc>
+    <UpdatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</UpdatedByUserId>
+    <RowVersion>AAAAAAACeDQ=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000003</OperatingCityId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <NormalizedChassisNumber>MD2A21BXXRWA44254</NormalizedChassisNumber>
+    <NormalizedSerialNumber>898679020</NormalizedSerialNumber>
+    <RegistrationType>7</RegistrationType>
+    <SerialNumber>898679020</SerialNumber>
+    <TrackedDistanceKm>51852.00</TrackedDistanceKm>
+    <RegisteredOwnerSponsorId>019c18d5-62e1-7000-8000-000000000041</RegisteredOwnerSponsorId>
+  </Vehicles>
+  <Vehicles>
+    <Id>01a0aed7-0d92-7dc1-9be6-abcf129a3517</Id>
+    <AssetNumber>VEH-ABCF129A3517</AssetNumber>
+    <NormalizedAssetNumber>VEHABCF129A3517</NormalizedAssetNumber>
+    <PlateNumberAr>ه ا 2986</PlateNumberAr>
+    <NormalizedPlateNumberAr>ها2986</NormalizedPlateNumberAr>
+    <PlateNumberEn>H A 2986</PlateNumberEn>
+    <NormalizedPlateNumberEn>HA2986</NormalizedPlateNumberEn>
+    <PlateLettersAr>ه ا</PlateLettersAr>
+    <PlateLettersEn>H A</PlateLettersEn>
+    <PlateDigits>2986</PlateDigits>
+    <ChassisNumber>MD2A21BX6SWG46560</ChassisNumber>
+    <VehicleManufacturerId>01a0aed7-0ca6-708a-8c86-3a7bd30125fd</VehicleManufacturerId>
+    <VehicleModelId>01a0aed7-0ca6-77b8-bacc-594731814438</VehicleModelId>
+    <ModelYear>2025</ModelYear>
+    <VehicleType>1</VehicleType>
+    <FuelType>1</FuelType>
+    <TransmissionType>3</TransmissionType>
+    <ColorAr>اسود</ColorAr>
+    <OwnershipType>1</OwnershipType>
+    <CurrentOdometer>68453</CurrentOdometer>
+    <LastOdometerAtUtc>2026-10-16T20:59:59.9999999Z</LastOdometerAtUtc>
+    <CurrentOperationalStatus>2</CurrentOperationalStatus>
+    <CurrentAssignmentId>01a0e6fc-02c0-76bd-aa1a-9ac1379db5d0</CurrentAssignmentId>
+    <Notes>Imported from جميع2 المركبات.xlsx, worksheet row 71.</Notes>
+    <CreatedAtUtc>2026-09-17T10:08:44.6074067Z</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-17T06:24:34.8836543Z</UpdatedAtUtc>
+    <UpdatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</UpdatedByUserId>
+    <RowVersion>AAAAAAACuHg=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000003</OperatingCityId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <NormalizedChassisNumber>MD2A21BX6SWG46560</NormalizedChassisNumber>
+    <NormalizedSerialNumber>689473220</NormalizedSerialNumber>
+    <RegistrationType>7</RegistrationType>
+    <SerialNumber>689473220</SerialNumber>
+    <TrackedDistanceKm>68453.00</TrackedDistanceKm>
+    <RegisteredOwnerSponsorId>019c18d5-62e1-7000-8000-000000000041</RegisteredOwnerSponsorId>
+  </Vehicles>
+  <Vehicles>
+    <Id>01a0aed7-0d93-7a9b-b640-e19dc339672a</Id>
+    <AssetNumber>VEH-E19DC339672A</AssetNumber>
+    <NormalizedAssetNumber>VEHE19DC339672A</NormalizedAssetNumber>
+    <PlateNumberAr>ه ا 5811</PlateNumberAr>
+    <NormalizedPlateNumberAr>ها5811</NormalizedPlateNumberAr>
+    <PlateNumberEn>H A 5811</PlateNumberEn>
+    <NormalizedPlateNumberEn>HA5811</NormalizedPlateNumberEn>
+    <PlateLettersAr>ه ا</PlateLettersAr>
+    <PlateLettersEn>H A</PlateLettersEn>
+    <PlateDigits>5811</PlateDigits>
+    <ChassisNumber>MD2A21BX9SWG48478</ChassisNumber>
+    <VehicleManufacturerId>01a0aed7-0ca6-708a-8c86-3a7bd30125fd</VehicleManufacturerId>
+    <VehicleModelId>01a0aed7-0ca6-77b8-bacc-594731814438</VehicleModelId>
+    <ModelYear>2025</ModelYear>
+    <VehicleType>1</VehicleType>
+    <FuelType>1</FuelType>
+    <TransmissionType>3</TransmissionType>
+    <ColorAr>احمر</ColorAr>
+    <OwnershipType>1</OwnershipType>
+    <CurrentOdometer>36557</CurrentOdometer>
+    <LastOdometerAtUtc>2026-10-10T06:15:00Z</LastOdometerAtUtc>
+    <CurrentOperationalStatus>2</CurrentOperationalStatus>
+    <CurrentAssignmentId>01a0e6fc-028f-7902-a93b-f50045a5a5f0</CurrentAssignmentId>
+    <Notes>Imported from جميع2 المركبات.xlsx, worksheet row 111.</Notes>
+    <CreatedAtUtc>2026-09-17T10:08:44.6074067Z</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-14T06:15:36.6513968Z</UpdatedAtUtc>
+    <UpdatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</UpdatedByUserId>
+    <RowVersion>AAAAAAACa/U=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000003</OperatingCityId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <NormalizedChassisNumber>MD2A21BX9SWG48478</NormalizedChassisNumber>
+    <NormalizedSerialNumber>219605220</NormalizedSerialNumber>
+    <RegistrationType>7</RegistrationType>
+    <SerialNumber>219605220</SerialNumber>
+    <TrackedDistanceKm>36557.00</TrackedDistanceKm>
+    <RegisteredOwnerSponsorId>019c18d5-62e1-7000-8000-000000000041</RegisteredOwnerSponsorId>
+  </Vehicles>
+  <Vehicles>
+    <Id>01a0aed7-0d95-7801-b0c1-ec872932876e</Id>
+    <AssetNumber>VEH-EC872932876E</AssetNumber>
+    <NormalizedAssetNumber>VEHEC872932876E</NormalizedAssetNumber>
+    <PlateNumberAr>ح ب 1027</PlateNumberAr>
+    <NormalizedPlateNumberAr>حب1027</NormalizedPlateNumberAr>
+    <PlateNumberEn>J B 1027</PlateNumberEn>
+    <NormalizedPlateNumberEn>JB1027</NormalizedPlateNumberEn>
+    <PlateLettersAr>ح ب</PlateLettersAr>
+    <PlateLettersEn>J B</PlateLettersEn>
+    <PlateDigits>1027</PlateDigits>
+    <ChassisNumber>MD2A21BX0RWD44806</ChassisNumber>
+    <VehicleManufacturerId>01a0aed7-0ca6-708a-8c86-3a7bd30125fd</VehicleManufacturerId>
+    <VehicleModelId>01a0aed7-0ca6-77b8-bacc-594731814438</VehicleModelId>
+    <ModelYear>2024</ModelYear>
+    <VehicleType>1</VehicleType>
+    <FuelType>1</FuelType>
+    <TransmissionType>3</TransmissionType>
+    <ColorAr>احمر</ColorAr>
+    <OwnershipType>1</OwnershipType>
+    <CurrentOdometer>90014</CurrentOdometer>
+    <LastOdometerAtUtc>2026-10-15T20:59:59.9999999Z</LastOdometerAtUtc>
+    <CurrentOperationalStatus>2</CurrentOperationalStatus>
+    <CurrentAssignmentId>01a0e6fc-018c-7a91-96b7-25c0571376df</CurrentAssignmentId>
+    <Notes>Imported from جميع2 المركبات.xlsx, worksheet row 229.</Notes>
+    <CreatedAtUtc>2026-09-17T10:08:44.6074067Z</CreatedAtUtc>
+    <UpdatedAtUtc>2026-10-17T08:02:37.4624884Z</UpdatedAtUtc>
+    <UpdatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</UpdatedByUserId>
+    <RowVersion>AAAAAAACuZ4=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <OperatingCityId>019c18d5-62e1-7000-8000-000000000003</OperatingCityId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <NormalizedChassisNumber>MD2A21BX0RWD44806</NormalizedChassisNumber>
+    <NormalizedSerialNumber>825035120</NormalizedSerialNumber>
+    <RegistrationType>7</RegistrationType>
+    <SerialNumber>825035120</SerialNumber>
+    <TrackedDistanceKm>90014.00</TrackedDistanceKm>
+    <RegisteredOwnerSponsorId>019c18d5-62e1-7000-8000-000000000041</RegisteredOwnerSponsorId>
+  </Vehicles>
+  <MaterialUsages>
+    <Id>01a1355d-0851-7d46-b76d-0041091af07b</Id>
+    <InventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</InventoryItemId>
+    <InventoryLocationId>019d77f0-0000-7000-8000-000000000003</InventoryLocationId>
+    <UsageType>2</UsageType>
+    <Direction>1</Direction>
+    <Quantity>1.000</Quantity>
+    <UnitOfMeasure>2</UnitOfMeasure>
+    <TotalCost>8.89</TotalCost>
+    <StockMovementId>01a1355d-0855-71b2-9e4b-b2944afbb5ce</StockMovementId>
+    <StockMovementLineId>01a1355d-0855-7a0d-8fbc-05acead6c68a</StockMovementLineId>
+    <VehicleId>01a0aed7-0d93-7998-94d0-3bcb5e64e6de</VehicleId>
+    <RiderVehicleAssignmentId>01a0ee10-eb02-7a54-8c16-d2f26f71ab35</RiderVehicleAssignmentId>
+    <RiderProfileId>01a0edfd-4bc9-7871-a25a-e7b4562629c0</RiderProfileId>
+    <AttributionStatus>1</AttributionStatus>
+    <UsedAtUtc>2026-10-07T13:03:00Z</UsedAtUtc>
+    <UsedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</UsedByUserId>
+    <CreatedAtUtc>2026-10-13T13:04:11.8651407Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+  </MaterialUsages>
+  <MaterialUsages>
+    <Id>01a1390b-678c-77dd-8bfc-0f9a9e2fa70a</Id>
+    <InventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</InventoryItemId>
+    <InventoryLocationId>019d77f0-0000-7000-8000-000000000003</InventoryLocationId>
+    <UsageType>2</UsageType>
+    <Direction>1</Direction>
+    <Quantity>1.000</Quantity>
+    <UnitOfMeasure>2</UnitOfMeasure>
+    <TotalCost>8.89</TotalCost>
+    <StockMovementId>01a1390b-678f-7d76-bf12-2183d2b5e3b0</StockMovementId>
+    <StockMovementLineId>01a1390b-678f-70b9-b4b2-a7d8972ba47d</StockMovementLineId>
+    <VehicleId>01a0aed7-0d91-7596-b567-2f5e741fedb2</VehicleId>
+    <RiderVehicleAssignmentId>01a0e6fc-0309-7534-8543-77a1d1143230</RiderVehicleAssignmentId>
+    <RiderProfileId>01a09667-03db-72ba-baf0-c849d06eb6ae</RiderProfileId>
+    <AttributionStatus>1</AttributionStatus>
+    <UsedAtUtc>2026-10-10T06:13:00Z</UsedAtUtc>
+    <UsedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</UsedByUserId>
+    <CreatedAtUtc>2026-10-14T06:13:31.1550998Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+  </MaterialUsages>
+  <MaterialUsages>
+    <Id>01a1390d-51c4-70ff-9daa-2abf840aa998</Id>
+    <InventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</InventoryItemId>
+    <InventoryLocationId>019d77f0-0000-7000-8000-000000000003</InventoryLocationId>
+    <UsageType>2</UsageType>
+    <Direction>1</Direction>
+    <Quantity>1.000</Quantity>
+    <UnitOfMeasure>2</UnitOfMeasure>
+    <TotalCost>8.89</TotalCost>
+    <StockMovementId>01a1390d-51c7-7939-a396-4edcde5b59b7</StockMovementId>
+    <StockMovementLineId>01a1390d-51c7-7ddb-b488-5ec2b0b3380e</StockMovementLineId>
+    <VehicleId>01a0aed7-0d93-7a9b-b640-e19dc339672a</VehicleId>
+    <RiderVehicleAssignmentId>01a0e6fc-028f-7902-a93b-f50045a5a5f0</RiderVehicleAssignmentId>
+    <RiderProfileId>01a09667-03c9-776c-a899-2afd38354d4d</RiderProfileId>
+    <AttributionStatus>1</AttributionStatus>
+    <UsedAtUtc>2026-10-10T06:15:00Z</UsedAtUtc>
+    <UsedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</UsedByUserId>
+    <CreatedAtUtc>2026-10-14T06:15:36.6513968Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+  </MaterialUsages>
+  <MaterialUsages>
+    <Id>01a13916-7dda-7b58-89aa-2dc25d4ec9ec</Id>
+    <InventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</InventoryItemId>
+    <InventoryLocationId>019d77f0-0000-7000-8000-000000000003</InventoryLocationId>
+    <UsageType>2</UsageType>
+    <Direction>1</Direction>
+    <Quantity>1.000</Quantity>
+    <UnitOfMeasure>2</UnitOfMeasure>
+    <TotalCost>8.89</TotalCost>
+    <StockMovementId>01a13916-7de3-7e49-858e-7bf26c916301</StockMovementId>
+    <StockMovementLineId>01a13916-7de3-7009-8c83-26c37aa566af</StockMovementLineId>
+    <VehicleId>01a0aed7-0d95-7801-b0c1-ec872932876e</VehicleId>
+    <RiderVehicleAssignmentId>01a0e6fc-018c-7a91-96b7-25c0571376df</RiderVehicleAssignmentId>
+    <RiderProfileId>01a09667-03cc-7a1c-97ec-c8bfc2965977</RiderProfileId>
+    <AttributionStatus>1</AttributionStatus>
+    <UsedAtUtc>2026-10-11T06:24:00Z</UsedAtUtc>
+    <UsedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</UsedByUserId>
+    <CreatedAtUtc>2026-10-14T06:25:37.7698635Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+  </MaterialUsages>
+  <MaterialUsages>
+    <Id>01a13918-cab1-7a44-82c4-344b4deaa9cd</Id>
+    <InventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</InventoryItemId>
+    <InventoryLocationId>019d77f0-0000-7000-8000-000000000003</InventoryLocationId>
+    <UsageType>2</UsageType>
+    <Direction>1</Direction>
+    <Quantity>1.000</Quantity>
+    <UnitOfMeasure>2</UnitOfMeasure>
+    <TotalCost>8.89</TotalCost>
+    <StockMovementId>01a13918-cab6-7f85-963e-4e10289c2b0f</StockMovementId>
+    <StockMovementLineId>01a13918-cab6-707d-862b-0fdcabd8afc9</StockMovementLineId>
+    <VehicleId>01a0aed7-0d92-7c35-b46f-7604f87db6fa</VehicleId>
+    <RiderVehicleAssignmentId>01a0e6fc-01a2-706f-a332-7f5df9ddf3c3</RiderVehicleAssignmentId>
+    <RiderProfileId>01a09667-03d1-7ab8-b452-b2904cc57072</RiderProfileId>
+    <AttributionStatus>1</AttributionStatus>
+    <UsedAtUtc>2026-10-10T06:27:00Z</UsedAtUtc>
+    <UsedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</UsedByUserId>
+    <CreatedAtUtc>2026-10-14T06:28:08.5086945Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+  </MaterialUsages>
+  <MaterialUsages>
+    <Id>01a13911-ca23-7753-9acd-4f41ceeb108e</Id>
+    <InventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</InventoryItemId>
+    <InventoryLocationId>019d77f0-0000-7000-8000-000000000003</InventoryLocationId>
+    <UsageType>2</UsageType>
+    <Direction>1</Direction>
+    <Quantity>1.000</Quantity>
+    <UnitOfMeasure>2</UnitOfMeasure>
+    <TotalCost>8.89</TotalCost>
+    <StockMovementId>01a13911-ca27-75ed-babe-964c8b1964b5</StockMovementId>
+    <StockMovementLineId>01a13911-ca27-7b83-ac9f-b830022e14d7</StockMovementLineId>
+    <VehicleId>01a0aed7-0d93-7998-94d0-3bcb5e64e6de</VehicleId>
+    <RiderVehicleAssignmentId>01a0ee10-eb02-7a54-8c16-d2f26f71ab35</RiderVehicleAssignmentId>
+    <RiderProfileId>01a0edfd-4bc9-7871-a25a-e7b4562629c0</RiderProfileId>
+    <AttributionStatus>1</AttributionStatus>
+    <UsedAtUtc>2026-10-11T06:19:00Z</UsedAtUtc>
+    <UsedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</UsedByUserId>
+    <CreatedAtUtc>2026-10-14T06:20:29.611597Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+  </MaterialUsages>
+  <MaterialUsages>
+    <Id>01a13914-6ffa-7399-9f49-83316711411a</Id>
+    <InventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</InventoryItemId>
+    <InventoryLocationId>019d77f0-0000-7000-8000-000000000003</InventoryLocationId>
+    <UsageType>2</UsageType>
+    <Direction>1</Direction>
+    <Quantity>1.000</Quantity>
+    <UnitOfMeasure>2</UnitOfMeasure>
+    <TotalCost>8.89</TotalCost>
+    <StockMovementId>01a13914-6fff-79ca-8c80-04b075d78f35</StockMovementId>
+    <StockMovementLineId>01a13914-6fff-7e16-81d5-29ca74b438cd</StockMovementLineId>
+    <VehicleId>01a0aed7-0d92-7dc1-9be6-abcf129a3517</VehicleId>
+    <RiderVehicleAssignmentId>01a0e6fc-02c0-76bd-aa1a-9ac1379db5d0</RiderVehicleAssignmentId>
+    <RiderProfileId>01a09667-03d4-7bdb-bac9-4d75597b11f6</RiderProfileId>
+    <AttributionStatus>1</AttributionStatus>
+    <UsedAtUtc>2026-10-11T06:22:00Z</UsedAtUtc>
+    <UsedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</UsedByUserId>
+    <CreatedAtUtc>2026-10-14T06:23:23.1385997Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+  </MaterialUsages>
+  <MaterialUsages>
+    <Id>01a13908-212d-7d20-9973-85b0b3d493c1</Id>
+    <InventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</InventoryItemId>
+    <InventoryLocationId>019d77f0-0000-7000-8000-000000000003</InventoryLocationId>
+    <UsageType>2</UsageType>
+    <Direction>1</Direction>
+    <Quantity>1.000</Quantity>
+    <UnitOfMeasure>2</UnitOfMeasure>
+    <TotalCost>8.89</TotalCost>
+    <StockMovementId>01a13908-2132-7ccd-96e3-4cf23bcda41f</StockMovementId>
+    <StockMovementLineId>01a13908-2132-728d-b61f-7067681613de</StockMovementLineId>
+    <VehicleId>01a0aed7-0d93-706a-8b6c-18d1d94c19bd</VehicleId>
+    <RiderVehicleAssignmentId>01a0e6fc-0278-7c21-8715-ed4a7dda7f66</RiderVehicleAssignmentId>
+    <RiderProfileId>01a09667-03d3-76ba-a292-3e2248efe29f</RiderProfileId>
+    <AttributionStatus>1</AttributionStatus>
+    <UsedAtUtc>2026-10-12T06:08:00Z</UsedAtUtc>
+    <UsedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</UsedByUserId>
+    <CreatedAtUtc>2026-10-14T06:09:56.534658Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+  </MaterialUsages>
+  <MaterialUsages>
+    <Id>01a13914-b9f4-7cbe-a23f-9bade4d0b7ae</Id>
+    <InventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</InventoryItemId>
+    <InventoryLocationId>019d77f0-0000-7000-8000-000000000003</InventoryLocationId>
+    <UsageType>2</UsageType>
+    <Direction>1</Direction>
+    <Quantity>1.000</Quantity>
+    <UnitOfMeasure>2</UnitOfMeasure>
+    <TotalCost>8.89</TotalCost>
+    <StockMovementId>01a13914-b9fb-7686-a0f3-46bceb2e08c0</StockMovementId>
+    <StockMovementLineId>01a13914-b9fb-7622-a09c-fbab7c994658</StockMovementLineId>
+    <VehicleId>01a0aed7-0d96-7058-b63a-5cf87063ad34</VehicleId>
+    <RiderVehicleAssignmentId>01a0e6fc-0391-7a55-8582-550f58fc3830</RiderVehicleAssignmentId>
+    <RiderProfileId>01a09667-03cd-7b53-acd1-0eeefafbf163</RiderProfileId>
+    <AttributionStatus>1</AttributionStatus>
+    <UsedAtUtc>2026-10-11T06:22:00Z</UsedAtUtc>
+    <UsedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</UsedByUserId>
+    <CreatedAtUtc>2026-10-14T06:23:42.0791934Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+  </MaterialUsages>
+  <MaterialUsages>
+    <Id>01a1395b-9754-77bd-afea-a26520d458b3</Id>
+    <InventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</InventoryItemId>
+    <InventoryLocationId>019d77f0-0000-7000-8000-000000000003</InventoryLocationId>
+    <UsageType>2</UsageType>
+    <Direction>1</Direction>
+    <Quantity>1.000</Quantity>
+    <UnitOfMeasure>2</UnitOfMeasure>
+    <TotalCost>8.89</TotalCost>
+    <StockMovementId>01a1395b-975d-73ac-bfd2-63cb139c6fd1</StockMovementId>
+    <StockMovementLineId>01a1395b-975d-7bf4-b789-5bf335ecab87</StockMovementLineId>
+    <VehicleId>01a0aed7-0d92-77aa-9960-7bc1b0d992f3</VehicleId>
+    <RiderVehicleAssignmentId>01a0e6fc-020a-7ce5-bff1-a0d45702bd20</RiderVehicleAssignmentId>
+    <RiderProfileId>01a0bf9d-e098-7490-891d-a8bc64183946</RiderProfileId>
+    <AttributionStatus>1</AttributionStatus>
+    <UsedAtUtc>2026-10-13T07:39:00Z</UsedAtUtc>
+    <UsedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</UsedByUserId>
+    <CreatedAtUtc>2026-10-14T07:41:06.2831414Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+  </MaterialUsages>
+  <CostAllocations>
+    <Id>01a1355d-0856-7f34-9881-282e79d73fcc</Id>
+    <StockMovementLineId>01a1355d-0855-7a0d-8fbc-05acead6c68a</StockMovementLineId>
+    <MaintenanceMaterialUsageId>01a1355d-0851-7d46-b76d-0041091af07b</MaintenanceMaterialUsageId>
+    <StockCostLayerId>01a0e5c1-6952-7db4-8957-0e2b57a02bfa</StockCostLayerId>
+    <AllocatedQuantity>1.000</AllocatedQuantity>
+    <UnitCost>8.894231</UnitCost>
+    <AllocatedCost>8.89</AllocatedCost>
+    <CreatedAtUtc>2026-10-13T13:04:11.8651407Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+  </CostAllocations>
+  <CostAllocations>
+    <Id>01a1390b-6790-75b3-b263-83281a4c5f58</Id>
+    <StockMovementLineId>01a1390b-678f-70b9-b4b2-a7d8972ba47d</StockMovementLineId>
+    <MaintenanceMaterialUsageId>01a1390b-678c-77dd-8bfc-0f9a9e2fa70a</MaintenanceMaterialUsageId>
+    <StockCostLayerId>01a0e5c1-6952-7db4-8957-0e2b57a02bfa</StockCostLayerId>
+    <AllocatedQuantity>1.000</AllocatedQuantity>
+    <UnitCost>8.894231</UnitCost>
+    <AllocatedCost>8.89</AllocatedCost>
+    <CreatedAtUtc>2026-10-14T06:13:31.1550998Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+  </CostAllocations>
+  <CostAllocations>
+    <Id>01a1390d-51c7-7d04-a45a-bf9523f480f8</Id>
+    <StockMovementLineId>01a1390d-51c7-7ddb-b488-5ec2b0b3380e</StockMovementLineId>
+    <MaintenanceMaterialUsageId>01a1390d-51c4-70ff-9daa-2abf840aa998</MaintenanceMaterialUsageId>
+    <StockCostLayerId>01a0e5c1-6952-7db4-8957-0e2b57a02bfa</StockCostLayerId>
+    <AllocatedQuantity>1.000</AllocatedQuantity>
+    <UnitCost>8.894231</UnitCost>
+    <AllocatedCost>8.89</AllocatedCost>
+    <CreatedAtUtc>2026-10-14T06:15:36.6513968Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+  </CostAllocations>
+  <CostAllocations>
+    <Id>01a13916-7de5-79a5-a81d-288230a63aad</Id>
+    <StockMovementLineId>01a13916-7de3-7009-8c83-26c37aa566af</StockMovementLineId>
+    <MaintenanceMaterialUsageId>01a13916-7dda-7b58-89aa-2dc25d4ec9ec</MaintenanceMaterialUsageId>
+    <StockCostLayerId>01a0e5c1-6952-7db4-8957-0e2b57a02bfa</StockCostLayerId>
+    <AllocatedQuantity>1.000</AllocatedQuantity>
+    <UnitCost>8.894231</UnitCost>
+    <AllocatedCost>8.89</AllocatedCost>
+    <CreatedAtUtc>2026-10-14T06:25:37.7698635Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+  </CostAllocations>
+  <CostAllocations>
+    <Id>01a13918-cab7-7d68-bd00-2937668eb76e</Id>
+    <StockMovementLineId>01a13918-cab6-707d-862b-0fdcabd8afc9</StockMovementLineId>
+    <MaintenanceMaterialUsageId>01a13918-cab1-7a44-82c4-344b4deaa9cd</MaintenanceMaterialUsageId>
+    <StockCostLayerId>01a0e5c1-6952-7db4-8957-0e2b57a02bfa</StockCostLayerId>
+    <AllocatedQuantity>1.000</AllocatedQuantity>
+    <UnitCost>8.894231</UnitCost>
+    <AllocatedCost>8.89</AllocatedCost>
+    <CreatedAtUtc>2026-10-14T06:28:08.5086945Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+  </CostAllocations>
+  <CostAllocations>
+    <Id>01a13911-ca28-78c8-9a57-9edffd0f8554</Id>
+    <StockMovementLineId>01a13911-ca27-7b83-ac9f-b830022e14d7</StockMovementLineId>
+    <MaintenanceMaterialUsageId>01a13911-ca23-7753-9acd-4f41ceeb108e</MaintenanceMaterialUsageId>
+    <StockCostLayerId>01a0e5c1-6952-7db4-8957-0e2b57a02bfa</StockCostLayerId>
+    <AllocatedQuantity>1.000</AllocatedQuantity>
+    <UnitCost>8.894231</UnitCost>
+    <AllocatedCost>8.89</AllocatedCost>
+    <CreatedAtUtc>2026-10-14T06:20:29.611597Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+  </CostAllocations>
+  <CostAllocations>
+    <Id>01a13914-7000-7f95-987c-d0b1704a13d9</Id>
+    <StockMovementLineId>01a13914-6fff-7e16-81d5-29ca74b438cd</StockMovementLineId>
+    <MaintenanceMaterialUsageId>01a13914-6ffa-7399-9f49-83316711411a</MaintenanceMaterialUsageId>
+    <StockCostLayerId>01a0e5c1-6952-7db4-8957-0e2b57a02bfa</StockCostLayerId>
+    <AllocatedQuantity>1.000</AllocatedQuantity>
+    <UnitCost>8.894231</UnitCost>
+    <AllocatedCost>8.89</AllocatedCost>
+    <CreatedAtUtc>2026-10-14T06:23:23.1385997Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+  </CostAllocations>
+  <CostAllocations>
+    <Id>01a13908-2133-7f3d-8b97-6b35da899d73</Id>
+    <StockMovementLineId>01a13908-2132-728d-b61f-7067681613de</StockMovementLineId>
+    <MaintenanceMaterialUsageId>01a13908-212d-7d20-9973-85b0b3d493c1</MaintenanceMaterialUsageId>
+    <StockCostLayerId>01a0e5c1-6952-7db4-8957-0e2b57a02bfa</StockCostLayerId>
+    <AllocatedQuantity>1.000</AllocatedQuantity>
+    <UnitCost>8.894231</UnitCost>
+    <AllocatedCost>8.89</AllocatedCost>
+    <CreatedAtUtc>2026-10-14T06:09:56.534658Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+  </CostAllocations>
+  <CostAllocations>
+    <Id>01a13914-b9fc-7eb5-acd7-56ec33a7897e</Id>
+    <StockMovementLineId>01a13914-b9fb-7622-a09c-fbab7c994658</StockMovementLineId>
+    <MaintenanceMaterialUsageId>01a13914-b9f4-7cbe-a23f-9bade4d0b7ae</MaintenanceMaterialUsageId>
+    <StockCostLayerId>01a0e5c1-6952-7db4-8957-0e2b57a02bfa</StockCostLayerId>
+    <AllocatedQuantity>1.000</AllocatedQuantity>
+    <UnitCost>8.894231</UnitCost>
+    <AllocatedCost>8.89</AllocatedCost>
+    <CreatedAtUtc>2026-10-14T06:23:42.0791934Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+  </CostAllocations>
+  <CostAllocations>
+    <Id>01a1395b-975f-763a-9c8a-bcece4b9a766</Id>
+    <StockMovementLineId>01a1395b-975d-7bf4-b789-5bf335ecab87</StockMovementLineId>
+    <MaintenanceMaterialUsageId>01a1395b-9754-77bd-afea-a26520d458b3</MaintenanceMaterialUsageId>
+    <StockCostLayerId>01a0e5c1-6952-7db4-8957-0e2b57a02bfa</StockCostLayerId>
+    <AllocatedQuantity>1.000</AllocatedQuantity>
+    <UnitCost>8.894231</UnitCost>
+    <AllocatedCost>8.89</AllocatedCost>
+    <CreatedAtUtc>2026-10-14T07:41:06.2831414Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+  </CostAllocations>
+  <BarrelAllocations>
+    <Id>01a1390b-678f-7d3c-8fa6-1e8e97a59375</Id>
+    <MaintenanceMaterialUsageId>01a1390b-678c-77dd-8bfc-0f9a9e2fa70a</MaintenanceMaterialUsageId>
+    <OilBarrelId>01a0e5c1-6954-7b9e-83c2-0d5473e2e3a8</OilBarrelId>
+    <QuantityLiters>1.000</QuantityLiters>
+    <Direction>1</Direction>
+    <CreatedAtUtc>2026-10-14T06:13:31.1550998Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+  </BarrelAllocations>
+  <BarrelAllocations>
+    <Id>01a1390d-51c7-7e22-90a5-2f45fdb5c0d8</Id>
+    <MaintenanceMaterialUsageId>01a1390d-51c4-70ff-9daa-2abf840aa998</MaintenanceMaterialUsageId>
+    <OilBarrelId>01a0e5c1-6954-7b9e-83c2-0d5473e2e3a8</OilBarrelId>
+    <QuantityLiters>1.000</QuantityLiters>
+    <Direction>1</Direction>
+    <CreatedAtUtc>2026-10-14T06:15:36.6513968Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+  </BarrelAllocations>
+  <BarrelAllocations>
+    <Id>01a13914-b9fb-75cd-928c-344507b76572</Id>
+    <MaintenanceMaterialUsageId>01a13914-b9f4-7cbe-a23f-9bade4d0b7ae</MaintenanceMaterialUsageId>
+    <OilBarrelId>01a0e5c1-6954-7b9e-83c2-0d5473e2e3a8</OilBarrelId>
+    <QuantityLiters>1.000</QuantityLiters>
+    <Direction>1</Direction>
+    <CreatedAtUtc>2026-10-14T06:23:42.0791934Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+  </BarrelAllocations>
+  <BarrelAllocations>
+    <Id>01a13916-7de3-7aa1-9987-551bfa8aab31</Id>
+    <MaintenanceMaterialUsageId>01a13916-7dda-7b58-89aa-2dc25d4ec9ec</MaintenanceMaterialUsageId>
+    <OilBarrelId>01a0e5c1-6954-7b9e-83c2-0d5473e2e3a8</OilBarrelId>
+    <QuantityLiters>1.000</QuantityLiters>
+    <Direction>1</Direction>
+    <CreatedAtUtc>2026-10-14T06:25:37.7698635Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+  </BarrelAllocations>
+  <BarrelAllocations>
+    <Id>01a1395b-975d-700e-916a-5f958c99fbca</Id>
+    <MaintenanceMaterialUsageId>01a1395b-9754-77bd-afea-a26520d458b3</MaintenanceMaterialUsageId>
+    <OilBarrelId>01a0e5c1-6954-7b9e-83c2-0d5473e2e3a8</OilBarrelId>
+    <QuantityLiters>1.000</QuantityLiters>
+    <Direction>1</Direction>
+    <CreatedAtUtc>2026-10-14T07:41:06.2831414Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+  </BarrelAllocations>
+  <BarrelAllocations>
+    <Id>01a13914-6fff-7f9b-800c-800b1261644a</Id>
+    <MaintenanceMaterialUsageId>01a13914-6ffa-7399-9f49-83316711411a</MaintenanceMaterialUsageId>
+    <OilBarrelId>01a0e5c1-6954-7b9e-83c2-0d5473e2e3a8</OilBarrelId>
+    <QuantityLiters>1.000</QuantityLiters>
+    <Direction>1</Direction>
+    <CreatedAtUtc>2026-10-14T06:23:23.1385997Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+  </BarrelAllocations>
+  <BarrelAllocations>
+    <Id>01a13908-2132-71ff-8a94-a1f54c80540e</Id>
+    <MaintenanceMaterialUsageId>01a13908-212d-7d20-9973-85b0b3d493c1</MaintenanceMaterialUsageId>
+    <OilBarrelId>01a0e5c1-6954-7b9e-83c2-0d5473e2e3a8</OilBarrelId>
+    <QuantityLiters>1.000</QuantityLiters>
+    <Direction>1</Direction>
+    <CreatedAtUtc>2026-10-14T06:09:56.534658Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+  </BarrelAllocations>
+  <BarrelAllocations>
+    <Id>01a1355d-0855-716a-96b5-d22aab3ed17b</Id>
+    <MaintenanceMaterialUsageId>01a1355d-0851-7d46-b76d-0041091af07b</MaintenanceMaterialUsageId>
+    <OilBarrelId>01a0e5c1-6954-7b9e-83c2-0d5473e2e3a8</OilBarrelId>
+    <QuantityLiters>1.000</QuantityLiters>
+    <Direction>1</Direction>
+    <CreatedAtUtc>2026-10-13T13:04:11.8651407Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+  </BarrelAllocations>
+  <BarrelAllocations>
+    <Id>01a13918-cab6-7723-8c61-ec7ecdec8d1e</Id>
+    <MaintenanceMaterialUsageId>01a13918-cab1-7a44-82c4-344b4deaa9cd</MaintenanceMaterialUsageId>
+    <OilBarrelId>01a0e5c1-6954-7b9e-83c2-0d5473e2e3a8</OilBarrelId>
+    <QuantityLiters>1.000</QuantityLiters>
+    <Direction>1</Direction>
+    <CreatedAtUtc>2026-10-14T06:28:08.5086945Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+  </BarrelAllocations>
+  <BarrelAllocations>
+    <Id>01a13911-ca27-785a-918b-ef2907322413</Id>
+    <MaintenanceMaterialUsageId>01a13911-ca23-7753-9acd-4f41ceeb108e</MaintenanceMaterialUsageId>
+    <OilBarrelId>01a0e5c1-6954-7b9e-83c2-0d5473e2e3a8</OilBarrelId>
+    <QuantityLiters>1.000</QuantityLiters>
+    <Direction>1</Direction>
+    <CreatedAtUtc>2026-10-14T06:20:29.611597Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+  </BarrelAllocations>
+  <CostLayers>
+    <Id>01a0e5c1-6952-7db4-8957-0e2b57a02bfa</Id>
+    <InventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</InventoryItemId>
+    <InventoryLocationId>019d77f0-0000-7000-8000-000000000003</InventoryLocationId>
+    <SourceReceiptLineId>01a0e5c1-6952-7992-aaf3-15abb95058c4</SourceReceiptLineId>
+    <SourceMovementLineId>01a0e5c1-6952-7efe-bde0-1a3df5da80b0</SourceMovementLineId>
+    <ReceivedAtUtc>2026-09-28T02:04:11.827Z</ReceivedAtUtc>
+    <OriginalSequence>639261578518270002</OriginalSequence>
+    <OriginalQuantity>832.000</OriginalQuantity>
+    <RemainingQuantity>219.500</RemainingQuantity>
+    <BaseUnitOfMeasure>2</BaseUnitOfMeasure>
+    <UnitCost>8.894231</UnitCost>
+    <OriginalTotalCost>7400.00</OriginalTotalCost>
+    <CreatedAtUtc>2026-09-28T02:04:13.0985065Z</CreatedAtUtc>
+    <CreatedByUserId>b1de8de7-7ad4-4f08-f387-08df1173e0a7</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-15T08:13:25.1187367Z</UpdatedAtUtc>
+    <UpdatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</UpdatedByUserId>
+    <RowVersion>AAAAAAACmbI=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </CostLayers>
+  <Barrels>
+    <Id>01a0e5c1-6954-7b9e-83c2-0d5473e2e3a8</Id>
+    <BarrelNumber>OB-20260928-73E2E3A8</BarrelNumber>
+    <PurchaseReceiptLineId>01a0e5c1-6952-7992-aaf3-15abb95058c4</PurchaseReceiptLineId>
+    <InventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</InventoryItemId>
+    <InventoryLocationId>019d77f0-0000-7000-8000-000000000003</InventoryLocationId>
+    <StockCostLayerId>01a0e5c1-6952-7db4-8957-0e2b57a02bfa</StockCostLayerId>
+    <PackageSequence>1</PackageSequence>
+    <NominalCapacityLiters>208.000</NominalCapacityLiters>
+    <RemainingLiters>11.500</RemainingLiters>
+    <MaximumAllowedLossLiters>4.160</MaximumAllowedLossLiters>
+    <RecordedLossLiters>0.000</RecordedLossLiters>
+    <Status>2</Status>
+    <OpenedAtUtc>2026-10-12T09:48:33.168Z</OpenedAtUtc>
+    <OpenedByUserId>4626b04b-de8e-46ab-7e5b-08df18ba8d67</OpenedByUserId>
+    <CreatedAtUtc>2026-09-28T02:04:13.0985065Z</CreatedAtUtc>
+    <CreatedByUserId>b1de8de7-7ad4-4f08-f387-08df1173e0a7</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-15T08:13:25.1187367Z</UpdatedAtUtc>
+    <UpdatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</UpdatedByUserId>
+    <RowVersion>AAAAAAACmbA=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <UnitCostPerLiter>8.894231</UnitCostPerLiter>
+    <AllowBothVehicleTypes>true</AllowBothVehicleTypes>
+    <RecordedMissingLiters>0.000</RecordedMissingLiters>
+    <OpenCarSlot>1</OpenCarSlot>
+    <OpenMotorcycleSlot>1</OpenMotorcycleSlot>
+  </Barrels>
+  <StockBalances>
+    <Id>01a0e5c1-6978-7ab4-8455-f9f43fc1823c</Id>
+    <InventoryItemId>01a0e5bc-8289-75a3-8b33-c93a95e3b472</InventoryItemId>
+    <InventoryLocationId>019d77f0-0000-7000-8000-000000000003</InventoryLocationId>
+    <QuantityOnHand>1467.500</QuantityOnHand>
+    <QuantityReserved>0.000</QuantityReserved>
+    <ReportingAverageUnitCost>9.030424</ReportingAverageUnitCost>
+    <LastMovementAtUtc>2026-10-10T08:12:00Z</LastMovementAtUtc>
+    <CreatedAtUtc>2026-09-28T02:04:13.0985065Z</CreatedAtUtc>
+    <CreatedByUserId>b1de8de7-7ad4-4f08-f387-08df1173e0a7</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-15T08:13:25.1187367Z</UpdatedAtUtc>
+    <UpdatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</UpdatedByUserId>
+    <RowVersion>AAAAAAACmbE=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </StockBalances>
+  <Expenses>
+    <Id>01a1390d-51c7-7fd9-9e32-0069ad0befb5</Id>
+    <VehicleId>01a0aed7-0d93-7a9b-b640-e19dc339672a</VehicleId>
+    <RiderVehicleAssignmentId>01a0e6fc-028f-7902-a93b-f50045a5a5f0</RiderVehicleAssignmentId>
+    <RiderProfileId>01a09667-03c9-776c-a899-2afd38354d4d</RiderProfileId>
+    <ExpenseType>MaintenanceMaterial</ExpenseType>
+    <SourceEntityType>MaintenanceMaterialUsage</SourceEntityType>
+    <SourceEntityId>01a1390d-51c4-70ff-9daa-2abf840aa998</SourceEntityId>
+    <OccurredOn>2026-10-10T00:00:00+03:00</OccurredOn>
+    <AmountBeforeTax>8.89</AmountBeforeTax>
+    <TaxAmount>0.00</TaxAmount>
+    <TotalAmount>8.89</TotalAmount>
+    <CurrencyCode>SAR</CurrencyCode>
+    <Description>Maintenance material: OIL-10W41</Description>
+    <CreatedAtUtc>2026-10-14T06:15:36.6513968Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+  </Expenses>
+  <Expenses>
+    <Id>01a1355d-0856-7b2a-8c3b-1187419d101a</Id>
+    <VehicleId>01a0aed7-0d93-7998-94d0-3bcb5e64e6de</VehicleId>
+    <RiderVehicleAssignmentId>01a0ee10-eb02-7a54-8c16-d2f26f71ab35</RiderVehicleAssignmentId>
+    <RiderProfileId>01a0edfd-4bc9-7871-a25a-e7b4562629c0</RiderProfileId>
+    <ExpenseType>MaintenanceMaterial</ExpenseType>
+    <SourceEntityType>MaintenanceMaterialUsage</SourceEntityType>
+    <SourceEntityId>01a1355d-0851-7d46-b76d-0041091af07b</SourceEntityId>
+    <OccurredOn>2026-10-07T00:00:00+03:00</OccurredOn>
+    <AmountBeforeTax>8.89</AmountBeforeTax>
+    <TaxAmount>0.00</TaxAmount>
+    <TotalAmount>8.89</TotalAmount>
+    <CurrencyCode>SAR</CurrencyCode>
+    <Description>Maintenance material: OIL-10W41</Description>
+    <CreatedAtUtc>2026-10-13T13:04:11.8651407Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+  </Expenses>
+  <Expenses>
+    <Id>01a1395b-975f-7c42-9c77-32ed4eed53e3</Id>
+    <VehicleId>01a0aed7-0d92-77aa-9960-7bc1b0d992f3</VehicleId>
+    <RiderVehicleAssignmentId>01a0e6fc-020a-7ce5-bff1-a0d45702bd20</RiderVehicleAssignmentId>
+    <RiderProfileId>01a0bf9d-e098-7490-891d-a8bc64183946</RiderProfileId>
+    <ExpenseType>MaintenanceMaterial</ExpenseType>
+    <SourceEntityType>MaintenanceMaterialUsage</SourceEntityType>
+    <SourceEntityId>01a1395b-9754-77bd-afea-a26520d458b3</SourceEntityId>
+    <OccurredOn>2026-10-13T00:00:00+03:00</OccurredOn>
+    <AmountBeforeTax>8.89</AmountBeforeTax>
+    <TaxAmount>0.00</TaxAmount>
+    <TotalAmount>8.89</TotalAmount>
+    <CurrencyCode>SAR</CurrencyCode>
+    <Description>Maintenance material: OIL-10W41</Description>
+    <CreatedAtUtc>2026-10-14T07:41:06.2831414Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+  </Expenses>
+  <Expenses>
+    <Id>01a1390b-6790-78bf-a43d-34f71a120a3d</Id>
+    <VehicleId>01a0aed7-0d91-7596-b567-2f5e741fedb2</VehicleId>
+    <RiderVehicleAssignmentId>01a0e6fc-0309-7534-8543-77a1d1143230</RiderVehicleAssignmentId>
+    <RiderProfileId>01a09667-03db-72ba-baf0-c849d06eb6ae</RiderProfileId>
+    <ExpenseType>MaintenanceMaterial</ExpenseType>
+    <SourceEntityType>MaintenanceMaterialUsage</SourceEntityType>
+    <SourceEntityId>01a1390b-678c-77dd-8bfc-0f9a9e2fa70a</SourceEntityId>
+    <OccurredOn>2026-10-10T00:00:00+03:00</OccurredOn>
+    <AmountBeforeTax>8.89</AmountBeforeTax>
+    <TaxAmount>0.00</TaxAmount>
+    <TotalAmount>8.89</TotalAmount>
+    <CurrencyCode>SAR</CurrencyCode>
+    <Description>Maintenance material: OIL-10W41</Description>
+    <CreatedAtUtc>2026-10-14T06:13:31.1550998Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+  </Expenses>
+  <Expenses>
+    <Id>01a13914-7000-71d6-ae8a-36c08858b043</Id>
+    <VehicleId>01a0aed7-0d92-7dc1-9be6-abcf129a3517</VehicleId>
+    <RiderVehicleAssignmentId>01a0e6fc-02c0-76bd-aa1a-9ac1379db5d0</RiderVehicleAssignmentId>
+    <RiderProfileId>01a09667-03d4-7bdb-bac9-4d75597b11f6</RiderProfileId>
+    <ExpenseType>MaintenanceMaterial</ExpenseType>
+    <SourceEntityType>MaintenanceMaterialUsage</SourceEntityType>
+    <SourceEntityId>01a13914-6ffa-7399-9f49-83316711411a</SourceEntityId>
+    <OccurredOn>2026-10-11T00:00:00+03:00</OccurredOn>
+    <AmountBeforeTax>8.89</AmountBeforeTax>
+    <TaxAmount>0.00</TaxAmount>
+    <TotalAmount>8.89</TotalAmount>
+    <CurrencyCode>SAR</CurrencyCode>
+    <Description>Maintenance material: OIL-10W41</Description>
+    <CreatedAtUtc>2026-10-14T06:23:23.1385997Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+  </Expenses>
+  <Expenses>
+    <Id>01a13908-2133-7677-af4d-5258e8efeb5e</Id>
+    <VehicleId>01a0aed7-0d93-706a-8b6c-18d1d94c19bd</VehicleId>
+    <RiderVehicleAssignmentId>01a0e6fc-0278-7c21-8715-ed4a7dda7f66</RiderVehicleAssignmentId>
+    <RiderProfileId>01a09667-03d3-76ba-a292-3e2248efe29f</RiderProfileId>
+    <ExpenseType>MaintenanceMaterial</ExpenseType>
+    <SourceEntityType>MaintenanceMaterialUsage</SourceEntityType>
+    <SourceEntityId>01a13908-212d-7d20-9973-85b0b3d493c1</SourceEntityId>
+    <OccurredOn>2026-10-12T00:00:00+03:00</OccurredOn>
+    <AmountBeforeTax>8.89</AmountBeforeTax>
+    <TaxAmount>0.00</TaxAmount>
+    <TotalAmount>8.89</TotalAmount>
+    <CurrencyCode>SAR</CurrencyCode>
+    <Description>Maintenance material: OIL-10W41</Description>
+    <CreatedAtUtc>2026-10-14T06:09:56.534658Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+  </Expenses>
+  <Expenses>
+    <Id>01a13914-b9fc-7f53-bcc0-683a24a87bfb</Id>
+    <VehicleId>01a0aed7-0d96-7058-b63a-5cf87063ad34</VehicleId>
+    <RiderVehicleAssignmentId>01a0e6fc-0391-7a55-8582-550f58fc3830</RiderVehicleAssignmentId>
+    <RiderProfileId>01a09667-03cd-7b53-acd1-0eeefafbf163</RiderProfileId>
+    <ExpenseType>MaintenanceMaterial</ExpenseType>
+    <SourceEntityType>MaintenanceMaterialUsage</SourceEntityType>
+    <SourceEntityId>01a13914-b9f4-7cbe-a23f-9bade4d0b7ae</SourceEntityId>
+    <OccurredOn>2026-10-11T00:00:00+03:00</OccurredOn>
+    <AmountBeforeTax>8.89</AmountBeforeTax>
+    <TaxAmount>0.00</TaxAmount>
+    <TotalAmount>8.89</TotalAmount>
+    <CurrencyCode>SAR</CurrencyCode>
+    <Description>Maintenance material: OIL-10W41</Description>
+    <CreatedAtUtc>2026-10-14T06:23:42.0791934Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+  </Expenses>
+  <Expenses>
+    <Id>01a13911-ca28-7867-93f1-8d48180e34ed</Id>
+    <VehicleId>01a0aed7-0d93-7998-94d0-3bcb5e64e6de</VehicleId>
+    <RiderVehicleAssignmentId>01a0ee10-eb02-7a54-8c16-d2f26f71ab35</RiderVehicleAssignmentId>
+    <RiderProfileId>01a0edfd-4bc9-7871-a25a-e7b4562629c0</RiderProfileId>
+    <ExpenseType>MaintenanceMaterial</ExpenseType>
+    <SourceEntityType>MaintenanceMaterialUsage</SourceEntityType>
+    <SourceEntityId>01a13911-ca23-7753-9acd-4f41ceeb108e</SourceEntityId>
+    <OccurredOn>2026-10-11T00:00:00+03:00</OccurredOn>
+    <AmountBeforeTax>8.89</AmountBeforeTax>
+    <TaxAmount>0.00</TaxAmount>
+    <TotalAmount>8.89</TotalAmount>
+    <CurrencyCode>SAR</CurrencyCode>
+    <Description>Maintenance material: OIL-10W41</Description>
+    <CreatedAtUtc>2026-10-14T06:20:29.611597Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+  </Expenses>
+  <Expenses>
+    <Id>01a13916-7de5-785f-ab5b-c5fa688b3f0f</Id>
+    <VehicleId>01a0aed7-0d95-7801-b0c1-ec872932876e</VehicleId>
+    <RiderVehicleAssignmentId>01a0e6fc-018c-7a91-96b7-25c0571376df</RiderVehicleAssignmentId>
+    <RiderProfileId>01a09667-03cc-7a1c-97ec-c8bfc2965977</RiderProfileId>
+    <ExpenseType>MaintenanceMaterial</ExpenseType>
+    <SourceEntityType>MaintenanceMaterialUsage</SourceEntityType>
+    <SourceEntityId>01a13916-7dda-7b58-89aa-2dc25d4ec9ec</SourceEntityId>
+    <OccurredOn>2026-10-11T00:00:00+03:00</OccurredOn>
+    <AmountBeforeTax>8.89</AmountBeforeTax>
+    <TaxAmount>0.00</TaxAmount>
+    <TotalAmount>8.89</TotalAmount>
+    <CurrencyCode>SAR</CurrencyCode>
+    <Description>Maintenance material: OIL-10W41</Description>
+    <CreatedAtUtc>2026-10-14T06:25:37.7698635Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+  </Expenses>
+  <Expenses>
+    <Id>01a13918-cab7-72ba-8f38-f552c706c100</Id>
+    <VehicleId>01a0aed7-0d92-7c35-b46f-7604f87db6fa</VehicleId>
+    <RiderVehicleAssignmentId>01a0e6fc-01a2-706f-a332-7f5df9ddf3c3</RiderVehicleAssignmentId>
+    <RiderProfileId>01a09667-03d1-7ab8-b452-b2904cc57072</RiderProfileId>
+    <ExpenseType>MaintenanceMaterial</ExpenseType>
+    <SourceEntityType>MaintenanceMaterialUsage</SourceEntityType>
+    <SourceEntityId>01a13918-cab1-7a44-82c4-344b4deaa9cd</SourceEntityId>
+    <OccurredOn>2026-10-10T00:00:00+03:00</OccurredOn>
+    <AmountBeforeTax>8.89</AmountBeforeTax>
+    <TaxAmount>0.00</TaxAmount>
+    <TotalAmount>8.89</TotalAmount>
+    <CurrencyCode>SAR</CurrencyCode>
+    <Description>Maintenance material: OIL-10W41</Description>
+    <CreatedAtUtc>2026-10-14T06:28:08.5086945Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+  </Expenses>
+  <OdometerReadings>
+    <Id>01a1390b-6790-78a4-8cb5-11211d6e023d</Id>
+    <VehicleId>01a0aed7-0d91-7596-b567-2f5e741fedb2</VehicleId>
+    <Reading>28926</Reading>
+    <RecordedAtUtc>2026-10-10T06:13:00Z</RecordedAtUtc>
+    <SourceType>6</SourceType>
+    <SourceEntityId>01a1390b-678a-7437-ae40-19289c6a6a87</SourceEntityId>
+    <Notes>Direct oil change</Notes>
+    <IsCorrection>false</IsCorrection>
+    <CreatedAtUtc>2026-10-14T06:13:31.1550998Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+  </OdometerReadings>
+  <OdometerReadings>
+    <Id>01a1355d-0856-75ef-98a2-196fa737c82b</Id>
+    <VehicleId>01a0aed7-0d93-7998-94d0-3bcb5e64e6de</VehicleId>
+    <Reading>93466</Reading>
+    <RecordedAtUtc>2026-10-07T13:03:00Z</RecordedAtUtc>
+    <SourceType>6</SourceType>
+    <SourceEntityId>01a1355d-0850-7c5f-b792-bdb3cb0d57e8</SourceEntityId>
+    <Notes>Direct oil change</Notes>
+    <IsCorrection>false</IsCorrection>
+    <CreatedAtUtc>2026-10-13T13:04:11.8651407Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+  </OdometerReadings>
+  <OdometerReadings>
+    <Id>01a1395b-9760-7280-bd2d-23f8b8f146bf</Id>
+    <VehicleId>01a0aed7-0d92-77aa-9960-7bc1b0d992f3</VehicleId>
+    <Reading>51852</Reading>
+    <RecordedAtUtc>2026-10-13T07:39:00Z</RecordedAtUtc>
+    <SourceType>6</SourceType>
+    <SourceEntityId>01a1395b-974f-79e1-88f4-72de8fefbe6f</SourceEntityId>
+    <Notes>Direct oil change</Notes>
+    <IsCorrection>false</IsCorrection>
+    <CreatedAtUtc>2026-10-14T07:41:06.2831414Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+  </OdometerReadings>
+  <OdometerReadings>
+    <Id>01a13914-7000-75fa-9386-4112cd3c16a0</Id>
+    <VehicleId>01a0aed7-0d92-7dc1-9be6-abcf129a3517</VehicleId>
+    <Reading>67139</Reading>
+    <RecordedAtUtc>2026-10-11T06:22:00Z</RecordedAtUtc>
+    <SourceType>6</SourceType>
+    <SourceEntityId>01a13914-6ff8-765f-8163-1afb003489d7</SourceEntityId>
+    <Notes>Direct oil change</Notes>
+    <IsCorrection>false</IsCorrection>
+    <CreatedAtUtc>2026-10-14T06:23:23.1385997Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+  </OdometerReadings>
+  <OdometerReadings>
+    <Id>01a13911-ca29-7258-b20f-53810b18ba64</Id>
+    <VehicleId>01a0aed7-0d93-7998-94d0-3bcb5e64e6de</VehicleId>
+    <Reading>94828</Reading>
+    <RecordedAtUtc>2026-10-11T06:19:00Z</RecordedAtUtc>
+    <SourceType>6</SourceType>
+    <SourceEntityId>01a13911-ca21-74de-b67a-f53c97746de7</SourceEntityId>
+    <Notes>Direct oil change</Notes>
+    <IsCorrection>false</IsCorrection>
+    <CreatedAtUtc>2026-10-14T06:20:29.611597Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+  </OdometerReadings>
+  <OdometerReadings>
+    <Id>01a1390d-51c8-7b7f-a021-5c63f7d3b2a7</Id>
+    <VehicleId>01a0aed7-0d93-7a9b-b640-e19dc339672a</VehicleId>
+    <Reading>36557</Reading>
+    <RecordedAtUtc>2026-10-10T06:15:00Z</RecordedAtUtc>
+    <SourceType>6</SourceType>
+    <SourceEntityId>01a1390d-51c2-714f-9082-f8b1c812cf3b</SourceEntityId>
+    <Notes>Direct oil change</Notes>
+    <IsCorrection>false</IsCorrection>
+    <CreatedAtUtc>2026-10-14T06:15:36.6513968Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+  </OdometerReadings>
+  <OdometerReadings>
+    <Id>01a13908-2133-7dca-ad5c-82fa4619d38c</Id>
+    <VehicleId>01a0aed7-0d93-706a-8b6c-18d1d94c19bd</VehicleId>
+    <Reading>1339</Reading>
+    <RecordedAtUtc>2026-10-12T06:08:00Z</RecordedAtUtc>
+    <SourceType>6</SourceType>
+    <SourceEntityId>01a13908-2127-78dc-bd33-54bde8581355</SourceEntityId>
+    <Notes>Direct oil change</Notes>
+    <IsCorrection>false</IsCorrection>
+    <CreatedAtUtc>2026-10-14T06:09:56.534658Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+  </OdometerReadings>
+  <OdometerReadings>
+    <Id>01a13914-b9fc-7fde-87c8-8328d363510c</Id>
+    <VehicleId>01a0aed7-0d96-7058-b63a-5cf87063ad34</VehicleId>
+    <Reading>77125</Reading>
+    <RecordedAtUtc>2026-10-11T06:22:00Z</RecordedAtUtc>
+    <SourceType>6</SourceType>
+    <SourceEntityId>01a13914-b9f2-7327-98b4-e21da151462a</SourceEntityId>
+    <Notes>Direct oil change</Notes>
+    <IsCorrection>false</IsCorrection>
+    <CreatedAtUtc>2026-10-14T06:23:42.0791934Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+  </OdometerReadings>
+  <OdometerReadings>
+    <Id>01a13918-cab7-7885-a366-905b8fb8886d</Id>
+    <VehicleId>01a0aed7-0d92-7c35-b46f-7604f87db6fa</VehicleId>
+    <Reading>37295</Reading>
+    <RecordedAtUtc>2026-10-10T06:27:00Z</RecordedAtUtc>
+    <SourceType>6</SourceType>
+    <SourceEntityId>01a13918-caae-7667-9f98-424ca40643b6</SourceEntityId>
+    <Notes>Direct oil change</Notes>
+    <IsCorrection>false</IsCorrection>
+    <CreatedAtUtc>2026-10-14T06:28:08.5086945Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+  </OdometerReadings>
+  <OdometerReadings>
+    <Id>01a13916-7de5-765a-be1f-9cf7aa881c04</Id>
+    <VehicleId>01a0aed7-0d95-7801-b0c1-ec872932876e</VehicleId>
+    <Reading>88639</Reading>
+    <RecordedAtUtc>2026-10-11T06:24:00Z</RecordedAtUtc>
+    <SourceType>6</SourceType>
+    <SourceEntityId>01a13916-7dd7-7854-8834-a4f0c8d9b37a</SourceEntityId>
+    <Notes>Direct oil change</Notes>
+    <IsCorrection>false</IsCorrection>
+    <CreatedAtUtc>2026-10-14T06:25:37.7698635Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+  </OdometerReadings>
+  <OilSchedules>
+    <Id>01a10596-5e3b-75b9-ae5a-2236422407c8</Id>
+    <VehicleId>01a0aed7-0d91-7596-b567-2f5e741fedb2</VehicleId>
+    <MaintenancePlanId>019d77f0-0000-7000-8000-000000000006</MaintenancePlanId>
+    <LastCompletedAtUtc>2026-10-10T06:13:00Z</LastCompletedAtUtc>
+    <LastCompletedOdometer>28926</LastCompletedOdometer>
+    <ReminderFromOdometer>29726</ReminderFromOdometer>
+    <MaximumDueOdometer>29926</MaximumDueOdometer>
+    <ComputedStatus>1</ComputedStatus>
+    <ComputedAtUtc>2026-10-14T06:13:31.1536214Z</ComputedAtUtc>
+    <CreatedAtUtc>2026-10-04T06:25:03.0363718Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-14T06:13:31.1550998Z</UpdatedAtUtc>
+    <UpdatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</UpdatedByUserId>
+    <RowVersion>AAAAAAACa8Y=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </OilSchedules>
+  <OilSchedules>
+    <Id>01a1057a-2010-78ab-8199-275d136cab2f</Id>
+    <VehicleId>01a0aed7-0d93-706a-8b6c-18d1d94c19bd</VehicleId>
+    <MaintenancePlanId>019d77f0-0000-7000-8000-000000000006</MaintenancePlanId>
+    <LastCompletedAtUtc>2026-10-12T06:08:00Z</LastCompletedAtUtc>
+    <LastCompletedOdometer>1339</LastCompletedOdometer>
+    <ReminderFromOdometer>2139</ReminderFromOdometer>
+    <MaximumDueOdometer>2339</MaximumDueOdometer>
+    <ComputedStatus>1</ComputedStatus>
+    <ComputedAtUtc>2026-10-14T06:09:56.5331189Z</ComputedAtUtc>
+    <CreatedAtUtc>2026-10-04T05:54:12.1198147Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-14T06:09:56.534658Z</UpdatedAtUtc>
+    <UpdatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</UpdatedByUserId>
+    <RowVersion>AAAAAAACa4s=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </OilSchedules>
+  <OilSchedules>
+    <Id>01a10597-423f-76ea-8146-3c2d506f6f8f</Id>
+    <VehicleId>01a0aed7-0d95-7801-b0c1-ec872932876e</VehicleId>
+    <MaintenancePlanId>019d77f0-0000-7000-8000-000000000006</MaintenancePlanId>
+    <LastCompletedAtUtc>2026-10-11T06:24:00Z</LastCompletedAtUtc>
+    <LastCompletedOdometer>88639</LastCompletedOdometer>
+    <ReminderFromOdometer>89439</ReminderFromOdometer>
+    <MaximumDueOdometer>89639</MaximumDueOdometer>
+    <ComputedStatus>1</ComputedStatus>
+    <ComputedAtUtc>2026-10-14T06:25:37.7681717Z</ComputedAtUtc>
+    <CreatedAtUtc>2026-10-04T06:26:01.4092243Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-14T06:25:37.7698635Z</UpdatedAtUtc>
+    <UpdatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</UpdatedByUserId>
+    <RowVersion>AAAAAAACbHk=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </OilSchedules>
+  <OilSchedules>
+    <Id>01a1059d-eed3-7ba1-8055-498fa18d6913</Id>
+    <VehicleId>01a0aed7-0d93-7998-94d0-3bcb5e64e6de</VehicleId>
+    <MaintenancePlanId>019d77f0-0000-7000-8000-000000000006</MaintenancePlanId>
+    <LastCompletedAtUtc>2026-10-11T06:19:00Z</LastCompletedAtUtc>
+    <LastCompletedOdometer>94828</LastCompletedOdometer>
+    <ReminderFromOdometer>95628</ReminderFromOdometer>
+    <MaximumDueOdometer>95828</MaximumDueOdometer>
+    <ComputedStatus>1</ComputedStatus>
+    <ComputedAtUtc>2026-10-14T06:20:29.610212Z</ComputedAtUtc>
+    <CreatedAtUtc>2026-10-04T06:33:18.8066109Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-14T06:20:29.611597Z</UpdatedAtUtc>
+    <UpdatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</UpdatedByUserId>
+    <RowVersion>AAAAAAACbB8=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </OilSchedules>
+  <OilSchedules>
+    <Id>01a100aa-bcaf-7090-a76d-72a67ed481ff</Id>
+    <VehicleId>01a0aed7-0d92-7dc1-9be6-abcf129a3517</VehicleId>
+    <MaintenancePlanId>019d77f0-0000-7000-8000-000000000006</MaintenancePlanId>
+    <LastCompletedAtUtc>2026-10-11T06:22:00Z</LastCompletedAtUtc>
+    <LastCompletedOdometer>67139</LastCompletedOdometer>
+    <ReminderFromOdometer>67939</ReminderFromOdometer>
+    <MaximumDueOdometer>68139</MaximumDueOdometer>
+    <ComputedStatus>1</ComputedStatus>
+    <ComputedAtUtc>2026-10-14T06:23:23.1373903Z</ComputedAtUtc>
+    <CreatedAtUtc>2026-10-03T07:29:11.8572352Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-14T06:23:23.1385997Z</UpdatedAtUtc>
+    <UpdatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</UpdatedByUserId>
+    <RowVersion>AAAAAAACbE4=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </OilSchedules>
+  <OilSchedules>
+    <Id>01a0f6e1-6b1e-7829-8936-ba6cf6215e08</Id>
+    <VehicleId>01a0aed7-0d93-7a9b-b640-e19dc339672a</VehicleId>
+    <MaintenancePlanId>019d77f0-0000-7000-8000-000000000006</MaintenancePlanId>
+    <LastCompletedAtUtc>2026-10-10T06:15:00Z</LastCompletedAtUtc>
+    <LastCompletedOdometer>36557</LastCompletedOdometer>
+    <ReminderFromOdometer>37357</ReminderFromOdometer>
+    <MaximumDueOdometer>37557</MaximumDueOdometer>
+    <ComputedStatus>1</ComputedStatus>
+    <ComputedAtUtc>2026-10-14T06:15:36.6501842Z</ComputedAtUtc>
+    <CreatedAtUtc>2026-10-01T09:52:43.2960321Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-14T06:15:36.6513968Z</UpdatedAtUtc>
+    <UpdatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</UpdatedByUserId>
+    <RowVersion>AAAAAAACa/Q=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </OilSchedules>
+  <OilSchedules>
+    <Id>01a1354a-14da-75cf-ac9e-deb9e5bc06c7</Id>
+    <VehicleId>01a0aed7-0d92-7c35-b46f-7604f87db6fa</VehicleId>
+    <MaintenancePlanId>019d77f0-0000-7000-8000-000000000006</MaintenancePlanId>
+    <LastCompletedAtUtc>2026-10-10T06:27:00Z</LastCompletedAtUtc>
+    <LastCompletedOdometer>37295</LastCompletedOdometer>
+    <ReminderFromOdometer>38095</ReminderFromOdometer>
+    <MaximumDueOdometer>38295</MaximumDueOdometer>
+    <ComputedStatus>1</ComputedStatus>
+    <ComputedAtUtc>2026-10-14T06:28:08.5067388Z</ComputedAtUtc>
+    <CreatedAtUtc>2026-10-13T12:43:29.8848863Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-14T06:28:08.5086945Z</UpdatedAtUtc>
+    <UpdatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</UpdatedByUserId>
+    <RowVersion>AAAAAAACbJ4=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </OilSchedules>
+  <OilSchedules>
+    <Id>01a0f6f1-a4aa-72bf-af6f-f4f89ea4a24d</Id>
+    <VehicleId>01a0aed7-0d92-77aa-9960-7bc1b0d992f3</VehicleId>
+    <MaintenancePlanId>019d77f0-0000-7000-8000-000000000006</MaintenancePlanId>
+    <LastCompletedAtUtc>2026-10-13T07:39:00Z</LastCompletedAtUtc>
+    <LastCompletedOdometer>51852</LastCompletedOdometer>
+    <ReminderFromOdometer>52652</ReminderFromOdometer>
+    <MaximumDueOdometer>52852</MaximumDueOdometer>
+    <ComputedStatus>1</ComputedStatus>
+    <ComputedAtUtc>2026-10-14T07:41:06.2794052Z</ComputedAtUtc>
+    <CreatedAtUtc>2026-10-01T10:10:26.6112473Z</CreatedAtUtc>
+    <CreatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-14T07:41:06.2831414Z</UpdatedAtUtc>
+    <UpdatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</UpdatedByUserId>
+    <RowVersion>AAAAAAACeDM=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </OilSchedules>
+  <OilSchedules>
+    <Id>01a10591-8250-7934-8a90-f6a9426e8b28</Id>
+    <VehicleId>01a0aed7-0d96-7058-b63a-5cf87063ad34</VehicleId>
+    <MaintenancePlanId>019d77f0-0000-7000-8000-000000000006</MaintenancePlanId>
+    <LastCompletedAtUtc>2026-10-11T06:22:00Z</LastCompletedAtUtc>
+    <LastCompletedOdometer>77125</LastCompletedOdometer>
+    <ReminderFromOdometer>77925</ReminderFromOdometer>
+    <MaximumDueOdometer>78125</MaximumDueOdometer>
+    <ComputedStatus>1</ComputedStatus>
+    <ComputedAtUtc>2026-10-14T06:23:42.0778809Z</ComputedAtUtc>
+    <CreatedAtUtc>2026-10-04T06:19:44.5939767Z</CreatedAtUtc>
+    <CreatedByUserId>369f989e-c422-44ca-d3fd-08df14b0e9ba</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-14T06:23:42.0791934Z</UpdatedAtUtc>
+    <UpdatedByUserId>99700cbf-96b8-4f56-4516-08df15b421cf</UpdatedByUserId>
+    <RowVersion>AAAAAAACbFc=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </OilSchedules>
+  <DatasetVersions>
+    <Id>01a0ae4c-8a28-7126-a6c3-81c291b99252</Id>
+    <ModuleKey>fleet</ModuleKey>
+    <Version>4855</Version>
+    <LastChangedAtUtc>2026-10-17T12:57:03.5931305Z</LastChangedAtUtc>
+    <CreatedAtUtc>2026-09-17T07:37:26.8251763Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-17T12:57:03.6009103Z</UpdatedAtUtc>
+    <UpdatedByUserId>4626b04b-de8e-46ab-7e5b-08df18ba8d67</UpdatedByUserId>
+    <RowVersion>AAAAAAAC1iY=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </DatasetVersions>
+  <DatasetVersions>
+    <Id>01a0bfd8-77cc-7b92-b895-a662f954e2b8</Id>
+    <ModuleKey>maintenance</ModuleKey>
+    <Version>484</Version>
+    <LastChangedAtUtc>2026-10-17T11:52:26.8876828Z</LastChangedAtUtc>
+    <CreatedAtUtc>2026-09-20T17:23:49.8476368Z</CreatedAtUtc>
+    <CreatedByUserId>b1de8de7-7ad4-4f08-f387-08df1173e0a7</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-17T11:52:26.8876828Z</UpdatedAtUtc>
+    <RowVersion>AAAAAAACwlg=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </DatasetVersions>
+</NewDataSet>

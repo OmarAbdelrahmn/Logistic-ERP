@@ -1,0 +1,430 @@
+{
+  "events": [
+    {
+      "Id": "eab2ed72-3902-4864-b8ab-e451f1a4e318",
+      "RiderClientAssignmentId": "c124ad30-172f-4160-96be-9b70ae01bc52",
+      "FromStatus": 1,
+      "ToStatus": 2,
+      "OccurredAtUtc": "2026-10-13T11:21:51.8811507+00:00",
+      "ActorUserId": "019c18d5-62e1-7000-c000-000000000001",
+      "Reason": "Chefz rider sheet import.",
+      "ChangeSnapshotJson": "{\"SheetRow\":207,\"OwnerIqama\":\"2570298998\",\"RiderIqama\":\"2334140718\",\"FromDate\":\"2026-10-01\"}",
+      "CreatedAtUtc": "2026-10-13T11:21:51.8811507+00:00",
+      "CreatedByUserId": "019c18d5-62e1-7000-c000-000000000001"
+    },
+    {
+      "Id": "01a135c1-ed61-72fb-a9cd-e7cc2dffc0ae",
+      "RiderClientAssignmentId": "c124ad30-172f-4160-96be-9b70ae01bc52",
+      "FromStatus": 2,
+      "ToStatus": 3,
+      "OccurredAtUtc": "2026-10-13T14:54:24.0972900+00:00",
+      "ActorUserId": "b1de8de7-7ad4-4f08-f387-08df1173e0a7",
+      "Reason": "إرجاع الحساب",
+      "ChangeSnapshotJson": "{\"EffectiveTo\":\"2026-10-13\",\"Status\":\"Ended\"}",
+      "CreatedAtUtc": "2026-10-13T14:54:24.1282847+00:00",
+      "CreatedByUserId": "b1de8de7-7ad4-4f08-f387-08df1173e0a7"
+    },
+    {
+      "Id": "01a135c2-b4f4-7faa-a867-0405449e3d30",
+      "RiderClientAssignmentId": "01a135c2-b4f4-79c4-8f04-e36bba44a366",
+      "FromStatus": 1,
+      "ToStatus": 2,
+      "OccurredAtUtc": "2026-10-13T14:55:15.1887373+00:00",
+      "ActorUserId": "b1de8de7-7ad4-4f08-f387-08df1173e0a7",
+      "Reason": "تسليم الحساب للمندوب",
+      "ChangeSnapshotJson": "{\"AccountId\":\"b25a9fa4-7a01-417e-a596-8984be3a7e8a\",\"OwnerRiderProfileId\":\"01a09667-03d2-7d20-a948-eece876f33d3\",\"ActualRiderProfileId\":\"01a1359f-30ae-7aac-bd45-07e9cd66899e\",\"EffectiveFrom\":\"2026-10-13\"}",
+      "CreatedAtUtc": "2026-10-13T14:55:15.2082289+00:00",
+      "CreatedByUserId": "b1de8de7-7ad4-4f08-f387-08df1173e0a7"
+    }
+  ],
+  "versions": [
+    {
+      "Id": "01a1067d-6004-76cb-95fd-715629f6abba",
+      "ModuleKey": "platform-operations",
+      "Version": 47,
+      "LastChangedAtUtc": "2026-10-13T14:55:15.2058091+00:00",
+      "CreatedAtUtc": "2026-10-04T10:37:22.3082810+00:00",
+      "CreatedByUserId": "019c18d5-62e1-7000-c000-000000000001",
+      "UpdatedAtUtc": "2026-10-13T14:55:15.2082289+00:00",
+      "UpdatedByUserId": "b1de8de7-7ad4-4f08-f387-08df1173e0a7",
+      "RowVersion": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        2,
+        101,
+        56
+      ],
+      "IsDeleted": false,
+      "DeletedAtUtc": null,
+      "DeletedByUserId": null,
+      "DeletionReason": null
+    },
+    {
+      "Id": "01a125a7-52ee-7106-8a4e-f95d1cc8724b",
+      "ModuleKey": "chefz",
+      "Version": 11,
+      "LastChangedAtUtc": "2026-10-13T15:01:01.0863109+00:00",
+      "CreatedAtUtc": "2026-10-10T11:51:25.1799442+00:00",
+      "CreatedByUserId": "019c18d5-62e1-7000-c000-000000000001",
+      "UpdatedAtUtc": "2026-10-13T15:01:01.0888740+00:00",
+      "UpdatedByUserId": "b1de8de7-7ad4-4f08-f387-08df1173e0a7",
+      "RowVersion": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        2,
+        101,
+        66
+      ],
+      "IsDeleted": false,
+      "DeletedAtUtc": null,
+      "DeletedByUserId": null,
+      "DeletionReason": null
+    }
+  ],
+  "actors": [
+    {
+      "Id": "019c18d5-62e1-7000-c000-000000000001",
+      "UserName": "Omar"
+    }
+  ],
+  "fks": [
+    {
+      "FKName": "FK_DailyPerformance_PerformanceImports_ImportId",
+      "SourceSchema": "chefz",
+      "SourceTable": "DailyPerformance",
+      "SourceColumn": "ImportId",
+      "TargetSchema": "chefz",
+      "TargetTable": "PerformanceImports"
+    },
+    {
+      "FKName": "FK_WalletSettlements_RiderClientAssignments_RiderClientAssignmentId",
+      "SourceSchema": "chefz",
+      "SourceTable": "WalletSettlements",
+      "SourceColumn": "RiderClientAssignmentId",
+      "TargetSchema": "app",
+      "TargetTable": "RiderClientAssignments"
+    },
+    {
+      "FKName": "FK_DailyPerformance_RiderClientAssignments_RiderClientAssignmentId",
+      "SourceSchema": "chefz",
+      "SourceTable": "DailyPerformance",
+      "SourceColumn": "RiderClientAssignmentId",
+      "TargetSchema": "app",
+      "TargetTable": "RiderClientAssignments"
+    },
+    {
+      "FKName": "FK_JahezAccountHandover_RiderClientAssignments_RiderClientAssignmentId",
+      "SourceSchema": "jahez",
+      "SourceTable": "JahezAccountHandover",
+      "SourceColumn": "RiderClientAssignmentId",
+      "TargetSchema": "app",
+      "TargetTable": "RiderClientAssignments"
+    },
+    {
+      "FKName": "FK_NinjaDailyDeductions_RiderClientAssignments_RiderClientAssignmentId",
+      "SourceSchema": "ninja",
+      "SourceTable": "NinjaDailyDeductions",
+      "SourceColumn": "RiderClientAssignmentId",
+      "TargetSchema": "app",
+      "TargetTable": "RiderClientAssignments"
+    },
+    {
+      "FKName": "FK_RiderAssignmentEvents_RiderClientAssignments_RiderClientAssignmentId",
+      "SourceSchema": "app",
+      "SourceTable": "RiderAssignmentEvents",
+      "SourceColumn": "RiderClientAssignmentId",
+      "TargetSchema": "app",
+      "TargetTable": "RiderClientAssignments"
+    },
+    {
+      "FKName": "FK_NinjaDailyPerformance_RiderClientAssignments_RiderClientAssignmentId",
+      "SourceSchema": "ninja",
+      "SourceTable": "NinjaDailyPerformance",
+      "SourceColumn": "RiderClientAssignmentId",
+      "TargetSchema": "app",
+      "TargetTable": "RiderClientAssignments"
+    }
+  ],
+  "columns": [
+    {
+      "TABLE_SCHEMA": "chefz",
+      "TABLE_NAME": "DailyPerformance",
+      "COLUMN_NAME": "Id",
+      "DATA_TYPE": "uniqueidentifier",
+      "IS_NULLABLE": "NO",
+      "COLUMN_DEFAULT": null
+    },
+    {
+      "TABLE_SCHEMA": "chefz",
+      "TABLE_NAME": "DailyPerformance",
+      "COLUMN_NAME": "PlatformRiderAccountId",
+      "DATA_TYPE": "uniqueidentifier",
+      "IS_NULLABLE": "NO",
+      "COLUMN_DEFAULT": null
+    },
+    {
+      "TABLE_SCHEMA": "chefz",
+      "TABLE_NAME": "DailyPerformance",
+      "COLUMN_NAME": "RiderClientAssignmentId",
+      "DATA_TYPE": "uniqueidentifier",
+      "IS_NULLABLE": "NO",
+      "COLUMN_DEFAULT": null
+    },
+    {
+      "TABLE_SCHEMA": "chefz",
+      "TABLE_NAME": "DailyPerformance",
+      "COLUMN_NAME": "RiderProfileId",
+      "DATA_TYPE": "uniqueidentifier",
+      "IS_NULLABLE": "NO",
+      "COLUMN_DEFAULT": null
+    },
+    {
+      "TABLE_SCHEMA": "chefz",
+      "TABLE_NAME": "DailyPerformance",
+      "COLUMN_NAME": "ImportId",
+      "DATA_TYPE": "uniqueidentifier",
+      "IS_NULLABLE": "NO",
+      "COLUMN_DEFAULT": null
+    },
+    {
+      "TABLE_SCHEMA": "chefz",
+      "TABLE_NAME": "DailyPerformance",
+      "COLUMN_NAME": "ReportDate",
+      "DATA_TYPE": "date",
+      "IS_NULLABLE": "NO",
+      "COLUMN_DEFAULT": null
+    },
+    {
+      "TABLE_SCHEMA": "chefz",
+      "TABLE_NAME": "DailyPerformance",
+      "COLUMN_NAME": "ReportIdNumber",
+      "DATA_TYPE": "nvarchar",
+      "IS_NULLABLE": "NO",
+      "COLUMN_DEFAULT": null
+    },
+    {
+      "TABLE_SCHEMA": "chefz",
+      "TABLE_NAME": "DailyPerformance",
+      "COLUMN_NAME": "SourceRowNumber",
+      "DATA_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_DEFAULT": null
+    },
+    {
+      "TABLE_SCHEMA": "chefz",
+      "TABLE_NAME": "DailyPerformance",
+      "COLUMN_NAME": "TotalValidOffers",
+      "DATA_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_DEFAULT": null
+    },
+    {
+      "TABLE_SCHEMA": "chefz",
+      "TABLE_NAME": "DailyPerformance",
+      "COLUMN_NAME": "AcceptedOffers",
+      "DATA_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_DEFAULT": null
+    },
+    {
+      "TABLE_SCHEMA": "chefz",
+      "TABLE_NAME": "DailyPerformance",
+      "COLUMN_NAME": "DeclinedOffers",
+      "DATA_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_DEFAULT": null
+    },
+    {
+      "TABLE_SCHEMA": "chefz",
+      "TABLE_NAME": "DailyPerformance",
+      "COLUMN_NAME": "MissedOffers",
+      "DATA_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_DEFAULT": null
+    },
+    {
+      "TABLE_SCHEMA": "chefz",
+      "TABLE_NAME": "DailyPerformance",
+      "COLUMN_NAME": "AcceptanceRate",
+      "DATA_TYPE": "decimal",
+      "IS_NULLABLE": "NO",
+      "COLUMN_DEFAULT": null
+    },
+    {
+      "TABLE_SCHEMA": "chefz",
+      "TABLE_NAME": "DailyPerformance",
+      "COLUMN_NAME": "CreatedAtUtc",
+      "DATA_TYPE": "datetimeoffset",
+      "IS_NULLABLE": "NO",
+      "COLUMN_DEFAULT": null
+    },
+    {
+      "TABLE_SCHEMA": "chefz",
+      "TABLE_NAME": "DailyPerformance",
+      "COLUMN_NAME": "CreatedByUserId",
+      "DATA_TYPE": "uniqueidentifier",
+      "IS_NULLABLE": "YES",
+      "COLUMN_DEFAULT": null
+    },
+    {
+      "TABLE_SCHEMA": "chefz",
+      "TABLE_NAME": "PerformanceImports",
+      "COLUMN_NAME": "Id",
+      "DATA_TYPE": "uniqueidentifier",
+      "IS_NULLABLE": "NO",
+      "COLUMN_DEFAULT": null
+    },
+    {
+      "TABLE_SCHEMA": "chefz",
+      "TABLE_NAME": "PerformanceImports",
+      "COLUMN_NAME": "ReportDate",
+      "DATA_TYPE": "date",
+      "IS_NULLABLE": "NO",
+      "COLUMN_DEFAULT": null
+    },
+    {
+      "TABLE_SCHEMA": "chefz",
+      "TABLE_NAME": "PerformanceImports",
+      "COLUMN_NAME": "FileName",
+      "DATA_TYPE": "nvarchar",
+      "IS_NULLABLE": "NO",
+      "COLUMN_DEFAULT": null
+    },
+    {
+      "TABLE_SCHEMA": "chefz",
+      "TABLE_NAME": "PerformanceImports",
+      "COLUMN_NAME": "ContentHash",
+      "DATA_TYPE": "nvarchar",
+      "IS_NULLABLE": "NO",
+      "COLUMN_DEFAULT": null
+    },
+    {
+      "TABLE_SCHEMA": "chefz",
+      "TABLE_NAME": "PerformanceImports",
+      "COLUMN_NAME": "ImportedRows",
+      "DATA_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_DEFAULT": null
+    },
+    {
+      "TABLE_SCHEMA": "chefz",
+      "TABLE_NAME": "PerformanceImports",
+      "COLUMN_NAME": "SkippedRows",
+      "DATA_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_DEFAULT": null
+    },
+    {
+      "TABLE_SCHEMA": "chefz",
+      "TABLE_NAME": "PerformanceImports",
+      "COLUMN_NAME": "CreatedAtUtc",
+      "DATA_TYPE": "datetimeoffset",
+      "IS_NULLABLE": "NO",
+      "COLUMN_DEFAULT": null
+    },
+    {
+      "TABLE_SCHEMA": "chefz",
+      "TABLE_NAME": "PerformanceImports",
+      "COLUMN_NAME": "CreatedByUserId",
+      "DATA_TYPE": "uniqueidentifier",
+      "IS_NULLABLE": "YES",
+      "COLUMN_DEFAULT": null
+    }
+  ],
+  "counts": [
+    {
+      "Kind": "DailyPerformance",
+      "N": 149
+    },
+    {
+      "Kind": "PerformanceImports",
+      "N": 1
+    },
+    {
+      "Kind": "WalletSettlements",
+      "N": 0
+    }
+  ],
+  "assignments": [
+    {
+      "Id": "c124ad30-172f-4160-96be-9b70ae01bc52",
+      "RiderProfileId": "01a0bf9d-e09f-74e8-b278-eb8db94a8297",
+      "ClientContractId": "01a125e8-4d17-73bf-9df8-9c76851c76ef",
+      "PlatformRiderAccountId": "b25a9fa4-7a01-417e-a596-8984be3a7e8a",
+      "EffectiveFrom": "2026-10-01T00:00:00.0000000",
+      "EffectiveTo": "2026-10-13T00:00:00.0000000",
+      "Status": 3,
+      "StartReason": "Chefz rider sheet import matched by owner and user iqama.",
+      "EndReason": "إرجاع الحساب",
+      "OperationalAgreementReference": null,
+      "OperationalAgreementNotes": null,
+      "AssignedByUserId": "019c18d5-62e1-7000-c000-000000000001",
+      "EndedByUserId": "b1de8de7-7ad4-4f08-f387-08df1173e0a7",
+      "WasBackdated": true,
+      "BackdatedReason": "Sheet handover date supplied by user.",
+      "CreatedAtUtc": "2026-10-13T11:21:51.8811507+00:00",
+      "CreatedByUserId": "019c18d5-62e1-7000-c000-000000000001",
+      "UpdatedAtUtc": "2026-10-13T14:54:24.1282847+00:00",
+      "UpdatedByUserId": "b1de8de7-7ad4-4f08-f387-08df1173e0a7",
+      "RowVersion": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        2,
+        101,
+        55
+      ],
+      "IsDeleted": false,
+      "DeletedAtUtc": null,
+      "DeletedByUserId": null,
+      "DeletionReason": null,
+      "PaymentModel": 1,
+      "RiderAccountSlot": 1
+    },
+    {
+      "Id": "01a135c2-b4f4-79c4-8f04-e36bba44a366",
+      "RiderProfileId": "01a1359f-30ae-7aac-bd45-07e9cd66899e",
+      "ClientContractId": "01a125e8-4d17-73bf-9df8-9c76851c76ef",
+      "PlatformRiderAccountId": "b25a9fa4-7a01-417e-a596-8984be3a7e8a",
+      "EffectiveFrom": "2026-10-13T00:00:00.0000000",
+      "EffectiveTo": null,
+      "Status": 2,
+      "StartReason": "تسليم الحساب للمندوب",
+      "EndReason": null,
+      "OperationalAgreementReference": null,
+      "OperationalAgreementNotes": null,
+      "AssignedByUserId": "b1de8de7-7ad4-4f08-f387-08df1173e0a7",
+      "EndedByUserId": null,
+      "WasBackdated": false,
+      "BackdatedReason": null,
+      "CreatedAtUtc": "2026-10-13T14:55:15.2082289+00:00",
+      "CreatedByUserId": "b1de8de7-7ad4-4f08-f387-08df1173e0a7",
+      "UpdatedAtUtc": null,
+      "UpdatedByUserId": null,
+      "RowVersion": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        2,
+        101,
+        59
+      ],
+      "IsDeleted": false,
+      "DeletedAtUtc": null,
+      "DeletedByUserId": null,
+      "DeletionReason": null,
+      "PaymentModel": 1,
+      "RiderAccountSlot": 1
+    }
+  ]
+}

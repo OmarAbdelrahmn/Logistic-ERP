@@ -1,0 +1,110 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="Code" type="xs:string" minOccurs="0" />
+                <xs:element name="NameAr" type="xs:string" minOccurs="0" />
+                <xs:element name="NameEn" type="xs:string" minOccurs="0" />
+                <xs:element name="DescriptionAr" type="xs:string" minOccurs="0" />
+                <xs:element name="DescriptionEn" type="xs:string" minOccurs="0" />
+                <xs:element name="LogoAssetKey" type="xs:string" minOccurs="0" />
+                <xs:element name="Status" type="xs:int" minOccurs="0" />
+                <xs:element name="Notes" type="xs:string" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="UpdatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="UpdatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RowVersion" type="xs:base64Binary" minOccurs="0" />
+                <xs:element name="IsDeleted" type="xs:boolean" minOccurs="0" />
+                <xs:element name="DeletedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="DeletedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DeletionReason" type="xs:string" minOccurs="0" />
+                <xs:element name="SupportedPaymentModels" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <Id>01a02a0d-845d-7535-ac25-1e1f0c8e5808</Id>
+    <Code>SHIFTZ</Code>
+    <NameAr>شفز</NameAr>
+    <NameEn>Shiftz</NameEn>
+    <Status>1</Status>
+    <Notes>Created by the HR Excel import.</Notes>
+    <CreatedAtUtc>2026-08-22T15:18:49.3852253Z</CreatedAtUtc>
+    <UpdatedAtUtc>2026-08-25T11:47:59.2735725Z</UpdatedAtUtc>
+    <RowVersion>AAAAAAAAC0Y=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <SupportedPaymentModels>1</SupportedPaymentModels>
+  </Table>
+  <Table>
+    <Id>01a02a0d-845c-7e0b-aa0c-3cd6246785d2</Id>
+    <Code>JAHEZ</Code>
+    <NameAr>جاهز</NameAr>
+    <NameEn>Jahez</NameEn>
+    <Status>1</Status>
+    <Notes>Created by the HR Excel import.</Notes>
+    <CreatedAtUtc>2026-08-22T15:18:49.3852253Z</CreatedAtUtc>
+    <RowVersion>AAAAAAAAC0c=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <SupportedPaymentModels>1</SupportedPaymentModels>
+  </Table>
+  <Table>
+    <Id>01a02a0d-845c-7c77-881f-5286903b7311</Id>
+    <Code>HUNGER</Code>
+    <NameAr>هنقرستيشن</NameAr>
+    <NameEn>HungerStation</NameEn>
+    <Status>1</Status>
+    <Notes>Created by the HR Excel import.</Notes>
+    <CreatedAtUtc>2026-08-22T15:18:49.3852253Z</CreatedAtUtc>
+    <RowVersion>AAAAAAAAC0g=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <SupportedPaymentModels>3</SupportedPaymentModels>
+  </Table>
+  <Table>
+    <Id>01a02a0d-845d-7bd6-b829-84caf8badc7f</Id>
+    <Code>NINJA</Code>
+    <NameAr>نينجا</NameAr>
+    <NameEn>Ninja</NameEn>
+    <Status>1</Status>
+    <Notes>Created by the HR Excel import.</Notes>
+    <CreatedAtUtc>2026-08-22T15:18:49.3852253Z</CreatedAtUtc>
+    <RowVersion>AAAAAAAAC0k=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <SupportedPaymentModels>3</SupportedPaymentModels>
+  </Table>
+  <Table>
+    <Id>01a02a0d-845c-7c44-bb8e-9fdf4d1aec2b</Id>
+    <Code>AMAZON</Code>
+    <NameAr>أمازون</NameAr>
+    <NameEn>Amazon</NameEn>
+    <Status>1</Status>
+    <Notes>Created by the HR Excel import.</Notes>
+    <CreatedAtUtc>2026-08-22T15:18:49.3852253Z</CreatedAtUtc>
+    <UpdatedAtUtc>2026-08-25T11:47:52.6413745Z</UpdatedAtUtc>
+    <RowVersion>AAAAAAAAC0o=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <SupportedPaymentModels>2</SupportedPaymentModels>
+  </Table>
+  <Table>
+    <Id>01a02a0d-83f6-77a0-9165-e430b588044d</Id>
+    <Code>KEETA</Code>
+    <NameAr>كيتا</NameAr>
+    <NameEn>Keeta</NameEn>
+    <Status>1</Status>
+    <Notes>Created by the HR Excel import.</Notes>
+    <CreatedAtUtc>2026-08-22T15:18:49.3852253Z</CreatedAtUtc>
+    <RowVersion>AAAAAAAAC0s=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <SupportedPaymentModels>3</SupportedPaymentModels>
+  </Table>
+</NewDataSet>
