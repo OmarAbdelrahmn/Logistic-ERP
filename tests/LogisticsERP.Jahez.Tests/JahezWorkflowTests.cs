@@ -59,18 +59,27 @@ public sealed partial class JahezWorkflowTests
         public Guid RiderId { get; private set; }
         public Guid OtherRiderId { get; private set; }
 
-        public static async Task<Fixture> Create(bool sql = false)
+        public static async Task<Fixture> Create(bool sql = false, bool createCurrentSchema = false)
         {
             var ct = TestContext.Current.CancellationToken;
             var name = $"LogisticsJahezTest_{Guid.NewGuid():N}";
             var user = new MutableUser(); var clock = new MutableClock { UtcNow = At(6, 23).ToUniversalTime() };
             var builder = new DbContextOptionsBuilder<ApplicationDbContext>();
-            if (sql) builder.UseSqlServer($"Server=(localdb)\\mssqllocaldb;Database={name};Trusted_Connection=True;TrustServerCertificate=True",
-                o => o.MigrationsHistoryTable("__ApplicationMigrationsHistory", "migration"));
+            if (sql)
+            {
+                var testConnection = new Microsoft.Data.SqlClient.SqlConnectionStringBuilder(
+                    Environment.GetEnvironmentVariable("LOGISTICS_JAHEZ_SQL_TEST_CONNECTION")
+                    ?? "Server=(localdb)\\mssqllocaldb;Trusted_Connection=True;TrustServerCertificate=True");
+                // Never migrate/drop the database named in an environment-provided connection string.
+                testConnection.InitialCatalog = name;
+                builder.UseSqlServer(testConnection.ConnectionString,
+                    o => o.MigrationsHistoryTable("__ApplicationMigrationsHistory", "migration"));
+            }
             else builder.UseInMemoryDatabase(name, o => o.EnableNullChecks(false));
             builder.AddInterceptors(new ApplicationPersistenceInterceptor(user, clock));
             var f = new Fixture(new ApplicationDbContext(builder.Options, clock), user, new TestPermissions(), clock, sql);
-            if (sql) { await f.Db.Database.MigrateAsync(ct); Assert.False(f.Db.Database.HasPendingModelChanges()); }
+            if (sql && createCurrentSchema) await f.Db.Database.EnsureCreatedAsync(ct);
+            else if (sql) { await f.Db.Database.MigrateAsync(ct); Assert.False(f.Db.Database.HasPendingModelChanges()); }
             else await f.Db.Database.EnsureCreatedAsync(ct);
             var platform = await f.Db.ClientPlatforms.SingleOrDefaultAsync(x => x.Code == "JAHEZ", ct);
             if (platform is null) { platform = new ClientPlatform { Code = "JAHEZ", NameAr = "جاهز", NameEn = "Jahez", SupportedPaymentModels = SupportedPlatformPaymentModels.PayPerOrder }; f.Db.Add(platform); }

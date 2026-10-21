@@ -61,13 +61,13 @@ internal sealed partial class NinjaService
             join a in accounts on p.PlatformRiderAccountId equals a.Id
             where p.ReportDate >= dateFrom && p.ReportDate <= dateTo && (accountId == null || p.PlatformRiderAccountId == accountId)
                 && (riderId == null || p.RiderProfileId == riderId)
-            select new ReportFact { Date = p.ReportDate, AccountId = p.PlatformRiderAccountId, RiderId = p.RiderProfileId,
+            select new ReportFact { Date = p.ReportDate, AccountId = p.PlatformRiderAccountId, RiderId = p.RiderProfileId, SourceId = p.SourceId == Guid.Empty ? p.Id : p.SourceId,
                 PerformanceRecords = 1, DeductionRecords = 0, Orders = (long)p.TotalOrders, Hours = p.TotalWorkingHours, Collected = 0m, Deductions = 0m };
         var deductions = from p in db.NinjaDailyDeductions.AsNoTracking()
             join a in accounts on p.PlatformRiderAccountId equals a.Id
             where p.ReportDate >= dateFrom && p.ReportDate <= dateTo && (accountId == null || p.PlatformRiderAccountId == accountId)
                 && (riderId == null || p.RiderProfileId == riderId)
-            select new ReportFact { Date = p.ReportDate, AccountId = p.PlatformRiderAccountId, RiderId = p.RiderProfileId,
+            select new ReportFact { Date = p.ReportDate, AccountId = p.PlatformRiderAccountId, RiderId = p.RiderProfileId, SourceId = p.SourceId == Guid.Empty ? p.Id : p.SourceId,
                 PerformanceRecords = 0, DeductionRecords = 1, Orders = 0L, Hours = 0m, Collected = p.TotalCollectedAmountAtDelivery, Deductions = p.TotalDeductions };
         // UNION ALL keeps both independent observations, avoiding a many-to-many join that multiplies totals.
         return Result.Success(performance.Concat(deductions));
@@ -78,7 +78,8 @@ internal sealed partial class NinjaService
         facts.GroupBy(f => new { Date = daily ? f.Date : DateOnly.MinValue, RiderId = riders ? f.RiderId : Guid.Empty,
             Bucket = f.PerformanceRecords + f.DeductionRecords })
             .Select(g => new ReportGroup { Date = g.Key.Date, RiderId = g.Key.RiderId,
-                PerformanceRecords = g.Sum(f => f.PerformanceRecords), DeductionRecords = g.Sum(f => f.DeductionRecords),
+                PerformanceRecords = g.Where(f => f.PerformanceRecords == 1).Select(f => f.SourceId).Distinct().Count(),
+                DeductionRecords = g.Where(f => f.DeductionRecords == 1).Select(f => f.SourceId).Distinct().Count(),
                 Orders = g.Sum(f => f.Orders), Hours = g.Sum(f => f.Hours), Collected = g.Sum(f => f.Collected), Deductions = g.Sum(f => f.Deductions),
                 PerformanceDays = g.Where(f => f.PerformanceRecords == 1).Select(f => f.Date).Distinct().Count(),
                 DeductionDays = g.Where(f => f.DeductionRecords == 1).Select(f => f.Date).Distinct().Count(),
@@ -89,6 +90,7 @@ internal sealed partial class NinjaService
 
     private sealed class ReportFact
     {
+        public Guid SourceId { get; init; }
         public DateOnly Date { get; init; }
         public Guid AccountId { get; init; }
         public Guid RiderId { get; init; }

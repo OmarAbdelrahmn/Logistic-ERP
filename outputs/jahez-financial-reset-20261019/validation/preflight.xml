@@ -1,0 +1,180 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="SchemaName" type="xs:string" minOccurs="0" />
+                <xs:element name="TableName" type="xs:string" minOccurs="0" />
+                <xs:element name="Records" type="xs:long" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="IsActive" type="xs:boolean" minOccurs="0" />
+                <xs:element name="ActivatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="NextHandoverNumber" type="xs:long" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table2">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Requests" type="xs:int" minOccurs="0" />
+                <xs:element name="LinksToRemovedOperations" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <SchemaName>jahez_v2</SchemaName>
+    <TableName>AccountFees</TableName>
+    <Records>15</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v2</SchemaName>
+    <TableName>AccountingEntries</TableName>
+    <Records>142</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v2</SchemaName>
+    <TableName>AccountSessions</TableName>
+    <Records>313</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v2</SchemaName>
+    <TableName>CashboxHandoverMovements</TableName>
+    <Records>26</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v2</SchemaName>
+    <TableName>CashboxHandovers</TableName>
+    <Records>2</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v2</SchemaName>
+    <TableName>CommandReceipts</TableName>
+    <Records>180</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v2</SchemaName>
+    <TableName>CommissionPolicies</TableName>
+    <Records>0</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v2</SchemaName>
+    <TableName>DailyOrders</TableName>
+    <Records>146</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v2</SchemaName>
+    <TableName>EarningsStatements</TableName>
+    <Records>0</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v2</SchemaName>
+    <TableName>ImportBatches</TableName>
+    <Records>12</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v2</SchemaName>
+    <TableName>ImportFiles</TableName>
+    <Records>12</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v2</SchemaName>
+    <TableName>ImportRows</TableName>
+    <Records>6548</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v2</SchemaName>
+    <TableName>MoneyMovements</TableName>
+    <Records>54</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v2</SchemaName>
+    <TableName>Operations</TableName>
+    <Records>60</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v2</SchemaName>
+    <TableName>PlatformTransactions</TableName>
+    <Records>0</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v2</SchemaName>
+    <TableName>RequestDecisions</TableName>
+    <Records>2</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v2</SchemaName>
+    <TableName>Requests</TableName>
+    <Records>3</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v2</SchemaName>
+    <TableName>SettlementReminders</TableName>
+    <Records>0</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v2</SchemaName>
+    <TableName>TransferredDebts</TableName>
+    <Records>2</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v3</SchemaName>
+    <TableName>BalanceVerifications</TableName>
+    <Records>0</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v3</SchemaName>
+    <TableName>HandoverLines</TableName>
+    <Records>10</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v3</SchemaName>
+    <TableName>HandoverPostings</TableName>
+    <Records>26</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v3</SchemaName>
+    <TableName>Ownership</TableName>
+    <Records>130</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v3</SchemaName>
+    <TableName>PetroEvidence</TableName>
+    <Records>0</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v3</SchemaName>
+    <TableName>Postings</TableName>
+    <Records>60</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v3</SchemaName>
+    <TableName>State</TableName>
+    <Records>1</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v3</SchemaName>
+    <TableName>TreasurySubAccounts</TableName>
+    <Records>23</Records>
+  </Table>
+  <Table1>
+    <IsActive>false</IsActive>
+    <NextHandoverNumber>1</NextHandoverNumber>
+  </Table1>
+  <Table2>
+    <Requests>3</Requests>
+    <LinksToRemovedOperations>3</LinksToRemovedOperations>
+  </Table2>
+</NewDataSet>

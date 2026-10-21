@@ -1,0 +1,236 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="SchemaName" type="xs:string" minOccurs="0" />
+                <xs:element name="TableName" type="xs:string" minOccurs="0" />
+                <xs:element name="Records" type="xs:long" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="OccurredAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="Action" type="xs:string" minOccurs="0" />
+                <xs:element name="BeforeJson" type="xs:string" minOccurs="0" />
+                <xs:element name="AfterJson" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table2">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="EnabledTreasuryProtections" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table3">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="NonzeroFinancialAccounts" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table4">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="RetiredKeys" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table5">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Requests" type="xs:int" minOccurs="0" />
+                <xs:element name="RemainingOperationLinks" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table6">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="EarliestCommissionStart" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="PreservedSessions" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table7">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="IsActive" type="xs:boolean" minOccurs="0" />
+                <xs:element name="ActivatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <SchemaName>jahez_v2</SchemaName>
+    <TableName>AccountFees</TableName>
+    <Records>0</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v2</SchemaName>
+    <TableName>AccountingEntries</TableName>
+    <Records>0</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v2</SchemaName>
+    <TableName>AccountSessions</TableName>
+    <Records>313</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v2</SchemaName>
+    <TableName>CashboxHandoverMovements</TableName>
+    <Records>0</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v2</SchemaName>
+    <TableName>CashboxHandovers</TableName>
+    <Records>0</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v2</SchemaName>
+    <TableName>CommandReceipts</TableName>
+    <Records>187</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v2</SchemaName>
+    <TableName>CommissionPolicies</TableName>
+    <Records>0</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v2</SchemaName>
+    <TableName>DailyOrders</TableName>
+    <Records>146</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v2</SchemaName>
+    <TableName>EarningsStatements</TableName>
+    <Records>0</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v2</SchemaName>
+    <TableName>ImportBatches</TableName>
+    <Records>12</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v2</SchemaName>
+    <TableName>ImportFiles</TableName>
+    <Records>12</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v2</SchemaName>
+    <TableName>ImportRows</TableName>
+    <Records>6548</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v2</SchemaName>
+    <TableName>MoneyMovements</TableName>
+    <Records>0</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v2</SchemaName>
+    <TableName>Operations</TableName>
+    <Records>0</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v2</SchemaName>
+    <TableName>PlatformTransactions</TableName>
+    <Records>0</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v2</SchemaName>
+    <TableName>RequestDecisions</TableName>
+    <Records>2</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v2</SchemaName>
+    <TableName>Requests</TableName>
+    <Records>3</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v2</SchemaName>
+    <TableName>SettlementReminders</TableName>
+    <Records>0</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v2</SchemaName>
+    <TableName>TransferredDebts</TableName>
+    <Records>0</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v3</SchemaName>
+    <TableName>BalanceVerifications</TableName>
+    <Records>0</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v3</SchemaName>
+    <TableName>HandoverLines</TableName>
+    <Records>0</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v3</SchemaName>
+    <TableName>HandoverPostings</TableName>
+    <Records>0</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v3</SchemaName>
+    <TableName>Ownership</TableName>
+    <Records>0</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v3</SchemaName>
+    <TableName>PetroEvidence</TableName>
+    <Records>0</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v3</SchemaName>
+    <TableName>Postings</TableName>
+    <Records>0</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v3</SchemaName>
+    <TableName>State</TableName>
+    <Records>1</Records>
+  </Table>
+  <Table>
+    <SchemaName>jahez_v3</SchemaName>
+    <TableName>TreasurySubAccounts</TableName>
+    <Records>23</Records>
+  </Table>
+  <Table1>
+    <OccurredAtUtc>2026-10-19T13:16:19.3434526Z</OccurredAtUtc>
+    <Action>JahezFinancialFreshStart</Action>
+    <BeforeJson>[{"Schema":"jahez_v2","Table":"AccountFees","Rows":15},{"Schema":"jahez_v2","Table":"AccountingEntries","Rows":142},{"Schema":"jahez_v2","Table":"AccountSessions","Rows":313},{"Schema":"jahez_v2","Table":"CashboxHandoverMovements","Rows":26},{"Schema":"jahez_v2","Table":"CashboxHandovers","Rows":2},{"Schema":"jahez_v2","Table":"CommandReceipts","Rows":183},{"Schema":"jahez_v2","Table":"CommissionPolicies","Rows":0},{"Schema":"jahez_v2","Table":"DailyOrders","Rows":146},{"Schema":"jahez_v2","Table":"EarningsStatements","Rows":0},{"Schema":"jahez_v2","Table":"ImportBatches","Rows":12},{"Schema":"jahez_v2","Table":"ImportFiles","Rows":12},{"Schema":"jahez_v2","Table":"ImportRows","Rows":6548},{"Schema":"jahez_v2","Table":"MoneyMovements","Rows":54},{"Schema":"jahez_v2","Table":"Operations","Rows":60},{"Schema":"jahez_v2","Table":"PlatformTransactions","Rows":0},{"Schema":"jahez_v2","Table":"RequestDecisions","Rows":2},{"Schema":"jahez_v2","Table":"Requests","Rows":3},{"Schema":"jahez_v2","Table":"SettlementReminders","Rows":0},{"Schema":"jahez_v2","Table":"TransferredDebts","Rows":2},{"Schema":"jahez_v3","Table":"BalanceVerifications","Rows":0},{"Schema":"jahez_v3","Table":"HandoverLines","Rows":10},{"Schema":"jahez_v3","Table":"HandoverPostings","Rows":26},{"Schema":"jahez_v3","Table":"Ownership","Rows":130},{"Schema":"jahez_v3","Table":"PetroEvidence","Rows":0},{"Schema":"jahez_v3","Table":"Postings","Rows":60},{"Schema":"jahez_v3","Table":"State","Rows":1},{"Schema":"jahez_v3","Table":"TreasurySubAccounts","Rows":23}]</BeforeJson>
+    <AfterJson>{"ResetThroughRiyadhDate":"2026-10-19","CommissionResumesOn":"2026-10-20","OrdersPreserved":true,"ImportsPreserved":true,"RequestsPreserved":true,"AccountAndAssignmentIdentitiesPreserved":true,"TreasuryActivated":false,"ArchivedRequestOperationLinks":[{"Id":"01A14F25-DDBF-778B-8FBB-212C87A8FC2B","OperationId":"01A14F10-2C0E-7406-9D3F-6068BB523670"},{"Id":"01A14F23-F1DC-7629-B4D9-2E4C1CD48479","OperationId":"01A14F23-CDB1-7C4F-878C-008B1E253C18"},{"Id":"01A14EB0-EB73-73F8-9284-56A936381181","OperationId":"01A14E94-839D-7B17-A42A-A8AE2C9D6130"}]}</AfterJson>
+  </Table1>
+  <Table2>
+    <EnabledTreasuryProtections>8</EnabledTreasuryProtections>
+  </Table2>
+  <Table3>
+    <NonzeroFinancialAccounts>0</NonzeroFinancialAccounts>
+  </Table3>
+  <Table4>
+    <RetiredKeys>127</RetiredKeys>
+  </Table4>
+  <Table5>
+    <Requests>3</Requests>
+    <RemainingOperationLinks>0</RemainingOperationLinks>
+  </Table5>
+  <Table6>
+    <EarliestCommissionStart>2026-10-20T00:00:00+03:00</EarliestCommissionStart>
+    <PreservedSessions>313</PreservedSessions>
+  </Table6>
+  <Table7>
+    <IsActive>false</IsActive>
+  </Table7>
+</NewDataSet>

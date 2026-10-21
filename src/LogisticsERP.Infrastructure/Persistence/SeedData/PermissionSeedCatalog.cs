@@ -285,6 +285,8 @@ internal static class PermissionSeedCatalog
         Create(303, PermissionKeys.Maintenance.CustomerLaborChargesRead, "Maintenance", "عرض مصنعية العميل", "Read customer labor charges", "عرض مصنعية العميل ضمن النطاق المصرح به.", "Read customer labor charges within the authorized scope.", sensitive: true),
         Create(304, PermissionKeys.Maintenance.MechanicLaborPaymentsRead, "Maintenance", "عرض أجرة الميكانيكي", "Read mechanic labor payments", "عرض أجرة الميكانيكي ضمن النطاق المصرح به.", "Read mechanic labor payments within the authorized scope.", sensitive: true),
         Create(305, PermissionKeys.Inventory.ReturnsRead, "Inventory", "عرض مرتجعات المورد", "Read supplier returns", "عرض مرتجعات المورد ضمن النطاق المصرح به.", "Read supplier returns within the authorized scope.", sensitive: true),
+    .. LogisticsERP.Application.Features.Jahez.JahezTreasuryPermissions.All.Select((key, i) =>
+        Create(750 + i, key, "Jahez", new[] { "عرض الخزينة", "إنشاء حساب خزينة", "تحديث حساب خزينة", "إنشاء تحويل خزينة", "إنشاء قبض وصرف مركزي", "إنشاء دليل بترو آب", "تسوية وترحيل الخزينة", "عرض التقارير المالية", "تصدير التقارير المالية" }[i], key, key, key, clientScope: true, sensitive: true, highTrust: true)),
     .. LogisticsERP.Application.Features.Jahez.JahezWorkflowPermissions.All.Select((key, i) =>
         Create(700 + i, key, "Jahez", WorkflowName(i), key, WorkflowName(i), key,
             clientScope: true, sensitive: true, highTrust: key.EndsWith(".approve", StringComparison.Ordinal)))

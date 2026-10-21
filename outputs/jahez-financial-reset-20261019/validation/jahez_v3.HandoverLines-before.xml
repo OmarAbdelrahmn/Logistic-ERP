@@ -1,0 +1,159 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="AccountCode" type="xs:string" minOccurs="0" />
+                <xs:element name="AccountNameAr" type="xs:string" minOccurs="0" />
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="HandoverId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="SubAccountId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="SponsorId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="SponsorNameAr" type="xs:string" minOccurs="0" />
+                <xs:element name="SponsorIdentifier" type="xs:string" minOccurs="0" />
+                <xs:element name="Amount" type="xs:decimal" minOccurs="0" />
+                <xs:element name="MovementCount" type="xs:int" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <AccountCode>SUP.BW.FEE</AccountCode>
+    <AccountNameAr>عهدة رسوم البوابا</AccountNameAr>
+    <Id>80ad29cf-491c-48d0-93ee-2496cb284e44</Id>
+    <HandoverId>01a14e19-0bb9-7e2c-a2d7-c70a19e63075</HandoverId>
+    <SubAccountId>019d0000-0000-7000-8000-000000000017</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <SponsorNameAr>البوابا الموكبلا</SponsorNameAr>
+    <SponsorIdentifier>7015658094</SponsorIdentifier>
+    <Amount>200.00</Amount>
+    <MovementCount>1</MovementCount>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <AccountCode>PETRO.EX</AccountCode>
+    <AccountNameAr>بترو آب إكسبرس</AccountNameAr>
+    <Id>628c42e4-9359-4f1a-8140-3613b2fe8341</Id>
+    <HandoverId>01a1533f-8443-7c37-a3a1-c695860e36d4</HandoverId>
+    <SubAccountId>019d0000-0000-7000-8000-000000000027</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <SponsorNameAr>اكسبرس جايت</SponsorNameAr>
+    <SponsorIdentifier>7034861059</SponsorIdentifier>
+    <Amount>69.99</Amount>
+    <MovementCount>1</MovementCount>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <AccountCode>SUP.EX.SET</AccountCode>
+    <AccountNameAr>عهدة تصفيات إكسبرس</AccountNameAr>
+    <Id>6af9e213-f397-4599-a07b-6c3491bcde41</Id>
+    <HandoverId>01a1533f-8443-7c37-a3a1-c695860e36d4</HandoverId>
+    <SubAccountId>019d0000-0000-7000-8000-000000000022</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <SponsorNameAr>اكسبرس جايت</SponsorNameAr>
+    <SponsorIdentifier>7034861059</SponsorIdentifier>
+    <Amount>135.94</Amount>
+    <MovementCount>1</MovementCount>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <AccountCode>BANK.TR</AccountCode>
+    <AccountNameAr>بنك التجارية</AccountNameAr>
+    <Id>d0d889de-e21f-40a1-bf23-7affe19fb810</Id>
+    <HandoverId>01a1533f-8443-7c37-a3a1-c695860e36d4</HandoverId>
+    <SubAccountId>019d0000-0000-7000-8000-000000000031</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000040</SponsorId>
+    <SponsorNameAr>البوابة المقبلة للتجارة</SponsorNameAr>
+    <SponsorIdentifier>7038745530</SponsorIdentifier>
+    <Amount>-535.93</Amount>
+    <MovementCount>1</MovementCount>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <AccountCode>BANK.EX</AccountCode>
+    <AccountNameAr>بنك إكسبرس</AccountNameAr>
+    <Id>002f60c3-963d-4b94-a963-8fbd3b5e9b0f</Id>
+    <HandoverId>01a1533f-8443-7c37-a3a1-c695860e36d4</HandoverId>
+    <SubAccountId>019d0000-0000-7000-8000-000000000026</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <SponsorNameAr>اكسبرس جايت</SponsorNameAr>
+    <SponsorIdentifier>7034861059</SponsorIdentifier>
+    <Amount>-5398.98</Amount>
+    <MovementCount>9</MovementCount>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <AccountCode>BANK.BW</AccountCode>
+    <AccountNameAr>بنك البوابا</AccountNameAr>
+    <Id>bbf47f77-a6c4-460c-8646-c7a4c333810e</Id>
+    <HandoverId>01a1533f-8443-7c37-a3a1-c695860e36d4</HandoverId>
+    <SubAccountId>019d0000-0000-7000-8000-000000000020</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <SponsorNameAr>البوابا الموكبلا</SponsorNameAr>
+    <SponsorIdentifier>7015658094</SponsorIdentifier>
+    <Amount>-2285.32</Amount>
+    <MovementCount>8</MovementCount>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <AccountCode>SUP.EX.FEE</AccountCode>
+    <AccountNameAr>عهدة رسوم إكسبرس</AccountNameAr>
+    <Id>a661c814-f790-4c23-9747-dd977d27ccd9</Id>
+    <HandoverId>01a1533f-8443-7c37-a3a1-c695860e36d4</HandoverId>
+    <SubAccountId>019d0000-0000-7000-8000-000000000023</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <SponsorNameAr>اكسبرس جايت</SponsorNameAr>
+    <SponsorIdentifier>7034861059</SponsorIdentifier>
+    <Amount>200.00</Amount>
+    <MovementCount>1</MovementCount>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <AccountCode>BANK.BW</AccountCode>
+    <AccountNameAr>بنك البوابا</AccountNameAr>
+    <Id>2d411f4d-d5b5-4cea-a4a8-e821cb5c319c</Id>
+    <HandoverId>01a14e19-0bb9-7e2c-a2d7-c70a19e63075</HandoverId>
+    <SubAccountId>019d0000-0000-7000-8000-000000000020</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <SponsorNameAr>البوابا الموكبلا</SponsorNameAr>
+    <SponsorIdentifier>7015658094</SponsorIdentifier>
+    <Amount>-629.46</Amount>
+    <MovementCount>2</MovementCount>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <AccountCode>SUP.BW.SET</AccountCode>
+    <AccountNameAr>عهدة تصفيات البوابا</AccountNameAr>
+    <Id>eba80b2e-d57b-4007-aa06-f6a92118f038</Id>
+    <HandoverId>01a14e19-0bb9-7e2c-a2d7-c70a19e63075</HandoverId>
+    <SubAccountId>019d0000-0000-7000-8000-000000000016</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <SponsorNameAr>البوابا الموكبلا</SponsorNameAr>
+    <SponsorIdentifier>7015658094</SponsorIdentifier>
+    <Amount>120.96</Amount>
+    <MovementCount>1</MovementCount>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <AccountCode>SUP.EX.FEE</AccountCode>
+    <AccountNameAr>عهدة رسوم إكسبرس</AccountNameAr>
+    <Id>1fc68d21-fcfb-4085-b823-f89140f81abe</Id>
+    <HandoverId>01a14e19-0bb9-7e2c-a2d7-c70a19e63075</HandoverId>
+    <SubAccountId>019d0000-0000-7000-8000-000000000023</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <SponsorNameAr>اكسبرس جايت</SponsorNameAr>
+    <SponsorIdentifier>7034861059</SponsorIdentifier>
+    <Amount>200.00</Amount>
+    <MovementCount>1</MovementCount>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+</NewDataSet>

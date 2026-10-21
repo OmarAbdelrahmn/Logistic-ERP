@@ -1,0 +1,18 @@
+{
+  "Applied": true,
+  "ValidationRolledBack": false,
+  "VerifiedAtUtc": "2026-10-20T06:48:05.0741770Z",
+  "CorrelationId": "jahez-restore-pre-reset-dates-20261020",
+  "ArchiveSource": "outputs/jahez-financial-reset-20261019/applied/jahez_v2.AccountSessions-before.xml",
+  "ArchiveSha256": "48B90DCBD05F511074FB1D4BFF68771710CD64B720CC3480895CB30B3C60E772",
+  "MatchedArchivedSessions": 313,
+  "ChangedSessions": 309,
+  "AlreadyMatchingArchivedSessions": 4,
+  "RestoredLastSettlementDates": 307,
+  "RestoredLastCommissionDates": 307,
+  "OriginallyWithoutSettlementDates": 6,
+  "PreservedNewSessions": 1,
+  "ProtectedTablesVerified": 29,
+  "FinancialTransactionsRestored": 0,
+  "PostReconnectDateDifferences": 0
+}

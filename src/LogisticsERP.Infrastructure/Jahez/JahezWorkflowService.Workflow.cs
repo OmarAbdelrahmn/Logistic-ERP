@@ -8,6 +8,8 @@ using LogisticsERP.Domain.Entities.System;
 using LogisticsERP.Domain.Enums;
 using LogisticsERP.Domain.Jahez;
 using Microsoft.EntityFrameworkCore;
+using LogisticsERP.Application.Features.Hr;
+using LogisticsERP.Infrastructure.Hr;
 
 namespace LogisticsERP.Infrastructure.Jahez;
 
@@ -16,14 +18,17 @@ internal sealed partial class JahezWorkflowService
     private static void WorkflowMoney(decimal value, bool nonnegative = false) => Require(
         Math.Abs(value) <= 1_000_000_000m && (!nonnegative || value >= 0), JahezErrors.Invalid("المبلغ خارج الحدود المسموحة."));
 
-    private async Task<JahezOperationPreview> WorkflowPreview(JahezOperationCreate r, CancellationToken ct)
+    private async Task<JahezOperationPreview> WorkflowPreview(JahezOperationCreate r, CancellationToken ct, DateOnly? commissionStartDate = null)
     {
         Reason(r.Reason);
+        Require(PlatformAccountDayAllocationService.Valid(r.DayUsage), JahezErrors.Invalid("Invalid day usage figures."));
+        Require(r.Mode != JahezOperationMode.Settle || r.DayUsage is null, JahezErrors.Invalid("Day usage belongs to withdrawal operations."));
         Require(Enum.IsDefined(r.Mode) && Enum.IsDefined(r.Purpose), JahezErrors.Invalid("نوع العملية أو غرض الحركة غير صالح."));
         WorkflowMoney(r.Net);
         Require(r.PaymentReference is null || r.PaymentReference.Length <= 500, JahezErrors.Invalid("مرجع الحركة طويل."));
         var h = await Handover(r.HandoverId, ct);
-        await Account(h.PlatformRiderAccountId, ct);
+        var previewAccount = await Account(h.PlatformRiderAccountId, ct);
+        var previewSponsor = await db.Sponsors.AsNoTracking().SingleOrDefaultAsync(x => x.Id == previewAccount.SponsorId, ct);
         Require(r.EffectiveAtUtc >= h.StartedAtUtc && r.EffectiveAtUtc <= Now, JahezErrors.Invalid("تاريخ العملية خارج الفترة المسموحة."));
         var end = h.EndedAtUtc.HasValue ? JahezRules.RiyadhDate(h.EndedAtUtc.Value) : Today;
         Require(r.ThroughDate >= JahezRules.RiyadhDate(h.StartedAtUtc) && r.ThroughDate <= end,
@@ -37,7 +42,8 @@ internal sealed partial class JahezWorkflowService
         if (r.Mode == JahezOperationMode.Withdraw)
         {
             Require(r.Net == 0 && !r.TransferToRider && r.Fund is null, JahezErrors.Invalid("السحب دون تصفية لا يقبل قيماً مالية."));
-            return new(0, 0, 0, JahezMoneyDirection.None, [], true, true, [], "[]");
+            return new(0, 0, 0, JahezMoneyDirection.None, [], true, true, [], "[]")
+            { SponsorId = previewSponsor?.Id, SponsorIdentifier = previewSponsor?.EmployerIdentityNumber, SponsorNameAr = previewSponsor?.RegistryNameAr };
         }
         Require(r.Purpose is JahezMoneyPurpose.Settlement or JahezMoneyPurpose.Fuel, JahezErrors.Invalid("اختر تصفية أو تحصيل بنزين."));
         var last = await db.Set<JahezOperation>().Where(x => x.HandoverId == h.Id && x.Status == JahezOperationStatus.Executed
@@ -45,7 +51,13 @@ internal sealed partial class JahezWorkflowService
         Require(!last.HasValue || r.ThroughDate > last.Value, JahezErrors.Conflict("هذه الفترة مصفاة بالفعل."));
         Require(!h.CommissionPostedThrough.HasValue || r.ThroughDate >= h.CommissionPostedThrough,
             JahezErrors.Conflict("تاريخ التصفية يسبق عمولة مرحلة."));
-        var calculation = await Commission(h, r.ThroughDate, ct);
+        if (commissionStartDate.HasValue)
+        {
+            await ValidateCommissionStart(h, commissionStartDate.Value, r.ThroughDate, null, ct);
+            Require(!h.CommissionPostedThrough.HasValue || commissionStartDate.Value > h.CommissionPostedThrough.Value,
+                JahezErrors.Conflict("بداية التصفية الجاهزة يجب أن تلي آخر عمولة مرحلة."));
+        }
+        var calculation = await Commission(h, r.ThroughDate, ct, commissionStartDate);
         // Only commission uses its own ledger. Informational platform debt and fees are never read here.
         var unpaid = await BucketBalance(h.Id, JahezLedgerBucket.Commission, r.ThroughDate, ct);
         var commission = JahezRules.Money(Math.Max(0, unpaid + calculation.Amount));
@@ -57,7 +69,8 @@ internal sealed partial class JahezWorkflowService
         var funds = r.TransferToRider ? [] : Enum.GetValues<JahezMoneyFund>().Where(x => JahezSettlementRules.Allows(x, direction, r.Purpose)).ToArray();
         return new(net, commission, remaining, direction, funds, r.Mode == JahezOperationMode.SettleAndWithdraw,
             calculation.Problems.Count == 0, calculation.Problems,
-            JsonSerializer.Serialize(new { Accrual = JsonSerializer.Deserialize<JsonElement>(calculation.Evidence), UnpaidCommission = unpaid }));
+            JsonSerializer.Serialize(new { Accrual = JsonSerializer.Deserialize<JsonElement>(calculation.Evidence), UnpaidCommission = unpaid }))
+        { SponsorId = previewSponsor?.Id, SponsorIdentifier = previewSponsor?.EmployerIdentityNumber, SponsorNameAr = previewSponsor?.RegistryNameAr };
     }
 
     public Task<Result<JahezOperationPreview>> PreviewOperationAsync(JahezOperationCreate request, CancellationToken ct = default) =>
@@ -68,6 +81,8 @@ internal sealed partial class JahezWorkflowService
         {
             if (request.Mode == JahezOperationMode.SettleAndWithdraw) await AuthorizeAsync(JahezWorkflowPermissions.Withdraw, ct);
             var preview = await WorkflowPreview(request, ct);
+            if (!request.TransferToRider && preview.Remaining != 0)
+                ValidateMoneyReference(request.PaymentReference);
             Require(!await db.Set<JahezOperation>().AnyAsync(x => x.HandoverId == request.HandoverId && x.ExecutedAtUtc == null, ct),
                 JahezErrors.Conflict("توجد عملية غير منفذة لهذه الفترة؛ استخدمها أو اطلب تعديلها."));
             var operation = new JahezOperation
@@ -76,6 +91,7 @@ internal sealed partial class JahezWorkflowService
                 EffectiveAtUtc = request.EffectiveAtUtc.ToUniversalTime(), Net = preview.Net, Commission = preview.Commission,
                 CalculatedCommission = preview.Commission, Remaining = preview.Remaining, CalculationJson = preview.CalculationJson,
                 Fund = request.Fund, Purpose = request.Purpose, TransferToRider = request.TransferToRider,
+                DayUsageJson = request.DayUsage is null ? null : JsonSerializer.Serialize(request.DayUsage),
                 PaymentReference = request.PaymentReference, Reason = request.Reason
             };
             db.Add(operation);
@@ -83,7 +99,8 @@ internal sealed partial class JahezWorkflowService
         }, ct);
 
     private static JahezOperationCreate OperationInput(JahezOperation o) => new(o.HandoverId, o.Mode, o.ThroughDate,
-        o.EffectiveAtUtc, o.Net, o.Reason, o.Fund, o.Purpose, o.TransferToRider, o.PaymentReference);
+        o.EffectiveAtUtc, o.Net, o.Reason, o.Fund, o.Purpose, o.TransferToRider, o.PaymentReference,
+        o.DayUsageJson is null ? null : JsonSerializer.Deserialize<PlatformAccountDayUsageInput>(o.DayUsageJson));
 
     public async Task<Result<JahezOperation>> ExecuteOperationAsync(string key, Guid id, CancellationToken ct = default)
     {
@@ -121,11 +138,14 @@ internal sealed partial class JahezWorkflowService
                 JahezErrors.Conflict("العملية ليست جاهزة أو تغيرت؛ أعد تحميلها."));
             Require(o.HandoverId == request.Values.HandoverId, JahezErrors.Invalid("لا يمكن نقل العملية إلى فترة أخرى."));
             if (request.Values.Mode != JahezOperationMode.Settle) await AuthorizeAsync(JahezWorkflowPermissions.Withdraw, ct);
-            var p = await WorkflowPreview(request.Values, ct);
+            var p = await WorkflowPreview(request.Values, ct, o.CommissionStartDate);
+            if (!request.Values.TransferToRider && p.Remaining != 0)
+                ValidateMoneyReference(request.Values.PaymentReference);
             o.Mode = request.Values.Mode; o.ThroughDate = request.Values.ThroughDate; o.EffectiveAtUtc = request.Values.EffectiveAtUtc.ToUniversalTime();
             o.Net = p.Net; o.Commission = p.Commission; o.CalculatedCommission = p.Commission; o.Remaining = p.Remaining;
             o.CalculationJson = p.CalculationJson; o.Fund = request.Values.Fund; o.Purpose = request.Values.Purpose;
             o.TransferToRider = request.Values.TransferToRider; o.PaymentReference = request.Values.PaymentReference;
+            o.DayUsageJson = request.Values.DayUsage is null ? null : JsonSerializer.Serialize(request.Values.DayUsage);
             o.Reason = request.Values.Reason; o.ApprovedRequestId = null;
             return o;
         }, ct);
@@ -135,7 +155,7 @@ internal sealed partial class JahezWorkflowService
         Require(o.Status == JahezOperationStatus.Ready, JahezErrors.Conflict("العملية منفذة أو قيد المراجعة."));
         if (o.Mode != JahezOperationMode.Withdraw) await AuthorizeAsync(JahezWorkflowPermissions.Settle, ct);
         if (o.Mode != JahezOperationMode.Settle) await AuthorizeAsync(JahezWorkflowPermissions.Withdraw, ct);
-        var p = await WorkflowPreview(OperationInput(o), ct);
+        var p = await WorkflowPreview(OperationInput(o), ct, o.CommissionStartDate);
         Require(p.CommissionComplete, JahezErrors.Conflict(string.Join(" ", p.Problems)));
         Require(p.Commission == o.CalculatedCommission && p.CalculationJson == o.CalculationJson,
             JahezErrors.Conflict("تغيرت بيانات العمولة؛ افتح طلب تعديل لتحديث واعتماد المعاينة."));
@@ -149,7 +169,7 @@ internal sealed partial class JahezWorkflowService
                     Math.Abs(o.Remaining), o.PaymentReference, o.Reason, o.Id, null, ct);
             }
             else Require(o.Fund is null, JahezErrors.Invalid("لا تحدد جهة مالية عند عدم وجود حركة أموال."));
-            await PostCommission(h, o.ThroughDate, Guid.CreateVersion7(), o.Reason, ct);
+            await PostCommission(h, o.ThroughDate, Guid.CreateVersion7(), o.Reason, ct, o.CommissionStartDate);
             // Consume the calculated period once. Approved commission overrides are preserved on the operation.
             if (o.CalculatedCommission > 0)
                 Entry(h, JahezLedgerBucket.Commission, JahezLedgerKind.Payment, -o.CalculatedCommission, o.Id, o.Reason);
@@ -158,7 +178,7 @@ internal sealed partial class JahezWorkflowService
                 : o.Remaining == 0 ? JahezOperationPaymentStatus.None : JahezOperationPaymentStatus.Paid;
         }
         else o.PaymentStatus = JahezOperationPaymentStatus.Deferred;
-        if (o.Mode != JahezOperationMode.Settle) await WithdrawOperationally(h, o.EffectiveAtUtc, o.Reason, ct);
+        if (o.Mode != JahezOperationMode.Settle) await WithdrawOperationally(h, o.EffectiveAtUtc, o.Reason, ct, OperationInput(o).DayUsage);
         o.Status = JahezOperationStatus.Executed;
         o.ExecutedAtUtc = Now;
         o.ExecutedByUserId = Actor;
@@ -167,15 +187,17 @@ internal sealed partial class JahezWorkflowService
             Require(o.Remaining > 0, JahezErrors.Invalid("الترحيل يتطلب مبلغاً موجباً."));
             var debt = new JahezTransferredDebt { OperationId = o.Id, RiderProfileId = h.RiderProfileId, Amount = o.Remaining };
             db.Add(debt);
-            await WorkflowBlockNotifications(h.RiderProfileId, debt.Id, false, ct);
+            await WorkflowDebtNotifications(h.RiderProfileId, debt.Id, false, ct);
         }
     }
 
-    private async Task WithdrawOperationally(JahezAccountSession h, DateTimeOffset at, string reason, CancellationToken ct)
+    private async Task WithdrawOperationally(JahezAccountSession h, DateTimeOffset at, string reason, CancellationToken ct, PlatformAccountDayUsageInput? dayUsage = null)
     {
         await ValidateStopDate(h, at, ct);
         h.EndedAtUtc = at.ToUniversalTime();
         var assignment = await db.RiderClientAssignments.SingleAsync(x => x.Id == h.RiderClientAssignmentId, ct);
+        var dayResult = await new PlatformAccountDayAllocationService(db).Stage(h.PlatformRiderAccountId, assignment.Id, JahezRules.RiyadhDate(at), dayUsage, reason, false, ct);
+        Require(dayResult.IsSuccess, dayResult.Error);
         var previous = assignment.Status;
         assignment.EffectiveTo = JahezRules.RiyadhDate(at);
         assignment.Status = RiderAssignmentStatus.Ended;
@@ -188,12 +210,16 @@ internal sealed partial class JahezWorkflowService
         Entry(h, JahezLedgerBucket.PlatformDebt, JahezLedgerKind.StatusChange, 0, Guid.CreateVersion7(), reason);
     }
 
+    private static void ValidateMoneyReference(string? reference) =>
+        Require(!string.IsNullOrWhiteSpace(reference) && reference.Length <= 500,
+            JahezErrors.Invalid("مرجع حركة المال الفعلية مطلوب، بحد 500 حرف."));
+
     private async Task<JahezMoneyMovement> StageMoney(JahezAccountSession h, JahezMoneyFund? fund,
         JahezMoneyDirection direction, JahezMoneyPurpose purpose, decimal amount, string? reference, string reason,
         Guid? operationId, Guid? debtId, CancellationToken ct)
     {
         Require(fund.HasValue && JahezSettlementRules.Allows(fund.Value, direction, purpose), JahezErrors.Invalid("جهة القبض أو الصرف لا تسمح بهذه الحركة."));
-        Require(!string.IsNullOrWhiteSpace(reference) && reference.Length <= 500, JahezErrors.Invalid("مرجع حركة المال الفعلية مطلوب، بحد 500 حرف."));
+        ValidateMoneyReference(reference);
         await AuthorizeAsync(direction == JahezMoneyDirection.Receipt ? JahezWorkflowPermissions.Receive : JahezWorkflowPermissions.Disburse, ct);
         var movement = new JahezMoneyMovement { HandoverId = h.Id, RiderProfileId = h.RiderProfileId,
             OperationId = operationId, TransferredDebtId = debtId, Fund = fund!.Value, Direction = direction,
@@ -210,15 +236,24 @@ internal sealed partial class JahezWorkflowService
             var debt = await db.Set<JahezTransferredDebt>().SingleOrDefaultAsync(x => x.Id == id, ct);
             Require(debt is not null, JahezErrors.NotFound);
             Require(debt!.PaidAtUtc is null, JahezErrors.Conflict("سُدد المبلغ المرحل بالفعل."));
-            var operation = await db.Set<JahezOperation>().SingleAsync(x => x.Id == debt.OperationId, ct);
-            var h = await Handover(operation.HandoverId, ct);
-            await StageMoney(h, request.Fund, JahezMoneyDirection.Receipt, request.Purpose, debt.Amount,
-                request.Reference, request.Reason, null, debt.Id, ct);
-            debt.PaidAtUtc = Now; debt.PaidByUserId = Actor;
+            await RepayWorkflowDebt(debt, request, ct);
             if (!await db.Set<JahezTransferredDebt>().AnyAsync(x => x.RiderProfileId == debt.RiderProfileId && x.Id != id && x.PaidAtUtc == null, ct))
-                await WorkflowBlockNotifications(debt.RiderProfileId, debt.Id, true, ct);
+                await WorkflowDebtNotifications(debt.RiderProfileId, debt.Id, true, ct);
             return debt;
         }, ct);
+
+    private async Task RepayWorkflowDebt(JahezTransferredDebt debt, JahezMoneyRecord request, CancellationToken ct)
+    {
+        var operation = await db.JahezOperations.IgnoreQueryFilters().SingleOrDefaultAsync(x => x.Id == debt.OperationId, ct);
+        Require(operation is not null, JahezErrors.Conflict("بيانات العملية الأصلية للمديونية غير متاحة؛ راجع السجل."));
+        var h = await db.JahezAccountSessions.IgnoreQueryFilters().SingleOrDefaultAsync(x => x.Id == operation!.HandoverId, ct);
+        Require(h is not null && h.RiderProfileId == debt.RiderProfileId,
+            JahezErrors.Conflict("بيانات المندوب الأصلي للمديونية غير متسقة؛ راجع السجل."));
+        await StageMoney(h!, request.Fund, JahezMoneyDirection.Receipt, request.Purpose, debt.Amount,
+            request.Reference, request.Reason, null, debt.Id, ct);
+        debt.PaidAtUtc = Now;
+        debt.PaidByUserId = Actor;
+    }
 
     public Task<Result<JahezMoneyMovement>> RecordFeeV2Async(string key, JahezFeeRecord request, CancellationToken ct = default) =>
         ExecuteAsync(key, "v2.fee.record", request, JahezWorkflowPermissions.FeesRecord, async () =>
@@ -235,7 +270,7 @@ internal sealed partial class JahezWorkflowService
             return movement;
         }, ct);
 
-    private async Task WorkflowBlockNotifications(Guid riderId, Guid sourceId, bool released, CancellationToken ct)
+    private async Task WorkflowDebtNotifications(Guid riderId, Guid sourceId, bool released, CancellationToken ct)
     {
         var assignments = await (from a in db.RiderClientAssignments join c in db.ClientContracts on a.ClientContractId equals c.Id
             join p in db.ClientPlatforms on c.ClientPlatformId equals p.Id where a.RiderProfileId == riderId && a.EffectiveTo == null
@@ -244,13 +279,13 @@ internal sealed partial class JahezWorkflowService
         var name = await (from r in db.RiderProfiles join e in db.Employees on r.EmployeeId equals e.Id
             where r.Id == riderId select e.FullNameAr).SingleAsync(ct);
         foreach (var recipient in recipients)
-            db.Add(new Notification { RecipientUserId = recipient, EventType = released ? "jahez.rider.block.released" : "jahez.rider.block.created",
-                Severity = released ? NotificationSeverity.Information : NotificationSeverity.Critical,
-                TitleAr = released ? "سداد مديونية جاهز المرحلة" : "إيقاف مندوب بسبب ترحيل مستحق جاهز",
-                TitleEn = released ? "Jahez rider debt paid" : "Rider operational block",
-                BodyAr = released ? $"{name}: سدد كامل المستحق المرحل. رُفع سبب البلوك المالي فقط."
-                    : $"{name}: موقوف داخل النظام على كيتا وشيفز ونينجا حتى السداد. يلزم إيقافه لدى الشركات.",
-                BodyEn = released ? "Transferred debt paid; independent suspensions remain." : "Block rider in Keeta, Chefz and Ninja pending full repayment.",
+            db.Add(new Notification { RecipientUserId = recipient, EventType = released ? "jahez.rider.debt.paid" : "jahez.rider.debt.transferred",
+                Severity = NotificationSeverity.Information,
+                TitleAr = released ? "سداد مديونية جاهز المرحلة" : "ترحيل مستحق جاهز على المندوب",
+                TitleEn = released ? "Jahez rider debt paid" : "Jahez debt transferred to rider",
+                BodyAr = released ? $"{name}: سدد كامل المستحق المرحل."
+                    : $"{name}: تم إثبات المستحق المرحل للمتابعة والسداد دون إيقاف التشغيل.",
+                BodyEn = released ? "Transferred debt paid." : "Transferred debt recorded for repayment; rider operations remain available.",
                 SourceEntityType = nameof(JahezTransferredDebt), SourceEntityId = sourceId,
                 DeepLink = $"/jahez/transferred-debts/{sourceId}", VisibleAtUtc = Now,
                 DeduplicationKey = $"jahez:transfer:{sourceId}:{released}:{recipient}" });

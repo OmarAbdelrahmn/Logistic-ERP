@@ -1,0 +1,58 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Platform" type="xs:string" minOccurs="0" />
+                <xs:element name="ExternalAccountId" type="xs:string" minOccurs="0" />
+                <xs:element name="BusinessDate" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="Participants" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Platform" type="xs:string" minOccurs="0" />
+                <xs:element name="ExternalAccountId" type="xs:string" minOccurs="0" />
+                <xs:element name="FirstStart" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="FirstEnd" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="SecondStart" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="SecondEnd" type="xs:dateTime" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table2">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="MigrationId" type="xs:string" minOccurs="0" />
+                <xs:element name="ProductVersion" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <Platform>SHIFTZ</Platform>
+    <ExternalAccountId>2607221690</ExternalAccountId>
+    <BusinessDate>2026-10-19T00:00:00+03:00</BusinessDate>
+    <Participants>3</Participants>
+  </Table>
+  <Table1>
+    <Platform>SHIFTZ</Platform>
+    <ExternalAccountId>2620593968</ExternalAccountId>
+    <FirstStart>2026-10-20T00:00:00+03:00</FirstStart>
+    <SecondStart>2026-10-01T00:00:00+03:00</SecondStart>
+    <SecondEnd>2026-10-20T00:00:00+03:00</SecondEnd>
+  </Table1>
+  <Table2>
+    <MigrationId>20261021071103_AddPlatformAccountDayAllocations</MigrationId>
+    <ProductVersion>10.0.11</ProductVersion>
+  </Table2>
+</NewDataSet>

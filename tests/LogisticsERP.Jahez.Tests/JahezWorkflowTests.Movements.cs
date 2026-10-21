@@ -240,11 +240,12 @@ public sealed partial class JahezWorkflowTests
     }
 
     [Fact]
-    public async Task V2MovementsKeepRowsWhenAccountSponsorIsMissing()
+    public async Task V2MovementsKeepRecordedSponsorWhenCurrentAccountSponsorIsMissing()
     {
         await using var f = await Fixture.Create();
         var ct = TestContext.Current.CancellationToken;
         var account = await f.Account("movement-no-sponsor");
+        var expectedName = await f.Db.Sponsors.Where(x => x.Id == account.SponsorId).Select(x => x.RegistryNameAr).SingleAsync(ct);
         Success(await f.Service.HandoverAsync("start", new(account.Id, f.RiderId, At(1), "استلام", 50, "fee-1"), ct));
         var tracked = await f.Db.PlatformRiderAccounts.SingleAsync(x => x.Id == account.Id, ct);
         tracked.SponsorId = null;
@@ -252,7 +253,8 @@ public sealed partial class JahezWorkflowTests
         f.Db.ChangeTracker.Clear();
 
         var row = Assert.Single(Success(await f.Service.MovementsV2Async(1, 1, ct: ct)).Items);
-        Assert.Null(row.SponsorNameAr);
+        Assert.Equal(expectedName, row.SponsorNameAr);
+        Assert.Equal(account.SponsorId, row.SponsorId);
         Assert.NotNull(row.UserRider);
         Assert.NotNull(row.OwnerRider);
         Assert.Empty(Success(await f.Service.MovementsV2Async(2, 1, ct: ct)).Items);
@@ -341,7 +343,8 @@ public sealed partial class JahezWorkflowTests
         var sql = query.ToQueryString();
         Assert.Contains("LEFT JOIN", sql);
         Assert.Contains("IqamaNo", sql);
-        Assert.Contains("RegistryNameAr", sql);
+        Assert.Contains("SponsorNameAr", sql);
+        Assert.Contains("[jahez_v3].[Ownership]", sql);
         Assert.Contains("ExternalAccountId", sql);
         Assert.Contains("[Net]", sql);
         Assert.Contains("[Commission]", sql);

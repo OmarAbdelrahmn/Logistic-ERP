@@ -1,5 +1,7 @@
 # Chefz bulk order settlements — التصفيات من ملف الطلبات
 
+**21 October 2026:** Shared-day Freelancer money allocation now uses outgoing riders' recorded counts and original worksheet row order. Every row counts, including blank order IDs. FullTime sharing remains prohibited. See [shared-day handovers and migration requirements](shared-account-day-handovers.md); the shared-day database migration was applied and verified on 21 October 2026; the matching API still needs deployment.
+
 For the complete screen flow, response examples, state handling, Arabic labels, and acceptance checks, use [the detailed frontend handoff](chefz-order-settlements-frontend-handoff.md). The hosted database migration was applied and independently verified on 12 October 2026; API deployment is still pending. See [the deployment record](chefz-order-settlement-hosted-deployment-20261012.md).
 
 Implemented 12 October 2026 in the .NET backend. This checkout contains the backend only. The application migration is applied to hosted `db67927`; deploy the updated API before connecting a frontend. The supplied workbook is a sample for read-only parser verification; it has not been imported into the company database.

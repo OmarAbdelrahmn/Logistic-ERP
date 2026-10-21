@@ -264,7 +264,8 @@ public sealed partial class ChefzWorkflowTests
         var changed = Value(await f.Service.ImportPerformanceAsync(new(2026, 10, 15), "changed.xlsx", Sheet("2522777933", "50%"), ct));
         Assert.Empty(changed.Issues);
         Assert.Equal(1, changed.ImportedRows);
-        Assert.Equal(50m, (await f.Db.ChefzDailyPerformance.SingleAsync(p => p.ReportDate == new DateOnly(2026, 10, 15), ct)).AcceptanceRate);
+        Assert.Equal(66.67m, (await f.Db.ChefzDailyPerformance.SingleAsync(p => p.ReportDate == new DateOnly(2026, 10, 15), ct)).AcceptanceRate);
+        Assert.Equal(50m, (await f.Db.ChefzDailyPerformanceSources.SingleAsync(p => p.ReportDate == new DateOnly(2026, 10, 15), ct)).AcceptanceRate);
         Assert.Equal(2, await f.Db.ChefzDailyPerformance.CountAsync(ct));
         if (sql)
         {

@@ -1,0 +1,583 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="Sequence" type="xs:long" minOccurs="0" />
+                <xs:element name="OccurredAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="Action" type="xs:string" minOccurs="0" />
+                <xs:element name="BeforeJson" type="xs:string" minOccurs="0" />
+                <xs:element name="AfterJson" type="xs:string" minOccurs="0" />
+                <xs:element name="CorrelationId" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DisplayNameAr" type="xs:string" minOccurs="0" />
+                <xs:element name="DisplayNameEn" type="xs:string" minOccurs="0" />
+                <xs:element name="UserName" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table2">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="Code" type="xs:string" minOccurs="0" />
+                <xs:element name="NameAr" type="xs:string" minOccurs="0" />
+                <xs:element name="NameEn" type="xs:string" minOccurs="0" />
+                <xs:element name="ParentId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="SponsorId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="Location" type="xs:int" minOccurs="0" />
+                <xs:element name="Purpose" type="xs:int" minOccurs="0" />
+                <xs:element name="AllowedDirections" type="xs:int" minOccurs="0" />
+                <xs:element name="IsPosting" type="xs:boolean" minOccurs="0" />
+                <xs:element name="IsDefault" type="xs:boolean" minOccurs="0" />
+                <xs:element name="IsActive" type="xs:boolean" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="UpdatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="UpdatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RowVersion" type="xs:base64Binary" minOccurs="0" />
+                <xs:element name="IsDeleted" type="xs:boolean" minOccurs="0" />
+                <xs:element name="DeletedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="DeletedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DeletionReason" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table3">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="Source" type="xs:int" minOccurs="0" />
+                <xs:element name="SourceId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="PlatformAccountId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="SponsorId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="SponsorIdentifier" type="xs:string" minOccurs="0" />
+                <xs:element name="SponsorNameAr" type="xs:string" minOccurs="0" />
+                <xs:element name="Evidence" type="xs:string" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table4">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="ActorNameAr" type="xs:string" minOccurs="0" />
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="SubAccountId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="SponsorId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="MoneyMovementId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="CashboxHandoverId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="BatchId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="Revision" type="xs:int" minOccurs="0" />
+                <xs:element name="ReversesPostingId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="Kind" type="xs:int" minOccurs="0" />
+                <xs:element name="Amount" type="xs:decimal" minOccurs="0" />
+                <xs:element name="OccurredAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="ActorUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="Reference" type="xs:string" minOccurs="0" />
+                <xs:element name="Reason" type="xs:string" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table5">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="AccountCode" type="xs:string" minOccurs="0" />
+                <xs:element name="AccountNameAr" type="xs:string" minOccurs="0" />
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="HandoverId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="SubAccountId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="SponsorId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="SponsorNameAr" type="xs:string" minOccurs="0" />
+                <xs:element name="SponsorIdentifier" type="xs:string" minOccurs="0" />
+                <xs:element name="Amount" type="xs:decimal" minOccurs="0" />
+                <xs:element name="MovementCount" type="xs:int" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table6">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="HandoverId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="PostingId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table7">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="IsActive" type="xs:boolean" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <Id>8669da86-a5a2-4596-9422-d90085deb10c</Id>
+    <Sequence>114981</Sequence>
+    <OccurredAtUtc>2026-10-17T11:57:04.6071116Z</OccurredAtUtc>
+    <Action>JahezAccountRosterImport</Action>
+    <BeforeJson>{"SourceSha256":"1ef216a7a34d9f52479e17ea07bc7f96ef3e556d961732335e392f33473372a3","DateCorrections":{"460555":"2026-10-17","404899":"2026-09-12","472431":"2026-10-15","492241":"2026-10-11","472844":"2026-10-13","474642":"2026-10-13","475162":"2026-10-17","470544":"2026-10-04","460711":"2026-10-16"},"PendingAssignments":[{"row":9,"account":"420509","riderIqama":"2215204666","date":"2026-10-11","reasons":["RiderAccountCapacityConflict"]},{"row":41,"account":"456454","riderIqama":"2539354528","date":"2026-10-11","reasons":["InactiveAccountHasListedRider"]},{"row":68,"account":"458394","riderIqama":"2626069906","date":"2026-10-15","reasons":["InactiveAccountHasListedRider"]},{"row":82,"account":"476885","riderIqama":"2501676890","date":"2026-10-12","reasons":["RiderAccountCapacityConflict"]},{"row":176,"account":"399990","riderIqama":"2630669634","date":"2026-10-05","reasons":["ExistingAssignmentHasDifferentRiderAndFinancialRecords"]},{"row":207,"account":"404654","riderIqama":"2546390671","date":"2026-10-08","reasons":["ExistingAssignmentHasDifferentRiderAndFinancialRecords"]},{"row":213,"account":"404719","riderIqama":"2608130296","date":"2026-10-13","reasons":["ExistingAssignmentHasDifferentRiderAndFinancialRecords"]},{"row":275,"account":"491306","riderIqama":"2501676890","date":"2026-10-14","reasons":["RiderAccountCapacityConflict"]},{"row":318,"account":"457195","riderIqama":"#N/A","date":null,"reasons":["RiderMissingOrAmbiguous","MissingDate"]},{"row":322,"account":"458167","riderIqama":"2501676890","date":"2026-10-01","reasons":["RiderAccountCapacityConflict"]},{"row":335,"account":"459049","riderIqama":"2215204666","date":"2026-10-05","reasons":["RiderAccountCapacityConflict"]},{"row":350,"account":"457357","riderIqama":"2460730217","date":"2026-10-15","reasons":["InactiveAccountHasListedRider"]},{"row":377,"account":"456420","riderIqama":"2462687274","date":"2026-10-12","reasons":["RiderAccountCapacityConflict"]}]}</BeforeJson>
+    <AfterJson>{"sourceRows":384,"uniqueAccounts":380,"duplicatesIgnored":4,"existingAccountsUpdated":378,"newAccounts":2,"ownerProfilesCreated":19,"accountSponsorChanges":39,"suspended":46,"available":36,"assigned":298,"newRiderAssignments":295,"existingRiderAssignmentsPreserved":3,"pendingRiderAssignments":13,"vehicleLinksCreated":374,"missingVehicleSerials":3,"unmatchedVehicleSerials":["400604220","720438120"],"ownerHrSponsorDifferences":87}</AfterJson>
+    <CorrelationId>jahez-account-sheet-20261017-1ef216a7a34d</CorrelationId>
+  </Table>
+  <Table1>
+    <Id>019c18d5-62e1-7000-c000-000000000001</Id>
+    <DisplayNameAr>عمر</DisplayNameAr>
+    <DisplayNameEn>Omar</DisplayNameEn>
+    <UserName>Omar</UserName>
+  </Table1>
+  <Table1>
+    <Id>5e8dbbf5-f4a8-447d-d933-08df10cc8271</Id>
+    <DisplayNameAr>ابراهيم</DisplayNameAr>
+    <DisplayNameEn>Ibrahima</DisplayNameEn>
+    <UserName>Ibrahima</UserName>
+  </Table1>
+  <Table1>
+    <Id>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</Id>
+    <DisplayNameAr>محمد ربيع محمود حميده</DisplayNameAr>
+    <DisplayNameEn>Mohamed Rabi3</DisplayNameEn>
+    <UserName>MohamedRabi3</UserName>
+  </Table1>
+  <Table2>
+    <Id>019d0000-0000-7000-8000-000000000010</Id>
+    <Code>SUP</Code>
+    <NameAr>عهدة مشرف جاهز</NameAr>
+    <NameEn>Jahez supervisor custody</NameEn>
+    <Location>1</Location>
+    <Purpose>3</Purpose>
+    <AllowedDirections>3</AllowedDirections>
+    <IsPosting>false</IsPosting>
+    <IsDefault>false</IsDefault>
+    <IsActive>true</IsActive>
+    <CreatedAtUtc>2026-10-19T00:00:00Z</CreatedAtUtc>
+    <RowVersion>AAAAAAADCAc=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table2>
+  <Table2>
+    <Id>019d0000-0000-7000-8000-000000000011</Id>
+    <Code>MAIN</Code>
+    <NameAr>الخزينة المركزية</NameAr>
+    <NameEn>Central treasury</NameEn>
+    <Location>2</Location>
+    <Purpose>3</Purpose>
+    <AllowedDirections>3</AllowedDirections>
+    <IsPosting>false</IsPosting>
+    <IsDefault>false</IsDefault>
+    <IsActive>true</IsActive>
+    <CreatedAtUtc>2026-10-19T00:00:00Z</CreatedAtUtc>
+    <RowVersion>AAAAAAADCAg=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table2>
+  <Table2>
+    <Id>019d0000-0000-7000-8000-000000000012</Id>
+    <Code>BANK</Code>
+    <NameAr>البنك</NameAr>
+    <NameEn>Bank</NameEn>
+    <Location>3</Location>
+    <Purpose>3</Purpose>
+    <AllowedDirections>3</AllowedDirections>
+    <IsPosting>false</IsPosting>
+    <IsDefault>false</IsDefault>
+    <IsActive>true</IsActive>
+    <CreatedAtUtc>2026-10-19T00:00:00Z</CreatedAtUtc>
+    <RowVersion>AAAAAAADCAk=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table2>
+  <Table2>
+    <Id>019d0000-0000-7000-8000-000000000013</Id>
+    <Code>PETRO</Code>
+    <NameAr>بترو آب - مقاصة التحصيل</NameAr>
+    <NameEn>PetroApp collection clearing</NameEn>
+    <Location>4</Location>
+    <Purpose>3</Purpose>
+    <AllowedDirections>3</AllowedDirections>
+    <IsPosting>false</IsPosting>
+    <IsDefault>false</IsDefault>
+    <IsActive>true</IsActive>
+    <CreatedAtUtc>2026-10-19T00:00:00Z</CreatedAtUtc>
+    <RowVersion>AAAAAAADCAo=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table2>
+  <Table2>
+    <Id>019d0000-0000-7000-8000-000000000014</Id>
+    <Code>MAIN.FEES</Code>
+    <NameAr>رسوم البوابا وإكسبرس</NameAr>
+    <NameEn>Al-Bwaba and Express fees</NameEn>
+    <ParentId>019d0000-0000-7000-8000-000000000011</ParentId>
+    <Location>2</Location>
+    <Purpose>2</Purpose>
+    <AllowedDirections>3</AllowedDirections>
+    <IsPosting>false</IsPosting>
+    <IsDefault>false</IsDefault>
+    <IsActive>true</IsActive>
+    <CreatedAtUtc>2026-10-19T00:00:00Z</CreatedAtUtc>
+    <RowVersion>AAAAAAADCAs=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table2>
+  <Table2>
+    <Id>019d0000-0000-7000-8000-000000000015</Id>
+    <Code>BANK.BWEXP</Code>
+    <NameAr>بنك البوابا وإكسبرس</NameAr>
+    <NameEn>Al-Bwaba and Express bank</NameEn>
+    <ParentId>019d0000-0000-7000-8000-000000000012</ParentId>
+    <Location>3</Location>
+    <Purpose>3</Purpose>
+    <AllowedDirections>3</AllowedDirections>
+    <IsPosting>false</IsPosting>
+    <IsDefault>false</IsDefault>
+    <IsActive>true</IsActive>
+    <CreatedAtUtc>2026-10-19T00:00:00Z</CreatedAtUtc>
+    <RowVersion>AAAAAAADCAw=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table2>
+  <Table2>
+    <Id>019d0000-0000-7000-8000-000000000016</Id>
+    <Code>SUP.BW.SET</Code>
+    <NameAr>عهدة تصفيات البوابا</NameAr>
+    <NameEn>BW settlement custody</NameEn>
+    <ParentId>019d0000-0000-7000-8000-000000000010</ParentId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <Location>1</Location>
+    <Purpose>1</Purpose>
+    <AllowedDirections>3</AllowedDirections>
+    <IsPosting>true</IsPosting>
+    <IsDefault>true</IsDefault>
+    <IsActive>true</IsActive>
+    <CreatedAtUtc>2026-10-19T00:00:00Z</CreatedAtUtc>
+    <RowVersion>AAAAAAADCA0=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table2>
+  <Table2>
+    <Id>019d0000-0000-7000-8000-000000000017</Id>
+    <Code>SUP.BW.FEE</Code>
+    <NameAr>عهدة رسوم البوابا</NameAr>
+    <NameEn>BW fee custody</NameEn>
+    <ParentId>019d0000-0000-7000-8000-000000000010</ParentId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <Location>1</Location>
+    <Purpose>2</Purpose>
+    <AllowedDirections>1</AllowedDirections>
+    <IsPosting>true</IsPosting>
+    <IsDefault>true</IsDefault>
+    <IsActive>true</IsActive>
+    <CreatedAtUtc>2026-10-19T00:00:00Z</CreatedAtUtc>
+    <RowVersion>AAAAAAADCA4=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table2>
+  <Table2>
+    <Id>019d0000-0000-7000-8000-000000000018</Id>
+    <Code>MAIN.BW.FEE</Code>
+    <NameAr>رسوم البوابا</NameAr>
+    <NameEn>BW central fees</NameEn>
+    <ParentId>019d0000-0000-7000-8000-000000000014</ParentId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <Location>2</Location>
+    <Purpose>2</Purpose>
+    <AllowedDirections>1</AllowedDirections>
+    <IsPosting>true</IsPosting>
+    <IsDefault>true</IsDefault>
+    <IsActive>true</IsActive>
+    <CreatedAtUtc>2026-10-19T00:00:00Z</CreatedAtUtc>
+    <RowVersion>AAAAAAADCBo=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table2>
+  <Table2>
+    <Id>019d0000-0000-7000-8000-000000000019</Id>
+    <Code>MAIN.BW.SET</Code>
+    <NameAr>تصفيات البوابا</NameAr>
+    <NameEn>BW central settlements</NameEn>
+    <ParentId>019d0000-0000-7000-8000-000000000011</ParentId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <Location>2</Location>
+    <Purpose>1</Purpose>
+    <AllowedDirections>3</AllowedDirections>
+    <IsPosting>true</IsPosting>
+    <IsDefault>true</IsDefault>
+    <IsActive>true</IsActive>
+    <CreatedAtUtc>2026-10-19T00:00:00Z</CreatedAtUtc>
+    <RowVersion>AAAAAAADCA8=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table2>
+  <Table2>
+    <Id>019d0000-0000-7000-8000-000000000020</Id>
+    <Code>BANK.BW</Code>
+    <NameAr>بنك البوابا</NameAr>
+    <NameEn>BW bank</NameEn>
+    <ParentId>019d0000-0000-7000-8000-000000000015</ParentId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <Location>3</Location>
+    <Purpose>3</Purpose>
+    <AllowedDirections>2</AllowedDirections>
+    <IsPosting>true</IsPosting>
+    <IsDefault>true</IsDefault>
+    <IsActive>true</IsActive>
+    <CreatedAtUtc>2026-10-19T00:00:00Z</CreatedAtUtc>
+    <RowVersion>AAAAAAADCBs=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table2>
+  <Table2>
+    <Id>019d0000-0000-7000-8000-000000000021</Id>
+    <Code>PETRO.BW</Code>
+    <NameAr>بترو آب البوابا</NameAr>
+    <NameEn>BW PetroApp clearing</NameEn>
+    <ParentId>019d0000-0000-7000-8000-000000000013</ParentId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <Location>4</Location>
+    <Purpose>3</Purpose>
+    <AllowedDirections>1</AllowedDirections>
+    <IsPosting>true</IsPosting>
+    <IsDefault>true</IsDefault>
+    <IsActive>true</IsActive>
+    <CreatedAtUtc>2026-10-19T00:00:00Z</CreatedAtUtc>
+    <RowVersion>AAAAAAADCBA=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table2>
+  <Table2>
+    <Id>019d0000-0000-7000-8000-000000000022</Id>
+    <Code>SUP.EX.SET</Code>
+    <NameAr>عهدة تصفيات إكسبرس</NameAr>
+    <NameEn>EX settlement custody</NameEn>
+    <ParentId>019d0000-0000-7000-8000-000000000010</ParentId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <Location>1</Location>
+    <Purpose>1</Purpose>
+    <AllowedDirections>3</AllowedDirections>
+    <IsPosting>true</IsPosting>
+    <IsDefault>true</IsDefault>
+    <IsActive>true</IsActive>
+    <CreatedAtUtc>2026-10-19T00:00:00Z</CreatedAtUtc>
+    <RowVersion>AAAAAAADCBE=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table2>
+  <Table2>
+    <Id>019d0000-0000-7000-8000-000000000023</Id>
+    <Code>SUP.EX.FEE</Code>
+    <NameAr>عهدة رسوم إكسبرس</NameAr>
+    <NameEn>EX fee custody</NameEn>
+    <ParentId>019d0000-0000-7000-8000-000000000010</ParentId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <Location>1</Location>
+    <Purpose>2</Purpose>
+    <AllowedDirections>1</AllowedDirections>
+    <IsPosting>true</IsPosting>
+    <IsDefault>true</IsDefault>
+    <IsActive>true</IsActive>
+    <CreatedAtUtc>2026-10-19T00:00:00Z</CreatedAtUtc>
+    <RowVersion>AAAAAAADCBI=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table2>
+  <Table2>
+    <Id>019d0000-0000-7000-8000-000000000024</Id>
+    <Code>MAIN.EX.FEE</Code>
+    <NameAr>رسوم إكسبرس</NameAr>
+    <NameEn>EX central fees</NameEn>
+    <ParentId>019d0000-0000-7000-8000-000000000014</ParentId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <Location>2</Location>
+    <Purpose>2</Purpose>
+    <AllowedDirections>1</AllowedDirections>
+    <IsPosting>true</IsPosting>
+    <IsDefault>true</IsDefault>
+    <IsActive>true</IsActive>
+    <CreatedAtUtc>2026-10-19T00:00:00Z</CreatedAtUtc>
+    <RowVersion>AAAAAAADCBw=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table2>
+  <Table2>
+    <Id>019d0000-0000-7000-8000-000000000025</Id>
+    <Code>MAIN.EX.SET</Code>
+    <NameAr>تصفيات إكسبرس</NameAr>
+    <NameEn>EX central settlements</NameEn>
+    <ParentId>019d0000-0000-7000-8000-000000000011</ParentId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <Location>2</Location>
+    <Purpose>1</Purpose>
+    <AllowedDirections>3</AllowedDirections>
+    <IsPosting>true</IsPosting>
+    <IsDefault>true</IsDefault>
+    <IsActive>true</IsActive>
+    <CreatedAtUtc>2026-10-19T00:00:00Z</CreatedAtUtc>
+    <RowVersion>AAAAAAADCBM=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table2>
+  <Table2>
+    <Id>019d0000-0000-7000-8000-000000000026</Id>
+    <Code>BANK.EX</Code>
+    <NameAr>بنك إكسبرس</NameAr>
+    <NameEn>EX bank</NameEn>
+    <ParentId>019d0000-0000-7000-8000-000000000015</ParentId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <Location>3</Location>
+    <Purpose>3</Purpose>
+    <AllowedDirections>2</AllowedDirections>
+    <IsPosting>true</IsPosting>
+    <IsDefault>true</IsDefault>
+    <IsActive>true</IsActive>
+    <CreatedAtUtc>2026-10-19T00:00:00Z</CreatedAtUtc>
+    <RowVersion>AAAAAAADCB0=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table2>
+  <Table2>
+    <Id>019d0000-0000-7000-8000-000000000027</Id>
+    <Code>PETRO.EX</Code>
+    <NameAr>بترو آب إكسبرس</NameAr>
+    <NameEn>EX PetroApp clearing</NameEn>
+    <ParentId>019d0000-0000-7000-8000-000000000013</ParentId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <Location>4</Location>
+    <Purpose>3</Purpose>
+    <AllowedDirections>1</AllowedDirections>
+    <IsPosting>true</IsPosting>
+    <IsDefault>true</IsDefault>
+    <IsActive>true</IsActive>
+    <CreatedAtUtc>2026-10-19T00:00:00Z</CreatedAtUtc>
+    <RowVersion>AAAAAAADCBQ=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table2>
+  <Table2>
+    <Id>019d0000-0000-7000-8000-000000000028</Id>
+    <Code>SUP.TR.SET</Code>
+    <NameAr>عهدة تصفيات التجارية</NameAr>
+    <NameEn>TR settlement custody</NameEn>
+    <ParentId>019d0000-0000-7000-8000-000000000010</ParentId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000040</SponsorId>
+    <Location>1</Location>
+    <Purpose>1</Purpose>
+    <AllowedDirections>3</AllowedDirections>
+    <IsPosting>true</IsPosting>
+    <IsDefault>true</IsDefault>
+    <IsActive>true</IsActive>
+    <CreatedAtUtc>2026-10-19T00:00:00Z</CreatedAtUtc>
+    <RowVersion>AAAAAAADCBU=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table2>
+  <Table2>
+    <Id>019d0000-0000-7000-8000-000000000029</Id>
+    <Code>SUP.TR.FEE</Code>
+    <NameAr>عهدة رسوم التجارية</NameAr>
+    <NameEn>TR fee custody</NameEn>
+    <ParentId>019d0000-0000-7000-8000-000000000010</ParentId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000040</SponsorId>
+    <Location>1</Location>
+    <Purpose>2</Purpose>
+    <AllowedDirections>1</AllowedDirections>
+    <IsPosting>true</IsPosting>
+    <IsDefault>true</IsDefault>
+    <IsActive>true</IsActive>
+    <CreatedAtUtc>2026-10-19T00:00:00Z</CreatedAtUtc>
+    <RowVersion>AAAAAAADCBY=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table2>
+  <Table2>
+    <Id>019d0000-0000-7000-8000-000000000030</Id>
+    <Code>MAIN.TR</Code>
+    <NameAr>صندوق التجارية</NameAr>
+    <NameEn>Trading central treasury</NameEn>
+    <ParentId>019d0000-0000-7000-8000-000000000011</ParentId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000040</SponsorId>
+    <Location>2</Location>
+    <Purpose>3</Purpose>
+    <AllowedDirections>3</AllowedDirections>
+    <IsPosting>true</IsPosting>
+    <IsDefault>true</IsDefault>
+    <IsActive>true</IsActive>
+    <CreatedAtUtc>2026-10-19T00:00:00Z</CreatedAtUtc>
+    <RowVersion>AAAAAAADCBc=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table2>
+  <Table2>
+    <Id>019d0000-0000-7000-8000-000000000031</Id>
+    <Code>BANK.TR</Code>
+    <NameAr>بنك التجارية</NameAr>
+    <NameEn>TR bank</NameEn>
+    <ParentId>019d0000-0000-7000-8000-000000000012</ParentId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000040</SponsorId>
+    <Location>3</Location>
+    <Purpose>3</Purpose>
+    <AllowedDirections>2</AllowedDirections>
+    <IsPosting>true</IsPosting>
+    <IsDefault>true</IsDefault>
+    <IsActive>true</IsActive>
+    <CreatedAtUtc>2026-10-19T00:00:00Z</CreatedAtUtc>
+    <RowVersion>AAAAAAADCBg=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table2>
+  <Table2>
+    <Id>019d0000-0000-7000-8000-000000000032</Id>
+    <Code>PETRO.TR</Code>
+    <NameAr>بترو آب التجارية</NameAr>
+    <NameEn>TR PetroApp clearing</NameEn>
+    <ParentId>019d0000-0000-7000-8000-000000000013</ParentId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000040</SponsorId>
+    <Location>4</Location>
+    <Purpose>3</Purpose>
+    <AllowedDirections>1</AllowedDirections>
+    <IsPosting>true</IsPosting>
+    <IsDefault>true</IsDefault>
+    <IsActive>true</IsActive>
+    <CreatedAtUtc>2026-10-19T00:00:00Z</CreatedAtUtc>
+    <RowVersion>AAAAAAADCBk=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table2>
+  <Table3>
+    <Id>01a15433-c7ff-733d-aae0-93bf32404360</Id>
+    <Source>1</Source>
+    <SourceId>01a15433-c7d5-7499-82ff-3dbfa16f1e1c</SourceId>
+    <PlatformAccountId>22a25cd6-a1f6-4e40-8551-e313278cc18a</PlatformAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000040</SponsorId>
+    <SponsorIdentifier>7038745530</SponsorIdentifier>
+    <SponsorNameAr>البوابة المقبلة للتجارة</SponsorNameAr>
+    <Evidence>Fee obligation creation</Evidence>
+    <CreatedAtUtc>2026-10-19T12:47:22.1153933Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+  </Table3>
+  <Table3>
+    <Id>01a1542c-7b6f-773a-a72f-c64e7e34300e</Id>
+    <Source>4</Source>
+    <SourceId>01a1542c-7a99-7ddb-a70d-444ca7127d05</SourceId>
+    <PlatformAccountId>cafae3d9-2e84-4252-a82d-7e29c32d4268</PlatformAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <SponsorIdentifier>7034861059</SponsorIdentifier>
+    <SponsorNameAr>اكسبرس جايت</SponsorNameAr>
+    <Evidence>Inherited from Operation:01a1542c-7557-772f-b481-3c42c1937e81</Evidence>
+    <CreatedAtUtc>2026-10-19T12:39:23.760812Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+  </Table3>
+  <Table3>
+    <Id>01a1542c-7b59-7817-9a3a-c74d7ab385f2</Id>
+    <Source>2</Source>
+    <SourceId>01a1542c-7557-772f-b481-3c42c1937e81</SourceId>
+    <PlatformAccountId>cafae3d9-2e84-4252-a82d-7e29c32d4268</PlatformAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <SponsorIdentifier>7034861059</SponsorIdentifier>
+    <SponsorNameAr>اكسبرس جايت</SponsorNameAr>
+    <Evidence>Settlement execution</Evidence>
+    <CreatedAtUtc>2026-10-19T12:39:23.760812Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+  </Table3>
+  <Table7>
+    <IsActive>false</IsActive>
+  </Table7>
+</NewDataSet>

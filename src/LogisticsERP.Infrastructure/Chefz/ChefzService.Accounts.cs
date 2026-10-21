@@ -32,11 +32,17 @@ internal sealed partial class ChefzService
         }).OrderBy(s => s.SponsorNameAr).ThenBy(s => s.SponsorId).ToArray();
         var summary = SummarizeAccounts(counts);
         var accountIds = rows.Select(x => x.Account.Id).ToArray();
-        var assignmentIds = await db.RiderClientAssignments.Where(x => accountIds.Contains(x.PlatformRiderAccountId) && x.EffectiveTo == null)
-            .Select(x => new { x.Id, x.PlatformRiderAccountId }).ToArrayAsync(ct);
+        var assignmentIds = await db.RiderClientAssignments.AsNoTracking()
+            .Where(x => accountIds.Contains(x.PlatformRiderAccountId) && x.EffectiveTo == null)
+            .OrderByDescending(x => x.EffectiveFrom).ThenByDescending(x => x.Id)
+            .Select(x => new { x.Id, x.PlatformRiderAccountId, x.RiderProfileId }).ToArrayAsync(ct);
+        var riders = await RiderIdentities(assignmentIds.Select(x => x.RiderProfileId), ct);
+        var riderIqamas = assignmentIds.GroupBy(x => x.PlatformRiderAccountId)
+            .ToDictionary(g => g.Key, g => riders.GetValueOrDefault(g.First().RiderProfileId)?.RiderIqamaNo);
         var blocked = await LogisticsERP.Infrastructure.Hr.RiderOperationalBlock.BlockedAssignmentIds(db, assignmentIds.Select(x => x.Id).ToArray(), ct);
         var blockedAccounts = assignmentIds.Where(x => blocked.Contains(x.Id)).Select(x => x.PlatformRiderAccountId).ToHashSet();
         return Result.Success(new ChefzAccountsResponse(rows.Select(r => AccountResponse(r.Account, r.Details, r.Password) with {
+            RiderIqamaNo = riderIqamas.GetValueOrDefault(r.Account.Id),
             IsOperationallyBlocked = blockedAccounts.Contains(r.Account.Id),
             OperationalBlockReason = blockedAccounts.Contains(r.Account.Id) ? LogisticsERP.Infrastructure.Hr.RiderOperationalBlock.Reason : null }).ToArray(),
             page, pageSize, summary.Total, summary, sponsors));

@@ -1,0 +1,108 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="DailyOrders" type="xs:int" minOccurs="0" />
+                <xs:element name="TotalOrders" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Batches" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table2">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Files" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table3">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="ImportRows" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table4">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Requests" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table5">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Decisions" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table6">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Sessions" type="xs:int" minOccurs="0" />
+                <xs:element name="ClosedSessions" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table7">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="TreasuryAccounts" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table8">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="IsActive" type="xs:boolean" minOccurs="0" />
+                <xs:element name="ActivatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="NextHandoverNumber" type="xs:long" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <DailyOrders>146</DailyOrders>
+    <TotalOrders>710</TotalOrders>
+  </Table>
+  <Table1>
+    <Batches>12</Batches>
+  </Table1>
+  <Table2>
+    <Files>12</Files>
+  </Table2>
+  <Table3>
+    <ImportRows>6548</ImportRows>
+  </Table3>
+  <Table4>
+    <Requests>3</Requests>
+  </Table4>
+  <Table5>
+    <Decisions>2</Decisions>
+  </Table5>
+  <Table6>
+    <Sessions>313</Sessions>
+    <ClosedSessions>13</ClosedSessions>
+  </Table6>
+  <Table7>
+    <TreasuryAccounts>23</TreasuryAccounts>
+  </Table7>
+  <Table8>
+    <IsActive>false</IsActive>
+    <NextHandoverNumber>1</NextHandoverNumber>
+  </Table8>
+</NewDataSet>

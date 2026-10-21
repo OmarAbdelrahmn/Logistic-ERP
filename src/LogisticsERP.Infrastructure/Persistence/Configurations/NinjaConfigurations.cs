@@ -26,12 +26,16 @@ internal sealed class NinjaConfigurations : IEntityTypeConfiguration<NinjaAccoun
     public void Configure(EntityTypeBuilder<NinjaDailyPerformance> b)
     {
         ConfigureRecord(b, "NinjaDailyPerformance");
+        b.HasOne<NinjaDailyPerformanceSource>().WithMany().HasForeignKey(x => x.SourceId).OnDelete(DeleteBehavior.Restrict);
+        b.HasIndex(x => new { x.SourceId, x.RiderClientAssignmentId }).IsUnique();
         b.Property(x => x.TotalWorkingHours).HasPrecision(18, 8);
         b.ToTable(t => t.HasCheckConstraint("CK_NinjaPerformance_Values", "[TotalOrders] >= 0 AND [TotalWorkingHours] BETWEEN 0 AND 24"));
     }
     public void Configure(EntityTypeBuilder<NinjaDailyDeduction> b)
     {
         ConfigureRecord(b, "NinjaDailyDeductions");
+        b.HasOne<NinjaDailyDeductionSource>().WithMany().HasForeignKey(x => x.SourceId).OnDelete(DeleteBehavior.Restrict);
+        b.HasIndex(x => new { x.SourceId, x.RiderClientAssignmentId }).IsUnique();
         b.Property(x => x.TotalCollectedAmountAtDelivery).HasPrecision(18, 2);
         b.Property(x => x.TotalDeductions).HasPrecision(18, 2);
         b.ToTable(t => t.HasCheckConstraint("CK_NinjaDeductions_CollectedAmount", "[TotalCollectedAmountAtDelivery] >= 0"));
@@ -46,7 +50,7 @@ internal sealed class NinjaConfigurations : IEntityTypeConfiguration<NinjaAccoun
         b.HasOne<RiderClientAssignment>().WithMany().HasForeignKey(x => x.RiderClientAssignmentId).OnDelete(DeleteBehavior.Restrict);
         b.HasOne<RiderProfile>().WithMany().HasForeignKey(x => x.RiderProfileId).OnDelete(DeleteBehavior.Restrict);
         b.HasOne<NinjaDailyImport>().WithMany().HasForeignKey(x => x.ImportId).OnDelete(DeleteBehavior.Restrict);
-        b.HasIndex(x => new { x.PlatformRiderAccountId, x.ReportDate }).IsUnique();
+        b.HasIndex(x => new { x.PlatformRiderAccountId, x.ReportDate, x.RiderClientAssignmentId }).IsUnique();
         b.HasIndex(x => new { x.RiderProfileId, x.ReportDate });
     }
 }

@@ -5,6 +5,9 @@ using LogisticsERP.Application.Features.Jahez;
 using LogisticsERP.Domain.Entities.Jahez;
 using LogisticsERP.Domain.Jahez;
 using Microsoft.EntityFrameworkCore;
+using LogisticsERP.Application.Features.Hr;
+using LogisticsERP.Infrastructure.Hr;
+using LogisticsERP.Domain.Entities.Clients;
 
 namespace LogisticsERP.Infrastructure.Jahez;
 
@@ -82,6 +85,11 @@ internal sealed partial class JahezWorkflowService
         var names = files.ToDictionary(x => x.Id, x => x.FileName);
         List<JahezImportIssue> issues = [];
         List<JahezImportRowPreview> previews = [];
+        List<JahezDispatchAllocation> resolvedAllocations = [];
+        var allocator = new PlatformAccountDayAllocationService(db);
+        if (rows.Length > 0) await allocator.Preload(accountIds, rows.Min(r => JahezRules.RiyadhDate(r.OccurredAtUtc)), rows.Max(r => JahezRules.RiyadhDate(r.OccurredAtUtc)), ct);
+        var savedDispatches = batch.CommittedAtUtc.HasValue
+            ? await db.Set<JahezDailyDispatch>().AsNoTracking().Where(d => d.BatchId == batch.Id).ToArrayAsync(ct) : [];
         var duplicatedDaily = rows.GroupBy(x => new { x.DriverId, Date = JahezRules.RiyadhDate(x.OccurredAtUtc) }).Where(g => g.Count() > 1).SelectMany(g => g).Select(x => x.Id).ToHashSet();
         foreach (var row in rows)
         {
@@ -108,14 +116,42 @@ internal sealed partial class JahezWorkflowService
                 var matches = handovers.Where(h => h.PlatformRiderAccountId == account.Id && h.StartedAtUtc < dayEnd
                     && (h.EndedAtUtc == null || h.EndedAtUtc > dayStart)).ToArray();
                 var manual = byRow.GetValueOrDefault(row.Id) ?? [];
-                if (manual.Length > 0)
+                if (batch.CommittedAtUtc.HasValue)
+                {
+                    resolvedAllocations.AddRange(savedDispatches.Where(d => d.ImportRowId == row.Id)
+                        .Select(d => new JahezDispatchAllocation(row.Id, d.HandoverId, d.Count, d.AllocationReason ?? "Saved allocation")));
+                }
+                else if (manual.Length > 0)
                 {
                     if (manual.Any(a => a.Count < 0 || string.IsNullOrWhiteSpace(a.Reason) || a.Reason.Length > 2000 || !matches.Any(h => h.Id == a.HandoverId))
                         || manual.Select(x => x.HandoverId).Distinct().Count() != manual.Length || manual.Sum(x => (long)x.Count) != row.Dispatches)
-                        Issue("invalid_allocation", "التوزيع يجب أن يغطي إجمالي الطلبات على مستخدمي هذا اليوم مع الأسباب.");
+                        Issue("invalid_allocation", "Allocations must cover this daily total using eligible sessions and reasons.");
+                    else
+                    {
+                        var usages = await allocator.Usages(account.Id, date, ct);
+                        foreach (var session in matches)
+                        {
+                            var supplied = manual.SingleOrDefault(a => a.HandoverId == session.Id)?.Count ?? 0;
+                            var recorded = usages.SingleOrDefault(u => u.RiderClientAssignmentId == session.RiderClientAssignmentId)?.OrdersCount;
+                            if (recorded.HasValue && recorded.Value != supplied)
+                                Issue("checkpoint_conflict", $"Rider {session.RiderProfileId}, assignment {session.RiderClientAssignmentId}: manual orders contradict recorded day usage.");
+                        }
+                        resolvedAllocations.AddRange(manual);
+                    }
                 }
-                else if (matches.Length != 1) Issue("assignment_ambiguous", "يلزم توزيع يدوي للطلبات على مستخدمي الحساب خلال اليوم.");
-                else handover = matches[0];
+                else if (row.Dispatches.HasValue)
+                {
+                    var allocation = await allocator.AllocateAsync(account.Id, date,
+                        new Dictionary<PlatformDayMetric, decimal> { [PlatformDayMetric.OrdersCount] = row.Dispatches.Value }, ct);
+                    if (allocation.IsFailure) Issue("assignment_ambiguous", allocation.Error.Description);
+                    else foreach (var share in allocation.Value!)
+                    {
+                        var session = matches.SingleOrDefault(h => h.RiderClientAssignmentId == share.AssignmentId);
+                        if (session is null) { Issue("assignment_missing", "The assignment has no eligible Jahez session."); continue; }
+                        resolvedAllocations.Add(new(row.Id, session.Id, checked((int)share.Values[PlatformDayMetric.OrdersCount]), "Recorded day usage and final rider remainder"));
+                    }
+                }
+                if (matches.Length == 1) handover = matches[0];
             }
             previews.Add(new(row.Id, names[row.FileId], row.RowNumber, row.DriverId, row.OccurredAtUtc, account?.Id, handover?.Id, handover?.RiderProfileId, row.NetAmount, row.Dispatches));
         }
@@ -163,7 +199,8 @@ internal sealed partial class JahezWorkflowService
                 problemRows.Contains(Guid.Empty) || problemDrivers.Contains(g.Key));
         }).ToArray();
         return new(batch.Id, batch.Kind, batch.CommittedAtUtc.HasValue, previews, issues,
-            files.Select(x => new JahezImportFileMetadata(x.Id, x.FileName)).ToArray(), summaries);
+            files.Select(x => new JahezImportFileMetadata(x.Id, x.FileName)).ToArray(), summaries)
+            { ResolvedAllocations = resolvedAllocations };
     }
 
     public Task<Result<JahezImportPreview>> CommitImportAsync(string key, Guid id, JahezImportCommitRequest request, CancellationToken ct = default) =>
@@ -193,9 +230,9 @@ internal sealed partial class JahezWorkflowService
             var rowIds = preview.Rows.Select(x => x.RowId).ToArray();
             var sourceRows = await db.Set<JahezImportRow>().Where(x => rowIds.Contains(x.Id)).ToDictionaryAsync(x => x.Id, ct);
             var hIds = preview.Rows.Where(x => x.HandoverId.HasValue).Select(x => x.HandoverId!.Value)
-                .Concat(request.Allocations?.Select(x => x.HandoverId) ?? []).Distinct().ToArray();
+                .Concat(preview.ResolvedAllocations.Select(x => x.HandoverId)).Distinct().ToArray();
             var handovers = await db.Set<JahezAccountSession>().Where(x => hIds.Contains(x.Id)).ToDictionaryAsync(x => x.Id, ct);
-            var allocationRows = request.Allocations?.GroupBy(x => x.RowId).ToDictionary(g => g.Key, g => g.ToArray()) ?? [];
+            var allocationRows = preview.ResolvedAllocations.GroupBy(x => x.RowId).ToDictionary(g => g.Key, g => g.ToArray());
             foreach (var row in preview.Rows)
             {
                 var source = sourceRows[row.RowId];
@@ -213,8 +250,15 @@ internal sealed partial class JahezWorkflowService
                     var manual = allocationRows.GetValueOrDefault(row.RowId) ?? [];
                     if (manual.Length == 0) db.Add(new JahezDailyDispatch { BatchId = batch.Id, ImportRowId = row.RowId,
                         HandoverId = row.HandoverId!.Value, Date = JahezRules.RiyadhDate(row.OccurredAtUtc), Count = source.Dispatches!.Value });
-                    else foreach (var allocation in manual) db.Add(new JahezDailyDispatch { BatchId = batch.Id, ImportRowId = row.RowId,
-                        HandoverId = allocation.HandoverId, Date = JahezRules.RiyadhDate(row.OccurredAtUtc), Count = allocation.Count, AllocationReason = allocation.Reason });
+                    else foreach (var allocation in manual)
+                    {
+                        var businessDate = JahezRules.RiyadhDate(row.OccurredAtUtc);
+                        var session = handovers[allocation.HandoverId];
+                        var usageId = await db.Set<PlatformAccountDayUsage>().Where(u => u.PlatformRiderAccountId == session.PlatformRiderAccountId
+                            && u.RiderClientAssignmentId == session.RiderClientAssignmentId && u.BusinessDate == businessDate).Select(u => (Guid?)u.Id).SingleOrDefaultAsync(ct);
+                        db.Add(new JahezDailyDispatch { BatchId = batch.Id, ImportRowId = row.RowId, DayUsageId = usageId,
+                            HandoverId = allocation.HandoverId, Date = businessDate, Count = allocation.Count, AllocationReason = allocation.Reason });
+                    }
                 }
             }
             batch.CommittedAtUtc = Now;

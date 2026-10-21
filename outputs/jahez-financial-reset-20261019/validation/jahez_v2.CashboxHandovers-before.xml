@@ -1,0 +1,86 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="BusinessDate" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="Status" type="xs:int" minOccurs="0" />
+                <xs:element name="RequestedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="CashboxAmount" type="xs:decimal" minOccurs="0" />
+                <xs:element name="PetroAppAmount" type="xs:decimal" minOccurs="0" />
+                <xs:element name="BankAmount" type="xs:decimal" minOccurs="0" />
+                <xs:element name="MovementCount" type="xs:int" minOccurs="0" />
+                <xs:element name="Reason" type="xs:string" minOccurs="0" />
+                <xs:element name="AccountantUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="ConfirmedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="ConfirmationReason" type="xs:string" minOccurs="0" />
+                <xs:element name="CancelledAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CancellationReason" type="xs:string" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="UpdatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="UpdatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RowVersion" type="xs:base64Binary" minOccurs="0" />
+                <xs:element name="IsDeleted" type="xs:boolean" minOccurs="0" />
+                <xs:element name="DeletedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="DeletedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DeletionReason" type="xs:string" minOccurs="0" />
+                <xs:element name="RequestedByNameAr" type="xs:string" minOccurs="0" />
+                <xs:element name="AccountantNameAr" type="xs:string" minOccurs="0" />
+                <xs:element name="DocumentNumber" type="xs:string" minOccurs="0" />
+                <xs:element name="TreasuryVersion" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <Id>01a1533f-8443-7c37-a3a1-c695860e36d4</Id>
+    <BusinessDate>2026-10-19T00:00:00+03:00</BusinessDate>
+    <Status>2</Status>
+    <RequestedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</RequestedByUserId>
+    <CashboxAmount>335.94</CashboxAmount>
+    <PetroAppAmount>69.99</PetroAppAmount>
+    <BankAmount>-8220.23</BankAmount>
+    <MovementCount>21</MovementCount>
+    <Reason>تسليم الأموال للمحاسب</Reason>
+    <AccountantUserId>5e8dbbf5-f4a8-447d-d933-08df10cc8271</AccountantUserId>
+    <ConfirmedAtUtc>2026-10-19T08:21:38.6719483Z</ConfirmedAtUtc>
+    <ConfirmationReason>تم الاستلام والمطابقة</ConfirmationReason>
+    <CreatedAtUtc>2026-10-19T08:20:34.0226764Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-19T08:21:38.6727886Z</UpdatedAtUtc>
+    <UpdatedByUserId>5e8dbbf5-f4a8-447d-d933-08df10cc8271</UpdatedByUserId>
+    <RowVersion>AAAAAAADAjw=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <TreasuryVersion>2</TreasuryVersion>
+  </Table>
+  <Table>
+    <Id>01a14e19-0bb9-7e2c-a2d7-c70a19e63075</Id>
+    <BusinessDate>2026-10-18T00:00:00+03:00</BusinessDate>
+    <Status>2</Status>
+    <RequestedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</RequestedByUserId>
+    <CashboxAmount>520.96</CashboxAmount>
+    <PetroAppAmount>0.00</PetroAppAmount>
+    <BankAmount>-629.46</BankAmount>
+    <MovementCount>5</MovementCount>
+    <Reason>تسليم الأموال للمحاسب</Reason>
+    <AccountantUserId>5e8dbbf5-f4a8-447d-d933-08df10cc8271</AccountantUserId>
+    <ConfirmedAtUtc>2026-10-18T08:34:24.6342093Z</ConfirmedAtUtc>
+    <ConfirmationReason>تم الاستلام والمطابقة</ConfirmationReason>
+    <CreatedAtUtc>2026-10-18T08:20:26.7262905Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-18T08:34:24.6370494Z</UpdatedAtUtc>
+    <UpdatedByUserId>5e8dbbf5-f4a8-447d-d933-08df10cc8271</UpdatedByUserId>
+    <RowVersion>AAAAAAAC6fg=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <TreasuryVersion>2</TreasuryVersion>
+  </Table>
+</NewDataSet>

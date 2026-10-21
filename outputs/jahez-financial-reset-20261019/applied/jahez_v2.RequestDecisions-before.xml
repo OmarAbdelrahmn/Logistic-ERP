@@ -1,0 +1,48 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RequestId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="ActorUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="Status" type="xs:int" minOccurs="0" />
+                <xs:element name="DecidedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="Reason" type="xs:string" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DecisionJson" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <Id>01a14f27-9fc3-79e3-aa50-062e94cff073</Id>
+    <RequestId>01a14f25-ddbf-778b-8fbb-212c87a8fc2b</RequestId>
+    <ActorUserId>5e8dbbf5-f4a8-447d-d933-08df10cc8271</ActorUserId>
+    <Status>2</Status>
+    <DecidedAtUtc>2026-10-18T13:15:59.2997535Z</DecidedAtUtc>
+    <Reason>اعتماد الطلب</Reason>
+    <CreatedAtUtc>2026-10-18T13:15:59.3333503Z</CreatedAtUtc>
+    <CreatedByUserId>5e8dbbf5-f4a8-447d-d933-08df10cc8271</CreatedByUserId>
+    <DecisionJson>{"request":{"Approve":true,"Reason":"\u0627\u0639\u062A\u0645\u0627\u062F \u0627\u0644\u0637\u0644\u0628","ApprovedNet":null,"ApprovedCommission":null,"ApprovedDebtAdjustment":null,"UseOriginalValues":false},"Net":-124.85,"Commission":675.00,"Remaining":550.15}</DecisionJson>
+  </Table>
+  <Table>
+    <Id>01a14f27-b3c2-74f1-b3c3-c881bd2f02a3</Id>
+    <RequestId>01a14f23-f1dc-7629-b4d9-2e4c1cd48479</RequestId>
+    <ActorUserId>5e8dbbf5-f4a8-447d-d933-08df10cc8271</ActorUserId>
+    <Status>2</Status>
+    <DecidedAtUtc>2026-10-18T13:16:04.4182888Z</DecidedAtUtc>
+    <Reason>اعتماد الطلب</Reason>
+    <CreatedAtUtc>2026-10-18T13:16:04.4393599Z</CreatedAtUtc>
+    <CreatedByUserId>5e8dbbf5-f4a8-447d-d933-08df10cc8271</CreatedByUserId>
+    <DecisionJson>{"request":{"Approve":true,"Reason":"\u0627\u0639\u062A\u0645\u0627\u062F \u0627\u0644\u0637\u0644\u0628","ApprovedNet":null,"ApprovedCommission":null,"ApprovedDebtAdjustment":null,"UseOriginalValues":false},"Net":103.20,"Commission":390.00,"Remaining":493.20}</DecisionJson>
+  </Table>
+</NewDataSet>

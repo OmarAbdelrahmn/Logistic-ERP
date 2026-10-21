@@ -1,0 +1,994 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="ActorNameAr" type="xs:string" minOccurs="0" />
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="SubAccountId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="SponsorId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="MoneyMovementId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="CashboxHandoverId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="BatchId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="Revision" type="xs:int" minOccurs="0" />
+                <xs:element name="ReversesPostingId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="Kind" type="xs:int" minOccurs="0" />
+                <xs:element name="Amount" type="xs:decimal" minOccurs="0" />
+                <xs:element name="OccurredAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="ActorUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="Reference" type="xs:string" minOccurs="0" />
+                <xs:element name="Reason" type="xs:string" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>b0546744-1faa-43a3-8c77-0734c855698e</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000023</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <MoneyMovementId>01a14f3e-4e2f-7e01-bfe2-541ea5b06291</MoneyMovementId>
+    <BatchId>477c699a-1706-4102-bac7-2cbe7fce6e06</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>200.00</Amount>
+    <OccurredAtUtc>2026-10-18T13:40:45.7438819Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>0</Reference>
+    <Reason>تسليم جديد للعمل</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>ba8f2073-f70c-4ee0-940a-09d45d677d1c</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000020</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <MoneyMovementId>01a1536e-0927-7c66-8ab5-5416cbfb8f33</MoneyMovementId>
+    <BatchId>c9285d5e-ebd6-49a4-b45d-5b15fe4b1f96</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>-211.01</Amount>
+    <OccurredAtUtc>2026-10-19T09:11:22.6632856Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>JHZ/2026/10/00458</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>6bb7369e-17a4-46f9-a97c-0c4b690626f1</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000020</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <MoneyMovementId>01a14a4a-8e0e-7ba5-8894-94af82ec7816</MoneyMovementId>
+    <BatchId>80bb961b-0d74-49e6-9343-23a7aecd257a</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>-366.58</Amount>
+    <OccurredAtUtc>2026-10-17T14:36:02.4469972Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>JHZ/2026/10/00058</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>1d749377-87ba-4155-ba8b-1188319234c4</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000020</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <MoneyMovementId>01a14ef6-f274-7d52-ae30-e78085a450eb</MoneyMovementId>
+    <BatchId>b1feaba1-f483-4bdf-a688-3f00968345e3</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>-331.14</Amount>
+    <OccurredAtUtc>2026-10-18T12:22:49.204709Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>JHZ/2026/10/00444</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>9919cc07-b6cd-4005-b604-12a9593456c5</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000026</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <MoneyMovementId>01a153b9-f934-7468-b5f1-eb42961a474a</MoneyMovementId>
+    <BatchId>80a44b1f-df28-48c8-825d-5bb0ec114e37</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>-465.05</Amount>
+    <OccurredAtUtc>2026-10-19T10:34:19.3166586Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>JHZ/2026/10/00469</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>ابراهيم</ActorNameAr>
+    <Id>3679f75b-33d4-4a31-b2f0-12b4ae79b448</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000025</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <CashboxHandoverId>01a1533f-8443-7c37-a3a1-c695860e36d4</CashboxHandoverId>
+    <BatchId>e530cf38-7b36-4b67-8cda-b2941f45406a</BatchId>
+    <Revision>0</Revision>
+    <Kind>2</Kind>
+    <Amount>135.94</Amount>
+    <OccurredAtUtc>2026-10-19T08:21:38.6719483Z</OccurredAtUtc>
+    <ActorUserId>5e8dbbf5-f4a8-447d-d933-08df10cc8271</ActorUserId>
+    <Reference>legacy:01a1533f-8443-7c37-a3a1-c695860e36d4</Reference>
+    <Reason>إعادة بناء تسليم مؤكد سابقاً؛ لا يمثل تحصيلاً جديداً</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>cb5a8916-d94d-4941-870b-1a4deb53e776</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000026</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <MoneyMovementId>01a153a7-d223-77f1-a5c5-a46012ed0f3b</MoneyMovementId>
+    <BatchId>a03ad27a-f1c2-4540-801b-af1949b291a9</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>-233.75</Amount>
+    <OccurredAtUtc>2026-10-19T10:14:29.6676695Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>JHZ/2026/10/00466</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>4eb6abd9-638a-4536-aa8e-1b180fe5b2a0</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000020</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <MoneyMovementId>01a153a5-3c13-7887-9806-d0ed59cc9bdb</MoneyMovementId>
+    <BatchId>e1d2bc2b-398a-44e8-beb1-518f6d92adac</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>-228.10</Amount>
+    <OccurredAtUtc>2026-10-19T10:11:40.1794256Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>JHZ/2026/10/00465</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>b216f143-2da4-4c10-8856-39bd6d78e436</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000016</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <MoneyMovementId>01a15362-f9c5-76ad-98a8-352300b7e959</MoneyMovementId>
+    <BatchId>60cae484-7489-4d73-9941-e3985f097745</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>30.00</Amount>
+    <OccurredAtUtc>2026-10-19T08:59:17.8298326Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>JHZ/2026/10/00457</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>c4c1f7c8-ab52-4439-9504-3feea45f841f</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000026</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <MoneyMovementId>01a15352-ad24-774a-b086-2887cb02778f</MoneyMovementId>
+    <BatchId>4a08464b-9add-4d38-93a9-13e7cdff390a</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>-1201.76</Amount>
+    <OccurredAtUtc>2026-10-19T08:41:29.636466Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>JHZ/2026/10/00454</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>e40984bb-380e-4ccd-bf1d-4126f67c9b91</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000026</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <MoneyMovementId>01a15397-b025-7c74-92f8-5f0fd0c0f9ab</MoneyMovementId>
+    <BatchId>462fcf5d-5e65-4912-a8ce-6dfd94b2afc9</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>-261.99</Amount>
+    <OccurredAtUtc>2026-10-19T09:56:52.38903Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>JHZ/2026/10/00461</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>f21241f9-5ecd-4d65-bf58-5077fed329b0</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000026</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <MoneyMovementId>01a1539e-d91c-7856-89a7-29eff3b8be63</MoneyMovementId>
+    <BatchId>05f5d973-42a8-41df-9cbe-0d260336699a</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>-399.62</Amount>
+    <OccurredAtUtc>2026-10-19T10:04:41.628836Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>JHZ/2026/10/00462</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>ابراهيم</ActorNameAr>
+    <Id>1cff62ab-6655-41d0-984f-52ce487cacda</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000023</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <CashboxHandoverId>01a1533f-8443-7c37-a3a1-c695860e36d4</CashboxHandoverId>
+    <BatchId>d45e1783-8cb0-49a6-b996-2cb3f9baf3d7</BatchId>
+    <Revision>0</Revision>
+    <Kind>2</Kind>
+    <Amount>-200.00</Amount>
+    <OccurredAtUtc>2026-10-19T08:21:38.6719483Z</OccurredAtUtc>
+    <ActorUserId>5e8dbbf5-f4a8-447d-d933-08df10cc8271</ActorUserId>
+    <Reference>legacy:01a1533f-8443-7c37-a3a1-c695860e36d4</Reference>
+    <Reason>إعادة بناء تسليم مؤكد سابقاً؛ لا يمثل تحصيلاً جديداً</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>3b6dd4aa-fe52-45a4-9393-53b548945f7a</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000026</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <MoneyMovementId>01a14e72-8cd8-77ca-88bc-ec554255c092</MoneyMovementId>
+    <BatchId>dcbc935f-607c-43b0-95ea-aecb2fa31f27</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>-374.06</Amount>
+    <OccurredAtUtc>2026-10-18T09:58:12.4405704Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>JHZ/2026/10/00434</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>92bb8fe6-abc4-4f23-aeb8-5623b18d408f</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000026</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <MoneyMovementId>01a153ac-4176-76a7-b8c3-f7dd4ad23b72</MoneyMovementId>
+    <BatchId>a84cef77-2706-41f7-a866-4d9af7d75d85</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>-733.28</Amount>
+    <OccurredAtUtc>2026-10-19T10:19:20.3105761Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>JHZ/2026/10/00467</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>124176e3-9d64-48df-a80b-5f9e03dea6a3</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000026</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <MoneyMovementId>01a14e8d-ed23-7d54-a33a-39df0e60caac</MoneyMovementId>
+    <BatchId>bdc37a63-870a-4182-b9f3-d24b0afed5aa</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>-233.38</Amount>
+    <OccurredAtUtc>2026-10-18T10:28:06.5633683Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>JHZ/2026/10/00438</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>da8c5938-1433-4169-8ecf-5fbe8a9c2d95</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000026</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <MoneyMovementId>01a14ee9-8eee-75ba-b5f2-d8a164dc9606</MoneyMovementId>
+    <BatchId>9720f1d2-b74e-4091-b780-04c5b9175571</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>-585.73</Amount>
+    <OccurredAtUtc>2026-10-18T12:08:11.7590734Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>JHZ/2026/10/00441</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>dd48aed8-21fc-462e-820b-621cdfb393c6</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000026</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <MoneyMovementId>01a14e77-0916-7b12-b467-92e388550d86</MoneyMovementId>
+    <BatchId>ca76f43b-8d1c-4d94-b4d7-7cfe6f424e83</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>-544.71</Amount>
+    <OccurredAtUtc>2026-10-18T10:03:06.3908714Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>JHZ/2026/10/00435</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>ابراهيم</ActorNameAr>
+    <Id>876ae52e-7e93-45c9-8538-645c2f0687fc</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000023</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <CashboxHandoverId>01a14e19-0bb9-7e2c-a2d7-c70a19e63075</CashboxHandoverId>
+    <BatchId>1f2853c7-2053-4f37-952e-0d8dd8a3f8a7</BatchId>
+    <Revision>0</Revision>
+    <Kind>2</Kind>
+    <Amount>-200.00</Amount>
+    <OccurredAtUtc>2026-10-18T08:34:24.6342093Z</OccurredAtUtc>
+    <ActorUserId>5e8dbbf5-f4a8-447d-d933-08df10cc8271</ActorUserId>
+    <Reference>legacy:01a14e19-0bb9-7e2c-a2d7-c70a19e63075</Reference>
+    <Reason>إعادة بناء تسليم مؤكد سابقاً؛ لا يمثل تحصيلاً جديداً</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>b0300d3f-efcb-4269-9f6e-68d9c8dbea69</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000026</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <MoneyMovementId>01a14f42-d31f-71e9-bc00-33623e85fb65</MoneyMovementId>
+    <BatchId>789d92bf-acf2-409c-925f-a167c9ed7c91</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>-1190.10</Amount>
+    <OccurredAtUtc>2026-10-18T13:45:41.9194213Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>JHZ/2026/10/00446</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>8f380c23-89a3-4422-ab1f-6a734982f87c</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000026</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <MoneyMovementId>01a153fe-e7fd-7806-883c-89b52e75fcd9</MoneyMovementId>
+    <BatchId>fe30d022-2682-419b-b0a2-b555e6cefbce</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>-897.66</Amount>
+    <OccurredAtUtc>2026-10-19T11:49:36.8938525Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>JHZ/2026/10/00473</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>ابراهيم</ActorNameAr>
+    <Id>47fd1701-c642-4018-ad8e-749d859b7165</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000019</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <CashboxHandoverId>01a14e19-0bb9-7e2c-a2d7-c70a19e63075</CashboxHandoverId>
+    <BatchId>1dbc67f1-4a83-4d26-a859-fc4147beaa9c</BatchId>
+    <Revision>0</Revision>
+    <Kind>2</Kind>
+    <Amount>120.96</Amount>
+    <OccurredAtUtc>2026-10-18T08:34:24.6342093Z</OccurredAtUtc>
+    <ActorUserId>5e8dbbf5-f4a8-447d-d933-08df10cc8271</ActorUserId>
+    <Reference>legacy:01a14e19-0bb9-7e2c-a2d7-c70a19e63075</Reference>
+    <Reason>إعادة بناء تسليم مؤكد سابقاً؛ لا يمثل تحصيلاً جديداً</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>cde5f6e4-6d0e-443f-87ff-7a4e93fb89c2</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000032</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000040</SponsorId>
+    <MoneyMovementId>01a153ee-a3b7-7419-a17a-dd9bea79a568</MoneyMovementId>
+    <BatchId>3d0bd4e6-c037-4abe-bec1-e71bc09c47a4</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>45.41</Amount>
+    <OccurredAtUtc>2026-10-19T11:31:50.8395727Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>0</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>e21ee208-5033-4523-a26a-7a5cc5fc11d8</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000026</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <MoneyMovementId>01a153a1-113b-7674-a2d0-91f46df73c53</MoneyMovementId>
+    <BatchId>4c64c599-9832-4c9b-8cab-93991e9fc39a</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>-160.01</Amount>
+    <OccurredAtUtc>2026-10-19T10:07:07.0677157Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>JHZ/2026/10/00463</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>b94a1b9b-4b4c-4fc8-9eac-7cebc0892b8a</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000026</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <MoneyMovementId>01a15358-150e-73ea-b505-d5b922ec4307</MoneyMovementId>
+    <BatchId>7bcdfbcb-f941-4e77-98f4-53dd15b21435</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>-433.13</Amount>
+    <OccurredAtUtc>2026-10-19T08:47:23.9189004Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>JHZ/2026/10/00455</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>1757b097-6df4-4ce3-a6c3-83ec80e44570</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000016</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <MoneyMovementId>01a149f9-3b7f-7829-9f80-30d75958e0db</MoneyMovementId>
+    <BatchId>e00b010c-c38d-4947-9f39-2df33aa2607f</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>120.96</Amount>
+    <OccurredAtUtc>2026-10-17T13:07:12.8954312Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>2130</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>ابراهيم</ActorNameAr>
+    <Id>61ac18fd-dc66-4973-b405-85b3df635575</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000016</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <CashboxHandoverId>01a14e19-0bb9-7e2c-a2d7-c70a19e63075</CashboxHandoverId>
+    <BatchId>1dbc67f1-4a83-4d26-a859-fc4147beaa9c</BatchId>
+    <Revision>0</Revision>
+    <Kind>2</Kind>
+    <Amount>-120.96</Amount>
+    <OccurredAtUtc>2026-10-18T08:34:24.6342093Z</OccurredAtUtc>
+    <ActorUserId>5e8dbbf5-f4a8-447d-d933-08df10cc8271</ActorUserId>
+    <Reference>legacy:01a14e19-0bb9-7e2c-a2d7-c70a19e63075</Reference>
+    <Reason>إعادة بناء تسليم مؤكد سابقاً؛ لا يمثل تحصيلاً جديداً</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>31d70e71-5287-49eb-ad11-87850ac22978</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000026</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <MoneyMovementId>01a153a3-71af-7eb6-8a19-d826ebc7c522</MoneyMovementId>
+    <BatchId>ef5bcd49-a969-4877-b847-39344a51493f</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>-654.34</Amount>
+    <OccurredAtUtc>2026-10-19T10:09:42.8313632Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>JHZ/2026/10/00464</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>1905f980-a375-4396-83b2-8f0147760311</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000020</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <MoneyMovementId>01a14f33-10b0-7545-88ad-746a6ba44c3a</MoneyMovementId>
+    <BatchId>4d983269-6f30-4759-a675-321594651673</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>-608.10</Amount>
+    <OccurredAtUtc>2026-10-18T13:28:29.1042768Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>JHZ/2026/10/00445</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>fd6130c7-2b79-4e94-9d3a-94c310cca310</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000026</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <MoneyMovementId>01a15385-8486-7654-9b0c-07bd730008b4</MoneyMovementId>
+    <BatchId>1ce645cb-5dc6-419c-90f3-7ef6faf18efa</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>-267.05</Amount>
+    <OccurredAtUtc>2026-10-19T09:37:01.5742232Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>JHZ/2026/10/00459</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>8ec8ee21-8a46-43ea-a4cf-959f669d9e5c</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000027</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <MoneyMovementId>01a1542c-7a99-7ddb-a70d-444ca7127d05</MoneyMovementId>
+    <BatchId>0d1d7580-f98e-4a51-a6ca-3d1bcd14eba3</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>177.98</Amount>
+    <OccurredAtUtc>2026-10-19T12:39:23.5457187Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>JHZ/2026/10/00474</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>ابراهيم</ActorNameAr>
+    <Id>f6b5c526-b019-4539-9120-9723468a1cf4</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000024</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <CashboxHandoverId>01a1533f-8443-7c37-a3a1-c695860e36d4</CashboxHandoverId>
+    <BatchId>d45e1783-8cb0-49a6-b996-2cb3f9baf3d7</BatchId>
+    <Revision>0</Revision>
+    <Kind>2</Kind>
+    <Amount>200.00</Amount>
+    <OccurredAtUtc>2026-10-19T08:21:38.6719483Z</OccurredAtUtc>
+    <ActorUserId>5e8dbbf5-f4a8-447d-d933-08df10cc8271</ActorUserId>
+    <Reference>legacy:01a1533f-8443-7c37-a3a1-c695860e36d4</Reference>
+    <Reason>إعادة بناء تسليم مؤكد سابقاً؛ لا يمثل تحصيلاً جديداً</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>d561b245-5739-4cfa-8e41-982a833adfc0</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000020</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <MoneyMovementId>01a14e92-3dda-7464-a175-7c66b853bf77</MoneyMovementId>
+    <BatchId>d0f2acde-581c-4b08-b925-09ba06e3f6e9</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>-72.48</Amount>
+    <OccurredAtUtc>2026-10-18T10:32:49.3708569Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>JHZ/2026/10/00439</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>18e9d6c3-5e21-4370-9fec-a009a7900058</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000026</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <MoneyMovementId>01a1538c-395d-79ef-b8da-52f52bcceafd</MoneyMovementId>
+    <BatchId>bafeb09f-df55-4d28-b762-6c8dae604d39</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>-101.83</Amount>
+    <OccurredAtUtc>2026-10-19T09:44:21.0855138Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>JHZ/2026/10/00460</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>a72f28d8-6e61-43fc-9435-a0f3f41c044d</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000023</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <MoneyMovementId>01a14a30-e02d-7d42-9adf-7788bf5bb8e9</MoneyMovementId>
+    <BatchId>15c9311e-fc60-47a9-93e5-e28dde75aa8d</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>200.00</Amount>
+    <OccurredAtUtc>2026-10-17T14:07:59.5338267Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>0</Reference>
+    <Reason>تسليم جديد للعمل</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>4143bc44-8cbe-42b4-864b-a106d7b4ead8</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000026</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <MoneyMovementId>01a14f7f-ae3a-7fa2-bdcc-d98039b1aa37</MoneyMovementId>
+    <BatchId>f0658f12-7031-4b73-8f55-5dd05735c802</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>-353.44</Amount>
+    <OccurredAtUtc>2026-10-18T14:52:10.170512Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>JHZ/2026/10/00449</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>30c1526b-78cf-4e3b-b672-a82040d77d68</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000020</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <MoneyMovementId>01a15347-0caf-7aa2-a5f7-64633bf194dc</MoneyMovementId>
+    <BatchId>ec9318e4-dc53-4671-9e3d-1dc84d63859b</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>-247.05</Amount>
+    <OccurredAtUtc>2026-10-19T08:28:47.6633333Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>JHZ/2026/10/00453</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>ابراهيم</ActorNameAr>
+    <Id>cd4e5bcb-b193-420b-b63d-abb990e40eaf</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000017</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <CashboxHandoverId>01a14e19-0bb9-7e2c-a2d7-c70a19e63075</CashboxHandoverId>
+    <BatchId>c1bcee43-64cb-4e12-80c7-2407fb7ea06a</BatchId>
+    <Revision>0</Revision>
+    <Kind>2</Kind>
+    <Amount>-200.00</Amount>
+    <OccurredAtUtc>2026-10-18T08:34:24.6342093Z</OccurredAtUtc>
+    <ActorUserId>5e8dbbf5-f4a8-447d-d933-08df10cc8271</ActorUserId>
+    <Reference>legacy:01a14e19-0bb9-7e2c-a2d7-c70a19e63075</Reference>
+    <Reason>إعادة بناء تسليم مؤكد سابقاً؛ لا يمثل تحصيلاً جديداً</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>fa12c1a0-1924-4d58-a6e2-ac62c7af542a</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000020</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <MoneyMovementId>01a153c4-3c5f-7552-9c98-ebcd63e1012d</MoneyMovementId>
+    <BatchId>36c80e09-93db-4f3e-9369-efa9380e8c9c</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>-552.82</Amount>
+    <OccurredAtUtc>2026-10-19T10:45:31.871411Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>JHZ/2026/10/00472</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>05b71d3e-b627-4959-8924-ae8b79733637</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000020</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <MoneyMovementId>01a153c0-da15-7b59-a776-1393d53069c5</MoneyMovementId>
+    <BatchId>4f3cb5d7-7c09-4b1d-a7fd-064c35793b83</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>-373.15</Amount>
+    <OccurredAtUtc>2026-10-19T10:41:50.1019098Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>JHZ/2026/10/00471</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>b1bc364e-afba-41b2-a755-b1ad17062ba8</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000017</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <MoneyMovementId>01a14a65-6041-74e5-80cc-3eb19fc79c26</MoneyMovementId>
+    <BatchId>501a921a-b4fc-47d9-849b-cf1b503abab5</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>200.00</Amount>
+    <OccurredAtUtc>2026-10-17T15:05:20.1934561Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>0</Reference>
+    <Reason>تسليم جديد للعمل</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>9d54cfbc-67fc-4c6b-b125-b35b70db8d1c</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000020</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <MoneyMovementId>01a14eec-6067-7caf-ab73-2aa83c2fd587</MoneyMovementId>
+    <BatchId>e88a4bdd-0ba3-4140-aed5-9e6519509a9d</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>-336.28</Amount>
+    <OccurredAtUtc>2026-10-18T12:11:16.4555526Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>JHZ/2026/10/00442</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>4f61e100-0527-43d7-a096-c11ac5b7d6f1</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000020</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <MoneyMovementId>01a14f74-6c54-7054-9258-52ffc8442542</MoneyMovementId>
+    <BatchId>d318b224-2669-46b3-9574-d750a228b403</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>-167.83</Amount>
+    <OccurredAtUtc>2026-10-18T14:39:52.4047541Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>JHZ/2026/10/00447</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>e5c23aee-861c-4c86-8ddf-c3e6d0717507</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000031</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000040</SponsorId>
+    <MoneyMovementId>01a14f5d-4398-7a52-9d3c-2fc24512f157</MoneyMovementId>
+    <BatchId>55bf6432-dd84-4e5f-8ee1-841d0c608d78</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>-535.93</Amount>
+    <OccurredAtUtc>2026-10-18T14:14:34.6484459Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>JHZ/2026/10/00063</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>60940e79-e005-4da4-9da5-c880865c04b8</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000026</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <MoneyMovementId>01a14e68-8a47-7b0c-b5b0-a013e0b9e127</MoneyMovementId>
+    <BatchId>fdff317d-c2b4-4b8a-8b0f-1bd0747e2251</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>-180.19</Amount>
+    <OccurredAtUtc>2026-10-18T09:47:16.4232956Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>JHZ/2026/10/00433</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>7a941294-30ba-49bf-89a5-c948bddd31fc</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000020</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <MoneyMovementId>01a153b6-ad7e-7469-9560-0285c03543d5</MoneyMovementId>
+    <BatchId>d0c40ac4-08ee-4110-adc3-394f0f083abc</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>-461.57</Amount>
+    <OccurredAtUtc>2026-10-19T10:30:43.3268476Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>JHZ/2026/10/00468</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>ed56fb5f-319c-4c50-96af-cab6eb04ff1e</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000028</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000040</SponsorId>
+    <MoneyMovementId>01a15374-383c-77a8-ae94-2c0287d8952b</MoneyMovementId>
+    <BatchId>17463854-77f1-4ddc-a82f-dcf4cee69b6e</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>23.96</Amount>
+    <OccurredAtUtc>2026-10-19T09:18:07.9322991Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>JHZ/2026/10/00064</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>ابراهيم</ActorNameAr>
+    <Id>daede810-61ec-4491-852f-d2d8840281d8</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000024</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <CashboxHandoverId>01a14e19-0bb9-7e2c-a2d7-c70a19e63075</CashboxHandoverId>
+    <BatchId>1f2853c7-2053-4f37-952e-0d8dd8a3f8a7</BatchId>
+    <Revision>0</Revision>
+    <Kind>2</Kind>
+    <Amount>200.00</Amount>
+    <OccurredAtUtc>2026-10-18T08:34:24.6342093Z</OccurredAtUtc>
+    <ActorUserId>5e8dbbf5-f4a8-447d-d933-08df10cc8271</ActorUserId>
+    <Reference>legacy:01a14e19-0bb9-7e2c-a2d7-c70a19e63075</Reference>
+    <Reason>إعادة بناء تسليم مؤكد سابقاً؛ لا يمثل تحصيلاً جديداً</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>495d33fa-d428-4f48-9047-db87dca3f386</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000020</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <MoneyMovementId>01a14fb5-cab8-7cdb-9416-d0ef4e7df782</MoneyMovementId>
+    <BatchId>f48f2734-596e-4b3a-a42b-dbc80f5c18c1</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>-145.87</Amount>
+    <OccurredAtUtc>2026-10-18T15:51:16.4089743Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>JHZ/2026/10/00450</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>ابراهيم</ActorNameAr>
+    <Id>f74943b1-389e-4bd1-81b6-df69a566d99a</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000018</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <CashboxHandoverId>01a14e19-0bb9-7e2c-a2d7-c70a19e63075</CashboxHandoverId>
+    <BatchId>c1bcee43-64cb-4e12-80c7-2407fb7ea06a</BatchId>
+    <Revision>0</Revision>
+    <Kind>2</Kind>
+    <Amount>200.00</Amount>
+    <OccurredAtUtc>2026-10-18T08:34:24.6342093Z</OccurredAtUtc>
+    <ActorUserId>5e8dbbf5-f4a8-447d-d933-08df10cc8271</ActorUserId>
+    <Reference>legacy:01a14e19-0bb9-7e2c-a2d7-c70a19e63075</Reference>
+    <Reason>إعادة بناء تسليم مؤكد سابقاً؛ لا يمثل تحصيلاً جديداً</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>b2f6400e-f281-4fbe-9a27-e370e827d808</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000026</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <MoneyMovementId>01a14e7b-b67a-7f49-a9a7-443f8a465a4e</MoneyMovementId>
+    <BatchId>6088f8a2-7bd9-4d60-a23d-777022bb6907</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>-1116.68</Amount>
+    <OccurredAtUtc>2026-10-18T10:08:12.9226778Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>JHZ/2026/10/00436</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>ابراهيم</ActorNameAr>
+    <Id>2208c44e-0df9-4cc0-9324-e6a1d02e77f8</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000022</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <CashboxHandoverId>01a1533f-8443-7c37-a3a1-c695860e36d4</CashboxHandoverId>
+    <BatchId>e530cf38-7b36-4b67-8cda-b2941f45406a</BatchId>
+    <Revision>0</Revision>
+    <Kind>2</Kind>
+    <Amount>-135.94</Amount>
+    <OccurredAtUtc>2026-10-19T08:21:38.6719483Z</OccurredAtUtc>
+    <ActorUserId>5e8dbbf5-f4a8-447d-d933-08df10cc8271</ActorUserId>
+    <Reference>legacy:01a1533f-8443-7c37-a3a1-c695860e36d4</Reference>
+    <Reason>إعادة بناء تسليم مؤكد سابقاً؛ لا يمثل تحصيلاً جديداً</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>ca72ac01-6f9d-4c82-a79a-eb317850b8fb</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000026</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <MoneyMovementId>01a153be-21c4-7bc3-af2f-1359574a247e</MoneyMovementId>
+    <BatchId>b56302f6-fb41-4d46-aa1d-336f9fa4e0e4</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>-884.30</Amount>
+    <OccurredAtUtc>2026-10-19T10:38:51.8447029Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>JHZ/2026/10/00470</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>عمر</ActorNameAr>
+    <Id>57bc42b4-1021-454b-9ae7-eb6d41e3a899</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000027</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <MoneyMovementId>01a14eb9-3d63-7e8d-96db-e1909e08d30c</MoneyMovementId>
+    <BatchId>407bf088-9ea6-4381-bd11-4daa53647856</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>69.99</Amount>
+    <OccurredAtUtc>2026-10-18T11:15:25.155034Z</OccurredAtUtc>
+    <ActorUserId>019c18d5-62e1-7000-c000-000000000001</ActorUserId>
+    <Reference>JHZ/2026/10/00440</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>9f336009-fdff-4de5-8319-ee9603f29542</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000020</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <MoneyMovementId>01a14eef-c455-7e2a-9bef-60717c4d23fe</MoneyMovementId>
+    <BatchId>73c30565-721d-446c-a098-fa3acb359cd3</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>-102.74</Amount>
+    <OccurredAtUtc>2026-10-18T12:14:58.6453742Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>JHZ/2026/10/00061</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>d33973cb-4526-4763-b337-f1b7dedba7e6</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000022</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <MoneyMovementId>01a14fbb-fc29-7280-8ccd-fd36b35ea114</MoneyMovementId>
+    <BatchId>68a1df76-6faf-4d8d-bf71-adc498a15a51</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>135.94</Amount>
+    <OccurredAtUtc>2026-10-18T15:58:02.2817525Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>0</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>6a1a5c6c-ab46-4322-bacb-f4766fe8c437</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000026</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000042</SponsorId>
+    <MoneyMovementId>01a14e64-0d4a-7242-9a57-bb174a125b8c</MoneyMovementId>
+    <BatchId>ee8d4236-1000-470c-b927-183fe76e7e05</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>-820.69</Amount>
+    <OccurredAtUtc>2026-10-18T09:42:22.2824573Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>JHZ/2026/10/00432</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>55a1b309-ff6a-4169-92e3-f52179f64327</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000031</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000040</SponsorId>
+    <MoneyMovementId>01a15394-5ba4-708e-ae8e-df92fd828211</MoneyMovementId>
+    <BatchId>dda2c793-c844-4169-ae20-50d4e3dc7e45</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>-116.01</Amount>
+    <OccurredAtUtc>2026-10-19T09:53:14.1483128Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>JHZ/2026/10/00065</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>f10e56c2-20e8-458a-9109-f82dfa9fbc3d</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000020</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <MoneyMovementId>01a14a90-620b-7edf-b28f-ef1ab1005615</MoneyMovementId>
+    <BatchId>f96b53bc-2ce2-4bc8-9e43-9523a85424f3</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>-262.88</Amount>
+    <OccurredAtUtc>2026-10-17T15:52:18.6992026Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>JHZ/2026/10/00059</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+  <Table>
+    <ActorNameAr>محمد ربيع محمود حميده</ActorNameAr>
+    <Id>6f1f2fff-75e4-4626-a6b8-fa9ed5043fef</Id>
+    <SubAccountId>019d0000-0000-7000-8000-000000000020</SubAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <MoneyMovementId>01a14e81-d20a-7cf3-9b11-16e1cfa5e68c</MoneyMovementId>
+    <BatchId>6228b4c7-5740-4e93-81a9-2acb3f0c77e7</BatchId>
+    <Revision>0</Revision>
+    <Kind>1</Kind>
+    <Amount>-520.88</Amount>
+    <OccurredAtUtc>2026-10-18T10:14:53.1943605Z</OccurredAtUtc>
+    <ActorUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</ActorUserId>
+    <Reference>JHZ/2026/10/00437</Reference>
+    <Reason>تصفية من داشبورد جاهز</Reason>
+    <CreatedAtUtc>2026-10-19T12:52:29.4583722Z</CreatedAtUtc>
+  </Table>
+</NewDataSet>

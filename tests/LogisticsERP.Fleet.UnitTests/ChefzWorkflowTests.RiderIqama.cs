@@ -20,6 +20,45 @@ public sealed partial class ChefzWorkflowTests
     }
 
     [Fact]
+    public async Task AccountListReturnsCurrentWorkerIqamaAndPreservesLeadingZerosAfterHandover()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var f = await Fixture.Create(false);
+        await SetReportRiderIqamas(f, ct);
+
+        var response = Value(await f.Service.GetAccountsAsync(1, 50, ct));
+        Assert.Equal(SecondRiderIqama, Assert.Single(response.Items).RiderIqamaNo);
+
+        f.Second.EffectiveTo = new(2026, 10, 31);
+        f.First.EffectiveTo = null;
+        await f.Db.SaveChangesAsync(ct);
+        response = Value(await f.Service.GetAccountsAsync(1, 50, ct));
+        Assert.Equal(FirstRiderIqama, Assert.Single(response.Items).RiderIqamaNo);
+        using var json = JsonDocument.Parse(JsonSerializer.Serialize(response, JsonSerializerOptions.Web));
+        Assert.Equal(FirstRiderIqama, json.RootElement.GetProperty("items")[0].GetProperty("riderIqamaNo").GetString());
+    }
+
+    [Theory]
+    [InlineData("ended")]
+    [InlineData("deleted")]
+    [InlineData("missing-rider")]
+    [InlineData("missing-iqama")]
+    public async Task AccountListReturnsNullWithoutCurrentWorkerIqama(string scenario)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var f = await Fixture.Create(false);
+        if (scenario != "missing-iqama") await SetReportRiderIqamas(f, ct);
+        if (scenario == "ended") f.Second.EffectiveTo = new(2026, 10, 31);
+        if (scenario == "deleted") f.Second.IsDeleted = true;
+        if (scenario == "missing-rider") f.Second.RiderProfileId = Guid.NewGuid();
+        await f.Db.SaveChangesAsync(ct);
+
+        var response = Value(await f.Service.GetAccountsAsync(1, 50, ct));
+        Assert.Null(Assert.Single(response.Items).RiderIqamaNo);
+        Assert.Equal(1, response.TotalCount);
+    }
+
+    [Fact]
     public async Task PerformanceReportsReturnActualAndHistoricalRiderIqamasInsteadOfAccountOwnerIdentity()
     {
         var ct = TestContext.Current.CancellationToken;

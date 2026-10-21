@@ -134,6 +134,7 @@ internal sealed class JahezConfigurations : IEntityTypeConfiguration<JahezAccoun
     {
         b.ConfigureHistory("DailyOrders", "jahez_v2");
         Values(b);
+        b.HasOne<PlatformAccountDayUsage>().WithMany().HasForeignKey(x => x.DayUsageId).OnDelete(DeleteBehavior.Restrict);
         Handover(b, x => x.HandoverId);
         b.HasOne<JahezImportBatch>().WithMany().HasForeignKey(x => x.BatchId).OnDelete(DeleteBehavior.Restrict);
         b.HasOne<JahezImportRow>().WithMany().HasForeignKey(x => x.ImportRowId).OnDelete(DeleteBehavior.Restrict);

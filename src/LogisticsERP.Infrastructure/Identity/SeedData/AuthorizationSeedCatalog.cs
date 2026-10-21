@@ -208,7 +208,8 @@ internal static class AuthorizationSeedCatalog
 
     public static IReadOnlyList<string> SystemAdminPermissions { get; } = ExpandPermissions(OriginalSystemAdminPermissions)
         .Concat(LogisticsERP.Application.Features.Jahez.JahezWorkflowPermissions.All)
-        .Concat(PermissionKeys.All.Where(key => key.StartsWith("ninja.", StringComparison.Ordinal)).Order(StringComparer.Ordinal)).ToArray();
+        .Concat(PermissionKeys.All.Where(key => key.StartsWith("ninja.", StringComparison.Ordinal)).Order(StringComparer.Ordinal))
+        .Concat(LogisticsERP.Application.Features.Jahez.JahezTreasuryPermissions.All).ToArray();
     public static IReadOnlyList<string> ManagerPermissions { get; } = ExpandPermissions(OriginalManagerPermissions);
 
     public static IReadOnlyList<RolePermissionSeed> RolePermissions { get; } =
@@ -315,6 +316,7 @@ internal static class AuthorizationSeedCatalog
             LogisticsERP.Application.Features.Jahez.JahezWorkflowPermissions.All, ref sequence);
         AddRolePermissions(seeds, SystemRoles.SystemAdminId,
             PermissionKeys.All.Where(key => key.StartsWith("ninja.", StringComparison.Ordinal)).Order(StringComparer.Ordinal), ref sequence);
+        AddRolePermissions(seeds, SystemRoles.SystemAdminId, LogisticsERP.Application.Features.Jahez.JahezTreasuryPermissions.All, ref sequence);
         return seeds;
     }
 

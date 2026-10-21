@@ -6,7 +6,7 @@ namespace LogisticsERP.Application.Features.Ninja;
 public sealed record NinjaAssignRequest(Guid ActualRiderProfileId, DateOnly EffectiveFrom, string PhoneNumber,
     string? NewPassword = null, string? Reason = null, bool WasBackdated = false, string? BackdatedReason = null);
 public sealed record NinjaReturnRequest(DateOnly EffectiveTo, string PhoneNumber, string? NewPassword,
-    string Reason, string RowVersion, string Status = "Ended");
+    string Reason, string RowVersion, string Status = "Ended", PlatformAccountDayUsageInput? DayUsage = null);
 public sealed record NinjaCredentialRequest(string? NewPassword, string? PhoneNumber, string Reason, string RowVersion);
 public sealed record NinjaPasswordNotification(string Code, string MessageAr, string MessageEn, DateTimeOffset ChangeAllowedAtUtc);
 public sealed record NinjaCredentialResponse(Guid AccountId, string? PhoneNumber, bool HasPassword,

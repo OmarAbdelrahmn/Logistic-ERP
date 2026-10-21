@@ -1,0 +1,225 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="ProvenSources" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Kind" type="xs:int" minOccurs="0" />
+                <xs:element name="EntryCount" type="xs:int" minOccurs="0" />
+                <xs:element name="SignedAmount" type="xs:decimal" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table2">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="SponsorName" type="xs:string" minOccurs="0" />
+                <xs:element name="AccountName" type="xs:string" minOccurs="0" />
+                <xs:element name="Location" type="xs:int" minOccurs="0" />
+                <xs:element name="Purpose" type="xs:int" minOccurs="0" />
+                <xs:element name="ReconstructedBalance" type="xs:decimal" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table3">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="PreservedMovements" type="xs:int" minOccurs="0" />
+                <xs:element name="OriginalAmounts" type="xs:decimal" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table4">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="PreservedHandovers" type="xs:int" minOccurs="0" />
+                <xs:element name="ConfirmedPhysicalCash" type="xs:decimal" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table5">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="ExactPostingMemberships" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table6">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="IsActive" type="xs:boolean" minOccurs="0" />
+                <xs:element name="ActivatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table7">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="MissingHistoricalOwnership" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <ProvenSources>122</ProvenSources>
+  </Table>
+  <Table1>
+    <Kind>1</Kind>
+    <EntryCount>50</EntryCount>
+    <SignedAmount>-16528.93</SignedAmount>
+  </Table1>
+  <Table1>
+    <Kind>2</Kind>
+    <EntryCount>10</EntryCount>
+    <SignedAmount>0.00</SignedAmount>
+  </Table1>
+  <Table2>
+    <SponsorName>البوابا الموكبلا</SponsorName>
+    <AccountName>بنك البوابا</AccountName>
+    <Location>3</Location>
+    <Purpose>3</Purpose>
+    <ReconstructedBalance>-4988.48</ReconstructedBalance>
+  </Table2>
+  <Table2>
+    <SponsorName>اكسبرس جايت</SponsorName>
+    <AccountName>بنك إكسبرس</AccountName>
+    <Location>3</Location>
+    <Purpose>3</Purpose>
+    <ReconstructedBalance>-12092.75</ReconstructedBalance>
+  </Table2>
+  <Table2>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+    <AccountName>بنك التجارية</AccountName>
+    <Location>3</Location>
+    <Purpose>3</Purpose>
+    <ReconstructedBalance>-651.94</ReconstructedBalance>
+  </Table2>
+  <Table2>
+    <SponsorName>البوابا الموكبلا</SponsorName>
+    <AccountName>رسوم البوابا</AccountName>
+    <Location>2</Location>
+    <Purpose>2</Purpose>
+    <ReconstructedBalance>200.00</ReconstructedBalance>
+  </Table2>
+  <Table2>
+    <SponsorName>البوابا الموكبلا</SponsorName>
+    <AccountName>تصفيات البوابا</AccountName>
+    <Location>2</Location>
+    <Purpose>1</Purpose>
+    <ReconstructedBalance>120.96</ReconstructedBalance>
+  </Table2>
+  <Table2>
+    <SponsorName>اكسبرس جايت</SponsorName>
+    <AccountName>رسوم إكسبرس</AccountName>
+    <Location>2</Location>
+    <Purpose>2</Purpose>
+    <ReconstructedBalance>400.00</ReconstructedBalance>
+  </Table2>
+  <Table2>
+    <SponsorName>اكسبرس جايت</SponsorName>
+    <AccountName>تصفيات إكسبرس</AccountName>
+    <Location>2</Location>
+    <Purpose>1</Purpose>
+    <ReconstructedBalance>135.94</ReconstructedBalance>
+  </Table2>
+  <Table2>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+    <AccountName>صندوق التجارية</AccountName>
+    <Location>2</Location>
+    <Purpose>3</Purpose>
+    <ReconstructedBalance>0.00</ReconstructedBalance>
+  </Table2>
+  <Table2>
+    <SponsorName>البوابا الموكبلا</SponsorName>
+    <AccountName>بترو آب البوابا</AccountName>
+    <Location>4</Location>
+    <Purpose>3</Purpose>
+    <ReconstructedBalance>0.00</ReconstructedBalance>
+  </Table2>
+  <Table2>
+    <SponsorName>اكسبرس جايت</SponsorName>
+    <AccountName>بترو آب إكسبرس</AccountName>
+    <Location>4</Location>
+    <Purpose>3</Purpose>
+    <ReconstructedBalance>247.97</ReconstructedBalance>
+  </Table2>
+  <Table2>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+    <AccountName>بترو آب التجارية</AccountName>
+    <Location>4</Location>
+    <Purpose>3</Purpose>
+    <ReconstructedBalance>45.41</ReconstructedBalance>
+  </Table2>
+  <Table2>
+    <SponsorName>البوابا الموكبلا</SponsorName>
+    <AccountName>عهدة رسوم البوابا</AccountName>
+    <Location>1</Location>
+    <Purpose>2</Purpose>
+    <ReconstructedBalance>0.00</ReconstructedBalance>
+  </Table2>
+  <Table2>
+    <SponsorName>البوابا الموكبلا</SponsorName>
+    <AccountName>عهدة تصفيات البوابا</AccountName>
+    <Location>1</Location>
+    <Purpose>1</Purpose>
+    <ReconstructedBalance>30.00</ReconstructedBalance>
+  </Table2>
+  <Table2>
+    <SponsorName>اكسبرس جايت</SponsorName>
+    <AccountName>عهدة رسوم إكسبرس</AccountName>
+    <Location>1</Location>
+    <Purpose>2</Purpose>
+    <ReconstructedBalance>0.00</ReconstructedBalance>
+  </Table2>
+  <Table2>
+    <SponsorName>اكسبرس جايت</SponsorName>
+    <AccountName>عهدة تصفيات إكسبرس</AccountName>
+    <Location>1</Location>
+    <Purpose>1</Purpose>
+    <ReconstructedBalance>0.00</ReconstructedBalance>
+  </Table2>
+  <Table2>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+    <AccountName>عهدة رسوم التجارية</AccountName>
+    <Location>1</Location>
+    <Purpose>2</Purpose>
+    <ReconstructedBalance>0.00</ReconstructedBalance>
+  </Table2>
+  <Table2>
+    <SponsorName>البوابة المقبلة للتجارة</SponsorName>
+    <AccountName>عهدة تصفيات التجارية</AccountName>
+    <Location>1</Location>
+    <Purpose>1</Purpose>
+    <ReconstructedBalance>23.96</ReconstructedBalance>
+  </Table2>
+  <Table3>
+    <PreservedMovements>50</PreservedMovements>
+    <OriginalAmounts>18937.41</OriginalAmounts>
+  </Table3>
+  <Table4>
+    <PreservedHandovers>2</PreservedHandovers>
+    <ConfirmedPhysicalCash>856.90</ConfirmedPhysicalCash>
+  </Table4>
+  <Table5>
+    <ExactPostingMemberships>26</ExactPostingMemberships>
+  </Table5>
+  <Table6>
+    <IsActive>false</IsActive>
+  </Table6>
+  <Table7>
+    <MissingHistoricalOwnership>0</MissingHistoricalOwnership>
+  </Table7>
+</NewDataSet>

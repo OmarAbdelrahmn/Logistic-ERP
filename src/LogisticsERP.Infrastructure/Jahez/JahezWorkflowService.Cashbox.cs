@@ -28,6 +28,7 @@ internal sealed partial class JahezWorkflowService
     public Task<Result<JahezCashboxHandover>> SubmitCashboxHandoverV2Async(string key, JahezCashboxHandoverCreate request, CancellationToken ct = default) =>
         ExecuteAsync(key, "v2.cashbox.submit", request, PermissionKeys.Jahez.CashboxSubmit, async () =>
         {
+            Require(!await TreasuryActive(ct), JahezErrors.Conflict("treasury_upgrade_required: استخدم واجهة الخزينة V3 لتسليم العهدة."));
             Reason(request.Reason);
             Require(request.BusinessDate <= Today, JahezErrors.Invalid("تاريخ تسليم الأموال لا يمكن أن يكون في المستقبل."));
             Require(!await db.JahezCashboxHandovers.AnyAsync(x => x.Status == JahezCashboxHandoverStatus.Pending, ct),
@@ -54,6 +55,7 @@ internal sealed partial class JahezWorkflowService
         JahezCashboxHandoverConfirm request, CancellationToken ct = default) =>
         ExecuteAsync(key, "v2.cashbox.confirm", new { id, request }, PermissionKeys.Jahez.CashboxConfirm, async () =>
         {
+            Require(!await TreasuryActive(ct), JahezErrors.Conflict("treasury_upgrade_required: استخدم واجهة الخزينة V3 لتسليم العهدة."));
             Reason(request.Reason);
             var h = await PendingCashboxHandover(id, request.RowVersion, ct);
             Require(h.RequestedByUserId != Actor, JahezErrors.Forbidden);
@@ -68,6 +70,7 @@ internal sealed partial class JahezWorkflowService
         JahezCashboxHandoverCancel request, CancellationToken ct = default) =>
         ExecuteAsync(key, "v2.cashbox.cancel", new { id, request }, PermissionKeys.Jahez.CashboxSubmit, async () =>
         {
+            Require(!await TreasuryActive(ct), JahezErrors.Conflict("treasury_upgrade_required: استخدم واجهة الخزينة V3 لتسليم العهدة."));
             Reason(request.Reason);
             var h = await PendingCashboxHandover(id, request.RowVersion, ct);
             Require(h.RequestedByUserId == Actor, JahezErrors.Forbidden);

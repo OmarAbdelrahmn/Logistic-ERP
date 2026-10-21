@@ -66,7 +66,9 @@ internal sealed partial class JahezWorkflowService
                 }
             }
             db.Add(entity);
-            return new JahezWorkflowApproval(entity, []);
+            var linkedOperation = entity.OperationId.HasValue
+                ? await db.JahezOperations.SingleAsync(x => x.Id == entity.OperationId.Value, ct) : null;
+            return new JahezWorkflowApproval(entity, []) { Amounts = JahezSettlementAmounts.From(linkedOperation) };
         }, ct);
 
     public async Task<Result<JahezWorkflowApproval>> DecideWorkflowRequestAsync(string key, Guid id, JahezWorkflowDecision request, CancellationToken ct = default)
@@ -111,6 +113,7 @@ internal sealed partial class JahezWorkflowService
                                 Status = JahezOperationStatus.Executed, PaymentStatus = JahezOperationPaymentStatus.Deferred,
                                 ThroughDate = JahezRules.RiyadhDate(entity.EffectiveAtUtc.Value), EffectiveAtUtc = entity.EffectiveAtUtc.Value,
                                 Reason = entity.Reason, ApprovedRequestId = entity.Id, ExecutedAtUtc = Now, ExecutedByUserId = Actor });
+                            await SynchronizeTreasuryAsync(ct);
                             await db.SaveChangesAsync(ct); // Release unique assignment slot within the owning transaction.
                             await CreateHandover(entity.TargetAccountId!.Value, h.RiderProfileId, entity.EffectiveAtUtc.Value,
                                 entity.Reason, entity.WaiverAmount, entity.Id, ct);
@@ -130,7 +133,7 @@ internal sealed partial class JahezWorkflowService
                             await ExecuteWorkflowOperation(operation, true, ct);
                             break;
                         case JahezApprovalKind.Adjustment when entity.AdjustmentTarget == JahezAdjustmentTarget.Settlement:
-                            var p = await WorkflowPreview(OperationInput(operation!), ct);
+                            var p = await WorkflowPreview(OperationInput(operation!), ct, operation!.CommissionStartDate);
                             Require(p.CommissionComplete, JahezErrors.Conflict(string.Join(" ", p.Problems)));
                             var net = request.UseOriginalValues ? operation!.Net : request.ApprovedNet ?? entity.ProposedNet ?? operation!.Net;
                             var commission = request.UseOriginalValues ? p.Commission : request.ApprovedCommission ?? entity.ProposedCommission ?? p.Commission;
@@ -154,7 +157,7 @@ internal sealed partial class JahezWorkflowService
                 var decision = new JahezApprovalDecision { RequestId = id, ActorUserId = Actor, Status = entity.Status,
                     DecidedAtUtc = Now, Reason = request.Reason, DecisionJson = JsonSerializer.Serialize(new { request, operation?.Net, operation?.Commission, operation?.Remaining }) };
                 db.Add(decision); NotifyDecision(entity, decision);
-                return new JahezWorkflowApproval(entity, [decision]);
+                return new JahezWorkflowApproval(entity, [decision]) { Amounts = JahezSettlementAmounts.From(operation) };
             }, ct);
         }
         catch (JahezBusinessException e) { return Result.Failure<JahezWorkflowApproval>(e.Error); }

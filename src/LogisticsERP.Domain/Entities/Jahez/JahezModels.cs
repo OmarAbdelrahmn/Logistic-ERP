@@ -133,6 +133,7 @@ public sealed class JahezTransaction : HistoryEntity
 
 public sealed class JahezDailyDispatch : HistoryEntity
 {
+    public Guid? DayUsageId { get; set; }
     public Guid BatchId { get; set; }
     public Guid ImportRowId { get; set; }
     public Guid HandoverId { get; set; }

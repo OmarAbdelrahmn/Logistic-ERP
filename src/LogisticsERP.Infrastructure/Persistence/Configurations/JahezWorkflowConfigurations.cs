@@ -26,6 +26,7 @@ internal sealed class JahezWorkflowConfigurations : IEntityTypeConfiguration<Jah
         {
             t.HasCheckConstraint("CK_JahezOperation_Amounts", "[Commission] >= 0 AND [CalculatedCommission] >= 0 AND [Remaining] = [Net] + [Commission]");
             t.HasCheckConstraint("CK_JahezOperation_State", "[Mode] BETWEEN 1 AND 3 AND [Status] BETWEEN 1 AND 3 AND [PaymentStatus] BETWEEN 1 AND 4 AND (([Status] = 3 AND [ExecutedAtUtc] IS NOT NULL) OR ([Status] <> 3 AND [ExecutedAtUtc] IS NULL))");
+            t.HasCheckConstraint("CK_JahezOperation_CommissionStart", "[CommissionStartDate] IS NULL OR [CommissionStartDate] <= [ThroughDate]");
         });
     }
     public void Configure(EntityTypeBuilder<JahezMoneyMovement> b)
@@ -43,8 +44,8 @@ internal sealed class JahezWorkflowConfigurations : IEntityTypeConfiguration<Jah
         b.HasIndex(x => new { x.Fund, x.OccurredAtUtc });
         b.ToTable(t =>
         {
-            t.HasCheckConstraint("CK_JahezMoney_Amount", "[Amount] > 0");
-            t.HasCheckConstraint("CK_JahezMoney_Routing", "([Direction] = 1 AND ([Fund] = 1 OR ([Fund] = 2 AND [Purpose] IN (1, 2)))) OR ([Direction] = 2 AND [Fund] IN (1, 3) AND [Purpose] <> 2)");
+            t.HasCheckConstraint("CK_JahezMoney_Amount", "[Amount] > 0 OR ([Amount] = 0 AND [Direction] = 0 AND [Purpose] = 1 AND [OperationId] IS NOT NULL)");
+            t.HasCheckConstraint("CK_JahezMoney_Routing", "([Direction] = 1 AND ([Fund] = 1 OR ([Fund] = 2 AND [Purpose] IN (1, 2)))) OR ([Direction] = 2 AND [Fund] IN (1, 3) AND [Purpose] <> 2) OR ([Direction] = 0 AND [Amount] = 0 AND [Purpose] = 1 AND [OperationId] IS NOT NULL AND [Fund] IN (1, 2, 3))");
         });
     }
     public void Configure(EntityTypeBuilder<JahezTransferredDebt> b)

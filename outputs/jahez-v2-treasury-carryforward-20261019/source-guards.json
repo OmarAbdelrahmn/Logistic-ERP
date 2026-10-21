@@ -1,0 +1,77 @@
+[
+  {
+    "Table": "jahez_v2.AccountFees",
+    "Sql": "SELECT CONVERT(varchar(64),HASHBYTES('SHA2_256',(SELECT * FROM [jahez_v2].[AccountFees] ORDER BY Id FOR JSON PATH)),2) AS SnapshotHash;",
+    "Sha256": "556FF533E22C0179FF5850A657D44615C3DB59DCA56F165A0E79CAC8C1FD7DC1"
+  },
+  {
+    "Table": "jahez_v2.AccountSessions",
+    "Sql": "SELECT CONVERT(varchar(64),HASHBYTES('SHA2_256',(SELECT * FROM [jahez_v2].[AccountSessions] ORDER BY Id FOR JSON PATH)),2) AS SnapshotHash;",
+    "Sha256": "3A2B983C99BF6423DD63E629AB085377612673A0E4EEFCF6CC7D1BA0F7C232E2"
+  },
+  {
+    "Table": "jahez_v2.Operations",
+    "Sql": "SELECT CONVERT(varchar(64),HASHBYTES('SHA2_256',(SELECT * FROM [jahez_v2].[Operations] ORDER BY Id FOR JSON PATH)),2) AS SnapshotHash;",
+    "Sha256": "0D4785E2933733988890931B0826DDE910B96C3DE9ECC48EAB4F457F2B2289DA"
+  },
+  {
+    "Table": "jahez_v2.MoneyMovements",
+    "Sql": "SELECT CONVERT(varchar(64),HASHBYTES('SHA2_256',(SELECT * FROM [jahez_v2].[MoneyMovements] ORDER BY Id FOR JSON PATH)),2) AS SnapshotHash;",
+    "Sha256": "6B90E946DE985516A1D569114B9C3CE2655A4F21442407A5BF89CD9A0EE922DF"
+  },
+  {
+    "Table": "jahez_v2.TransferredDebts",
+    "Sql": "SELECT CONVERT(varchar(64),HASHBYTES('SHA2_256',(SELECT * FROM [jahez_v2].[TransferredDebts] ORDER BY Id FOR JSON PATH)),2) AS SnapshotHash;",
+    "Sha256": "D7AC2B557B654C634DB21401D218A2508890064493AC11728D22D2356081C80A"
+  },
+  {
+    "Table": "jahez_v2.CashboxHandovers",
+    "Sql": "SELECT CONVERT(varchar(64),HASHBYTES('SHA2_256',(SELECT * FROM [jahez_v2].[CashboxHandovers] ORDER BY Id FOR JSON PATH)),2) AS SnapshotHash;",
+    "Sha256": "0DBDE2AE0CB5CE1D9F9A065306BDC66D30C4E21BC343E1DDAE86D7844C3ABCA9"
+  },
+  {
+    "Table": "jahez_v2.CashboxHandoverMovements",
+    "Sql": "SELECT CONVERT(varchar(64),HASHBYTES('SHA2_256',(SELECT * FROM [jahez_v2].[CashboxHandoverMovements] ORDER BY Id FOR JSON PATH)),2) AS SnapshotHash;",
+    "Sha256": "498CE6993F4C265C1D069E7228C7BE29BA29B30A52BD823340364AF306FD4E19"
+  },
+  {
+    "Table": "app.PlatformRiderAccounts",
+    "Sql": "SELECT CONVERT(varchar(64),HASHBYTES('SHA2_256',(SELECT * FROM [app].[PlatformRiderAccounts] ORDER BY Id FOR JSON PATH)),2) AS SnapshotHash;",
+    "Sha256": "CB94F6F531D0B2944D26EBAA97282A9F02A49C2FA9B17D71280E5301EA0BC97A"
+  },
+  {
+    "Table": "app.Sponsors",
+    "Sql": "SELECT CONVERT(varchar(64),HASHBYTES('SHA2_256',(SELECT * FROM [app].[Sponsors] ORDER BY Id FOR JSON PATH)),2) AS SnapshotHash;",
+    "Sha256": "367D7B16CCE2DCAD47738E3F9218AB2D4ECF1B99E06D5EB2ECBD2F80DF898158"
+  },
+  {
+    "Table": "jahez_v3.Ownership",
+    "Sql": "SELECT CONVERT(varchar(64),HASHBYTES('SHA2_256',(SELECT * FROM [jahez_v3].[Ownership] ORDER BY Id FOR JSON PATH)),2) AS SnapshotHash;",
+    "Sha256": "091585C1D1A2002479267F6B7F7647D32D1CD087E55D02A0B26B36BF32446010"
+  },
+  {
+    "Table": "jahez_v3.Postings",
+    "Sql": "SELECT CONVERT(varchar(64),HASHBYTES('SHA2_256',(SELECT * FROM [jahez_v3].[Postings] ORDER BY Id FOR JSON PATH)),2) AS SnapshotHash;",
+    "Sha256": ""
+  },
+  {
+    "Table": "jahez_v3.TreasurySubAccounts",
+    "Sql": "SELECT CONVERT(varchar(64),HASHBYTES('SHA2_256',(SELECT * FROM [jahez_v3].[TreasurySubAccounts] ORDER BY Id FOR JSON PATH)),2) AS SnapshotHash;",
+    "Sha256": "9DC6BCD313CFD956DCE57F724F5BAC0BE927062E7A1748A7C6A7F26448816B1E"
+  },
+  {
+    "Table": "jahez_v3.HandoverLines",
+    "Sql": "SELECT CONVERT(varchar(64),HASHBYTES('SHA2_256',(SELECT * FROM [jahez_v3].[HandoverLines] ORDER BY Id FOR JSON PATH)),2) AS SnapshotHash;",
+    "Sha256": ""
+  },
+  {
+    "Table": "jahez_v3.HandoverPostings",
+    "Sql": "SELECT CONVERT(varchar(64),HASHBYTES('SHA2_256',(SELECT * FROM [jahez_v3].[HandoverPostings] ORDER BY Id FOR JSON PATH)),2) AS SnapshotHash;",
+    "Sha256": ""
+  },
+  {
+    "Table": "sponsor-audit-history",
+    "Sql": "SELECT CONVERT(varchar(64),HASHBYTES('SHA2_256',(SELECT * FROM audit.AuditEntries WHERE EntityType=N'PlatformRiderAccount' OR Action=N'JahezAccountRosterImport' ORDER BY Sequence FOR JSON PATH)),2) AS SnapshotHash;",
+    "Sha256": "D9DE7112154CE47A9E45E38A8C89B3AB01FE8C8C437677845A72B099B74BB19D"
+  }
+]

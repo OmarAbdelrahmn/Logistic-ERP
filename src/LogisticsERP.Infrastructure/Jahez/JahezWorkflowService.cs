@@ -15,12 +15,21 @@ using LogisticsERP.Domain.Platform;
 using LogisticsERP.Infrastructure.Hr;
 using LogisticsERP.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using LogisticsERP.Infrastructure.Identity;
 
 namespace LogisticsERP.Infrastructure.Jahez;
 
 internal sealed partial class JahezWorkflowService(
-    ApplicationDbContext db, ICurrentUser user, IPermissionChecker permissions, TimeProvider clock) : IJahezWorkflowService
+    ApplicationDbContext db, ICurrentUser user, IPermissionChecker permissions, TimeProvider clock,
+    IJahezTreasuryReportRenderer? treasuryRenderer = null,
+    ILogger<JahezWorkflowService>? logger = null, IdentityDbContext? treasuryIdentity = null) : IJahezWorkflowService, IJahezTreasuryService
 {
+    private string? commandActorName;
+    private static readonly Action<ILogger, string, Guid, Exception?> CommandCommittedLog = LoggerMessage.Define<string, Guid>(
+        LogLevel.Information, new EventId(5600, "JahezCommandCommitted"), "Jahez command {Operation} committed for {Actor}");
+    private static readonly Action<ILogger, string, string, Exception?> CommandRejectedLog = LoggerMessage.Define<string, string>(
+        LogLevel.Warning, new EventId(5601, "JahezCommandRejected"), "Jahez command {Operation} rejected: {Code}");
     private Guid Actor => user.UserId ?? throw new JahezBusinessException(JahezErrors.Forbidden);
     private DateTimeOffset Now => clock.GetUtcNow();
     private DateOnly Today => JahezRules.RiyadhDate(Now);
@@ -49,12 +58,17 @@ internal sealed partial class JahezWorkflowService(
         {
             await AuthorizeAsync(permission, ct);
             Require(!string.IsNullOrWhiteSpace(key) && key.Length <= 150, JahezErrors.Invalid("مفتاح عدم التكرار مطلوب، بحد أقصى 150 حرفًا."));
+            commandActorName = await TreasuryUserName(Actor, ct);
             var hash = Hash(JsonSerializer.SerializeToUtf8Bytes(payload));
             return await db.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
             {
                 db.ChangeTracker.Clear();
+                var writeAccountIds = await DayWriteAccounts(payload, ct);
+                await using var accountScope = await PlatformAccountWriteScope.AcquireAsync(db, writeAccountIds, ct);
                 await using var transaction = db.Database.IsRelational()
                     ? await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct) : null;
+                if (operation.StartsWith("v2.cashbox.", StringComparison.Ordinal))
+                    Require(!await TreasuryActive(ct), JahezErrors.Conflict("treasury_upgrade_required: استخدم واجهة الخزينة V3 لتسليم العهدة."));
                 var receipt = await db.Set<JahezCommandReceipt>().AsNoTracking().SingleOrDefaultAsync(
                     x => x.ActorUserId == Actor && x.Operation == operation && x.CommandKey == key, ct);
                 if (receipt is not null)
@@ -63,6 +77,7 @@ internal sealed partial class JahezWorkflowService(
                     return Result.Success(JsonSerializer.Deserialize<T>(receipt.ResultJson)!);
                 }
                 var value = await action();
+                await SynchronizeTreasuryAsync(ct);
                 // Persist generated audit times and rowversions before freezing the response.
                 // Both saves are protected by the same SQL transaction.
                 await db.SaveChangesAsync(ct);
@@ -71,11 +86,28 @@ internal sealed partial class JahezWorkflowService(
                     PayloadHash = hash, ResultJson = resultJson });
                 await db.SaveChangesAsync(ct);
                 if (transaction is not null) await transaction.CommitAsync(ct);
+                if (logger is not null) CommandCommittedLog(logger, operation, Actor, null);
                 return Result.Success(JsonSerializer.Deserialize<T>(resultJson)!);
             });
         }
-        catch (JahezBusinessException e) { db.ChangeTracker.Clear(); return Result.Failure<T>(e.Error); }
-        catch (DbUpdateException) { db.ChangeTracker.Clear(); return Result.Failure<T>(JahezErrors.Conflict("تعارض في البيانات؛ أعد تحميل السجل وحاول مجددًا بالمفتاح نفسه.")); }
+        catch (JahezBusinessException e)
+        {
+            db.ChangeTracker.Clear();
+            if (logger is not null) CommandRejectedLog(logger, operation, e.Error.Code, null);
+            return Result.Failure<T>(e.Error);
+        }
+        catch (DbUpdateException)
+        {
+            db.ChangeTracker.Clear();
+            if (logger is not null) CommandRejectedLog(logger, operation, "persistence_conflict", null);
+            return Result.Failure<T>(JahezErrors.Conflict("تعارض في البيانات؛ أعد تحميل السجل وحاول مجددًا بالمفتاح نفسه."));
+        }
+        catch (Microsoft.Data.SqlClient.SqlException e) when (e.Number is 1205 or 1222)
+        {
+            db.ChangeTracker.Clear();
+            if (logger is not null) CommandRejectedLog(logger, operation, "transaction_conflict", null);
+            return Result.Failure<T>(JahezErrors.Conflict("تعارض متزامن؛ أعد المحاولة بالمفتاح نفسه."));
+        }
     }
 
     private static string Hash(byte[] bytes) => Convert.ToHexString(SHA256.HashData(bytes));
@@ -140,6 +172,8 @@ internal sealed partial class JahezWorkflowService(
         Require(!await db.RiderClientAssignments.AnyAsync(x => x.PlatformRiderAccountId == accountId && x.EffectiveTo == null, ct), JahezErrors.Conflict("الحساب مسند بالفعل."));
         Require(!await db.Set<JahezAccountSession>().AnyAsync(x => x.PlatformRiderAccountId == accountId && (x.EndedAtUtc == null || x.EndedAtUtc > effective), ct),
             JahezErrors.Conflict("تاريخ الاستلام يتداخل مع استخدام سابق."));
+        var dayDates = await new PlatformAccountDayAllocationService(db).ValidateStart(accountId, JahezRules.RiyadhDate(effective), null, null, ct);
+        Require(dayDates.IsSuccess, dayDates.Error);
         var rider = await (from r in db.RiderProfiles join e in db.Employees on r.EmployeeId equals e.Id
             where r.Id == riderId && e.Status == EmployeeStatus.Active select r).SingleOrDefaultAsync(ct);
         Require(rider is not null, JahezErrors.NotFound);
@@ -164,6 +198,8 @@ internal sealed partial class JahezWorkflowService(
         var h = new JahezAccountSession { PlatformRiderAccountId = accountId, RiderProfileId = riderId,
             RiderClientAssignmentId = assignment.Id, StartedAtUtc = effective, CommissionStartsOn = JahezRules.RiyadhDate(effective).AddDays(1), Reason = reason };
         db.Add(h);
+        var dayStage = await new PlatformAccountDayAllocationService(db).Stage(accountId, assignment.Id, JahezRules.RiyadhDate(effective), null, reason, true, ct);
+        Require(dayStage.IsSuccess, dayStage.Error);
         var fee = new JahezAccountFee { HandoverId = h.Id, WaivedAmount = waiver, ApprovalRequestId = approvalId };
         db.Add(fee);
         Entry(h, JahezLedgerBucket.AccountFees, JahezLedgerKind.Charge, 200m - waiver, fee.Id, reason);
@@ -188,11 +224,11 @@ internal sealed partial class JahezWorkflowService(
         Require(!lastThrough.HasValue || JahezRules.RiyadhDate(effective) >= lastThrough.Value, JahezErrors.Conflict("السحب يسبق آخر تصفية."));
     }
 
-    private async Task<(decimal Amount, List<string> Problems, DateOnly Through, string Evidence)> Commission(JahezAccountSession h, DateOnly through, CancellationToken ct)
+    private async Task<(decimal Amount, List<string> Problems, DateOnly Through, string Evidence)> Commission(JahezAccountSession h, DateOnly through, CancellationToken ct, DateOnly? startOverride = null)
     {
         var end = h.EndedAtUtc.HasValue ? JahezRules.RiyadhDate(h.EndedAtUtc.Value) : Today;
         if (through > end) through = end;
-        var start = h.CommissionPostedThrough?.AddDays(1) ?? h.CommissionStartsOn;
+        var start = startOverride ?? h.CommissionPostedThrough?.AddDays(1) ?? h.CommissionStartsOn;
         if (start > through) return (0m, [], through, "[]");
         var policies = await db.Set<JahezCommissionPolicyPeriod>().AsNoTracking()
             .Where(x => x.HandoverId == h.Id && x.ToDate >= start && x.FromDate <= through).OrderBy(x => x.FromDate).ToArrayAsync(ct);
@@ -231,15 +267,15 @@ internal sealed partial class JahezWorkflowService(
         return (JahezRules.Money(amount), problems, through, JsonSerializer.Serialize(evidence));
     }
 
-    private async Task PostCommission(JahezAccountSession h, DateOnly through, Guid source, string reason, CancellationToken ct)
+    private async Task PostCommission(JahezAccountSession h, DateOnly through, Guid source, string reason, CancellationToken ct, DateOnly? startOverride = null)
     {
-        var calculation = await Commission(h, through, ct);
+        var calculation = await Commission(h, through, ct, startOverride);
         Require(calculation.Problems.Count == 0, JahezErrors.Conflict(string.Join(" ", calculation.Problems)));
-        if (calculation.Through >= h.CommissionStartsOn && (!h.CommissionPostedThrough.HasValue || calculation.Through > h.CommissionPostedThrough))
+        if ((startOverride.HasValue || calculation.Through >= h.CommissionStartsOn) && (!h.CommissionPostedThrough.HasValue || calculation.Through > h.CommissionPostedThrough))
         {
             db.Add(new JahezLedgerEntry { Id = source, HandoverId = h.Id, Bucket = JahezLedgerBucket.Commission,
                 Kind = JahezLedgerKind.Charge, Amount = calculation.Amount, SourceId = source, OccurredAtUtc = Now, Reason = reason,
-                FromDate = h.CommissionPostedThrough?.AddDays(1) ?? h.CommissionStartsOn, ThroughDate = calculation.Through,
+                FromDate = startOverride ?? h.CommissionPostedThrough?.AddDays(1) ?? h.CommissionStartsOn, ThroughDate = calculation.Through,
                 CalculationJson = calculation.Evidence });
             h.CommissionPostedThrough = calculation.Through;
         }

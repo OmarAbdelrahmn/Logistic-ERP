@@ -20,6 +20,7 @@ public sealed class NinjaDailyImport : HistoryEntity
 
 public abstract class NinjaDailyRecord : HistoryEntity
 {
+    public Guid SourceId { get; set; }
     public Guid PlatformRiderAccountId { get; set; }
     public Guid RiderClientAssignmentId { get; set; }
     public Guid RiderProfileId { get; set; }

@@ -14,6 +14,7 @@ public sealed record ChefzAccountResponse(Guid AccountId, string ExternalAccount
     Guid? SponsorId = null, Guid? OperatingCityId = null, string VehicleType = "Car", string DashboardStatus = "active",
     string Status = "Available", string? StatusReason = null, string AccountRowVersion = "")
 {
+    public string? RiderIqamaNo { get; init; }
     public bool IsOperationallyBlocked { get; init; }
     public string? OperationalBlockReason { get; init; }
 }

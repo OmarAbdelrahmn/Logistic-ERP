@@ -199,7 +199,7 @@ public sealed partial class JahezWorkflowTests
     }
 
     [Fact]
-    public async Task V2TransferNeedsApprovalCreatesBlockAndFullRepaymentLiftsOnlyThisCause()
+    public async Task V2TransferNeedsApprovalWithoutBlockingOperationsAndFullRepaymentIsIdempotent()
     {
         await using var f = await Fixture.Create(); var ct = TestContext.Current.CancellationToken;
         var a = await f.Account("v2-transfer");
@@ -214,7 +214,7 @@ public sealed partial class JahezWorkflowTests
         Assert.Empty(await f.Db.JahezMoneyMovements.ToArrayAsync(ct));
         var ninja = new ClientPlatform { Code = "NINJA", NameAr = "نينجا", NameEn = "Ninja" };
         f.Db.Add(ninja); await f.Db.SaveChangesAsync(ct);
-        Assert.True(await RiderOperationalBlock.IsBlocked(f.Db, f.RiderId, ninja.Id, ct));
+        Assert.False(await RiderOperationalBlock.IsBlocked(f.Db, f.RiderId, ninja.Id, ct));
         Assert.False(await RiderOperationalBlock.IsBlocked(f.Db, f.OtherRiderId, ninja.Id, ct));
         var keeta = new ClientPlatform { Code = "KEETA", NameAr = "كيتا", NameEn = "Keeta" };
         var otherAccount = await f.Account("v2-keeta");
@@ -224,16 +224,14 @@ public sealed partial class JahezWorkflowTests
             DisplayNameEn = "Keeta", Status = ClientContractStatus.Active };
         f.Db.Add(keeta); f.Db.Add(contract); await f.Db.SaveChangesAsync(ct);
         var simple = new SimplePlatformService(f.Db, f.User, f.Clock, new UnusedProtector());
-        var compatibility = new PlatformOperationsService(f.Db, f.User, f.Clock, new UnusedProtector());
-        var denied = await simple.AssignAccountAsync(otherAccount.Id, new(f.RiderId, new(2026, 10, 6), "تشغيل", false, null), ct);
-        Assert.True(denied.IsFailure); Assert.Equal(RiderOperationalBlock.Error.Code, denied.Error.Code);
-        var deniedCompat = await compatibility.AssignAccountAsync(new(f.RiderId, contract.Id, otherAccount.Id,
-            new(2026, 10, 6), "Active", "تشغيل", null, null, false, null), ct);
-        Assert.True(deniedCompat.IsFailure); Assert.Equal(RiderOperationalBlock.Error.Code, deniedCompat.Error.Code);
+        var assigned = Success(await simple.AssignAccountAsync(otherAccount.Id, new(f.RiderId, new(2026, 10, 6), "تشغيل", false, null), ct));
+        Assert.False(await RiderOperationalBlock.IsAccountBlocked(f.Db, otherAccount.Id, ct));
+        Assert.Empty(await RiderOperationalBlock.BlockedAssignmentIds(f.Db,
+            await f.Db.RiderClientAssignments.Select(x => x.Id).ToArrayAsync(ct), ct));
         var money = new JahezMoneyRecord(JahezMoneyFund.Cashbox, "receipt-175", "سداد كامل");
         f.Permissions.Denied = JahezWorkflowPermissions.Receive;
         Assert.True((await f.Service.RepayTransferredDebtAsync("denied", debt.Id, money, ct)).IsFailure);
-        Assert.True(await RiderOperationalBlock.IsBlocked(f.Db, f.RiderId, ninja.Id, ct));
+        Assert.False(await RiderOperationalBlock.IsBlocked(f.Db, f.RiderId, ninja.Id, ct));
         f.Permissions.Denied = null;
         Success(await f.Service.RepayTransferredDebtAsync("repay", debt.Id, money, ct));
         Assert.False(await RiderOperationalBlock.IsBlocked(f.Db, f.RiderId, ninja.Id, ct));

@@ -51,7 +51,8 @@ public sealed record ReleaseSimplePlatformAccountRequest(
     DateOnly EffectiveTo,
     string Status,
     string Reason,
-    string RowVersion);
+    string RowVersion,
+    PlatformAccountDayUsageInput? DayUsage = null);
 
 public sealed record RotateSimplePlatformCredentialRequest(string Secret, string Reason);
 

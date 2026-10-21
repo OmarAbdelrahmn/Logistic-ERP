@@ -1,0 +1,562 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="MigrationId" type="xs:string" minOccurs="0" />
+                <xs:element name="ProductVersion" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="MigrationId" type="xs:string" minOccurs="0" />
+                <xs:element name="ProductVersion" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table2">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="name" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table3">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Code" type="xs:string" minOccurs="0" />
+                <xs:element name="NameAr" type="xs:string" minOccurs="0" />
+                <xs:element name="IsPosting" type="xs:boolean" minOccurs="0" />
+                <xs:element name="Location" type="xs:int" minOccurs="0" />
+                <xs:element name="Purpose" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table4">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="IsActive" type="xs:boolean" minOccurs="0" />
+                <xs:element name="ActivatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="NextHandoverNumber" type="xs:long" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table5">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Key" type="xs:string" minOccurs="0" />
+                <xs:element name="NameAr" type="xs:string" minOccurs="0" />
+                <xs:element name="RequiresClientScope" type="xs:boolean" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table6">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Movements" type="xs:long" minOccurs="0" />
+                <xs:element name="MovementAmount" type="xs:decimal" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table7">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="LedgerEntries" type="xs:long" minOccurs="0" />
+                <xs:element name="LedgerAmount" type="xs:decimal" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table8">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Status" type="xs:int" minOccurs="0" />
+                <xs:element name="Handovers" type="xs:long" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table9">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="TableName" type="xs:string" minOccurs="0" />
+                <xs:element name="TriggerName" type="xs:string" minOccurs="0" />
+                <xs:element name="is_disabled" type="xs:boolean" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table10">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="name" type="xs:string" minOccurs="0" />
+                <xs:element name="is_unique" type="xs:boolean" minOccurs="0" />
+                <xs:element name="has_filter" type="xs:boolean" minOccurs="0" />
+                <xs:element name="filter_definition" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <MigrationId>20261019075320_AddJahezTreasuryV3</MigrationId>
+    <ProductVersion>10.0.11</ProductVersion>
+  </Table>
+  <Table>
+    <MigrationId>20261019114428_UseGranularJahezTreasuryPermissions</MigrationId>
+    <ProductVersion>10.0.11</ProductVersion>
+  </Table>
+  <Table1>
+    <MigrationId>20261019075332_GrantJahezTreasuryPermissions</MigrationId>
+    <ProductVersion>10.0.11</ProductVersion>
+  </Table1>
+  <Table1>
+    <MigrationId>20261019114451_UseGranularJahezTreasuryPermissions</MigrationId>
+    <ProductVersion>10.0.11</ProductVersion>
+  </Table1>
+  <Table2>
+    <name>BalanceVerifications</name>
+  </Table2>
+  <Table2>
+    <name>HandoverLines</name>
+  </Table2>
+  <Table2>
+    <name>HandoverPostings</name>
+  </Table2>
+  <Table2>
+    <name>Ownership</name>
+  </Table2>
+  <Table2>
+    <name>PetroEvidence</name>
+  </Table2>
+  <Table2>
+    <name>Postings</name>
+  </Table2>
+  <Table2>
+    <name>State</name>
+  </Table2>
+  <Table2>
+    <name>TreasurySubAccounts</name>
+  </Table2>
+  <Table3>
+    <Code>BANK</Code>
+    <NameAr>البنك</NameAr>
+    <IsPosting>false</IsPosting>
+    <Location>3</Location>
+    <Purpose>3</Purpose>
+  </Table3>
+  <Table3>
+    <Code>BANK.BW</Code>
+    <NameAr>بنك البوابا</NameAr>
+    <IsPosting>true</IsPosting>
+    <Location>3</Location>
+    <Purpose>3</Purpose>
+  </Table3>
+  <Table3>
+    <Code>BANK.BWEXP</Code>
+    <NameAr>بنك البوابا وإكسبرس</NameAr>
+    <IsPosting>false</IsPosting>
+    <Location>3</Location>
+    <Purpose>3</Purpose>
+  </Table3>
+  <Table3>
+    <Code>BANK.EX</Code>
+    <NameAr>بنك إكسبرس</NameAr>
+    <IsPosting>true</IsPosting>
+    <Location>3</Location>
+    <Purpose>3</Purpose>
+  </Table3>
+  <Table3>
+    <Code>BANK.TR</Code>
+    <NameAr>بنك التجارية</NameAr>
+    <IsPosting>true</IsPosting>
+    <Location>3</Location>
+    <Purpose>3</Purpose>
+  </Table3>
+  <Table3>
+    <Code>MAIN</Code>
+    <NameAr>الخزينة المركزية</NameAr>
+    <IsPosting>false</IsPosting>
+    <Location>2</Location>
+    <Purpose>3</Purpose>
+  </Table3>
+  <Table3>
+    <Code>MAIN.BW.FEE</Code>
+    <NameAr>رسوم البوابا</NameAr>
+    <IsPosting>true</IsPosting>
+    <Location>2</Location>
+    <Purpose>2</Purpose>
+  </Table3>
+  <Table3>
+    <Code>MAIN.BW.SET</Code>
+    <NameAr>تصفيات البوابا</NameAr>
+    <IsPosting>true</IsPosting>
+    <Location>2</Location>
+    <Purpose>1</Purpose>
+  </Table3>
+  <Table3>
+    <Code>MAIN.EX.FEE</Code>
+    <NameAr>رسوم إكسبرس</NameAr>
+    <IsPosting>true</IsPosting>
+    <Location>2</Location>
+    <Purpose>2</Purpose>
+  </Table3>
+  <Table3>
+    <Code>MAIN.EX.SET</Code>
+    <NameAr>تصفيات إكسبرس</NameAr>
+    <IsPosting>true</IsPosting>
+    <Location>2</Location>
+    <Purpose>1</Purpose>
+  </Table3>
+  <Table3>
+    <Code>MAIN.FEES</Code>
+    <NameAr>رسوم البوابا وإكسبرس</NameAr>
+    <IsPosting>false</IsPosting>
+    <Location>2</Location>
+    <Purpose>2</Purpose>
+  </Table3>
+  <Table3>
+    <Code>MAIN.TR</Code>
+    <NameAr>صندوق التجارية</NameAr>
+    <IsPosting>true</IsPosting>
+    <Location>2</Location>
+    <Purpose>3</Purpose>
+  </Table3>
+  <Table3>
+    <Code>PETRO</Code>
+    <NameAr>بترو آب - مقاصة التحصيل</NameAr>
+    <IsPosting>false</IsPosting>
+    <Location>4</Location>
+    <Purpose>3</Purpose>
+  </Table3>
+  <Table3>
+    <Code>PETRO.BW</Code>
+    <NameAr>بترو آب البوابا</NameAr>
+    <IsPosting>true</IsPosting>
+    <Location>4</Location>
+    <Purpose>3</Purpose>
+  </Table3>
+  <Table3>
+    <Code>PETRO.EX</Code>
+    <NameAr>بترو آب إكسبرس</NameAr>
+    <IsPosting>true</IsPosting>
+    <Location>4</Location>
+    <Purpose>3</Purpose>
+  </Table3>
+  <Table3>
+    <Code>PETRO.TR</Code>
+    <NameAr>بترو آب التجارية</NameAr>
+    <IsPosting>true</IsPosting>
+    <Location>4</Location>
+    <Purpose>3</Purpose>
+  </Table3>
+  <Table3>
+    <Code>SUP</Code>
+    <NameAr>عهدة مشرف جاهز</NameAr>
+    <IsPosting>false</IsPosting>
+    <Location>1</Location>
+    <Purpose>3</Purpose>
+  </Table3>
+  <Table3>
+    <Code>SUP.BW.FEE</Code>
+    <NameAr>عهدة رسوم البوابا</NameAr>
+    <IsPosting>true</IsPosting>
+    <Location>1</Location>
+    <Purpose>2</Purpose>
+  </Table3>
+  <Table3>
+    <Code>SUP.BW.SET</Code>
+    <NameAr>عهدة تصفيات البوابا</NameAr>
+    <IsPosting>true</IsPosting>
+    <Location>1</Location>
+    <Purpose>1</Purpose>
+  </Table3>
+  <Table3>
+    <Code>SUP.EX.FEE</Code>
+    <NameAr>عهدة رسوم إكسبرس</NameAr>
+    <IsPosting>true</IsPosting>
+    <Location>1</Location>
+    <Purpose>2</Purpose>
+  </Table3>
+  <Table3>
+    <Code>SUP.EX.SET</Code>
+    <NameAr>عهدة تصفيات إكسبرس</NameAr>
+    <IsPosting>true</IsPosting>
+    <Location>1</Location>
+    <Purpose>1</Purpose>
+  </Table3>
+  <Table3>
+    <Code>SUP.TR.FEE</Code>
+    <NameAr>عهدة رسوم التجارية</NameAr>
+    <IsPosting>true</IsPosting>
+    <Location>1</Location>
+    <Purpose>2</Purpose>
+  </Table3>
+  <Table3>
+    <Code>SUP.TR.SET</Code>
+    <NameAr>عهدة تصفيات التجارية</NameAr>
+    <IsPosting>true</IsPosting>
+    <Location>1</Location>
+    <Purpose>1</Purpose>
+  </Table3>
+  <Table4>
+    <IsActive>false</IsActive>
+    <NextHandoverNumber>1</NextHandoverNumber>
+  </Table4>
+  <Table5>
+    <Key>jahez.financial-reports.export</Key>
+    <NameAr>تصدير التقارير المالية</NameAr>
+    <RequiresClientScope>true</RequiresClientScope>
+  </Table5>
+  <Table5>
+    <Key>jahez.financial-reports.read</Key>
+    <NameAr>عرض التقارير المالية</NameAr>
+    <RequiresClientScope>true</RequiresClientScope>
+  </Table5>
+  <Table5>
+    <Key>jahez.treasury.accounts.create</Key>
+    <NameAr>إنشاء حساب خزينة</NameAr>
+    <RequiresClientScope>true</RequiresClientScope>
+  </Table5>
+  <Table5>
+    <Key>jahez.treasury.accounts.update</Key>
+    <NameAr>تحديث حساب خزينة</NameAr>
+    <RequiresClientScope>true</RequiresClientScope>
+  </Table5>
+  <Table5>
+    <Key>jahez.treasury.adjust</Key>
+    <NameAr>تسوية وترحيل الخزينة</NameAr>
+    <RequiresClientScope>true</RequiresClientScope>
+  </Table5>
+  <Table5>
+    <Key>jahez.treasury.entries.create</Key>
+    <NameAr>إنشاء قبض وصرف مركزي</NameAr>
+    <RequiresClientScope>true</RequiresClientScope>
+  </Table5>
+  <Table5>
+    <Key>jahez.treasury.petroapp-evidence.create</Key>
+    <NameAr>إنشاء دليل بترو آب</NameAr>
+    <RequiresClientScope>true</RequiresClientScope>
+  </Table5>
+  <Table5>
+    <Key>jahez.treasury.read</Key>
+    <NameAr>عرض الخزينة</NameAr>
+    <RequiresClientScope>true</RequiresClientScope>
+  </Table5>
+  <Table5>
+    <Key>jahez.treasury.transfers.create</Key>
+    <NameAr>إنشاء تحويل خزينة</NameAr>
+    <RequiresClientScope>true</RequiresClientScope>
+  </Table5>
+  <Table6>
+    <Movements>49</Movements>
+    <MovementAmount>18759.43</MovementAmount>
+  </Table6>
+  <Table7>
+    <LedgerEntries>130</LedgerEntries>
+    <LedgerAmount>2200.000000</LedgerAmount>
+  </Table7>
+  <Table8>
+    <Status>2</Status>
+    <Handovers>2</Handovers>
+  </Table8>
+  <Table9>
+    <TableName>Ownership</TableName>
+    <TriggerName>TR_Ownership_Immutable</TriggerName>
+    <is_disabled>false</is_disabled>
+  </Table9>
+  <Table9>
+    <TableName>Postings</TableName>
+    <TriggerName>TR_Postings_Immutable</TriggerName>
+    <is_disabled>false</is_disabled>
+  </Table9>
+  <Table9>
+    <TableName>BalanceVerifications</TableName>
+    <TriggerName>TR_BalanceVerifications_Immutable</TriggerName>
+    <is_disabled>false</is_disabled>
+  </Table9>
+  <Table9>
+    <TableName>HandoverLines</TableName>
+    <TriggerName>TR_HandoverLines_Immutable</TriggerName>
+    <is_disabled>false</is_disabled>
+  </Table9>
+  <Table9>
+    <TableName>HandoverPostings</TableName>
+    <TriggerName>TR_HandoverPostings_Immutable</TriggerName>
+    <is_disabled>false</is_disabled>
+  </Table9>
+  <Table9>
+    <TableName>PetroEvidence</TableName>
+    <TriggerName>TR_PetroEvidence_Immutable</TriggerName>
+    <is_disabled>false</is_disabled>
+  </Table9>
+  <Table9>
+    <TableName>Postings</TableName>
+    <TriggerName>TR_Postings_Ownership</TriggerName>
+    <is_disabled>false</is_disabled>
+  </Table9>
+  <Table9>
+    <TableName>TreasurySubAccounts</TableName>
+    <TriggerName>TR_TreasuryAccounts_Identity</TriggerName>
+    <is_disabled>false</is_disabled>
+  </Table9>
+  <Table10>
+    <name>PK_Ownership</name>
+    <is_unique>true</is_unique>
+    <has_filter>false</has_filter>
+  </Table10>
+  <Table10>
+    <name>IX_Ownership_PlatformAccountId_SponsorId</name>
+    <is_unique>false</is_unique>
+    <has_filter>false</has_filter>
+  </Table10>
+  <Table10>
+    <name>IX_Ownership_Source_SourceId</name>
+    <is_unique>true</is_unique>
+    <has_filter>false</has_filter>
+  </Table10>
+  <Table10>
+    <name>IX_Ownership_SponsorId</name>
+    <is_unique>false</is_unique>
+    <has_filter>false</has_filter>
+  </Table10>
+  <Table10>
+    <name>PK_PetroEvidence</name>
+    <is_unique>true</is_unique>
+    <has_filter>false</has_filter>
+  </Table10>
+  <Table10>
+    <name>IX_PetroEvidence_ReplacesId</name>
+    <is_unique>true</is_unique>
+    <has_filter>true</has_filter>
+    <filter_definition>([ReplacesId] IS NOT NULL)</filter_definition>
+  </Table10>
+  <Table10>
+    <name>IX_PetroEvidence_SponsorId_BusinessDate</name>
+    <is_unique>false</is_unique>
+    <has_filter>false</has_filter>
+  </Table10>
+  <Table10>
+    <name>IX_PetroEvidence_SponsorId_Reference</name>
+    <is_unique>true</is_unique>
+    <has_filter>false</has_filter>
+  </Table10>
+  <Table10>
+    <name>PK_State</name>
+    <is_unique>true</is_unique>
+    <has_filter>false</has_filter>
+  </Table10>
+  <Table10>
+    <name>IX_State_IsDeleted</name>
+    <is_unique>false</is_unique>
+    <has_filter>false</has_filter>
+  </Table10>
+  <Table10>
+    <name>PK_TreasurySubAccounts</name>
+    <is_unique>true</is_unique>
+    <has_filter>false</has_filter>
+  </Table10>
+  <Table10>
+    <name>IX_TreasurySubAccounts_Code</name>
+    <is_unique>true</is_unique>
+    <has_filter>false</has_filter>
+  </Table10>
+  <Table10>
+    <name>IX_TreasurySubAccounts_IsDeleted</name>
+    <is_unique>false</is_unique>
+    <has_filter>false</has_filter>
+  </Table10>
+  <Table10>
+    <name>IX_TreasurySubAccounts_ParentId</name>
+    <is_unique>false</is_unique>
+    <has_filter>false</has_filter>
+  </Table10>
+  <Table10>
+    <name>IX_TreasurySubAccounts_SponsorId_Location_Purpose</name>
+    <is_unique>true</is_unique>
+    <has_filter>true</has_filter>
+    <filter_definition>([IsDefault]=(1) AND [IsPosting]=(1) AND [IsDeleted]=(0))</filter_definition>
+  </Table10>
+  <Table10>
+    <name>PK_BalanceVerifications</name>
+    <is_unique>true</is_unique>
+    <has_filter>false</has_filter>
+  </Table10>
+  <Table10>
+    <name>IX_BalanceVerifications_SubAccountId_VerifiedAtUtc</name>
+    <is_unique>false</is_unique>
+    <has_filter>false</has_filter>
+  </Table10>
+  <Table10>
+    <name>PK_HandoverLines</name>
+    <is_unique>true</is_unique>
+    <has_filter>false</has_filter>
+  </Table10>
+  <Table10>
+    <name>IX_HandoverLines_HandoverId_SubAccountId</name>
+    <is_unique>true</is_unique>
+    <has_filter>false</has_filter>
+  </Table10>
+  <Table10>
+    <name>IX_HandoverLines_SubAccountId</name>
+    <is_unique>false</is_unique>
+    <has_filter>false</has_filter>
+  </Table10>
+  <Table10>
+    <name>PK_Postings</name>
+    <is_unique>true</is_unique>
+    <has_filter>false</has_filter>
+  </Table10>
+  <Table10>
+    <name>IX_Postings_BatchId</name>
+    <is_unique>false</is_unique>
+    <has_filter>false</has_filter>
+  </Table10>
+  <Table10>
+    <name>IX_Postings_CashboxHandoverId</name>
+    <is_unique>false</is_unique>
+    <has_filter>false</has_filter>
+  </Table10>
+  <Table10>
+    <name>IX_Postings_MoneyMovementId_Revision</name>
+    <is_unique>true</is_unique>
+    <has_filter>true</has_filter>
+    <filter_definition>([MoneyMovementId] IS NOT NULL AND [Kind]=(1))</filter_definition>
+  </Table10>
+  <Table10>
+    <name>IX_Postings_ReversesPostingId</name>
+    <is_unique>true</is_unique>
+    <has_filter>true</has_filter>
+    <filter_definition>([ReversesPostingId] IS NOT NULL)</filter_definition>
+  </Table10>
+  <Table10>
+    <name>IX_Postings_SponsorId_OccurredAtUtc</name>
+    <is_unique>false</is_unique>
+    <has_filter>false</has_filter>
+  </Table10>
+  <Table10>
+    <name>IX_Postings_SubAccountId_OccurredAtUtc_Id</name>
+    <is_unique>false</is_unique>
+    <has_filter>false</has_filter>
+  </Table10>
+  <Table10>
+    <name>PK_HandoverPostings</name>
+    <is_unique>true</is_unique>
+    <has_filter>false</has_filter>
+  </Table10>
+  <Table10>
+    <name>IX_HandoverPostings_HandoverId_PostingId</name>
+    <is_unique>true</is_unique>
+    <has_filter>false</has_filter>
+  </Table10>
+  <Table10>
+    <name>IX_HandoverPostings_PostingId</name>
+    <is_unique>false</is_unique>
+    <has_filter>false</has_filter>
+  </Table10>
+</NewDataSet>

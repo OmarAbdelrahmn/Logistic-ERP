@@ -47,6 +47,7 @@ internal sealed partial class NinjaService(ApplicationDbContext db, ICurrentUser
 
     private async Task<Result<NinjaLifecycleResponse>> Lifecycle(Guid accountId, NinjaAssignRequest? assign, NinjaReturnRequest? release, CancellationToken ct)
     {
+        await using var accountScope = await PlatformAccountWriteScope.AcquireAsync(db, [accountId], ct);
         var account = await Accounts.SingleOrDefaultAsync(a => a.Id == accountId, ct);
         if (account is null) return Result.Failure<NinjaLifecycleResponse>(NinjaErrors.NotFound);
         var permission = assign is not null ? PermissionKeys.Ninja.AssignmentsCreate : PermissionKeys.Ninja.AssignmentsDelete;
@@ -71,7 +72,7 @@ internal sealed partial class NinjaService(ApplicationDbContext db, ICurrentUser
                 ? await platforms.AssignNinjaAccountAsync(accountId, new(assign.ActualRiderProfileId, assign.EffectiveFrom,
                     assign.Reason, assign.WasBackdated, assign.BackdatedReason), () => Stage(account, p), ct)
                 : await platforms.ReleaseNinjaAccountAsync(accountId, new(release!.EffectiveTo, release.Status,
-                    release.Reason, release.RowVersion), () => Stage(account, p), ct);
+                    release.Reason, release.RowVersion, release.DayUsage), () => Stage(account, p), ct);
         }
         catch (DbUpdateException) { db.ChangeTracker.Clear(); return Result.Failure<NinjaLifecycleResponse>(NinjaErrors.Conflict); }
         if (result.IsFailure) { db.ChangeTracker.Clear(); return Result.Failure<NinjaLifecycleResponse>(result.Error); }

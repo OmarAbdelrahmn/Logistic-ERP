@@ -1,0 +1,37 @@
+{
+  "Server": "db67927.public.databaseasp.net",
+  "Database": "db67927",
+  "VerifiedAtUtc": "2026-10-19T12:15:54.4611085Z",
+  "ApplicationMigrations": [
+    "20261019075320_AddJahezTreasuryV3",
+    "20261019114428_UseGranularJahezTreasuryPermissions"
+  ],
+  "IdentityMigrations": [
+    "20261019075332_GrantJahezTreasuryPermissions",
+    "20261019114451_UseGranularJahezTreasuryPermissions"
+  ],
+  "PostCommitVerified": true,
+  "PreservedBusinessTables": 24,
+  "ExistingDataComparedInBothDirections": true,
+  "TreasuryActive": false,
+  "HistoricalAttributionOrBackfillPerformed": false,
+  "ApiBinaryDeployed": false,
+  "ServerBackupCompleted": true,
+  "BackupIncludesChecksums": true,
+  "RestoreVerifyOnlyPerformed": false,
+  "BackupVerificationLimitation": "Hosted login lacks CREATE DATABASE permission in master required by RESTORE VERIFYONLY.",
+  "MoneyMovements": 49,
+  "MovementAmount": 18759.43,
+  "LedgerEntries": 130,
+  "LedgerAmount": 2200.000000,
+  "ScriptHashes": [
+    {
+      "Sha256": "A268611D7E6A8B52101002E4E90A9FA78404136E956C3EB4E9FA202B6CDA1BB2",
+      "File": "jahez-treasury-v3-application.sql"
+    },
+    {
+      "Sha256": "168AA560DEFC286FEE598C6CF49560EDDB2F989CDB2D64D15D1ADDD0A898B56F",
+      "File": "jahez-treasury-v3-identity.sql"
+    }
+  ]
+}

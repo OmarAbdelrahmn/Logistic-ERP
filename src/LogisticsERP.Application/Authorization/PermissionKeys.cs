@@ -571,5 +571,6 @@ public static class PermissionKeys
         HrForms.TemplatesCreate,
         HrForms.TemplatesUpdate,
         HrForms.TemplatesDelete
-    }.Concat(LogisticsERP.Application.Features.Jahez.JahezWorkflowPermissions.All).ToFrozenSet(StringComparer.Ordinal);
+    }.Concat(LogisticsERP.Application.Features.Jahez.JahezWorkflowPermissions.All)
+        .Concat(LogisticsERP.Application.Features.Jahez.JahezTreasuryPermissions.All).ToFrozenSet(StringComparer.Ordinal);
 }

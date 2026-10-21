@@ -1,0 +1,8 @@
+{
+  "verifiedAtUtc": "2026-10-18T15:44:45.4631428+00:00",
+  "migration": "20261018144507_AddJahezSettlementCommissionStart",
+  "schemaVerified": true,
+  "settlementUnchanged": true,
+  "settlementExecuted": false,
+  "account": "476835"
+}

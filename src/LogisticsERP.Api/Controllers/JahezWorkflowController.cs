@@ -64,6 +64,8 @@ public sealed class JahezWorkflowController(IJahezWorkflowService service) : Con
     public Task<IActionResult> UpdateOperation(Guid id, [FromHeader(Name = "Idempotency-Key")] string key, JahezOperationUpdate request, CancellationToken ct) => Respond(service.UpdateOperationAsync(key, id, request, ct));
     [HttpPut("operations/{id:guid}/payment-method"), RequirePermission(JahezWorkflowPermissions.Settle)]
     public Task<IActionResult> UpdatePaymentMethod(Guid id, [FromHeader(Name = "Idempotency-Key")] string key, JahezOperationPaymentMethodUpdate request, CancellationToken ct) => Respond(service.UpdateOperationPaymentMethodAsync(key, id, request, ct));
+    [HttpPut("operations/{id:guid}/commission-start"), RequirePermission(JahezWorkflowPermissions.AdjustmentApprove)]
+    public Task<IActionResult> UpdateCommissionStart(Guid id, [FromHeader(Name = "Idempotency-Key")] string key, JahezOperationCommissionStartUpdate request, CancellationToken ct) => Respond(service.UpdateOperationCommissionStartAsync(key, id, request, ct));
     // Per-kind permissions are resolved by the service before idempotency replay.
     [HttpPost("requests"), RequirePermission(PermissionKeys.Jahez.Read)]
     public Task<IActionResult> CreateRequest([FromHeader(Name = "Idempotency-Key")] string key, JahezWorkflowRequestCreate request, CancellationToken ct) => Respond(service.CreateWorkflowRequestAsync(key, request, ct));
@@ -77,6 +79,13 @@ public sealed class JahezWorkflowController(IJahezWorkflowService service) : Con
     public Task<IActionResult> Fee([FromHeader(Name = "Idempotency-Key")] string key, JahezFeeRecord request, CancellationToken ct) => Respond(service.RecordFeeV2Async(key, request, ct));
     [HttpGet("transferred-debts"), RequirePermission(PermissionKeys.Jahez.Read)]
     public Task<IActionResult> Debts(int page = 1, int pageSize = 50, CancellationToken ct = default) => Respond(service.TransferredDebtsAsync(page, pageSize, ct));
+    [HttpGet("riders/transferred-debts"), RequirePermission(PermissionKeys.Jahez.Read)]
+    public Task<IActionResult> RiderDebts(int page = 1, int pageSize = 50, CancellationToken ct = default) => Respond(service.RidersWithTransferredDebtsAsync(page, pageSize, ct));
+    [HttpGet("riders/{riderId:guid}/transferred-debts"), RequirePermission(PermissionKeys.Jahez.Read)]
+    public Task<IActionResult> RiderDebtDetails(Guid riderId, int page = 1, int pageSize = 50, CancellationToken ct = default) => Respond(service.RiderTransferredDebtsAsync(riderId, page, pageSize, ct));
+    [HttpPost("riders/{riderId:guid}/transferred-debts/repayment"), RequirePermission(JahezWorkflowPermissions.Repay)]
+    public Task<IActionResult> RepayRiderDebts(Guid riderId, [FromHeader(Name = "Idempotency-Key")] string key,
+        JahezRiderDebtRepayment request, CancellationToken ct) => Respond(service.RepayRiderTransferredDebtsAsync(key, riderId, request, ct));
     [HttpPost("transferred-debts/{id:guid}/repayment"), RequirePermission(JahezWorkflowPermissions.Repay)]
     public Task<IActionResult> Repay(Guid id, [FromHeader(Name = "Idempotency-Key")] string key, JahezMoneyRecord request, CancellationToken ct) => Respond(service.RepayTransferredDebtAsync(key, id, request, ct));
     [HttpGet("money-movements"), RequirePermission(PermissionKeys.Jahez.CashboxRead)]

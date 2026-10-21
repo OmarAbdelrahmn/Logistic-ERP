@@ -1,4 +1,4 @@
-﻿using LogisticsERP.Application.Features.Jahez;
+using LogisticsERP.Application.Features.Jahez;
 using LogisticsERP.Infrastructure.Jahez;
 using LogisticsERP.Application.Abstractions.Authentication;
 using LogisticsERP.Application.Abstractions.Persistence;
@@ -73,12 +73,16 @@ public static class DependencyInjection
         services.AddScoped<IHousingService, HousingService>();
         services.AddScoped<IHousingWarehouseService, HousingWarehouseService>();
         services.AddScoped<IPlatformOperationsService, PlatformOperationsService>();
+        services.AddScoped<LogisticsERP.Application.Features.Hr.IPlatformAccountDayAllocationService, LogisticsERP.Infrastructure.Hr.PlatformAccountDayAllocationService>();
+        services.AddScoped<LogisticsERP.Application.Features.Hr.IPlatformAccountDayUsageService, LogisticsERP.Infrastructure.Hr.PlatformAccountDayUsageService>();
         services.AddScoped<SimplePlatformService>();
         services.AddScoped<ISimplePlatformService>(provider => provider.GetRequiredService<SimplePlatformService>());
         services.AddScoped<LogisticsERP.Application.Features.Ninja.INinjaService, LogisticsERP.Infrastructure.Ninja.NinjaService>();
         services.AddScoped<LogisticsERP.Application.Features.Chefz.IChefzService, LogisticsERP.Infrastructure.Chefz.ChefzService>();
         services.AddScoped<JahezWorkflowService>();
         services.AddScoped<IJahezWorkflowService>(provider => provider.GetRequiredService<JahezWorkflowService>());
+        services.AddScoped<IJahezTreasuryService>(provider => provider.GetRequiredService<JahezWorkflowService>());
+        services.AddSingleton<IJahezTreasuryReportRenderer, JahezTreasuryReportRenderer>();
         services.AddScoped<IJahezReminderService, JahezReminderService>();
         services.AddScoped<IHrWorkflowService, HrWorkflowService>();
         services.AddScoped<ILegalCaseService, LegalCaseService>();

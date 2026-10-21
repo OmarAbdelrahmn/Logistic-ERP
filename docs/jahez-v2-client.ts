@@ -1,6 +1,7 @@
-import type { AccountDetails, AccountsPage, AccountStatusUpdate, Approval, ApprovalRequest, DecisionRequest,
-  FeeReceipt, FundBalance, MoneyRecord, Movement, MovementRow, MovementDateRange, Operation, OperationCreate, OperationUpdate, OperationPaymentMethodUpdate,
-  Page, Preview, Problem, Statistics, TransferredDebt, HandoverCreate, Handover,
+import type { AccountDetails, AccountsPage, AccountStatusUpdate, Approval, ApprovalRequestRow, ApprovalDetails, DecisionRequest,
+  FeeReceipt, FundBalance, MoneyRecord, Movement, MovementRow, MovementDateRange, Operation, OperationCreate, OperationUpdate, OperationPaymentMethodUpdate, OperationCommissionStartUpdate,
+  Page, Preview, Problem, Statistics, TransferredDebt, TransferredDebtRow, HandoverCreate, Handover,
+  RiderTransferredDebtSummary, RiderDebtRepayment, RiderDebtRepaymentResponse,
   CashboxHandover, CashboxHandoverCreate, CashboxHandoverConfirm, CashboxHandoverCancel,
   EarningsRequest, EarningsStatement, AdministrativeDebt, ImportBatch, ImportPreview, ImportCommit, ImportKind } from './jahez-v2-api-contracts';
 
@@ -56,14 +57,18 @@ export function jahezClient(baseUrl: string, token: () => string) {
     createOperation: (value: OperationCreate, key: string) => send<Operation>('operations', 'POST', value, key),
     updateOperation: (id: string, value: OperationUpdate, key: string) => send<Operation>(`operations/${id}`, 'PUT', value, key),
     updatePaymentMethod: (id: string, value: OperationPaymentMethodUpdate, key: string) => send<Operation>(`operations/${id}/payment-method`, 'PUT', value, key),
+    updateCommissionStart: (id: string, value: OperationCommissionStartUpdate, key: string) => send<Operation>(`operations/${id}/commission-start`, 'PUT', value, key),
     execute: (id: string, key: string) => send<Operation>(`operations/${id}/execute`, 'POST', undefined, key),
     operations: (number = 1, size = 50) => send<Page<Operation>>(`operations?${page(number, size)}`),
-    requests: (number = 1, size = 50) => send<Page<ApprovalRequest>>(`requests?${page(number, size)}`),
-    request: (id: string) => send<Approval>(`requests/${id}`),
+    requests: (number = 1, size = 50) => send<Page<ApprovalRequestRow>>(`requests?${page(number, size)}`),
+    request: (id: string) => send<ApprovalDetails>(`requests/${id}`),
     createRequest: (value: import('./jahez-v2-api-contracts').RequestCreate, key: string) => send<Approval>('requests', 'POST', value, key),
     decide: (id: string, value: DecisionRequest, key: string) => send<Approval>(`requests/${id}/decision`, 'POST', value, key),
     recordFee: (value: FeeReceipt, key: string) => send<Movement>('fees/receipts', 'POST', value, key),
-    transferredDebts: (number = 1, size = 50) => send<Page<TransferredDebt>>(`transferred-debts?${page(number, size)}`),
+    transferredDebts: (number = 1, size = 50) => send<Page<TransferredDebtRow>>(`transferred-debts?${page(number, size)}`),
+    ridersWithTransferredDebts: (number = 1, size = 50) => send<Page<RiderTransferredDebtSummary>>(`riders/transferred-debts?${page(number, size)}`),
+    riderTransferredDebts: (riderId: string, number = 1, size = 50) => send<Page<TransferredDebtRow>>(`riders/${riderId}/transferred-debts?${page(number, size)}`),
+    repayRiderTransferredDebts: (riderId: string, value: RiderDebtRepayment, key: string) => send<RiderDebtRepaymentResponse>(`riders/${riderId}/transferred-debts/repayment`, 'POST', value, key),
     repay: (id: string, value: MoneyRecord, key: string) => send<TransferredDebt>(`transferred-debts/${id}/repayment`, 'POST', value, key),
     movements: (number = 1, size = 50, dates: MovementDateRange = {}) => {
       const query = new URLSearchParams(page(number, size));

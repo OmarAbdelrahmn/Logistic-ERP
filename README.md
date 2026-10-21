@@ -133,6 +133,7 @@ The private document root is `src/LogisticsERP.Api/wwwroot/private/employee-docu
 - [Create users with roles and permissions](docs/user-creation-authorization-api.md)
 - [Jahez operations, financial workflows, imports, and Backend API (Arabic)](docs/jahez-backend-api.md)
 - [Jahez V2: complete frontend handoff, signed settlements, approvals, money routing, and hosted migration](docs/jahez-v2-frontend-handoff-ar.md)
+- [Jahez settlement commission-start corrections and cashbox updates](docs/jahez-commission-start-correction-frontend-handoff.md)
 - [Chefz account details, wallet settlements, and daily performance API](docs/chefz-backend-api.md)
 - [Complete Chefz frontend handoff: Arabic screens, API contracts, settlements, imports, and permissions](docs/chefz-frontend-handoff.md)
 - [Ninja: full endpoint reference, enriched account details, status controls and performance reports](docs/ninja-full-api-reference.md)
@@ -140,3 +141,11 @@ The private document root is `src/LogisticsERP.Api/wwwroot/private/employee-docu
 - [Ninja sheet checkups: saved statuses, missing accounts, city/iqama problems and upload notes](docs/ninja-account-sheet-updates.md)
 - [New Ninja sheet-checkup services: frontend API handoff](docs/ninja-sheet-checkup-services-frontend-handoff.md)
 - [Ninja sheet-checkup hosted database deployment and verification](docs/ninja-account-sheet-reviews-hosted-deployment-20261015.md)
+
+Jahez treasury V3: start with the [complete frontend Markdown handoff pack](docs/jahez-treasury-frontend/README.md). Also see the [Arabic backend/frontend/migration guide](docs/jahez-treasury-v3-ar.md), [TypeScript contracts](docs/jahez-treasury-api-contracts.ts), and [client](docs/jahez-treasury-client.ts). Activation requires finance attribution review and verified balances.
+
+Hosted database: [Jahez treasury migrations applied and verified on 19 October 2026](docs/jahez-treasury-hosted-deployment-20261019.md). Both migration contexts have no pending updates; treasury activation and API binary deployment remain separate.
+
+Historical money: [V2 ownership and custody carried into V3 on 19 October 2026](docs/jahez-treasury-v2-carryforward-20261019.md). Original V2 records and confirmed handovers were preserved; missing bank funding evidence still blocks financial reconciliation and activation.
+
+Latest financial state: the user subsequently chose a [fresh financial start before V3](docs/jahez-financial-fresh-start-20261019.md). Old financial history and copied balances were backed up and cleared, while orders, imports, approval requests, accounts and assignments were preserved. Treasury remains inactive pending verified real-world opening balances.

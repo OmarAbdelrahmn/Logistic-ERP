@@ -1,4 +1,4 @@
-﻿using LogisticsERP.Application.Features.Jahez;
+using LogisticsERP.Application.Features.Jahez;
 using LogisticsERP.Domain.Chefz;
 using System.Text.Json;
 using LogisticsERP.Application.Abstractions.Authentication;
@@ -408,6 +408,7 @@ internal sealed class PlatformOperationsService(
 
     public async Task<Result<PlatformAssignmentResponse>> AssignAccountAsync(AssignPlatformAccountRequest request, CancellationToken cancellationToken = default)
     {
+        await using var accountScope = await PlatformAccountWriteScope.AcquireAsync(dbContext, [request.PlatformRiderAccountId], cancellationToken);
         if (currentUser.UserId is not { } userId) return Result.Failure<PlatformAssignmentResponse>(HrErrors.CurrentUserUnavailable);
         if (!TryParseEnum<RiderAssignmentStatus>(request.Status, out var status)
             || status is RiderAssignmentStatus.Ended or RiderAssignmentStatus.Cancelled
@@ -453,6 +454,9 @@ internal sealed class PlatformOperationsService(
                     account.PaymentModel,
                     cancellationToken));
         var riderAccountSlot = PlatformAssignmentPolicySupport.NextSlot(activeAssignments);
+        var dayAllocation = new PlatformAccountDayAllocationService(dbContext);
+        var validDates = await dayAllocation.ValidateStart(account.Id, request.EffectiveFrom, null, null, cancellationToken);
+        if (validDates.IsFailure) return Result.Failure<PlatformAssignmentResponse>(validDates.Error);
         var entity = new RiderClientAssignment
         {
             RiderProfileId = request.RiderProfileId,
@@ -470,6 +474,8 @@ internal sealed class PlatformOperationsService(
             BackdatedReason = HrServiceSupport.TrimOrNull(request.BackdatedReason)
         };
         dbContext.RiderClientAssignments.Add(entity);
+        var stagedUsage = await dayAllocation.Stage(account.Id, entity.Id, request.EffectiveFrom, null, request.StartReason ?? "Account assigned", true, cancellationToken);
+        if (stagedUsage.IsFailure) { dbContext.ChangeTracker.Clear(); return Result.Failure<PlatformAssignmentResponse>(stagedUsage.Error); }
         dbContext.RiderAssignmentEvents.Add(new RiderAssignmentEvent
         {
             RiderClientAssignmentId = entity.Id,
@@ -487,6 +493,7 @@ internal sealed class PlatformOperationsService(
         }
         catch (DbUpdateException)
         {
+            dbContext.ChangeTracker.Clear();
             return Result.Failure<PlatformAssignmentResponse>(HrErrors.Conflict);
         }
         return (await GetAssignmentsAsync(null, false, cancellationToken)).MapSingle(item => item.Id == entity.Id);
@@ -497,6 +504,8 @@ internal sealed class PlatformOperationsService(
         if (currentUser.UserId is not { } userId || !TryParseEnum<RiderAssignmentStatus>(request.Status, out var status)
             || status is not (RiderAssignmentStatus.Ended or RiderAssignmentStatus.Cancelled) || !HrServiceSupport.HasText(request.EndReason))
             return Result.Failure<PlatformAssignmentResponse>(HrErrors.InvalidRequest);
+        var accountId = await dbContext.RiderClientAssignments.AsNoTracking().Where(a => a.Id == id).Select(a => a.PlatformRiderAccountId).SingleOrDefaultAsync(cancellationToken);
+        await using var accountScope = await PlatformAccountWriteScope.AcquireAsync(dbContext, [accountId], cancellationToken);
         var entity = await dbContext.RiderClientAssignments.SingleOrDefaultAsync(item => item.Id == id, cancellationToken);
         if (entity is not null && await (from a in dbContext.PlatformRiderAccounts join p in dbContext.ClientPlatforms on a.ClientPlatformId equals p.Id
                 where a.Id == entity.PlatformRiderAccountId && p.Code == "JAHEZ" select a.Id).AnyAsync(cancellationToken))
@@ -507,6 +516,11 @@ internal sealed class PlatformOperationsService(
             return Result.Failure<PlatformAssignmentResponse>(LogisticsERP.Application.Features.Ninja.NinjaErrors.UseNinjaWorkflow);
         if (!HrServiceSupport.MatchesRowVersion(entity.RowVersion, request.RowVersion)) return Result.Failure<PlatformAssignmentResponse>(HrErrors.ConcurrencyConflict);
         if (entity.EffectiveTo is not null || request.EffectiveTo < entity.EffectiveFrom) return Result.Failure<PlatformAssignmentResponse>(HrErrors.Conflict);
+        var dayAllocation = new PlatformAccountDayAllocationService(dbContext);
+        var validEnd = await dayAllocation.ValidateEnd(entity, request.EffectiveTo, status == RiderAssignmentStatus.Cancelled, cancellationToken);
+        if (validEnd.IsFailure) return Result.Failure<PlatformAssignmentResponse>(validEnd.Error);
+        var stagedUsage = await dayAllocation.Stage(entity.PlatformRiderAccountId, entity.Id, request.EffectiveTo, request.DayUsage, request.EndReason, false, cancellationToken);
+        if (stagedUsage.IsFailure) { dbContext.ChangeTracker.Clear(); return Result.Failure<PlatformAssignmentResponse>(stagedUsage.Error); }
         var fromStatus = entity.Status;
         entity.EffectiveTo = request.EffectiveTo;
         entity.Status = status;

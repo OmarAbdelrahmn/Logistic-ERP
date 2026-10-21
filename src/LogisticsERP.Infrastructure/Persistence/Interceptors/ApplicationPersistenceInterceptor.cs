@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using LogisticsERP.Application.Abstractions.Authentication;
 using LogisticsERP.Domain.Common;
 using LogisticsERP.Domain.Entities.Chefz;
@@ -99,16 +99,23 @@ internal sealed class ApplicationPersistenceInterceptor(
     {
         if (entry.State is EntityState.Modified or EntityState.Deleted)
         {
+            if (entry.Entity is TreasurySubAccount && (entry.State == EntityState.Deleted
+                || entry.Properties.Any(x => x.IsModified && x.Metadata.Name is not
+                    (nameof(TreasurySubAccount.NameAr) or nameof(TreasurySubAccount.NameEn) or nameof(TreasurySubAccount.IsActive) or nameof(TreasurySubAccount.RowVersion)))))
+                throw new InvalidOperationException("Treasury account identity and routing are immutable.");
+            if (entry.Entity is TreasuryState && (entry.State == EntityState.Deleted
+                || entry.Property(nameof(TreasuryState.IsActive)).OriginalValue is true && entry.Property(nameof(TreasuryState.IsActive)).IsModified))
+                throw new InvalidOperationException("Activated treasury cannot be disabled after cutover.");
             if (entry.Entity is JahezCashboxHandover && (entry.State == EntityState.Deleted
                 || entry.Property(nameof(JahezCashboxHandover.Status)).OriginalValue is not JahezCashboxHandoverStatus.Pending
                 || entry.Properties.Any(x => x.IsModified && x.Metadata.Name is not
                     (nameof(JahezCashboxHandover.Status) or nameof(JahezCashboxHandover.AccountantUserId)
                     or nameof(JahezCashboxHandover.ConfirmedAtUtc) or nameof(JahezCashboxHandover.ConfirmationReason)
                     or nameof(JahezCashboxHandover.CancelledAtUtc) or nameof(JahezCashboxHandover.CancellationReason)
-                    or nameof(JahezCashboxHandover.RowVersion)))))
+                    or nameof(JahezCashboxHandover.AccountantNameAr) or nameof(JahezCashboxHandover.RowVersion)))))
                 throw new InvalidOperationException("Cashbox handover snapshots are immutable and can only be confirmed or cancelled once.");
             if (entry.Entity is JahezOperation && entry.Property(nameof(JahezOperation.Status)).OriginalValue is JahezOperationStatus.Executed
-                && !IsJahezPaymentMethodCorrection(entry))
+                && !IsJahezPaymentMethodCorrection(entry) && !IsJahezCommissionStartCorrection(entry))
                 throw new InvalidOperationException("Executed Jahez operations are immutable.");
             if (entry.Entity is JahezApprovalRequest
                 && entry.Property(nameof(JahezApprovalRequest.Status)).OriginalValue is JahezApprovalStatus original
@@ -198,9 +205,9 @@ internal sealed class ApplicationPersistenceInterceptor(
 
             if (entry.State == EntityState.Modified)
             {
-                if (IsJahezPaymentMethodCorrection(entry)) return;
+                if (IsJahezPaymentMethodCorrection(entry) || IsJahezCommissionStartCorrection(entry)) return;
                 // Daily performance is corrected by reupload; preserve its account/day and creation identity.
-                // Other history records remain append-only except the payout metadata correction above.
+                // Other history records remain append-only except the authorized Jahez corrections above.
                 if (history is ChefzDailyPerformance && entry.Properties
                     .Where(property => property.IsModified)
                     .All(property => ChefzPerformanceCorrectionProperties.Contains(property.Metadata.Name)))
@@ -238,6 +245,31 @@ internal sealed class ApplicationPersistenceInterceptor(
                 && entry.Property(nameof(JahezMoneyMovement.Fund)).OriginalValue is JahezMoneyFund.Cashbox or JahezMoneyFund.Bank
                 && entry.Properties.Where(x => x.IsModified).All(x => x.Metadata.Name is
                     nameof(JahezMoneyMovement.Fund) or nameof(JahezMoneyMovement.Reference));
+        return false;
+    }
+
+    private static bool IsJahezCommissionStartCorrection(EntityEntry<Entity> entry)
+    {
+        if (entry.State != EntityState.Modified || entry.Context is not ApplicationDbContext context
+            || context.JahezCommissionStartCorrectionOperationId is not Guid operationId) return false;
+        if (entry.Entity is JahezOperation operation)
+            return operation.Id == operationId && operation.Status == JahezOperationStatus.Executed
+                && operation.Mode != JahezOperationMode.Withdraw && operation.Purpose == JahezMoneyPurpose.Settlement
+                && !operation.TransferToRider && operation.CommissionStartDate.HasValue
+                && operation.CommissionStartDate <= operation.ThroughDate
+                && operation.Commission >= 0 && operation.Commission == operation.CalculatedCommission
+                && operation.Remaining == operation.Net + operation.Commission
+                && entry.Properties.Where(x => x.IsModified).All(x => x.Metadata.Name is
+                    nameof(JahezOperation.CommissionStartDate) or nameof(JahezOperation.Commission)
+                    or nameof(JahezOperation.CalculatedCommission) or nameof(JahezOperation.Remaining)
+                    or nameof(JahezOperation.CalculationJson) or nameof(JahezOperation.PaymentStatus)
+                    or nameof(JahezOperation.Fund) or nameof(JahezOperation.PaymentReference)
+                    or nameof(JahezOperation.ApprovedRequestId));
+        if (entry.Entity is JahezMoneyMovement movement)
+            return movement.OperationId == operationId && movement.Purpose == JahezMoneyPurpose.Settlement
+                && movement.Amount >= 0 && entry.Properties.Where(x => x.IsModified).All(x => x.Metadata.Name is
+                    nameof(JahezMoneyMovement.Amount) or nameof(JahezMoneyMovement.Direction)
+                    or nameof(JahezMoneyMovement.Fund) or nameof(JahezMoneyMovement.Reference));
         return false;
     }
 

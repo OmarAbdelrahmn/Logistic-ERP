@@ -4,6 +4,8 @@ using LogisticsERP.Application.Common.Results;
 using LogisticsERP.Application.Features.Chefz;
 using LogisticsERP.Domain.Entities.Chefz;
 using LogisticsERP.Domain.Entities.Clients;
+using LogisticsERP.Application.Features.Hr;
+using LogisticsERP.Infrastructure.Hr;
 using LogisticsERP.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
@@ -39,73 +41,86 @@ internal sealed partial class ChefzService
             || content.Length is 0 or > ChefzSpreadsheetParser.MaxBytes)
             return Result.Failure<ChefzImportResponse>(ChefzErrors.Invalid("حدد تاريخ التقرير وارفع ملف xlsx بحد أقصى 10 ميجابايت."));
         var hash = Convert.ToHexString(SHA256.HashData(content));
-        var previous = await db.ChefzPerformanceImports.AsNoTracking().SingleOrDefaultAsync(b => b.ReportDate == reportDate && b.ContentHash == hash, ct);
         // Recheck current rows: a later upload may have corrected data from this file.
         var parsed = ChefzSpreadsheetParser.Parse(content);
         var issues = parsed.Issues.ToList();
         if (issues.Count != 0) return Result.Success(new ChefzImportResponse(null, reportDate, 0, 0, issues));
+        var reportIds = parsed.Rows.Select(r => r.IdNumber).ToArray();
         var details = await (from a in Accounts.AsNoTracking() join d in db.ChefzAccountDetails.AsNoTracking()
-            on a.Id equals d.PlatformRiderAccountId select d).ToArrayAsync(ct);
+            on a.Id equals d.PlatformRiderAccountId where reportIds.Contains(d.ReportIdNumber) select d).ToArrayAsync(ct);
         var byId = details.ToLookup(d => d.ReportIdNumber, StringComparer.Ordinal);
-        var assignments = await (from a in db.RiderClientAssignments.AsNoTracking() join account in Accounts on a.PlatformRiderAccountId equals account.Id
-            where (a.Status == RiderAssignmentStatus.Active || a.Status == RiderAssignmentStatus.Ended)
-                && a.EffectiveFrom <= reportDate && (a.EffectiveTo == null || a.EffectiveTo >= reportDate) select a).ToArrayAsync(ct);
-        var byAccount = assignments.ToLookup(a => a.PlatformRiderAccountId);
-        var existingRows = await db.ChefzDailyPerformance.Where(p => p.ReportDate == reportDate).ToDictionaryAsync(p => p.PlatformRiderAccountId, ct);
+        var accountIds = details.Select(d => d.PlatformRiderAccountId).ToArray();
+        await using var accountScope = await PlatformAccountWriteScope.AcquireAsync(db, accountIds, ct);
+        var previous = await db.ChefzPerformanceImports.AsNoTracking().SingleOrDefaultAsync(b => b.ReportDate == reportDate && b.ContentHash == hash, ct);
+        var existingRows = await db.ChefzDailyPerformance.Where(p => p.ReportDate == reportDate && accountIds.Contains(p.PlatformRiderAccountId)).ToArrayAsync(ct);
+        var sources = await db.Set<ChefzDailyPerformanceSource>().Where(p => p.ReportDate == reportDate && accountIds.Contains(p.PlatformRiderAccountId))
+            .ToDictionaryAsync(p => p.PlatformRiderAccountId, ct);
         var batch = previous ?? new ChefzPerformanceImport { ReportDate = reportDate, FileName = Path.GetFileName(fileName), ContentHash = hash };
-        var pending = new List<(ChefzDailyPerformance Performance, ChefzParsedRow Row, RiderClientAssignment Assignment, bool IsNew)>();
+        var pending = new List<(ChefzDailyPerformanceSource Source, ChefzParsedRow Row, IReadOnlyList<PlatformDayShare> Shares, bool IsNew)>();
+        var allocator = new PlatformAccountDayAllocationService(db);
+        await allocator.Preload(accountIds, reportDate, reportDate, ct);
         var skipped = 0;
         foreach (var row in parsed.Rows)
         {
             ct.ThrowIfCancellationRequested();
             var matches = byId[row.IdNumber].ToArray();
             if (matches.Length != 1)
-            { issues.Add(new(row.RowNumber, row.IdNumber, "رقم الهوية غير مرتبط بحساب شيفز واحد؛ أضف تفاصيل الحساب أولاً.")); continue; }
+            { issues.Add(new(row.RowNumber, row.IdNumber, "Report ID must identify exactly one Chefz account.")); continue; }
             var accountId = matches[0].PlatformRiderAccountId;
-            var riders = byAccount[accountId].ToArray();
-            if (riders.Length != 1)
-            { issues.Add(new(row.RowNumber, row.IdNumber, "يجب وجود تكليف واحد للمندوب بتاريخ التقرير.")); continue; }
-            var assignment = riders[0];
-            if (existingRows.TryGetValue(accountId, out var old))
+            var allocation = await allocator.AllocateAsync(accountId, reportDate, new Dictionary<PlatformDayMetric, decimal>
             {
-                if (old.RiderClientAssignmentId == assignment.Id && old.RiderProfileId == assignment.RiderProfileId
-                    && old.ReportIdNumber == row.IdNumber && old.TotalValidOffers == row.TotalValidOffers
-                    && old.AcceptedOffers == row.AcceptedOffers && old.DeclinedOffers == row.DeclinedOffers
-                    && old.MissedOffers == row.MissedOffers && old.AcceptanceRate == row.AcceptanceRate)
-                    skipped++;
-                else pending.Add((old, row, assignment, false));
-                continue;
-            }
-            pending.Add((new ChefzDailyPerformance
-            {
-                PlatformRiderAccountId = accountId, ReportDate = reportDate
-            }, row, assignment, true));
+                [PlatformDayMetric.OrdersCount] = row.AcceptedOffers, [PlatformDayMetric.TotalValidOffers] = row.TotalValidOffers,
+                [PlatformDayMetric.DeclinedOffers] = row.DeclinedOffers, [PlatformDayMetric.MissedOffers] = row.MissedOffers
+            }, ct);
+            if (allocation.IsFailure) { issues.Add(new(row.RowNumber, row.IdNumber, allocation.Error.Description)); continue; }
+            var shares = allocation.Value!;
+            if (shares.Any(a => a.Values[PlatformDayMetric.OrdersCount] > a.Values[PlatformDayMetric.TotalValidOffers]))
+            { issues.Add(new(row.RowNumber, row.IdNumber, "Allocated accepted offers exceed valid offers.")); continue; }
+            var isNew = !sources.TryGetValue(accountId, out var source);
+            var oldRows = existingRows.Where(p => p.PlatformRiderAccountId == accountId).ToArray();
+            if (!isNew && !oldRows.Select(p => p.RiderClientAssignmentId).Order().SequenceEqual(shares.Select(a => a.AssignmentId).Order()))
+            { issues.Add(new(row.RowNumber, row.IdNumber, "Saved attribution differs from the assignment history; correct history before importing.")); continue; }
+            if (source is not null && source.ReportIdNumber == row.IdNumber && source.TotalValidOffers == row.TotalValidOffers
+                && source.AcceptedOffers == row.AcceptedOffers && source.DeclinedOffers == row.DeclinedOffers
+                && source.MissedOffers == row.MissedOffers && source.AcceptanceRate == row.AcceptanceRate)
+            { skipped++; continue; }
+            source ??= new() { PlatformRiderAccountId = accountId, ReportDate = reportDate };
+            pending.Add((source, row, shares, isNew));
         }
         if (issues.Count > 0) return Result.Success(new ChefzImportResponse(null, reportDate, 0, 0, issues));
-        // Stage changes only after every row validates, so invalid files leave no tracked corrections.
-        foreach (var (performance, row, assignment, isNew) in pending)
+        // Do not stage any corrections until all source rows and rider shares validate.
+        var savedRows = existingRows.ToList();
+        foreach (var (source, row, shares, isNew) in pending)
         {
-            performance.RiderClientAssignmentId = assignment.Id;
-            performance.RiderProfileId = assignment.RiderProfileId;
-            performance.ImportId = batch.Id;
-            performance.ReportIdNumber = row.IdNumber;
-            performance.SourceRowNumber = row.RowNumber;
-            performance.TotalValidOffers = row.TotalValidOffers;
-            performance.AcceptedOffers = row.AcceptedOffers;
-            performance.DeclinedOffers = row.DeclinedOffers;
-            performance.MissedOffers = row.MissedOffers;
-            performance.AcceptanceRate = row.AcceptanceRate;
-            if (isNew) db.ChefzDailyPerformance.Add(performance);
+            source.ImportId = batch.Id; source.ReportIdNumber = row.IdNumber; source.SourceRowNumber = row.RowNumber;
+            source.TotalValidOffers = row.TotalValidOffers; source.AcceptedOffers = row.AcceptedOffers;
+            source.DeclinedOffers = row.DeclinedOffers; source.MissedOffers = row.MissedOffers; source.AcceptanceRate = row.AcceptanceRate;
+            if (isNew) db.Add(source);
+            foreach (var share in shares)
+            {
+                var performance = savedRows.SingleOrDefault(p => p.PlatformRiderAccountId == source.PlatformRiderAccountId && p.RiderClientAssignmentId == share.AssignmentId);
+                if (performance is null)
+                {
+                    performance = new() { PlatformRiderAccountId = source.PlatformRiderAccountId, ReportDate = reportDate,
+                        RiderClientAssignmentId = share.AssignmentId, RiderProfileId = share.RiderProfileId, SourceId = source.Id };
+                    db.Add(performance); savedRows.Add(performance);
+                }
+                performance.ImportId = batch.Id; performance.ReportIdNumber = row.IdNumber; performance.SourceRowNumber = row.RowNumber;
+                performance.TotalValidOffers = checked((int)share.Values[PlatformDayMetric.TotalValidOffers]);
+                performance.AcceptedOffers = checked((int)share.Values[PlatformDayMetric.OrdersCount]);
+                performance.DeclinedOffers = checked((int)share.Values[PlatformDayMetric.DeclinedOffers]);
+                performance.MissedOffers = checked((int)share.Values[PlatformDayMetric.MissedOffers]);
+                // The original rate remains on the source; rider rates use allocated counts.
+                performance.AcceptanceRate = performance.TotalValidOffers == 0 ? 0
+                    : decimal.Round(100m * performance.AcceptedOffers / performance.TotalValidOffers, 2, MidpointRounding.AwayFromZero);
+            }
         }
         if (previous is null)
         {
-            batch.ImportedRows = pending.Count;
-            batch.SkippedRows = skipped;
-            db.ChefzPerformanceImports.Add(batch);
+            batch.ImportedRows = pending.Count; batch.SkippedRows = skipped; db.ChefzPerformanceImports.Add(batch);
         }
-        foreach (var change in pending) existingRows[change.Performance.PlatformRiderAccountId] = change.Performance;
-        var reportRows = parsed.Rows.Select(row => existingRows[byId[row.IdNumber].Single().PlatformRiderAccountId]).ToArray();
-        var responses = await PerformanceResponses(reportRows, ct);
+        var requestedAccounts = parsed.Rows.Select(row => byId[row.IdNumber].Single().PlatformRiderAccountId).ToHashSet();
+        var responses = await PerformanceResponses(savedRows.Where(p => requestedAccounts.Contains(p.PlatformRiderAccountId)).ToArray(), ct);
         var riderGroups = responses.GroupBy(p => p.RiderProfileId).Select(g => new ChefzPerformanceRider(g.Key, g.First().RiderName,
             g.OrderBy(p => p.ExternalAccountId, StringComparer.Ordinal).ThenBy(p => p.AccountId).ToArray())
             { RiderIqamaNo = g.First().RiderIqamaNo })

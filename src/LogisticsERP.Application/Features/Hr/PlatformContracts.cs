@@ -1,4 +1,4 @@
-﻿using LogisticsERP.Application.Common.Results;
+using LogisticsERP.Application.Common.Results;
 
 namespace LogisticsERP.Application.Features.Hr;
 
@@ -40,7 +40,7 @@ public sealed record PlatformRegistrationUpsertRequest(Guid RegisteredEmployeeId
 public sealed record PlatformRegistrationResponse(Guid Id, Guid RegisteredEmployeeId, string RegisteredEmployeeNameAr, Guid RiderProfileId, Guid ClientPlatformId, string PlatformNameAr, Guid ClientContractId, string ContractNameAr, Guid? SponsorId, string? SponsorNameAr, Guid OperatingCityId, string OperatingCityAr, string RegistrationType, string Status, string? StatusReason, DateTimeOffset? RequestedAtUtc, DateTimeOffset? ActivatedAtUtc, Guid? PlatformRiderAccountId, string? Notes, string RowVersion);
 
 public sealed record AssignPlatformAccountRequest(Guid RiderProfileId, Guid ClientContractId, Guid PlatformRiderAccountId, DateOnly EffectiveFrom, string Status, string? StartReason, string? OperationalAgreementReference, string? OperationalAgreementNotes, bool WasBackdated, string? BackdatedReason);
-public sealed record ClosePlatformAssignmentRequest(DateOnly EffectiveTo, string Status, string EndReason, string RowVersion);
+public sealed record ClosePlatformAssignmentRequest(DateOnly EffectiveTo, string Status, string EndReason, string RowVersion, PlatformAccountDayUsageInput? DayUsage = null);
 public sealed record PlatformAssignmentResponse(Guid Id, Guid ActualEmployeeId, string ActualEmployeeNameAr, Guid RiderProfileId, Guid ClientContractId, string ContractNameAr, Guid PlatformRiderAccountId, string ExternalAccountId, string PaymentModel, DateOnly EffectiveFrom, DateOnly? EffectiveTo, string Status, string? StartReason, string? EndReason, string? OperationalAgreementReference, string? OperationalAgreementNotes, bool WasBackdated, string? BackdatedReason, string RowVersion)
 {
     public bool IsOperationallyBlocked { get; init; }

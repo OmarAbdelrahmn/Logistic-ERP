@@ -30,18 +30,25 @@ export interface SponsorStatistics { sponsorId: Id; nameAr: string; accounts: nu
 export interface Statistics { yesterday: DateOnly; totalAccounts: number; activeAccounts: number;
   unassignedAccounts: number; blockedAccounts: number; missingPasswordAccounts: number; yesterdayOrders: number | null;
   accountsWithYesterdayData: number; sponsors: SponsorStatistics[] }
+export interface PlatformAccountDayUsageInput { ordersCount?: number | null; workingHours?: number | null;
+  collectedAmount?: number | null; deductionsAmount?: number | null; totalValidOffers?: number | null;
+  declinedOffers?: number | null; missedOffers?: number | null }
 export interface OperationCreate { handoverId: Id; mode: OperationMode; throughDate: DateOnly; effectiveAtUtc: Instant;
-  net: number; reason: string; fund?: Fund | null; purpose?: Purpose; transferToRider?: boolean; paymentReference?: string | null }
+  net: number; reason: string; fund?: Fund | null; purpose?: Purpose; transferToRider?: boolean;
+  paymentReference?: string | null; dayUsage?: PlatformAccountDayUsageInput | null }
 export interface Preview { net: number; commission: number; remaining: number; direction: Direction;
+  sponsorId: Id | null; sponsorIdentifier: string | null; sponsorNameAr: string | null;
   allowedFunds: Fund[]; withdrawsAccount: boolean; commissionComplete: boolean; problems: string[]; calculationJson: string }
-export interface Operation extends Audit { handoverId: Id; mode: OperationMode; status: OperationStatus;
-  paymentStatus: PaymentStatus; throughDate: DateOnly; effectiveAtUtc: Instant; net: number; commission: number;
-  calculatedCommission: number; remaining: number; calculationJson: string; fund: Fund | null; purpose: Purpose;
+export interface Operation extends Audit { expectedSponsorId: Id | null; handoverId: Id; mode: OperationMode; status: OperationStatus;
+  paymentStatus: PaymentStatus; throughDate: DateOnly; commissionStartDate: DateOnly | null; effectiveAtUtc: Instant; net: number; commission: number;
+  calculatedCommission: number; remaining: number; calculationJson: string; dayUsageJson: string | null; fund: Fund | null; purpose: Purpose;
   transferToRider: boolean; paymentReference: string | null; reason: string; approvedRequestId: Id | null;
   executedAtUtc: Instant | null; executedByUserId: Id | null }
 export interface OperationUpdate { values: OperationCreate; rowVersion: string }
 export interface OperationPaymentMethodUpdate { fund: Fund.Cashbox | Fund.Bank; paymentReference: string;
   reason: string; rowVersion: string }
+export interface OperationCommissionStartUpdate { startDate: DateOnly; reason: string; rowVersion: string;
+  fund?: Fund | null; paymentReference?: string | null }
 export interface RequestCreate { handoverId: Id; kind: ApprovalKind; reason: string; operationId?: Id | null;
   targetAccountId?: Id | null; waiverAmount?: number; fromDate?: DateOnly | null; toDate?: DateOnly | null;
   effectiveAtUtc?: Instant | null; adjustmentTarget?: AdjustmentTarget | null; proposedNet?: number | null;
@@ -55,22 +62,49 @@ export interface DecisionRequest { approve: boolean; reason: string; approvedNet
   approvedCommission?: number | null; approvedDebtAdjustment?: number | null; useOriginalValues?: boolean }
 export interface Decision { id: Id; requestId: Id; actorUserId: Id; status: ApprovalStatus; decidedAtUtc: Instant;
   reason: string; decisionJson: string | null; createdAtUtc: Instant; createdByUserId: Id | null }
-export interface Approval { request: ApprovalRequest; decisions: Decision[] }
+export interface SettlementAmounts { dashboardDebt: number; commission: number; total: number }
+export interface Approval { request: ApprovalRequest; decisions: Decision[]; amounts: SettlementAmounts | null }
+// Read endpoints enrich the original request handover; write responses keep Approval.
+export interface ApprovalRequestRow extends ApprovalRequest { userRider: Person | null;
+  assignment: ApprovalAssignment | null; account: ApprovalAccount | null;
+  targetAccount: ApprovalAccount | null; operation: Operation | null; amounts: SettlementAmounts | null }
+export interface ApprovalAssignment { assignmentId: Id; handoverId: Id; accountId: Id; riderProfileId: Id;
+  startedAtUtc: Instant; endedAtUtc: Instant | null; effectiveFrom: DateOnly | null; effectiveTo: DateOnly | null;
+  status: string | null; startReason: string | null; endReason: string | null; commissionStartsOn: DateOnly;
+  commissionPostedThrough: DateOnly | null; lastSettlementPaymentAtUtc: Instant | null }
+export interface ApprovalAccount { accountId: Id; code: string; externalAccountId: string; userName: string | null;
+  status: string; statusReason: string | null; operatingCityId: Id; cityNameAr: string | null;
+  sponsorId: Id | null; sponsorNameAr: string | null }
+export interface ApprovalDetails { request: ApprovalRequestRow; decisions: Decision[] }
 export interface MoneyRecord { fund: Fund; reference: string; reason: string; purpose?: Purpose }
 export interface FeeReceipt { handoverId: Id; amount: number; fund: Fund; reference: string; reason: string }
 export interface TransferredDebt extends Audit { operationId: Id; riderProfileId: Id; amount: number;
   paidAtUtc: Instant | null; paidByUserId: Id | null }
+export interface RiderTransferredDebtSummary { riderProfileId: Id; userRider: Person | null;
+  unpaidDebtCount: number; outstandingAmount: number; amounts: SettlementAmounts | null }
+export interface RiderDebtRepayment { expectedAmount: number; fund: Fund; reference: string; reason: string }
+export interface RiderDebtRepaymentResponse { riderProfileId: Id; paidAmount: number; paidDebtIds: Id[]; remainingAmount: number }
+// GET transferred-debts follows the debt's source operation, never the account's current assignment.
+export interface TransferredDebtRow extends TransferredDebt { userRider: Person | null;
+  assignment: TransferredDebtAssignment | null; sourceOperation: TransferredDebtSourceOperation | null }
+export interface TransferredDebtAssignment { assignmentId: Id; handoverId: Id; accountId: Id;
+  externalAccountId: string | null; riderProfileId: Id; startedAtUtc: Instant; endedAtUtc: Instant | null;
+  effectiveFrom: DateOnly | null; effectiveTo: DateOnly | null; status: string | null;
+  startReason: string | null; endReason: string | null }
+export interface TransferredDebtSourceOperation { id: Id; mode: OperationMode; throughDate: DateOnly;
+  effectiveAtUtc: Instant; net: number; commission: number; remaining: number; reason: string;
+  approvedRequestId: Id | null; executedAtUtc: Instant | null }
 export interface Movement { id: Id; handoverId: Id; riderProfileId: Id; operationId: Id | null;
   transferredDebtId: Id | null; fund: Fund; direction: Direction; purpose: Purpose;
   amount: number; actorUserId: Id; occurredAtUtc: Instant; reference: string; reason: string;
   createdAtUtc: Instant; createdByUserId: Id | null }
 // GET money-movements: the recorded movement rider and the linked account's registered owner.
-export interface MovementRow extends Movement { userRider: Person | null; ownerRider: Person | null;
+export interface MovementRow extends Movement { sponsorId: Id | null; sponsorIdentifier: string | null; treasurySubAccountId: Id | null; userRider: Person | null; ownerRider: Person | null;
   sponsorNameAr: string | null; cashboxHandoverId: Id | null; isHandedToAccountant: boolean;
   accountId: Id | null; platformAccountId: string | null; externalAccountId: string | null; net: number | null;
   commission: number | null; calculatedCommission: number | null;
   // Inclusive saved company-commission accrual range, only for purpose = Settlement.
-  startDate: DateOnly | null; endDate: DateOnly | null }
+  startDate: DateOnly | null; endDate: DateOnly | null; operationRowVersion: string | null }
 // Dates use YYYY-MM-DD, inclusive in Riyadh time. Defaults: current month's first day through today.
 // Each omitted bound defaults independently; fromDate > toDate returns HTTP 400.
 export interface MovementDateRange { fromDate?: DateOnly | null; toDate?: DateOnly | null }
@@ -120,6 +154,7 @@ export const routes = {
   accounts: '/api/jahez/v2/accounts', statistics: '/api/jahez/v2/statistics', operations: '/api/jahez/v2/operations',
   preview: '/api/jahez/v2/operations/preview', requests: '/api/jahez/v2/requests',
   transferredDebts: '/api/jahez/v2/transferred-debts', feeReceipts: '/api/jahez/v2/fees/receipts',
+  ridersWithTransferredDebts: '/api/jahez/v2/riders/transferred-debts',
   moneyMovements: '/api/jahez/v2/money-movements', funds: '/api/jahez/v2/funds',
   cashboxHandovers: '/api/jahez/v2/cashbox/handovers',
   handovers: '/api/jahez/v2/handovers', earnings: '/api/jahez/v2/earnings', imports: '/api/jahez/v2/imports', administrativeDebts: '/api/jahez/v2/administrative-debts'

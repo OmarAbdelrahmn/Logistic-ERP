@@ -152,17 +152,6 @@ internal sealed partial class JahezWorkflowService
     }
     public Task<Result<JahezPage<JahezOperation>>> OperationsV2Async(int page, int pageSize, CancellationToken ct = default) =>
         ReadAsync(PermissionKeys.Jahez.Read, () => WorkflowPage(db.Set<JahezOperation>(), page, pageSize, ct), ct);
-    public Task<Result<JahezPage<JahezApprovalRequest>>> RequestsV2Async(int page, int pageSize, CancellationToken ct = default) =>
-        ReadAsync(PermissionKeys.Jahez.Read, () => WorkflowPage(db.Set<JahezApprovalRequest>(), page, pageSize, ct), ct);
-    public Task<Result<JahezWorkflowApproval>> RequestV2Async(Guid id, CancellationToken ct = default) =>
-        ReadAsync(PermissionKeys.Jahez.Read, async () =>
-        {
-            var r = await db.Set<JahezApprovalRequest>().AsNoTracking().SingleOrDefaultAsync(x => x.Id == id, ct);
-            Require(r is not null, JahezErrors.NotFound);
-            return new JahezWorkflowApproval(r!, await db.Set<JahezApprovalDecision>().AsNoTracking().Where(x => x.RequestId == id).OrderBy(x => x.DecidedAtUtc).ToArrayAsync(ct));
-        }, ct);
-    public Task<Result<JahezPage<JahezTransferredDebt>>> TransferredDebtsAsync(int page, int pageSize, CancellationToken ct = default) =>
-        ReadAsync(PermissionKeys.Jahez.Read, () => WorkflowPage(db.Set<JahezTransferredDebt>(), page, pageSize, ct), ct);
     private IQueryable<JahezMoneyMovementResponse> WorkflowMovements(int page, int pageSize,
         DateTimeOffset fromUtc, DateTimeOffset toExclusiveUtc)
     {
@@ -181,6 +170,8 @@ internal sealed partial class JahezWorkflowService
             from handover in handovers.DefaultIfEmpty()
             join account in db.PlatformRiderAccounts on handover.PlatformRiderAccountId equals account.Id into accounts
             from account in accounts.DefaultIfEmpty()
+            join ownership in db.Set<TreasuryOwnership>().Where(x => x.Source == TreasurySource.Movement) on m.Id equals ownership.SourceId into ownerships
+            from ownership in ownerships.DefaultIfEmpty()
             join sponsor in db.Sponsors on account.SponsorId equals sponsor.Id into sponsors
             from sponsor in sponsors.DefaultIfEmpty()
             join owner in db.Employees on account.RegisteredEmployeeId equals owner.Id into owners
@@ -198,13 +189,18 @@ internal sealed partial class JahezWorkflowService
                     employee.FullNameEn, employee.IqamaNo, employee.PrimaryPhone, employee.SponsorId),
                 owner == null ? null : new JahezAccountPerson(owner.Id, ownerRider == null ? null : ownerRider.Id,
                     owner.FullNameAr, owner.FullNameEn, owner.IqamaNo, owner.PrimaryPhone, owner.SponsorId),
-                sponsor == null ? null : sponsor.RegistryNameAr, cashboxHandoverId,
+                ownership == null ? null : ownership.SponsorNameAr, cashboxHandoverId,
                 db.JahezCashboxHandovers.Any(h => h.Id == cashboxHandoverId && h.Status == JahezCashboxHandoverStatus.Confirmed),
                 handover == null ? null : (Guid?)handover.PlatformRiderAccountId,
                 account == null ? null : account.ExternalAccountId,
                 operation == null ? null : (decimal?)operation.Net,
                 operation == null ? null : (decimal?)operation.Commission,
-                operation == null ? null : (decimal?)operation.CalculatedCommission),
+                operation == null ? null : (decimal?)operation.CalculatedCommission)
+                { OperationRowVersion = operation == null ? null : Convert.ToBase64String(operation.RowVersion),
+                    SponsorId = ownership == null ? null : ownership.SponsorId,
+                    SponsorIdentifier = ownership == null ? null : ownership.SponsorIdentifier,
+                    TreasurySubAccountId = db.Set<TreasuryPosting>().Where(p => p.MoneyMovementId == m.Id && p.Kind == TreasuryEntryKind.Business)
+                        .OrderByDescending(p => p.Revision).Select(p => (Guid?)p.SubAccountId).FirstOrDefault() },
                 operation == null ? null : operation.CalculationJson);
     }
 

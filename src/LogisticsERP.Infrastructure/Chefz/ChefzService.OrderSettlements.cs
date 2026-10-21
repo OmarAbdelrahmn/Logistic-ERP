@@ -5,6 +5,8 @@ using LogisticsERP.Application.Features.Chefz;
 using LogisticsERP.Domain.Chefz;
 using LogisticsERP.Domain.Entities.Chefz;
 using LogisticsERP.Domain.Enums;
+using LogisticsERP.Application.Features.Hr;
+using LogisticsERP.Infrastructure.Hr;
 using Microsoft.EntityFrameworkCore;
 
 namespace LogisticsERP.Infrastructure.Chefz;
@@ -74,6 +76,9 @@ internal sealed partial class ChefzService
             on d.PlatformRiderAccountId equals a.Id where driverIds.Contains(d.ReportIdNumber) select d).ToArrayAsync(ct);
         var byDriver = details.ToLookup(d => d.ReportIdNumber, StringComparer.Ordinal);
         var accountIds = details.Select(d => d.PlatformRiderAccountId).ToArray();
+        await using var accountScope = await PlatformAccountWriteScope.AcquireAsync(db, accountIds, ct);
+        oldImport = await db.ChefzOrderSettlementImports.AsNoTracking().SingleOrDefaultAsync(i => i.ContentHash == hash, ct);
+        if (oldImport is not null) return Result.Success(await ReadOrderImport(oldImport, preview, true, ct));
         var from = parsed.Rows.Min(r => ChefzRules.Period(r.Date.Year, r.Date.Month, r.Date.Day <= 15 ? 1 : 2).From);
         var to = parsed.Rows.Max(r => ChefzRules.Period(r.Date.Year, r.Date.Month, r.Date.Day <= 15 ? 1 : 2).To);
         var assignments = await db.RiderClientAssignments.AsNoTracking().Where(a => accountIds.Contains(a.PlatformRiderAccountId)
@@ -83,18 +88,27 @@ internal sealed partial class ChefzService
         var riderIds = assignments.Select(a => a.RiderProfileId).Distinct().ToArray();
         var names = await (from r in db.RiderProfiles.AsNoTracking() join e in db.Employees.AsNoTracking()
             on r.EmployeeId equals e.Id where riderIds.Contains(r.Id) select new { r.Id, e.FullNameAr }).ToDictionaryAsync(r => r.Id, r => r.FullNameAr, ct);
-        var resolved = new List<(ChefzOrderRow Row, Guid AssignmentId)>();
-        foreach (var row in parsed.Rows)
+        var resolved = new List<(ChefzOrderRow Row, Guid AssignmentId, int Sequence)>();
+        var allocator = new PlatformAccountDayAllocationService(db);
+        await allocator.Preload(accountIds, from, to, ct);
+        foreach (var day in parsed.Rows.GroupBy(r => new { r.DriverId, r.Date }))
         {
             ct.ThrowIfCancellationRequested();
-            var matches = byDriver[row.DriverId].ToArray();
+            var matches = byDriver[day.Key.DriverId].ToArray();
             if (matches.Length != 1 || !Enum.IsDefined(matches[0].AccountType))
-            { issues.Add(new(row.RowNumber, row.DriverId, "Driver ID غير مرتبط بحساب شيفز واحد بنوع حساب صحيح؛ راجع ReportIdNumber في تفاصيل الحساب.")); continue; }
-            var candidates = byAccount[matches[0].PlatformRiderAccountId].Where(a => a.EffectiveFrom <= row.Date
-                && (a.EffectiveTo == null || a.EffectiveTo >= row.Date)).ToArray();
-            if (candidates.Length != 1 || !names.ContainsKey(candidates[0].RiderProfileId))
-            { issues.Add(new(row.RowNumber, row.DriverId, $"يلزم تكليف واحد لمندوب موجود بتاريخ الطلب {row.Date:yyyy-MM-dd}؛ لا تستخدم صاحب الحساب بديلاً.")); continue; }
-            resolved.Add((row, candidates[0].Id));
+            { issues.Add(new(day.First().RowNumber, day.Key.DriverId, "Driver ID must identify one Chefz account with a valid account type.")); continue; }
+            var allocation = await allocator.AllocateAsync(matches[0].PlatformRiderAccountId, day.Key.Date,
+                new Dictionary<PlatformDayMetric, decimal> { [PlatformDayMetric.OrdersCount] = day.Count() }, ct);
+            if (allocation.IsFailure) { issues.Add(new(day.First().RowNumber, day.Key.DriverId, allocation.Error.Description)); continue; }
+            var orderedRows = day.OrderBy(r => r.RowNumber).ToArray(); var offset = 0;
+            foreach (var share in allocation.Value!)
+            {
+                if (!names.ContainsKey(share.RiderProfileId))
+                { issues.Add(new(day.First().RowNumber, day.Key.DriverId, $"Actual rider {share.RiderProfileId} does not exist.")); break; }
+                var count = checked((int)share.Values[PlatformDayMetric.OrdersCount]);
+                foreach (var row in orderedRows.Skip(offset).Take(count)) resolved.Add((row, share.AssignmentId, share.Sequence));
+                offset += count;
+            }
         }
         if (issues.Count != 0) return Result.Success(await OrderImportResponse(null, preview, false, parsed.Rows.Count, [], issues, ct));
         var batch = new ChefzOrderSettlementImport { FileName = Path.GetFileName(fileName), ContentHash = hash, SourceRows = parsed.Rows.Count };
@@ -140,6 +154,14 @@ internal sealed partial class ChefzService
             foreach (var s in pending) { s.Id = Guid.Empty; s.ImportId = null; }
             return Result.Success(await OrderImportResponse(null, preview, false, parsed.Rows.Count, pending, issues, ct));
         }
+        db.AddRange(resolved.Select(r => new ChefzImportedOrderRow
+        {
+            ImportId = batch.Id, SourceRowNumber = r.Row.RowNumber,
+            PlatformRiderAccountId = byAssignment[r.AssignmentId].PlatformRiderAccountId,
+            RiderClientAssignmentId = r.AssignmentId, BusinessDate = r.Row.Date, UsageSequence = r.Sequence,
+            OrderId = r.Row.OrderId, DeliveryFees = r.Row.DeliveryFees, Tips = r.Row.Tips,
+            Compensation = r.Row.Compensation, Bonuses = r.Row.Bonuses, Deductions = r.Row.Deductions, CashCollected = r.Row.CashCollected
+        }));
         db.ChefzOrderSettlementImports.Add(batch);
         db.ChefzWalletSettlements.AddRange(pending);
         var response = await OrderImportResponse(batch.Id, false, false, batch.SourceRows, pending, [], ct);

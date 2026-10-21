@@ -204,11 +204,6 @@ internal sealed partial class ChefzService
         var accounts = await Accounts.AsNoTracking().Select(a => new { a.Id, a.SponsorId }).ToArrayAsync(ct);
         var performance = await db.ChefzDailyPerformance.AsNoTracking().Where(p => p.ReportDate >= cycle.From && p.ReportDate <= yesterday
             && Accounts.Any(a => a.Id == p.PlatformRiderAccountId)).ToArrayAsync(ct);
-        var ids = accounts.Select(a => a.Id).ToArray();
-        var assigned = await db.RiderClientAssignments.AsNoTracking().Where(a => ids.Contains(a.PlatformRiderAccountId)
-            && a.EffectiveFrom <= yesterday && (a.EffectiveTo == null || a.EffectiveTo >= yesterday)
-            && (a.Status == RiderAssignmentStatus.Active || a.Status == RiderAssignmentStatus.Ended))
-            .Select(a => new { a.PlatformRiderAccountId, a.RiderProfileId }).ToArrayAsync(ct);
         IReadOnlyList<ChefzManagementReport> reports = sponsors.Select(s =>
         {
             var sponsorAccounts = accounts.Where(a => a.SponsorId == s.Id).Select(a => a.Id).ToHashSet();
@@ -216,11 +211,10 @@ internal sealed partial class ChefzService
             var cycleTotals = data.GroupBy(p => p.PlatformRiderAccountId).ToDictionary(g => g.Key, g => g.Sum(p => (long)p.AcceptedOffers));
             var dailyTotals = data.Where(p => p.ReportDate == yesterday).GroupBy(p => p.RiderProfileId)
                 .ToDictionary(g => g.Key, g => g.Sum(p => (long)p.AcceptedOffers));
-            // Include assigned riders without a daily row as zero for the management roster only.
-            var roster = assigned.Where(a => sponsorAccounts.Contains(a.PlatformRiderAccountId)).Select(a => a.RiderProfileId).Union(dailyTotals.Keys).ToArray();
+            // Both daily buckets partition riders who actually completed orders, after combining their accounts.
             return new ChefzManagementReport(s.Id, s.RegistryNameAr, "ذا شفز", reportDate, yesterday, cycle.From,
                 data.Sum(p => (long)p.AcceptedOffers), sponsorAccounts.Count(id => cycleTotals.GetValueOrDefault(id) < 3),
-                dailyTotals.Count(p => p.Value > 0), roster.Count(id => dailyTotals.GetValueOrDefault(id) <= 3), dailyTotals.Count(p => p.Value > 3));
+                dailyTotals.Count(p => p.Value > 0), dailyTotals.Count(p => p.Value is > 0 and <= 3), dailyTotals.Count(p => p.Value > 3));
         }).ToArray();
         return Result.Success(reports);
     }

@@ -1,5 +1,7 @@
 # Edit a Chefz assignment start date
 
+**21 October 2026:** Freelancer assignments may share a boundary day when their usage order and report figures can be resolved. FullTime assignments remain exclusive by day. Date corrections also protect saved usage/allocation evidence. See [shared-day handovers](shared-account-day-handovers.md).
+
 `PUT /api/chefz/assignments/{assignmentId}/start-date`
 
 Permission: `chefz.accounts.update`, scoped to the Chefz platform. Supported platform codes: `CHEFZ`, `THECHEFZ`, `CHEFSZ`, and `SHIFTZ`.

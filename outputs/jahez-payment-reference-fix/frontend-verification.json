@@ -1,0 +1,20 @@
+{
+  "passed": 15,
+  "checks": [
+    "Reject invalid reference length 0",
+    "Reject invalid reference length 3",
+    "Reject invalid reference length 501",
+    "Send trimmed real reference on create",
+    "Load saved UTC timestamps as Riyadh local time",
+    "Accept 500-character reference and bank disbursement",
+    "No save without preview",
+    "Fresh preview catches new money requirement",
+    "No reference required for zero settlement",
+    "No reference required for withdrawal",
+    "No reference required for transfer",
+    "Repair existing draft with reference and current row version",
+    "Block execution when saved reference is missing",
+    "Block execution until changed reference is saved",
+    "Execute only with matching saved payment details"
+  ]
+}

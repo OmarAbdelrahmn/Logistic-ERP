@@ -12,17 +12,20 @@ public enum JahezAdjustmentTarget { Settlement = 1, AdministrativeDebt = 2 }
 
 public sealed class JahezOperation : AuditableEntity
 {
+    public Guid? ExpectedSponsorId { get; set; }
     public Guid HandoverId { get; set; }
     public JahezOperationMode Mode { get; set; }
     public JahezOperationStatus Status { get; set; } = JahezOperationStatus.Ready;
     public JahezOperationPaymentStatus PaymentStatus { get; set; } = JahezOperationPaymentStatus.None;
     public DateOnly ThroughDate { get; set; }
+    public DateOnly? CommissionStartDate { get; set; }
     public DateTimeOffset EffectiveAtUtc { get; set; }
     public decimal Net { get; set; }
     public decimal Commission { get; set; }
     public decimal CalculatedCommission { get; set; }
     public decimal Remaining { get; set; }
     public string CalculationJson { get; set; } = "[]";
+    public string? DayUsageJson { get; set; }
     public JahezMoneyFund? Fund { get; set; }
     public JahezMoneyPurpose Purpose { get; set; } = JahezMoneyPurpose.Settlement;
     public bool TransferToRider { get; set; }
@@ -34,7 +37,7 @@ public sealed class JahezOperation : AuditableEntity
 }
 
 // A single journal for actual receipts/disbursements, including migrated receipts.
-// Cash/bank payout methods and references permit audited corrections; financial facts stay immutable.
+// Payment metadata and authorized commission-start corrections are audited; original execution identity is retained.
 public sealed class JahezMoneyMovement : HistoryEntity
 {
     public Guid HandoverId { get; set; }

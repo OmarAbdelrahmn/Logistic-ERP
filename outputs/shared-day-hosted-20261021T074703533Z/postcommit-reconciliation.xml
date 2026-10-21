@@ -1,0 +1,123 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Dataset" type="xs:string" minOccurs="0" />
+                <xs:element name="SourceId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="PlatformRiderAccountId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="ReportDate" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="TotalOrders" type="xs:int" minOccurs="0" />
+                <xs:element name="AllocatedOrders" type="xs:int" minOccurs="0" />
+                <xs:element name="TotalWorkingHours" type="xs:decimal" minOccurs="0" />
+                <xs:element name="AllocatedHours" type="xs:decimal" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Dataset" type="xs:string" minOccurs="0" />
+                <xs:element name="SourceId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="PlatformRiderAccountId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="ReportDate" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="TotalCollectedAmountAtDelivery" type="xs:decimal" minOccurs="0" />
+                <xs:element name="AllocatedCollected" type="xs:decimal" minOccurs="0" />
+                <xs:element name="TotalDeductions" type="xs:decimal" minOccurs="0" />
+                <xs:element name="AllocatedDeductions" type="xs:decimal" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table2">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Dataset" type="xs:string" minOccurs="0" />
+                <xs:element name="SourceId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="PlatformRiderAccountId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="ReportDate" type="xs:dateTime" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table3">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Dataset" type="xs:string" minOccurs="0" />
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table4">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Dataset" type="xs:string" minOccurs="0" />
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table5">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Dataset" type="xs:string" minOccurs="0" />
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table6">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Issue" type="xs:string" minOccurs="0" />
+                <xs:element name="PlatformRiderAccountId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="BusinessDate" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="Participants" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table7">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Issue" type="xs:string" minOccurs="0" />
+                <xs:element name="PlatformRiderAccountId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="FirstAssignment" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="SecondAssignment" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table8">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Issue" type="xs:string" minOccurs="0" />
+                <xs:element name="SettlementId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table9">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Issue" type="xs:string" minOccurs="0" />
+                <xs:element name="ImportId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="SourceRows" type="xs:int" minOccurs="0" />
+                <xs:element name="RetainedRows" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table6>
+    <Issue>UnresolvedLegacyOrder</Issue>
+    <PlatformRiderAccountId>c82f1a48-8890-4a9e-9785-ecdc5f92d323</PlatformRiderAccountId>
+    <BusinessDate>2026-10-19T00:00:00+03:00</BusinessDate>
+    <Participants>3</Participants>
+  </Table6>
+  <Table7>
+    <Issue>ChefzFullTimeOverlap</Issue>
+    <PlatformRiderAccountId>77c3b06d-96fe-43ef-9180-96a08453aafd</PlatformRiderAccountId>
+    <FirstAssignment>01a15a0f-238c-7474-bd01-4b5f4ca62d23</FirstAssignment>
+    <SecondAssignment>485ae439-a0d2-4143-a347-8d68d62bae7d</SecondAssignment>
+  </Table7>
+</NewDataSet>

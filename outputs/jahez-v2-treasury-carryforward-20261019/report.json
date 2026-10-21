@@ -1,0 +1,17 @@
+{
+  "Applied": true,
+  "VerifiedAtUtc": "2026-10-19T12:52:36.7104229Z",
+  "ProvenSources": 122,
+  "OriginalMovements": 50,
+  "ConfirmedHandovers": 2,
+  "ConfirmedPhysicalCash": 856.90,
+  "ExactMemberships": 26,
+  "TreasuryActivated": false,
+  "FundingInvented": false,
+  "OriginalV2TablesPreserved": 22,
+  "ExistingRowsComparedInBothDirections": true,
+  "RestoreVerifyOnlyPerformed": false,
+  "PlanSha256": "F2E91F0E1BD19D031BB78D59402C3AF15CC0B8E1AD6F7C8A89818F2B04101C7E",
+  "SqlSha256": "D0141AE04DE675F38F4CED98C1B188E0D7913A67BD6FF06A5F9CA63D44BC47E3",
+  "BankReconciliation": "Historical payouts carried without invented funding; verified opening/funding evidence is still required."
+}

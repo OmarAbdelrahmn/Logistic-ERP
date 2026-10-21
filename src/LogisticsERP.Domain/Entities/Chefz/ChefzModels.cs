@@ -98,6 +98,7 @@ public sealed class ChefzPerformanceImport : HistoryEntity
 
 public sealed class ChefzDailyPerformance : HistoryEntity
 {
+    public Guid SourceId { get; set; }
     public Guid PlatformRiderAccountId { get; set; }
     public Guid RiderClientAssignmentId { get; set; }
     public Guid RiderProfileId { get; set; }

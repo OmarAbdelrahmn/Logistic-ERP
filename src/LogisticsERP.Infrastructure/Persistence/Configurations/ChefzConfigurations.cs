@@ -85,7 +85,9 @@ internal sealed class ChefzConfigurations : IEntityTypeConfiguration<ChefzAccoun
         b.HasOne<RiderClientAssignment>().WithMany().HasForeignKey(x => x.RiderClientAssignmentId).OnDelete(DeleteBehavior.Restrict);
         b.HasOne<RiderProfile>().WithMany().HasForeignKey(x => x.RiderProfileId).OnDelete(DeleteBehavior.Restrict);
         b.HasOne<ChefzPerformanceImport>().WithMany().HasForeignKey(x => x.ImportId).OnDelete(DeleteBehavior.Restrict);
-        b.HasIndex(x => new { x.PlatformRiderAccountId, x.ReportDate }).IsUnique();
+        b.HasIndex(x => new { x.PlatformRiderAccountId, x.ReportDate, x.RiderClientAssignmentId }).IsUnique();
+        b.HasOne<ChefzDailyPerformanceSource>().WithMany().HasForeignKey(x => x.SourceId).OnDelete(DeleteBehavior.Restrict);
+        b.HasIndex(x => new { x.SourceId, x.RiderClientAssignmentId }).IsUnique();
         b.HasIndex(x => new { x.RiderProfileId, x.ReportDate });
         b.ToTable(t => t.HasCheckConstraint("CK_ChefzPerformance_Values",
             "[TotalValidOffers] >= 0 AND [AcceptedOffers] >= 0 AND [DeclinedOffers] >= 0 AND [MissedOffers] >= 0 AND [AcceptanceRate] BETWEEN 0 AND 100"));

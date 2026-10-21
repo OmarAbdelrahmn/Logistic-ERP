@@ -23,7 +23,10 @@ public sealed record JahezImportRowPreview(Guid RowId, string FileName, int RowN
     DateTimeOffset OccurredAtUtc, Guid? AccountId, Guid? HandoverId, Guid? RiderProfileId, decimal NetAmount, int? Dispatches);
 public sealed record JahezImportPreview(Guid BatchId, JahezImportKind Kind, bool Committed,
     IReadOnlyList<JahezImportRowPreview> Rows, IReadOnlyList<JahezImportIssue> Issues, IReadOnlyList<JahezImportFileMetadata>? Files = null,
-    IReadOnlyList<JahezImportAccountSummary>? Accounts = null);
+    IReadOnlyList<JahezImportAccountSummary>? Accounts = null)
+{
+    public IReadOnlyList<JahezDispatchAllocation> ResolvedAllocations { get; init; } = [];
+}
 public sealed record JahezImportAccountSummary(Guid? AccountId, string DriverId, DateOnly FromDate, DateOnly ToDate,
     int ValidRowCount, decimal NetAmount, decimal PlatformDebtChange, long? Dispatches, bool HasIssues);
 public sealed record JahezImportFileMetadata(Guid Id, string FileName);

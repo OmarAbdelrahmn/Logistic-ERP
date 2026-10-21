@@ -193,6 +193,7 @@ export interface ChefzManagementReport {
   cycleOrders: number;
   accountsBelowThreeOrdersInCycle: number;
   ridersWithOrdersYesterday: number;
+  /** Riders with 1–3 accepted orders, combined across their accounts within this sponsor; excludes zero/missing data. */
   ridersWithThreeOrFewerOrdersYesterday: number;
   ridersWithMoreThanThreeOrdersYesterday: number;
 }
@@ -206,6 +207,8 @@ export interface ChefzAccountReminder {
 }
 
 export interface ChefzAccountResponse {
+  /** Account list: current assigned worker's ERP iqama; null when unavailable. */
+  riderIqamaNo: string | null;
   accountId: Guid;
   externalAccountId: string;
   reportIdNumber: string;

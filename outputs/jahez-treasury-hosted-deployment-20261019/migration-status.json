@@ -1,0 +1,14 @@
+[
+  {
+    "Context": "Application",
+    "Applied": 90,
+    "Pending": 0,
+    "Unknown": 0
+  },
+  {
+    "Context": "Identity",
+    "Applied": 23,
+    "Pending": 0,
+    "Unknown": 0
+  }
+]

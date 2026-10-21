@@ -8,6 +8,8 @@ The value comes from `RiderProfile.Employee.IqamaNo` for the rider identified by
 
 ## Affected endpoints and JSON paths
 
+Updated 20 October 2026: the account list (`GET /api/chefz/accounts`, used by the admin Chefz accounts screen) also returns `items[].riderIqamaNo` for the current open assignment (`effectiveTo == null`). Ended and deleted assignments are excluded. The value is `null` when no current rider or iqama is available, with no fallback to the registered account owner's identity.
+
 Paths below are relative to the response body. All routes use the `/api/chefz` prefix.
 
 | Method / route | New iqama field paths |

@@ -1,0 +1,39 @@
+{
+  "Database": "db67927",
+  "Server": "db67927.public.databaseasp.net",
+  "Migration": "20261021071103_AddPlatformAccountDayAllocations",
+  "CompletedAtUtc": "2026-10-21T07:47:34.0406195Z",
+  "BackupWithChecksums": true,
+  "RestoreVerifyOnlyPerformed": false,
+  "BackupVerificationLimitation": "Hosted login cannot perform RESTORE VERIFYONLY; checksum backup completed.",
+  "RehearsalRolledBack": true,
+  "PostCommitVerified": true,
+  "ApiDeployed": false,
+  "PreservedBusinessTables": 34,
+  "SourceRecords": [
+    {
+      "Dataset": "ChefzPerformanceSources",
+      "Records": 2772
+    },
+    {
+      "Dataset": "NinjaPerformanceSources",
+      "Records": 0
+    },
+    {
+      "Dataset": "NinjaDeductionSources",
+      "Records": 0
+    },
+    {
+      "Dataset": "DayUsages",
+      "Records": 789
+    },
+    {
+      "Dataset": "OrderRows",
+      "Records": 0
+    }
+  ],
+  "UnresolvedLegacyDays": 1,
+  "FullTimeOverlapPairs": 1,
+  "ScriptSha256": "40D988A46ABBA33CF5B10E442687ABC2D1051ED089FCBC22BF144FCBDAA7C2A3",
+  "OutputDirectory": "C:\\Users\\omarf\\OneDrive\\Documents\\ChatGPT\\Logistic ERP\\outputs\\shared-day-hosted-20261021T074703533Z"
+}

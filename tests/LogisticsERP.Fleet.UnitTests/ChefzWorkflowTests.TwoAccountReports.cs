@@ -111,6 +111,7 @@ public sealed partial class ChefzWorkflowTests
         var management = Assert.Single(Value(await f.Service.GetManagementReportAsync(new(2026, 10, 21), f.Account.SponsorId, ct)));
         Assert.Equal(5, management.CycleOrders);
         Assert.Equal(1, management.RidersWithOrdersYesterday);
+        Assert.Equal(0, management.RidersWithThreeOrFewerOrdersYesterday);
         Assert.Equal(1, management.RidersWithMoreThanThreeOrdersYesterday);
     }
 

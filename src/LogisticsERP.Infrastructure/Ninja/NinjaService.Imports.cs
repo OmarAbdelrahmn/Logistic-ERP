@@ -3,6 +3,8 @@ using LogisticsERP.Application.Authorization;
 using LogisticsERP.Application.Common.Results;
 using LogisticsERP.Application.Features.Ninja;
 using LogisticsERP.Domain.Entities.Ninja;
+using LogisticsERP.Application.Features.Hr;
+using LogisticsERP.Infrastructure.Hr;
 using LogisticsERP.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
@@ -26,52 +28,79 @@ internal sealed partial class NinjaService
             && captainIds.Contains(a.ExternalAccountId)).Select(a => new { a.Id, a.ExternalAccountId }).ToArrayAsync(ct);
         var byCaptain = accounts.ToLookup(a => a.ExternalAccountId, StringComparer.Ordinal);
         var accountIds = accounts.Select(a => a.Id).ToArray();
-        var assignments = await db.RiderClientAssignments.AsNoTracking().Where(a => accountIds.Contains(a.PlatformRiderAccountId)
-            && (a.Status == RiderAssignmentStatus.Active || a.Status == RiderAssignmentStatus.Ended)
-            && a.EffectiveFrom <= reportDate && (a.EffectiveTo == null || a.EffectiveTo >= reportDate)).ToArrayAsync(ct);
-        var byAccount = assignments.ToLookup(a => a.PlatformRiderAccountId);
+        await using var accountScope = await PlatformAccountWriteScope.AcquireAsync(db, accountIds, ct);
         var hash = Convert.ToHexString(SHA256.HashData(content));
         var previous = await db.NinjaDailyImports.AsNoTracking().SingleOrDefaultAsync(i => i.IsDeductions == deductions
             && i.ReportDate == reportDate && i.ContentHash == hash, ct);
-        var oldPerformance = deductions ? new Dictionary<Guid, NinjaDailyPerformance>() : await db.NinjaDailyPerformance.AsNoTracking()
+        if (previous is not null) return Result.Success(new NinjaImportResponse(previous.Id, reportDate, 0, parsed.Rows.Count, []));
+        var oldPerformance = await db.Set<NinjaDailyPerformanceSource>().AsNoTracking()
             .Where(p => p.ReportDate == reportDate && accountIds.Contains(p.PlatformRiderAccountId)).ToDictionaryAsync(p => p.PlatformRiderAccountId, ct);
-        var oldDeductions = !deductions ? new Dictionary<Guid, NinjaDailyDeduction>() : await db.NinjaDailyDeductions.AsNoTracking()
+        var oldDeductions = await db.Set<NinjaDailyDeductionSource>().AsNoTracking()
             .Where(p => p.ReportDate == reportDate && accountIds.Contains(p.PlatformRiderAccountId)).ToDictionaryAsync(p => p.PlatformRiderAccountId, ct);
         var batch = new NinjaDailyImport { ReportDate = reportDate, IsDeductions = deductions, FileName = Path.GetFileName(fileName), ContentHash = hash };
         var performance = new List<NinjaDailyPerformance>(); var amounts = new List<NinjaDailyDeduction>();
+        var performanceSources = new List<NinjaDailyPerformanceSource>(); var deductionSources = new List<NinjaDailyDeductionSource>();
+        var allocator = new PlatformAccountDayAllocationService(db);
+        await allocator.Preload(accountIds, reportDate, reportDate, ct);
         var issues = new List<NinjaImportIssue>(); var skipped = 0;
         foreach (var row in parsed.Rows)
         {
             ct.ThrowIfCancellationRequested();
             var matches = byCaptain[row.CaptainId].ToArray();
-            if (matches.Length != 1) { issues.Add(new(row.RowNumber, row.CaptainId, "Captain ID لا يرتبط بحساب نينجا واحد ضمن النطاق المسموح.")); continue; }
-            var accountId = matches[0].Id; var riders = byAccount[accountId].ToArray();
-            if (riders.Length != 1) { issues.Add(new(row.RowNumber, row.CaptainId, "يجب وجود تكليف واحد للمندوب بتاريخ التقرير؛ لا يتم استخدام صاحب الحساب.")); continue; }
-            var a = riders[0];
+            if (matches.Length != 1) { issues.Add(new(row.RowNumber, row.CaptainId, "Captain ID must identify one permitted account.")); continue; }
+            var accountId = matches[0].Id;
             if (!deductions && oldPerformance.TryGetValue(accountId, out var old))
             {
-                if (old.RiderClientAssignmentId == a.Id && old.RiderProfileId == a.RiderProfileId
-                    && old.TotalOrders == row.TotalOrders && old.TotalWorkingHours == row.WorkingHours) skipped++;
-                else issues.Add(new(row.RowNumber, row.CaptainId, "يوجد أداء محفوظ لهذا الحساب واليوم بقيم أو تكليف مختلف؛ لم يتم استبداله."));
+                if (old.TotalOrders == row.TotalOrders && old.TotalWorkingHours == row.WorkingHours) skipped++;
+                else issues.Add(new(row.RowNumber, row.CaptainId, "Different performance is already saved for this account/day; it was not replaced."));
                 continue;
             }
             if (deductions && oldDeductions.TryGetValue(accountId, out var oldAmount))
             {
-                if (oldAmount.RiderClientAssignmentId == a.Id && oldAmount.RiderProfileId == a.RiderProfileId
-                    && oldAmount.TotalCollectedAmountAtDelivery == row.CollectedAmount && oldAmount.TotalDeductions == row.Deductions) skipped++;
-                else issues.Add(new(row.RowNumber, row.CaptainId, "توجد خصومات محفوظة لهذا الحساب واليوم بقيم أو تكليف مختلف؛ لم يتم استبدالها."));
+                if (oldAmount.TotalCollectedAmountAtDelivery == row.CollectedAmount && oldAmount.TotalDeductions == row.Deductions) skipped++;
+                else issues.Add(new(row.RowNumber, row.CaptainId, "Different deductions are already saved for this account/day; they were not replaced."));
                 continue;
             }
-            NinjaDailyRecord record;
-            if (deductions) { var d = new NinjaDailyDeduction { TotalCollectedAmountAtDelivery = row.CollectedAmount, TotalDeductions = row.Deductions }; amounts.Add(d); record = d; }
-            else { var p = new NinjaDailyPerformance { TotalOrders = row.TotalOrders, TotalWorkingHours = row.WorkingHours }; performance.Add(p); record = p; }
-            record.PlatformRiderAccountId = accountId; record.RiderClientAssignmentId = a.Id; record.RiderProfileId = a.RiderProfileId;
-            record.ImportId = batch.Id; record.ReportDate = reportDate; record.CaptainId = row.CaptainId; record.SourceRowNumber = row.RowNumber;
+            var totals = deductions
+                ? new Dictionary<PlatformDayMetric, decimal> { [PlatformDayMetric.CollectedAmount] = row.CollectedAmount, [PlatformDayMetric.DeductionsAmount] = row.Deductions }
+                : new Dictionary<PlatformDayMetric, decimal> { [PlatformDayMetric.OrdersCount] = row.TotalOrders, [PlatformDayMetric.WorkingHours] = row.WorkingHours };
+            var allocation = await allocator.AllocateAsync(accountId, reportDate, totals, ct);
+            if (allocation.IsFailure) { issues.Add(new(row.RowNumber, row.CaptainId, allocation.Error.Description)); continue; }
+            NinjaDailySource source;
+            if (deductions)
+            {
+                var d = new NinjaDailyDeductionSource { TotalCollectedAmountAtDelivery = row.CollectedAmount, TotalDeductions = row.Deductions };
+                deductionSources.Add(d); source = d;
+            }
+            else
+            {
+                var p = new NinjaDailyPerformanceSource { TotalOrders = row.TotalOrders, TotalWorkingHours = row.WorkingHours };
+                performanceSources.Add(p); source = p;
+            }
+            source.PlatformRiderAccountId = accountId; source.ImportId = batch.Id; source.ReportDate = reportDate;
+            source.CaptainId = row.CaptainId; source.SourceRowNumber = row.RowNumber;
+            foreach (var share in allocation.Value!)
+            {
+                NinjaDailyRecord record;
+                if (deductions)
+                {
+                    var d = new NinjaDailyDeduction { TotalCollectedAmountAtDelivery = share.Values[PlatformDayMetric.CollectedAmount],
+                        TotalDeductions = share.Values[PlatformDayMetric.DeductionsAmount] }; amounts.Add(d); record = d;
+                }
+                else
+                {
+                    var p = new NinjaDailyPerformance { TotalOrders = checked((int)share.Values[PlatformDayMetric.OrdersCount]),
+                        TotalWorkingHours = share.Values[PlatformDayMetric.WorkingHours] }; performance.Add(p); record = p;
+                }
+                record.SourceId = source.Id; record.PlatformRiderAccountId = accountId; record.RiderClientAssignmentId = share.AssignmentId;
+                record.RiderProfileId = share.RiderProfileId; record.ImportId = batch.Id; record.ReportDate = reportDate;
+                record.CaptainId = row.CaptainId; record.SourceRowNumber = row.RowNumber;
+            }
         }
         if (issues.Count > 0) return Result.Success(new NinjaImportResponse(null, reportDate, 0, 0, issues));
-        if (previous is not null) return Result.Success(new NinjaImportResponse(previous.Id, reportDate, 0, skipped, []));
-        batch.ImportedRows = performance.Count + amounts.Count; batch.SkippedRows = skipped;
-        db.NinjaDailyImports.Add(batch); db.NinjaDailyPerformance.AddRange(performance); db.NinjaDailyDeductions.AddRange(amounts);
+        batch.ImportedRows = performanceSources.Count + deductionSources.Count; batch.SkippedRows = skipped;
+        db.NinjaDailyImports.Add(batch); db.AddRange(performanceSources); db.AddRange(deductionSources);
+        db.NinjaDailyPerformance.AddRange(performance); db.NinjaDailyDeductions.AddRange(amounts);
         return await Persist(new NinjaImportResponse(batch.Id, reportDate, batch.ImportedRows, skipped, []), ct);
     }
 

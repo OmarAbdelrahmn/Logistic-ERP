@@ -61,7 +61,8 @@ public sealed partial class ChefzWorkflowTests
         await f.Db.SaveChangesAsync(ct);
         Assert.Equal("Chefz.Invalid", (await f.Service.UpdateAssignmentStartDateAsync(f.First.Id, new(default, "AQ=="), ct)).Error.Code);
         Assert.Equal("Chefz.Invalid", (await f.Service.UpdateAssignmentStartDateAsync(f.First.Id, new(new(2026, 10, 16), "AQ=="), ct)).Error.Code);
-        // End dates are inclusive, including a handover on the same day.
+        // FullTime accounts retain exclusive inclusive calendar days.
+        Value(await f.Service.SaveAccountAsync(f.Account.Id, new("FullTime"), ct));
         Assert.Equal("Chefz.Conflict", (await f.Service.UpdateAssignmentStartDateAsync(f.Second.Id, new(new(2026, 10, 15), "AQ=="), ct)).Error.Code);
         f.Second.Status = RiderAssignmentStatus.Cancelled;
         await f.Db.SaveChangesAsync(ct);

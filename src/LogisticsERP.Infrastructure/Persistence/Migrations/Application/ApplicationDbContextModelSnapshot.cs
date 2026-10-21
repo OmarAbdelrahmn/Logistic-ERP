@@ -142,6 +142,9 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<Guid>("RiderProfileId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("SourceId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<int>("SourceRowNumber")
                         .HasColumnType("int");
 
@@ -154,14 +157,174 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.HasIndex("RiderClientAssignmentId");
 
-                    b.HasIndex("PlatformRiderAccountId", "ReportDate")
+                    b.HasIndex("RiderProfileId", "ReportDate");
+
+                    b.HasIndex("SourceId", "RiderClientAssignmentId")
                         .IsUnique();
 
-                    b.HasIndex("RiderProfileId", "ReportDate");
+                    b.HasIndex("PlatformRiderAccountId", "ReportDate", "RiderClientAssignmentId")
+                        .IsUnique();
 
                     b.ToTable("DailyPerformance", "chefz", t =>
                         {
                             t.HasCheckConstraint("CK_ChefzPerformance_Values", "[TotalValidOffers] >= 0 AND [AcceptedOffers] >= 0 AND [DeclinedOffers] >= 0 AND [MissedOffers] >= 0 AND [AcceptanceRate] BETWEEN 0 AND 100");
+                        });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Chefz.ChefzDailyPerformanceSource", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("AcceptanceRate")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<int>("AcceptedOffers")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("DeclinedOffers")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid>("ImportId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("MissedOffers")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("PlatformRiderAccountId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly>("ReportDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("ReportIdNumber")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int>("SourceRowNumber")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalValidOffers")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ImportId");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("PlatformRiderAccountId", "ReportDate")
+                        .IsUnique();
+
+                    b.ToTable("DailyPerformanceSources", "chefz", t =>
+                        {
+                            t.HasCheckConstraint("CK_ChefzPerformanceSource_Values", "[TotalValidOffers] >= 0 AND [AcceptedOffers] >= 0 AND [DeclinedOffers] >= 0 AND [MissedOffers] >= 0 AND [AcceptanceRate] BETWEEN 0 AND 100");
+                        });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Chefz.ChefzImportedOrderRow", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Bonuses")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateOnly>("BusinessDate")
+                        .HasColumnType("date");
+
+                    b.Property<decimal>("CashCollected")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("Compensation")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Deductions")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("DeliveryFees")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("ImportId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("OrderId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<Guid>("PlatformRiderAccountId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("RiderClientAssignmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("SourceRowNumber")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Tips")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("UsageSequence")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RiderClientAssignmentId");
+
+                    b.HasIndex("ImportId", "SourceRowNumber")
+                        .IsUnique();
+
+                    b.HasIndex("PlatformRiderAccountId", "BusinessDate");
+
+                    b.ToTable("ImportedOrderRows", "chefz", t =>
+                        {
+                            t.HasCheckConstraint("CK_ChefzImportedRow_Values", "[UsageSequence] > 0 AND [SourceRowNumber] > 1 AND [Deductions] >= 0 AND [CashCollected] >= 0");
                         });
                 });
 
@@ -730,6 +893,103 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.HasIndex("PlatformRiderAccountId", "RotatedAtUtc");
 
                     b.ToTable("PlatformAccountCredentialVersions", "app");
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Clients.PlatformAccountDayUsage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly>("BusinessDate")
+                        .HasColumnType("date");
+
+                    b.Property<decimal?>("CollectedAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("DeclinedOffers")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("DeductionsAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("MissedOffers")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("OrdersCount")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("PlatformRiderAccountId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<Guid>("RiderClientAssignmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int?>("Sequence")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("TotalValidOffers")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal?>("WorkingHours")
+                        .HasPrecision(18, 8)
+                        .HasColumnType("decimal(18,8)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("RiderClientAssignmentId");
+
+                    b.HasIndex("PlatformRiderAccountId", "BusinessDate", "RiderClientAssignmentId")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.HasIndex("PlatformRiderAccountId", "BusinessDate", "Sequence")
+                        .IsUnique()
+                        .HasFilter("[Sequence] IS NOT NULL AND [IsDeleted] = 0");
+
+                    b.ToTable("PlatformAccountDayUsages", "app", t =>
+                        {
+                            t.HasCheckConstraint("CK_PlatformAccountDayUsage_Values", "([Sequence] IS NULL OR [Sequence] > 0) AND ([OrdersCount] IS NULL OR [OrdersCount] >= 0) AND ([WorkingHours] IS NULL OR [WorkingHours] BETWEEN 0 AND 24) AND ([CollectedAmount] IS NULL OR [CollectedAmount] >= 0) AND ([TotalValidOffers] IS NULL OR [TotalValidOffers] >= 0) AND ([DeclinedOffers] IS NULL OR [DeclinedOffers] >= 0) AND ([MissedOffers] IS NULL OR [MissedOffers] >= 0)");
+                        });
                 });
 
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Clients.PlatformAccountRegistration", b =>
@@ -6199,6 +6459,10 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("AccountantNameAr")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
                     b.Property<Guid?>("AccountantUserId")
                         .HasColumnType("uniqueidentifier");
 
@@ -6243,6 +6507,10 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<string>("DocumentNumber")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -6258,6 +6526,10 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
 
+                    b.Property<string>("RequestedByNameAr")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
                     b.Property<Guid>("RequestedByUserId")
                         .HasColumnType("uniqueidentifier");
 
@@ -6270,6 +6542,11 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
+                    b.Property<int>("TreasuryVersion")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(2);
+
                     b.Property<DateTimeOffset?>("UpdatedAtUtc")
                         .HasColumnType("datetimeoffset");
 
@@ -6277,6 +6554,10 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DocumentNumber")
+                        .IsUnique()
+                        .HasFilter("[DocumentNumber] IS NOT NULL");
 
                     b.HasIndex("IsDeleted");
 
@@ -6426,6 +6707,9 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<DateOnly>("Date")
                         .HasColumnType("date");
 
+                    b.Property<Guid?>("DayUsageId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("HandoverId")
                         .HasColumnType("uniqueidentifier");
 
@@ -6435,6 +6719,8 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.HasKey("Id");
 
                     b.HasIndex("BatchId");
+
+                    b.HasIndex("DayUsageId");
 
                     b.HasIndex("HandoverId", "Date");
 
@@ -6828,9 +7114,9 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.ToTable("MoneyMovements", "jahez_v2", t =>
                         {
-                            t.HasCheckConstraint("CK_JahezMoney_Amount", "[Amount] > 0");
+                            t.HasCheckConstraint("CK_JahezMoney_Amount", "[Amount] > 0 OR ([Amount] = 0 AND [Direction] = 0 AND [Purpose] = 1 AND [OperationId] IS NOT NULL)");
 
-                            t.HasCheckConstraint("CK_JahezMoney_Routing", "([Direction] = 1 AND ([Fund] = 1 OR ([Fund] = 2 AND [Purpose] IN (1, 2)))) OR ([Direction] = 2 AND [Fund] IN (1, 3) AND [Purpose] <> 2)");
+                            t.HasCheckConstraint("CK_JahezMoney_Routing", "([Direction] = 1 AND ([Fund] = 1 OR ([Fund] = 2 AND [Purpose] IN (1, 2)))) OR ([Direction] = 2 AND [Fund] IN (1, 3) AND [Purpose] <> 2) OR ([Direction] = 0 AND [Amount] = 0 AND [Purpose] = 1 AND [OperationId] IS NOT NULL AND [Fund] IN (1, 2, 3))");
                         });
                 });
 
@@ -6854,11 +7140,17 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<DateOnly?>("CommissionStartDate")
+                        .HasColumnType("date");
+
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<Guid?>("CreatedByUserId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DayUsageJson")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTimeOffset?>("DeletedAtUtc")
                         .HasColumnType("datetimeoffset");
@@ -6877,6 +7169,9 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .HasColumnType("datetimeoffset");
 
                     b.Property<Guid?>("ExecutedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ExpectedSponsorId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int?>("Fund")
@@ -6950,6 +7245,8 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.ToTable("Operations", "jahez_v2", t =>
                         {
                             t.HasCheckConstraint("CK_JahezOperation_Amounts", "[Commission] >= 0 AND [CalculatedCommission] >= 0 AND [Remaining] = [Net] + [Commission]");
+
+                            t.HasCheckConstraint("CK_JahezOperation_CommissionStart", "[CommissionStartDate] IS NULL OR [CommissionStartDate] <= [ThroughDate]");
 
                             t.HasCheckConstraint("CK_JahezOperation_State", "[Mode] BETWEEN 1 AND 3 AND [Status] BETWEEN 1 AND 3 AND [PaymentStatus] BETWEEN 1 AND 4 AND (([Status] = 3 AND [ExecutedAtUtc] IS NOT NULL) OR ([Status] <> 3 AND [ExecutedAtUtc] IS NULL))");
                         });
@@ -7125,6 +7422,890 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.ToTable("TransferredDebts", "jahez_v2", t =>
                         {
                             t.HasCheckConstraint("CK_JahezTransferredDebt_Amount", "[Amount] > 0");
+                        });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.PetroAppEvidence", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("AllocatedCollections")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateOnly>("BusinessDate")
+                        .HasColumnType("date");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Kind")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("Reference")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid?>("ReplacesId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SponsorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReplacesId")
+                        .IsUnique()
+                        .HasFilter("[ReplacesId] IS NOT NULL");
+
+                    b.HasIndex("SponsorId", "BusinessDate");
+
+                    b.HasIndex("SponsorId", "Reference")
+                        .IsUnique();
+
+                    b.ToTable("PetroEvidence", "jahez_v3", t =>
+                        {
+                            t.HasCheckConstraint("CK_PetroEvidence_Amounts", "[Amount]>=0 AND [AllocatedCollections]>=0 AND [Kind] IN(1,2) AND ([Kind]=1 OR [AllocatedCollections]=0)");
+                        });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.TreasuryBalanceVerification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("Reference")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid>("SubAccountId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("VerifiedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<decimal>("VerifiedBalance")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SubAccountId", "VerifiedAtUtc");
+
+                    b.ToTable("BalanceVerifications", "jahez_v3");
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.TreasuryHandoverLine", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AccountCode")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("AccountNameAr")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("HandoverId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("MovementCount")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("SponsorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("SponsorIdentifier")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("SponsorNameAr")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<Guid>("SubAccountId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SubAccountId");
+
+                    b.HasIndex("HandoverId", "SubAccountId")
+                        .IsUnique();
+
+                    b.ToTable("HandoverLines", "jahez_v3");
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.TreasuryHandoverPosting", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("HandoverId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("PostingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PostingId");
+
+                    b.HasIndex("HandoverId", "PostingId")
+                        .IsUnique();
+
+                    b.ToTable("HandoverPostings", "jahez_v3");
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.TreasuryOwnership", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Evidence")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<Guid>("PlatformAccountId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Source")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("SourceId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SponsorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("SponsorIdentifier")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("SponsorNameAr")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SponsorId");
+
+                    b.HasIndex("PlatformAccountId", "SponsorId");
+
+                    b.HasIndex("Source", "SourceId")
+                        .IsUnique();
+
+                    b.ToTable("Ownership", "jahez_v3");
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.TreasuryPosting", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ActorNameAr")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<Guid>("ActorUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("BatchId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CashboxHandoverId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Kind")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("MoneyMovementId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("OccurredAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("Reference")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid?>("ReversesPostingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Revision")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("SponsorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SubAccountId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BatchId");
+
+                    b.HasIndex("CashboxHandoverId");
+
+                    b.HasIndex("ReversesPostingId")
+                        .IsUnique()
+                        .HasFilter("[ReversesPostingId] IS NOT NULL");
+
+                    b.HasIndex("MoneyMovementId", "Revision")
+                        .IsUnique()
+                        .HasFilter("[MoneyMovementId] IS NOT NULL AND [Kind] = 1");
+
+                    b.HasIndex("SponsorId", "OccurredAtUtc");
+
+                    b.HasIndex("SubAccountId", "OccurredAtUtc", "Id");
+
+                    b.ToTable("Postings", "jahez_v3", t =>
+                        {
+                            t.HasCheckConstraint("CK_TreasuryPosting_Amount", "[Amount]<>0 AND [Kind] BETWEEN 1 AND 5 AND [Revision]>=0");
+                        });
+
+                    b.HasAnnotation("SqlServer:UseSqlOutputClause", false);
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.TreasuryState", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("ActivatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<long>("NextHandoverNumber")
+                        .HasColumnType("bigint");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.ToTable("State", "jahez_v3", t =>
+                        {
+                            t.HasCheckConstraint("CK_TreasuryState_Singleton", "[Id]='019d0000-0000-7000-8000-000000000001' AND [NextHandoverNumber]>0 AND [IsDeleted]=0");
+                        });
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("019d0000-0000-7000-8000-000000000001"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 10, 19, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsActive = false,
+                            IsDeleted = false,
+                            NextHandoverNumber = 1L,
+                            RowVersion = new byte[0]
+                        });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.TreasurySubAccount", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("AllowedDirections")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsPosting")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Location")
+                        .HasColumnType("int");
+
+                    b.Property<string>("NameAr")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("NameEn")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<Guid?>("ParentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Purpose")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<Guid?>("SponsorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("ParentId");
+
+                    b.HasIndex("SponsorId", "Location", "Purpose")
+                        .IsUnique()
+                        .HasFilter("[IsDefault] = 1 AND [IsPosting] = 1 AND [IsDeleted] = 0");
+
+                    b.ToTable("TreasurySubAccounts", "jahez_v3", t =>
+                        {
+                            t.HasCheckConstraint("CK_TreasuryAccount_Classification", "[Location] BETWEEN 1 AND 4 AND [Purpose] BETWEEN 1 AND 3 AND [AllowedDirections] BETWEEN 1 AND 3 AND ([IsPosting]=0 OR [SponsorId] IS NOT NULL) AND [IsDeleted]=0");
+                        });
+
+                    b.HasAnnotation("SqlServer:UseSqlOutputClause", false);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("019d0000-0000-7000-8000-000000000010"),
+                            AllowedDirections = 3,
+                            Code = "SUP",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 10, 19, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsActive = true,
+                            IsDefault = false,
+                            IsDeleted = false,
+                            IsPosting = false,
+                            Location = 1,
+                            NameAr = "عهدة مشرف جاهز",
+                            NameEn = "Jahez supervisor custody",
+                            Purpose = 3,
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019d0000-0000-7000-8000-000000000011"),
+                            AllowedDirections = 3,
+                            Code = "MAIN",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 10, 19, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsActive = true,
+                            IsDefault = false,
+                            IsDeleted = false,
+                            IsPosting = false,
+                            Location = 2,
+                            NameAr = "الخزينة المركزية",
+                            NameEn = "Central treasury",
+                            Purpose = 3,
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019d0000-0000-7000-8000-000000000012"),
+                            AllowedDirections = 3,
+                            Code = "BANK",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 10, 19, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsActive = true,
+                            IsDefault = false,
+                            IsDeleted = false,
+                            IsPosting = false,
+                            Location = 3,
+                            NameAr = "البنك",
+                            NameEn = "Bank",
+                            Purpose = 3,
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019d0000-0000-7000-8000-000000000013"),
+                            AllowedDirections = 3,
+                            Code = "PETRO",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 10, 19, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsActive = true,
+                            IsDefault = false,
+                            IsDeleted = false,
+                            IsPosting = false,
+                            Location = 4,
+                            NameAr = "بترو آب - مقاصة التحصيل",
+                            NameEn = "PetroApp collection clearing",
+                            Purpose = 3,
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019d0000-0000-7000-8000-000000000014"),
+                            AllowedDirections = 3,
+                            Code = "MAIN.FEES",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 10, 19, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsActive = true,
+                            IsDefault = false,
+                            IsDeleted = false,
+                            IsPosting = false,
+                            Location = 2,
+                            NameAr = "رسوم البوابا وإكسبرس",
+                            NameEn = "Al-Bwaba and Express fees",
+                            ParentId = new Guid("019d0000-0000-7000-8000-000000000011"),
+                            Purpose = 2,
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019d0000-0000-7000-8000-000000000015"),
+                            AllowedDirections = 3,
+                            Code = "BANK.BWEXP",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 10, 19, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsActive = true,
+                            IsDefault = false,
+                            IsDeleted = false,
+                            IsPosting = false,
+                            Location = 3,
+                            NameAr = "بنك البوابا وإكسبرس",
+                            NameEn = "Al-Bwaba and Express bank",
+                            ParentId = new Guid("019d0000-0000-7000-8000-000000000012"),
+                            Purpose = 3,
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019d0000-0000-7000-8000-000000000016"),
+                            AllowedDirections = 3,
+                            Code = "SUP.BW.SET",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 10, 19, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsActive = true,
+                            IsDefault = true,
+                            IsDeleted = false,
+                            IsPosting = true,
+                            Location = 1,
+                            NameAr = "عهدة تصفيات البوابا",
+                            NameEn = "BW settlement custody",
+                            ParentId = new Guid("019d0000-0000-7000-8000-000000000010"),
+                            Purpose = 1,
+                            RowVersion = new byte[0],
+                            SponsorId = new Guid("019c18d5-62e1-7000-8000-000000000041")
+                        },
+                        new
+                        {
+                            Id = new Guid("019d0000-0000-7000-8000-000000000017"),
+                            AllowedDirections = 1,
+                            Code = "SUP.BW.FEE",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 10, 19, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsActive = true,
+                            IsDefault = true,
+                            IsDeleted = false,
+                            IsPosting = true,
+                            Location = 1,
+                            NameAr = "عهدة رسوم البوابا",
+                            NameEn = "BW fee custody",
+                            ParentId = new Guid("019d0000-0000-7000-8000-000000000010"),
+                            Purpose = 2,
+                            RowVersion = new byte[0],
+                            SponsorId = new Guid("019c18d5-62e1-7000-8000-000000000041")
+                        },
+                        new
+                        {
+                            Id = new Guid("019d0000-0000-7000-8000-000000000018"),
+                            AllowedDirections = 1,
+                            Code = "MAIN.BW.FEE",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 10, 19, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsActive = true,
+                            IsDefault = true,
+                            IsDeleted = false,
+                            IsPosting = true,
+                            Location = 2,
+                            NameAr = "رسوم البوابا",
+                            NameEn = "BW central fees",
+                            ParentId = new Guid("019d0000-0000-7000-8000-000000000014"),
+                            Purpose = 2,
+                            RowVersion = new byte[0],
+                            SponsorId = new Guid("019c18d5-62e1-7000-8000-000000000041")
+                        },
+                        new
+                        {
+                            Id = new Guid("019d0000-0000-7000-8000-000000000019"),
+                            AllowedDirections = 3,
+                            Code = "MAIN.BW.SET",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 10, 19, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsActive = true,
+                            IsDefault = true,
+                            IsDeleted = false,
+                            IsPosting = true,
+                            Location = 2,
+                            NameAr = "تصفيات البوابا",
+                            NameEn = "BW central settlements",
+                            ParentId = new Guid("019d0000-0000-7000-8000-000000000011"),
+                            Purpose = 1,
+                            RowVersion = new byte[0],
+                            SponsorId = new Guid("019c18d5-62e1-7000-8000-000000000041")
+                        },
+                        new
+                        {
+                            Id = new Guid("019d0000-0000-7000-8000-000000000020"),
+                            AllowedDirections = 2,
+                            Code = "BANK.BW",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 10, 19, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsActive = true,
+                            IsDefault = true,
+                            IsDeleted = false,
+                            IsPosting = true,
+                            Location = 3,
+                            NameAr = "بنك البوابا",
+                            NameEn = "BW bank",
+                            ParentId = new Guid("019d0000-0000-7000-8000-000000000015"),
+                            Purpose = 3,
+                            RowVersion = new byte[0],
+                            SponsorId = new Guid("019c18d5-62e1-7000-8000-000000000041")
+                        },
+                        new
+                        {
+                            Id = new Guid("019d0000-0000-7000-8000-000000000021"),
+                            AllowedDirections = 1,
+                            Code = "PETRO.BW",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 10, 19, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsActive = true,
+                            IsDefault = true,
+                            IsDeleted = false,
+                            IsPosting = true,
+                            Location = 4,
+                            NameAr = "بترو آب البوابا",
+                            NameEn = "BW PetroApp clearing",
+                            ParentId = new Guid("019d0000-0000-7000-8000-000000000013"),
+                            Purpose = 3,
+                            RowVersion = new byte[0],
+                            SponsorId = new Guid("019c18d5-62e1-7000-8000-000000000041")
+                        },
+                        new
+                        {
+                            Id = new Guid("019d0000-0000-7000-8000-000000000022"),
+                            AllowedDirections = 3,
+                            Code = "SUP.EX.SET",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 10, 19, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsActive = true,
+                            IsDefault = true,
+                            IsDeleted = false,
+                            IsPosting = true,
+                            Location = 1,
+                            NameAr = "عهدة تصفيات إكسبرس",
+                            NameEn = "EX settlement custody",
+                            ParentId = new Guid("019d0000-0000-7000-8000-000000000010"),
+                            Purpose = 1,
+                            RowVersion = new byte[0],
+                            SponsorId = new Guid("019c18d5-62e1-7000-8000-000000000042")
+                        },
+                        new
+                        {
+                            Id = new Guid("019d0000-0000-7000-8000-000000000023"),
+                            AllowedDirections = 1,
+                            Code = "SUP.EX.FEE",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 10, 19, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsActive = true,
+                            IsDefault = true,
+                            IsDeleted = false,
+                            IsPosting = true,
+                            Location = 1,
+                            NameAr = "عهدة رسوم إكسبرس",
+                            NameEn = "EX fee custody",
+                            ParentId = new Guid("019d0000-0000-7000-8000-000000000010"),
+                            Purpose = 2,
+                            RowVersion = new byte[0],
+                            SponsorId = new Guid("019c18d5-62e1-7000-8000-000000000042")
+                        },
+                        new
+                        {
+                            Id = new Guid("019d0000-0000-7000-8000-000000000024"),
+                            AllowedDirections = 1,
+                            Code = "MAIN.EX.FEE",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 10, 19, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsActive = true,
+                            IsDefault = true,
+                            IsDeleted = false,
+                            IsPosting = true,
+                            Location = 2,
+                            NameAr = "رسوم إكسبرس",
+                            NameEn = "EX central fees",
+                            ParentId = new Guid("019d0000-0000-7000-8000-000000000014"),
+                            Purpose = 2,
+                            RowVersion = new byte[0],
+                            SponsorId = new Guid("019c18d5-62e1-7000-8000-000000000042")
+                        },
+                        new
+                        {
+                            Id = new Guid("019d0000-0000-7000-8000-000000000025"),
+                            AllowedDirections = 3,
+                            Code = "MAIN.EX.SET",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 10, 19, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsActive = true,
+                            IsDefault = true,
+                            IsDeleted = false,
+                            IsPosting = true,
+                            Location = 2,
+                            NameAr = "تصفيات إكسبرس",
+                            NameEn = "EX central settlements",
+                            ParentId = new Guid("019d0000-0000-7000-8000-000000000011"),
+                            Purpose = 1,
+                            RowVersion = new byte[0],
+                            SponsorId = new Guid("019c18d5-62e1-7000-8000-000000000042")
+                        },
+                        new
+                        {
+                            Id = new Guid("019d0000-0000-7000-8000-000000000026"),
+                            AllowedDirections = 2,
+                            Code = "BANK.EX",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 10, 19, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsActive = true,
+                            IsDefault = true,
+                            IsDeleted = false,
+                            IsPosting = true,
+                            Location = 3,
+                            NameAr = "بنك إكسبرس",
+                            NameEn = "EX bank",
+                            ParentId = new Guid("019d0000-0000-7000-8000-000000000015"),
+                            Purpose = 3,
+                            RowVersion = new byte[0],
+                            SponsorId = new Guid("019c18d5-62e1-7000-8000-000000000042")
+                        },
+                        new
+                        {
+                            Id = new Guid("019d0000-0000-7000-8000-000000000027"),
+                            AllowedDirections = 1,
+                            Code = "PETRO.EX",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 10, 19, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsActive = true,
+                            IsDefault = true,
+                            IsDeleted = false,
+                            IsPosting = true,
+                            Location = 4,
+                            NameAr = "بترو آب إكسبرس",
+                            NameEn = "EX PetroApp clearing",
+                            ParentId = new Guid("019d0000-0000-7000-8000-000000000013"),
+                            Purpose = 3,
+                            RowVersion = new byte[0],
+                            SponsorId = new Guid("019c18d5-62e1-7000-8000-000000000042")
+                        },
+                        new
+                        {
+                            Id = new Guid("019d0000-0000-7000-8000-000000000028"),
+                            AllowedDirections = 3,
+                            Code = "SUP.TR.SET",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 10, 19, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsActive = true,
+                            IsDefault = true,
+                            IsDeleted = false,
+                            IsPosting = true,
+                            Location = 1,
+                            NameAr = "عهدة تصفيات التجارية",
+                            NameEn = "TR settlement custody",
+                            ParentId = new Guid("019d0000-0000-7000-8000-000000000010"),
+                            Purpose = 1,
+                            RowVersion = new byte[0],
+                            SponsorId = new Guid("019c18d5-62e1-7000-8000-000000000040")
+                        },
+                        new
+                        {
+                            Id = new Guid("019d0000-0000-7000-8000-000000000029"),
+                            AllowedDirections = 1,
+                            Code = "SUP.TR.FEE",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 10, 19, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsActive = true,
+                            IsDefault = true,
+                            IsDeleted = false,
+                            IsPosting = true,
+                            Location = 1,
+                            NameAr = "عهدة رسوم التجارية",
+                            NameEn = "TR fee custody",
+                            ParentId = new Guid("019d0000-0000-7000-8000-000000000010"),
+                            Purpose = 2,
+                            RowVersion = new byte[0],
+                            SponsorId = new Guid("019c18d5-62e1-7000-8000-000000000040")
+                        },
+                        new
+                        {
+                            Id = new Guid("019d0000-0000-7000-8000-000000000030"),
+                            AllowedDirections = 3,
+                            Code = "MAIN.TR",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 10, 19, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsActive = true,
+                            IsDefault = true,
+                            IsDeleted = false,
+                            IsPosting = true,
+                            Location = 2,
+                            NameAr = "صندوق التجارية",
+                            NameEn = "Trading central treasury",
+                            ParentId = new Guid("019d0000-0000-7000-8000-000000000011"),
+                            Purpose = 3,
+                            RowVersion = new byte[0],
+                            SponsorId = new Guid("019c18d5-62e1-7000-8000-000000000040")
+                        },
+                        new
+                        {
+                            Id = new Guid("019d0000-0000-7000-8000-000000000031"),
+                            AllowedDirections = 2,
+                            Code = "BANK.TR",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 10, 19, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsActive = true,
+                            IsDefault = true,
+                            IsDeleted = false,
+                            IsPosting = true,
+                            Location = 3,
+                            NameAr = "بنك التجارية",
+                            NameEn = "TR bank",
+                            ParentId = new Guid("019d0000-0000-7000-8000-000000000012"),
+                            Purpose = 3,
+                            RowVersion = new byte[0],
+                            SponsorId = new Guid("019c18d5-62e1-7000-8000-000000000040")
+                        },
+                        new
+                        {
+                            Id = new Guid("019d0000-0000-7000-8000-000000000032"),
+                            AllowedDirections = 1,
+                            Code = "PETRO.TR",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 10, 19, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsActive = true,
+                            IsDefault = true,
+                            IsDeleted = false,
+                            IsPosting = true,
+                            Location = 4,
+                            NameAr = "بترو آب التجارية",
+                            NameEn = "TR PetroApp clearing",
+                            ParentId = new Guid("019d0000-0000-7000-8000-000000000013"),
+                            Purpose = 3,
+                            RowVersion = new byte[0],
+                            SponsorId = new Guid("019c18d5-62e1-7000-8000-000000000040")
                         });
                 });
 
@@ -10296,6 +11477,9 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<Guid>("RiderProfileId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("SourceId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<int>("SourceRowNumber")
                         .HasColumnType("int");
 
@@ -10313,14 +11497,66 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.HasIndex("RiderClientAssignmentId");
 
-                    b.HasIndex("PlatformRiderAccountId", "ReportDate")
+                    b.HasIndex("RiderProfileId", "ReportDate");
+
+                    b.HasIndex("SourceId", "RiderClientAssignmentId")
                         .IsUnique();
 
-                    b.HasIndex("RiderProfileId", "ReportDate");
+                    b.HasIndex("PlatformRiderAccountId", "ReportDate", "RiderClientAssignmentId")
+                        .IsUnique();
 
                     b.ToTable("NinjaDailyDeductions", "ninja", t =>
                         {
                             t.HasCheckConstraint("CK_NinjaDeductions_CollectedAmount", "[TotalCollectedAmountAtDelivery] >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Ninja.NinjaDailyDeductionSource", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CaptainId")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ImportId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("PlatformRiderAccountId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly>("ReportDate")
+                        .HasColumnType("date");
+
+                    b.Property<int>("SourceRowNumber")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("TotalCollectedAmountAtDelivery")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TotalDeductions")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ImportId");
+
+                    b.HasIndex("PlatformRiderAccountId", "ReportDate")
+                        .IsUnique();
+
+                    b.ToTable("NinjaDailyDeductionSources", "ninja", t =>
+                        {
+                            t.HasCheckConstraint("CK_NinjaDeductionSource_Values", "[TotalCollectedAmountAtDelivery] >= 0");
                         });
                 });
 
@@ -10396,6 +11632,9 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<Guid>("RiderProfileId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("SourceId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<int>("SourceRowNumber")
                         .HasColumnType("int");
 
@@ -10412,14 +11651,65 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.HasIndex("RiderClientAssignmentId");
 
-                    b.HasIndex("PlatformRiderAccountId", "ReportDate")
+                    b.HasIndex("RiderProfileId", "ReportDate");
+
+                    b.HasIndex("SourceId", "RiderClientAssignmentId")
                         .IsUnique();
 
-                    b.HasIndex("RiderProfileId", "ReportDate");
+                    b.HasIndex("PlatformRiderAccountId", "ReportDate", "RiderClientAssignmentId")
+                        .IsUnique();
 
                     b.ToTable("NinjaDailyPerformance", "ninja", t =>
                         {
                             t.HasCheckConstraint("CK_NinjaPerformance_Values", "[TotalOrders] >= 0 AND [TotalWorkingHours] BETWEEN 0 AND 24");
+                        });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Ninja.NinjaDailyPerformanceSource", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CaptainId")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ImportId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("PlatformRiderAccountId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly>("ReportDate")
+                        .HasColumnType("date");
+
+                    b.Property<int>("SourceRowNumber")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalOrders")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("TotalWorkingHours")
+                        .HasPrecision(18, 8)
+                        .HasColumnType("decimal(18,8)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ImportId");
+
+                    b.HasIndex("PlatformRiderAccountId", "ReportDate")
+                        .IsUnique();
+
+                    b.ToTable("NinjaDailyPerformanceSources", "ninja", t =>
+                        {
+                            t.HasCheckConstraint("CK_NinjaPerformanceSource_Values", "[TotalOrders] >= 0 AND [TotalWorkingHours] BETWEEN 0 AND 24");
                         });
                 });
 
@@ -16262,6 +17552,195 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         },
                         new
                         {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000750"),
+                            Category = "Jahez",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "jahez.treasury.read",
+                            DescriptionEn = "jahez.treasury.read",
+                            DisplayOrder = 750,
+                            GrantabilityRule = "HIGH_TRUST_ONLY",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = true,
+                            IsSensitive = true,
+                            Key = "jahez.treasury.read",
+                            NameAr = "عرض الخزينة",
+                            NameEn = "jahez.treasury.read",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000751"),
+                            Category = "Jahez",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "jahez.treasury.accounts.create",
+                            DescriptionEn = "jahez.treasury.accounts.create",
+                            DisplayOrder = 751,
+                            GrantabilityRule = "HIGH_TRUST_ONLY",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = true,
+                            IsSensitive = true,
+                            Key = "jahez.treasury.accounts.create",
+                            NameAr = "إنشاء حساب خزينة",
+                            NameEn = "jahez.treasury.accounts.create",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000752"),
+                            Category = "Jahez",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "jahez.treasury.accounts.update",
+                            DescriptionEn = "jahez.treasury.accounts.update",
+                            DisplayOrder = 752,
+                            GrantabilityRule = "HIGH_TRUST_ONLY",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = true,
+                            IsSensitive = true,
+                            Key = "jahez.treasury.accounts.update",
+                            NameAr = "تحديث حساب خزينة",
+                            NameEn = "jahez.treasury.accounts.update",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000753"),
+                            Category = "Jahez",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "jahez.treasury.transfers.create",
+                            DescriptionEn = "jahez.treasury.transfers.create",
+                            DisplayOrder = 753,
+                            GrantabilityRule = "HIGH_TRUST_ONLY",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = true,
+                            IsSensitive = true,
+                            Key = "jahez.treasury.transfers.create",
+                            NameAr = "إنشاء تحويل خزينة",
+                            NameEn = "jahez.treasury.transfers.create",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000754"),
+                            Category = "Jahez",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "jahez.treasury.entries.create",
+                            DescriptionEn = "jahez.treasury.entries.create",
+                            DisplayOrder = 754,
+                            GrantabilityRule = "HIGH_TRUST_ONLY",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = true,
+                            IsSensitive = true,
+                            Key = "jahez.treasury.entries.create",
+                            NameAr = "إنشاء قبض وصرف مركزي",
+                            NameEn = "jahez.treasury.entries.create",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000755"),
+                            Category = "Jahez",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "jahez.treasury.petroapp-evidence.create",
+                            DescriptionEn = "jahez.treasury.petroapp-evidence.create",
+                            DisplayOrder = 755,
+                            GrantabilityRule = "HIGH_TRUST_ONLY",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = true,
+                            IsSensitive = true,
+                            Key = "jahez.treasury.petroapp-evidence.create",
+                            NameAr = "إنشاء دليل بترو آب",
+                            NameEn = "jahez.treasury.petroapp-evidence.create",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000756"),
+                            Category = "Jahez",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "jahez.treasury.adjust",
+                            DescriptionEn = "jahez.treasury.adjust",
+                            DisplayOrder = 756,
+                            GrantabilityRule = "HIGH_TRUST_ONLY",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = true,
+                            IsSensitive = true,
+                            Key = "jahez.treasury.adjust",
+                            NameAr = "تسوية وترحيل الخزينة",
+                            NameEn = "jahez.treasury.adjust",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000757"),
+                            Category = "Jahez",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "jahez.financial-reports.read",
+                            DescriptionEn = "jahez.financial-reports.read",
+                            DisplayOrder = 757,
+                            GrantabilityRule = "HIGH_TRUST_ONLY",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = true,
+                            IsSensitive = true,
+                            Key = "jahez.financial-reports.read",
+                            NameAr = "عرض التقارير المالية",
+                            NameEn = "jahez.financial-reports.read",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000758"),
+                            Category = "Jahez",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "jahez.financial-reports.export",
+                            DescriptionEn = "jahez.financial-reports.export",
+                            DisplayOrder = 758,
+                            GrantabilityRule = "HIGH_TRUST_ONLY",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = true,
+                            IsSensitive = true,
+                            Key = "jahez.financial-reports.export",
+                            NameAr = "تصدير التقارير المالية",
+                            NameEn = "jahez.financial-reports.export",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
                             Id = new Guid("019c18d5-62e1-7000-a000-000000000700"),
                             Category = "Jahez",
                             CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
@@ -21117,6 +22596,48 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .HasForeignKey("RiderProfileId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Chefz.ChefzDailyPerformanceSource", null)
+                        .WithMany()
+                        .HasForeignKey("SourceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Chefz.ChefzDailyPerformanceSource", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Chefz.ChefzPerformanceImport", null)
+                        .WithMany()
+                        .HasForeignKey("ImportId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Clients.PlatformRiderAccount", null)
+                        .WithMany()
+                        .HasForeignKey("PlatformRiderAccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Chefz.ChefzImportedOrderRow", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Chefz.ChefzOrderSettlementImport", null)
+                        .WithMany()
+                        .HasForeignKey("ImportId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Clients.PlatformRiderAccount", null)
+                        .WithMany()
+                        .HasForeignKey("PlatformRiderAccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Clients.RiderClientAssignment", null)
+                        .WithMany()
+                        .HasForeignKey("RiderClientAssignmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Chefz.ChefzSponsorStatistics", b =>
@@ -21175,6 +22696,21 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .WithMany()
                         .HasForeignKey("SupersededVersionId")
                         .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Clients.PlatformAccountDayUsage", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Clients.PlatformRiderAccount", null)
+                        .WithMany()
+                        .HasForeignKey("PlatformRiderAccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Clients.RiderClientAssignment", null)
+                        .WithMany()
+                        .HasForeignKey("RiderClientAssignmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Clients.PlatformAccountRegistration", b =>
@@ -22254,6 +23790,11 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("LogisticsERP.Domain.Entities.Clients.PlatformAccountDayUsage", null)
+                        .WithMany()
+                        .HasForeignKey("DayUsageId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("LogisticsERP.Domain.Entities.Jahez.JahezAccountSession", null)
                         .WithMany()
                         .HasForeignKey("HandoverId")
@@ -22403,6 +23944,111 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .HasForeignKey("RiderProfileId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.PetroAppEvidence", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Jahez.PetroAppEvidence", null)
+                        .WithMany()
+                        .HasForeignKey("ReplacesId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.Sponsor", null)
+                        .WithMany()
+                        .HasForeignKey("SponsorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.TreasuryBalanceVerification", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Jahez.TreasurySubAccount", null)
+                        .WithMany()
+                        .HasForeignKey("SubAccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.TreasuryHandoverLine", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Jahez.JahezCashboxHandover", null)
+                        .WithMany()
+                        .HasForeignKey("HandoverId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Jahez.TreasurySubAccount", null)
+                        .WithMany()
+                        .HasForeignKey("SubAccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.TreasuryHandoverPosting", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Jahez.JahezCashboxHandover", null)
+                        .WithMany()
+                        .HasForeignKey("HandoverId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Jahez.TreasuryPosting", null)
+                        .WithMany()
+                        .HasForeignKey("PostingId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.TreasuryOwnership", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.Sponsor", null)
+                        .WithMany()
+                        .HasForeignKey("SponsorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.TreasuryPosting", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Jahez.JahezCashboxHandover", null)
+                        .WithMany()
+                        .HasForeignKey("CashboxHandoverId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Jahez.JahezMoneyMovement", null)
+                        .WithMany()
+                        .HasForeignKey("MoneyMovementId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Jahez.TreasuryPosting", null)
+                        .WithMany()
+                        .HasForeignKey("ReversesPostingId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.Sponsor", null)
+                        .WithMany()
+                        .HasForeignKey("SponsorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Jahez.TreasurySubAccount", null)
+                        .WithMany()
+                        .HasForeignKey("SubAccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.TreasurySubAccount", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Jahez.TreasurySubAccount", null)
+                        .WithMany()
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.Sponsor", null)
+                        .WithMany()
+                        .HasForeignKey("SponsorId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Maintenance.ExternalCustomerPayment", b =>
@@ -23152,6 +24798,27 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .HasForeignKey("RiderProfileId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Ninja.NinjaDailyDeductionSource", null)
+                        .WithMany()
+                        .HasForeignKey("SourceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Ninja.NinjaDailyDeductionSource", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Ninja.NinjaDailyImport", null)
+                        .WithMany()
+                        .HasForeignKey("ImportId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Clients.PlatformRiderAccount", null)
+                        .WithMany()
+                        .HasForeignKey("PlatformRiderAccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Ninja.NinjaDailyPerformance", b =>
@@ -23177,6 +24844,27 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.HasOne("LogisticsERP.Domain.Entities.Workforce.RiderProfile", null)
                         .WithMany()
                         .HasForeignKey("RiderProfileId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Ninja.NinjaDailyPerformanceSource", null)
+                        .WithMany()
+                        .HasForeignKey("SourceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Ninja.NinjaDailyPerformanceSource", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Ninja.NinjaDailyImport", null)
+                        .WithMany()
+                        .HasForeignKey("ImportId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Clients.PlatformRiderAccount", null)
+                        .WithMany()
+                        .HasForeignKey("PlatformRiderAccountId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });

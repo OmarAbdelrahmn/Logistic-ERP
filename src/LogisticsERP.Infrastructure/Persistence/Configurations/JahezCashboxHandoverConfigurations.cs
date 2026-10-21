@@ -10,6 +10,11 @@ internal sealed class JahezCashboxHandoverConfigurations : IEntityTypeConfigurat
     public void Configure(EntityTypeBuilder<JahezCashboxHandover> b)
     {
         b.ConfigureAuditable("CashboxHandovers", "jahez_v2");
+        b.Property(x => x.DocumentNumber).HasMaxLength(50);
+        b.Property(x => x.RequestedByNameAr).HasMaxLength(200);
+        b.Property(x => x.AccountantNameAr).HasMaxLength(200);
+        b.Property(x => x.TreasuryVersion).HasDefaultValue(2);
+        b.HasIndex(x => x.DocumentNumber).IsUnique().HasFilter("[DocumentNumber] IS NOT NULL");
         b.Property(x => x.CashboxAmount).HasPrecision(18, 2);
         b.Property(x => x.PetroAppAmount).HasPrecision(18, 2);
         b.Property(x => x.BankAmount).HasPrecision(18, 2);

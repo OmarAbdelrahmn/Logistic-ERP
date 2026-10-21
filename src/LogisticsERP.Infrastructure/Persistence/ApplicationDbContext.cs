@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using LogisticsERP.Domain.Entities.Jahez;
 using LogisticsERP.Application.Abstractions.Persistence;
 using LogisticsERP.Domain.Common;
@@ -33,6 +33,8 @@ public sealed class ApplicationDbContext(
     : DbContext(options), IApplicationDbContext
 {
     private readonly TimeProvider _timeProvider = timeProvider ?? TimeProvider.System;
+    // Set only while the authorized correction use case owns its transaction.
+    internal Guid? JahezCommissionStartCorrectionOperationId { get; set; }
     public DbSet<JahezOperation> JahezOperations => Set<JahezOperation>();
     public DbSet<JahezMoneyMovement> JahezMoneyMovements => Set<JahezMoneyMovement>();
     public DbSet<JahezTransferredDebt> JahezTransferredDebts => Set<JahezTransferredDebt>();
@@ -106,6 +108,11 @@ public sealed class ApplicationDbContext(
     public DbSet<LogisticsERP.Domain.Entities.Chefz.ChefzPerformanceImport> ChefzPerformanceImports => Set<LogisticsERP.Domain.Entities.Chefz.ChefzPerformanceImport>();
     public DbSet<LogisticsERP.Domain.Entities.Chefz.ChefzOrderSettlementImport> ChefzOrderSettlementImports => Set<LogisticsERP.Domain.Entities.Chefz.ChefzOrderSettlementImport>();
     public DbSet<PlatformAccountCredentialVersion> PlatformAccountCredentialVersions => Set<PlatformAccountCredentialVersion>();
+    public DbSet<PlatformAccountDayUsage> PlatformAccountDayUsages => Set<PlatformAccountDayUsage>();
+    public DbSet<LogisticsERP.Domain.Entities.Ninja.NinjaDailyPerformanceSource> NinjaDailyPerformanceSources => Set<LogisticsERP.Domain.Entities.Ninja.NinjaDailyPerformanceSource>();
+    public DbSet<LogisticsERP.Domain.Entities.Ninja.NinjaDailyDeductionSource> NinjaDailyDeductionSources => Set<LogisticsERP.Domain.Entities.Ninja.NinjaDailyDeductionSource>();
+    public DbSet<LogisticsERP.Domain.Entities.Chefz.ChefzDailyPerformanceSource> ChefzDailyPerformanceSources => Set<LogisticsERP.Domain.Entities.Chefz.ChefzDailyPerformanceSource>();
+    public DbSet<LogisticsERP.Domain.Entities.Chefz.ChefzImportedOrderRow> ChefzImportedOrderRows => Set<LogisticsERP.Domain.Entities.Chefz.ChefzImportedOrderRow>();
     public DbSet<RiderClientAssignment> RiderClientAssignments => Set<RiderClientAssignment>();
     public DbSet<RiderAssignmentEvent> RiderAssignmentEvents => Set<RiderAssignmentEvent>();
     public DbSet<PlatformAccountRegistration> PlatformAccountRegistrations => Set<PlatformAccountRegistration>();

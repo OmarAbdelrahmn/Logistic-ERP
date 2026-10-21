@@ -1,0 +1,52 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="OperationId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RiderProfileId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="Amount" type="xs:decimal" minOccurs="0" />
+                <xs:element name="PaidAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="PaidByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="UpdatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="UpdatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RowVersion" type="xs:base64Binary" minOccurs="0" />
+                <xs:element name="IsDeleted" type="xs:boolean" minOccurs="0" />
+                <xs:element name="DeletedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="DeletedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DeletionReason" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <Id>01a14f27-9f5c-72c4-8460-0b77e134cece</Id>
+    <OperationId>01a14f10-2c0e-7406-9d3f-6068bb523670</OperationId>
+    <RiderProfileId>01a14f01-aaaa-7343-9513-909f220ac619</RiderProfileId>
+    <Amount>550.15</Amount>
+    <CreatedAtUtc>2026-10-18T13:15:59.3333503Z</CreatedAtUtc>
+    <CreatedByUserId>5e8dbbf5-f4a8-447d-d933-08df10cc8271</CreatedByUserId>
+    <RowVersion>AAAAAAAC9gU=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table>
+  <Table>
+    <Id>01a14f27-b3b2-7458-bb64-bf6368f5e4df</Id>
+    <OperationId>01a14f23-cdb1-7c4f-878c-008b1e253c18</OperationId>
+    <RiderProfileId>01a0bf9d-e0a3-7224-99d1-a558c6b83a7a</RiderProfileId>
+    <Amount>493.20</Amount>
+    <CreatedAtUtc>2026-10-18T13:16:04.4393599Z</CreatedAtUtc>
+    <CreatedByUserId>5e8dbbf5-f4a8-447d-d933-08df10cc8271</CreatedByUserId>
+    <RowVersion>AAAAAAAC9hI=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table>
+</NewDataSet>

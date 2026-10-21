@@ -210,10 +210,10 @@ GET /api/chefz/reports/management?reportDate=2026-10-11&sponsorId=<sponsorUuid>
 | cycleOrders | إجمالي عدد طلبات الدورة حتى اليوم السابق |
 | accountsBelowThreeOrdersInCycle | عدد الحسابات بأقل من 3 طلبات خلال الدورة |
 | ridersWithOrdersYesterday | عدد المناديب الذين نفذوا طلبات في اليوم السابق |
-| ridersWithThreeOrFewerOrdersYesterday | عدد المناديب بثلاثة طلبات أو أقل في اليوم السابق |
+| ridersWithThreeOrFewerOrdersYesterday | عدد المناديب الذين نفذوا من طلب واحد إلى ثلاثة طلبات في اليوم السابق |
 | ridersWithMoreThanThreeOrdersYesterday | عدد المناديب بأكثر من ثلاثة طلبات في اليوم السابق |
 
-For report date 11 October, performance date is 10 October and cycle begins 1 October. On the 1st or 16th, the cycle is the half containing yesterday, so the previous half is reported. Cycle order counts group by account, daily counts by actual rider. Accounts without performance are counted below three in this management roster report. Daily low-order counts include assigned riders without a daily row as zero. The rider-performance report instead exposes missing data explicitly. Sponsor grouping uses current account sponsor membership.
+For report date 11 October, performance date is 10 October and cycle begins 1 October. On the 1st or 16th, the cycle is the half containing yesterday, so the previous half is reported. Cycle order counts group by account, daily counts by actual rider after combining their accounts within each sponsor. Accounts without performance are counted below three in the separate cycle account count. Daily rider counts exclude zero orders and missing daily records: the 1–3 orders bucket plus the >3 orders bucket equals `ridersWithOrdersYesterday`. Sponsor grouping uses current account sponsor membership.
 
 Use one report card/table per sponsor and display both report and performance dates. No server PDF/XLSX export route is added here; a frontend print view may use this returned report.
 

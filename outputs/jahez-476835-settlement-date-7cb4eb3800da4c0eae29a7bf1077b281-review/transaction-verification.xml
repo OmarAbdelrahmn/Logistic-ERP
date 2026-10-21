@@ -1,0 +1,32 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Account" type="xs:string" minOccurs="0" />
+                <xs:element name="LastSettlementDate" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="CommissionPostedThrough" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="CommissionStartsOn" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="Commission" type="xs:decimal" minOccurs="0" />
+                <xs:element name="Remaining" type="xs:decimal" minOccurs="0" />
+                <xs:element name="ExecutedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <Account>476835</Account>
+    <LastSettlementDate>2026-10-14T00:00:00+03:00</LastSettlementDate>
+    <CommissionPostedThrough>2026-10-14T00:00:00+03:00</CommissionPostedThrough>
+    <CommissionStartsOn>2026-10-15T00:00:00+03:00</CommissionStartsOn>
+    <Commission>60.00</Commission>
+    <Remaining>135.94</Remaining>
+  </Table>
+</NewDataSet>

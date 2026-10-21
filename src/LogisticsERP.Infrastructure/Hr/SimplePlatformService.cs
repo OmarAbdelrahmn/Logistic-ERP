@@ -1,4 +1,4 @@
-﻿using LogisticsERP.Application.Features.Jahez;
+using LogisticsERP.Application.Features.Jahez;
 using LogisticsERP.Domain.Chefz;
 using System.Text.Json;
 using LogisticsERP.Application.Abstractions.Authentication;
@@ -326,6 +326,7 @@ internal sealed class SimplePlatformService(
             return Result.Failure<SimplePlatformAssignmentResponse>(HrErrors.InvalidRequest);
         }
 
+        await using var accountScope = await PlatformAccountWriteScope.AcquireAsync(dbContext, [accountId], cancellationToken);
         var account = await dbContext.PlatformRiderAccounts.SingleOrDefaultAsync(
             item => item.Id == accountId,
             cancellationToken);
@@ -377,6 +378,10 @@ internal sealed class SimplePlatformService(
         }
         var riderAccountSlot = PlatformAssignmentPolicySupport.NextSlot(activeAssignments);
 
+        var dayAllocation = new PlatformAccountDayAllocationService(dbContext);
+        var validDates = await dayAllocation.ValidateStart(accountId, request.EffectiveFrom, null, null, cancellationToken);
+        if (validDates.IsFailure) return Result.Failure<SimplePlatformAssignmentResponse>(validDates.Error);
+
         OwnerProjection? owner;
         if (account.RegisteredEmployeeId is { } ownerEmployeeId)
         {
@@ -417,6 +422,8 @@ internal sealed class SimplePlatformService(
             BackdatedReason = HrServiceSupport.TrimOrNull(request.BackdatedReason)
         };
         dbContext.RiderClientAssignments.Add(assignment);
+        var stagedUsage = await dayAllocation.Stage(accountId, assignment.Id, request.EffectiveFrom, null, request.Reason ?? "Account assigned", true, cancellationToken);
+        if (stagedUsage.IsFailure) { dbContext.ChangeTracker.Clear(); return Result.Failure<SimplePlatformAssignmentResponse>(stagedUsage.Error); }
         dbContext.RiderAssignmentEvents.Add(new RiderAssignmentEvent
         {
             RiderClientAssignmentId = assignment.Id,
@@ -440,6 +447,7 @@ internal sealed class SimplePlatformService(
         }
         catch (DbUpdateException)
         {
+            dbContext.ChangeTracker.Clear();
             return Result.Failure<SimplePlatformAssignmentResponse>(HrErrors.Conflict);
         }
 
@@ -471,6 +479,7 @@ internal sealed class SimplePlatformService(
             return Result.Failure<SimplePlatformAssignmentResponse>(HrErrors.InvalidRequest);
         }
 
+        await using var accountScope = await PlatformAccountWriteScope.AcquireAsync(dbContext, [accountId], cancellationToken);
         var account = await dbContext.PlatformRiderAccounts.SingleOrDefaultAsync(
             item => item.Id == accountId,
             cancellationToken);
@@ -504,6 +513,11 @@ internal sealed class SimplePlatformService(
             return Result.Failure<SimplePlatformAssignmentResponse>(HrErrors.NotFound);
         }
 
+        var dayAllocation = new PlatformAccountDayAllocationService(dbContext);
+        var validEnd = await dayAllocation.ValidateEnd(assignment, request.EffectiveTo, status == RiderAssignmentStatus.Cancelled, cancellationToken);
+        if (validEnd.IsFailure) return Result.Failure<SimplePlatformAssignmentResponse>(validEnd.Error);
+        var stagedUsage = await dayAllocation.Stage(accountId, assignment.Id, request.EffectiveTo, request.DayUsage, request.Reason, false, cancellationToken);
+        if (stagedUsage.IsFailure) { dbContext.ChangeTracker.Clear(); return Result.Failure<SimplePlatformAssignmentResponse>(stagedUsage.Error); }
         stageCredentials?.Invoke();
         var fromStatus = assignment.Status;
         assignment.EffectiveTo = request.EffectiveTo;

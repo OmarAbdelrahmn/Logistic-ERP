@@ -72,7 +72,7 @@ Each record contains the sponsor GUID, sponsor name, `values`, and `rowVersion`.
 
 Returns one row per sponsor (all sponsors when no ID is supplied): company name, application, report date, yesterday's performance date, cycle start, cycle orders through yesterday, accounts below three cycle orders, riders with orders yesterday, riders with at most three yesterday, and riders above three yesterday. Cycle uses the half containing yesterday, so a report on the 1st/16th reports the completed preceding half. Conflicting example dates on rows 8/9 are resolved using the sheet's stated yesterday rule.
 
-Counts group by account for cycle counts and by actual rider for daily counts. Daily low-order counts include the roster assigned on yesterday plus riders with daily records. Accounts without cycle performance are below three for this management roster count. Performance reports instead expose missing data explicitly. Current account sponsor membership determines grouping.
+Counts group by account for cycle counts and by actual rider for daily counts, combining the rider's accounts within each sponsor before classifying the daily total. Daily low-order counts include only riders with 1–3 accepted orders yesterday; zero orders and missing daily records are excluded from all three daily rider counts. `ridersWithOrdersYesterday` always equals `ridersWithThreeOrFewerOrdersYesterday + ridersWithMoreThanThreeOrdersYesterday`. Accounts without cycle performance are still below three for the separate cycle account count. Current account sponsor membership determines grouping.
 
 ## Reminders
 

@@ -1,5 +1,7 @@
 # Ninja accounts and daily reports
 
+**21 October 2026:** Returns accept optional `dayUsage` figures. Daily imports now split account totals between actual same-day assignments and retain original sources. Missing figures block only affected imports. See [shared-day handovers and API additions](shared-account-day-handovers.md).
+
 **17 October 2026:** Ninja now uses [dedicated permissions](ninja-permissions.md). Apply the new application/identity permission migrations and update frontend permission checks before using the updated API.
 
 Current source reference (15 October 2026): [all 19 Ninja endpoints](ninja-full-api-reference.md) and [system, permissions, identity, status and reporting details](ninja-system-details.md). Account reads embed separate owner/actual-rider names, phones and iqamas. Account detail/status and aggregate reports need API publication but no migration. The subsequent [saved sheet checkups, status observations and upload notes](ninja-account-sheet-updates.md) add five endpoints and require the separate `AddNinjaAccountSheetReviews` migration; main accounts are not modified by checkups.

@@ -6,6 +6,10 @@ public enum JahezCashboxHandoverStatus { Pending = 1, Confirmed = 2, Cancelled =
 
 public sealed class JahezCashboxHandover : AuditableEntity
 {
+    public int TreasuryVersion { get; set; } = 2;
+    public string? DocumentNumber { get; set; }
+    public string? RequestedByNameAr { get; set; }
+    public string? AccountantNameAr { get; set; }
     public DateOnly BusinessDate { get; set; }
     public JahezCashboxHandoverStatus Status { get; set; } = JahezCashboxHandoverStatus.Pending;
     public Guid RequestedByUserId { get; set; }

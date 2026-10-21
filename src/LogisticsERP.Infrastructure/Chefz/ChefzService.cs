@@ -97,6 +97,7 @@ internal sealed partial class ChefzService(ApplicationDbContext db, ICurrentUser
             || request.VehicleType is not (null or "Car" or "Motorcycle")
             || request.DashboardStatus is not (null or "active" or "Block By CHEFZ" or "The supervisor suspended"))
             return Result.Failure<ChefzAccountResponse>(ChefzErrors.Invalid("حدد نوع الحساب Freelancer أو FullTime ورقم الهوية الموجود في التقرير."));
+        await using var accountScope = await PlatformAccountWriteScope.AcquireAsync(db, [accountId], ct);
         var account = await Accounts.SingleOrDefaultAsync(a => a.Id == accountId, ct);
         if (account is null) return Result.Failure<ChefzAccountResponse>(ChefzErrors.NotFound);
         var ownerId = await db.Employees.AsNoTracking().Where(e => e.Id == account.RegisteredEmployeeId).Select(e => e.IqamaNo).SingleOrDefaultAsync(ct);
@@ -109,6 +110,14 @@ internal sealed partial class ChefzService(ApplicationDbContext db, ICurrentUser
         var details = await db.ChefzAccountDetails.SingleOrDefaultAsync(d => d.PlatformRiderAccountId == accountId, ct);
         if (details is not null && !HrServiceSupport.MatchesRowVersion(details.RowVersion, request.RowVersion))
             return Result.Failure<ChefzAccountResponse>(ChefzErrors.Conflict("تم تعديل البيانات؛ أعد تحميل الحساب."));
+        if (type == ChefzAccountType.FullTime && (details is null || details.AccountType != ChefzAccountType.FullTime))
+        {
+            var assignments = await db.RiderClientAssignments.AsNoTracking().Where(a => a.PlatformRiderAccountId == accountId
+                && a.Status != RiderAssignmentStatus.Cancelled).ToArrayAsync(ct);
+            if (assignments.Any(a => assignments.Any(b => b.Id != a.Id && a.EffectiveFrom <= (b.EffectiveTo ?? DateOnly.MaxValue)
+                && b.EffectiveFrom <= (a.EffectiveTo ?? DateOnly.MaxValue))))
+                return Result.Failure<ChefzAccountResponse>(ChefzErrors.Conflict("Cannot convert an account with shared-day assignments to FullTime."));
+        }
         if (details is null)
         {
             details = new() { PlatformRiderAccountId = accountId };

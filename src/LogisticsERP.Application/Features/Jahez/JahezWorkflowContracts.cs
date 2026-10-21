@@ -1,17 +1,25 @@
 using LogisticsERP.Application.Common.Results;
 using LogisticsERP.Domain.Entities.Jahez;
+using LogisticsERP.Application.Features.Hr;
 
 namespace LogisticsERP.Application.Features.Jahez;
 
 public sealed record JahezOperationCreate(Guid HandoverId, JahezOperationMode Mode, DateOnly ThroughDate,
     DateTimeOffset EffectiveAtUtc, decimal Net, string Reason, JahezMoneyFund? Fund = null,
-    JahezMoneyPurpose Purpose = JahezMoneyPurpose.Settlement, bool TransferToRider = false, string? PaymentReference = null);
+    JahezMoneyPurpose Purpose = JahezMoneyPurpose.Settlement, bool TransferToRider = false, string? PaymentReference = null, PlatformAccountDayUsageInput? DayUsage = null);
 public sealed record JahezOperationPreview(decimal Net, decimal Commission, decimal Remaining,
     JahezMoneyDirection Direction, IReadOnlyList<JahezMoneyFund> AllowedFunds, bool WithdrawsAccount,
-    bool CommissionComplete, IReadOnlyList<string> Problems, string CalculationJson);
+    bool CommissionComplete, IReadOnlyList<string> Problems, string CalculationJson)
+{
+    public Guid? SponsorId { get; init; }
+    public string? SponsorIdentifier { get; init; }
+    public string? SponsorNameAr { get; init; }
+}
 public sealed record JahezOperationUpdate(JahezOperationCreate Values, string RowVersion);
 public sealed record JahezOperationPaymentMethodUpdate(JahezMoneyFund Fund, string PaymentReference,
     string Reason, string RowVersion);
+public sealed record JahezOperationCommissionStartUpdate(DateOnly StartDate, string Reason, string RowVersion,
+    JahezMoneyFund? Fund = null, string? PaymentReference = null);
 public sealed record JahezWorkflowRequestCreate(Guid HandoverId, JahezApprovalKind Kind, string Reason,
     Guid? OperationId = null, Guid? TargetAccountId = null, decimal WaiverAmount = 0,
     DateOnly? FromDate = null, DateOnly? ToDate = null, DateTimeOffset? EffectiveAtUtc = null,
@@ -19,7 +27,10 @@ public sealed record JahezWorkflowRequestCreate(Guid HandoverId, JahezApprovalKi
     decimal? ProposedCommission = null, decimal? DebtAdjustment = null);
 public sealed record JahezWorkflowDecision(bool Approve, string Reason, decimal? ApprovedNet = null,
     decimal? ApprovedCommission = null, decimal? ApprovedDebtAdjustment = null, bool UseOriginalValues = false);
-public sealed record JahezWorkflowApproval(JahezApprovalRequest Request, IReadOnlyList<JahezApprovalDecision> Decisions);
+public sealed record JahezWorkflowApproval(JahezApprovalRequest Request, IReadOnlyList<JahezApprovalDecision> Decisions)
+{
+    public JahezSettlementAmounts? Amounts { get; init; }
+}
 public sealed record JahezMoneyRecord(JahezMoneyFund Fund, string Reference, string Reason,
     JahezMoneyPurpose Purpose = JahezMoneyPurpose.TransferredDebtRepayment);
 public sealed record JahezFeeRecord(Guid HandoverId, decimal Amount, JahezMoneyFund Fund, string Reference, string Reason);
@@ -36,6 +47,10 @@ public sealed record JahezMoneyMovementResponse(Guid Id, Guid HandoverId, Guid R
     public string? PlatformAccountId => ExternalAccountId;
     public DateOnly? StartDate { get; init; }
     public DateOnly? EndDate { get; init; }
+    public string? OperationRowVersion { get; init; }
+    public Guid? SponsorId { get; init; }
+    public string? SponsorIdentifier { get; init; }
+    public Guid? TreasurySubAccountId { get; init; }
 }
 public sealed record JahezAccountRow(Guid AccountId, string Code, string ExternalAccountId, string? UserName,
     Guid OperatingCityId, string CityNameAr, Guid? SponsorId, string? SponsorNameAr, string Status,
@@ -77,13 +92,17 @@ public interface IJahezWorkflowService
     Task<Result<JahezOperation>> ExecuteOperationAsync(string key, Guid id, CancellationToken ct = default);
     Task<Result<JahezOperation>> UpdateOperationAsync(string key, Guid id, JahezOperationUpdate request, CancellationToken ct = default);
     Task<Result<JahezOperation>> UpdateOperationPaymentMethodAsync(string key, Guid id, JahezOperationPaymentMethodUpdate request, CancellationToken ct = default);
+    Task<Result<JahezOperation>> UpdateOperationCommissionStartAsync(string key, Guid id, JahezOperationCommissionStartUpdate request, CancellationToken ct = default);
     Task<Result<JahezPage<JahezOperation>>> OperationsV2Async(int page, int pageSize, CancellationToken ct = default);
     Task<Result<JahezWorkflowApproval>> CreateWorkflowRequestAsync(string key, JahezWorkflowRequestCreate request, CancellationToken ct = default);
     Task<Result<JahezWorkflowApproval>> DecideWorkflowRequestAsync(string key, Guid id, JahezWorkflowDecision request, CancellationToken ct = default);
-    Task<Result<JahezPage<JahezApprovalRequest>>> RequestsV2Async(int page, int pageSize, CancellationToken ct = default);
-    Task<Result<JahezWorkflowApproval>> RequestV2Async(Guid id, CancellationToken ct = default);
+    Task<Result<JahezPage<JahezApprovalRequestResponse>>> RequestsV2Async(int page, int pageSize, CancellationToken ct = default);
+    Task<Result<JahezWorkflowApprovalDetails>> RequestV2Async(Guid id, CancellationToken ct = default);
     Task<Result<JahezTransferredDebt>> RepayTransferredDebtAsync(string key, Guid id, JahezMoneyRecord request, CancellationToken ct = default);
-    Task<Result<JahezPage<JahezTransferredDebt>>> TransferredDebtsAsync(int page, int pageSize, CancellationToken ct = default);
+    Task<Result<JahezPage<JahezTransferredDebtResponse>>> TransferredDebtsAsync(int page, int pageSize, CancellationToken ct = default);
+    Task<Result<JahezPage<JahezRiderTransferredDebtSummary>>> RidersWithTransferredDebtsAsync(int page, int pageSize, CancellationToken ct = default);
+    Task<Result<JahezPage<JahezTransferredDebtResponse>>> RiderTransferredDebtsAsync(Guid riderId, int page, int pageSize, CancellationToken ct = default);
+    Task<Result<JahezRiderDebtRepaymentResponse>> RepayRiderTransferredDebtsAsync(string key, Guid riderId, JahezRiderDebtRepayment request, CancellationToken ct = default);
     Task<Result<JahezMoneyMovement>> RecordFeeV2Async(string key, JahezFeeRecord request, CancellationToken ct = default);
     Task<Result<JahezPage<JahezMoneyMovementResponse>>> MovementsV2Async(int page, int pageSize,
         DateOnly? fromDate = null, DateOnly? toDate = null, CancellationToken ct = default);
