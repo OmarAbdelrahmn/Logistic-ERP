@@ -102,6 +102,7 @@ internal sealed class RiderClientAssignmentConfiguration : IEntityTypeConfigurat
         builder.Property(entity => entity.PaymentModel)
             .HasDefaultValue(PlatformAccountPaymentModel.PayPerOrder);
         builder.Property(entity => entity.RiderAccountSlot).HasDefaultValue(1);
+        builder.Property(entity => entity.NinjaRiderType).HasConversion<string>().HasMaxLength(32);
         builder.HasOne<RiderProfile>().WithMany().HasForeignKey(entity => entity.RiderProfileId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<ClientContract>().WithMany().HasForeignKey(entity => entity.ClientContractId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<PlatformRiderAccount>().WithMany().HasForeignKey(entity => entity.PlatformRiderAccountId).OnDelete(DeleteBehavior.Restrict);
@@ -137,6 +138,8 @@ internal sealed class RiderClientAssignmentConfiguration : IEntityTypeConfigurat
             table.HasCheckConstraint("CK_RiderClientAssignments_BackdatedReason", "[WasBackdated] = 0 OR [BackdatedReason] IS NOT NULL");
             table.HasCheckConstraint("CK_RiderClientAssignments_PaymentModel", "[PaymentModel] IN (1, 2)");
             table.HasCheckConstraint("CK_RiderClientAssignments_RiderAccountSlot", "[RiderAccountSlot] IN (1, 2, 3)");
+            table.HasCheckConstraint("CK_RiderClientAssignments_NinjaRiderType",
+                "[NinjaRiderType] IS NULL OR [NinjaRiderType] IN ('InternalCar', 'ExternalCar', 'InternalMotorcycle', 'ExternalMotorcycle')");
         });
     }
 }

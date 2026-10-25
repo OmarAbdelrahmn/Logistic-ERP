@@ -354,7 +354,10 @@ public sealed partial class JahezWorkflowTests
             .UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=UnusedV2;Trusted_Connection=True").Options);
         var service = new JahezWorkflowService(db, new MutableUser(), new TestPermissions(), new MutableClock { UtcNow = At(6) });
         var query = (IQueryable<JahezAccountRow>)typeof(JahezWorkflowService).GetMethod("WorkflowAccounts", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(service, new object?[] { null, 0, 50 })!;
-        Assert.Contains("SELECT", query.ToQueryString());
+        var sql = query.ToQueryString();
+        Assert.Contains("SELECT", sql);
+        Assert.Contains("VehiclePlatformAccountAssignments", sql);
+        Assert.Contains("VehicleType", sql);
         Assert.False(db.Database.HasPendingModelChanges());
         Assert.Contains("MoneyMovements", db.Database.GenerateCreateScript());
     }

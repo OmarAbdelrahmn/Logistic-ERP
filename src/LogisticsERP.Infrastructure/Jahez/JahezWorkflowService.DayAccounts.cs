@@ -11,6 +11,7 @@ internal sealed partial class JahezWorkflowService
     private async Task<Guid[]> DayWriteAccounts(object payload, CancellationToken ct)
     {
         var accountIds = new HashSet<Guid>(); var handoverIds = new HashSet<Guid>(); var referenceIds = new HashSet<Guid>();
+        var riderIds = new HashSet<Guid>();
         void Visit(JsonElement element)
         {
             if (element.ValueKind == JsonValueKind.Array) { foreach (var item in element.EnumerateArray()) Visit(item); return; }
@@ -22,11 +23,15 @@ internal sealed partial class JahezWorkflowService
                     if (property.Name is "AccountId" or "TargetAccountId") accountIds.Add(id);
                     else if (property.Name == "HandoverId") handoverIds.Add(id);
                     else if (property.Name is "id" or "Id") referenceIds.Add(id);
+                    else if (property.Name is "riderId" or "RiderProfileId") riderIds.Add(id);
                 }
                 else Visit(property.Value);
             }
         }
         Visit(JsonSerializer.SerializeToElement(payload));
+        foreach (var operationId in await db.JahezTransferredDebts.IgnoreQueryFilters().AsNoTracking()
+            .Where(d => referenceIds.Contains(d.Id) || riderIds.Contains(d.RiderProfileId) && d.PaidAtUtc == null)
+            .Select(d => d.OperationId).ToArrayAsync(ct)) referenceIds.Add(operationId);
         if (referenceIds.Count > 0)
         {
             var requestReferences = await db.Set<JahezApprovalRequest>().AsNoTracking().Where(r => referenceIds.Contains(r.Id))

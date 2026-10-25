@@ -30,7 +30,7 @@ internal sealed partial class JahezWorkflowService
             Require(owner is not null, JahezErrors.Conflict("توجد حركة دون ملكية مالية موثقة."));
             var location = m.Fund switch { JahezMoneyFund.Cashbox => TreasuryLocation.Supervisor,
                 JahezMoneyFund.Bank => TreasuryLocation.Bank, _ => TreasuryLocation.PetroApp };
-            var purpose = m.Purpose == JahezMoneyPurpose.AccountFee ? TreasuryPurpose.AccountFee : TreasuryPurpose.Settlement;
+            var purpose = m.Purpose is JahezMoneyPurpose.AccountFee or JahezMoneyPurpose.AccountFeeRefund ? TreasuryPurpose.AccountFee : TreasuryPurpose.Settlement;
             var account = accounts.SingleOrDefault(a => a.SponsorId == owner!.SponsorId && a.Location == location
                 && (a.Purpose == purpose || a.Purpose == TreasuryPurpose.Combined));
             Require(account is not null, JahezErrors.Conflict("حساب التوجيه المالي غير مهيأ."));
@@ -96,7 +96,8 @@ internal sealed partial class JahezWorkflowService
             var snapshot = await HandoverPreview(request.BusinessDate, ct);
             Require(snapshot.Preview.MovementCount > 0, JahezErrors.Conflict("لا توجد عهدة أو حركات غير مسلمة."));
             var supervisorIds = await db.Set<TreasurySubAccount>().Where(x => x.Location == TreasuryLocation.Supervisor).Select(x => x.Id).ToArrayAsync(ct);
-            Require(!snapshot.Preview.Lines.Any(x => supervisorIds.Contains(x.SubAccountId) && x.Amount < 0), JahezErrors.Conflict("توجد عهدة سالبة؛ راجع التمويل قبل التسليم."));
+            foreach (var line in snapshot.Preview.Lines.Where(x => supervisorIds.Contains(x.SubAccountId) && x.Amount < 0))
+                await ValidateRefundHandoverLine(line, snapshot.Postings, ct);
             var state = await db.Set<TreasuryState>().SingleAsync(x => x.Id == TreasuryState.SingletonId, ct);
             var h = new JahezCashboxHandover { TreasuryVersion = 3, DocumentNumber = $"JH-{state.NextHandoverNumber++:D10}",
                 BusinessDate = request.BusinessDate, RequestedByUserId = Actor, RequestedByNameAr = commandActorName, Reason = request.Reason,
@@ -123,18 +124,50 @@ internal sealed partial class JahezWorkflowService
                 && request.CashCounts.Select(x => x.SubAccountId).Distinct().Count() == cash.Length
                 && cash.All(l => request.CashCounts.Any(c => c.SubAccountId == l.SubAccountId && c.Amount == l.Amount)),
                 JahezErrors.Invalid("يجب مطابقة كل حساب نقدي على حدة، بما فيه الحسابات ذات الرصيد الصفري."));
-            foreach (var line in cash.Where(x => x.Amount > 0))
+            foreach (var line in cash.Where(x => x.Amount != 0))
             {
                 var from = await PostingAccount(line.SubAccountId, ct);
                 var to = await Route(new TreasuryOwnership { SponsorId = line.SponsorId }, JahezMoneyFund.Cashbox,
                     from.Purpose == TreasuryPurpose.AccountFee ? JahezMoneyPurpose.AccountFee : JahezMoneyPurpose.Settlement, ct, central: true);
-                await Transfer(from, to, line.Amount, h.DocumentNumber!, request.Reason, ct, h.Id);
+                if (line.Amount > 0)
+                    await Transfer(from, to, line.Amount, h.DocumentNumber!, request.Reason, ct, h.Id);
+                else
+                {
+                    var postings = await (from link in db.Set<TreasuryHandoverPosting>()
+                        join posting in db.Set<TreasuryPosting>() on link.PostingId equals posting.Id
+                        where link.HandoverId == h.Id && posting.SubAccountId == line.SubAccountId
+                        select posting).AsNoTracking().ToArrayAsync(ct);
+                    await ValidateRefundHandoverLine(line, postings, ct);
+                    TransferRefundDeduction(from, to, line.Amount, h.Id, h.DocumentNumber!, request.Reason);
+                }
             }
             h.Status = JahezCashboxHandoverStatus.Confirmed; h.AccountantUserId = Actor;
             h.AccountantNameAr = commandActorName;
             h.ConfirmedAtUtc = Now; h.ConfirmationReason = request.Reason;
             return new TreasuryHandoverDetail(h, lines);
         }, ct);
+
+    private async Task ValidateRefundHandoverLine(TreasuryHandoverLine line, IReadOnlyList<TreasuryPosting> postings, CancellationToken ct)
+    {
+        var movementIds = postings.Where(x => x.SubAccountId == line.SubAccountId && x.Kind == TreasuryEntryKind.Business && x.Amount < 0)
+            .Select(x => x.MoneyMovementId).ToArray();
+        var refunds = await db.JahezAccountFeeRefunds.AsNoTracking().Where(x => movementIds.Contains(x.MoneyMovementId))
+            .SumAsync(x => (decimal?)x.RefundAmount, ct) ?? 0m;
+        Require(line.Amount + refunds >= 0, JahezErrors.Conflict("العهدة السالبة يجب أن تكون ناتجة عن استرداد رسوم موثق؛ راجع التمويل."));
+    }
+
+    // A signed deduction passes the refund expense to central custody. It is not
+    // a second rider payout and may overdraw central custody for this sponsor.
+    private void TransferRefundDeduction(TreasurySubAccount from, TreasurySubAccount to, decimal signed,
+        Guid handoverId, string reference, string reason, DateTimeOffset? at = null)
+    {
+        Require(signed < 0 && from.Id != to.Id && from.SponsorId == to.SponsorId
+            && from.Location == TreasuryLocation.Supervisor && to.Location == TreasuryLocation.Central,
+            JahezErrors.Invalid("قيد خصم الاسترداد غير صالح."));
+        var batch = Guid.CreateVersion7();
+        AddPosting(from, -signed, TreasuryEntryKind.Transfer, reference, reason, batch, handover: handoverId, at: at);
+        AddPosting(to, signed, TreasuryEntryKind.Transfer, reference, reason, batch, handover: handoverId, at: at);
+    }
 
     public Task<Result<TreasuryHandoverDetail>> CancelTreasuryHandoverAsync(string key, Guid id, JahezCashboxHandoverCancel request, CancellationToken ct = default) =>
         ExecuteAsync(key, "v3.handover.cancel", new { id, request }, PermissionKeys.Jahez.CashboxSubmit, async () =>

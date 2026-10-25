@@ -1,0 +1,73 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Account" type="xs:string" minOccurs="0" />
+                <xs:element name="LastCommissionDate" type="xs:string" minOccurs="0" />
+                <xs:element name="CalculationStartsOn" type="xs:string" minOccurs="0" />
+                <xs:element name="LastSettlementPaymentAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Verified" type="xs:int" minOccurs="0" />
+                <xs:element name="Mismatches" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table2">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="AuditCount" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <Account>405092</Account>
+    <LastCommissionDate>2026-10-20</LastCommissionDate>
+    <CalculationStartsOn>2026-10-20</CalculationStartsOn>
+    <LastSettlementPaymentAtUtc>2026-09-12T21:00:00Z</LastSettlementPaymentAtUtc>
+  </Table>
+  <Table>
+    <Account>408132</Account>
+    <LastCommissionDate>2026-10-20</LastCommissionDate>
+    <CalculationStartsOn>2026-10-20</CalculationStartsOn>
+    <LastSettlementPaymentAtUtc>2026-09-22T21:00:00Z</LastSettlementPaymentAtUtc>
+  </Table>
+  <Table>
+    <Account>474572</Account>
+    <LastCommissionDate>2026-10-22</LastCommissionDate>
+    <CalculationStartsOn>2026-10-22</CalculationStartsOn>
+    <LastSettlementPaymentAtUtc>2026-10-15T21:00:00Z</LastSettlementPaymentAtUtc>
+  </Table>
+  <Table>
+    <Account>483905</Account>
+    <LastCommissionDate>2026-10-01</LastCommissionDate>
+    <CalculationStartsOn>2026-10-01</CalculationStartsOn>
+    <LastSettlementPaymentAtUtc>2026-09-27T21:00:00Z</LastSettlementPaymentAtUtc>
+  </Table>
+  <Table>
+    <Account>493593</Account>
+    <LastCommissionDate>2026-10-01</LastCommissionDate>
+    <CalculationStartsOn>2026-10-01</CalculationStartsOn>
+    <LastSettlementPaymentAtUtc>2026-09-13T21:00:00Z</LastSettlementPaymentAtUtc>
+  </Table>
+  <Table1>
+    <Verified>5</Verified>
+    <Mismatches>0</Mismatches>
+  </Table1>
+  <Table2>
+    <AuditCount>5</AuditCount>
+  </Table2>
+</NewDataSet>

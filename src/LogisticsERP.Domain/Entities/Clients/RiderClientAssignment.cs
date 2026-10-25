@@ -10,6 +10,7 @@ public sealed class RiderClientAssignment : AuditableEntity
     public Guid PlatformRiderAccountId { get; set; }
     public PlatformAccountPaymentModel PaymentModel { get; set; } = PlatformAccountPaymentModel.PayPerOrder;
     public int RiderAccountSlot { get; set; } = 1;
+    public NinjaRiderType? NinjaRiderType { get; set; }
     public DateOnly EffectiveFrom { get; set; }
     public DateOnly? EffectiveTo { get; set; }
     public RiderAssignmentStatus Status { get; set; } = RiderAssignmentStatus.Planned;

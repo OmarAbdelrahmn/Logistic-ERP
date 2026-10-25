@@ -21,7 +21,7 @@ public sealed partial class NinjaWorkflowTests
         var actual = await f.Db.Employees.SingleAsync(e => e.Id == f.Rider.EmployeeId, ct);
         actual.IqamaNo = "2560597839"; actual.FullNameEn = "ACTUAL RIDER";
         await f.Db.SaveChangesAsync(ct);
-        Value(await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, new(2026, 10, 12), "0501111111", "unchanged"), ct));
+        Value(await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, new(2026, 10, 12), "0501111111", "unchanged", RiderType: "InternalCar", PaymentModel: "PayPerOrder"), ct));
         var beforeVersion = f.Account.RowVersion.ToArray(); var beforeUpdate = f.Account.UpdatedAtUtc;
         var clean = Value(await f.Service.CompareAccountsAsync("owners.xlsx",
             AccountSheet(["272578", " account   owner ", " RIYADH ", "٢٥٥٢٤٣١٩٤٨"]), ct));

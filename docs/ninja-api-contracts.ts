@@ -2,11 +2,16 @@
 export type Guid = string;
 export type DateOnly = string;
 export type UtcTimestamp = string;
+export type NinjaRiderType = "InternalCar" | "ExternalCar" | "InternalMotorcycle" | "ExternalMotorcycle";
+/** عمولة / بالراتب. */
+export type NinjaPaymentModel = "PayPerOrder" | "Salary";
 
 export interface NinjaAssignRequest {
   actualRiderProfileId: Guid;
   effectiveFrom: DateOnly;
   phoneNumber: string;
+  riderType: NinjaRiderType;
+  paymentModel: NinjaPaymentModel;
   newPassword?: string | null;
   reason?: string | null;
   wasBackdated?: boolean;
@@ -49,9 +54,11 @@ export interface NinjaCredentialResponse {
 }
 
 export interface NinjaAssignmentResponse {
+  /** Null for assignments created before rider type selection was introduced. */
+  riderType: NinjaRiderType | null;
   id: Guid;
   accountId: Guid;
-  paymentModel: string;
+  paymentModel: NinjaPaymentModel;
   actualRiderProfileId: Guid;
   actualEmployeeId: Guid;
   actualRiderNameAr: string;
@@ -74,6 +81,11 @@ export interface NinjaLifecycleResponse {
 }
 
 export interface NinjaAccountResponse {
+  /** Latest decrypted password on GET reads with platform_credentials.read for this platform; otherwise null. */
+  password: string | null;
+  /** Current assignment type; null when unassigned or on an unclassified legacy assignment. */
+  riderType: NinjaRiderType | null;
+  paymentModel: NinjaPaymentModel;
   accountId: Guid;
   /** External Captain ID. Keep it as text, including leading zeroes. */
   captainId: string;

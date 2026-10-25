@@ -32,6 +32,7 @@ public sealed record ChefzSettlementResponse(Guid Id, Guid AccountId, Guid Assig
     public string? SponsorNameEn { get; init; }
     public string RiderName { get; init; } = "";
     public string? RiderIqamaNo { get; init; }
+    public string? RiderIban { get; init; }
 }
 public sealed record ChefzPerformanceResponse(Guid Id, Guid AccountId, Guid AssignmentId, Guid RiderProfileId,
     DateOnly ReportDate, string ReportIdNumber, int TotalValidOffers, int AcceptedOffers,

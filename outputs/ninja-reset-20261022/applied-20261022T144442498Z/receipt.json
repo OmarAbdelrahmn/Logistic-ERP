@@ -1,0 +1,15 @@
+{
+  "status": "Committed and verified on fresh connection",
+  "accounts": 327,
+  "existingAccountsUpdated": 300,
+  "accountsAdded": 27,
+  "accountRemovedFromActiveList": "215472",
+  "excludedByUser": "66689",
+  "assignmentsRemoved": 107,
+  "assignmentEventsRemoved": 107,
+  "registrationsRemoved": 107,
+  "dayAllocationsRemoved": 107,
+  "allAccountsStatus": "Available",
+  "providerFlags": "Retained in OperationalNotes JSON",
+  "verificationMismatches": 0
+}

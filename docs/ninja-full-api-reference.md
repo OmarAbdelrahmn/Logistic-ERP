@@ -62,7 +62,10 @@ The following account contract is shared by list items, account detail and statu
   "ownerEmployeeId": "00000000-0000-0000-0000-000000000002",
   "actualRiderProfileId": "00000000-0000-0000-0000-000000000003",
   "phoneNumber": "0503333333",
+  "riderType": "InternalCar",
+  "paymentModel": "Salary",
   "hasPassword": true,
+  "password": "EXAMPLE_SAVED_PASSWORD",
   "passwordChangeAllowedAtUtc": "2026-10-16T09:00:00+00:00",
   "rowVersion": "AQ==",
   "currentAssignmentId": "00000000-0000-0000-0000-000000000004",
@@ -92,7 +95,7 @@ The following account contract is shared by list items, account detail and statu
 
 `owner` and `actualRider` contain employee details, not ERP login-user details. The top-level phone is the Ninja account phone. Each nested phone comes from the respective employee primary phone. NameEn/phone/iqama may be null. An unassigned account has null `actualRiderProfileId`, `actualRider`, `currentAssignmentId` and `assignmentRowVersion`. Missing/deleted person references return a null nested object without inventing owner/user data. `ownerEmployeeId` and `sponsorId` can also be null for existing records.
 
-`hasPassword` reports whether any credential version exists; password values are never returned. The deadline can be in the past and does not itself mean the password is currently locked.
+`hasPassword` reports whether any credential version exists. On account list/detail GET reads, `password` returns the readable password from the latest saved credential version when the caller also has `platform_credentials.read` for this Ninja platform. It is null when no password is saved or the caller lacks that additional permission; `hasPassword` can therefore be true while `password` is null. The deadline comes from the same latest version, can be in the past and does not itself mean the password is currently locked. During cooldown the password returned is the retained saved value, never a rejected replacement. These GET responses send `Cache-Control: no-store, no-cache`. The status-write response leaves `password` null. See the [password read handoff](ninja-account-password-reads.md).
 
 Account responses also expose nullable `latestSheetStatus`, `latestSheetSuspended`, `latestSheetUploadId`, `sheetUpdatedAtUtc` from the latest matched saved sheet row. These are separate observations; the main `status` remains the ERP operational status. No account fields are written by a checkup.
 
@@ -145,6 +148,8 @@ Comparison uses registered ownership and city, not the actual rider. Possible ma
   "actualRiderProfileId": "00000000-0000-0000-0000-000000000003",
   "effectiveFrom": "2026-10-15",
   "phoneNumber": "0503333333",
+  "riderType": "InternalCar",
+  "paymentModel": "Salary",
   "newPassword": null,
   "reason": "Handed to rider",
   "wasBackdated": false,
@@ -152,18 +157,22 @@ Comparison uses registered ownership and city, not the actual rider. Possible ma
 }
 ```
 
-Required fields: rider profile, effective date, valid phone. `newPassword`/`reason` are optional; backdating defaults to false and requires a valid backdate reason when used. Account must be available and rider/owner/assignment rules must pass. The phone is required even if the password stays unchanged.
+Required fields: rider profile, effective date, valid phone, `riderType`, and `paymentModel`. Choose exactly one of `InternalCar`, `ExternalCar`, `InternalMotorcycle`, or `ExternalMotorcycle` for `riderType`. Choose `PayPerOrder` (عمولة) or `Salary` (بالراتب) for `paymentModel`; values are case-sensitive and missing/invalid values return HTTP 400 / `ninja.invalid`. `newPassword`/`reason` are optional; backdating defaults to false and requires a valid backdate reason when used. Account must be available and rider/owner/assignment rules must pass. The phone is required even if the password stays unchanged.
+
+The selected payment model overrides the account default for this assignment, must be enabled in the platform's supported payment models, and controls the existing account/salary assignment limits. It is saved on both the assignment and account in the same commit as credentials and lifecycle changes. Generic metadata routes cannot change the payment model of an active Ninja assignment; return the account and create a new assignment to change it. Ninja account list/detail/status responses return `paymentModel` from the current assignment, falling back to the account value while unassigned. Historical assignments retain their own payment model.
 
 Success is `{ assignment, credentials }`. Assignment fields:
 
 ```text
-id, accountId, paymentModel,
+id, accountId, paymentModel, riderType,
 actualRiderProfileId, actualEmployeeId, actualRiderNameAr, actualRiderNameEn,
 effectiveFrom, effectiveTo, status, startReason, endReason,
 wasBackdated, backdatedReason, assignedByUserId, endedByUserId, rowVersion
 ```
 
 Dates are date-only; `effectiveTo`, nameEn, reasons, and endedByUserId may be null. `rowVersion` here belongs to the assignment. Credential fields are documented in section 7. Owner/actual-rider person objects are obtained from account detail after the operation.
+
+`riderType` is saved on each assignment and returned in assignment/return/history responses. Account list/detail returns the current assignment's `riderType`, or null when unassigned or on an unclassified legacy assignment. Previous assignments retain their own type after reassignment. See the [rider type frontend handoff](ninja-assignment-rider-types.md) for labels and rollout requirements.
 
 ## 6. Return account
 

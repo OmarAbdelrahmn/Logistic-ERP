@@ -59,10 +59,12 @@ public sealed class NinjaController(INinjaService service) : ControllerBase
 
     [HttpGet("accounts")]
     [RequirePermission(PermissionKeys.Ninja.Read)]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     public Task<IActionResult> Accounts(int page = 1, int pageSize = 50, CancellationToken ct = default) => ToAction(service.GetAccountsAsync(page, pageSize, ct));
 
     [HttpGet("accounts/{accountId:guid}")]
     [RequirePermission(PermissionKeys.Ninja.Read)]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     public Task<IActionResult> Account(Guid accountId, CancellationToken ct) => ToAction(service.GetAccountAsync(accountId, ct));
 
     [HttpPut("accounts/{accountId:guid}/status")]

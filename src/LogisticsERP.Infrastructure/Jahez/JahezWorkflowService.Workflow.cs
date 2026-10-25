@@ -229,7 +229,7 @@ internal sealed partial class JahezWorkflowService
     }
 
     public Task<Result<JahezTransferredDebt>> RepayTransferredDebtAsync(string key, Guid id, JahezMoneyRecord request, CancellationToken ct = default) =>
-        ExecuteAsync(key, "v2.debt.repay", new { id, request }, JahezWorkflowPermissions.Repay, async () =>
+        ExecuteDebtRepaymentAsync(key, "v2.debt.repay", new { id, request }, async () =>
         {
             Reason(request.Reason);
             Require(request.Purpose is JahezMoneyPurpose.TransferredDebtRepayment or JahezMoneyPurpose.Fuel, JahezErrors.Invalid("غرض سداد المبلغ المرحل غير صالح."));
@@ -249,10 +249,8 @@ internal sealed partial class JahezWorkflowService
         var h = await db.JahezAccountSessions.IgnoreQueryFilters().SingleOrDefaultAsync(x => x.Id == operation!.HandoverId, ct);
         Require(h is not null && h.RiderProfileId == debt.RiderProfileId,
             JahezErrors.Conflict("بيانات المندوب الأصلي للمديونية غير متسقة؛ راجع السجل."));
-        await StageMoney(h!, request.Fund, JahezMoneyDirection.Receipt, request.Purpose, debt.Amount,
-            request.Reference, request.Reason, null, debt.Id, ct);
-        debt.PaidAtUtc = Now;
-        debt.PaidByUserId = Actor;
+        var state = new RiderDebtState(debt, operation!, h!);
+        await StageDebtPayment(state, state.DashboardRemaining, state.CommissionRemaining, request, ct);
     }
 
     public Task<Result<JahezMoneyMovement>> RecordFeeV2Async(string key, JahezFeeRecord request, CancellationToken ct = default) =>
@@ -270,7 +268,7 @@ internal sealed partial class JahezWorkflowService
             return movement;
         }, ct);
 
-    private async Task WorkflowDebtNotifications(Guid riderId, Guid sourceId, bool released, CancellationToken ct)
+    private async Task WorkflowDebtNotifications(Guid riderId, Guid sourceId, bool released, CancellationToken ct, bool adjusted = false)
     {
         var assignments = await (from a in db.RiderClientAssignments join c in db.ClientContracts on a.ClientContractId equals c.Id
             join p in db.ClientPlatforms on c.ClientPlatformId equals p.Id where a.RiderProfileId == riderId && a.EffectiveTo == null
@@ -281,11 +279,12 @@ internal sealed partial class JahezWorkflowService
         foreach (var recipient in recipients)
             db.Add(new Notification { RecipientUserId = recipient, EventType = released ? "jahez.rider.debt.paid" : "jahez.rider.debt.transferred",
                 Severity = NotificationSeverity.Information,
-                TitleAr = released ? "سداد مديونية جاهز المرحلة" : "ترحيل مستحق جاهز على المندوب",
-                TitleEn = released ? "Jahez rider debt paid" : "Jahez debt transferred to rider",
-                BodyAr = released ? $"{name}: سدد كامل المستحق المرحل."
+                TitleAr = released ? adjusted ? "تسوية مديونية جاهز المرحلة" : "سداد مديونية جاهز المرحلة" : "ترحيل مستحق جاهز على المندوب",
+                TitleEn = released ? adjusted ? "Jahez rider debt settled" : "Jahez rider debt paid" : "Jahez debt transferred to rider",
+                BodyAr = released ? adjusted ? $"{name}: تمت تسوية المستحق المرحل بتعديل العمولة." : $"{name}: سدد كامل المستحق المرحل."
                     : $"{name}: تم إثبات المستحق المرحل للمتابعة والسداد دون إيقاف التشغيل.",
-                BodyEn = released ? "Transferred debt paid." : "Transferred debt recorded for repayment; rider operations remain available.",
+                BodyEn = released ? adjusted ? "Transferred debt settled by commission adjustment." : "Transferred debt paid."
+                    : "Transferred debt recorded for repayment; rider operations remain available.",
                 SourceEntityType = nameof(JahezTransferredDebt), SourceEntityId = sourceId,
                 DeepLink = $"/jahez/transferred-debts/{sourceId}", VisibleAtUtc = Now,
                 DeduplicationKey = $"jahez:transfer:{sourceId}:{released}:{recipient}" });

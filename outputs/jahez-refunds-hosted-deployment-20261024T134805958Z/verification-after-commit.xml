@@ -1,0 +1,75 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="MigrationId" type="xs:string" minOccurs="0" />
+                <xs:element name="ProductVersion" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Refunds" type="xs:long" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table2">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="MoneyMovements" type="xs:long" minOccurs="0" />
+                <xs:element name="MovementAmounts" type="xs:decimal" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table3">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="LedgerEntries" type="xs:long" minOccurs="0" />
+                <xs:element name="LedgerAmounts" type="xs:decimal" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table4">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Debts" type="xs:long" minOccurs="0" />
+                <xs:element name="DebtAmounts" type="xs:decimal" minOccurs="0" />
+                <xs:element name="PaidAmounts" type="xs:decimal" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <MigrationId>20261024115050_SupportJahezPartialDebtRepayments</MigrationId>
+    <ProductVersion>10.0.11</ProductVersion>
+  </Table>
+  <Table>
+    <MigrationId>20261024132700_AddJahezAccountFeeRefunds</MigrationId>
+    <ProductVersion>10.0.11</ProductVersion>
+  </Table>
+  <Table1>
+    <Refunds>0</Refunds>
+  </Table1>
+  <Table2>
+    <MoneyMovements>153</MoneyMovements>
+    <MovementAmounts>50294.86</MovementAmounts>
+  </Table2>
+  <Table3>
+    <LedgerEntries>2084</LedgerEntries>
+    <LedgerAmounts>58875.903000</LedgerAmounts>
+  </Table3>
+  <Table4>
+    <Debts>4</Debts>
+    <DebtAmounts>1196.38</DebtAmounts>
+    <PaidAmounts>0.00</PaidAmounts>
+  </Table4>
+</NewDataSet>

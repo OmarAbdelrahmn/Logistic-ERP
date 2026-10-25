@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>LogisticsERP.Fleet.UnitTests</AssemblyName>
+    <EnableNETAnalyzers>false</EnableNETAnalyzers>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/LogisticsERP.Infrastructure/LogisticsERP.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>

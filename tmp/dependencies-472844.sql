@@ -1,0 +1,16 @@
+DECLARE @h uniqueidentifier='01a163a8-04f9-7dbb-99cb-87bcbdfb4380',@r uniqueidentifier='01a163a8-04f9-7562-a177-4e80dacfaf55',@m uniqueidentifier='01a163a8-0561-7091-9ae5-57febf8c323c';
+SELECT * FROM app.RiderAssignmentEvents WHERE RiderClientAssignmentId=@r;
+SELECT * FROM app.PlatformAccountDayUsages WHERE RiderClientAssignmentId=@r;
+SELECT * FROM jahez_v2.CommissionPolicies WHERE HandoverId=@h;
+SELECT * FROM jahez_v2.DailyOrders WHERE HandoverId=@h;
+SELECT * FROM jahez_v2.EarningsStatements WHERE HandoverId=@h;
+SELECT * FROM jahez_v2.PlatformTransactions WHERE HandoverId=@h;
+SELECT * FROM jahez_v2.Requests WHERE HandoverId=@h;
+SELECT * FROM jahez_v2.SettlementReminders WHERE HandoverId=@h;
+SELECT * FROM jahez_v2.CashboxHandoverMovements WHERE MoneyMovementId=@m;
+SELECT * FROM jahez_v3.Postings WHERE MoneyMovementId=@m;
+SELECT s.name SchemaName,t.name TableName,tr.name TriggerName,tr.is_disabled,OBJECT_DEFINITION(tr.object_id) Definition FROM sys.triggers tr JOIN sys.tables t ON tr.parent_id=t.object_id JOIN sys.schemas s ON s.schema_id=t.schema_id WHERE s.name IN('jahez_v2','jahez_v3') OR t.name IN('RiderClientAssignments','RiderAssignmentEvents','PlatformAccountDayUsages');
+SELECT OBJECT_SCHEMA_NAME(f.parent_object_id) SchemaName,OBJECT_NAME(f.parent_object_id) TableName,c.name ColumnName,OBJECT_SCHEMA_NAME(f.referenced_object_id) RefSchema,OBJECT_NAME(f.referenced_object_id) RefTable FROM sys.foreign_key_columns f JOIN sys.columns c ON c.object_id=f.parent_object_id AND c.column_id=f.parent_column_id WHERE f.referenced_object_id IN(OBJECT_ID('app.RiderClientAssignments'),OBJECT_ID('jahez_v2.AccountSessions'),OBJECT_ID('jahez_v2.MoneyMovements'),OBJECT_ID('jahez_v2.Operations'),OBJECT_ID('jahez_v2.AccountFees'),OBJECT_ID('app.PlatformAccountDayUsages'));
+SELECT name FROM sys.tables WHERE schema_id=SCHEMA_ID('jahez_v3');
+SELECT COUNT(*) MovementCount,SUM(CASE Direction WHEN 1 THEN Amount ELSE -Amount END) CashTotal FROM jahez_v2.MoneyMovements WHERE Fund=1;
+SELECT * FROM jahez_v2.CommandReceipts WHERE ResultJson LIKE '%01a163a8-04f9-7dbb-99cb-87bcbdfb4380%' OR ResultJson LIKE '%01a163a8-04f9-7562-a177-4e80dacfaf55%' OR ResultJson LIKE '%01a16443-4c02-7427-8c84-64d5293fc937%';

@@ -17,7 +17,7 @@ Use [ninja-api-contracts.ts](ninja-api-contracts.ts) for all request/response ty
 - Send business dates as `YYYY-MM-DD` directly from the date input. Do not convert date-only values through UTC `Date.toISOString()`.
 - Assignment, return and upload dates cannot be after the current day in **Asia/Riyadh**. Password deadlines are UTC timestamps; display them with an explicit Riyadh timezone. The server is authoritative when a timer differs from the browser clock.
 - Page defaults are `page=1&pageSize=50`, maximum size 100. Responses are `{ items, page, pageSize }` with no total count. Use Next/Load more; a full final page can require one additional empty request. Reports require inclusive `from` and `to` dates.
-- Keep passwords only in temporary form state; clear after submission. Responses expose `hasPassword`, never the password. Do not persist requests with plaintext passwords in browser storage, analytics or logs.
+- Keep passwords only in temporary form state; clear after submission. Account list/detail GET responses now also expose a nullable readable `password` to callers with `platform_credentials.read` for the Ninja platform; otherwise it is null. `hasPassword` remains the saved-credential indicator. See the [password read handoff](ninja-account-password-reads.md). Do not persist plaintext password requests or responses in browser storage, analytics or logs.
 
 ## Endpoint map
 

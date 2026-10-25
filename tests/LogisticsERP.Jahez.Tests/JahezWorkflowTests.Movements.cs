@@ -41,12 +41,14 @@ public sealed partial class JahezWorkflowTests
         Assert.Equal("2000000002", row.OwnerRider.IqamaNo);
         Assert.NotEqual(row.UserRider.EmployeeId, row.OwnerRider.EmployeeId);
         Assert.Equal(50, row.Amount); Assert.Equal("fee-1", row.Reference);
+        Assert.Equal("fee-1", row.PaymentReference);
         Assert.Equal(handover.Id, row.HandoverId);
         Assert.Equal(account.Id, row.AccountId);
         Assert.Equal("44120", row.PlatformAccountId);
         using var json = System.Text.Json.JsonSerializer.SerializeToDocument(row,
             System.Text.Json.JsonSerializerOptions.Web);
         Assert.Equal("44120", json.RootElement.GetProperty("platformAccountId").GetString());
+        Assert.Equal("fee-1", json.RootElement.GetProperty("paymentReference").GetString());
         Assert.Equal(account.ExternalAccountId, row.ExternalAccountId);
         Assert.Null(row.Net);
         Assert.Null(row.Commission);

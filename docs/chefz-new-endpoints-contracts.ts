@@ -79,6 +79,7 @@ export interface ChefzRatingCounts {
   unrated: number;
 }
 export interface ChefzAccountPerformanceSummary {
+  accountType: 'Freelancer' | 'FullTime' | 'Unconfigured';
   accountId: Guid;
   externalAccountId: string;
   summary: ChefzReportSummary;
@@ -172,6 +173,7 @@ export interface ChefzImportResponse {
   riders: ChefzPerformanceRider[];
 }
 export interface ChefzAccountPerformanceReport {
+  accountType: 'Freelancer' | 'FullTime' | 'Unconfigured';
   accountId: Guid;
   externalAccountId: string;
   riderProfileId: Guid;
@@ -372,6 +374,7 @@ export interface ChefzOrderSettlementImportResponse {
 
 /** Existing GET /settlements items, extended to identify order imports. */
 export interface ChefzSettlementResponse {
+  riderIban: string | null;
   riderName: string;
   riderIqamaNo: string | null;
   id: Guid;

@@ -88,7 +88,7 @@ internal sealed partial class JahezWorkflowService
                 TreasuryOwnership? origin = null;
                 if (m.TransferredDebtId.HasValue) origin = await Ownership(TreasurySource.Debt, m.TransferredDebtId.Value, ct);
                 else if (m.OperationId.HasValue) origin = await Ownership(TreasurySource.Operation, m.OperationId.Value, ct);
-                else if (m.Purpose == JahezMoneyPurpose.AccountFee)
+                else if (m.Purpose is JahezMoneyPurpose.AccountFee or JahezMoneyPurpose.AccountFeeRefund)
                 {
                     var fee = db.Set<JahezAccountFee>().Local.FirstOrDefault(x => x.HandoverId == m.HandoverId)
                         ?? await db.Set<JahezAccountFee>().IgnoreQueryFilters().AsNoTracking().SingleOrDefaultAsync(x => x.HandoverId == m.HandoverId, ct);
@@ -118,7 +118,7 @@ internal sealed partial class JahezWorkflowService
     {
         var location = central ? TreasuryLocation.Central : fund switch
         { JahezMoneyFund.Cashbox => TreasuryLocation.Supervisor, JahezMoneyFund.Bank => TreasuryLocation.Bank, _ => TreasuryLocation.PetroApp };
-        var classification = purpose == JahezMoneyPurpose.AccountFee ? TreasuryPurpose.AccountFee : TreasuryPurpose.Settlement;
+        var classification = purpose is JahezMoneyPurpose.AccountFee or JahezMoneyPurpose.AccountFeeRefund ? TreasuryPurpose.AccountFee : TreasuryPurpose.Settlement;
         var account = await db.Set<TreasurySubAccount>().SingleOrDefaultAsync(x => x.IsDefault && x.IsActive
             && x.IsPosting && x.SponsorId == owner.SponsorId && x.Location == location
             && (x.Purpose == classification || x.Purpose == TreasuryPurpose.Combined), ct);
@@ -177,10 +177,14 @@ internal sealed partial class JahezWorkflowService
         }
         var account = await Route(owner, m.Fund, m.Purpose, ct);
         var amount = m.Direction == JahezMoneyDirection.Receipt ? m.Amount : -m.Amount;
-        Require(account.AllowedDirections == TreasuryDirections.Dual
+        var feeRefund = m.Purpose == JahezMoneyPurpose.AccountFeeRefund && m.Fund == JahezMoneyFund.Cashbox
+            && m.Direction == JahezMoneyDirection.Disbursement && !correction
+            && (db.JahezAccountFeeRefunds.Local.Any(x => x.MoneyMovementId == m.Id)
+                || await db.JahezAccountFeeRefunds.AnyAsync(x => x.MoneyMovementId == m.Id, ct));
+        Require(feeRefund || account.AllowedDirections == TreasuryDirections.Dual
             || amount > 0 && account.AllowedDirections == TreasuryDirections.InOnly
             || amount < 0 && account.AllowedDirections == TreasuryDirections.OutOnly, JahezErrors.Invalid("اتجاه الحركة غير مسموح للحساب."));
-        if (!historical && amount < 0) await EnsureAvailable(account, -amount, ct);
+        if (!historical && !feeRefund && amount < 0) await EnsureAvailable(account, -amount, ct);
         var businessPosting = AddPosting(account, amount, TreasuryEntryKind.Business, m.Reference, m.Reason, batch, m.Id, revision: revision,
             at: historical ? m.OccurredAtUtc : Now);
         if (historical)
@@ -188,7 +192,8 @@ internal sealed partial class JahezWorkflowService
             businessPosting.ActorUserId = m.ActorUserId;
             businessPosting.ActorNameAr = await TreasuryUserName(m.ActorUserId, ct);
         }
-        if (!historical) await EnsureAvailable(account, 0, ct);
+        // Receipts can replenish an overdrawn refund cashbox without needing to clear it in one payment.
+        if (!historical && !feeRefund && amount < 0) await EnsureAvailable(account, 0, ct);
         if (!historical && prior is not null && prior.SubAccountId != account.Id)
             await EnsureAvailable(await PostingAccount(prior.SubAccountId, ct), 0, ct);
     }

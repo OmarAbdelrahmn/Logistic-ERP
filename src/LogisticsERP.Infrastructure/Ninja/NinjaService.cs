@@ -57,6 +57,16 @@ internal sealed partial class NinjaService(ApplicationDbContext db, ICurrentUser
         var password = assign?.NewPassword ?? release?.NewPassword;
         if (password is not null && !await Allowed(PermissionKeys.Ninja.CredentialsRotate, account.ClientPlatformId, ct))
             return Result.Failure<NinjaLifecycleResponse>(NinjaErrors.Forbidden);
+        NinjaRiderType riderType = default;
+        if (assign is not null && (assign.RiderType is not ("InternalCar" or "ExternalCar" or "InternalMotorcycle" or "ExternalMotorcycle")
+            || !Enum.TryParse(assign.RiderType, out riderType)))
+            return Result.Failure<NinjaLifecycleResponse>(NinjaErrors.Invalid(
+                "اختر نوع المندوب: InternalCar أو ExternalCar أو InternalMotorcycle أو ExternalMotorcycle."));
+        PlatformAccountPaymentModel paymentModel = default;
+        if (assign is not null && (assign.PaymentModel is not ("PayPerOrder" or "Salary")
+            || !Enum.TryParse(assign.PaymentModel, out paymentModel)))
+            return Result.Failure<NinjaLifecycleResponse>(NinjaErrors.Invalid(
+                "اختر طريقة الدفع: PayPerOrder (عمولة) أو Salary (بالراتب)."));
         var effective = assign?.EffectiveFrom ?? release!.EffectiveTo;
         var today = DateOnly.FromDateTime(clock.GetUtcNow().ToOffset(TimeSpan.FromHours(3)).DateTime);
         if (effective == default || effective > today || (assign is not null && effective < today && !assign.WasBackdated))
@@ -70,7 +80,7 @@ internal sealed partial class NinjaService(ApplicationDbContext db, ICurrentUser
         {
             result = assign is not null
                 ? await platforms.AssignNinjaAccountAsync(accountId, new(assign.ActualRiderProfileId, assign.EffectiveFrom,
-                    assign.Reason, assign.WasBackdated, assign.BackdatedReason), () => Stage(account, p), ct)
+                    assign.Reason, assign.WasBackdated, assign.BackdatedReason), riderType, paymentModel, () => Stage(account, p), ct)
                 : await platforms.ReleaseNinjaAccountAsync(accountId, new(release!.EffectiveTo, release.Status,
                     release.Reason, release.RowVersion, release.DayUsage), () => Stage(account, p), ct);
         }

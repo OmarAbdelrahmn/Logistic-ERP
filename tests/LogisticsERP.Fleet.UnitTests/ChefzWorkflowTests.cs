@@ -631,8 +631,8 @@ public sealed partial class ChefzWorkflowTests
         var result = Value(await f.Service.ProcessOrderSettlementsAsync("mixed.xlsx", content.ToArray(), true, ct));
         Assert.Empty(result.Issues); var rider = Assert.Single(result.Riders);
         Assert.Equal(2, rider.Accounts.Count); Assert.Equal(f.First.RiderProfileId, rider.RiderProfileId);
-        Assert.Equal(962.52m, rider.NetEarnings); Assert.Equal(388.94m, rider.CompanyAmount);
-        Assert.Equal(573.58m, rider.RiderAmount);
+        Assert.Equal(962.52m, rider.NetEarnings); Assert.Equal(388.04m, rider.CompanyAmount);
+        Assert.Equal(574.48m, rider.RiderAmount);
         Assert.Equal(375m, rider.Accounts.Single(a => a.AccountId == other.Id).CompanyAmount);
     }
 

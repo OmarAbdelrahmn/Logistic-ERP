@@ -2,6 +2,8 @@
 
 Date: 21 October 2026. Scope: withdrawal with approved debt transfer, manager approval amounts, the indebted-rider list, full repayment, and treatment of withdrawal without settlement.
 
+24 October update: [partial payments and total commission adjustment](jahez-rider-debt-partial-payments.md) extends this contract. Display `outstandingAmount` for unpaid debt rows; `amounts` now describes remaining balances after partial receipts. Existing full-repayment endpoints collect only the remainder.
+
 ## 1. Delivery status and integration files
 
 This document describes the current local backend source. The changes have not been confirmed deployed to the hosted API. Coordinate API deployment before enabling the new frontend actions. The main ERP frontend is outside this repository.

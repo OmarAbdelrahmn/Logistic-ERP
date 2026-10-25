@@ -1305,6 +1305,10 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<string>("NinjaRiderType")
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
                     b.Property<string>("OperationalAgreementNotes")
                         .HasMaxLength(4000)
                         .HasColumnType("nvarchar(4000)");
@@ -1385,6 +1389,8 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                             t.HasCheckConstraint("CK_RiderClientAssignments_BackdatedReason", "[WasBackdated] = 0 OR [BackdatedReason] IS NOT NULL");
 
                             t.HasCheckConstraint("CK_RiderClientAssignments_EffectiveRange", "[EffectiveTo] IS NULL OR [EffectiveTo] >= [EffectiveFrom]");
+
+                            t.HasCheckConstraint("CK_RiderClientAssignments_NinjaRiderType", "[NinjaRiderType] IS NULL OR [NinjaRiderType] IN ('InternalCar', 'ExternalCar', 'InternalMotorcycle', 'ExternalMotorcycle')");
 
                             t.HasCheckConstraint("CK_RiderClientAssignments_PaymentModel", "[PaymentModel] IN (1, 2)");
 
@@ -6227,6 +6233,88 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         });
                 });
 
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.JahezAccountFeeRefund", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AccountFeeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ActorUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("CalculatedCommission")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("CalculationJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("CancelledUnpaidFee")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("DeductedCommission")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("GrossFeeRefund")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("HandoverId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("MoneyMovementId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("OccurredAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("Reference")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<decimal>("RefundAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("WaiveCommission")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountFeeId")
+                        .IsUnique();
+
+                    b.HasIndex("HandoverId")
+                        .IsUnique();
+
+                    b.HasIndex("MoneyMovementId")
+                        .IsUnique();
+
+                    b.HasIndex("OccurredAtUtc");
+
+                    b.ToTable("AccountFeeRefunds", "jahez_v2", t =>
+                        {
+                            t.HasCheckConstraint("CK_JahezFeeRefund_Amounts", "[GrossFeeRefund] > 0 AND [CancelledUnpaidFee] >= 0 AND [CalculatedCommission] >= 0 AND [DeductedCommission] >= 0 AND [RefundAmount] > 0 AND [RefundAmount] = [GrossFeeRefund] - [DeductedCommission] AND (([WaiveCommission] = 1 AND [DeductedCommission] = 0) OR ([WaiveCommission] = 0 AND [DeductedCommission] = [CalculatedCommission]))");
+                        });
+                });
+
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.JahezAccountSession", b =>
                 {
                     b.Property<Guid>("Id")
@@ -7056,11 +7144,19 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<decimal?>("CommissionPaid")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<Guid?>("CreatedByUserId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal?>("DashboardDebtPaid")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("Direction")
                         .HasColumnType("int");
@@ -7107,7 +7203,6 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.HasIndex("RiderProfileId");
 
                     b.HasIndex("TransferredDebtId")
-                        .IsUnique()
                         .HasFilter("[TransferredDebtId] IS NOT NULL");
 
                     b.HasIndex("Fund", "OccurredAtUtc");
@@ -7115,6 +7210,8 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.ToTable("MoneyMovements", "jahez_v2", t =>
                         {
                             t.HasCheckConstraint("CK_JahezMoney_Amount", "[Amount] > 0 OR ([Amount] = 0 AND [Direction] = 0 AND [Purpose] = 1 AND [OperationId] IS NOT NULL)");
+
+                            t.HasCheckConstraint("CK_JahezMoney_DebtAllocation", "([DashboardDebtPaid] IS NULL AND [CommissionPaid] IS NULL) OR ([DashboardDebtPaid] IS NOT NULL AND [CommissionPaid] IS NOT NULL AND [TransferredDebtId] IS NOT NULL AND [Direction] = 1 AND [DashboardDebtPaid] >= 0 AND [CommissionPaid] >= 0 AND [DashboardDebtPaid] + [CommissionPaid] = [Amount])");
 
                             t.HasCheckConstraint("CK_JahezMoney_Routing", "([Direction] = 1 AND ([Fund] = 1 OR ([Fund] = 2 AND [Purpose] IN (1, 2)))) OR ([Direction] = 2 AND [Fund] IN (1, 3) AND [Purpose] <> 2) OR ([Direction] = 0 AND [Amount] = 0 AND [Purpose] = 1 AND [OperationId] IS NOT NULL AND [Fund] IN (1, 2, 3))");
                         });
@@ -7389,6 +7486,12 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<Guid>("OperationId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<decimal>("PaidAmount")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)")
+                        .HasDefaultValue(0m);
+
                     b.Property<DateTimeOffset?>("PaidAtUtc")
                         .HasColumnType("datetimeoffset");
 
@@ -7421,7 +7524,7 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.ToTable("TransferredDebts", "jahez_v2", t =>
                         {
-                            t.HasCheckConstraint("CK_JahezTransferredDebt_Amount", "[Amount] > 0");
+                            t.HasCheckConstraint("CK_JahezTransferredDebt_Amount", "[Amount] >= 0 AND [PaidAmount] >= 0 AND [PaidAmount] <= [Amount] AND (([PaidAmount] = [Amount] AND [PaidAtUtc] IS NOT NULL) OR ([PaidAmount] < [Amount] AND [PaidAtUtc] IS NULL))");
                         });
                 });
 
@@ -23699,6 +23802,27 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.HasOne("LogisticsERP.Domain.Entities.Jahez.JahezAccountSession", null)
                         .WithMany()
                         .HasForeignKey("HandoverId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.JahezAccountFeeRefund", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Jahez.JahezAccountFee", null)
+                        .WithMany()
+                        .HasForeignKey("AccountFeeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Jahez.JahezAccountSession", null)
+                        .WithMany()
+                        .HasForeignKey("HandoverId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Jahez.JahezMoneyMovement", null)
+                        .WithMany()
+                        .HasForeignKey("MoneyMovementId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });

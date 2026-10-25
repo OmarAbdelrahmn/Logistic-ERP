@@ -14,6 +14,8 @@ Updated 17 October 2026. All 19 `/api/ninja/*` endpoints and their service metho
 
 Password rotation permission is required whenever `newPassword` is supplied, including during cooldown. Performance/deduction import permissions are independent of account-update permission and of each other.
 
+Account list/detail GET responses now include a nullable `password` field. Returning its readable saved value requires the existing `platform_credentials.read` permission in the same Ninja client-platform scope, in addition to `ninja.read`. Readers without credential-read access still receive account metadata, with `password: null`. A rotation grant does not imply credential-read access. No new permission definition or migration is needed for this field. See the [password read handoff](ninja-account-password-reads.md).
+
 The permission catalog lists these under category `Ninja` with Arabic/English labels, client scope and sensitive-data metadata. The system administrator role receives all seven keys. Existing manager/custom role grants and user grants are not automatically copied from shared platform permissions. Assign the required Ninja keys explicitly through access management with the Ninja platform scope. Shared platform, Jahez and Chefz grants alone do not authorize Ninja endpoints.
 
 Generic `/api/platform-accounts` setup, metadata and history routes retain their own platform permissions. Ninja lifecycle and credential changes continue to use the dedicated Ninja workflow.

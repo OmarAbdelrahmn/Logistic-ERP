@@ -115,17 +115,15 @@ internal sealed class ApplicationPersistenceInterceptor(
                     or nameof(JahezCashboxHandover.AccountantNameAr) or nameof(JahezCashboxHandover.RowVersion)))))
                 throw new InvalidOperationException("Cashbox handover snapshots are immutable and can only be confirmed or cancelled once.");
             if (entry.Entity is JahezOperation && entry.Property(nameof(JahezOperation.Status)).OriginalValue is JahezOperationStatus.Executed
-                && !IsJahezPaymentMethodCorrection(entry) && !IsJahezCommissionStartCorrection(entry))
+                && !IsJahezPaymentMethodCorrection(entry) && !IsJahezCommissionStartCorrection(entry) && !IsJahezNetCorrection(entry)
+                && !IsJahezDebtCommissionCorrection(entry))
                 throw new InvalidOperationException("Executed Jahez operations are immutable.");
             if (entry.Entity is JahezApprovalRequest
                 && entry.Property(nameof(JahezApprovalRequest.Status)).OriginalValue is JahezApprovalStatus original
                 && original != JahezApprovalStatus.Pending)
                 throw new InvalidOperationException("Decided Jahez workflow requests are immutable.");
-            if (entry.Entity is JahezTransferredDebt && (entry.State == EntityState.Deleted
-                || entry.Property(nameof(JahezTransferredDebt.PaidAtUtc)).OriginalValue is not null
-                || entry.Properties.Any(x => x.IsModified && x.Metadata.Name is not (nameof(JahezTransferredDebt.PaidAtUtc)
-                    or nameof(JahezTransferredDebt.PaidByUserId) or nameof(JahezTransferredDebt.RowVersion)))))
-                throw new InvalidOperationException("Transferred debt permits one full repayment only.");
+            if (entry.Entity is JahezTransferredDebt debt && !IsJahezDebtChange(entry, debt))
+                throw new InvalidOperationException("Transferred debt permits increasing repayments or an authorized unpaid commission correction only.");
         }
         if (entry.Entity is AuditableEntity auditable)
         {
@@ -205,7 +203,7 @@ internal sealed class ApplicationPersistenceInterceptor(
 
             if (entry.State == EntityState.Modified)
             {
-                if (IsJahezPaymentMethodCorrection(entry) || IsJahezCommissionStartCorrection(entry)) return;
+                if (IsJahezPaymentMethodCorrection(entry) || IsJahezCommissionStartCorrection(entry) || IsJahezNetCorrection(entry)) return;
                 // Daily performance is corrected by reupload; preserve its account/day and creation identity.
                 // Other history records remain append-only except the authorized Jahez corrections above.
                 if (history is ChefzDailyPerformance && entry.Properties
@@ -271,6 +269,52 @@ internal sealed class ApplicationPersistenceInterceptor(
                     nameof(JahezMoneyMovement.Amount) or nameof(JahezMoneyMovement.Direction)
                     or nameof(JahezMoneyMovement.Fund) or nameof(JahezMoneyMovement.Reference));
         return false;
+    }
+
+    private static bool IsJahezNetCorrection(EntityEntry<Entity> entry)
+    {
+        if (entry.State != EntityState.Modified || entry.Context is not ApplicationDbContext context
+            || context.JahezNetCorrectionOperationId is not Guid operationId) return false;
+        if (entry.Entity is JahezOperation operation)
+            return operation.Id == operationId && operation.Status == JahezOperationStatus.Executed
+                && operation.Mode != JahezOperationMode.Withdraw && operation.Purpose == JahezMoneyPurpose.Settlement
+                && !operation.TransferToRider && operation.Fund.HasValue && Enum.IsDefined(operation.Fund.Value)
+                && operation.Remaining == operation.Net + operation.Commission
+                && entry.Properties.Where(x => x.IsModified).All(x => x.Metadata.Name is
+                    nameof(JahezOperation.Net) or nameof(JahezOperation.Remaining)
+                    or nameof(JahezOperation.PaymentStatus) or nameof(JahezOperation.ApprovedRequestId)
+                    or nameof(JahezOperation.Fund) or nameof(JahezOperation.PaymentReference));
+        if (entry.Entity is JahezMoneyMovement movement)
+            return movement.OperationId == operationId && Enum.IsDefined(movement.Fund)
+                && movement.Purpose == JahezMoneyPurpose.Settlement && movement.Amount >= 0
+                && entry.Properties.Where(x => x.IsModified).All(x => x.Metadata.Name is
+                    nameof(JahezMoneyMovement.Amount) or nameof(JahezMoneyMovement.Direction)
+                    or nameof(JahezMoneyMovement.Fund) or nameof(JahezMoneyMovement.Reference));
+        return false;
+    }
+
+    private static bool IsJahezDebtCommissionCorrection(EntityEntry<Entity> entry) =>
+        entry.State == EntityState.Modified && entry.Context is ApplicationDbContext context
+        && entry.Entity is JahezOperation operation && context.JahezDebtCommissionCorrectionOperationIds.Contains(operation.Id)
+        && operation.Status == JahezOperationStatus.Executed && operation.TransferToRider
+        && operation.PaymentStatus == JahezOperationPaymentStatus.Transferred && operation.Commission >= 0
+        && operation.Remaining == operation.Net + operation.Commission && operation.Remaining >= 0
+        && entry.Properties.Where(x => x.IsModified).All(x => x.Metadata.Name is
+            nameof(JahezOperation.Commission) or nameof(JahezOperation.Remaining) or nameof(JahezOperation.ApprovedRequestId));
+
+    private static bool IsJahezDebtChange(EntityEntry<Entity> entry, JahezTransferredDebt debt)
+    {
+        if (entry.State != EntityState.Modified || entry.Property(nameof(JahezTransferredDebt.PaidAtUtc)).OriginalValue is not null
+            || debt.PaidAmount < 0 || debt.PaidAmount > debt.Amount
+            || debt.PaidAtUtc.HasValue != (debt.PaidAmount == debt.Amount)) return false;
+        if (entry.Context is ApplicationDbContext context && context.JahezDebtCommissionCorrectionOperationIds.Contains(debt.OperationId))
+            return entry.Properties.Where(x => x.IsModified).All(x => x.Metadata.Name is
+                nameof(JahezTransferredDebt.Amount) or nameof(JahezTransferredDebt.PaidAtUtc)
+                or nameof(JahezTransferredDebt.PaidByUserId) or nameof(JahezTransferredDebt.RowVersion));
+        return debt.PaidAmount >= (decimal)entry.Property(nameof(JahezTransferredDebt.PaidAmount)).OriginalValue!
+            && entry.Properties.Where(x => x.IsModified).All(x => x.Metadata.Name is
+                nameof(JahezTransferredDebt.PaidAmount) or nameof(JahezTransferredDebt.PaidAtUtc)
+                or nameof(JahezTransferredDebt.PaidByUserId) or nameof(JahezTransferredDebt.RowVersion));
     }
 
     private IEnumerable<AuditEntry> CreateAuditEntries(

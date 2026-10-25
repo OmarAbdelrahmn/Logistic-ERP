@@ -169,7 +169,7 @@ internal sealed partial class ChefzService(ApplicationDbContext db, ICurrentUser
         s.EndWalletAmount, s.GrossEarnings, s.CommissionRate, s.DailyFee, s.CompanyAmount, s.RiderAmount,
         s.Source, s.ImportId, s.SourceRows, s.DeliveryFees, s.VatAmount, s.Tips, s.Compensation, s.Bonuses, s.Deductions);
 
-    private sealed record RiderIdentity(Guid RiderProfileId, string RiderName, string? RiderIqamaNo);
+    private sealed record RiderIdentity(Guid RiderProfileId, string RiderName, string? RiderIqamaNo, string? RiderIban);
 
     private async Task<Dictionary<Guid, RiderIdentity>> RiderIdentities(IEnumerable<Guid> ids, CancellationToken ct)
     {
@@ -179,7 +179,7 @@ internal sealed partial class ChefzService(ApplicationDbContext db, ICurrentUser
         return await (from rider in db.RiderProfiles.IgnoreQueryFilters().AsNoTracking()
             join employee in db.Employees.IgnoreQueryFilters().AsNoTracking() on rider.EmployeeId equals employee.Id
             where riderIds.Contains(rider.Id)
-            select new RiderIdentity(rider.Id, employee.FullNameAr, employee.IqamaNo))
+            select new RiderIdentity(rider.Id, employee.FullNameAr, employee.IqamaNo, employee.Iban))
             .ToDictionaryAsync(r => r.RiderProfileId, ct);
     }
 
@@ -199,7 +199,8 @@ internal sealed partial class ChefzService(ApplicationDbContext db, ICurrentUser
             return SettlementResponse(s) with
             {
                 SponsorNameAr = sponsor?.RegistryNameAr, SponsorNameEn = sponsor?.RegistryNameEn,
-                RiderName = rider?.RiderName ?? "مندوب سابق", RiderIqamaNo = rider?.RiderIqamaNo
+                RiderName = rider?.RiderName ?? "مندوب سابق", RiderIqamaNo = rider?.RiderIqamaNo,
+                RiderIban = string.IsNullOrWhiteSpace(rider?.RiderIban) ? null : rider.RiderIban
             };
         }).ToArray();
     }

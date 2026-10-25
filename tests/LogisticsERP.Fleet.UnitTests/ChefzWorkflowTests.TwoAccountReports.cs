@@ -116,10 +116,10 @@ public sealed partial class ChefzWorkflowTests
     }
 
     [Theory]
-    [InlineData("Freelancer", "Freelancer", 14.69, 29.39)]
+    [InlineData("Freelancer", "Freelancer", 13.04, 26.09)]
     [InlineData("FullTime", "FullTime", 400, 300)]
-    [InlineData("FullTime", "Freelancer", 400, 29.39)]
-    [InlineData("Freelancer", "FullTime", 14.69, 300)]
+    [InlineData("FullTime", "Freelancer", 400, 26.09)]
+    [InlineData("Freelancer", "FullTime", 13.04, 300)]
     public async Task TwoAccountMoneyUploadKeepsEachAccountAndItsFeeWithOneRiderPayout(string firstType, string secondType,
         double firstCompany, double secondCompany)
     {

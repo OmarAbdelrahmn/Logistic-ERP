@@ -33,7 +33,7 @@ internal sealed partial class JahezWorkflowService
                 handover = movement!.HandoverId;
                 if (movement.TransferredDebtId.HasValue) inherited = await Ownership(TreasurySource.Debt, movement.TransferredDebtId.Value, ct);
                 else if (movement.OperationId.HasValue) inherited = await Ownership(TreasurySource.Operation, movement.OperationId.Value, ct);
-                else if (movement.Purpose == JahezMoneyPurpose.AccountFee)
+                else if (movement.Purpose is JahezMoneyPurpose.AccountFee or JahezMoneyPurpose.AccountFeeRefund)
                 {
                     var feeId = await db.Set<JahezAccountFee>().IgnoreQueryFilters().Where(x => x.HandoverId == handover).Select(x => x.Id).SingleOrDefaultAsync(ct);
                     inherited = await Ownership(TreasurySource.Fee, feeId, ct);
@@ -209,9 +209,16 @@ internal sealed partial class JahezWorkflowService
                     }
                     if (from.Location == TreasuryLocation.Supervisor && line.Amount != 0)
                     {
-                        Require(line.Amount > 0, JahezErrors.Conflict($"التسليم التاريخي {h.Id} يحتوي عجزاً نقدياً؛ يلزم توثيق تسوية التمويل ومراجعة المالية قبل الترحيل."));
                         var to = await Route(new TreasuryOwnership { SponsorId = line.SponsorId }, JahezMoneyFund.Cashbox, from.Purpose == TreasuryPurpose.AccountFee ? JahezMoneyPurpose.AccountFee : JahezMoneyPurpose.Settlement, ct, central: true);
-                        await Transfer(from, to, line.Amount, $"legacy:{h.Id}", reason, ct, h.Id, historical: true, at: h.ConfirmedAtUtc);
+                        if (line.Amount > 0)
+                            await Transfer(from, to, line.Amount, legacyReference, reason, ct, h.Id, historical: true, at: h.ConfirmedAtUtc);
+                        else
+                        {
+                            var refundPostings = await db.Set<TreasuryPosting>().AsNoTracking()
+                                .Where(p => p.SubAccountId == from.Id && p.MoneyMovementId.HasValue && linkedIds.Contains(p.MoneyMovementId.Value)).ToArrayAsync(ct);
+                            await ValidateRefundHandoverLine(line, refundPostings, ct);
+                            TransferRefundDeduction(from, to, line.Amount, h.Id, legacyReference, reason, h.ConfirmedAtUtc);
+                        }
                     }
                     db.Add(line);
                 }

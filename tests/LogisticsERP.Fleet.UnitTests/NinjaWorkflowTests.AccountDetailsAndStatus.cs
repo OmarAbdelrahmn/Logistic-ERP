@@ -50,7 +50,7 @@ public sealed partial class NinjaWorkflowTests
         var empty = Value(await f.Service.GetAccountAsync(f.Account.Id, ct));
         Assert.Equal("Owner", empty.Owner!.NameEn); Assert.Equal(owner.Id, empty.Owner.EmployeeId);
         Assert.Null(empty.ActualRider); Assert.Null(empty.ActualRiderProfileId); Assert.Null(empty.PhoneNumber);
-        var assigned = Value(await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, new(2026, 10, 12), "0503333333"), ct));
+        var assigned = Value(await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, new(2026, 10, 12), "0503333333", RiderType: "InternalCar", PaymentModel: "PayPerOrder"), ct));
         var account = Assert.Single(Value(await f.Service.GetAccountsAsync(1, 50, ct)).Items);
         Assert.Equal(empty.Owner, account.Owner); Assert.Equal("Rider", account.ActualRider!.NameEn);
         Assert.Equal("2000000001", account.Owner!.IqamaNo); Assert.Equal("0501111111", account.Owner.PhoneNumber);
@@ -72,7 +72,7 @@ public sealed partial class NinjaWorkflowTests
     {
         var ct = TestContext.Current.CancellationToken;
         await using var f = await Fixture.Create();
-        var assigned = Value(await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, new(2026, 10, 12), "0501111111", "initial"), ct));
+        var assigned = Value(await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, new(2026, 10, 12), "0501111111", "initial", RiderType: "InternalCar", PaymentModel: "PayPerOrder"), ct));
         var changed = Value(await f.Service.SetAccountStatusAsync(f.Account.Id, new(status, assigned.Credentials.RowVersion, "  Admin choice  "), ct));
         Assert.Equal(status, changed.Status); Assert.Equal("Admin choice", changed.StatusReason);
         Assert.Equal(f.Rider.Id, changed.ActualRiderProfileId); Assert.False(f.Account.IsDeleted);
@@ -80,7 +80,7 @@ public sealed partial class NinjaWorkflowTests
         var returned = Value(await f.Service.GetAccountAsync(f.Account.Id, ct));
         Assert.Equal(status, returned.Status); Assert.Equal("Admin choice", returned.StatusReason); Assert.Null(returned.ActualRider);
         Assert.Equal(changed.Owner, returned.Owner); Assert.Single(f.Db.RiderClientAssignments);
-        Assert.True((await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, new(2026, 10, 12), "0501111111"), ct)).IsFailure);
+        Assert.True((await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, new(2026, 10, 12), "0501111111", RiderType: "InternalCar", PaymentModel: "PayPerOrder"), ct)).IsFailure);
         var active = Value(await f.Service.SetAccountStatusAsync(f.Account.Id, new("Active", returned.RowVersion), ct));
         Assert.Equal("Available", active.Status); Assert.Null(active.StatusReason);
     }
@@ -90,7 +90,7 @@ public sealed partial class NinjaWorkflowTests
     {
         var ct = TestContext.Current.CancellationToken;
         await using var f = await Fixture.Create();
-        var assigned = Value(await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, new(2026, 10, 12), "0501111111"), ct));
+        var assigned = Value(await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, new(2026, 10, 12), "0501111111", RiderType: "InternalCar", PaymentModel: "PayPerOrder"), ct));
         var token = assigned.Credentials.RowVersion;
         Assert.True((await f.Service.SetAccountStatusAsync(f.Account.Id, new("Assigned", token), ct)).IsFailure);
         Assert.True((await f.Service.SetAccountStatusAsync(f.Account.Id, new("Suspended", "invalid"), ct)).IsFailure);

@@ -1,5 +1,9 @@
 # Chefz account details, wallet settlements, and daily performance
 
+**25 October 2026:** Period reports include each account's current `accountType` (`FullTime`, `Freelancer`, or `Unconfigured` when account details are missing). This appears at `accounts[].accountType` in `GET /api/chefz/reports/riders` and `riders[].accounts[].accountType` in `GET /api/chefz/reports/riders/all`, including accounts without performance in the all-riders roster.
+
+**25 October 2026:** `GET /api/chefz/settlements` includes `items[].riderIban: string | null` from the assigned rider's employee record. Wallet preview and save responses include the same `riderIban` field. Missing riders and null, empty, or whitespace-only IBANs return explicit JSON `null`. The IBAN is looked up at request time.
+
 **17 October 2026:** Settlement list, wallet preview, and wallet save responses include `sponsorNameAr` and `sponsorNameEn` from the account's current sponsor. Both are nullable when no visible sponsor is linked; settlements remain in the response without a sponsor. Sponsor names are looked up at request time, rather than stored in the settlement snapshot.
 
 **17 October 2026:** [Assignment start date correction](chefz-assignment-start-date.md) adds `PUT /api/chefz/assignments/{assignmentId}/start-date` to edit only the start date of an existing Chefz assignment.

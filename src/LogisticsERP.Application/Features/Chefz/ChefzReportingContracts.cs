@@ -27,6 +27,7 @@ public sealed record ChefzRiderReport(Guid? AccountId, Guid? RiderId, int Reques
 public sealed record ChefzAccountPerformanceReport(Guid AccountId, string ExternalAccountId, Guid RiderProfileId,
     string RiderName, ChefzReportSummary Summary, IReadOnlyList<ChefzPerformanceResponse> Daily)
 {
+    public string AccountType { get; init; } = "Unconfigured";
     public string? RiderIqamaNo { get; init; }
 }
 public sealed record ChefzRidersPerformanceReport(DateOnly From, DateOnly To, int RequestedHalves,
@@ -38,7 +39,10 @@ public sealed record ChefzRiderPerformanceSummary(Guid RiderProfileId, string Ri
 {
     public string? RiderIqamaNo { get; init; }
 }
-public sealed record ChefzAccountPerformanceSummary(Guid AccountId, string ExternalAccountId, ChefzReportSummary Summary);
+public sealed record ChefzAccountPerformanceSummary(Guid AccountId, string ExternalAccountId, ChefzReportSummary Summary)
+{
+    public string AccountType { get; init; } = "Unconfigured";
+}
 public sealed record ChefzManagementReport(Guid SponsorId, string SponsorNameAr, string Application,
     DateOnly ReportDate, DateOnly PerformanceDate, DateOnly CycleFrom, long CycleOrders,
     int AccountsBelowThreeOrdersInCycle, int RidersWithOrdersYesterday,

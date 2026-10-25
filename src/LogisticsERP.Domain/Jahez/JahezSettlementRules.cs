@@ -10,7 +10,9 @@ public static class JahezSettlementRules
         > 0 => JahezMoneyDirection.Receipt, < 0 => JahezMoneyDirection.Disbursement, _ => JahezMoneyDirection.None
     };
     public static bool Allows(JahezMoneyFund fund, JahezMoneyDirection direction, JahezMoneyPurpose purpose) =>
-        direction switch
+        purpose == JahezMoneyPurpose.AccountFeeRefund
+        ? fund == JahezMoneyFund.Cashbox && direction == JahezMoneyDirection.Disbursement
+        : direction switch
         {
             JahezMoneyDirection.Receipt => fund == JahezMoneyFund.Cashbox
                 || fund == JahezMoneyFund.PetroApp && purpose is JahezMoneyPurpose.Settlement or JahezMoneyPurpose.Fuel,

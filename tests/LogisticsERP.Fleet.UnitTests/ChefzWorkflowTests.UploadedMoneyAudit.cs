@@ -92,7 +92,7 @@ public sealed partial class ChefzWorkflowTests
         var referenceCompany = fresh.Riders.Sum(r => r.Accounts.Where(a => a.AccountType == "FullTime").Sum(a => a.AssignedDays * 25m)
             + ChefzOrderSettlementRules.Money(r.Accounts.Where(a => a.AccountType == "Freelancer").Sum(a => a.NetEarnings + AccountCash(a)) * .15m));
         var currentCompany = fresh.Riders.Sum(r => r.Accounts.Where(a => a.AccountType == "FullTime").Sum(a => a.AssignedDays * 25m)
-            + ChefzOrderSettlementRules.Money(r.Accounts.Where(a => a.AccountType == "Freelancer").Sum(a => a.NetEarnings) * .15m));
+            + ChefzOrderSettlementRules.Money(r.Accounts.Where(a => a.AccountType == "Freelancer").Sum(a => a.DeliveryFeesAfterVat) * .15m));
         Assert.Equal(correctedCompany + companyChangeAfterAssignmentCorrection, referenceCompany);
         Assert.Equal(correctedRider - companyChangeAfterAssignmentCorrection, correctedNet - referenceCompany);
         Assert.Equal(currentCompany, fresh.CompanyAmount);
@@ -134,7 +134,7 @@ public sealed partial class ChefzWorkflowTests
     }
 
     [Fact]
-    public async Task StoredOrdersVatCorrectionPlanMatchesDomainRulesReadOnly()
+    public async Task StoredOrdersVatCorrectionPlanKeepsHistoricalSplitAndCurrentFeeBasedCommissionReadOnly()
     {
         var root = Environment.GetEnvironmentVariable("CHEFZ_MONEY_AUDIT_ROOT");
         Assert.SkipUnless(root is not null, "Set CHEFZ_MONEY_AUDIT_ROOT for the stored-snapshot correction audit.");
@@ -157,14 +157,28 @@ public sealed partial class ChefzWorkflowTests
             return row;
         }).ToArray();
         foreach (var batch in computed.GroupBy(s => s.ImportId)) ChefzOrderSettlementRules.ReconcileRiderCycles(batch);
+        // This retained correction plan predates the delivery-fees-only commission rule.
+        // Validate its historical net-based split independently of today's calculated split.
+        var historicalCompany = computed.ToDictionary(s => s.Id, s => s.AccountType == ChefzAccountType.Freelancer
+            ? ChefzOrderSettlementRules.Money(s.GrossEarnings * ChefzRules.FreelancerRate) : s.CompanyAmount);
+        foreach (var cycle in computed.GroupBy(s => new { s.ImportId, s.RiderProfileId, s.PeriodFrom }))
+        {
+            var freelancers = cycle.Where(s => s.AccountType == ChefzAccountType.Freelancer)
+                .OrderByDescending(s => Math.Abs(s.GrossEarnings)).ThenBy(s => s.PlatformRiderAccountId)
+                .ThenBy(s => s.RiderClientAssignmentId).ToArray();
+            if (freelancers.Length > 0)
+                historicalCompany[freelancers[0].Id] += ChefzOrderSettlementRules.Money(
+                    freelancers.Sum(s => s.GrossEarnings) * ChefzRules.FreelancerRate)
+                    - freelancers.Sum(s => historicalCompany[s.Id]);
+        }
         foreach (var expected in cases)
         {
             var row = Assert.Single(computed, s => s.Id == expected.GetProperty("Id").GetGuid());
             decimal Amount(string key) => decimal.Parse(expected.GetProperty(key).ToString(), System.Globalization.CultureInfo.InvariantCulture);
             Assert.Equal(Amount("VatAmount"), row.VatAmount);
             Assert.Equal(Amount("GrossEarnings"), row.GrossEarnings);
-            Assert.Equal(Amount("CompanyAmount"), row.CompanyAmount);
-            Assert.Equal(Amount("RiderAmount"), row.RiderAmount);
+            Assert.Equal(Amount("CompanyAmount"), historicalCompany[row.Id]);
+            Assert.Equal(Amount("RiderAmount"), row.GrossEarnings - historicalCompany[row.Id]);
             Assert.Equal(expected.GetProperty("AssignedDays").GetInt32(), row.AssignedDays);
         }
         Assert.Equal(241, computed.Length);

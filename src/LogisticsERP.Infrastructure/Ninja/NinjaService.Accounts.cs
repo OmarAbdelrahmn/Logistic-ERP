@@ -15,7 +15,7 @@ internal sealed partial class NinjaService
         if (!ValidPage(page, pageSize)) return Result.Failure<NinjaPage<NinjaAccountResponse>>(NinjaErrors.Invalid("حجم الصفحة من 1 إلى 100."));
         var ids = await AllowedPlatforms(PermissionKeys.Ninja.Read, ct);
         if (ids.Length == 0) return Result.Failure<NinjaPage<NinjaAccountResponse>>(NinjaErrors.Forbidden);
-        var rows = await AccountResponses(Accounts.Where(a => ids.Contains(a.ClientPlatformId)), page, pageSize, ct);
+        var rows = await AccountResponses(Accounts.Where(a => ids.Contains(a.ClientPlatformId)), page, pageSize, ct, includePassword: true);
         return Result.Success(new NinjaPage<NinjaAccountResponse>(rows, page, pageSize));
     }
 
@@ -23,7 +23,7 @@ internal sealed partial class NinjaService
     {
         var ids = await AllowedPlatforms(PermissionKeys.Ninja.Read, ct);
         if (ids.Length == 0) return Result.Failure<NinjaAccountResponse>(NinjaErrors.Forbidden);
-        var rows = await AccountResponses(Accounts.Where(a => ids.Contains(a.ClientPlatformId) && a.Id == accountId), 1, 1, ct);
+        var rows = await AccountResponses(Accounts.Where(a => ids.Contains(a.ClientPlatformId) && a.Id == accountId), 1, 1, ct, includePassword: true);
         return rows.Length == 0 ? Result.Failure<NinjaAccountResponse>(NinjaErrors.NotFound) : Result.Success(rows[0]);
     }
 
@@ -52,7 +52,8 @@ internal sealed partial class NinjaService
         return Result.Success(rows[0]);
     }
 
-    private async Task<NinjaAccountResponse[]> AccountResponses(IQueryable<PlatformRiderAccount> accounts, int page, int pageSize, CancellationToken ct)
+    private async Task<NinjaAccountResponse[]> AccountResponses(IQueryable<PlatformRiderAccount> accounts, int page, int pageSize,
+        CancellationToken ct, bool includePassword = false)
     {
         var rows = await (from a in accounts.AsNoTracking()
             join d in db.NinjaAccountDetails.AsNoTracking() on a.Id equals d.PlatformRiderAccountId into details
@@ -65,9 +66,19 @@ internal sealed partial class NinjaService
                 RiderId = assignment == null ? null : (Guid?)assignment.RiderProfileId,
                 AssignmentId = assignment == null ? null : (Guid?)assignment.Id,
                 AssignmentRowVersion = assignment == null ? null : assignment.RowVersion,
-                LastChange = db.PlatformAccountCredentialVersions.Where(v => v.PlatformRiderAccountId == a.Id)
-                    .OrderByDescending(v => v.KeyVersion).Select(v => (DateTimeOffset?)v.RotatedAtUtc).FirstOrDefault() })
+                RiderType = assignment == null ? null : assignment.NinjaRiderType,
+                PaymentModel = assignment == null ? a.PaymentModel : assignment.PaymentModel,
+                Credential = db.PlatformAccountCredentialVersions.AsNoTracking().Where(v => v.PlatformRiderAccountId == a.Id)
+                    .OrderByDescending(v => v.KeyVersion)
+                    .Select(v => new { v.Ciphertext, v.Nonce, v.AuthenticationTag, v.RotatedAtUtc }).FirstOrDefault() })
             .Skip((page - 1) * pageSize).Take(pageSize).ToArrayAsync(ct);
+        var passwordPlatforms = new HashSet<Guid>();
+        if (includePassword)
+        {
+            foreach (var platformId in rows.Select(r => r.Account.ClientPlatformId).Distinct())
+                if (await Allowed(PermissionKeys.Operations.PlatformCredentialsRead, platformId, ct))
+                    passwordPlatforms.Add(platformId);
+        }
         var riderIds = rows.Where(r => r.RiderId.HasValue).Select(r => r.RiderId!.Value).ToArray();
         var riders = await db.RiderProfiles.AsNoTracking().Where(r => riderIds.Contains(r.Id))
             .Select(r => new { r.Id, r.EmployeeId }).ToDictionaryAsync(r => r.Id, ct);
@@ -83,12 +94,16 @@ internal sealed partial class NinjaService
         var blocked = await RiderOperationalBlock.BlockedAssignmentIds(db,
             rows.Where(r => r.AssignmentId.HasValue).Select(r => r.AssignmentId!.Value).ToArray(), ct);
         return rows.Select(r => new NinjaAccountResponse(r.Account.Id, r.Account.ExternalAccountId, r.Account.Status.ToString(),
-            r.Account.RegisteredEmployeeId, r.RiderId, r.Details?.PhoneNumber, r.LastChange is not null, r.LastChange?.AddHours(72),
+            r.Account.RegisteredEmployeeId, r.RiderId, r.Details?.PhoneNumber, r.Credential is not null, r.Credential?.RotatedAtUtc.AddHours(72),
             Convert.ToBase64String(r.Account.RowVersion), r.AssignmentId,
             r.AssignmentRowVersion is null ? null : Convert.ToBase64String(r.AssignmentRowVersion))
         {
+            Password = passwordPlatforms.Contains(r.Account.ClientPlatformId) && r.Credential is { } credential
+                ? protector.Unprotect(new(credential.Ciphertext, credential.Nonce, credential.AuthenticationTag)) : null,
             Owner = r.Account.RegisteredEmployeeId is { } ownerId ? people.GetValueOrDefault(ownerId) : null,
             ActualRider = r.RiderId is { } riderId && riders.TryGetValue(riderId, out var rider) ? people.GetValueOrDefault(rider.EmployeeId) : null,
+            RiderType = r.RiderType?.ToString(),
+            PaymentModel = r.PaymentModel.ToString(),
             StatusReason = r.Account.StatusReason, Code = r.Account.Code, OperatingCityId = r.Account.OperatingCityId, SponsorId = r.Account.SponsorId,
             LatestSheetStatus = latestSheets.GetValueOrDefault(r.Account.Id)?.SheetStatus,
             LatestSheetSuspended = latestSheets.GetValueOrDefault(r.Account.Id)?.SheetSuspended,

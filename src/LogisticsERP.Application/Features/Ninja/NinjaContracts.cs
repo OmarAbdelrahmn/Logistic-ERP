@@ -4,7 +4,8 @@ using LogisticsERP.Application.Features.Hr;
 namespace LogisticsERP.Application.Features.Ninja;
 
 public sealed record NinjaAssignRequest(Guid ActualRiderProfileId, DateOnly EffectiveFrom, string PhoneNumber,
-    string? NewPassword = null, string? Reason = null, bool WasBackdated = false, string? BackdatedReason = null);
+    string? NewPassword = null, string? Reason = null, bool WasBackdated = false, string? BackdatedReason = null,
+    string? RiderType = null, string? PaymentModel = null);
 public sealed record NinjaReturnRequest(DateOnly EffectiveTo, string PhoneNumber, string? NewPassword,
     string Reason, string RowVersion, string Status = "Ended", PlatformAccountDayUsageInput? DayUsage = null);
 public sealed record NinjaCredentialRequest(string? NewPassword, string? PhoneNumber, string Reason, string RowVersion);
@@ -20,6 +21,9 @@ public sealed record NinjaAccountResponse(Guid AccountId, string CaptainId, stri
 {
     public NinjaPersonResponse? Owner { get; init; }
     public NinjaPersonResponse? ActualRider { get; init; }
+    public string? Password { get; init; }
+    public string? RiderType { get; init; }
+    public string PaymentModel { get; init; } = string.Empty;
     public string? StatusReason { get; init; }
     public string Code { get; init; } = string.Empty;
     public Guid OperatingCityId { get; init; }

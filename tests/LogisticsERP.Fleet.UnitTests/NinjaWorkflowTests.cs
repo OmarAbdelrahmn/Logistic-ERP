@@ -24,7 +24,7 @@ public sealed partial class NinjaWorkflowTests
     public async Task AssignmentReturnAndReassignmentKeepLockedPasswordAndChangePhoneImmediately()
     {
         await using var f = await Fixture.Create(); var ct = TestContext.Current.CancellationToken;
-        var assigned = Value(await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, new(2026, 10, 12), "0501111111", "initial"), ct));
+        var assigned = Value(await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, new(2026, 10, 12), "0501111111", "initial", RiderType: "InternalCar", PaymentModel: "PayPerOrder"), ct));
         Assert.True(assigned.Credentials.PasswordChanged); Assert.Null(assigned.Credentials.Notification);
         var deadline = assigned.Credentials.PasswordChangeAllowedAtUtc;
         var listed = Assert.Single(Value(await f.Service.GetAccountsAsync(1, 50, ct)).Items);
@@ -35,7 +35,7 @@ public sealed partial class NinjaWorkflowTests
         Assert.Single(f.Db.PlatformAccountCredentialVersions); Assert.Single(f.Db.Notifications);
         Assert.Equal("initial", f.Password()); Assert.Equal(PlatformRiderAccountStatus.Available, f.Account.Status);
         f.Clock.Now = f.Clock.Now.AddDays(1);
-        var reassigned = Value(await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, new(2026, 10, 13), "0503333333", "blocked-again"), ct));
+        var reassigned = Value(await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, new(2026, 10, 13), "0503333333", "blocked-again", RiderType: "InternalCar", PaymentModel: "PayPerOrder"), ct));
         Assert.False(reassigned.Credentials.PasswordChanged); Assert.Equal("initial", f.Password());
         Assert.Equal("0503333333", reassigned.Credentials.PhoneNumber);
         f.Clock.Now = deadline!.Value.AddTicks(-1);
@@ -52,10 +52,10 @@ public sealed partial class NinjaWorkflowTests
     public async Task UnlockedReturnRequiresDifferentPasswordAndFailedAssignmentDoesNotStageChanges()
     {
         await using var f = await Fixture.Create(); var ct = TestContext.Current.CancellationToken;
-        var invalid = await f.Service.AssignAsync(f.Account.Id, new(Guid.NewGuid(), new(2026, 10, 12), "0501111111", "unused"), ct);
+        var invalid = await f.Service.AssignAsync(f.Account.Id, new(Guid.NewGuid(), new(2026, 10, 12), "0501111111", "unused", RiderType: "InternalCar", PaymentModel: "PayPerOrder"), ct);
         Assert.True(invalid.IsFailure); await f.Db.SaveChangesAsync(ct);
         Assert.Empty(f.Db.PlatformAccountCredentialVersions); Assert.Empty(f.Db.NinjaAccountDetails);
-        var assigned = Value(await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, new(2026, 10, 12), "0501111111", "initial"), ct));
+        var assigned = Value(await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, new(2026, 10, 12), "0501111111", "initial", RiderType: "InternalCar", PaymentModel: "PayPerOrder"), ct));
         f.Clock.Now = f.Clock.Now.AddDays(3);
         Assert.True((await f.Service.ReturnAsync(f.Account.Id, new(new(2026, 10, 15), "0502222222", null, "Return", assigned.Assignment.RowVersion), ct)).IsFailure);
         Assert.True((await f.Service.ReturnAsync(f.Account.Id, new(new(2026, 10, 15), "0502222222", "initial", "Return", assigned.Assignment.RowVersion), ct)).IsFailure);
@@ -68,9 +68,9 @@ public sealed partial class NinjaWorkflowTests
     public async Task SameDayReassignmentProceedsDuringCooldownButAmbiguousDailyReportIsRejected()
     {
         await using var f = await Fixture.Create(); var ct = TestContext.Current.CancellationToken;
-        var first = Value(await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, new(2026, 10, 12), "0501111111", "initial"), ct));
+        var first = Value(await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, new(2026, 10, 12), "0501111111", "initial", RiderType: "InternalCar", PaymentModel: "PayPerOrder"), ct));
         Value(await f.Service.ReturnAsync(f.Account.Id, new(new(2026, 10, 12), "0502222222", null, "Return", first.Assignment.RowVersion), ct));
-        var next = Value(await f.Service.AssignAsync(f.Account.Id, new(f.OwnerRider.Id, new(2026, 10, 12), "0503333333", "next"), ct));
+        var next = Value(await f.Service.AssignAsync(f.Account.Id, new(f.OwnerRider.Id, new(2026, 10, 12), "0503333333", "next", RiderType: "InternalCar", PaymentModel: "PayPerOrder"), ct));
         Assert.NotNull(next.Credentials.Notification); Assert.False(next.Credentials.PasswordChanged);
         Assert.Equal("initial", f.Password()); Assert.Equal("0503333333", next.Credentials.PhoneNumber);
         var report = Value(await f.Service.ImportAsync(false, new(2026, 10, 12), "x.xlsx", Sheet(false, "272578", 18, 12), ct));
@@ -81,7 +81,7 @@ public sealed partial class NinjaWorkflowTests
     public async Task DailyImportsCreditHistoricalAssignedRiderAndPreserveDeductionSign()
     {
         await using var f = await Fixture.Create(); var ct = TestContext.Current.CancellationToken;
-        var assigned = Value(await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, new(2026, 10, 12), "0501111111"), ct));
+        var assigned = Value(await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, new(2026, 10, 12), "0501111111", RiderType: "InternalCar", PaymentModel: "PayPerOrder"), ct));
         var performance = Sheet(false, "272578", 18, 12.90777778m);
         var deductions = Sheet(true, "272578", 0, -58.24m);
         Assert.Equal(1, Value(await f.Service.ImportAsync(false, new(2026, 10, 12), "performance.xlsx", performance, ct)).ImportedRows);
@@ -93,7 +93,7 @@ public sealed partial class NinjaWorkflowTests
         Assert.Equal(12.90777778m, saved.TotalWorkingHours); Assert.Equal(-58.24m, Assert.Single(f.Db.NinjaDailyDeductions).TotalDeductions);
         f.Clock.Now = f.Clock.Now.AddDays(1);
         Value(await f.Service.ReturnAsync(f.Account.Id, new(new(2026, 10, 12), "0502222222", "return", "Return", assigned.Assignment.RowVersion), ct));
-        Value(await f.Service.AssignAsync(f.Account.Id, new(f.OwnerRider.Id, new(2026, 10, 13), "0503333333"), ct));
+        Value(await f.Service.AssignAsync(f.Account.Id, new(f.OwnerRider.Id, new(2026, 10, 13), "0503333333", RiderType: "InternalCar", PaymentModel: "PayPerOrder"), ct));
         Value(await f.Service.ImportAsync(false, new(2026, 10, 13), "performance.xlsx", performance, ct));
         var history = Value(await f.Service.GetPerformanceAsync(new(2026, 10, 12), new(2026, 10, 13), null, f.Rider.Id, 1, 50, ct));
         Assert.Equal(new DateOnly(2026, 10, 12), Assert.Single(history.Items).ReportDate);
@@ -107,7 +107,7 @@ public sealed partial class NinjaWorkflowTests
         await using var f = await Fixture.Create(); var ct = TestContext.Current.CancellationToken;
         var missing = Value(await f.Service.ImportAsync(false, new(2026, 10, 12), "x.xlsx", Sheet(false, "272578", 18, 12), ct));
         Assert.Single(missing.Issues); Assert.Empty(f.Db.NinjaDailyImports);
-        Value(await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, new(2026, 10, 12), "0501111111"), ct));
+        Value(await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, new(2026, 10, 12), "0501111111", RiderType: "InternalCar", PaymentModel: "PayPerOrder"), ct));
         var mixed = Sheet(false, "272578", 18, 12, "999");
         Assert.Single(Value(await f.Service.ImportAsync(false, new(2026, 10, 12), "x.xlsx", mixed, ct)).Issues);
         await f.Db.SaveChangesAsync(ct); Assert.Empty(f.Db.NinjaDailyPerformance); Assert.Empty(f.Db.NinjaDailyImports);
@@ -133,10 +133,10 @@ public sealed partial class NinjaWorkflowTests
         var legacy = new PlatformOperationsService(f.Db, f.User, f.Clock, f.Protector);
         Assert.Equal("ninja.use_workflow", (await legacy.RotateCredentialAsync(f.Account.Id, new("x", "reason"), ct)).Error.Code);
         f.Checker.Denied = PermissionKeys.Ninja.CredentialsRotate;
-        Assert.True((await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, new(2026, 10, 12), "0501111111", "x"), ct)).IsFailure);
+        Assert.True((await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, new(2026, 10, 12), "0501111111", "x", RiderType: "InternalCar", PaymentModel: "PayPerOrder"), ct)).IsFailure);
         Assert.Empty(f.Db.PlatformAccountCredentialVersions);
         f.Checker.Denied = null;
-        var assigned = Value(await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, new(2026, 10, 12), "0501111111", "x"), ct));
+        var assigned = Value(await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, new(2026, 10, 12), "0501111111", "x", RiderType: "InternalCar", PaymentModel: "PayPerOrder"), ct));
         Assert.Equal("ninja.use_workflow", (await f.Simple.ReleaseAccountAsync(f.Account.Id, new(new(2026, 10, 12), "Ended", "Return", assigned.Assignment.RowVersion), ct)).Error.Code);
         Assert.Equal("ninja.use_workflow", (await legacy.CloseAssignmentAsync(assigned.Assignment.Id, new(new(2026, 10, 12), "Ended", "Return", assigned.Assignment.RowVersion), ct)).Error.Code);
         f.Checker.Denied = PermissionKeys.Ninja.PerformanceImport;
@@ -170,7 +170,7 @@ public sealed partial class NinjaWorkflowTests
         Assert.SkipUnless(Environment.GetEnvironmentVariable("NINJA_SQL_TEST_SERVER") is not null,
             "Set NINJA_SQL_TEST_SERVER to a working local SQL Server for isolated database verification.");
         await using var f = await Fixture.Create(true); var ct = TestContext.Current.CancellationToken;
-        var assigned = Value(await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, new(2026, 10, 12), "0501111111", "initial"), ct));
+        var assigned = Value(await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, new(2026, 10, 12), "0501111111", "initial", RiderType: "InternalCar", PaymentModel: "PayPerOrder"), ct));
         Value(await f.Service.GetAccountsAsync(1, 50, ct));
         Value(await f.Service.ImportAsync(false, new(2026, 10, 12), "x.xlsx", Sheet(false, "272578", 18, 12), ct));
         Value(await f.Service.ImportAsync(true, new(2026, 10, 12), "x.xlsx", Sheet(true, "272578", 0, -6), ct));

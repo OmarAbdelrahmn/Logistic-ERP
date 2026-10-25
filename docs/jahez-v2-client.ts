@@ -1,7 +1,10 @@
 import type { AccountDetails, AccountsPage, AccountStatusUpdate, Approval, ApprovalRequestRow, ApprovalDetails, DecisionRequest,
-  FeeReceipt, FundBalance, MoneyRecord, Movement, MovementRow, MovementDateRange, Operation, OperationCreate, OperationUpdate, OperationPaymentMethodUpdate, OperationCommissionStartUpdate,
-  Page, Preview, Problem, Statistics, TransferredDebt, TransferredDebtRow, HandoverCreate, Handover,
+  RiderPerformanceFilter, JahezRidersPerformanceReport,
+  FeeRefundPreviewRequest, FeeRefundCreate, FeeRefundPreview, FeeRefund,
+  FeeReceipt, FundBalance, MoneyRecord, Movement, MovementRow, MovementDateRange, Operation, OperationCreate, OperationUpdate, OperationPaymentMethodUpdate, OperationNetUpdate, OperationCommissionStartUpdate,
+  Page, Preview, Problem, ProfitReport, Statistics, TransferredDebt, TransferredDebtRow, HandoverCreate, Handover,
   RiderTransferredDebtSummary, RiderDebtRepayment, RiderDebtRepaymentResponse,
+  RiderDebtPartialRepayment, RiderDebtPartialRepaymentResponse, RiderDebtCommissionUpdate, RiderDebtCommissionUpdateResponse,
   CashboxHandover, CashboxHandoverCreate, CashboxHandoverConfirm, CashboxHandoverCancel,
   EarningsRequest, EarningsStatement, AdministrativeDebt, ImportBatch, ImportPreview, ImportCommit, ImportKind } from './jahez-v2-api-contracts';
 
@@ -27,6 +30,9 @@ export function jahezClient(baseUrl: string, token: () => string) {
   }
   const page = (number: number, size: number) => `page=${number}&pageSize=${size}`;
   return {
+    previewFeeRefund: (value: FeeRefundPreviewRequest) => send<FeeRefundPreview>('fees/refunds/preview', 'POST', value),
+    refundFee: (value: FeeRefundCreate, key: string) => send<FeeRefund>('fees/refunds', 'POST', value, key),
+    feeRefunds: (handoverId: string) => send<FeeRefund[]>(`handovers/${handoverId}/fee-refunds`),
     handover: (value: HandoverCreate, key: string) => send<Handover>('handovers', 'POST', value, key),
     recordEarnings: (value: EarningsRequest, key: string) => send<EarningsStatement>('earnings', 'POST', value, key),
     administrativeDebts: (number = 1, size = 50) => send<Page<AdministrativeDebt>>(`administrative-debts?${page(number, size)}`),
@@ -52,11 +58,26 @@ export function jahezClient(baseUrl: string, token: () => string) {
     accounts: (number = 1, size = 50) => send<AccountsPage>(`accounts?${page(number, size)}`),
     account: (id: string, number = 1, size = 50) => send<AccountDetails>(`accounts/${id}?${page(number, size)}`),
     statistics: () => send<Statistics>('statistics'),
+    riderPerformance: (filter: RiderPerformanceFilter) => {
+      const query = new URLSearchParams({ startDate: filter.startDate, endDate: filter.endDate });
+      if (filter.riderId != null) query.set('riderId', filter.riderId);
+      if (filter.accountId != null) query.set('accountId', filter.accountId);
+      if (filter.page != null) query.set('page', String(filter.page));
+      if (filter.pageSize != null) query.set('pageSize', String(filter.pageSize));
+      return send<JahezRidersPerformanceReport>(`reports/riders?${query}`);
+    },
+    profitReport: (dates: MovementDateRange = {}) => {
+      const query = new URLSearchParams();
+      if (dates.fromDate != null) query.set('fromDate', dates.fromDate);
+      if (dates.toDate != null) query.set('toDate', dates.toDate);
+      return send<ProfitReport>(`reports/profit?${query}`);
+    },
     updateStatus: (id: string, value: AccountStatusUpdate, key: string) => send<AccountsPage['items'][number]>(`accounts/${id}/status`, 'PUT', value, key),
     preview: (value: OperationCreate) => send<Preview>('operations/preview', 'POST', value),
     createOperation: (value: OperationCreate, key: string) => send<Operation>('operations', 'POST', value, key),
     updateOperation: (id: string, value: OperationUpdate, key: string) => send<Operation>(`operations/${id}`, 'PUT', value, key),
     updatePaymentMethod: (id: string, value: OperationPaymentMethodUpdate, key: string) => send<Operation>(`operations/${id}/payment-method`, 'PUT', value, key),
+    updateNet: (id: string, value: OperationNetUpdate, key: string) => send<Operation>(`operations/${id}/net`, 'PUT', value, key),
     updateCommissionStart: (id: string, value: OperationCommissionStartUpdate, key: string) => send<Operation>(`operations/${id}/commission-start`, 'PUT', value, key),
     execute: (id: string, key: string) => send<Operation>(`operations/${id}/execute`, 'POST', undefined, key),
     operations: (number = 1, size = 50) => send<Page<Operation>>(`operations?${page(number, size)}`),
@@ -69,6 +90,8 @@ export function jahezClient(baseUrl: string, token: () => string) {
     ridersWithTransferredDebts: (number = 1, size = 50) => send<Page<RiderTransferredDebtSummary>>(`riders/transferred-debts?${page(number, size)}`),
     riderTransferredDebts: (riderId: string, number = 1, size = 50) => send<Page<TransferredDebtRow>>(`riders/${riderId}/transferred-debts?${page(number, size)}`),
     repayRiderTransferredDebts: (riderId: string, value: RiderDebtRepayment, key: string) => send<RiderDebtRepaymentResponse>(`riders/${riderId}/transferred-debts/repayment`, 'POST', value, key),
+    partiallyRepayRiderTransferredDebts: (riderId: string, value: RiderDebtPartialRepayment, key: string) => send<RiderDebtPartialRepaymentResponse>(`riders/${riderId}/transferred-debts/partial-repayment`, 'POST', value, key),
+    updateRiderDebtCommission: (riderId: string, value: RiderDebtCommissionUpdate, key: string) => send<RiderDebtCommissionUpdateResponse>(`riders/${riderId}/transferred-debts/commission`, 'PUT', value, key),
     repay: (id: string, value: MoneyRecord, key: string) => send<TransferredDebt>(`transferred-debts/${id}/repayment`, 'POST', value, key),
     movements: (number = 1, size = 50, dates: MovementDateRange = {}) => {
       const query = new URLSearchParams(page(number, size));

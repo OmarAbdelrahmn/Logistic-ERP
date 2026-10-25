@@ -1,0 +1,125 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="TableName" type="xs:string" minOccurs="0" />
+                <xs:element name="RowId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RowJson" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="CashBefore" type="xs:decimal" minOccurs="0" />
+                <xs:element name="CashAfter" type="xs:decimal" minOccurs="0" />
+                <xs:element name="TotalBefore" type="xs:decimal" minOccurs="0" />
+                <xs:element name="TotalAfter" type="xs:decimal" minOccurs="0" />
+                <xs:element name="OutstandingBefore" type="xs:decimal" minOccurs="0" />
+                <xs:element name="OutstandingAfter" type="xs:decimal" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <TableName>app.PlatformAccountDayUsages</TableName>
+    <RowId>01a163a8-0554-7936-8fe6-4cae2535cf6e</RowId>
+    <RowJson>{"Id":"01A163A8-0554-7936-8FE6-4CAE2535CF6E","PlatformRiderAccountId":"49E3F36A-1BCC-41E8-B960-CEA041725FFA","RiderClientAssignmentId":"01A163A8-04F9-7562-A177-4E80DACFAF55","BusinessDate":"2026-10-22","Sequence":1,"Reason":"تصفية من داشبورد جاهز","CreatedAtUtc":"2026-10-22T12:48:38.3760682Z","CreatedByUserId":"BADE1C20-D7EA-4AE4-D3FC-08DF14B0E9BA","UpdatedAtUtc":"2026-10-22T15:38:19.2631579Z","UpdatedByUserId":"BADE1C20-D7EA-4AE4-D3FC-08DF14B0E9BA","RowVersion":"AAAAAAADb3I=","IsDeleted":false}</RowJson>
+  </Table>
+  <Table>
+    <TableName>app.RiderAssignmentEvents</TableName>
+    <RowId>01a16443-5efb-7546-b7ee-18f3f7cb6197</RowId>
+    <RowJson>{"Id":"01A16443-5EFB-7546-B7EE-18F3F7CB6197","RiderClientAssignmentId":"01A163A8-04F9-7562-A177-4E80DACFAF55","FromStatus":2,"ToStatus":3,"OccurredAtUtc":"2026-10-22T15:38:19.2595914Z","ActorUserId":"BADE1C20-D7EA-4AE4-D3FC-08DF14B0E9BA","Reason":"تصفية من داشبورد جاهز","CreatedAtUtc":"2026-10-22T15:38:19.2631579Z","CreatedByUserId":"BADE1C20-D7EA-4AE4-D3FC-08DF14B0E9BA"}</RowJson>
+  </Table>
+  <Table>
+    <TableName>app.RiderAssignmentEvents</TableName>
+    <RowId>01a163a8-0554-7dc2-a52c-e8bdedd30685</RowId>
+    <RowJson>{"Id":"01A163A8-0554-7DC2-A52C-E8BDEDD30685","RiderClientAssignmentId":"01A163A8-04F9-7562-A177-4E80DACFAF55","FromStatus":1,"ToStatus":2,"OccurredAtUtc":"2026-10-22T12:48:38.2289637Z","ActorUserId":"BADE1C20-D7EA-4AE4-D3FC-08DF14B0E9BA","Reason":"تسليم جديد للعمل","CreatedAtUtc":"2026-10-22T12:48:38.3760682Z","CreatedByUserId":"BADE1C20-D7EA-4AE4-D3FC-08DF14B0E9BA"}</RowJson>
+  </Table>
+  <Table>
+    <TableName>app.RiderClientAssignments</TableName>
+    <RowId>01a163a8-04f9-7562-a177-4e80dacfaf55</RowId>
+    <RowJson>{"Id":"01A163A8-04F9-7562-A177-4E80DACFAF55","RiderProfileId":"01A163A6-F658-73C5-8A6C-16AFCF4573E3","ClientContractId":"01A10681-7081-7F17-93A9-90F085469645","PlatformRiderAccountId":"49E3F36A-1BCC-41E8-B960-CEA041725FFA","EffectiveFrom":"2026-10-22","EffectiveTo":"2026-10-22","Status":3,"StartReason":"تسليم جديد للعمل","EndReason":"تصفية من داشبورد جاهز","AssignedByUserId":"BADE1C20-D7EA-4AE4-D3FC-08DF14B0E9BA","EndedByUserId":"BADE1C20-D7EA-4AE4-D3FC-08DF14B0E9BA","WasBackdated":false,"CreatedAtUtc":"2026-10-22T12:48:38.3760682Z","CreatedByUserId":"BADE1C20-D7EA-4AE4-D3FC-08DF14B0E9BA","UpdatedAtUtc":"2026-10-22T15:38:19.2631579Z","UpdatedByUserId":"BADE1C20-D7EA-4AE4-D3FC-08DF14B0E9BA","RowVersion":"AAAAAAADb3Q=","IsDeleted":false,"PaymentModel":1,"RiderAccountSlot":1}</RowJson>
+  </Table>
+  <Table>
+    <TableName>jahez_v2.AccountFees</TableName>
+    <RowId>01a163a8-0554-7ea3-b888-0a7a5cc7d87d</RowId>
+    <RowJson>{"Id":"01A163A8-0554-7EA3-B888-0A7A5CC7D87D","HandoverId":"01A163A8-04F9-7DBB-99CB-87BCBDFB4380","Amount":200.000000,"WaivedAmount":0.000000,"CreatedAtUtc":"2026-10-22T12:48:38.3760682Z","CreatedByUserId":"BADE1C20-D7EA-4AE4-D3FC-08DF14B0E9BA","RowVersion":"AAAAAAADY28=","IsDeleted":false}</RowJson>
+  </Table>
+  <Table>
+    <TableName>jahez_v2.AccountingEntries</TableName>
+    <RowId>01a16443-5efc-7e44-be59-5a6d0638ee7b</RowId>
+    <RowJson>{"Id":"01A16443-5EFC-7E44-BE59-5A6D0638EE7B","HandoverId":"01A163A8-04F9-7DBB-99CB-87BCBDFB4380","Bucket":2,"Kind":6,"Amount":0.000000,"SourceId":"01A16443-5EFC-7C09-BB32-7276445C112A","OccurredAtUtc":"2026-10-22T15:38:19.2601888Z","Reason":"تصفية من داشبورد جاهز","CreatedAtUtc":"2026-10-22T15:38:19.2631579Z","CreatedByUserId":"BADE1C20-D7EA-4AE4-D3FC-08DF14B0E9BA"}</RowJson>
+  </Table>
+  <Table>
+    <TableName>jahez_v2.AccountingEntries</TableName>
+    <RowId>01a163a8-0561-766e-94e4-6d34691a9e45</RowId>
+    <RowJson>{"Id":"01A163A8-0561-766E-94E4-6D34691A9E45","HandoverId":"01A163A8-04F9-7DBB-99CB-87BCBDFB4380","Bucket":1,"Kind":2,"Amount":-200.000000,"SourceId":"01A163A8-0561-7091-9AE5-57FEBF8C323C","OccurredAtUtc":"2026-10-22T12:48:38.2412437Z","Reason":"تسليم جديد للعمل","CreatedAtUtc":"2026-10-22T12:48:38.3760682Z","CreatedByUserId":"BADE1C20-D7EA-4AE4-D3FC-08DF14B0E9BA"}</RowJson>
+  </Table>
+  <Table>
+    <TableName>jahez_v2.AccountingEntries</TableName>
+    <RowId>01a163a8-0554-799d-9603-ce1813f6b4cb</RowId>
+    <RowJson>{"Id":"01A163A8-0554-799D-9603-CE1813F6B4CB","HandoverId":"01A163A8-04F9-7DBB-99CB-87BCBDFB4380","Bucket":1,"Kind":1,"Amount":200.000000,"SourceId":"01A163A8-0554-7EA3-B888-0A7A5CC7D87D","OccurredAtUtc":"2026-10-22T12:48:38.2289315Z","Reason":"تسليم جديد للعمل","CreatedAtUtc":"2026-10-22T12:48:38.3760682Z","CreatedByUserId":"BADE1C20-D7EA-4AE4-D3FC-08DF14B0E9BA"}</RowJson>
+  </Table>
+  <Table>
+    <TableName>jahez_v2.AccountSessions</TableName>
+    <RowId>01a163a8-04f9-7dbb-99cb-87bcbdfb4380</RowId>
+    <RowJson>{"Id":"01A163A8-04F9-7DBB-99CB-87BCBDFB4380","PlatformRiderAccountId":"49E3F36A-1BCC-41E8-B960-CEA041725FFA","RiderProfileId":"01A163A6-F658-73C5-8A6C-16AFCF4573E3","RiderClientAssignmentId":"01A163A8-04F9-7562-A177-4E80DACFAF55","StartedAtUtc":"2026-10-22T12:47:00Z","EndedAtUtc":"2026-10-22T15:37:00Z","CommissionStartsOn":"2026-10-23","LastSettlementPaymentAtUtc":"2026-10-22T15:38:19.2500991Z","Reason":"تسليم جديد للعمل","CreatedAtUtc":"2026-10-22T12:48:38.3760682Z","CreatedByUserId":"BADE1C20-D7EA-4AE4-D3FC-08DF14B0E9BA","UpdatedAtUtc":"2026-10-22T15:38:19.2631579Z","UpdatedByUserId":"BADE1C20-D7EA-4AE4-D3FC-08DF14B0E9BA","RowVersion":"AAAAAAADb24=","IsDeleted":false}</RowJson>
+  </Table>
+  <Table>
+    <TableName>jahez_v2.CommandReceipts</TableName>
+    <RowId>01a16443-4c4f-7b9f-be2b-3b2d554a708e</RowId>
+    <RowJson>{"Id":"01A16443-4C4F-7B9F-BE2B-3B2D554A708E","ActorUserId":"BADE1C20-D7EA-4AE4-D3FC-08DF14B0E9BA","CommandKey":"op-create-fa05a976-74fc-4913-8bbd-ec33716ef049","Operation":"v2.operation.create","PayloadHash":"C7282126A80DD0116B5A898848DD5E9837AADB1D76F24B080022378DA0DDAB3A","ResultJson":"{\"ExpectedSponsorId\":\"019c18d5-62e1-7000-8000-000000000042\",\"HandoverId\":\"01a163a8-04f9-7dbb-99cb-87bcbdfb4380\",\"Mode\":2,\"Status\":1,\"PaymentStatus\":1,\"ThroughDate\":\"2026-10-22\",\"CommissionStartDate\":null,\"EffectiveAtUtc\":\"2026-10-22T15:37:00+00:00\",\"Net\":0,\"Commission\":0,\"CalculatedCommission\":0,\"Remaining\":0,\"CalculationJson\":\"{\\u0022Accrual\\u0022:[],\\u0022UnpaidCommission\\u0022:0.000000}\",\"DayUsageJson\":null,\"Fund\":null,\"Purpose\":1,\"TransferToRider\":false,\"PaymentReference\":null,\"Reason\":\"\\u062A\\u0635\\u0641\\u064A\\u0629 \\u0645\\u0646 \\u062F\\u0627\\u0634\\u0628\\u0648\\u0631\\u062F \\u062C\\u0627\\u0647\\u0632\",\"ApprovedRequestId\":null,\"ExecutedAtUtc\":null,\"ExecutedByUserId\":null,\"CreatedAtUtc\":\"2026-10-22T15:38:14.4173066+00:00\",\"CreatedByUserId\":\"bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba\",\"UpdatedAtUtc\":null,\"UpdatedByUserId\":null,\"RowVersion\":\"AAAAAAADb2w=\",\"IsDeleted\":false,\"DeletedAtUtc\":null,\"DeletedByUserId\":null,\"DeletionReason\":null,\"Id\":\"01a16443-4c02-7427-8c84-64d5293fc937\"}","CreatedAtUtc":"2026-10-22T15:38:14.4797088Z","CreatedByUserId":"BADE1C20-D7EA-4AE4-D3FC-08DF14B0E9BA"}</RowJson>
+  </Table>
+  <Table>
+    <TableName>jahez_v2.CommandReceipts</TableName>
+    <RowId>01a16443-5f28-7aa3-b313-a86c75c6b1e1</RowId>
+    <RowJson>{"Id":"01A16443-5F28-7AA3-B313-A86C75C6B1E1","ActorUserId":"BADE1C20-D7EA-4AE4-D3FC-08DF14B0E9BA","CommandKey":"op-exec-01a16443-4c02-7427-8c84-64d5293fc937","Operation":"v2.operation.execute","PayloadHash":"84CE70C26095885C2E1D8A27269953870BFED2CCFAE8AC23DF58451EE552330F","ResultJson":"{\"ExpectedSponsorId\":\"019c18d5-62e1-7000-8000-000000000042\",\"HandoverId\":\"01a163a8-04f9-7dbb-99cb-87bcbdfb4380\",\"Mode\":2,\"Status\":3,\"PaymentStatus\":1,\"ThroughDate\":\"2026-10-22\",\"CommissionStartDate\":null,\"EffectiveAtUtc\":\"2026-10-22T15:37:00+00:00\",\"Net\":0.00,\"Commission\":0.00,\"CalculatedCommission\":0.00,\"Remaining\":0.00,\"CalculationJson\":\"{\\u0022Accrual\\u0022:[],\\u0022UnpaidCommission\\u0022:0.000000}\",\"DayUsageJson\":null,\"Fund\":null,\"Purpose\":1,\"TransferToRider\":false,\"PaymentReference\":null,\"Reason\":\"\\u062A\\u0635\\u0641\\u064A\\u0629 \\u0645\\u0646 \\u062F\\u0627\\u0634\\u0628\\u0648\\u0631\\u062F \\u062C\\u0627\\u0647\\u0632\",\"ApprovedRequestId\":null,\"ExecutedAtUtc\":\"2026-10-22T15:38:19.2602418+00:00\",\"ExecutedByUserId\":\"bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba\",\"CreatedAtUtc\":\"2026-10-22T15:38:14.4173066+00:00\",\"CreatedByUserId\":\"bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba\",\"UpdatedAtUtc\":\"2026-10-22T15:38:19.2631579+00:00\",\"UpdatedByUserId\":\"bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba\",\"RowVersion\":\"AAAAAAADb3E=\",\"IsDeleted\":false,\"DeletedAtUtc\":null,\"DeletedByUserId\":null,\"DeletionReason\":null,\"Id\":\"01a16443-4c02-7427-8c84-64d5293fc937\"}","CreatedAtUtc":"2026-10-22T15:38:19.3045126Z","CreatedByUserId":"BADE1C20-D7EA-4AE4-D3FC-08DF14B0E9BA"}</RowJson>
+  </Table>
+  <Table>
+    <TableName>jahez_v2.CommandReceipts</TableName>
+    <RowId>01a163a8-0865-778e-8cbd-ce6a407423da</RowId>
+    <RowJson>{"Id":"01A163A8-0865-778E-8CBD-CE6A407423DA","ActorUserId":"BADE1C20-D7EA-4AE4-D3FC-08DF14B0E9BA","CommandKey":"handover-b36e6621-32dc-4c39-a9f7-a2ddbdda8756","Operation":"handover","PayloadHash":"EE1015F32E67AA69F680B9EADCF34A665BD6DC31168FF68F6CDA9B0D856B24E8","ResultJson":"{\"Id\":\"01a163a8-04f9-7dbb-99cb-87bcbdfb4380\",\"AccountId\":\"49e3f36a-1bcc-41e8-b960-cea041725ffa\",\"ExternalAccountId\":\"472844\",\"RiderProfileId\":\"01a163a6-f658-73c5-8a6c-16afcf4573e3\",\"AssignmentId\":\"01a163a8-04f9-7562-a177-4e80dacfaf55\",\"StartedAtUtc\":\"2026-10-22T12:47:00+00:00\",\"EndedAtUtc\":null,\"CommissionStartsOn\":\"2026-10-23\",\"CommissionPostedThrough\":null,\"LastSettlementPaymentAtUtc\":null}","CreatedAtUtc":"2026-10-22T12:48:39.0142707Z","CreatedByUserId":"BADE1C20-D7EA-4AE4-D3FC-08DF14B0E9BA"}</RowJson>
+  </Table>
+  <Table>
+    <TableName>jahez_v2.MoneyMovements</TableName>
+    <RowId>01a163a8-0561-7091-9ae5-57febf8c323c</RowId>
+    <RowJson>{"Id":"01A163A8-0561-7091-9AE5-57FEBF8C323C","HandoverId":"01A163A8-04F9-7DBB-99CB-87BCBDFB4380","RiderProfileId":"01A163A6-F658-73C5-8A6C-16AFCF4573E3","Fund":1,"Direction":1,"Purpose":3,"Amount":200.00,"ActorUserId":"BADE1C20-D7EA-4AE4-D3FC-08DF14B0E9BA","OccurredAtUtc":"2026-10-22T12:48:38.2411454Z","Reference":"0","Reason":"تسليم جديد للعمل","CreatedAtUtc":"2026-10-22T12:48:38.3760682Z","CreatedByUserId":"BADE1C20-D7EA-4AE4-D3FC-08DF14B0E9BA"}</RowJson>
+  </Table>
+  <Table>
+    <TableName>jahez_v2.Operations</TableName>
+    <RowId>01a16443-4c02-7427-8c84-64d5293fc937</RowId>
+    <RowJson>{"Id":"01A16443-4C02-7427-8C84-64D5293FC937","HandoverId":"01A163A8-04F9-7DBB-99CB-87BCBDFB4380","Mode":2,"Status":3,"PaymentStatus":1,"ThroughDate":"2026-10-22","EffectiveAtUtc":"2026-10-22T15:37:00Z","Net":0.00,"Commission":0.00,"CalculatedCommission":0.00,"Remaining":0.00,"CalculationJson":"{\"Accrual\":[],\"UnpaidCommission\":0.000000}","Purpose":1,"TransferToRider":false,"Reason":"تصفية من داشبورد جاهز","ExecutedAtUtc":"2026-10-22T15:38:19.2602418Z","ExecutedByUserId":"BADE1C20-D7EA-4AE4-D3FC-08DF14B0E9BA","CreatedAtUtc":"2026-10-22T15:38:14.4173066Z","CreatedByUserId":"BADE1C20-D7EA-4AE4-D3FC-08DF14B0E9BA","UpdatedAtUtc":"2026-10-22T15:38:19.2631579Z","UpdatedByUserId":"BADE1C20-D7EA-4AE4-D3FC-08DF14B0E9BA","RowVersion":"AAAAAAADb3E=","IsDeleted":false,"ExpectedSponsorId":"019C18D5-62E1-7000-8000-000000000042"}</RowJson>
+  </Table>
+  <Table>
+    <TableName>jahez_v3.Ownership</TableName>
+    <RowId>01a16443-5efe-7047-a12b-329ffd674763</RowId>
+    <RowJson>{"Id":"01A16443-5EFE-7047-A12B-329FFD674763","Source":2,"SourceId":"01A16443-4C02-7427-8C84-64D5293FC937","PlatformAccountId":"49E3F36A-1BCC-41E8-B960-CEA041725FFA","SponsorId":"019C18D5-62E1-7000-8000-000000000042","SponsorIdentifier":"7034861059","SponsorNameAr":"اكسبرس جايت","Evidence":"Settlement execution","CreatedAtUtc":"2026-10-22T15:38:19.2631579Z","CreatedByUserId":"BADE1C20-D7EA-4AE4-D3FC-08DF14B0E9BA"}</RowJson>
+  </Table>
+  <Table>
+    <TableName>jahez_v3.Ownership</TableName>
+    <RowId>01a163a8-0585-7295-b0c9-76f4b9729c20</RowId>
+    <RowJson>{"Id":"01A163A8-0585-7295-B0C9-76F4B9729C20","Source":1,"SourceId":"01A163A8-0554-7EA3-B888-0A7A5CC7D87D","PlatformAccountId":"49E3F36A-1BCC-41E8-B960-CEA041725FFA","SponsorId":"019C18D5-62E1-7000-8000-000000000042","SponsorIdentifier":"7034861059","SponsorNameAr":"اكسبرس جايت","Evidence":"Fee obligation creation","CreatedAtUtc":"2026-10-22T12:48:38.3760682Z","CreatedByUserId":"BADE1C20-D7EA-4AE4-D3FC-08DF14B0E9BA"}</RowJson>
+  </Table>
+  <Table>
+    <TableName>jahez_v3.Ownership</TableName>
+    <RowId>01a163a8-0595-717e-8d77-8d93b304509e</RowId>
+    <RowJson>{"Id":"01A163A8-0595-717E-8D77-8D93B304509E","Source":4,"SourceId":"01A163A8-0561-7091-9AE5-57FEBF8C323C","PlatformAccountId":"49E3F36A-1BCC-41E8-B960-CEA041725FFA","SponsorId":"019C18D5-62E1-7000-8000-000000000042","SponsorIdentifier":"7034861059","SponsorNameAr":"اكسبرس جايت","Evidence":"Inherited from Fee:01a163a8-0554-7ea3-b888-0a7a5cc7d87d","CreatedAtUtc":"2026-10-22T12:48:38.3760682Z","CreatedByUserId":"BADE1C20-D7EA-4AE4-D3FC-08DF14B0E9BA"}</RowJson>
+  </Table>
+  <Table1>
+    <CashBefore>2064.20</CashBefore>
+    <CashAfter>1864.20</CashAfter>
+    <TotalBefore>-40133.16</TotalBefore>
+    <TotalAfter>-40333.16</TotalAfter>
+    <OutstandingBefore>823.22</OutstandingBefore>
+    <OutstandingAfter>623.22</OutstandingAfter>
+  </Table1>
+</NewDataSet>

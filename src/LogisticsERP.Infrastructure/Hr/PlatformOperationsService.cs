@@ -182,7 +182,8 @@ internal sealed class PlatformOperationsService(
             cancellationToken);
         var isNinja = id is not null && await dbContext.ClientPlatforms.AnyAsync(p => p.Id == entity.ClientPlatformId && p.Code == "NINJA", cancellationToken);
         if (isNinja && (status != entity.Status || entity.ClientPlatformId != request.ClientPlatformId
-            || HrServiceSupport.TrimOrNull(request.StatusReason) != entity.StatusReason))
+            || HrServiceSupport.TrimOrNull(request.StatusReason) != entity.StatusReason
+            || activeAssignment is not null && paymentModel != activeAssignment.PaymentModel))
             return Result.Failure<PlatformAccountResponse>(LogisticsERP.Application.Features.Ninja.NinjaErrors.UseNinjaWorkflow);
         var isChefz = await dbContext.ClientPlatforms.AnyAsync(p => p.Id == request.ClientPlatformId
             && (p.Code == "CHEFZ" || p.Code == "THECHEFZ" || p.Code == "CHEFSZ" || p.Code == "SHIFTZ"), cancellationToken);

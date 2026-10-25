@@ -8,14 +8,14 @@ namespace LogisticsERP.Fleet.UnitTests;
 public sealed partial class ChefzWorkflowTests
 {
     [Theory]
-    [InlineData("Freelancer", 115, 20, 25, 135, 20.25, 114.75)]
+    [InlineData("Freelancer", 115, 20, 25, 135, 15, 120)]
     [InlineData("FullTime", 115, 20, 25, 135, 375, -240)]
-    [InlineData("Freelancer", 115, -20, 25, 135, 20.25, 114.75)]
-    [InlineData("Freelancer", 115, 0, 5, 155, 23.25, 131.75)]
-    [InlineData("Freelancer", 115, 200, 205, -45, -6.75, -38.25)]
+    [InlineData("Freelancer", 115, -20, 25, 135, 15, 120)]
+    [InlineData("Freelancer", 115, 0, 5, 155, 15, 140)]
+    [InlineData("Freelancer", 115, 200, 205, -45, 15, -60)]
     [InlineData("FullTime", 115, 200, 205, -45, 375, -420)]
-    [InlineData("Freelancer", 0, 20, 25, 35, 5.25, 29.75)]
-    public async Task OrderCashIsIncludedInDeductionsBeforeCompanyShareAndSavedExactlyOnce(string type,
+    [InlineData("Freelancer", 0, 20, 25, 35, 0, 35)]
+    public async Task OrderCashReducesRiderPayoutWithoutChangingFeeBasedCommissionAndSavesExactlyOnce(string type,
         decimal fees, decimal cash, decimal deductions, decimal net, decimal company, decimal riderAmount)
     {
         var ct = TestContext.Current.CancellationToken;
@@ -64,10 +64,10 @@ public sealed partial class ChefzWorkflowTests
     }
 
     [Theory]
-    [InlineData("Freelancer", "Freelancer", 13.19, 26.39)]
+    [InlineData("Freelancer", "Freelancer", 13.04, 26.09)]
     [InlineData("FullTime", "FullTime", 400, 300)]
-    [InlineData("FullTime", "Freelancer", 400, 26.39)]
-    [InlineData("Freelancer", "FullTime", 13.19, 300)]
+    [InlineData("FullTime", "Freelancer", 400, 26.09)]
+    [InlineData("Freelancer", "FullTime", 13.04, 300)]
     public async Task CollectedCashIsDeductedPerAccountAndCombinedForTheActualRider(string firstType, string secondType,
         decimal firstCompany, decimal secondCompany)
     {

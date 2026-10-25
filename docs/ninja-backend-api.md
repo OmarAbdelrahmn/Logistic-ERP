@@ -8,7 +8,7 @@ Current source reference (15 October 2026): [all 19 Ninja endpoints](ninja-full-
 
 This module uses existing platform accounts with platform code `NINJA`. Create the platform and its accounts through `/api/platforms` and `/api/platform-accounts`. Set each account's `externalAccountId` to the exact Captain ID from Ninja's reports. Keep identifiers as strings, including any leading zeroes.
 
-The API stores locally recorded credentials. There is no Ninja provider integration to change a password or phone on Ninja's servers; an operator must perform the permitted change there and record it here. Password values are encrypted with the existing platform credential protector and never included in responses, notifications or audit snapshots.
+The API stores locally recorded credentials. There is no Ninja provider integration to change a password or phone on Ninja's servers; an operator must perform the permitted change there and record it here. Password values remain encrypted with the existing platform credential protector. Account list/detail GET responses include the readable latest saved `password` only with `ninja.read` and `platform_credentials.read` for the Ninja platform; otherwise the field is null. Passwords remain excluded from notifications and audit snapshots. See the [password read handoff](ninja-account-password-reads.md).
 
 ## Account operations
 

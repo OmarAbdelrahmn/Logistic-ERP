@@ -53,7 +53,7 @@ public sealed class JahezAuthorizationTests
             var permission = Assert.Single(action.GetCustomAttributes<RequirePermissionAttribute>());
             Assert.StartsWith(AuthenticationPolicies.PermissionPrefix + "jahez.", permission.Policy, StringComparison.Ordinal);
             Assert.Empty(action.GetCustomAttributes<AllowAnonymousAttribute>());
-            if (action.Name != nameof(JahezWorkflowController.Preview) && (action.GetCustomAttribute<HttpPostAttribute>() is not null
+            if (action.Name is not (nameof(JahezWorkflowController.Preview) or nameof(JahezWorkflowController.PreviewFeeRefund)) && (action.GetCustomAttribute<HttpPostAttribute>() is not null
                 || action.GetCustomAttribute<HttpPutAttribute>() is not null))
             {
                 var header = Assert.Single(action.GetParameters(), p => p.GetCustomAttribute<FromHeaderAttribute>()?.Name == "Idempotency-Key");

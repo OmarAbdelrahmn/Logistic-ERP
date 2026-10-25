@@ -32,13 +32,17 @@ internal sealed partial class JahezWorkflowService
             where !debt.IsDeleted && debt.PaidAtUtc == null
             join operation in db.JahezOperations on debt.OperationId equals operation.Id into operations
             from operation in operations.DefaultIfEmpty()
-            select new { debt.RiderProfileId, debt.Amount,
-                DashboardDebt = operation == null ? (decimal?)null : operation.Net,
-                Commission = operation == null ? (decimal?)null : operation.Commission };
+            let dashboard = operation == null ? (decimal?)null : operation.Net > 0 ? operation.Net : 0
+            let dashboardRemaining = dashboard == null ? (decimal?)null : dashboard > debt.PaidAmount ? dashboard - debt.PaidAmount : 0
+            select new { debt.RiderProfileId, Amount = debt.Amount - debt.PaidAmount, debt.PaidAmount,
+                DashboardDebt = dashboardRemaining,
+                Commission = operation == null ? (decimal?)null : debt.Amount - debt.PaidAmount - dashboardRemaining,
+                TotalCommission = operation == null ? (decimal?)null : operation.Commission };
         var summaries = obligations.GroupBy(x => x.RiderProfileId)
             .Select(g => new { RiderId = g.Key, Count = g.Count(), Total = g.Sum(x => x.Amount),
                 Missing = g.Count(x => x.DashboardDebt == null),
-                DashboardDebt = g.Sum(x => x.DashboardDebt ?? 0), Commission = g.Sum(x => x.Commission ?? 0) })
+                DashboardDebt = g.Sum(x => x.DashboardDebt ?? 0), Commission = g.Sum(x => x.Commission ?? 0),
+                PaidAmount = g.Sum(x => x.PaidAmount), TotalCommission = g.Sum(x => x.TotalCommission ?? 0) })
             .OrderBy(x => x.RiderId).Skip((page - 1) * pageSize).Take(pageSize);
         return from summary in summaries
             join rider in db.RiderProfiles on summary.RiderId equals rider.Id into riders
@@ -50,7 +54,8 @@ internal sealed partial class JahezWorkflowService
                 employee == null ? null : new JahezAccountPerson(employee.Id, rider.Id, employee.FullNameAr,
                     employee.FullNameEn, employee.IqamaNo, employee.PrimaryPhone, employee.SponsorId),
                 summary.Count, summary.Total, summary.Missing > 0 ? null
-                    : new JahezSettlementAmounts(summary.DashboardDebt, summary.Commission, summary.Total));
+                    : new JahezSettlementAmounts(summary.DashboardDebt, summary.Commission, summary.Total))
+                { PaidAmount = summary.PaidAmount, TotalCommission = summary.Missing > 0 ? null : summary.TotalCommission };
     }
 
     public Task<Result<JahezPage<JahezTransferredDebtResponse>>> RiderTransferredDebtsAsync(
@@ -64,7 +69,7 @@ internal sealed partial class JahezWorkflowService
 
     public Task<Result<JahezRiderDebtRepaymentResponse>> RepayRiderTransferredDebtsAsync(
         string key, Guid riderId, JahezRiderDebtRepayment request, CancellationToken ct = default) =>
-        ExecuteAsync(key, "v2.rider-debts.repay", new { riderId, request }, JahezWorkflowPermissions.Repay, async () =>
+        ExecuteDebtRepaymentAsync(key, "v2.rider-debts.repay", new { riderId, request }, async () =>
         {
             await AuthorizeAsync(JahezWorkflowPermissions.Receive, ct);
             Reason(request.Reason);
@@ -73,7 +78,7 @@ internal sealed partial class JahezWorkflowService
             var debts = await db.JahezTransferredDebts.Where(x => x.RiderProfileId == riderId && x.PaidAtUtc == null)
                 .OrderBy(x => x.Id).ToArrayAsync(ct);
             Require(debts.Length > 0, JahezErrors.Conflict("لا توجد مديونيات مرحلة غير مسددة لهذا المندوب."));
-            var total = debts.Sum(x => x.Amount);
+            var total = debts.Sum(x => x.Amount - x.PaidAmount);
             Require(request.ExpectedAmount == total, JahezErrors.Conflict("تغير إجمالي المديونية؛ أعد تحميل المبالغ قبل السداد."));
             foreach (var debt in debts)
                 await RepayWorkflowDebt(debt, new(request.Fund, request.Reference, request.Reason), ct);
@@ -119,6 +124,11 @@ internal sealed partial class JahezWorkflowService
                         assignment == null ? null : assignment.EndReason),
                     operation == null ? null : new JahezTransferredDebtSourceOperation(operation.Id, operation.Mode,
                         operation.ThroughDate, operation.EffectiveAtUtc, operation.Net, operation.Commission,
-                        operation.Remaining, operation.Reason, operation.ApprovedRequestId, operation.ExecutedAtUtc));
+                        operation.Remaining, operation.Reason, operation.ApprovedRequestId, operation.ExecutedAtUtc))
+                { PaidAmount = debt.PaidAmount,
+                    Amounts = operation == null ? null : new JahezSettlementAmounts(
+                        (operation.Net > 0 ? operation.Net : 0) > debt.PaidAmount ? (operation.Net > 0 ? operation.Net : 0) - debt.PaidAmount : 0,
+                        debt.Amount - debt.PaidAmount - ((operation.Net > 0 ? operation.Net : 0) > debt.PaidAmount ? (operation.Net > 0 ? operation.Net : 0) - debt.PaidAmount : 0),
+                        debt.Amount - debt.PaidAmount) };
     }
 }

@@ -329,24 +329,26 @@ Rollback requires resolving any assignment that occupies slot 3 before restoring
 
 ## 10. Chefz money-sheet cash deductions — 18 October update
 
+Updated 25 October 2026: Freelancer commission for new order settlements now uses delivery fees after VAT only. The formulas and example below reflect this rule; existing saved imports retain their snapshots.
+
 The money upload now reads the optional `Cash Collected By Driver` header, including repeated whitespace such as `Cash   Collected By Driver`. Missing or blank cash values are zero, preserving older templates. The existing decimal, range, duplicate-header and formula validation applies to this column too.
 
 ```text
 deliveryFeesAfterVat = round(sum(Driver Delivery Fees) / 1.15, 2)
 deductions = sum(abs(Deduction Amount)) + sum(abs(Cash Collected By Driver))
 netEarnings = deliveryFeesAfterVat + Bonus Amount + Driver Compensate + Driver Tip − deductions
-Freelancer companyAmount = round(netEarnings × 0.15, 2)
+Freelancer companyAmount = round(deliveryFeesAfterVat × 0.15, 2)
 FullTime companyAmount = assignedDays × 25 SAR
 riderAmount = netEarnings − companyAmount
 ```
 
-VAT is extracted from delivery fees only. Bonus Amount, Driver Compensate and Driver Tip are added at their full values afterward. Cash is included in deductions before calculating the existing company share; the company-fee rules are unchanged.
+VAT is extracted from delivery fees only. Bonus Amount, Driver Compensate and Driver Tip are added at their full values afterward. Cash is included in deductions and reduces the rider's payout; these adjustments do not affect the Freelancer commission base. FullTime daily fees keep their existing rule.
 
 Affected routes: `POST /api/chefz/settlements/orders/preview`, `POST /api/chefz/settlements/orders/import`, `GET /api/chefz/settlements/orders/imports/{importId}` and the existing settlement list. The response shape does not change: `deductions` now includes both sources in each `riders[]` row and nested `accounts[]` row, and saved order settlements retain that combined amount.
 
 Frontend changes: update upload help/template-column guidance; label the preview/detail/export deduction amount **إجمالي الخصومات (الخصومات + النقد المحصل)**; render returned totals. Do not subtract cash again client-side or subtract it from fees before VAT extraction. Continue blocking save on `issues` and using `canSave` normally.
 
-Example: delivery fees 115 → 100 after VAT; bonus 30 + compensation 20 + tip 10; Deduction Amount 5 + collected cash 20 → deductions 25; net earnings 135. For Freelancer, company amount is 20.25 and rider amount is 114.75. Amounts are SAR.
+Example: delivery fees 115 → 100 after VAT; bonus 30 + compensation 20 + tip 10; Deduction Amount 5 + collected cash 20 → deductions 25; net earnings 135. For Freelancer, company amount is 15 and rider amount is 120. Amounts are SAR.
 
 This update needs the API build published; no database migration is needed. Existing saved imports and identical-file replays keep their original financial snapshots. This code change does not recalculate historical settlements. Preview, save, saved read and replay should agree for new files, including two Chefz accounts attributed to one actual rider.
 

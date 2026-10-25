@@ -71,6 +71,25 @@ internal sealed class PlatformAccountDayUsageService(ApplicationDbContext db, IC
         if (string.IsNullOrWhiteSpace(request.Reason) || request.Reason.Length > 2000 || request.Assignments is null
             || request.Assignments.Count is 0 or > 100 || request.Assignments.Any(a => !PlatformAccountDayAllocationService.Valid(a.Figures)))
             return Result.Failure<PlatformAccountDayResponse>(HrErrors.InvalidRequest);
+        try
+        {
+            return await db.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
+            {
+                // A retry must reload rowversions and figures after the previous transaction rolled back.
+                db.ChangeTracker.Clear();
+                return await UpdateCoreAsync(accountId, date, request, ct);
+            });
+        }
+        catch (DbUpdateException)
+        {
+            db.ChangeTracker.Clear();
+            return Result.Failure<PlatformAccountDayResponse>(HrErrors.ConcurrencyConflict);
+        }
+    }
+
+    private async Task<Result<PlatformAccountDayResponse>> UpdateCoreAsync(Guid accountId, DateOnly date,
+        PlatformAccountDayUpdateRequest request, CancellationToken ct)
+    {
         await using var scope = await PlatformAccountWriteScope.AcquireAsync(db, [accountId], ct);
         var candidates = await Allocation.Candidates(accountId, date, ct);
         var ids = request.Assignments.Select(a => a.AssignmentId).ToArray();
@@ -103,26 +122,23 @@ internal sealed class PlatformAccountDayUsageService(ApplicationDbContext db, IC
                     "Saved allocations reference these figures; use their correction workflow.", change.AssignmentId));
         }
         await using var transaction = db.Database.IsRelational() ? await db.Database.BeginTransactionAsync(ct) : null;
-        try
+        // Release unique sequence slots inside the transaction before applying a reordered list.
+        foreach (var usage in usages.Values) { usage.Sequence = null; usage.Reason = request.Reason; }
+        if (usages.Count > 0) await db.SaveChangesAsync(ct);
+        for (var i = 0; i < ids.Length; i++)
         {
-            // Release unique sequence slots inside the transaction before applying a reordered list.
-            foreach (var usage in usages.Values) { usage.Sequence = null; usage.Reason = request.Reason; }
-            if (usages.Count > 0) await db.SaveChangesAsync(ct);
-            for (var i = 0; i < ids.Length; i++)
+            var change = request.Assignments[i];
+            if (!usages.TryGetValue(change.AssignmentId, out var usage))
             {
-                var change = request.Assignments[i];
-                if (!usages.TryGetValue(change.AssignmentId, out var usage))
-                {
-                    usage = new() { PlatformRiderAccountId = accountId, RiderClientAssignmentId = change.AssignmentId, BusinessDate = date };
-                    db.Add(usage);
-                }
-                usage.Sequence = i + 1; usage.Reason = request.Reason;
-                if (change.Figures is not null) PlatformAccountDayAllocationService.Apply(usage, change.Figures);
+                usage = new() { PlatformRiderAccountId = accountId, RiderClientAssignmentId = change.AssignmentId, BusinessDate = date };
+                db.Add(usage);
             }
-            await db.SaveChangesAsync(ct);
-            if (transaction is not null) await transaction.CommitAsync(ct);
+            usage.Sequence = i + 1; usage.Reason = request.Reason;
+            if (change.Figures is not null) PlatformAccountDayAllocationService.Apply(usage, change.Figures);
         }
-        catch (DbUpdateException) { db.ChangeTracker.Clear(); return Result.Failure<PlatformAccountDayResponse>(HrErrors.ConcurrencyConflict); }
-        return Result.Success(await Response(accountId, date, ct));
+        await db.SaveChangesAsync(ct);
+        var response = await Response(accountId, date, ct);
+        if (transaction is not null) await transaction.CommitAsync(ct);
+        return Result.Success(response);
     }
 }

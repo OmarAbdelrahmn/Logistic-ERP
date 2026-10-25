@@ -2,12 +2,26 @@
 export type Id = string;
 export type DateOnly = string;
 export type Instant = string;
+export interface ProfitReport { fromDate: DateOnly; toDate: DateOnly;
+  accountOpeningFeesTotal: number; settlementCommissionTotal: number; totalProfit: number }
+export interface RiderPerformanceFilter { startDate: DateOnly; endDate: DateOnly; riderId?: Id;
+  accountId?: Id; page?: number; pageSize?: number }
+export interface JahezPerformanceSummary { periodDays: number; daysWithData: number; daysWithOrders: number;
+  zeroOrderDays: number; missingDays: number; orders: number; averageOrdersPerDayWithData: number | null;
+  maxOrdersPerDay: number | null }
+export interface JahezPerformanceDay { date: DateOnly; orders: number | null }
+export interface JahezAccountPerformanceReport { accountId: Id; externalAccountId: string;
+  summary: JahezPerformanceSummary; daily: JahezPerformanceDay[] }
+export interface JahezRiderPerformanceReport { riderProfileId: Id; riderName: string; riderIqamaNo: string | null;
+  selectedSummary: JahezPerformanceSummary; daily: JahezPerformanceDay[]; accounts: JahezAccountPerformanceReport[] }
+export interface JahezRidersPerformanceReport extends Page<JahezRiderPerformanceReport> { startDate: DateOnly;
+  endDate: DateOnly; riderId: Id | null; accountId: Id | null; totalCount: number }
 export enum OperationMode { Settle = 1, SettleAndWithdraw = 2, Withdraw = 3 }
 export enum OperationStatus { Ready = 1, UnderReview = 2, Executed = 3 }
 export enum PaymentStatus { None = 1, Paid = 2, Transferred = 3, Deferred = 4 }
 export enum Direction { None = 0, Receipt = 1, Disbursement = 2 }
 export enum Fund { Cashbox = 1, PetroApp = 2, Bank = 3 }
-export enum Purpose { Settlement = 1, Fuel = 2, AccountFee = 3, TransferredDebtRepayment = 4 }
+export enum Purpose { Settlement = 1, Fuel = 2, AccountFee = 3, TransferredDebtRepayment = 4, AccountFeeRefund = 5 }
 export enum ApprovalKind { FeeException = 1, AccountSwitch = 2, PercentageCommission = 3, SettlementTransfer = 4, Adjustment = 5 }
 export enum ApprovalStatus { Pending = 1, Approved = 2, Rejected = 3, Cancelled = 4 }
 export enum AdjustmentTarget { Settlement = 1, AdministrativeDebt = 2 }
@@ -18,6 +32,7 @@ export interface Audit { id: Id; createdAtUtc: Instant; createdByUserId: Id | nu
 export interface Person { employeeId: Id; riderProfileId: Id | null; nameAr: string; nameEn: string | null;
   iqamaNo: string | null; mobile: string | null; sponsorId: Id | null }
 export interface Account { accountId: Id; code: string; externalAccountId: string; userName: string | null;
+  vehicleType: 'Motorcycle' | 'Car' | 'Van' | 'Truck' | 'Other' | null;
   operatingCityId: Id; cityNameAr: string; sponsorId: Id | null; sponsorNameAr: string | null;
   status: 'Available' | 'Assigned' | 'Suspended' | 'Retired' | 'Archived'; statusReason: string | null;
   isAssigned: boolean; hasPassword: boolean; owner: Person | null; actualRider: Person | null;
@@ -33,6 +48,16 @@ export interface Statistics { yesterday: DateOnly; totalAccounts: number; active
 export interface PlatformAccountDayUsageInput { ordersCount?: number | null; workingHours?: number | null;
   collectedAmount?: number | null; deductionsAmount?: number | null; totalValidOffers?: number | null;
   declinedOffers?: number | null; missedOffers?: number | null }
+export interface FeeRefundPreviewRequest { handoverId: Id; waiveCommission: boolean }
+export interface FeeRefundCreate extends FeeRefundPreviewRequest { reference: string; reason: string;
+  dayUsage?: PlatformAccountDayUsageInput | null }
+export interface FeeRefundPreview { handoverId: Id; expiresAtUtc: Instant; grossFeeRefund: number;
+  cancelledUnpaidFee: number; calculatedCommission: number; waiveCommission: boolean;
+  deductedCommission: number; refundAmount: number; calculationJson: string }
+export interface FeeRefund { id: Id; handoverId: Id; accountFeeId: Id; moneyMovementId: Id;
+  grossFeeRefund: number; cancelledUnpaidFee: number; waiveCommission: boolean; calculatedCommission: number;
+  deductedCommission: number; refundAmount: number; calculationJson: string; actorUserId: Id;
+  occurredAtUtc: Instant; reference: string; reason: string; createdAtUtc: Instant; createdByUserId: Id | null }
 export interface OperationCreate { handoverId: Id; mode: OperationMode; throughDate: DateOnly; effectiveAtUtc: Instant;
   net: number; reason: string; fund?: Fund | null; purpose?: Purpose; transferToRider?: boolean;
   paymentReference?: string | null; dayUsage?: PlatformAccountDayUsageInput | null }
@@ -47,6 +72,8 @@ export interface Operation extends Audit { expectedSponsorId: Id | null; handove
 export interface OperationUpdate { values: OperationCreate; rowVersion: string }
 export interface OperationPaymentMethodUpdate { fund: Fund.Cashbox | Fund.Bank; paymentReference: string;
   reason: string; rowVersion: string }
+export interface OperationNetUpdate { net: number; reason: string; rowVersion: string;
+  fund?: Fund | null; paymentReference?: string | null }
 export interface OperationCommissionStartUpdate { startDate: DateOnly; reason: string; rowVersion: string;
   fund?: Fund | null; paymentReference?: string | null }
 export interface RequestCreate { handoverId: Id; kind: ApprovalKind; reason: string; operationId?: Id | null;
@@ -79,14 +106,27 @@ export interface ApprovalDetails { request: ApprovalRequestRow; decisions: Decis
 export interface MoneyRecord { fund: Fund; reference: string; reason: string; purpose?: Purpose }
 export interface FeeReceipt { handoverId: Id; amount: number; fund: Fund; reference: string; reason: string }
 export interface TransferredDebt extends Audit { operationId: Id; riderProfileId: Id; amount: number;
-  paidAtUtc: Instant | null; paidByUserId: Id | null }
+  paidAmount: number; paidAtUtc: Instant | null; paidByUserId: Id | null }
 export interface RiderTransferredDebtSummary { riderProfileId: Id; userRider: Person | null;
-  unpaidDebtCount: number; outstandingAmount: number; amounts: SettlementAmounts | null }
+  unpaidDebtCount: number; outstandingAmount: number; amounts: SettlementAmounts | null;
+  paidAmount: number; totalCommission: number | null }
+export interface RiderDebtPartialRepayment { amount: number; expectedAmounts: SettlementAmounts;
+  fund: Fund; reference: string; reason: string }
+export interface RiderDebtPaymentAllocation { debtId: Id; movementId: Id; dashboardDebtPaid: number;
+  commissionPaid: number; remainingAmount: number; isPaid: boolean }
+export interface RiderDebtPartialRepaymentResponse { riderProfileId: Id; paidAmount: number;
+  dashboardDebtPaid: number; commissionPaid: number; remainingAmounts: SettlementAmounts;
+  allocations: RiderDebtPaymentAllocation[] }
+export interface RiderDebtCommissionUpdate { commission: number; expectedCommission: number;
+  expectedAmounts: SettlementAmounts; reason: string }
+export interface RiderDebtCommissionUpdateResponse { riderProfileId: Id; previousCommission: number;
+  commission: number; remainingAmounts: SettlementAmounts; adjustedDebtIds: Id[] }
 export interface RiderDebtRepayment { expectedAmount: number; fund: Fund; reference: string; reason: string }
 export interface RiderDebtRepaymentResponse { riderProfileId: Id; paidAmount: number; paidDebtIds: Id[]; remainingAmount: number }
 // GET transferred-debts follows the debt's source operation, never the account's current assignment.
 export interface TransferredDebtRow extends TransferredDebt { userRider: Person | null;
-  assignment: TransferredDebtAssignment | null; sourceOperation: TransferredDebtSourceOperation | null }
+  assignment: TransferredDebtAssignment | null; sourceOperation: TransferredDebtSourceOperation | null;
+  outstandingAmount: number; amounts: SettlementAmounts | null }
 export interface TransferredDebtAssignment { assignmentId: Id; handoverId: Id; accountId: Id;
   externalAccountId: string | null; riderProfileId: Id; startedAtUtc: Instant; endedAtUtc: Instant | null;
   effectiveFrom: DateOnly | null; effectiveTo: DateOnly | null; status: string | null;
@@ -97,9 +137,10 @@ export interface TransferredDebtSourceOperation { id: Id; mode: OperationMode; t
 export interface Movement { id: Id; handoverId: Id; riderProfileId: Id; operationId: Id | null;
   transferredDebtId: Id | null; fund: Fund; direction: Direction; purpose: Purpose;
   amount: number; actorUserId: Id; occurredAtUtc: Instant; reference: string; reason: string;
-  createdAtUtc: Instant; createdByUserId: Id | null }
+  createdAtUtc: Instant; createdByUserId: Id | null; dashboardDebtPaid: number | null; commissionPaid: number | null }
 // GET money-movements: the recorded movement rider and the linked account's registered owner.
 export interface MovementRow extends Movement { sponsorId: Id | null; sponsorIdentifier: string | null; treasurySubAccountId: Id | null; userRider: Person | null; ownerRider: Person | null;
+  paymentReference: string | null;
   sponsorNameAr: string | null; cashboxHandoverId: Id | null; isHandedToAccountant: boolean;
   accountId: Id | null; platformAccountId: string | null; externalAccountId: string | null; net: number | null;
   commission: number | null; calculatedCommission: number | null;

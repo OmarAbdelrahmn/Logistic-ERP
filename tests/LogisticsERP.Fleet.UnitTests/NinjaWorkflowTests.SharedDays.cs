@@ -33,9 +33,9 @@ public sealed partial class NinjaWorkflowTests
     {
         await using var f = await Fixture.Create(); var ct = TestContext.Current.CancellationToken;
         var date = new DateOnly(2026, 10, 12);
-        var first = Value(await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, date, "0501111111", "initial"), ct));
+        var first = Value(await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, date, "0501111111", "initial", RiderType: "InternalCar", PaymentModel: "PayPerOrder"), ct));
         Value(await f.Service.ReturnAsync(f.Account.Id, new(date, "0502222222", null, "Return", first.Assignment.RowVersion), ct));
-        var last = Value(await f.Service.AssignAsync(f.Account.Id, new(f.OwnerRider.Id, date, "0503333333"), ct));
+        var last = Value(await f.Service.AssignAsync(f.Account.Id, new(f.OwnerRider.Id, date, "0503333333", RiderType: "InternalCar", PaymentModel: "PayPerOrder"), ct));
         foreach (var u in await f.Db.PlatformAccountDayUsages.ToArrayAsync(ct)) u.Sequence = null;
         await f.Db.SaveChangesAsync(ct);
         var service = new PlatformAccountDayUsageService(f.Db, f.User, f.Checker, f.Clock);
@@ -61,10 +61,10 @@ public sealed partial class NinjaWorkflowTests
     {
         await using var f = await Fixture.Create(); var ct = TestContext.Current.CancellationToken;
         var date = new DateOnly(2026, 10, 12);
-        var first = Value(await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, date, "0501111111", "initial"), ct));
+        var first = Value(await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, date, "0501111111", "initial", RiderType: "InternalCar", PaymentModel: "PayPerOrder"), ct));
         Value(await f.Service.ReturnAsync(f.Account.Id, new(date, "0502222222", null, "Return", first.Assignment.RowVersion,
             DayUsage: new(OrdersCount: 2, WorkingHours: 3)), ct));
-        var last = Value(await f.Service.AssignAsync(f.Account.Id, new(f.OwnerRider.Id, date, "0503333333"), ct));
+        var last = Value(await f.Service.AssignAsync(f.Account.Id, new(f.OwnerRider.Id, date, "0503333333", RiderType: "InternalCar", PaymentModel: "PayPerOrder"), ct));
         var imported = Value(await f.Service.ImportAsync(false, date, "performance.xlsx", Sheet(false, "272578", 6, 10), ct));
         Assert.Empty(imported.Issues); Assert.Equal(1, imported.ImportedRows);
         var shares = await f.Db.NinjaDailyPerformance.OrderBy(p => p.TotalOrders).ToArrayAsync(ct);
@@ -104,9 +104,9 @@ public sealed partial class NinjaWorkflowTests
     {
         await using var f = await Fixture.Create(); var ct = TestContext.Current.CancellationToken;
         var date = new DateOnly(2026, 10, 12);
-        var first = Value(await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, date, "0501111111", "initial"), ct));
+        var first = Value(await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, date, "0501111111", "initial", RiderType: "InternalCar", PaymentModel: "PayPerOrder"), ct));
         Value(await f.Service.ReturnAsync(f.Account.Id, new(date, "0502222222", null, "Return", first.Assignment.RowVersion), ct));
-        Value(await f.Service.AssignAsync(f.Account.Id, new(f.OwnerRider.Id, date, "0503333333"), ct));
+        Value(await f.Service.AssignAsync(f.Account.Id, new(f.OwnerRider.Id, date, "0503333333", RiderType: "InternalCar", PaymentModel: "PayPerOrder"), ct));
         Assert.Null(f.Db.PlatformAccountDayUsages.Single(u => u.RiderClientAssignmentId == first.Assignment.Id).OrdersCount);
         Assert.NotEmpty(Value(await f.Service.ImportAsync(false, date, "x.xlsx", Sheet(false, "272578", 6, 10), ct)).Issues);
         var usage = f.Db.PlatformAccountDayUsages.Single(u => u.RiderClientAssignmentId == first.Assignment.Id);
@@ -120,11 +120,11 @@ public sealed partial class NinjaWorkflowTests
     {
         await using var f = await Fixture.Create(); var ct = TestContext.Current.CancellationToken;
         var date = new DateOnly(2026, 10, 12);
-        var first = Value(await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, date, "0501111111", "initial"), ct));
+        var first = Value(await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, date, "0501111111", "initial", RiderType: "InternalCar", PaymentModel: "PayPerOrder"), ct));
         Value(await f.Service.ReturnAsync(f.Account.Id, new(date, "0502222222", null, "Return", first.Assignment.RowVersion, DayUsage: new(2, 1)), ct));
-        var second = Value(await f.Service.AssignAsync(f.Account.Id, new(f.OwnerRider.Id, date, "0503333333"), ct));
+        var second = Value(await f.Service.AssignAsync(f.Account.Id, new(f.OwnerRider.Id, date, "0503333333", RiderType: "InternalCar", PaymentModel: "PayPerOrder"), ct));
         Value(await f.Service.ReturnAsync(f.Account.Id, new(date, "0502222222", null, "Return", second.Assignment.RowVersion, DayUsage: new(3, 2)), ct));
-        var third = Value(await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, date, "0503333333"), ct));
+        var third = Value(await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, date, "0503333333", RiderType: "InternalCar", PaymentModel: "PayPerOrder"), ct));
         Assert.Empty(Value(await f.Service.ImportAsync(false, date, "x.xlsx", Sheet(false, "272578", 9, 8), ct)).Issues);
         Assert.Equal(2, f.Db.NinjaDailyPerformance.Single(p => p.RiderClientAssignmentId == first.Assignment.Id).TotalOrders);
         Assert.Equal(3, f.Db.NinjaDailyPerformance.Single(p => p.RiderClientAssignmentId == second.Assignment.Id).TotalOrders);

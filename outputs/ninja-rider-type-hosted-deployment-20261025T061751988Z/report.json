@@ -1,0 +1,17 @@
+{
+  "Database": "db67927",
+  "VerifiedAtUtc": "2026-10-25T06:17:56.6895399Z",
+  "AppliedMigration": "20261024150306_AddNinjaAssignmentRiderType",
+  "ApplicationPending": [],
+  "IdentityPending": [],
+  "PostCommitVerified": true,
+  "ExistingAssignmentsComparedAndPreserved": true,
+  "AssignmentsBefore": 860,
+  "AssignmentsAfter": 860,
+  "ExistingAssignmentsRemainUnclassified": true,
+  "ServerBackupCompleted": true,
+  "RestoreVerificationPerformed": false,
+  "ApiDeployed": false,
+  "ScriptSha256": "ACF2270CBA5E9AFEBB6192F7A56205D9C6BD6387B128BCC953D9C8199EA418E1",
+  "EvidenceDirectory": "C:\\Users\\omarf\\OneDrive\\Documents\\ChatGPT\\Logistic ERP\\outputs\\ninja-rider-type-hosted-deployment-20261025T061751988Z"
+}

@@ -48,6 +48,16 @@ internal sealed partial class ChefzService
 
     private sealed record ReportMetricsDay(DateOnly ReportDate, long Orders, long ValidOffers);
 
+    private async Task<Dictionary<Guid, string>> ReportAccountTypes(IEnumerable<Guid> ids, CancellationToken ct)
+    {
+        var accountIds = ids.Distinct().ToArray();
+        if (accountIds.Length == 0) return [];
+        var details = await db.ChefzAccountDetails.AsNoTracking()
+            .Where(d => accountIds.Contains(d.PlatformRiderAccountId))
+            .Select(d => new { d.PlatformRiderAccountId, d.AccountType }).ToArrayAsync(ct);
+        return details.ToDictionary(d => d.PlatformRiderAccountId, d => d.AccountType.ToString());
+    }
+
     private static ChefzReportSummary Summarize(ChefzDailyPerformance[] rows, ChefzPerformanceSettings s) =>
         Summarize(rows.Select(p => new ReportMetricsDay(p.ReportDate, p.AcceptedOffers, p.TotalValidOffers)).ToArray(), s);
 
@@ -117,6 +127,7 @@ internal sealed partial class ChefzService
             allAverage is null ? null : decimal.Round(allAverage.Value, 2), allRate,
             allRating);
         var accountRows = await PerformanceResponses(selected, ct);
+        var accountTypes = await ReportAccountTypes(accountRows.Select(p => p.AccountId), ct);
         var byAccountRider = accountRows.ToLookup(p => (p.AccountId, p.RiderProfileId));
         var accounts = selected.GroupBy(p => new { p.PlatformRiderAccountId, p.RiderProfileId }).Select(g =>
         {
@@ -124,7 +135,8 @@ internal sealed partial class ChefzService
                 .OrderBy(p => p.ReportDate).ThenBy(p => p.Id).ToArray();
             return new ChefzAccountPerformanceReport(g.Key.PlatformRiderAccountId, rows[0].ExternalAccountId,
                 g.Key.RiderProfileId, rows[0].RiderName, Summarize(g.ToArray(), s), rows)
-                { RiderIqamaNo = rows[0].RiderIqamaNo };
+                { RiderIqamaNo = rows[0].RiderIqamaNo,
+                    AccountType = accountTypes.GetValueOrDefault(g.Key.PlatformRiderAccountId, "Unconfigured") };
         }).OrderBy(a => a.RiderName, StringComparer.Ordinal).ThenBy(a => a.ExternalAccountId, StringComparer.Ordinal)
             .ThenBy(a => a.RiderProfileId).ThenBy(a => a.AccountId).ToArray();
         // Account-only reports can span several workers; only label the overall report for an explicit rider filter.
@@ -165,6 +177,7 @@ internal sealed partial class ChefzService
         // Fetch only metrics in the bounded period, with a fixed number of queries for every rider.
         var metrics = await performance.Select(p => new { AccountId = p.PlatformRiderAccountId, p.RiderProfileId,
             p.ReportDate, Orders = (long)p.AcceptedOffers, ValidOffers = (long)p.TotalValidOffers }).ToArrayAsync(ct);
+        var accountTypes = await ReportAccountTypes(members.Select(p => p.AccountId), ct);
         var byAccount = metrics.ToLookup(p => (p.AccountId, p.RiderProfileId));
         var byRider = metrics.ToLookup(p => p.RiderProfileId);
         var riders = members.GroupBy(p => p.RiderProfileId).Select(group =>
@@ -173,7 +186,8 @@ internal sealed partial class ChefzService
             var accounts = group.OrderBy(p => p.ExternalAccountId, StringComparer.Ordinal).ThenBy(p => p.AccountId)
                 .Select(p => new ChefzAccountPerformanceSummary(p.AccountId, p.ExternalAccountId,
                     Summarize(byAccount[(p.AccountId, p.RiderProfileId)]
-                        .Select(d => new ReportMetricsDay(d.ReportDate, d.Orders, d.ValidOffers)).ToArray(), settings))).ToArray();
+                        .Select(d => new ReportMetricsDay(d.ReportDate, d.Orders, d.ValidOffers)).ToArray(), settings))
+                    { AccountType = accountTypes.GetValueOrDefault(p.AccountId, "Unconfigured") }).ToArray();
             var halfReports = periods.Select(period =>
             {
                 var summary = Summarize(days.Where(p => p.ReportDate >= period.From && p.ReportDate <= period.To).ToArray(), settings);

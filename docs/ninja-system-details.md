@@ -8,6 +8,8 @@ Read the [complete endpoint reference](ninja-full-api-reference.md), [TypeScript
 
 ## What Ninja does
 
+New Ninja assignments require [rider type and payment model selections](ninja-assignment-rider-types.md): internal car, external car, internal motorcycle, or external motorcycle; plus `PayPerOrder` (عمولة) or `Salary` (بالراتب). Both values are retained per assignment and returned in Ninja account and assignment responses. The selected payment model drives the existing assignment limits and updates the account's payment model. Deploy the matching database migration, API and frontend together.
+
 The ERP tracks accounts on the client platform whose code is exactly `NINJA`. A Captain ID is the account's `externalAccountId`, stored as text, including leading zeros. The ERP records registered ownership, actual rider assignments, account status, locally recorded phone/password versions, uploaded daily performance, and deductions.
 
 This is an ERP module, not a live Ninja provider API connection. Saving a phone or password records an operator's change in the ERP; it does not update Ninja's servers. Imports do not create payroll entries, settlements, or payments.
@@ -36,6 +38,7 @@ The authorization handler resolves the `NINJA` platform for `/api/ninja/*` and c
 | Action | Required permission keys |
 | --- | --- |
 | Account list/detail/comparison, raw daily records, all three aggregate reports | `ninja.read` |
+| Read the actual `password` in account list/detail GET responses | `ninja.read` **and** `platform_credentials.read`, both for the Ninja platform |
 | Change status, change login phone, upload account checkups or edit their notes | `ninja.accounts.update` |
 | Import performance | `ninja.performance.import` |
 | Import deductions | `ninja.deductions.import` |
@@ -47,7 +50,7 @@ The authorization handler resolves the `NINJA` platform for `/api/ninja/*` and c
 | Assignment history | `platform_assignments.read` |
 | Credential version metadata history | `platform_credentials.read` |
 
-Grant the keys needed for the operator's work with the Ninja platform scope through the existing ERP access management. `reports.read` and Chefz permissions are not used by Ninja report endpoints. Person names, phones and iqamas are included under Ninja account/report read access; there is no additional field-level permission in this module. Existing seed roles are defaults; actual grants and scopes determine access.
+Grant the keys needed for the operator's work with the Ninja platform scope through the existing ERP access management. `reports.read` and Chefz permissions are not used by Ninja report endpoints. Person names, phones and iqamas are included under Ninja account/report read access. The `password` field on account GET reads additionally requires `platform_credentials.read`; otherwise it is null. Existing seed roles are defaults; actual grants and scopes determine access.
 
 ## Status controls
 

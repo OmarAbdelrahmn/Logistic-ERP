@@ -20,10 +20,10 @@ public sealed partial class NinjaWorkflowTests
         var otherPlatform = new ClientPlatform { Code = "OTHER", NameAr = "Other" };
         var other = new PlatformRiderAccount { ClientPlatformId = otherPlatform.Id, Code = "OTHER-1", ExternalAccountId = "999" };
         f.Db.AddRange(second, otherPlatform, other); await f.Db.SaveChangesAsync(ct);
-        var first = Value(await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, day, "0501111111", "initial"), ct));
+        var first = Value(await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, day, "0501111111", "initial", RiderType: "InternalCar", PaymentModel: "PayPerOrder"), ct));
         Value(await f.Service.ImportAsync(false, day, "one.xlsx", Sheet(false, f.Account.ExternalAccountId, 10, 2), ct));
         Value(await f.Service.ReturnAsync(f.Account.Id, new(day, "0501111111", null, "Changed accounts", first.Assignment.RowVersion), ct));
-        Value(await f.Service.AssignAsync(second.Id, new(f.Rider.Id, day, "0502222222"), ct));
+        Value(await f.Service.AssignAsync(second.Id, new(f.Rider.Id, day, "0502222222", RiderType: "InternalCar", PaymentModel: "PayPerOrder"), ct));
         Value(await f.Service.ImportAsync(false, day, "two.xlsx", Sheet(false, second.ExternalAccountId, 5, 3), ct));
         f.Db.NinjaDailyPerformance.Add(new NinjaDailyPerformance { PlatformRiderAccountId = other.Id, RiderProfileId = f.Rider.Id,
             RiderClientAssignmentId = Guid.NewGuid(), ImportId = Guid.NewGuid(), ReportDate = day, CaptainId = "999", TotalOrders = 999 });
@@ -44,11 +44,11 @@ public sealed partial class NinjaWorkflowTests
         var ct = TestContext.Current.CancellationToken;
         await using var f = await Fixture.Create();
         var day = new DateOnly(2026, 10, 12); f.Clock.Now = f.Clock.Now.AddDays(3);
-        var assigned = Value(await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, day, "0501111111", "initial", WasBackdated: true, BackdatedReason: "History"), ct));
+        var assigned = Value(await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, day, "0501111111", "initial", WasBackdated: true, BackdatedReason: "History", RiderType: "InternalCar", PaymentModel: "PayPerOrder"), ct));
         Value(await f.Service.ImportAsync(false, day, "p.xlsx", Sheet(false, "272578", 18, 6), ct));
         Value(await f.Service.ImportAsync(true, day, "d.xlsx", Sheet(true, "272578", 100, -10), ct));
         Value(await f.Service.ReturnAsync(f.Account.Id, new(day, "0502222222", null, "Returned", assigned.Assignment.RowVersion), ct));
-        Value(await f.Service.AssignAsync(f.Account.Id, new(f.OwnerRider.Id, day.AddDays(1), "0503333333", WasBackdated: true, BackdatedReason: "History"), ct));
+        Value(await f.Service.AssignAsync(f.Account.Id, new(f.OwnerRider.Id, day.AddDays(1), "0503333333", WasBackdated: true, BackdatedReason: "History", RiderType: "InternalCar", PaymentModel: "PayPerOrder"), ct));
         Value(await f.Service.ImportAsync(false, day.AddDays(1), "p.xlsx", Sheet(false, "272578", 12, 4), ct));
         Value(await f.Service.ImportAsync(false, day.AddDays(2), "p.xlsx", Sheet(false, "272578", 0, 0), ct));
         Value(await f.Service.ImportAsync(true, day.AddDays(2), "d.xlsx", Sheet(true, "272578", 30, 2), ct));

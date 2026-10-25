@@ -35,6 +35,8 @@ public sealed class ApplicationDbContext(
     private readonly TimeProvider _timeProvider = timeProvider ?? TimeProvider.System;
     // Set only while the authorized correction use case owns its transaction.
     internal Guid? JahezCommissionStartCorrectionOperationId { get; set; }
+    internal Guid? JahezNetCorrectionOperationId { get; set; }
+    internal HashSet<Guid> JahezDebtCommissionCorrectionOperationIds { get; } = [];
     public DbSet<JahezOperation> JahezOperations => Set<JahezOperation>();
     public DbSet<JahezMoneyMovement> JahezMoneyMovements => Set<JahezMoneyMovement>();
     public DbSet<JahezTransferredDebt> JahezTransferredDebts => Set<JahezTransferredDebt>();
@@ -212,6 +214,7 @@ public sealed class ApplicationDbContext(
 
     public DbSet<JahezAccountSession> JahezAccountSessions => Set<JahezAccountSession>();
     public DbSet<JahezAccountFee> JahezAccountFees => Set<JahezAccountFee>();
+    public DbSet<JahezAccountFeeRefund> JahezAccountFeeRefunds => Set<JahezAccountFeeRefund>();
     public DbSet<JahezApprovalRequest> JahezApprovalRequests => Set<JahezApprovalRequest>();
     public DbSet<JahezApprovalDecision> JahezApprovalDecisions => Set<JahezApprovalDecision>();
     public DbSet<JahezCommissionPolicyPeriod> JahezCommissionPolicyPeriods => Set<JahezCommissionPolicyPeriod>();

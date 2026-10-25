@@ -116,12 +116,14 @@ vatAmount = deliveryFees − deliveryFeesAfterVat
 deductions = sum(abs(Deduction Amount)) + sum(abs(Cash Collected By Driver))
 netEarnings = deliveryFeesAfterVat + tips + compensation + bonuses − deductions
 
-Freelancer: companyAmount = round(netEarnings × 0.15, 2)
+Freelancer: companyAmount = round(deliveryFeesAfterVat × 0.15, 2)
 FullTime:   companyAmount = assignedDays × 25 SAR
 riderAmount = netEarnings − companyAmount
 ```
 
 Delivery fees include 15% VAT, confirmed by the user on 17 October 2026: SAR 115 becomes SAR 100 before VAT. The backend divides fees by 1.15, correcting the former flat 15% deduction. It does not reduce tips, compensation, or bonuses. Round to two decimals away from zero. Combining accounts/assignments may require a cent adjustment; the backend reconciles VAT once per rider/cycle and commission across that rider's freelancer accounts. Individual breakdown values can therefore include a cent residual; display them as returned. Existing saved imports retain their original snapshots until an explicit financial correction is applied.
+
+Update 25 October 2026: new order settlements calculate the 15% commission only on each Freelancer account's delivery fees after VAT. Tips, compensation, bonuses, deductions, and collected cash change the rider's payout without changing commission. With SAR 115 fees, SAR 10 tips, SAR 20 compensation, SAR 30 bonuses, and SAR 25 deductions, net earnings are SAR 135, commission is SAR 15, and the rider amount is SAR 120. FullTime daily fees and manual wallet settlements keep their existing formulas. Deploy the updated API; the response shape and database schema are unchanged. Saved imports and identical-file replays retain their recorded figures.
 
 Update 18 October 2026: the preview, saved-import detail and settlement list use the existing `deductions` field for **Deduction Amount + Cash Collected By Driver**. Label it **إجمالي الخصومات (الخصومات + النقد المحصل)**, including nested account rows and exports. Display the combined amount once; the returned `netEarnings`, `companyAmount` and `riderAmount` already incorporate it. There is no new response field or database migration. Publish the updated API for new uploads; identical-file replays retain their saved figures.
 
@@ -145,7 +147,7 @@ Synthetic monetary example:
 | Full-time company share, if assigned for 15 days | 375.00 |
 | Full-time rider share in that alternative | 494.57 |
 
-Negative net/company/rider values are preserved. A negative rider amount is a balance due, not a payout of zero. Do not use `Math.max(0, amount)` or remove minus signs. The freelancer percentage preserves the sign of net earnings. Saving records the settlement; it does not transfer money.
+Negative net/company/rider values are preserved. A negative rider amount is a balance due, not a payout of zero. Do not use `Math.max(0, amount)` or remove minus signs. The freelancer percentage preserves the sign of delivery fees after VAT; deductions can make the rider's balance negative while commission remains positive. Saving records the settlement; it does not transfer money.
 
 `sourceRows` is the number of financial report rows, including adjustments. Label it **عدد صفوف التقرير**, not **عدد الطلبات المكتملة**.
 

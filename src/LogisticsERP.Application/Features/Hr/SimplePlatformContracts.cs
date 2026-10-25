@@ -75,6 +75,7 @@ public sealed record SimplePlatformAssignmentResponse(
     Guid? EndedByUserId,
     string RowVersion)
 {
+    public string? RiderType { get; init; }
     public bool IsOperationallyBlocked { get; init; }
     public string? OperationalBlockReason { get; init; }
 }

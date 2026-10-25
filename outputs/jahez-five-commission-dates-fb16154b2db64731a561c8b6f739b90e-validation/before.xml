@@ -1,0 +1,575 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="AccountSessions">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="PlatformRiderAccountId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RiderProfileId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RiderClientAssignmentId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="StartedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="EndedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CommissionStartsOn" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="CommissionPostedThrough" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="LastSettlementPaymentAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="Reason" type="xs:string" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="UpdatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="UpdatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RowVersion" type="xs:base64Binary" minOccurs="0" />
+                <xs:element name="IsDeleted" type="xs:boolean" minOccurs="0" />
+                <xs:element name="DeletedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="DeletedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DeletionReason" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="DatasetVersions">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="ModuleKey" type="xs:string" minOccurs="0" />
+                <xs:element name="Version" type="xs:long" minOccurs="0" />
+                <xs:element name="LastChangedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="UpdatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="UpdatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RowVersion" type="xs:base64Binary" minOccurs="0" />
+                <xs:element name="IsDeleted" type="xs:boolean" minOccurs="0" />
+                <xs:element name="DeletedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="DeletedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DeletionReason" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="AccountingEntries">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="HandoverId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="Bucket" type="xs:int" minOccurs="0" />
+                <xs:element name="Kind" type="xs:int" minOccurs="0" />
+                <xs:element name="Amount" type="xs:decimal" minOccurs="0" />
+                <xs:element name="SourceId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="ReversesEntryId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="OccurredAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="Reason" type="xs:string" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="CalculationJson" type="xs:string" minOccurs="0" />
+                <xs:element name="FromDate" type="xs:dateTime" minOccurs="0" />
+                <xs:element name="ThroughDate" type="xs:dateTime" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <AccountSessions>
+    <Id>e0e52bd1-cf85-4049-a45a-6d31b47724ec</Id>
+    <PlatformRiderAccountId>d809e8fa-105d-4f4c-ae57-1f8b525b13b0</PlatformRiderAccountId>
+    <RiderProfileId>01a0f19b-e6b0-763d-a029-ced1209f8e75</RiderProfileId>
+    <RiderClientAssignmentId>c3af04f0-2939-4893-8ac0-099da18963f0</RiderClientAssignmentId>
+    <StartedAtUtc>2026-09-22T21:00:00Z</StartedAtUtc>
+    <CommissionStartsOn>2026-09-23T00:00:00+03:00</CommissionStartsOn>
+    <CommissionPostedThrough>2026-09-23T00:00:00+03:00</CommissionPostedThrough>
+    <LastSettlementPaymentAtUtc>2026-09-22T21:00:00Z</LastSettlementPaymentAtUtc>
+    <Reason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</Reason>
+    <CreatedAtUtc>2026-10-17T11:57:04.6071116Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-20T06:47:57.9256382Z</UpdatedAtUtc>
+    <RowVersion>AAAAAAADGeQ=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </AccountSessions>
+  <AccountSessions>
+    <Id>4679a728-59d3-4e35-be09-89c2e2910a51</Id>
+    <PlatformRiderAccountId>fa484e11-27d0-4f43-a7d6-434b6d511daf</PlatformRiderAccountId>
+    <RiderProfileId>01a0bf9d-e0a4-7d32-9605-9950fc27be17</RiderProfileId>
+    <RiderClientAssignmentId>7c10bc8a-80c9-46c7-861d-131e7fff98d0</RiderClientAssignmentId>
+    <StartedAtUtc>2026-10-15T21:00:00Z</StartedAtUtc>
+    <CommissionStartsOn>2026-10-16T00:00:00+03:00</CommissionStartsOn>
+    <CommissionPostedThrough>2026-10-16T00:00:00+03:00</CommissionPostedThrough>
+    <LastSettlementPaymentAtUtc>2026-10-15T21:00:00Z</LastSettlementPaymentAtUtc>
+    <Reason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</Reason>
+    <CreatedAtUtc>2026-10-17T11:57:04.6071116Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-20T06:47:57.9256382Z</UpdatedAtUtc>
+    <RowVersion>AAAAAAADGgw=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </AccountSessions>
+  <AccountSessions>
+    <Id>b8783a1e-a8e4-4cad-970e-a160d1ed8b34</Id>
+    <PlatformRiderAccountId>2eaded07-4f35-47a4-8dae-462707f00fe9</PlatformRiderAccountId>
+    <RiderProfileId>01a0bf9d-e0a4-7c40-9dcd-31e1a9943f60</RiderProfileId>
+    <RiderClientAssignmentId>13d48175-0520-4c23-8b83-4c645e57e704</RiderClientAssignmentId>
+    <StartedAtUtc>2026-09-12T21:00:00Z</StartedAtUtc>
+    <CommissionStartsOn>2026-09-13T00:00:00+03:00</CommissionStartsOn>
+    <CommissionPostedThrough>2026-09-13T00:00:00+03:00</CommissionPostedThrough>
+    <LastSettlementPaymentAtUtc>2026-09-12T21:00:00Z</LastSettlementPaymentAtUtc>
+    <Reason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</Reason>
+    <CreatedAtUtc>2026-10-17T11:57:04.6071116Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-20T06:47:57.9256382Z</UpdatedAtUtc>
+    <RowVersion>AAAAAAADGjA=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </AccountSessions>
+  <AccountSessions>
+    <Id>d3dc1fc0-24df-4bf8-a5ca-af0dc75eb2f1</Id>
+    <PlatformRiderAccountId>33f7f35c-4824-48bb-a026-7815754020aa</PlatformRiderAccountId>
+    <RiderProfileId>01a0bf9d-e0a3-7703-8b07-1b0720c1bc7d</RiderProfileId>
+    <RiderClientAssignmentId>2d733714-f868-4f59-980e-6b50b66d8716</RiderClientAssignmentId>
+    <StartedAtUtc>2026-09-28T00:00:00+03:00</StartedAtUtc>
+    <CommissionStartsOn>2026-09-28T00:00:00+03:00</CommissionStartsOn>
+    <CommissionPostedThrough>2026-09-28T00:00:00+03:00</CommissionPostedThrough>
+    <LastSettlementPaymentAtUtc>2026-09-27T21:00:00Z</LastSettlementPaymentAtUtc>
+    <Reason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</Reason>
+    <CreatedAtUtc>2026-10-17T11:57:04.6071116Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-20T06:47:57.9256382Z</UpdatedAtUtc>
+    <RowVersion>AAAAAAADGkM=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </AccountSessions>
+  <AccountSessions>
+    <Id>79e9dc82-ef4d-43aa-9be6-e15bca8c7571</Id>
+    <PlatformRiderAccountId>80478319-42d4-47d3-98e8-d4ba26af0aa0</PlatformRiderAccountId>
+    <RiderProfileId>01a0bf9d-e0a6-70cf-a161-e2e82305d80d</RiderProfileId>
+    <RiderClientAssignmentId>9c0dc0cd-b0c2-40d7-966d-09e45185afd3</RiderClientAssignmentId>
+    <StartedAtUtc>2026-09-14T00:00:00+03:00</StartedAtUtc>
+    <CommissionStartsOn>2026-09-14T00:00:00+03:00</CommissionStartsOn>
+    <CommissionPostedThrough>2026-09-14T00:00:00+03:00</CommissionPostedThrough>
+    <LastSettlementPaymentAtUtc>2026-09-13T21:00:00Z</LastSettlementPaymentAtUtc>
+    <Reason>October Jahez workbook reconciliation authorized by user; dates represent both handover and last clearance. No financial receipt or account fee imported.</Reason>
+    <CreatedAtUtc>2026-10-17T11:57:04.6071116Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-20T06:47:57.9256382Z</UpdatedAtUtc>
+    <RowVersion>AAAAAAADGoE=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </AccountSessions>
+  <DatasetVersions>
+    <Id>01a10681-712e-7b26-93e0-8f9df3b1a024</Id>
+    <ModuleKey>jahez</ModuleKey>
+    <Version>1275</Version>
+    <LastChangedAtUtc>2026-10-24T14:20:26.3139786Z</LastChangedAtUtc>
+    <CreatedAtUtc>2026-10-04T10:41:48.8464462Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-24T14:20:26.3141812Z</UpdatedAtUtc>
+    <UpdatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</UpdatedByUserId>
+    <RowVersion>AAAAAAADk+s=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </DatasetVersions>
+  <AccountingEntries>
+    <Id>01a15d9e-7ee1-7e16-a521-0356407353cc</Id>
+    <HandoverId>79e9dc82-ef4d-43aa-9be6-e15bca8c7571</HandoverId>
+    <Bucket>2</Bucket>
+    <Kind>1</Kind>
+    <Amount>33.009000</Amount>
+    <SourceId>01a15d9e-7ee1-7a9b-a247-f683154d609e</SourceId>
+    <OccurredAtUtc>2026-10-14T16:00:41Z</OccurredAtUtc>
+    <Reason>حركة جاهز مستوردة</Reason>
+    <CreatedAtUtc>2026-10-21T08:40:30.7422503Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+  </AccountingEntries>
+  <AccountingEntries>
+    <Id>01a15d9e-7edc-71ca-ad6f-1094605a4413</Id>
+    <HandoverId>b8783a1e-a8e4-4cad-970e-a160d1ed8b34</HandoverId>
+    <Bucket>2</Bucket>
+    <Kind>1</Kind>
+    <Amount>24.003000</Amount>
+    <SourceId>01a15d9e-7edc-7f26-a3d6-e8794722425a</SourceId>
+    <OccurredAtUtc>2026-09-25T10:46:55Z</OccurredAtUtc>
+    <Reason>حركة جاهز مستوردة</Reason>
+    <CreatedAtUtc>2026-10-21T08:40:30.7422503Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+  </AccountingEntries>
+  <AccountingEntries>
+    <Id>01a15d9e-7edc-735b-b3b7-19e900ba0f73</Id>
+    <HandoverId>b8783a1e-a8e4-4cad-970e-a160d1ed8b34</HandoverId>
+    <Bucket>2</Bucket>
+    <Kind>1</Kind>
+    <Amount>16.001000</Amount>
+    <SourceId>01a15d9e-7edc-7cfe-badd-d49317d8ce06</SourceId>
+    <OccurredAtUtc>2026-09-23T15:44:47Z</OccurredAtUtc>
+    <Reason>حركة جاهز مستوردة</Reason>
+    <CreatedAtUtc>2026-10-21T08:40:30.7422503Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+  </AccountingEntries>
+  <AccountingEntries>
+    <Id>01a15d9e-7edc-77ee-8776-1aef45c1cddf</Id>
+    <HandoverId>d3dc1fc0-24df-4bf8-a5ca-af0dc75eb2f1</HandoverId>
+    <Bucket>2</Bucket>
+    <Kind>1</Kind>
+    <Amount>62.010000</Amount>
+    <SourceId>01a15d9e-7edc-70c9-baa8-1022b818aa65</SourceId>
+    <OccurredAtUtc>2026-10-02T18:50:24Z</OccurredAtUtc>
+    <Reason>حركة جاهز مستوردة</Reason>
+    <CreatedAtUtc>2026-10-21T08:40:30.7422503Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+  </AccountingEntries>
+  <AccountingEntries>
+    <Id>01a15d9e-7edc-7fdc-b7e7-220d79cc981e</Id>
+    <HandoverId>d3dc1fc0-24df-4bf8-a5ca-af0dc75eb2f1</HandoverId>
+    <Bucket>2</Bucket>
+    <Kind>1</Kind>
+    <Amount>71.529000</Amount>
+    <SourceId>01a15d9e-7edc-723b-8630-0299aae687e3</SourceId>
+    <OccurredAtUtc>2026-10-03T10:46:46Z</OccurredAtUtc>
+    <Reason>حركة جاهز مستوردة</Reason>
+    <CreatedAtUtc>2026-10-21T08:40:30.7422503Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+  </AccountingEntries>
+  <AccountingEntries>
+    <Id>01a15d9e-7edc-71bf-8eeb-3ecab3306697</Id>
+    <HandoverId>e0e52bd1-cf85-4049-a45a-6d31b47724ec</HandoverId>
+    <Bucket>2</Bucket>
+    <Kind>1</Kind>
+    <Amount>22.006000</Amount>
+    <SourceId>01a15d9e-7edc-7972-9d52-8f545eb571f8</SourceId>
+    <OccurredAtUtc>2026-09-24T18:17:07Z</OccurredAtUtc>
+    <Reason>حركة جاهز مستوردة</Reason>
+    <CreatedAtUtc>2026-10-21T08:40:30.7422503Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+  </AccountingEntries>
+  <AccountingEntries>
+    <Id>01a15d9e-7ee3-7862-b9b7-4aa2b2d1e195</Id>
+    <HandoverId>b8783a1e-a8e4-4cad-970e-a160d1ed8b34</HandoverId>
+    <Bucket>2</Bucket>
+    <Kind>1</Kind>
+    <Amount>26.805000</Amount>
+    <SourceId>01a15d9e-7ee3-7dbe-b03d-55d660ca9db2</SourceId>
+    <OccurredAtUtc>2026-10-06T15:55:30Z</OccurredAtUtc>
+    <Reason>حركة جاهز مستوردة</Reason>
+    <CreatedAtUtc>2026-10-21T08:40:30.7422503Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+  </AccountingEntries>
+  <AccountingEntries>
+    <Id>01a15d9e-7edc-79bd-a7ad-60f71e71577a</Id>
+    <HandoverId>79e9dc82-ef4d-43aa-9be6-e15bca8c7571</HandoverId>
+    <Bucket>2</Bucket>
+    <Kind>1</Kind>
+    <Amount>85.017000</Amount>
+    <SourceId>01a15d9e-7edc-70bd-a955-dae138427d38</SourceId>
+    <OccurredAtUtc>2026-09-20T17:01:08Z</OccurredAtUtc>
+    <Reason>حركة جاهز مستوردة</Reason>
+    <CreatedAtUtc>2026-10-21T08:40:30.7422503Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+  </AccountingEntries>
+  <AccountingEntries>
+    <Id>01a15d9e-7ee3-7359-a999-69ea538e4e22</Id>
+    <HandoverId>79e9dc82-ef4d-43aa-9be6-e15bca8c7571</HandoverId>
+    <Bucket>2</Bucket>
+    <Kind>1</Kind>
+    <Amount>114.017000</Amount>
+    <SourceId>01a15d9e-7ee3-7b48-a2f9-379afad0c2a8</SourceId>
+    <OccurredAtUtc>2026-10-07T16:52:30Z</OccurredAtUtc>
+    <Reason>حركة جاهز مستوردة</Reason>
+    <CreatedAtUtc>2026-10-21T08:40:30.7422503Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+  </AccountingEntries>
+  <AccountingEntries>
+    <Id>01a15d9e-7ee2-7494-bce9-6a945ebc2692</Id>
+    <HandoverId>79e9dc82-ef4d-43aa-9be6-e15bca8c7571</HandoverId>
+    <Bucket>2</Bucket>
+    <Kind>1</Kind>
+    <Amount>23.996000</Amount>
+    <SourceId>01a15d9e-7ee2-7c74-8c99-e1d43d22cfd8</SourceId>
+    <OccurredAtUtc>2026-10-09T17:56:02Z</OccurredAtUtc>
+    <Reason>حركة جاهز مستوردة</Reason>
+    <CreatedAtUtc>2026-10-21T08:40:30.7422503Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+  </AccountingEntries>
+  <AccountingEntries>
+    <Id>01a15d9e-7ee0-7bb9-978e-7259856edc45</Id>
+    <HandoverId>79e9dc82-ef4d-43aa-9be6-e15bca8c7571</HandoverId>
+    <Bucket>2</Bucket>
+    <Kind>1</Kind>
+    <Amount>17.997000</Amount>
+    <SourceId>01a15d9e-7ee0-7de3-b34a-8d1f91f249de</SourceId>
+    <OccurredAtUtc>2026-10-16T18:19:02Z</OccurredAtUtc>
+    <Reason>حركة جاهز مستوردة</Reason>
+    <CreatedAtUtc>2026-10-21T08:40:30.7422503Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+  </AccountingEntries>
+  <AccountingEntries>
+    <Id>01a15d9e-7ee3-7d3b-9454-82010c041e13</Id>
+    <HandoverId>b8783a1e-a8e4-4cad-970e-a160d1ed8b34</HandoverId>
+    <Bucket>2</Bucket>
+    <Kind>1</Kind>
+    <Amount>13.001000</Amount>
+    <SourceId>01a15d9e-7ee3-768b-bde7-cef0d6f41967</SourceId>
+    <OccurredAtUtc>2026-10-03T12:28:12Z</OccurredAtUtc>
+    <Reason>حركة جاهز مستوردة</Reason>
+    <CreatedAtUtc>2026-10-21T08:40:30.7422503Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+  </AccountingEntries>
+  <AccountingEntries>
+    <Id>01a15d9e-7edc-7df9-b6b2-876636a56a52</Id>
+    <HandoverId>b8783a1e-a8e4-4cad-970e-a160d1ed8b34</HandoverId>
+    <Bucket>2</Bucket>
+    <Kind>1</Kind>
+    <Amount>17.997000</Amount>
+    <SourceId>01a15d9e-7edc-7f4b-b3ea-84a3c09846c7</SourceId>
+    <OccurredAtUtc>2026-09-22T09:30:45Z</OccurredAtUtc>
+    <Reason>حركة جاهز مستوردة</Reason>
+    <CreatedAtUtc>2026-10-21T08:40:30.7422503Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+  </AccountingEntries>
+  <AccountingEntries>
+    <Id>01a15d9e-7edc-7803-a1f1-88537c247027</Id>
+    <HandoverId>79e9dc82-ef4d-43aa-9be6-e15bca8c7571</HandoverId>
+    <Bucket>2</Bucket>
+    <Kind>1</Kind>
+    <Amount>11.003000</Amount>
+    <SourceId>01a15d9e-7edc-765f-a401-c467a3491c55</SourceId>
+    <OccurredAtUtc>2026-09-27T11:15:16Z</OccurredAtUtc>
+    <Reason>حركة جاهز مستوردة</Reason>
+    <CreatedAtUtc>2026-10-21T08:40:30.7422503Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+  </AccountingEntries>
+  <AccountingEntries>
+    <Id>01a15d9e-7edc-7611-8aad-91534cb747e0</Id>
+    <HandoverId>b8783a1e-a8e4-4cad-970e-a160d1ed8b34</HandoverId>
+    <Bucket>2</Bucket>
+    <Kind>1</Kind>
+    <Amount>46.000000</Amount>
+    <SourceId>01a15d9e-7edc-78c3-bc2c-79940f8393e9</SourceId>
+    <OccurredAtUtc>2026-09-16T10:11:27Z</OccurredAtUtc>
+    <Reason>حركة جاهز مستوردة</Reason>
+    <CreatedAtUtc>2026-10-21T08:40:30.7422503Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+  </AccountingEntries>
+  <AccountingEntries>
+    <Id>01a15d9e-7eda-770d-9f2a-95e4c4c83ef2</Id>
+    <HandoverId>d3dc1fc0-24df-4bf8-a5ca-af0dc75eb2f1</HandoverId>
+    <Bucket>2</Bucket>
+    <Kind>1</Kind>
+    <Amount>-17.725000</Amount>
+    <SourceId>01a15d9e-7eda-75d4-8aaa-c78e274f7f6e</SourceId>
+    <OccurredAtUtc>2026-10-19T16:52:45Z</OccurredAtUtc>
+    <Reason>حركة جاهز مستوردة</Reason>
+    <CreatedAtUtc>2026-10-21T08:40:30.7422503Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+  </AccountingEntries>
+  <AccountingEntries>
+    <Id>01a15d9e-7edc-71bc-9f8c-966a30e1c83d</Id>
+    <HandoverId>79e9dc82-ef4d-43aa-9be6-e15bca8c7571</HandoverId>
+    <Bucket>2</Bucket>
+    <Kind>1</Kind>
+    <Amount>44.008000</Amount>
+    <SourceId>01a15d9e-7edc-7561-bf50-fd05cd98c51d</SourceId>
+    <OccurredAtUtc>2026-09-24T09:40:26Z</OccurredAtUtc>
+    <Reason>حركة جاهز مستوردة</Reason>
+    <CreatedAtUtc>2026-10-21T08:40:30.7422503Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+  </AccountingEntries>
+  <AccountingEntries>
+    <Id>01a15d9e-7edc-7a83-bf57-98b608feb07b</Id>
+    <HandoverId>d3dc1fc0-24df-4bf8-a5ca-af0dc75eb2f1</HandoverId>
+    <Bucket>2</Bucket>
+    <Kind>1</Kind>
+    <Amount>55.608000</Amount>
+    <SourceId>01a15d9e-7edc-7e54-83f1-f95ea584d922</SourceId>
+    <OccurredAtUtc>2026-10-04T16:29:40Z</OccurredAtUtc>
+    <Reason>حركة جاهز مستوردة</Reason>
+    <CreatedAtUtc>2026-10-21T08:40:30.7422503Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+  </AccountingEntries>
+  <AccountingEntries>
+    <Id>01a15d9e-7edc-79c9-838e-98da87712e33</Id>
+    <HandoverId>e0e52bd1-cf85-4049-a45a-6d31b47724ec</HandoverId>
+    <Bucket>2</Bucket>
+    <Kind>1</Kind>
+    <Amount>67.715000</Amount>
+    <SourceId>01a15d9e-7edc-7d1e-832f-d6283ea53ed7</SourceId>
+    <OccurredAtUtc>2026-09-23T12:36:38Z</OccurredAtUtc>
+    <Reason>حركة جاهز مستوردة</Reason>
+    <CreatedAtUtc>2026-10-21T08:40:30.7422503Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+  </AccountingEntries>
+  <AccountingEntries>
+    <Id>01a15d9e-7ee3-742c-9ab3-998fafa227c3</Id>
+    <HandoverId>79e9dc82-ef4d-43aa-9be6-e15bca8c7571</HandoverId>
+    <Bucket>2</Bucket>
+    <Kind>1</Kind>
+    <Amount>59.011000</Amount>
+    <SourceId>01a15d9e-7ee3-71f8-9a0a-1af634192311</SourceId>
+    <OccurredAtUtc>2026-10-01T09:41:51Z</OccurredAtUtc>
+    <Reason>حركة جاهز مستوردة</Reason>
+    <CreatedAtUtc>2026-10-21T08:40:30.7422503Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+  </AccountingEntries>
+  <AccountingEntries>
+    <Id>01a15d9e-7ee0-7649-94bb-a4c0439fd103</Id>
+    <HandoverId>b8783a1e-a8e4-4cad-970e-a160d1ed8b34</HandoverId>
+    <Bucket>2</Bucket>
+    <Kind>1</Kind>
+    <Amount>25.006000</Amount>
+    <SourceId>01a15d9e-7ee0-759b-85fc-bdd3eca52761</SourceId>
+    <OccurredAtUtc>2026-10-16T08:58:33Z</OccurredAtUtc>
+    <Reason>حركة جاهز مستوردة</Reason>
+    <CreatedAtUtc>2026-10-21T08:40:30.7422503Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+  </AccountingEntries>
+  <AccountingEntries>
+    <Id>01a15d9e-7edc-724f-8027-b6152cd0e474</Id>
+    <HandoverId>d3dc1fc0-24df-4bf8-a5ca-af0dc75eb2f1</HandoverId>
+    <Bucket>2</Bucket>
+    <Kind>1</Kind>
+    <Amount>126.022000</Amount>
+    <SourceId>01a15d9e-7edc-7291-b0f6-dc003fd19ef9</SourceId>
+    <OccurredAtUtc>2026-10-06T11:50:43Z</OccurredAtUtc>
+    <Reason>حركة جاهز مستوردة</Reason>
+    <CreatedAtUtc>2026-10-21T08:40:30.7422503Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+  </AccountingEntries>
+  <AccountingEntries>
+    <Id>01a15d9e-7edd-7a6f-be17-c038a37c4cb2</Id>
+    <HandoverId>b8783a1e-a8e4-4cad-970e-a160d1ed8b34</HandoverId>
+    <Bucket>2</Bucket>
+    <Kind>1</Kind>
+    <Amount>11.000000</Amount>
+    <SourceId>01a15d9e-7edd-7477-9241-9bd739ae8691</SourceId>
+    <OccurredAtUtc>2026-09-13T11:27:45Z</OccurredAtUtc>
+    <Reason>حركة جاهز مستوردة</Reason>
+    <CreatedAtUtc>2026-10-21T08:40:30.7422503Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+  </AccountingEntries>
+  <AccountingEntries>
+    <Id>01a15d9e-7edc-7d6c-a192-c43af0c1ebff</Id>
+    <HandoverId>79e9dc82-ef4d-43aa-9be6-e15bca8c7571</HandoverId>
+    <Bucket>2</Bucket>
+    <Kind>1</Kind>
+    <Amount>29.001000</Amount>
+    <SourceId>01a15d9e-7edc-7d56-8aa7-3788d0f3130a</SourceId>
+    <OccurredAtUtc>2026-09-17T08:39:44Z</OccurredAtUtc>
+    <Reason>حركة جاهز مستوردة</Reason>
+    <CreatedAtUtc>2026-10-21T08:40:30.7422503Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+  </AccountingEntries>
+  <AccountingEntries>
+    <Id>01a15d9e-7ee1-75b5-b5d2-c4a7b8357a26</Id>
+    <HandoverId>b8783a1e-a8e4-4cad-970e-a160d1ed8b34</HandoverId>
+    <Bucket>2</Bucket>
+    <Kind>1</Kind>
+    <Amount>30.999000</Amount>
+    <SourceId>01a15d9e-7ee1-7c49-bb43-94958730961b</SourceId>
+    <OccurredAtUtc>2026-10-15T10:46:39Z</OccurredAtUtc>
+    <Reason>حركة جاهز مستوردة</Reason>
+    <CreatedAtUtc>2026-10-21T08:40:30.7422503Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+  </AccountingEntries>
+  <AccountingEntries>
+    <Id>01a15d9e-7edc-717d-807a-c8060344fac9</Id>
+    <HandoverId>b8783a1e-a8e4-4cad-970e-a160d1ed8b34</HandoverId>
+    <Bucket>2</Bucket>
+    <Kind>1</Kind>
+    <Amount>11.001000</Amount>
+    <SourceId>01a15d9e-7edc-7767-8460-e7587931b2c2</SourceId>
+    <OccurredAtUtc>2026-09-30T11:44:45Z</OccurredAtUtc>
+    <Reason>حركة جاهز مستوردة</Reason>
+    <CreatedAtUtc>2026-10-21T08:40:30.7422503Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+  </AccountingEntries>
+  <AccountingEntries>
+    <Id>01a15d9e-7edc-7284-9db3-cbe22fc31465</Id>
+    <HandoverId>d3dc1fc0-24df-4bf8-a5ca-af0dc75eb2f1</HandoverId>
+    <Bucket>2</Bucket>
+    <Kind>1</Kind>
+    <Amount>162.289000</Amount>
+    <SourceId>01a15d9e-7edc-7262-8b96-4efd6c5997de</SourceId>
+    <OccurredAtUtc>2026-10-05T09:37:49Z</OccurredAtUtc>
+    <Reason>حركة جاهز مستوردة</Reason>
+    <CreatedAtUtc>2026-10-21T08:40:30.7422503Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+  </AccountingEntries>
+  <AccountingEntries>
+    <Id>01a15d9e-7edc-77b3-a227-cd1409db22ae</Id>
+    <HandoverId>79e9dc82-ef4d-43aa-9be6-e15bca8c7571</HandoverId>
+    <Bucket>2</Bucket>
+    <Kind>1</Kind>
+    <Amount>38.003000</Amount>
+    <SourceId>01a15d9e-7edc-712f-a3bd-f614cbae07d5</SourceId>
+    <OccurredAtUtc>2026-09-25T11:17:59Z</OccurredAtUtc>
+    <Reason>حركة جاهز مستوردة</Reason>
+    <CreatedAtUtc>2026-10-21T08:40:30.7422503Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+  </AccountingEntries>
+  <AccountingEntries>
+    <Id>01a15d9e-7edc-7467-a40d-e405b8e1fb5c</Id>
+    <HandoverId>79e9dc82-ef4d-43aa-9be6-e15bca8c7571</HandoverId>
+    <Bucket>2</Bucket>
+    <Kind>1</Kind>
+    <Amount>-102.001000</Amount>
+    <SourceId>01a15d9e-7edc-7119-8b4d-17bb4263b5e7</SourceId>
+    <OccurredAtUtc>2026-09-30T17:39:47Z</OccurredAtUtc>
+    <Reason>حركة جاهز مستوردة</Reason>
+    <CreatedAtUtc>2026-10-21T08:40:30.7422503Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+  </AccountingEntries>
+  <AccountingEntries>
+    <Id>01a15d9e-7ed9-7047-b5a4-e4af32814551</Id>
+    <HandoverId>d3dc1fc0-24df-4bf8-a5ca-af0dc75eb2f1</HandoverId>
+    <Bucket>2</Bucket>
+    <Kind>1</Kind>
+    <Amount>60.010000</Amount>
+    <SourceId>01a15d9e-7ed9-7700-aa38-5ab139311eee</SourceId>
+    <OccurredAtUtc>2026-10-20T10:08:05Z</OccurredAtUtc>
+    <Reason>حركة جاهز مستوردة</Reason>
+    <CreatedAtUtc>2026-10-21T08:40:30.7422503Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+  </AccountingEntries>
+  <AccountingEntries>
+    <Id>01a15d9e-7ee3-7835-b5d5-e5a68f896888</Id>
+    <HandoverId>79e9dc82-ef4d-43aa-9be6-e15bca8c7571</HandoverId>
+    <Bucket>2</Bucket>
+    <Kind>1</Kind>
+    <Amount>61.015000</Amount>
+    <SourceId>01a15d9e-7ee3-70bd-87a8-66b7dd5166bf</SourceId>
+    <OccurredAtUtc>2026-10-03T16:45:12Z</OccurredAtUtc>
+    <Reason>حركة جاهز مستوردة</Reason>
+    <CreatedAtUtc>2026-10-21T08:40:30.7422503Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+  </AccountingEntries>
+  <AccountingEntries>
+    <Id>01a15d9e-7edc-70d4-8a9f-e9979c09801b</Id>
+    <HandoverId>b8783a1e-a8e4-4cad-970e-a160d1ed8b34</HandoverId>
+    <Bucket>2</Bucket>
+    <Kind>1</Kind>
+    <Amount>-383.244000</Amount>
+    <SourceId>01a15d9e-7edc-7827-81bb-2019ff67563b</SourceId>
+    <OccurredAtUtc>2026-09-17T12:44:14Z</OccurredAtUtc>
+    <Reason>حركة جاهز مستوردة</Reason>
+    <CreatedAtUtc>2026-10-21T08:40:30.7422503Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+  </AccountingEntries>
+  <AccountingEntries>
+    <Id>01a15d9e-7ee3-794a-9c90-ea9692648fbc</Id>
+    <HandoverId>b8783a1e-a8e4-4cad-970e-a160d1ed8b34</HandoverId>
+    <Bucket>2</Bucket>
+    <Kind>1</Kind>
+    <Amount>24.004000</Amount>
+    <SourceId>01a15d9e-7ee3-7380-bfaf-49a450392318</SourceId>
+    <OccurredAtUtc>2026-10-01T11:41:15Z</OccurredAtUtc>
+    <Reason>حركة جاهز مستوردة</Reason>
+    <CreatedAtUtc>2026-10-21T08:40:30.7422503Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+  </AccountingEntries>
+  <AccountingEntries>
+    <Id>01a15d9e-7edd-7985-8858-f7e4595f6cec</Id>
+    <HandoverId>b8783a1e-a8e4-4cad-970e-a160d1ed8b34</HandoverId>
+    <Bucket>2</Bucket>
+    <Kind>1</Kind>
+    <Amount>34.997000</Amount>
+    <SourceId>01a15d9e-7edd-7cd0-8456-bbcdcc321203</SourceId>
+    <OccurredAtUtc>2026-09-15T11:23:16Z</OccurredAtUtc>
+    <Reason>حركة جاهز مستوردة</Reason>
+    <CreatedAtUtc>2026-10-21T08:40:30.7422503Z</CreatedAtUtc>
+    <CreatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</CreatedByUserId>
+  </AccountingEntries>
+</NewDataSet>

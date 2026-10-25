@@ -4,6 +4,14 @@ Database migration `20261017165534_AddJahezV2AccountantHandovers` was applied an
 
 Base path: `/api/jahez/v2`. IDs are UUID strings, dates are `YYYY-MM-DD`, timestamps are ISO 8601, rowversions are Base64, and JSON enum values are numeric.
 
+The period profit totals endpoint, `/reports/profit`, is documented in [Jahez profit report](jahez-profit-report.md).
+
+Rider performance by inclusive start/end dates is available through `/reports/riders`; see [the date-range performance report](jahez-rider-performance-report.md) for filters, daily counts, and account breakdowns.
+
+To correct **صافي المبلغ المُدخل للتصفية** on executed settlements in Cashbox, Bank, or PetroApp, see [settlement net correction](jahez-settlement-net-correction.md): `PUT /operations/{id}/net`.
+
+For **ديون المناديب غير المسددة**, see [partial repayment and rider commission adjustment](jahez-rider-debt-partial-payments.md).
+
 Every request needs `Authorization: Bearer <access-token>`. Every POST additionally needs `Content-Type: application/json` and `Idempotency-Key: <unique-command-key>`. Keep the same key and body when retrying the same command; keys are scoped by actor and operation. A changed payload with an already-used key returns 409. Keys must contain 1–150 characters. Reasons must be nonblank and at most 2,000 characters.
 
 All seven endpoints below return HTTP 200 on success. Responses are returned directly, with no `data` or `success` wrapper. Permissions are enforced in the Jahez client-platform scope.
@@ -39,6 +47,12 @@ Use this endpoint for balance cards. Midnight does not reset balances. Confirmat
 ## 2. Movement history
 
 `GET /money-movements` returns the full history within the selected dates, including already-confirmed movements. Filtering uses `occurredAtUtc`, both dates are inclusive in Riyadh time, and filtering runs before pagination. Each omitted bound defaults independently: `fromDate` to the first day of the current month, `toDate` to today. A reversed range returns 400. Rows are ordered by `occurredAtUtc` descending, then ID.
+
+Each movement also exposes `paymentReference`: the saved receipt number or actual transfer reference entered in **رقم إيصال القبض أو الصرف أو مرجع التحويل الفعلي**. It mirrors the existing `reference` value when present and returns `null` for blank legacy references. Use it to display or prefill the Cashbox reference field. It is available for settlement, fee, and transferred-debt receipt rows. No validation-message text is stored or generated as a reference.
+
+```json
+{ "reference": "RCPT-350", "paymentReference": "RCPT-350" }
+```
 
 `userRider` is the recorded movement rider, including after account reassignment. `ownerRider` is the account's registered owner. Missing persons and iqamas are nullable. `sponsorNameAr` is the account sponsor's Arabic registry name. `cashboxHandoverId` identifies the pending/confirmed accountant handover, or is null if none. `isHandedToAccountant` becomes true only after confirmation. Cancelled handovers release their movements while retaining their audit evidence.
 
@@ -289,3 +303,6 @@ Movement payment-method corrections are blocked while their accountant handover 
 - Applied database migration evidence: [report.json](../outputs/jahez-accountant-handovers-migration-20261017T170033907Z/report.json).
 
 Mutations use the existing service-owned serializable transaction, idempotency receipts, rowversions, audit entries, restricted foreign keys, immutable snapshots, and a unique single-pending index. Confirmation changes outstanding aggregation without deleting or zeroing journal rows. The local Jahez suite passed 104 tests; five opt-in database cases were skipped in that run. The hosted read-only integration test passed after applying this migration. Transactional handover writes and concurrent confirmations were not exercised on the hosted database.
+## استرداد رسوم فتح حساب
+
+See [the refund endpoint and checkbox handoff](jahez-account-fee-refunds.md) for refunds within seven days, optional commission waiver, account withdrawal, negative cashbox balances, and signed end-of-day deductions.

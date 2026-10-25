@@ -80,7 +80,7 @@ public sealed partial class NinjaWorkflowTests
             async () => await f.Service.GetAccountsAsync(1, 50, ct),
             async () => await f.Service.GetAccountAsync(f.Account.Id, ct),
             async () => await f.Service.SetAccountStatusAsync(f.Account.Id, new("Suspended", Convert.ToBase64String(f.Account.RowVersion)), ct),
-            async () => await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, new(2026, 10, 12), "0501111111", "x"), ct),
+            async () => await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, new(2026, 10, 12), "0501111111", "x", RiderType: "InternalCar", PaymentModel: "PayPerOrder"), ct),
             async () => await f.Service.ReturnAsync(f.Account.Id, new(new(2026, 10, 12), "0501111111", "x", "Return", "AQ=="), ct),
             async () => await f.Service.UpdateCredentialsAsync(f.Account.Id, new("x", "0501111111", "Change", "AQ=="), ct),
             async () => await f.Service.ImportAsync(false, new(2026, 10, 12), "x.xlsx", [], ct),
@@ -102,7 +102,7 @@ public sealed partial class NinjaWorkflowTests
         var ct = TestContext.Current.CancellationToken;
         await using var f = await Fixture.Create();
         f.Checker.Granted = PermissionKeys.All.Where(k => k.StartsWith("ninja.", StringComparison.Ordinal)).ToHashSet(StringComparer.Ordinal);
-        Value(await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, new(2026, 10, 12), "0501111111", "x"), ct));
+        Value(await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, new(2026, 10, 12), "0501111111", "x", RiderType: "InternalCar", PaymentModel: "PayPerOrder"), ct));
         Value(await f.Service.GetAccountsAsync(1, 50, ct));
         f.Checker.Granted = [PermissionKeys.Ninja.PerformanceImport];
         Assert.Empty(Value(await f.Service.ImportAsync(false, new(2026, 10, 12), "performance.xlsx", Sheet(false, "272578", 18, 12), ct)).Issues);

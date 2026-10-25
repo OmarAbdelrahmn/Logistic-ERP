@@ -1,0 +1,87 @@
+{
+  "Database": "db67927",
+  "VerifiedAtUtc": "2026-10-24T15:58:51.6438609Z",
+  "Mode": "ReadOnly",
+  "LocalApplicationUsesHostedDatabase": true,
+  "MigrationComparison": [
+    {
+      "Context": "Application",
+      "SourceMigrationCount": 94,
+      "HostedMigrationCount": 93,
+      "LatestSource": "20261024150306_AddNinjaAssignmentRiderType",
+      "LatestHosted": "20261024132700_AddJahezAccountFeeRefunds",
+      "PendingHosted": [
+        "20261024150306_AddNinjaAssignmentRiderType"
+      ],
+      "HostedOnly": []
+    },
+    {
+      "Context": "Identity",
+      "SourceMigrationCount": 23,
+      "HostedMigrationCount": 23,
+      "LatestSource": "20261019114451_UseGranularJahezTreasuryPermissions",
+      "LatestHosted": "20261019114451_UseGranularJahezTreasuryPermissions",
+      "PendingHosted": [],
+      "HostedOnly": []
+    }
+  ],
+  "NinjaColumns": [
+    {
+      "Schema": "app",
+      "Table": "PlatformAccountCredentialVersions",
+      "Column": "Ciphertext",
+      "Type": "varbinary",
+      "MaxLengthBytes": -1,
+      "Nullable": false
+    },
+    {
+      "Schema": "app",
+      "Table": "PlatformAccountCredentialVersions",
+      "Column": "Nonce",
+      "Type": "varbinary",
+      "MaxLengthBytes": 32,
+      "Nullable": false
+    },
+    {
+      "Schema": "app",
+      "Table": "PlatformAccountCredentialVersions",
+      "Column": "AuthenticationTag",
+      "Type": "varbinary",
+      "MaxLengthBytes": 32,
+      "Nullable": false
+    },
+    {
+      "Schema": "app",
+      "Table": "PlatformAccountCredentialVersions",
+      "Column": "KeyVersion",
+      "Type": "int",
+      "MaxLengthBytes": 4,
+      "Nullable": false
+    },
+    {
+      "Schema": "app",
+      "Table": "PlatformAccountCredentialVersions",
+      "Column": "RotatedAtUtc",
+      "Type": "datetimeoffset",
+      "MaxLengthBytes": 10,
+      "Nullable": false
+    },
+    {
+      "Schema": "app",
+      "Table": "PlatformRiderAccounts",
+      "Column": "PaymentModel",
+      "Type": "int",
+      "MaxLengthBytes": 4,
+      "Nullable": false
+    },
+    {
+      "Schema": "app",
+      "Table": "RiderClientAssignments",
+      "Column": "PaymentModel",
+      "Type": "int",
+      "MaxLengthBytes": 4,
+      "Nullable": false
+    }
+  ],
+  "NinjaRiderTypeConstraintPresent": false
+}

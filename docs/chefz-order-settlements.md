@@ -1,5 +1,7 @@
 # Chefz bulk order settlements — التصفيات من ملف الطلبات
 
+**25 October 2026:** For new order settlements, Freelancer commission is 15% of delivery fees after removing VAT. Tips, compensation, bonuses, deductions, and collected cash affect the rider's payout but not the commission base. FullTime daily fees and manual wallet calculations keep their existing rules. No database migration is required; deploy the updated API. Existing saved imports and identical-file replays keep their recorded amounts.
+
 **21 October 2026:** Shared-day Freelancer money allocation now uses outgoing riders' recorded counts and original worksheet row order. Every row counts, including blank order IDs. FullTime sharing remains prohibited. See [shared-day handovers and migration requirements](shared-account-day-handovers.md); the shared-day database migration was applied and verified on 21 October 2026; the matching API still needs deployment.
 
 For the complete screen flow, response examples, state handling, Arabic labels, and acceptance checks, use [the detailed frontend handoff](chefz-order-settlements-frontend-handoff.md). The hosted database migration was applied and independently verified on 12 October 2026; API deployment is still pending. See [the deployment record](chefz-order-settlement-hosted-deployment-20261012.md).
@@ -39,7 +41,7 @@ For each order, exactly one Active or Ended rider assignment must cover its date
 | `Driver Compensate` | Add directly. |
 | `Bonus Amount` | Add directly, as confirmed by the user. Optional column; absent means zero. |
 | `Deduction Amount` | Subtract its magnitude; positive and negative deduction notation both represent a deduction. |
-| `Cash Collected By Driver` | Add its magnitude to deductions, then subtract the combined deductions from net earnings before the company/rider split. Optional; absent or blank means zero. |
+| `Cash Collected By Driver` | Add its magnitude to deductions, reducing the rider's payout without changing the company commission. Optional; absent or blank means zero. |
 
 `Date`, `Driver ID`, and fees/tips/compensation/deduction headers are required. Blank financial cells mean zero. Values support at most two decimal places and absolute values up to SAR 1 billion per source cell. Negative fee/tip/compensation/bonus values represent reversals. Formulas in processed fields are rejected; upload original values. `Chef Order ID` is optional; repeated nonblank IDs for the same Driver ID are rejected. Blank order IDs are allowed for adjustment rows. `sourceRows` counts financial source rows, not necessarily completed orders.
 
@@ -49,18 +51,20 @@ vatAmount = sum(deliveryFees) − deliveryFeesAfterVat
 deductions = sum(abs(Deduction Amount)) + sum(abs(Cash Collected By Driver))
 netEarnings = deliveryFeesAfterVat + tips + compensation + bonuses − deductions
 
-Freelancer companyAmount = round(netEarnings × 0.15, 2)
+Freelancer companyAmount = round(deliveryFeesAfterVat × 0.15, 2)
 FullTime companyAmount = assignedCalendarDays × SAR 25
 riderAmount = netEarnings − companyAmount
 ```
 
 Delivery fees include 15% VAT, as confirmed on 17 October 2026: SAR 115 becomes SAR 100 before VAT. Extract VAT by dividing fees by 1.15. Tips, compensation, and bonuses are not reduced by VAT. Round to two decimals away from zero. VAT is reconciled once per rider/cycle after combining assignments/accounts; freelancer commission is reconciled across that rider's freelancer accounts. Cent residuals are allocated deterministically to the largest contributing account detail. Details exactly match rider/import totals. This corrects the former flat 15% deduction. Existing saved imports retain their snapshots until an explicit financial correction is applied; deploying this formula does not rewrite saved settlements.
 
+For example, SAR 115 delivery fees becomes SAR 100 after VAT. With SAR 10 tips, SAR 20 compensation, SAR 30 bonuses, and SAR 25 deductions, net earnings are SAR 135, company commission is SAR 15, and the rider receives SAR 120. For mixed account types, the percentage uses only the Freelancer accounts' delivery fees after their allocated VAT; FullTime fees are calculated separately.
+
 Update 18 October 2026: `deductions` now combines `Deduction Amount` and `Cash Collected By Driver` for new money-sheet imports, at both account and rider levels. The API response shape and database schema are unchanged. Display the returned combined `deductions` once; do not subtract cash again in the frontend. Duplicate cash headers, formulas and invalid monetary values are rejected using the existing parser rules. Existing identical-file replays still return their saved snapshots rather than recalculating them.
 
 Full-time days are inclusive calendar days where the account assignment intersects the cycle, including days without orders. Overlapping assignment dates during charged full-time days block saving even if no source order falls on the overlap, preventing a day being charged twice. The charge applies per full-time account assignment, preserving the existing wallet-settlement rule. An assignment contributes only to cycles represented by its source rows. A partial file does not establish that every order is present; upload the complete cycle report before saving. For mixed account types, compute each type's share on its account details and add results to the rider row.
 
-Negative net/rider amounts are kept, not clamped to zero. A negative rider amount means a balance due rather than a payout. The freelancer percentage also preserves the sign of the net total. Saving records a settlement; it does not execute a bank transfer.
+Negative net/rider amounts are kept, not clamped to zero. A negative rider amount means a balance due rather than a payout. The freelancer percentage preserves the sign of delivery fees after VAT; deductions can make the rider's balance negative while commission remains positive. Saving records a settlement; it does not execute a bank transfer.
 
 ## Preview and saving
 

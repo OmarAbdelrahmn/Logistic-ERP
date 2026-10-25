@@ -58,6 +58,13 @@ internal sealed partial class JahezWorkflowService
             join employee in db.Employees on rider.EmployeeId equals employee.Id into employees
             from employee in employees.DefaultIfEmpty()
             let lastDate = orders.Where(x => x.AccountId == a.Id && x.Count > 0).Select(x => (DateOnly?)x.Date).Max()
+            let vehicleType = (from link in db.VehiclePlatformAccountAssignments.AsNoTracking()
+                join vehicle in db.Vehicles.AsNoTracking() on link.VehicleId equals vehicle.Id
+                where link.PlatformRiderAccountId == a.Id && !link.IsDeleted && !vehicle.IsDeleted
+                    && link.Status == VehiclePlatformAccountAssignmentStatus.Active && link.EndedAtUtc == null
+                    && link.ApprovalStatus == VehiclePlatformAccountApprovalStatus.Approved
+                orderby link.ApprovedAtUtc descending, link.Id descending
+                select (VehicleType?)vehicle.VehicleType).FirstOrDefault()
             select new JahezAccountRow(a.Id, a.Code, a.ExternalAccountId, a.UserName, a.OperatingCityId, globalCity.NameAr,
                 a.SponsorId, sponsor == null ? null : sponsor.RegistryNameAr, a.Status.ToString(), a.StatusReason,
                 assignment != null, db.PlatformAccountCredentialVersions.Any(x => x.PlatformRiderAccountId == a.Id && x.Ciphertext.Length >= 1),
@@ -72,7 +79,8 @@ internal sealed partial class JahezWorkflowService
                 orders.Any(x => x.AccountId == a.Id && x.Date == yesterday)
                     ? orders.Where(x => x.AccountId == a.Id && x.Date == yesterday).Sum(x => (int?)x.Count) : null,
                 lastDate, lastDate == null ? null : orders.Where(x => x.AccountId == a.Id && x.Date == lastDate).Sum(x => (int?)x.Count),
-                Convert.ToBase64String(a.RowVersion));
+                Convert.ToBase64String(a.RowVersion))
+                { VehicleType = vehicleType.HasValue ? vehicleType.Value.ToString() : null };
     }
 
     public Task<Result<JahezAccountsPage>> AccountsV2Async(int page, int pageSize, CancellationToken ct = default) =>
@@ -197,6 +205,7 @@ internal sealed partial class JahezWorkflowService
                 operation == null ? null : (decimal?)operation.Commission,
                 operation == null ? null : (decimal?)operation.CalculatedCommission)
                 { OperationRowVersion = operation == null ? null : Convert.ToBase64String(operation.RowVersion),
+                    DashboardDebtPaid = m.DashboardDebtPaid, CommissionPaid = m.CommissionPaid,
                     SponsorId = ownership == null ? null : ownership.SponsorId,
                     SponsorIdentifier = ownership == null ? null : ownership.SponsorIdentifier,
                     TreasurySubAccountId = db.Set<TreasuryPosting>().Where(p => p.MoneyMovementId == m.Id && p.Kind == TreasuryEntryKind.Business)

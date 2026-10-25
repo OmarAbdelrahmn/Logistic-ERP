@@ -1,0 +1,32 @@
+{
+  "Server": "db67927.public.databaseasp.net",
+  "Database": "db67927",
+  "VerifiedAtUtc": "2026-10-24T13:48:19.6295329Z",
+  "AppliedMigrations": [
+    "20261024115050_SupportJahezPartialDebtRepayments",
+    "20261024132700_AddJahezAccountFeeRefunds"
+  ],
+  "ApplicationPending": [],
+  "IdentityPending": [],
+  "PostCommitVerified": true,
+  "ExistingRecordsComparedAndPreserved": true,
+  "ProtectedTables": 29,
+  "MoneyMovements": 153,
+  "LedgerEntries": 2084,
+  "TransferredDebts": 4,
+  "Refunds": 0,
+  "ServerBackupCompleted": true,
+  "RestoreVerifyOnlyPerformed": false,
+  "ApiDeployed": false,
+  "Scripts": [
+    {
+      "Name": "jahez-partial-debt-repayments.sql",
+      "Sha256": "3D174A5389109F9A83FF773589B4248798D0D16BDD3CAF228706DF59406EA22B"
+    },
+    {
+      "Name": "jahez-account-fee-refunds.sql",
+      "Sha256": "16D16DB5FBAFC2C3487C24E4D4106D8852E15F6795A317EEF12A0CC8A8DF5B3B"
+    }
+  ],
+  "EvidenceDirectory": "C:\\Users\\omarf\\OneDrive\\Documents\\ChatGPT\\Logistic ERP\\outputs\\jahez-refunds-hosted-deployment-20261024T134805958Z"
+}

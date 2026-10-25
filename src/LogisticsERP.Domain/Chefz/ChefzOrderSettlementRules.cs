@@ -25,7 +25,7 @@ public static class ChefzOrderSettlementRules
         result.GrossEarnings = result.DeliveryFees - result.VatAmount + result.Tips
             + result.Compensation + result.Bonuses - result.Deductions;
         result.CompanyAmount = type == ChefzAccountType.Freelancer
-            ? Money(result.GrossEarnings * ChefzRules.FreelancerRate)
+            ? Money((result.DeliveryFees - result.VatAmount) * ChefzRules.FreelancerRate)
             : result.AssignedDays * ChefzRules.FullTimeDailyFee;
         result.RiderAmount = result.GrossEarnings - result.CompanyAmount;
         return result;
@@ -44,12 +44,14 @@ public static class ChefzOrderSettlementRules
             foreach (var s in rows)
             {
                 s.GrossEarnings = s.DeliveryFees - s.VatAmount + s.Tips + s.Compensation + s.Bonuses - s.Deductions;
-                if (s.AccountType == ChefzAccountType.Freelancer) s.CompanyAmount = Money(s.GrossEarnings * ChefzRules.FreelancerRate);
+                if (s.AccountType == ChefzAccountType.Freelancer)
+                    s.CompanyAmount = Money((s.DeliveryFees - s.VatAmount) * ChefzRules.FreelancerRate);
             }
+            // Reconcile commission on VAT-exclusive delivery fees; adjustments belong to the rider.
             var freelancers = rows.Where(s => s.AccountType == ChefzAccountType.Freelancer)
-                .OrderByDescending(s => Math.Abs(s.GrossEarnings)).ThenBy(s => s.PlatformRiderAccountId).ThenBy(s => s.RiderClientAssignmentId).ToArray();
+                .OrderByDescending(s => Math.Abs(s.DeliveryFees - s.VatAmount)).ThenBy(s => s.PlatformRiderAccountId).ThenBy(s => s.RiderClientAssignmentId).ToArray();
             if (freelancers.Length > 0)
-                freelancers[0].CompanyAmount += Money(freelancers.Sum(s => s.GrossEarnings) * ChefzRules.FreelancerRate)
+                freelancers[0].CompanyAmount += Money(freelancers.Sum(s => s.DeliveryFees - s.VatAmount) * ChefzRules.FreelancerRate)
                     - freelancers.Sum(s => s.CompanyAmount);
             foreach (var s in rows) s.RiderAmount = s.GrossEarnings - s.CompanyAmount;
         }

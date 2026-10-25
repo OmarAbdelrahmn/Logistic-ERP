@@ -33,6 +33,8 @@ internal sealed class JahezWorkflowConfigurations : IEntityTypeConfiguration<Jah
     {
         b.ConfigureHistory("MoneyMovements", "jahez_v2");
         b.Property(x => x.Amount).HasPrecision(18, 2);
+        b.Property(x => x.DashboardDebtPaid).HasPrecision(18, 2);
+        b.Property(x => x.CommissionPaid).HasPrecision(18, 2);
         b.Property(x => x.Reference).HasMaxLength(500);
         b.Property(x => x.Reason).HasMaxLength(2000);
         b.HasOne<JahezAccountSession>().WithMany().HasForeignKey(x => x.HandoverId).OnDelete(DeleteBehavior.Restrict);
@@ -40,11 +42,12 @@ internal sealed class JahezWorkflowConfigurations : IEntityTypeConfiguration<Jah
         b.HasOne<JahezOperation>().WithMany().HasForeignKey(x => x.OperationId).OnDelete(DeleteBehavior.Restrict);
         b.HasOne<JahezTransferredDebt>().WithMany().HasForeignKey(x => x.TransferredDebtId).OnDelete(DeleteBehavior.Restrict);
         b.HasIndex(x => x.OperationId).IsUnique().HasFilter("[OperationId] IS NOT NULL");
-        b.HasIndex(x => x.TransferredDebtId).IsUnique().HasFilter("[TransferredDebtId] IS NOT NULL");
+        b.HasIndex(x => x.TransferredDebtId).HasFilter("[TransferredDebtId] IS NOT NULL");
         b.HasIndex(x => new { x.Fund, x.OccurredAtUtc });
         b.ToTable(t =>
         {
             t.HasCheckConstraint("CK_JahezMoney_Amount", "[Amount] > 0 OR ([Amount] = 0 AND [Direction] = 0 AND [Purpose] = 1 AND [OperationId] IS NOT NULL)");
+            t.HasCheckConstraint("CK_JahezMoney_DebtAllocation", "([DashboardDebtPaid] IS NULL AND [CommissionPaid] IS NULL) OR ([DashboardDebtPaid] IS NOT NULL AND [CommissionPaid] IS NOT NULL AND [TransferredDebtId] IS NOT NULL AND [Direction] = 1 AND [DashboardDebtPaid] >= 0 AND [CommissionPaid] >= 0 AND [DashboardDebtPaid] + [CommissionPaid] = [Amount])");
             t.HasCheckConstraint("CK_JahezMoney_Routing", "([Direction] = 1 AND ([Fund] = 1 OR ([Fund] = 2 AND [Purpose] IN (1, 2)))) OR ([Direction] = 2 AND [Fund] IN (1, 3) AND [Purpose] <> 2) OR ([Direction] = 0 AND [Amount] = 0 AND [Purpose] = 1 AND [OperationId] IS NOT NULL AND [Fund] IN (1, 2, 3))");
         });
     }
@@ -52,10 +55,11 @@ internal sealed class JahezWorkflowConfigurations : IEntityTypeConfiguration<Jah
     {
         b.ConfigureAuditable("TransferredDebts", "jahez_v2");
         b.Property(x => x.Amount).HasPrecision(18, 2);
+        b.Property(x => x.PaidAmount).HasPrecision(18, 2).HasDefaultValue(0m);
         b.HasOne<JahezOperation>().WithMany().HasForeignKey(x => x.OperationId).OnDelete(DeleteBehavior.Restrict);
         b.HasOne<RiderProfile>().WithMany().HasForeignKey(x => x.RiderProfileId).OnDelete(DeleteBehavior.Restrict);
         b.HasIndex(x => x.OperationId).IsUnique();
         b.HasIndex(x => new { x.RiderProfileId, x.PaidAtUtc });
-        b.ToTable(t => t.HasCheckConstraint("CK_JahezTransferredDebt_Amount", "[Amount] > 0"));
+        b.ToTable(t => t.HasCheckConstraint("CK_JahezTransferredDebt_Amount", "[Amount] >= 0 AND [PaidAmount] >= 0 AND [PaidAmount] <= [Amount] AND (([PaidAmount] = [Amount] AND [PaidAtUtc] IS NOT NULL) OR ([PaidAmount] < [Amount] AND [PaidAtUtc] IS NULL))"));
     }
 }
