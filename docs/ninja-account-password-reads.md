@@ -19,6 +19,10 @@ The example password is a placeholder. The API returns the actual readable passw
 
 Account access still requires `ninja.read`. The password field additionally requires the existing `platform_credentials.read` permission for the account's Ninja client platform. Without it, the account is readable with `password: null`, even when `hasPassword` is true. A credential-read grant for another platform or a rotation grant alone does not reveal the password. If no password has been saved, `password` and the deadline are null and `hasPassword` is false.
 
+An encrypted credential that fails cryptographic authentication also returns `password: null` while preserving `hasPassword`, the cooldown deadline and the rest of the account. Other readable passwords on the page are still returned. This read does not change the stored credentials or try an older password. The API logs event `3100` (`NinjaCredentialUnreadable`) with the account ID and request correlation ID, without secret values. Missing or invalid encryption configuration still surfaces as an error.
+
+The API reads `SensitiveData:EncryptionKey` through its normal .NET configuration. A hosting environment variable named `SensitiveData__EncryptionKey` overrides the JSON setting. Downloading `appsettings.json` does not reveal the effective hosting environment value, so testing that file's key alone cannot establish the cause of a hosted request failure.
+
 During the password cooldown, rejected replacements are not returned: the retained saved password remains visible. After a successful rotation, the next account GET returns the new saved value and its new deadline. Refresh account detail after credential writes. Status writes and other mutation responses do not include the readable password.
 
 The GET routes disable response caching with `Cache-Control: no-store, no-cache`. Read `password` directly from the account object using the updated [TypeScript contract](ninja-api-contracts.ts). Keep the existing `hasPassword` and deadline display behavior; null password does not necessarily mean no saved credential.

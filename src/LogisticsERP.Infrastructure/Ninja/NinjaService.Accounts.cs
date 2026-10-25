@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using LogisticsERP.Application.Authorization;
 using LogisticsERP.Application.Common.Results;
 using LogisticsERP.Application.Features.Ninja;
@@ -5,11 +6,17 @@ using LogisticsERP.Domain.Entities.Clients;
 using LogisticsERP.Domain.Enums;
 using LogisticsERP.Infrastructure.Hr;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace LogisticsERP.Infrastructure.Ninja;
 
 internal sealed partial class NinjaService
 {
+    private static readonly Action<ILogger, Guid, string?, Exception?> LogUnreadableCredential =
+        LoggerMessage.Define<Guid, string?>(LogLevel.Error, new EventId(3100, "NinjaCredentialUnreadable"),
+            "Unable to decrypt Ninja account credential. AccountId: {AccountId}, CorrelationId: {CorrelationId}");
+
     public async Task<Result<NinjaPage<NinjaAccountResponse>>> GetAccountsAsync(int page, int pageSize, CancellationToken ct = default)
     {
         if (!ValidPage(page, pageSize)) return Result.Failure<NinjaPage<NinjaAccountResponse>>(NinjaErrors.Invalid("حجم الصفحة من 1 إلى 100."));
@@ -99,7 +106,7 @@ internal sealed partial class NinjaService
             r.AssignmentRowVersion is null ? null : Convert.ToBase64String(r.AssignmentRowVersion))
         {
             Password = passwordPlatforms.Contains(r.Account.ClientPlatformId) && r.Credential is { } credential
-                ? protector.Unprotect(new(credential.Ciphertext, credential.Nonce, credential.AuthenticationTag)) : null,
+                ? ReadAccountPassword(r.Account.Id, new(credential.Ciphertext, credential.Nonce, credential.AuthenticationTag)) : null,
             Owner = r.Account.RegisteredEmployeeId is { } ownerId ? people.GetValueOrDefault(ownerId) : null,
             ActualRider = r.RiderId is { } riderId && riders.TryGetValue(riderId, out var rider) ? people.GetValueOrDefault(rider.EmployeeId) : null,
             RiderType = r.RiderType?.ToString(),
@@ -112,6 +119,18 @@ internal sealed partial class NinjaService
             IsOperationallyBlocked = r.AssignmentId.HasValue && blocked.Contains(r.AssignmentId.Value),
             OperationalBlockReason = r.AssignmentId.HasValue && blocked.Contains(r.AssignmentId.Value) ? RiderOperationalBlock.Reason : null
         }).ToArray();
+    }
+
+    private string? ReadAccountPassword(Guid accountId, ProtectedPlatformCredential credential)
+    {
+        try { return protector.Unprotect(credential); }
+        catch (CryptographicException)
+        {
+            // Legacy credentials can use an unavailable key. Keep the account readable
+            // and retain HasPassword/cooldown metadata without changing the saved secret.
+            LogUnreadableCredential(logger ?? NullLogger<NinjaService>.Instance, accountId, user.CorrelationId, null);
+            return null;
+        }
     }
 
     private Task<Dictionary<Guid, NinjaPersonResponse>> People(Guid[] employeeIds, CancellationToken ct) =>

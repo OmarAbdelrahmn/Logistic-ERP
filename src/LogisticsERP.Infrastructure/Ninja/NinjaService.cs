@@ -11,11 +11,13 @@ using LogisticsERP.Domain.Enums;
 using LogisticsERP.Infrastructure.Hr;
 using LogisticsERP.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace LogisticsERP.Infrastructure.Ninja;
 
 internal sealed partial class NinjaService(ApplicationDbContext db, ICurrentUser user, IPermissionChecker permissions,
-    TimeProvider clock, IPlatformCredentialProtector protector, SimplePlatformService platforms) : INinjaService
+    TimeProvider clock, IPlatformCredentialProtector protector, SimplePlatformService platforms,
+    ILogger<NinjaService>? logger = null) : INinjaService
 {
     private IQueryable<PlatformRiderAccount> Accounts => from a in db.PlatformRiderAccounts
         join p in db.ClientPlatforms on a.ClientPlatformId equals p.Id where p.Code == "NINJA" select a;

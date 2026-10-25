@@ -1,0 +1,19 @@
+{
+  "Mode": "Applied",
+  "VerifiedAtUtc": "2026-10-25T09:06:59.8036776Z",
+  "Scope": "NINJA",
+  "DeletedVersions": 89,
+  "RemainingLegacyNinjaVersions": 0,
+  "OtherCredentialsPreserved": true,
+  "NinjaAccountsPreserved": true,
+  "EncryptedBackupVerified": true,
+  "BackupPath": "C:\\Users\\omarf\\OneDrive\\Documents\\ChatGPT\\Logistic ERP\\artifacts\\ninja-password-cleanup-20261025T090633828Z\\before-delete-encrypted.xml",
+  "RunDirectory": "C:\\Users\\omarf\\OneDrive\\Documents\\ChatGPT\\Logistic ERP\\artifacts\\ninja-password-cleanup-20261025T090633828Z",
+  "PlanPath": "C:\\Users\\omarf\\OneDrive\\Documents\\ChatGPT\\Logistic ERP\\artifacts\\ninja-password-cleanup-20261025T090459449Z\\plan.json",
+  "NinjaAccountsRemaining": 328,
+  "NinjaAccountsWithPasswords": 0,
+  "OtherCredentialVersionsRemaining": 233,
+  "IndependentReadVerified": true,
+  "IdempotencyVerified": true,
+  "AuthenticatedEndpointVerified": false
+}
