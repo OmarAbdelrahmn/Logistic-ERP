@@ -1,0 +1,12 @@
+{
+  "VerifiedAtUtc": "2026-10-25T08:35:54.4120932Z",
+  "HostedOriginalKeyRestored": true,
+  "ConfigurationReadBackVerified": true,
+  "ApiHealthStatus": 200,
+  "ChefzCredentialsVerified": 233,
+  "TargetCredentialVerified": true,
+  "DatabaseWrites": 0,
+  "PasswordsReset": 0,
+  "AuthenticatedEndpointVerified": false,
+  "PrivateBackupDirectory": "C:\\Users\\omarf\\OneDrive\\Documents\\ChatGPT\\Logistic ERP\\artifacts\\chefz-key-recovery-20261025T083537462Z"
+}

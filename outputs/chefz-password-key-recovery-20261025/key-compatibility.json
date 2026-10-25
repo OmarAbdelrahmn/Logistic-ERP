@@ -1,0 +1,34 @@
+{
+  "VerifiedAtUtc": "2026-10-25T08:29:07.5143801Z",
+  "AccountId": "2dee6b7f-a813-4429-a9bc-3b3d0c1330fe",
+  "AccountMatches": 1,
+  "KeySource": "Original Chefz import key backup",
+  "CredentialVersionsChecked": 322,
+  "FailedDecryptions": 89,
+  "TargetVersionsChecked": 1,
+  "TargetFailedDecryptions": 0,
+  "OtherEncryptedFields": [
+    {
+      "Table": "app.RiderHealthCards",
+      "Column": "CardNumberCiphertext",
+      "EncryptedValues": 0
+    },
+    {
+      "Table": "app.EmployeeDriverLicenses",
+      "Column": "LicenseNumberCiphertext",
+      "EncryptedValues": 0
+    },
+    {
+      "Table": "app.EmployeeMedicalInsurancePolicies",
+      "Column": "MemberNumberCiphertext",
+      "EncryptedValues": 0
+    },
+    {
+      "Table": "app.EmployeeMedicalInsurancePolicies",
+      "Column": "PolicyNumberCiphertext",
+      "EncryptedValues": 0
+    }
+  ],
+  "DatabaseWrites": 0,
+  "SecretsPrinted": false
+}
