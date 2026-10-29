@@ -6,10 +6,13 @@ public static class PermissionKeys
 {
     public static class Ninja
     {
+        public const string EvaluationManage = "ninja.evaluation.manage";
+        public const string EvaluationExport = "ninja.evaluation.export";
         public const string Read = "ninja.read";
         public const string AccountsUpdate = "ninja.accounts.update";
         public const string AssignmentsCreate = "ninja.assignments.create";
         public const string AssignmentsDelete = "ninja.assignments.delete";
+        public const string AssignmentDatesUpdate = "ninja.assignments.dates.update";
         public const string CredentialsRotate = "ninja.credentials.rotate";
         public const string PerformanceImport = "ninja.performance.import";
         public const string DeductionsImport = "ninja.deductions.import";
@@ -324,7 +327,8 @@ public static class PermissionKeys
 
     public static FrozenSet<string> All { get; } = new[]
     {
-        Ninja.Read, Ninja.AccountsUpdate, Ninja.AssignmentsCreate, Ninja.AssignmentsDelete,
+        Ninja.EvaluationManage, Ninja.EvaluationExport,
+        Ninja.Read, Ninja.AccountsUpdate, Ninja.AssignmentsCreate, Ninja.AssignmentsDelete, Ninja.AssignmentDatesUpdate,
         Ninja.CredentialsRotate, Ninja.PerformanceImport, Ninja.DeductionsImport,
         Chefz.Read, Chefz.AccountsUpdate, Chefz.PerformanceImport, Chefz.SettlementsCreate,
         Security.UsersRead,

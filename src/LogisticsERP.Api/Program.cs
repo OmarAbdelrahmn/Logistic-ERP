@@ -64,7 +64,7 @@ builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, HttpCurrentUser>();
-builder.Services.AddControllers();
+builder.Services.AddControllers(options => options.Filters.Add<LogisticsERP.Api.MonthlyAccountUsageFilter>());
 builder.Services.PostConfigure<ApiBehaviorOptions>(options =>
 {
     options.InvalidModelStateResponseFactory = context =>

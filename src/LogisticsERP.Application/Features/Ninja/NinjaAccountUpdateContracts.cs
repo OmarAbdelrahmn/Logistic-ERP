@@ -12,7 +12,13 @@ public sealed record NinjaAccountUpdatePage<T>(IReadOnlyList<T> Items, int Page,
 public sealed record NinjaAccountUpdateProblem(string Code, string MessageAr, string MessageEn);
 public sealed record NinjaAccountUpdateSystemAccount(Guid AccountId, string CaptainId, string AccountCode, string Status,
     Guid? OwnerEmployeeId, string? OwnerNameAr, string? OwnerNameEn, string? OwnerIqamaNo, string? OwnerStatus,
-    Guid OperatingCityId, string? CityCode, string? CityNameAr, string? CityNameEn);
+    Guid OperatingCityId, string? CityCode, string? CityNameAr, string? CityNameEn) : LogisticsERP.Application.Features.Hr.IMonthlyAccountUsageResponse
+{
+    [global::System.Text.Json.Serialization.JsonIgnore]
+    public Guid UsageAccountId => AccountId;
+    public string MonthlyUsageStatus { get; set; } = "Unused";
+    public string UsageMonth { get; set; } = string.Empty;
+}
 public sealed record NinjaAccountUpdateRowResponse(Guid Id, int SourceRowNumber, string CaptainId, string SheetOwnerName,
     string SheetCity, string SheetIqamaNo, string SheetStatus, bool? SheetSuspended, string MatchStatus,
     NinjaAccountUpdateSystemAccount? System, IReadOnlyList<NinjaAccountUpdateProblem> Problems);

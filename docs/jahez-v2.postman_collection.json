@@ -501,7 +501,7 @@
         "url": "{{baseUrl}}/api/jahez/v2/requests",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"handoverId\": \"{{handoverId}}\",\n  \"kind\": 5,\n  \"reason\": \"تصحيح رصيد المتابعة\",\n  \"adjustmentTarget\": 2,\n  \"debtAdjustment\": 100\n}"
+          "raw": "{\n  \"accountId\": \"{{accountId}}\",\n  \"kind\": 5,\n  \"reason\": \"تصحيح رصيد المتابعة\",\n  \"adjustmentTarget\": 2,\n  \"debtAdjustment\": 100\n}"
         }
       }
     },

@@ -1,0 +1,425 @@
+﻿code,severity,sheet,row,account,field,workbook,database,detail
+NON_RECORD_ROW,Info,البدلاء,89,,,,,Summary/formula row; exclude from import.
+NON_RECORD_ROW,Info,البدلاء,90,,,,,Summary/formula row; exclude from import.
+NONSTANDARD_RIDER_ID,Review,البدلاء,2,215810,actual rider identity,8000000009,,May be an intentional temporary identity; do not replace or merge automatically.
+SHORT_NUMERIC_PASSWORD,Review,البدلاء,2,215810,password,,,Numeric password has fewer than six digits; original leading zero cannot be inferred safely.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,2,215810,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,3,215332,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,4,214288,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,5,215769,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,6,215473,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_NAME_DIFFERENCE,Review,البدلاء,7,214754,,احمد ابراهيم عبد الغني بسطويسي,احمد ابراهيم عبدالغني بسطويسي,Match identity first; aliases/contractor annotations may explain the difference.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,7,214754,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,البدلاء,7,214754,,2,1,
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,8,264401,,ExternalMotorcycle,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,البدلاء,8,264401,,2,1,
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,9,215794,,ExternalMotorcycle,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,10,175323,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,11,214276,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+NONSTANDARD_RIDER_ID,Review,البدلاء,12,214271,actual rider identity,7000000004,,May be an intentional temporary identity; do not replace or merge automatically.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,12,214271,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,13,214197,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,14,215770,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,15,215459,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,16,222880,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,17,214312,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+SHORT_NUMERIC_PASSWORD,Review,البدلاء,18,214235,password,,,Numeric password has fewer than six digits; original leading zero cannot be inferred safely.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,18,214235,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+MULTIPLE_PHONE_CHOICES,Decision,البدلاء,19,215809,,0542983073 / 0558751163,,Cell contains two phone numbers. Preserve both; choose which is the account login phone.
+RIDER_NAME_DIFFERENCE,Review,البدلاء,19,215809,,محمد نويون ميا,MD NOYON MIA,Match identity first; aliases/contractor annotations may explain the difference.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,19,215809,,InternalMotorcycle,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,البدلاء,19,215809,,2,1,
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,20,246113,,ExternalMotorcycle,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,21,215800,,ExternalMotorcycle,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+SHORT_NUMERIC_PASSWORD,Review,البدلاء,22,282009,password,,,Numeric password has fewer than six digits; original leading zero cannot be inferred safely.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,22,282009,,ExternalMotorcycle,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+SHORT_NUMERIC_PASSWORD,Review,البدلاء,23,215459,password,,,Numeric password has fewer than six digits; original leading zero cannot be inferred safely.
+RIDER_NAME_DIFFERENCE,Review,البدلاء,23,215459,,حسن سليم عبدالكريم سليم,حسن سليم عبد الكريم سليم,Match identity first; aliases/contractor annotations may explain the difference.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,23,215459,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,24,214321,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+HISTORY_NOT_ACCEPTED,Decision,البدلاء,25,214299,,لا يقبل,,History row says not accepted; decide whether this represents actual work or a failed attempt.
+RIDER_NAME_DIFFERENCE,Review,البدلاء,25,214299,,اسماعيل حسين شاون شاوون,اسماعيل حسين شاون,Match identity first; aliases/contractor annotations may explain the difference.
+ASSIGNMENT_NOT_EXACT,Change,البدلاء,25,214299,,,0,"No unique assignment matches account, rider, start and end dates."
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,26,214754,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,البدلاء,26,214754,,2,1,
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,27,215774,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+NONSTANDARD_RIDER_ID,Review,البدلاء,28,214125,actual rider identity,7000000016,,May be an intentional temporary identity; do not replace or merge automatically.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,28,214125,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+SHORT_NUMERIC_PASSWORD,Review,البدلاء,29,214235,password,,,Numeric password has fewer than six digits; original leading zero cannot be inferred safely.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,29,214235,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,30,214261,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,31,214214,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,32,215476,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,33,215760,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+SHORT_NUMERIC_PASSWORD,Review,البدلاء,34,215459,password,,,Numeric password has fewer than six digits; original leading zero cannot be inferred safely.
+RIDER_NAME_DIFFERENCE,Review,البدلاء,34,215459,,حسن سليم عبدالكريم سليم,حسن سليم عبد الكريم سليم,Match identity first; aliases/contractor annotations may explain the difference.
+DUPLICATE_DATABASE_ASSIGNMENT,Decision,البدلاء,34,215459,,,2,"No unique assignment matches account, rider, start and end dates."
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,35,215801,,ExternalMotorcycle,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,36,215777,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+SHORT_NUMERIC_PASSWORD,Review,البدلاء,37,222883,password,,,Numeric password has fewer than six digits; original leading zero cannot be inferred safely.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,37,222883,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,38,215482,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,39,215481,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,40,215705,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,41,215718,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,42,215772,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,43,272576,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,44,215452,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,45,215814,,ExternalMotorcycle,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,البدلاء,45,215814,,2,1,
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,46,215710,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,البدلاء,46,215710,,2,1,
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,47,215806,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,البدلاء,47,215806,,2,1,
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,48,215475,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,49,26528,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,50,291322,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+SHORT_NUMERIC_PASSWORD,Review,البدلاء,51,214330,password,,,Numeric password has fewer than six digits; original leading zero cannot be inferred safely.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,51,214330,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,52,215707,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_NAME_DIFFERENCE,Review,البدلاء,53,282046,,محمد محمود عبدالمنعم محمود,محمد محمود عبد المنعم محمود,Match identity first; aliases/contractor annotations may explain the difference.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,53,282046,,ExternalMotorcycle,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,البدلاء,53,282046,,2,1,
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,54,214330,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_NAME_DIFFERENCE,Review,البدلاء,55,272702,,محمد أرفال اسلام ا رفعت,MD ASHRAFUL ISLAM RIFAT,Match identity first; aliases/contractor annotations may explain the difference.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,55,272702,,InternalMotorcycle,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,البدلاء,55,272702,,2,1,
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,56,214335,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,57,214267,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+SHORT_NUMERIC_PASSWORD,Review,البدلاء,58,215746,password,,,Numeric password has fewer than six digits; original leading zero cannot be inferred safely.
+RIDER_NAME_DIFFERENCE,Review,البدلاء,58,215746,,محمد خالد علي,محمد خالد علي محمد,Match identity first; aliases/contractor annotations may explain the difference.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,58,215746,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,59,279831,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,60,279576,,InternalMotorcycle,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,البدلاء,60,279576,,2,1,
+SHORT_NUMERIC_PASSWORD,Review,البدلاء,61,246095,password,,,Numeric password has fewer than six digits; original leading zero cannot be inferred safely.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,61,246095,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+SHORT_NUMERIC_PASSWORD,Review,البدلاء,62,215817,password,,,Numeric password has fewer than six digits; original leading zero cannot be inferred safely.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,62,215817,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+MULTIPLE_PHONE_CHOICES,Decision,البدلاء,63,214265,,0558006043 / 0503087628,,Cell contains two phone numbers. Preserve both; choose which is the account login phone.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,63,214265,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_NAME_DIFFERENCE,Review,البدلاء,64,215731,,مصطفى فتحي سيد ابراهيم,مصطفى فتحى سيد ابراهيم,Match identity first; aliases/contractor annotations may explain the difference.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,64,215731,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,65,291320,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,66,264411,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_NAME_DIFFERENCE,Review,البدلاء,67,246108,,حسن كريم كريم ال,HASANUL KARIM,Match identity first; aliases/contractor annotations may explain the difference.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,67,246108,,InternalMotorcycle,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,البدلاء,67,246108,,2,1,
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,68,267566,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+NONSTANDARD_RIDER_ID,Review,البدلاء,69,246091,actual rider identity,7000000013,,May be an intentional temporary identity; do not replace or merge automatically.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,69,246091,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,70,272578,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,71,214205,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,72,246092,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+ACCOUNT_CITY_DIFFERENCE,Review,البدلاء,73,286366,,Jeddah,Riyadh,Workbook says actual work city; account registration city is a separate concept.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,73,286366,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_NAME_DIFFERENCE,Review,البدلاء,74,267561,,الأمين العبيد الأمين احمد,الامين العبيد الامين احمد,Match identity first; aliases/contractor annotations may explain the difference.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,74,267561,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+SHORT_NUMERIC_PASSWORD,Review,البدلاء,75,214312,password,,,Numeric password has fewer than six digits; original leading zero cannot be inferred safely.
+RIDER_NAME_DIFFERENCE,Review,البدلاء,75,214312,,دكتور رافيول تشودري يعرف,MD RAFIUL ALAM CHOWDHURY,Match identity first; aliases/contractor annotations may explain the difference.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,75,214312,,InternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,البدلاء,75,214312,,2,1,
+RIDER_NAME_DIFFERENCE,Review,البدلاء,76,226083,,رشوان عبد الجابر عبد ربه رشوان,رشوان عبدالجابر عبد ربه رشوان,Match identity first; aliases/contractor annotations may explain the difference.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,76,226083,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,البدلاء,76,226083,,2,1,
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,77,194264,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+ACCOUNT_CITY_DIFFERENCE,Review,البدلاء,78,286371,,Jeddah,Riyadh,Workbook says actual work city; account registration city is a separate concept.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,78,286371,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+ACCOUNT_CITY_DIFFERENCE,Review,البدلاء,79,159271,,Jeddah,Taif,Workbook says actual work city; account registration city is a separate concept.
+RIDER_TYPE_DIFFERENCE,Change,البدلاء,79,159271,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,البدلاء,79,159271,,2,1,
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,2,215339,nationality,مصر,مصري,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,2,215339,,ExternalMotorcycle,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,3,246088,nationality,مصر,مصري,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,3,246088,,ExternalMotorcycle,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,4,215331,nationality,مصر,مصري,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,4,215331,,ExternalMotorcycle,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,5,282111,nationality,بنجلاديش,بنغلاديشي,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,5,282111,,ExternalMotorcycle,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_NAME_DIFFERENCE,Review,الداتا الحالية,6,282009,,محمد أرفال اسلام ا رفعت,MD ASHRAFUL ISLAM RIFAT,Match identity first; aliases/contractor annotations may explain the difference.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,6,282009,,InternalMotorcycle,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,6,282009,,2,1,
+LOGIN_PHONE_DIFFERENCE,Change,الداتا الحالية,6,282009,,0530129311,0569084538,
+ACCOUNT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,6,282009,,2,1,
+NONSTANDARD_RIDER_ID,Review,الداتا الحالية,7,282008,actual rider identity,7000000013,,May be an intentional temporary identity; do not replace or merge automatically.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,7,282008,nationality,بنجلاديش,بنغلاديشي,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,7,282008,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,8,282007,nationality,بنجلاديش,بنغلاديشي,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,8,282007,,ExternalMotorcycle,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,9,267219,nationality,مصر,مصري,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,9,267219,,ExternalMotorcycle,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+SHORT_NUMERIC_PASSWORD,Review,الداتا الحالية,10,215729,password,,,Numeric password has fewer than six digits; original leading zero cannot be inferred safely.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,10,215729,nationality,باكستان,باكستاني,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,10,215729,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,11,215810,nationality,مصر,مصري,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,11,215810,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,11,215810,,2,1,
+ACCOUNT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,11,215810,,2,1,
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,12,246591,nationality,اليمن,يمني,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,12,246591,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,13,246114,,ExternalMotorcycle,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,14,246112,,ExternalMotorcycle,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,15,246111,,ExternalMotorcycle,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+SHORT_NUMERIC_PASSWORD,Review,الداتا الحالية,16,215811,password,,,Numeric password has fewer than six digits; original leading zero cannot be inferred safely.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,16,215811,,ExternalMotorcycle,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,17,246117,,ExternalMotorcycle,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,18,215812,,ExternalMotorcycle,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,18,215812,,2,1,
+ACCOUNT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,18,215812,,2,1,
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,19,246087,,ExternalMotorcycle,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,20,215795,,ExternalMotorcycle,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,21,215794,nationality,بنجلاديش,بنغلاديشي,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_PROPERTY_DIFFERENCE,Change,الداتا الحالية,21,215794,rider phone,0540983494,0560438481,
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,21,215794,,ExternalMotorcycle,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,22,246107,,ExternalMotorcycle,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,22,246107,,2,1,
+ACCOUNT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,22,246107,,2,1,
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,23,57153,,ExternalMotorcycle,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,24,215323,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,25,246590,,ExternalMotorcycle,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,26,272701,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+SHORT_NUMERIC_PASSWORD,Review,الداتا الحالية,27,215322,password,,,Numeric password has fewer than six digits; original leading zero cannot be inferred safely.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,27,215322,,ExternalMotorcycle,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,27,215322,,2,1,
+ACCOUNT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,27,215322,,2,1,
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,28,246105,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+SHORT_NUMERIC_PASSWORD,Review,الداتا الحالية,29,246094,password,,,Numeric password has fewer than six digits; original leading zero cannot be inferred safely.
+RIDER_NAME_DIFFERENCE,Review,الداتا الحالية,29,246094,,فارس البدري ابراهيم,فارس البدري ابراهيم الحاج,Match identity first; aliases/contractor annotations may explain the difference.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,29,246094,nationality,السودان,سوداني,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,29,246094,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,29,246094,,2,1,
+ACCOUNT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,29,246094,,2,1,
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,30,215804,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,31,246086,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,32,215326,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,33,87492,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,33,87492,,2,1,
+ACCOUNT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,33,87492,,2,1,
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,34,214217,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,35,214138,,InternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,36,215480,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+NONSTANDARD_RIDER_ID,Review,الداتا الحالية,37,214258,actual rider identity,7000000001,,May be an intentional temporary identity; do not replace or merge automatically.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,37,214258,nationality,بنجلاديش,بنغلاديشي,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,37,214258,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,38,214256,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,39,214297,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+NONSTANDARD_RIDER_ID,Review,الداتا الحالية,40,215469,actual rider identity,7000000002,,May be an intentional temporary identity; do not replace or merge automatically.
+SHORT_NUMERIC_PASSWORD,Review,الداتا الحالية,40,215469,password,,,Numeric password has fewer than six digits; original leading zero cannot be inferred safely.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,40,215469,nationality,بنجلاديش,بنغلاديشي,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,40,215469,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,41,222878,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,42,215725,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,43,222881,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,44,215451,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_NAME_DIFFERENCE,Review,الداتا الحالية,45,214211,,محمود ربيع جنيدي خالد,محمود ربيع جنيدى خالد,Match identity first; aliases/contractor annotations may explain the difference.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,45,214211,,InternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,45,214211,,2,1,
+ACCOUNT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,45,214211,,2,1,
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,46,215471,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,47,215773,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,48,214329,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,49,214260,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+OWNER_ID_MISMATCH,Blocker,الداتا الحالية,50,255527,,2629274197,2620274197,
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,50,255527,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+NONSTANDARD_RIDER_ID,Review,الداتا الحالية,51,214288,actual rider identity,7000000003,,May be an intentional temporary identity; do not replace or merge automatically.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,51,214288,nationality,بنجلاديش,بنغلاديشي,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,51,214288,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_NAME_DIFFERENCE,Review,الداتا الحالية,52,214271,,فيصل مونشي فيصل مونشي,FAYSAL MUNSHI,Match identity first; aliases/contractor annotations may explain the difference.
+RIDER_PROPERTY_DIFFERENCE,Change,الداتا الحالية,52,214271,rider phone,0508798746,0578526764,
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,52,214271,,InternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,53,276596,,ExternalMotorcycle,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,54,215799,,ExternalMotorcycle,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,54,215799,,2,1,
+ACCOUNT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,54,215799,,2,1,
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,55,215333,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,56,246102,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+NONSTANDARD_RIDER_ID,Review,الداتا الحالية,57,214235,actual rider identity,7000000004,,May be an intentional temporary identity; do not replace or merge automatically.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,57,214235,nationality,بنجلاديش,بنغلاديشي,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,57,214235,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+SHORT_NUMERIC_PASSWORD,Review,الداتا الحالية,58,279546,password,,,Numeric password has fewer than six digits; original leading zero cannot be inferred safely.
+RIDER_NAME_DIFFERENCE,Review,الداتا الحالية,58,279546,,محمد سيف ال ا ا اسلام,MD SAIFUL ISLAM,Match identity first; aliases/contractor annotations may explain the difference.
+RIDER_NAME_DIFFERENCE,Review,الداتا الحالية,59,279579,,محمد منير أوسين,MD MONIR HOSSEN,Match identity first; aliases/contractor annotations may explain the difference.
+RIDER_PROPERTY_DIFFERENCE,Change,الداتا الحالية,59,279579,rider phone,0543556705,0570954973,
+RIDER_NAME_DIFFERENCE,Review,الداتا الحالية,60,279669,,محمد أسيكور رحمن آفاز عاشق,محمد اسيكور رحمن افاز عاشق,Match identity first; aliases/contractor annotations may explain the difference.
+RIDER_PROPERTY_DIFFERENCE,Change,الداتا الحالية,60,279669,rider phone,0570493310,0572136137,
+RIDER_NAME_DIFFERENCE,Review,الداتا الحالية,61,279577,,أخترا ا حوسان,AKTER HOSSAN,Match identity first; aliases/contractor annotations may explain the difference.
+RIDER_NAME_DIFFERENCE,Review,الداتا الحالية,62,279571,,سين علام ١١ روفين,SAHIN ALAM ROVEN,Match identity first; aliases/contractor annotations may explain the difference.
+RIDER_NAME_DIFFERENCE,Review,الداتا الحالية,63,279565,,محمد روني 11 أحمد,MD RONY AHMED,Match identity first; aliases/contractor annotations may explain the difference.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,64,246589,nationality,بنجلاديش,بنغلاديشي,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_PROPERTY_DIFFERENCE,Change,الداتا الحالية,64,246589,rider phone,0536189321,0,
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,65,215473,nationality,بنجلاديش,بنغلاديشي,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,65,215473,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+LOGIN_PHONE_DIFFERENCE,Change,الداتا الحالية,65,215473,,0571166051,0578933603,
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,66,215463,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,67,148308,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,68,246099,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+NONSTANDARD_RIDER_ID,Review,الداتا الحالية,69,77230,actual rider identity,7000000011,,May be an intentional temporary identity; do not replace or merge automatically.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,69,77230,nationality,بنجلاديش,بنغلاديشي,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,69,77230,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,70,279566,,ExternalMotorcycle,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_PROPERTY_DIFFERENCE,Change,الداتا الحالية,71,82581,nationality,السودان,يمني,
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,71,82581,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,71,82581,,2,1,
+ACCOUNT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,71,82581,,2,1,
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,72,267208,nationality,بنجلاديش,بنغلاديشي,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,72,267208,,ExternalMotorcycle,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+NONSTANDARD_RIDER_ID,Review,الداتا الحالية,73,215728,actual rider identity,7000000005,,May be an intentional temporary identity; do not replace or merge automatically.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,73,215728,nationality,بنجلاديش,بنغلاديشي,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,73,215728,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,74,279558,nationality,باكستان,باكستاني,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,74,279558,,ExternalMotorcycle,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+MULTIPLE_PHONE_CHOICES,Decision,الداتا الحالية,75,215731,,0558006043 / 0503087628,,Cell contains two phone numbers. Preserve both; choose which is the account login phone.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,75,215731,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,76,214291,nationality,باكستان,باكستاني,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_PROPERTY_DIFFERENCE,Change,الداتا الحالية,76,214291,rider phone,0507970469,0582217118,
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,76,214291,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,77,214279,nationality,مصر,مصري,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,77,214279,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_NAME_DIFFERENCE,Review,الداتا الحالية,78,279581,,محمد خيري محمد احمد,محمد خيرى محمد احمد,Match identity first; aliases/contractor annotations may explain the difference.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,78,279581,,InternalMotorcycle,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,78,279581,,2,1,
+ACCOUNT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,78,279581,,2,1,
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,79,279550,nationality,مصر,مصري,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_PROPERTY_DIFFERENCE,Change,الداتا الحالية,79,279550,rider phone,0557314582,0541746204,
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,79,279550,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,80,267205,nationality,مصر,مصري,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,80,267205,,ExternalMotorcycle,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_NAME_DIFFERENCE,Review,الداتا الحالية,81,267201,,محمد عبده عبدالله الوصابي,محمدعبدة عبدالله الوصابي,Match identity first; aliases/contractor annotations may explain the difference.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,81,267201,,ExternalMotorcycle,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+SHORT_NUMERIC_PASSWORD,Review,الداتا الحالية,82,246098,password,,,Numeric password has fewer than six digits; original leading zero cannot be inferred safely.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,82,246098,nationality,باكستان,باكستاني,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,82,246098,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_NAME_DIFFERENCE,Review,الداتا الحالية,83,215720,,محمد المصطفى صديق عبد الرحمن عثمان,محمد المصطفي صديق عبدالرحمن,Match identity first; aliases/contractor annotations may explain the difference.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,83,215720,nationality,السودان,سوداني,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,83,215720,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,83,215720,,2,1,
+ACCOUNT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,83,215720,,2,1,
+ACCOUNT_CITY_DIFFERENCE,Review,الداتا الحالية,84,159271,,Jeddah,Taif,Workbook says actual work city; account registration city is a separate concept.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,84,159271,nationality,مصر,مصري,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_PROPERTY_DIFFERENCE,Change,الداتا الحالية,84,159271,rider phone,0537920797,0544463081,
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,84,159271,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+LOGIN_PHONE_DIFFERENCE,Change,الداتا الحالية,84,159271,,0537920797,0548617278,
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,85,246093,nationality,مصر,مصري,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,85,246093,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_PROPERTY_DIFFERENCE,Change,الداتا الحالية,86,295969,nationality,اثيوبيا,برمي,
+RIDER_PROPERTY_DIFFERENCE,Change,الداتا الحالية,86,295969,rider phone,0590053019,0543960996,
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,86,295969,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+SHORT_NUMERIC_PASSWORD,Review,الداتا الحالية,87,295968,password,,,Numeric password has fewer than six digits; original leading zero cannot be inferred safely.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,87,295968,nationality,مصر,مصري,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,87,295968,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,87,295968,,2,1,
+ACCOUNT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,87,295968,,2,1,
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,88,295967,nationality,مصر,مصري,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,88,295967,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,89,295965,nationality,مصر,مصري,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_PROPERTY_DIFFERENCE,Change,الداتا الحالية,89,295965,rider phone,0594483865,0593383865,
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,89,295965,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,90,295964,nationality,مصر,مصري,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,90,295964,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,91,279831,nationality,اليمن,يمني,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,91,279831,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+LOGIN_PHONE_DIFFERENCE,Change,الداتا الحالية,91,279831,,0538691034,0565535606,
+NONSTANDARD_RIDER_ID,Review,الداتا الحالية,92,246116,actual rider identity,7000000010,,May be an intentional temporary identity; do not replace or merge automatically.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,92,246116,nationality,بنجلاديش,بنغلاديشي,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,92,246116,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_PROPERTY_DIFFERENCE,Change,الداتا الحالية,93,223613,nationality,باكستان,بنغلاديشي,
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,93,223613,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+NONSTANDARD_RIDER_ID,Review,الداتا الحالية,94,214310,actual rider identity,7000000006,,May be an intentional temporary identity; do not replace or merge automatically.
+SHORT_NUMERIC_PASSWORD,Review,الداتا الحالية,94,214310,password,,,Numeric password has fewer than six digits; original leading zero cannot be inferred safely.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,94,214310,nationality,بنجلاديش,بنغلاديشي,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,94,214310,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+NONSTANDARD_RIDER_ID,Review,الداتا الحالية,95,215776,actual rider identity,7000000007,,May be an intentional temporary identity; do not replace or merge automatically.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,95,215776,nationality,بنجلاديش,بنغلاديشي,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,95,215776,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+SHORT_NUMERIC_PASSWORD,Review,الداتا الحالية,96,69412,password,,,Numeric password has fewer than six digits; original leading zero cannot be inferred safely.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,96,69412,nationality,بنجلاديش,بنغلاديشي,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,96,69412,,ExternalMotorcycle,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,96,69412,,2,1,
+ACCOUNT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,96,69412,,2,1,
+RIDER_PROPERTY_DIFFERENCE,Change,الداتا الحالية,97,246106,rider phone,0540640312,0570785879,
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,97,246106,,InternalMotorcycle,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,97,246106,,2,1,
+ACCOUNT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,97,246106,,2,1,
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,98,223614,nationality,باكستان,باكستاني,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,98,223614,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,99,215814,,ExternalMotorcycle,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+LOGIN_PHONE_DIFFERENCE,Change,الداتا الحالية,99,215814,,0560796815,0534153934,
+NONSTANDARD_RIDER_ID,Review,الداتا الحالية,100,215723,actual rider identity,7000000008,,May be an intentional temporary identity; do not replace or merge automatically.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,100,215723,nationality,بنجلاديش,بنغلاديشي,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,100,215723,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,101,272704,nationality,باكستان,باكستاني,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,101,272704,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,102,215327,nationality,باكستان,باكستاني,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,102,215327,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+SHORT_NUMERIC_PASSWORD,Review,الداتا الحالية,103,246095,password,,,Numeric password has fewer than six digits; original leading zero cannot be inferred safely.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,103,246095,nationality,مصر,مصري,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,103,246095,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,103,246095,,2,1,
+LOGIN_PHONE_DIFFERENCE,Change,الداتا الحالية,103,246095,,0563687380,0556371995,
+ACCOUNT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,103,246095,,2,1,
+ACCOUNT_CITY_DIFFERENCE,Review,الداتا الحالية,104,214308,,Jeddah,Riyadh,Workbook says actual work city; account registration city is a separate concept.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,104,214308,nationality,السودان,سوداني,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,104,214308,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+ACCOUNT_CITY_DIFFERENCE,Review,الداتا الحالية,105,272575,,Jeddah,Riyadh,Workbook says actual work city; account registration city is a separate concept.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,105,272575,nationality,اليمن,يمني,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,105,272575,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,106,214759,nationality,مصر,مصري,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,106,214759,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,107,214753,nationality,باكستان,باكستاني,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,107,214753,,ExternalCar,,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+CURRENT_NOT_PLACED,Decision,الداتا الحالية,108,222872,,لم يتم التسكين,,Current sheet names a rider but explicitly says the placement is not completed.
+ASSIGNMENT_NOT_EXACT,Change,الداتا الحالية,108,222872,,,0,"No unique assignment matches account, rider, start and end dates."
+LOGIN_PHONE_DIFFERENCE,Change,الداتا الحالية,108,222872,,0564926978,,
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,111,214210,nationality,باكستان,باكستاني,Same nationality using country name versus adjective; not a citizenship conflict.
+SHORT_NUMERIC_PASSWORD,Review,الداتا الحالية,113,215722,password,,,Numeric password has fewer than six digits; original leading zero cannot be inferred safely.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,114,215732,nationality,الهند,هندي,Same nationality using country name versus adjective; not a citizenship conflict.
+SHORT_NUMERIC_PASSWORD,Review,الداتا الحالية,115,215715,password,,,Numeric password has fewer than six digits; original leading zero cannot be inferred safely.
+CURRENT_NOT_PLACED,Decision,الداتا الحالية,117,272573,,لم يتم التسكين,,Current sheet names a rider but explicitly says the placement is not completed.
+ASSIGNMENT_NOT_EXACT,Change,الداتا الحالية,117,272573,,,0,"No unique assignment matches account, rider, start and end dates."
+LOGIN_PHONE_DIFFERENCE,Change,الداتا الحالية,117,272573,,0540292673,,
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,122,215775,nationality,بنجلاديش,بنغلاديشي,Same nationality using country name versus adjective; not a citizenship conflict.
+SHORT_NUMERIC_PASSWORD,Review,الداتا الحالية,124,272577,password,,,Numeric password has fewer than six digits; original leading zero cannot be inferred safely.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,124,272577,nationality,مصر,مصري,Same nationality using country name versus adjective; not a citizenship conflict.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,125,214321,nationality,الهند,هندي,Same nationality using country name versus adjective; not a citizenship conflict.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,128,215450,nationality,الهند,هندي,Same nationality using country name versus adjective; not a citizenship conflict.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,130,215769,nationality,اليمن,يمني,Same nationality using country name versus adjective; not a citizenship conflict.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,133,215477,nationality,الهند,هندي,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_PROPERTY_DIFFERENCE,Change,الداتا الحالية,135,215770,rider phone,0534680145,0575764060,
+SHORT_NUMERIC_PASSWORD,Review,الداتا الحالية,136,215459,password,,,Numeric password has fewer than six digits; original leading zero cannot be inferred safely.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,136,215459,nationality,مصر,مصري,Same nationality using country name versus adjective; not a citizenship conflict.
+LOGIN_PHONE_DIFFERENCE,Change,الداتا الحالية,136,215459,,0548006139,0568238394,
+ACCOUNT_CITY_DIFFERENCE,Review,الداتا الحالية,137,286370,,Jeddah,Riyadh,Workbook says actual work city; account registration city is a separate concept.
+SHORT_NUMERIC_PASSWORD,Review,الداتا الحالية,138,286356,password,,,Numeric password has fewer than six digits; original leading zero cannot be inferred safely.
+ACCOUNT_CITY_DIFFERENCE,Review,الداتا الحالية,138,286356,,Jeddah,Riyadh,Workbook says actual work city; account registration city is a separate concept.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,138,286356,nationality,اثيوبيا,إثيوبي,Same nationality using country name versus adjective; not a citizenship conflict.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,139,286334,nationality,مصر,مصري,Same nationality using country name versus adjective; not a citizenship conflict.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,140,286333,nationality,اليمن,يمني,Same nationality using country name versus adjective; not a citizenship conflict.
+SHORT_NUMERIC_PASSWORD,Review,الداتا الحالية,141,285971,password,,,Numeric password has fewer than six digits; original leading zero cannot be inferred safely.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,141,285971,nationality,باكستان,باكستاني,Same nationality using country name versus adjective; not a citizenship conflict.
+SHORT_NUMERIC_PASSWORD,Review,الداتا الحالية,142,267573,password,,,Numeric password has fewer than six digits; original leading zero cannot be inferred safely.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,142,267573,,ExternalCar,InternalCar,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,143,267570,nationality,مصر,مصري,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_TYPE_DIFFERENCE,Change,الداتا الحالية,143,267570,,ExternalCar,InternalCar,Suggested mapping uses sponsorship for internal/external and vehicle label for car/motorcycle.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,145,267562,nationality,مصر,مصري,Same nationality using country name versus adjective; not a citizenship conflict.
+SHORT_NUMERIC_PASSWORD,Review,الداتا الحالية,146,292604,password,,,Numeric password has fewer than six digits; original leading zero cannot be inferred safely.
+RIDER_PROPERTY_DIFFERENCE,Change,الداتا الحالية,146,292604,rider phone,0539858760,0538958760,
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,147,292603,nationality,الهند,هندي,Same nationality using country name versus adjective; not a citizenship conflict.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,148,292600,nationality,الهند,هندي,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_NAME_DIFFERENCE,Review,الداتا الحالية,149,292599,,ولي الدين محمد عمر,والى الدين محمد عمر الياس,Match identity first; aliases/contractor annotations may explain the difference.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,149,292599,nationality,السودان,سوداني,Same nationality using country name versus adjective; not a citizenship conflict.
+RIDER_PROPERTY_DIFFERENCE,Change,الداتا الحالية,149,292599,rider phone,0574477167,0532101559,
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,150,292598,nationality,باكستان,باكستاني,Same nationality using country name versus adjective; not a citizenship conflict.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,151,286354,nationality,باكستان,باكستاني,Same nationality using country name versus adjective; not a citizenship conflict.
+NATIONALITY_LABEL_ONLY,Info,الداتا الحالية,152,286342,nationality,باكستان,باكستاني,Same nationality using country name versus adjective; not a citizenship conflict.
+DATABASE_ASSIGNMENT_UNMATCHED,Review,,,215459,,,2553845369,DB assignment 01a16df6-33eb-7436-b37b-b90230121a6a: 2026-10-06 to 2026-10-06; not an exact workbook match.
+DATABASE_ASSIGNMENT_UNMATCHED,Review,,,215459,,,2553845369,DB assignment 01a16df8-6809-71c6-b939-d53d664fe930: 2026-10-06 to 2026-10-06; not an exact workbook match.
+SAME_DAY_ACCOUNT,Review,الداتا الحالية,11,215810,,البدلاء row 2,,account 215810; 2026-10-01 to 2026-10-01 versus 2026-10-01 to open; inclusive end dates.
+SAME_DAY_ACCOUNT,Review,الداتا الحالية,57,214235,,البدلاء row 29,,account 214235; 2026-10-05 to 2026-10-08 versus 2026-10-08 to open; inclusive end dates.
+SAME_DAY_ACCOUNT,Review,البدلاء,54,214330,,البدلاء row 51,,account 214330; 2026-10-01 to 2026-10-14 versus 2026-10-14 to 2026-10-15; inclusive end dates.
+SAME_DAY_ACCOUNT,Review,الداتا الحالية,84,159271,,البدلاء row 79,,account 159271; 2026-10-23 to 2026-10-24 versus 2026-10-24 to open; inclusive end dates.
+SAME_DAY_RIDER,Review,البدلاء,27,215774,,البدلاء row 10,,rider 2530745104; 2026-10-01 to 2026-10-04 versus 2026-10-04 to 2026-10-06; inclusive end dates.
+SAME_DAY_RIDER,Review,الداتا الحالية,130,215769,,البدلاء row 11,,rider 2268920499; 2026-10-01 to 2026-10-04 versus 2026-10-04 to open; inclusive end dates.
+SAME_DAY_RIDER,Review,الداتا الحالية,146,292604,,البدلاء row 77,,rider 2611407459; 2026-10-10 to 2026-10-24 versus 2026-10-24 to open; inclusive end dates.
+SAME_DAY_RIDER,Review,الداتا الحالية,97,246106,,البدلاء row 60,,rider 2550771675; 2026-10-01 to 2026-10-17 versus 2026-10-17 to open; inclusive end dates.
+SAME_DAY_RIDER,Review,الداتا الحالية,7,282008,,البدلاء row 69,,rider 7000000013; 2026-10-01 to 2026-10-20 versus 2026-10-20 to open; inclusive end dates.
+OVERLAPPING_RIDER,Blocker,الداتا الحالية,143,267570,,البدلاء row 78,,rider 2589847850; 2026-10-20 to 2026-10-24 versus 2026-10-23 to open; inclusive end dates.

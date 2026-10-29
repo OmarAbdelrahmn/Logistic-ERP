@@ -1,3 +1,4 @@
+using LogisticsERP.Application.Features.Hr;
 using System.Data;
 using System.Security.Cryptography;
 using System.Text;
@@ -138,13 +139,13 @@ internal sealed partial class JahezWorkflowService(
 
     private void Entry(JahezAccountSession h, JahezLedgerBucket bucket, JahezLedgerKind kind, decimal amount,
         Guid sourceId, string reason, DateTimeOffset? occurred = null, Guid? reverses = null) => db.Add(new JahezLedgerEntry
-        { HandoverId = h.Id, Bucket = bucket, Kind = kind, Amount = amount, SourceId = sourceId,
+        { AccountId = h.PlatformRiderAccountId, HandoverId = h.Id, Bucket = bucket, Kind = kind, Amount = amount, SourceId = sourceId,
             OccurredAtUtc = occurred ?? Now, Reason = reason, ReversesEntryId = reverses });
 
     public Task<Result<JahezHandoverResponse>> HandoverAsync(string key, JahezHandoverRequest request, CancellationToken ct = default) =>
         ExecuteAsync(key, "handover", request, PermissionKeys.Jahez.HandoversCreate, async () =>
         {
-            var h = await CreateHandover(request.AccountId, request.RiderProfileId, request.EffectiveAtUtc, request.Reason, 0m, null, ct);
+            var h = await CreateHandover(request.AccountId, request.RiderProfileId, request.EffectiveAtUtc, request.Reason, 0m, null, ct, request.PreviousDayUsages);
             Require(request.InitialFeePayment is >= 0m and <= 200m && JahezRules.Money(request.InitialFeePayment) == request.InitialFeePayment,
                 JahezErrors.Invalid("دفعة الرسوم غير صالحة."));
             if (request.InitialFeePayment > 0)
@@ -159,7 +160,7 @@ internal sealed partial class JahezWorkflowService(
         }, ct);
 
     private async Task<JahezAccountSession> CreateHandover(Guid accountId, Guid riderId, DateTimeOffset effective,
-        string reason, decimal waiver, Guid? approvalId, CancellationToken ct)
+        string reason, decimal waiver, Guid? approvalId, CancellationToken ct, IReadOnlyList<PreviousDayUsageInput>? previousDayUsages = null)
     {
         Reason(reason);
         effective = effective.ToUniversalTime();
@@ -188,6 +189,9 @@ internal sealed partial class JahezWorkflowService(
             contract = new ClientContract { ClientPlatformId = account.ClientPlatformId, Code = "JAHEZ-OPERATIONS", DisplayNameAr = "تشغيل جاهز", DisplayNameEn = "Jahez operations", Status = ClientContractStatus.Active };
             db.Add(contract);
         }
+        var allocator = new PlatformAccountDayAllocationService(db);
+        var previous = await allocator.PrepareAssignment(accountId, JahezRules.RiyadhDate(effective), riderId, previousDayUsages, reason, ct);
+        Require(previous.IsSuccess, previous.Error);
         var assignment = new RiderClientAssignment { RiderProfileId = riderId, ClientContractId = contract.Id,
             PlatformRiderAccountId = accountId, PaymentModel = account.PaymentModel, RiderAccountSlot = PlatformAssignmentPolicySupport.NextSlot(active),
             EffectiveFrom = JahezRules.RiyadhDate(effective), Status = RiderAssignmentStatus.Active, StartReason = reason,
@@ -200,6 +204,7 @@ internal sealed partial class JahezWorkflowService(
         db.Add(h);
         var dayStage = await new PlatformAccountDayAllocationService(db).Stage(accountId, assignment.Id, JahezRules.RiyadhDate(effective), null, reason, true, ct);
         Require(dayStage.IsSuccess, dayStage.Error);
+        await allocator.LinkContinuation(accountId, JahezRules.RiyadhDate(effective), reason, ct);
         var fee = new JahezAccountFee { HandoverId = h.Id, WaivedAmount = waiver, ApprovalRequestId = approvalId };
         db.Add(fee);
         Entry(h, JahezLedgerBucket.AccountFees, JahezLedgerKind.Charge, 200m - waiver, fee.Id, reason);
@@ -213,8 +218,7 @@ internal sealed partial class JahezWorkflowService(
         Require(h.EndedAtUtc is null && effective >= h.StartedAtUtc && effective <= Now, JahezErrors.Conflict("فترة الإغلاق غير صالحة."));
         Require(!h.CommissionPostedThrough.HasValue || JahezRules.RiyadhDate(effective) >= h.CommissionPostedThrough.Value,
             JahezErrors.Conflict("الإغلاق يسبق فترة عمولة مرحلة."));
-        Require(!await db.Set<JahezTransaction>().AnyAsync(x => x.HandoverId == h.Id && x.OccurredAtUtc >= effective
-            && !db.Set<JahezImportBatch>().Any(b => b.ReplacesBatchId == x.BatchId && b.CommittedAtUtc != null), ct),
+        Require(!await CurrentTransactions.AnyAsync(x => x.HandoverId == h.Id && x.OccurredAtUtc >= effective, ct),
             JahezErrors.Conflict("توجد حركات مستوردة بعد تاريخ الإغلاق؛ صحح إسنادها أولًا."));
         Require(!await db.Set<JahezDailyDispatch>().AnyAsync(x => x.HandoverId == h.Id && x.Date > JahezRules.RiyadhDate(effective)
             && !db.Set<JahezImportBatch>().Any(b => b.ReplacesBatchId == x.BatchId && b.CommittedAtUtc != null), ct),

@@ -10,7 +10,6 @@ builder.Services.AddHostedService<ExportJobProcessor>();
 builder.Services.AddHostedService<LogisticsERP.Worker.FleetExpiryNotificationWorker>();
 builder.Services.AddHostedService<AccidentDeadlineNotificationWorker>();
 builder.Services.AddHostedService<LogisticsERP.Worker.EmployeeExpiryNotificationWorker>();
-builder.Services.AddHostedService<JahezReminderWorker>();
 
 var host = builder.Build();
 await host.RunAsync();

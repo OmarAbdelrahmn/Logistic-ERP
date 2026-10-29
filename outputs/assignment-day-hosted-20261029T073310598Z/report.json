@@ -1,0 +1,11 @@
+{
+  "Database": "db67927",
+  "Migration": "20261029071925_MoveDayContributionsToAssignment",
+  "BackupCompleted": true,
+  "RehearsalRolledBack": true,
+  "Applied": true,
+  "PostCommitVerified": true,
+  "ContributionRows": 0,
+  "ApiDeployed": false,
+  "EvidenceDirectory": "C:\\Users\\omarf\\OneDrive\\Documents\\ChatGPT\\Logistic ERP\\outputs\\assignment-day-hosted-20261029T073310598Z"
+}

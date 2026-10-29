@@ -14,6 +14,7 @@ internal sealed partial class NinjaService
 {
     public async Task<Result<NinjaImportResponse>> ImportAsync(bool deductions, DateOnly reportDate, string fileName, byte[] content, CancellationToken ct = default)
     {
+        if (!deductions) return await ImportPerformanceLegacy(reportDate, fileName, content, ct);
         var platformIds = await AllowedPlatforms(deductions ? PermissionKeys.Ninja.DeductionsImport : PermissionKeys.Ninja.PerformanceImport, ct);
         if (platformIds.Length == 0) return Result.Failure<NinjaImportResponse>(NinjaErrors.Forbidden);
         var today = DateOnly.FromDateTime(clock.GetUtcNow().ToOffset(TimeSpan.FromHours(3)).DateTime);

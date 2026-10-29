@@ -1,0 +1,8 @@
+{
+  "sourceUnchanged": true,
+  "sourceRowKeysUnique": true,
+  "accountCountsReconciled": true,
+  "assignmentCountsReconciled": true,
+  "passwordValuesExcludedFromExtracts": true,
+  "hostedWritesPerformed": false
+}

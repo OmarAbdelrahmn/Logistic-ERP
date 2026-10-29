@@ -3,7 +3,13 @@ namespace LogisticsERP.Application.Features.Ninja;
 public sealed record NinjaAccountSheetRow(int RowNumber, string CaptainId, string OwnerName, string City, string OwnerNationalId);
 public sealed record NinjaComparisonSystemAccount(Guid AccountId, string CaptainId, string AccountCode, string Status,
     Guid? OwnerEmployeeId, string? OwnerNationalId, string? OwnerNameAr, string? OwnerNameEn,
-    Guid OperatingCityId, string? CityCode, string? CityNameAr, string? CityNameEn);
+    Guid OperatingCityId, string? CityCode, string? CityNameAr, string? CityNameEn) : LogisticsERP.Application.Features.Hr.IMonthlyAccountUsageResponse
+{
+    [global::System.Text.Json.Serialization.JsonIgnore]
+    public Guid UsageAccountId => AccountId;
+    public string MonthlyUsageStatus { get; set; } = "Unused";
+    public string UsageMonth { get; set; } = string.Empty;
+}
 public sealed record NinjaAccountDifference(string Field, string? SheetValue, string? SystemValue);
 public sealed record NinjaComparedAccount(NinjaAccountSheetRow Sheet, NinjaComparisonSystemAccount System,
     IReadOnlyList<NinjaAccountDifference> Differences);

@@ -31,12 +31,13 @@ public sealed class JahezAccountFee : AuditableEntity
 
 public sealed class JahezApprovalRequest : AuditableEntity
 {
+    public Guid? AccountId { get; set; }
     public Guid? OperationId { get; set; }
     public JahezAdjustmentTarget? AdjustmentTarget { get; set; }
     public decimal? ProposedNet { get; set; }
     public decimal? ProposedCommission { get; set; }
     public decimal? DebtAdjustment { get; set; }
-    public Guid HandoverId { get; set; }
+    public Guid? HandoverId { get; set; }
     public JahezApprovalKind Kind { get; set; }
     public JahezApprovalStatus Status { get; set; }
     public Guid RequestedByUserId { get; set; }
@@ -121,9 +122,11 @@ public sealed class JahezImportRow : HistoryEntity
 
 public sealed class JahezTransaction : HistoryEntity
 {
+    public Guid? AccountId { get; set; }
+    public Guid? SupersededByBatchId { get; set; }
     public Guid BatchId { get; set; }
     public Guid ImportRowId { get; set; }
-    public Guid HandoverId { get; set; }
+    public Guid? HandoverId { get; set; }
     public DateTimeOffset OccurredAtUtc { get; set; }
     public decimal DeliveryPrice { get; set; }
     public decimal CashAmount { get; set; }
@@ -144,10 +147,11 @@ public sealed class JahezDailyDispatch : HistoryEntity
 
 
 // Signed receivable: charges are positive, payments/credits are negative.
-// Transfer entries carry zero: obligations stay on their original rider and handover.
+// Platform debt belongs to the account; an optional handover records its context.
 public sealed class JahezLedgerEntry : HistoryEntity
 {
-    public Guid HandoverId { get; set; }
+    public Guid? AccountId { get; set; }
+    public Guid? HandoverId { get; set; }
     public JahezLedgerBucket Bucket { get; set; }
     public JahezLedgerKind Kind { get; set; }
     public decimal Amount { get; set; }

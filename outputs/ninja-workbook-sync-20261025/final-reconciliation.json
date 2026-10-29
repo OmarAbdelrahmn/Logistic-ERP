@@ -1,0 +1,20 @@
+{
+  "applied": true,
+  "batchId": "01a173a0-341b-72bb-93fc-b28dafcc0961",
+  "matchedSourcePeriods": 229,
+  "currentAssignments": 151,
+  "historicalAssignments": 78,
+  "currentSalaryAssignments": 21,
+  "currentCommissionAssignments": 130,
+  "allLatestAccountsMatched": 207,
+  "activeDayUsageRows": 291,
+  "sourceSnapshots": 229,
+  "passwordsModified": false,
+  "riderTypesModified": false,
+  "rowBackupReadBackVerified": true,
+  "backupHashVerified": true,
+  "postcommitFreshConnectionVerified": true,
+  "repeatVerificationWrites": 0,
+  "serverBackupCreated": true,
+  "serverRestoreVerificationSucceeded": false
+}

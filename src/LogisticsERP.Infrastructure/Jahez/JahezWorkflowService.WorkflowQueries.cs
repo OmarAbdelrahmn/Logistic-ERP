@@ -13,22 +13,74 @@ namespace LogisticsERP.Infrastructure.Jahez;
 
 internal sealed partial class JahezWorkflowService
 {
+    public Task<Result<JahezPage<JahezSettlementReminder>>> SettlementRemindersAsync(int page, int pageSize, CancellationToken ct = default) =>
+        ReadAsync(PermissionKeys.Jahez.Read, async () =>
+        {
+            Page(page, pageSize);
+            var today = Today;
+            var cutoff = JahezRules.StartOfDay(today.AddDays(-10)).ToUniversalTime();
+            var query = from h in db.JahezAccountSessions.AsNoTracking()
+                        join a in db.PlatformRiderAccounts.AsNoTracking() on h.PlatformRiderAccountId equals a.Id
+                        join r in db.RiderProfiles.AsNoTracking() on h.RiderProfileId equals r.Id
+                        join e in db.Employees.AsNoTracking() on r.EmployeeId equals e.Id
+                        where (h.LastSettlementPaymentAtUtc ?? h.StartedAtUtc) < cutoff
+                        orderby h.Id
+                        select new
+                        {
+                            h.Id, h.PlatformRiderAccountId, a.ExternalAccountId, h.RiderProfileId, e.FullNameAr,
+                            h.StartedAtUtc, h.EndedAtUtc, h.LastSettlementPaymentAtUtc,
+                            Settled = db.Set<JahezOperation>().Where(o => o.HandoverId == h.Id && o.ExecutedAtUtc != null && o.Mode != JahezOperationMode.Withdraw)
+                                .Select(o => (DateOnly?)o.ThroughDate).Max(),
+                            Debt = db.Set<JahezTransferredDebt>().Any(d => d.PaidAtUtc == null && db.Set<JahezOperation>()
+                                .Any(o => o.Id == d.OperationId && o.HandoverId == h.Id && o.ExecutedAtUtc != null))
+                        };
+            var items = new List<JahezSettlementReminder>();
+            var matched = 0;
+            var offset = 0;
+            while (items.Count < pageSize)
+            {
+                var batch = await query.Skip(offset).Take(200).ToArrayAsync(ct);
+                if (batch.Length == 0) break;
+                offset += batch.Length;
+                foreach (var h in batch)
+                {
+                    var due = h.EndedAtUtc == null || !h.Settled.HasValue || h.Settled < JahezRules.RiyadhDate(h.EndedAtUtc.Value) || h.Debt;
+                    if (!due) continue;
+                    if (matched++ < (page - 1) * pageSize) continue;
+                    var anchor = h.LastSettlementPaymentAtUtc ?? h.StartedAtUtc;
+                    items.Add(new JahezSettlementReminder(h.Id, h.PlatformRiderAccountId, h.ExternalAccountId,
+                        h.RiderProfileId, h.FullNameAr, anchor, today.DayNumber - JahezRules.RiyadhDate(anchor).DayNumber));
+                    if (items.Count == pageSize) break;
+                }
+                if (batch.Length < 200) break;
+            }
+            return new JahezPage<JahezSettlementReminder>(items, page, pageSize);
+        }, ct);
     public Task<Result<JahezPage<JahezImportBatch>>> ImportBatchesAsync(int page, int pageSize, CancellationToken ct = default) =>
         ReadAsync(PermissionKeys.Jahez.ImportsRead, () => WorkflowPage(db.Set<JahezImportBatch>(), page, pageSize, ct), ct);
     public Task<Result<JahezPage<JahezAdministrativeDebt>>> AdministrativeDebtsAsync(int page, int pageSize, CancellationToken ct = default) =>
         ReadAsync(PermissionKeys.Jahez.Read, async () =>
         {
             Page(page, pageSize);
-            var rows = await (from h in db.Set<JahezAccountSession>().AsNoTracking()
-                join a in db.PlatformRiderAccounts on h.PlatformRiderAccountId equals a.Id
-                join r in db.RiderProfiles on h.RiderProfileId equals r.Id
-                join e in db.Employees on r.EmployeeId equals e.Id
-                orderby h.StartedAtUtc descending, h.Id
-                select new JahezAdministrativeDebt(h.Id, a.Id, a.ExternalAccountId, r.Id, e.FullNameAr,
-                    db.Set<JahezLedgerEntry>().Where(x => x.HandoverId == h.Id && x.Bucket == JahezLedgerBucket.PlatformDebt).Sum(x => x.Amount)))
+            var rows = await AdministrativeDebtAccounts()
                 .Skip((page - 1) * pageSize).Take(pageSize).ToArrayAsync(ct);
             return new JahezPage<JahezAdministrativeDebt>(rows, page, pageSize);
         }, ct);
+    private IQueryable<JahezAdministrativeDebt> AdministrativeDebtAccounts() =>
+        from a in db.PlatformRiderAccounts.AsNoTracking()
+        where db.ClientPlatforms.Any(p => p.Id == a.ClientPlatformId && p.Code == "JAHEZ")
+        join h in db.JahezAccountSessions.Where(x => x.EndedAtUtc == null) on a.Id equals h.PlatformRiderAccountId into handovers
+        from h in handovers.DefaultIfEmpty()
+        join r in db.RiderProfiles on h.RiderProfileId equals r.Id into riders
+        from r in riders.DefaultIfEmpty()
+        join e in db.Employees on r.EmployeeId equals e.Id into employees
+        from e in employees.DefaultIfEmpty()
+        orderby a.Code, a.Id
+        select new JahezAdministrativeDebt(h == null ? null : h.Id, a.Id, a.ExternalAccountId,
+            r == null ? null : r.Id, e == null ? null : e.FullNameAr,
+            db.JahezLedgerEntries.Where(x => x.Bucket == JahezLedgerBucket.PlatformDebt
+                && (x.AccountId == a.Id || x.AccountId == null && db.JahezAccountSessions
+                    .Any(s => s.Id == x.HandoverId && s.PlatformRiderAccountId == a.Id))).Sum(x => x.Amount));
     private IQueryable<JahezAccountRow> WorkflowAccounts(Guid? accountId = null, int? skip = null, int? take = null)
     {
         var yesterday = Today.AddDays(-1);
@@ -100,9 +152,9 @@ internal sealed partial class JahezWorkflowService
             var ids = db.Set<JahezAccountSession>().Where(x => x.PlatformRiderAccountId == id).Select(x => x.Id);
             var handovers = await GetHandoversAsync(id, null, page, pageSize, ct);
             var operations = await WorkflowPage(db.Set<JahezOperation>().Where(x => ids.Contains(x.HandoverId)), page, pageSize, ct);
-            var requests = await WorkflowPage(db.Set<JahezApprovalRequest>().Where(x => ids.Contains(x.HandoverId)), page, pageSize, ct);
+            var requests = await WorkflowPage(db.Set<JahezApprovalRequest>().Where(x => x.AccountId == id || x.HandoverId.HasValue && ids.Contains(x.HandoverId.Value)), page, pageSize, ct);
             var fees = await WorkflowPage(db.Set<JahezAccountFee>().Where(x => ids.Contains(x.HandoverId)), page, pageSize, ct);
-            var ledger = await db.Set<JahezLedgerEntry>().AsNoTracking().Where(x => ids.Contains(x.HandoverId))
+            var ledger = await db.Set<JahezLedgerEntry>().AsNoTracking().Where(x => x.AccountId == id || x.HandoverId.HasValue && ids.Contains(x.HandoverId.Value))
                 .OrderByDescending(x => x.OccurredAtUtc).ThenBy(x => x.Id).Skip((page - 1) * pageSize).Take(pageSize).ToArrayAsync(ct);
             var orders = await (from d in db.Set<JahezDailyDispatch>().AsNoTracking()
                 join h in db.Set<JahezAccountSession>() on d.HandoverId equals h.Id

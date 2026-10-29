@@ -9,15 +9,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LogisticsERP.Infrastructure.Hr;
 
-internal sealed class PlatformAccountDayAllocationService(ApplicationDbContext db) : IPlatformAccountDayAllocationService
+internal sealed partial class PlatformAccountDayAllocationService(ApplicationDbContext db) : IPlatformAccountDayAllocationService
 {
     private ILookup<Guid, RiderClientAssignment>? cachedAssignments;
     private ILookup<(Guid AccountId, DateOnly Date), PlatformAccountDayUsage>? cachedUsages;
     private ILookup<Guid, JahezAccountSession>? cachedSessions;
     private HashSet<Guid>? fullTimeAccounts;
+    private ILookup<(Guid AccountId, DateOnly Date), PlatformAccountDayContribution>? cachedContributions;
 
     internal async Task Preload(Guid[] accountIds, DateOnly from, DateOnly to, CancellationToken ct)
     {
+        cachedContributions = (await db.Set<PlatformAccountDayContribution>().AsNoTracking().Where(c => accountIds.Contains(c.PlatformRiderAccountId)
+            && c.BusinessDate >= from && c.BusinessDate <= to).ToArrayAsync(ct)).ToLookup(c => (c.PlatformRiderAccountId, c.BusinessDate));
         cachedAssignments = (await db.RiderClientAssignments.AsNoTracking().Where(a => accountIds.Contains(a.PlatformRiderAccountId)
             && a.EffectiveFrom <= to && (a.EffectiveTo == null || a.EffectiveTo >= from)).ToArrayAsync(ct)).ToLookup(a => a.PlatformRiderAccountId);
         cachedUsages = (await db.Set<PlatformAccountDayUsage>().AsNoTracking().Where(u => accountIds.Contains(u.PlatformRiderAccountId)
@@ -142,13 +145,18 @@ internal sealed class PlatformAccountDayAllocationService(ApplicationDbContext d
         var result = await Ordered(accountId, date, ct);
         if (result.IsFailure) return Result.Failure<IReadOnlyList<PlatformDayShare>>(result.Error);
         var ordered = result.Value!;
+        var contributions = await Contributions(accountId, date, ct);
+        var covered = contributions.SelectMany(c => Ids(c).SkipLast(1)).ToHashSet();
+        ordered = ordered.Where(a => !covered.Contains(a.Id)).ToArray();
         var usages = (await Usages(accountId, date, ct)).ToDictionary(u => u.RiderClientAssignmentId);
         var remaining = totals.ToDictionary();
         var shares = new List<PlatformDayShare>();
         for (var i = 0; i < ordered.Length; i++)
         {
             var assignment = ordered[i];
-            var figures = Figures(usages.GetValueOrDefault(assignment.Id));
+            var contribution = contributions.SingleOrDefault(c => c.RepresentativeAssignmentId == assignment.Id);
+            var figures = contribution is null ? Figures(usages.GetValueOrDefault(assignment.Id))
+                : ContributionFigures(contribution, usages);
             var values = new Dictionary<PlatformDayMetric, decimal>();
             foreach (var (metric, total) in totals)
             {
@@ -164,7 +172,12 @@ internal sealed class PlatformAccountDayAllocationService(ApplicationDbContext d
                         $"{metric} does not reconcile to the imported total {total}.", assignment.Id, metric.ToString()));
                 values[metric] = value; remaining[metric] -= value;
             }
-            shares.Add(new(assignment.Id, assignment.RiderProfileId, i + 1, values));
+            if (contribution is not null && contribution.FiguresJson is null)
+                foreach (var metric in totals.Keys.Where(m => m != PlatformDayMetric.DeductionsAmount))
+                    if (Ids(contribution).Sum(id => Value(Figures(usages.GetValueOrDefault(id)), metric) ?? 0) > values[metric])
+                        return Result.Failure<IReadOnlyList<PlatformDayShare>>(Error(accountId, date, "Group total contradicts recorded individual figures."));
+            shares.Add(new PlatformDayShare(assignment.Id, assignment.RiderProfileId, i + 1, values)
+            { ContributionId = contribution?.Id, CoveredAssignmentIds = contribution is null ? [assignment.Id] : Ids(contribution) });
         }
         return Result.Success<IReadOnlyList<PlatformDayShare>>(shares);
     }

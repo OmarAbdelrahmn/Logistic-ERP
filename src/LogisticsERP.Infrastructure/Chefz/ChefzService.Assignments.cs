@@ -34,6 +34,10 @@ internal sealed partial class ChefzService
         if (assignment.EffectiveFrom == request.EffectiveFrom)
             return Result.Success(AssignmentStartDateResponse(assignment));
 
+        if (await db.Set<PlatformAccountDayContribution>().AnyAsync(c => c.PlatformRiderAccountId == accountId
+            && c.AssignmentIdsJson.Contains(assignmentId.ToString())
+            && (c.BusinessDate < request.EffectiveFrom), ct))
+            return Result.Failure<ChefzAssignmentStartDateResponse>(ChefzErrors.Conflict("The date change would exclude a saved grouped contribution."));
         var allocator = new PlatformAccountDayAllocationService(db);
         var validDates = await allocator.ValidateStart(accountId, request.EffectiveFrom, assignment.EffectiveTo, assignment.Id, ct);
         if (validDates.IsFailure) return Result.Failure<ChefzAssignmentStartDateResponse>(ChefzErrors.Conflict(validDates.Error.Description));

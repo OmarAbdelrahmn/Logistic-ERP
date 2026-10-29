@@ -44,7 +44,7 @@ internal sealed partial class JahezWorkflowService
             from employee in employees.DefaultIfEmpty()
             join assignment in db.RiderClientAssignments on handover.RiderClientAssignmentId equals assignment.Id into assignments
             from assignment in assignments.DefaultIfEmpty()
-            join account in db.PlatformRiderAccounts on handover.PlatformRiderAccountId equals account.Id into accounts
+            join account in db.PlatformRiderAccounts on (request.AccountId ?? (Guid?)handover.PlatformRiderAccountId) equals account.Id into accounts
             from account in accounts.DefaultIfEmpty()
             join city in db.OperatingCities on account.OperatingCityId equals city.Id into cities
             from city in cities.DefaultIfEmpty()
@@ -89,6 +89,6 @@ internal sealed partial class JahezWorkflowService
                     target.UserName, target.Status.ToString(), target.StatusReason, target.OperatingCityId,
                     targetGlobalCity == null ? null : targetGlobalCity.NameAr, target.SponsorId,
                     targetSponsor == null ? null : targetSponsor.RegistryNameAr),
-                operation);
+                operation) { AccountId = request.AccountId ?? (handover == null ? null : handover.PlatformRiderAccountId) };
     }
 }

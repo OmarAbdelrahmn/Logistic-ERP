@@ -108,6 +108,8 @@ public sealed partial class ChefzWorkflowTests
         var raw = Value(await f.Service.GetPerformanceAsync(null, rider.RiderProfileId, date, date, 1, 50, ct));
         Assert.Equal(2, raw.Items.Count);
         Assert.All(raw.Items, p => Assert.Equal("المندوب الثاني", p.RiderName));
+        Assert.Equal("FullTime", Assert.Single(raw.Items, p => p.AccountId == f.Account.Id).AccountType);
+        Assert.Equal("Freelancer", Assert.Single(raw.Items, p => p.AccountId == second.Account.Id).AccountType);
         var management = Assert.Single(Value(await f.Service.GetManagementReportAsync(new(2026, 10, 21), f.Account.SponsorId, ct)));
         Assert.Equal(5, management.CycleOrders);
         Assert.Equal(1, management.RidersWithOrdersYesterday);

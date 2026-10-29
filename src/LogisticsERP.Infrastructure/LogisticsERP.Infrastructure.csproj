@@ -3,6 +3,7 @@
     <RootNamespace>LogisticsERP.Infrastructure</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <InternalsVisibleTo Include="LogisticsERP.NinjaPerformance" />
     <InternalsVisibleTo Include="LogisticsERP.Fleet.UnitTests" />
     <InternalsVisibleTo Include="LogisticsERP.Jahez.Tests" />
   </ItemGroup>
@@ -13,6 +14,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="ClosedXML" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" />
     <PackageReference Include="ExcelDataReader" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />

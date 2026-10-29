@@ -1,3 +1,4 @@
+import type { MonthlyAccountUsage, WithPreviousDayUsages } from "./shared-account-day-usage-contracts";
 /** Ninja HTTP contracts. Dates are YYYY-MM-DD; timestamps are ISO UTC strings. */
 export type Guid = string;
 export type DateOnly = string;
@@ -6,7 +7,7 @@ export type NinjaRiderType = "InternalCar" | "ExternalCar" | "InternalMotorcycle
 /** عمولة / بالراتب. */
 export type NinjaPaymentModel = "PayPerOrder" | "Salary";
 
-export interface NinjaAssignRequest {
+export interface NinjaAssignRequest extends WithPreviousDayUsages {
   actualRiderProfileId: Guid;
   effectiveFrom: DateOnly;
   phoneNumber: string;
@@ -33,6 +34,24 @@ export interface NinjaCredentialRequest {
   phoneNumber: string | null;
   reason: string;
   /** Account token: account.rowVersion or credentials.rowVersion. */
+  rowVersion: string;
+}
+
+export interface NinjaAssignmentDatesRequest {
+  effectiveFrom: DateOnly;
+  /** Null for the current assignment; required for an ended assignment. */
+  effectiveTo: DateOnly | null;
+  reason: string;
+  /** Assignment token, never the account rowVersion. */
+  rowVersion: string;
+}
+
+export interface NinjaAssignmentDatesResponse {
+  accountId: Guid;
+  assignmentId: Guid;
+  effectiveFrom: DateOnly;
+  effectiveTo: DateOnly | null;
+  status: "Active" | "Ended";
   rowVersion: string;
 }
 
@@ -80,7 +99,7 @@ export interface NinjaLifecycleResponse {
   credentials: NinjaCredentialResponse;
 }
 
-export interface NinjaAccountResponse {
+export interface NinjaAccountResponse extends MonthlyAccountUsage {
   /** Latest decrypted password on GET reads with platform_credentials.read for this platform; otherwise null. */
   password: string | null;
   /** Current assignment type; null when unassigned or on an unclassified legacy assignment. */
@@ -138,7 +157,7 @@ export interface NinjaAccountUpdateUploadResponse {
   summary: NinjaAccountUpdateSummary;
   sheetStatuses: { sheetStatus: string; count: number }[];
 }
-export interface NinjaAccountUpdateSystemAccount {
+export interface NinjaAccountUpdateSystemAccount extends MonthlyAccountUsage {
   accountId: Guid;
   captainId: string;
   accountCode: string;
@@ -212,7 +231,12 @@ export interface NinjaPerformanceReport {
   metrics: NinjaReportMetrics;
 }
 
-export interface NinjaDailyReport { date: DateOnly; metrics: NinjaReportMetrics; }
+export interface NinjaSponsorReport {
+  sponsorId: Guid | null;
+  sponsorNameAr: string | null;
+  metrics: NinjaReportMetrics;
+}
+export interface NinjaDailyReport { date: DateOnly; metrics: NinjaReportMetrics; sponsors: NinjaSponsorReport[]; }
 export interface NinjaRiderReport {
   riderProfileId: Guid;
   rider: NinjaPersonResponse | null;
@@ -251,7 +275,7 @@ export interface NinjaAccountSheetRow {
   ownerNationalId: string;
 }
 
-export interface NinjaComparisonSystemAccount {
+export interface NinjaComparisonSystemAccount extends MonthlyAccountUsage {
   accountId: Guid;
   captainId: string;
   accountCode: string;
@@ -421,6 +445,9 @@ export class NinjaApiClient {
   }
   setAccountStatus(accountId: Guid, body: NinjaAccountStatusRequest, signal?: AbortSignal): Promise<NinjaAccountResponse> {
     return this.request(`accounts/${encodeURIComponent(accountId)}/status`, "PUT", body, signal);
+  }
+  updateAssignmentDates(accountId: Guid, assignmentId: Guid, body: NinjaAssignmentDatesRequest, signal?: AbortSignal): Promise<NinjaAssignmentDatesResponse> {
+    return this.request(`accounts/${encodeURIComponent(accountId)}/assignments/${encodeURIComponent(assignmentId)}/dates`, "PUT", body, signal);
   }
   performanceReport(query: NinjaReportQuery, signal?: AbortSignal): Promise<NinjaPerformanceReport> {
     return this.request(`reports/performance?${this.query(query)}`, "GET", undefined, signal);

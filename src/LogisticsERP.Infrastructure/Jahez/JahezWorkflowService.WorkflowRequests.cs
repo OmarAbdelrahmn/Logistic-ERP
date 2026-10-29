@@ -15,8 +15,15 @@ internal sealed partial class JahezWorkflowService
         {
             Require(Enum.IsDefined(request.Kind), JahezErrors.Invalid("نوع الطلب غير صالح."));
             Reason(request.Reason);
-            var h = await Handover(request.HandoverId, ct);
-            var entity = new JahezApprovalRequest { HandoverId = h.Id, Kind = request.Kind,
+            var administrativeDebt = request.Kind == JahezApprovalKind.Adjustment
+                && request.AdjustmentTarget == JahezAdjustmentTarget.AdministrativeDebt;
+            Require(administrativeDebt || request.HandoverId.HasValue, JahezErrors.Invalid("حدد إسناد الحساب لهذا النوع من الطلبات."));
+            var h = request.HandoverId.HasValue ? await Handover(request.HandoverId.Value, ct) : null!;
+            var accountId = request.AccountId ?? h?.PlatformRiderAccountId;
+            Require(accountId.HasValue, JahezErrors.Invalid("حدد حساب جاهز."));
+            Require(h is null || h!.PlatformRiderAccountId == accountId, JahezErrors.Invalid("الإسناد لا يتبع الحساب المحدد."));
+            await Account(accountId!.Value, ct);
+            var entity = new JahezApprovalRequest { AccountId = accountId, HandoverId = h?.Id, Kind = request.Kind,
                 Status = JahezApprovalStatus.Pending, RequestedByUserId = Actor, Reason = request.Reason,
                 OperationId = request.OperationId, TargetAccountId = request.TargetAccountId,
                 WaiverAmount = JahezRules.Money(request.WaiverAmount), FromDate = request.FromDate, ToDate = request.ToDate,
@@ -27,7 +34,7 @@ internal sealed partial class JahezWorkflowService
             if (request.Kind is JahezApprovalKind.ResetAccount || request.Kind == JahezApprovalKind.Adjustment && request.AdjustmentTarget == JahezAdjustmentTarget.Settlement)
             {
                 Require(request.OperationId.HasValue, JahezErrors.Invalid("حدد عملية التصفية."));
-                var o = await db.Set<JahezOperation>().SingleOrDefaultAsync(x => x.Id == request.OperationId && x.HandoverId == h.Id, ct);
+                var o = await db.Set<JahezOperation>().SingleOrDefaultAsync(x => x.Id == request.OperationId && x.HandoverId == h!.Id, ct);
                 Require(o is not null && o.Status == JahezOperationStatus.Ready && o.Mode != JahezOperationMode.Withdraw,
                     JahezErrors.Conflict("العملية غير متاحة للمراجعة."));
                 if (request.Kind == JahezApprovalKind.ResetAccount)
@@ -46,14 +53,14 @@ internal sealed partial class JahezWorkflowService
                         Require(entity.WaiverAmount > 0 && entity.WaiverAmount <= JahezRules.AccountFee, JahezErrors.Invalid("مبلغ الإعفاء غير صالح."));
                         break;
                     case JahezApprovalKind.FreeSwitch:
-                        Require(h.EndedAtUtc is null && request.TargetAccountId.HasValue && request.TargetAccountId != h.PlatformRiderAccountId
-                            && entity.EffectiveAtUtc.HasValue && entity.EffectiveAtUtc >= h.StartedAtUtc && entity.EffectiveAtUtc <= Now
+                        Require(h!.EndedAtUtc is null && request.TargetAccountId.HasValue && request.TargetAccountId != h!.PlatformRiderAccountId
+                            && entity.EffectiveAtUtc.HasValue && entity.EffectiveAtUtc >= h!.StartedAtUtc && entity.EffectiveAtUtc <= Now
                             && entity.WaiverAmount >= 0 && entity.WaiverAmount <= JahezRules.AccountFee,
                             JahezErrors.Invalid("حدد الحساب البديل ووقت التبديل وقيمة الإعفاء من رسومه."));
                         await Account(request.TargetAccountId!.Value, ct);
                         break;
                     case JahezApprovalKind.PercentageCommission:
-                        Require(entity.FromDate.HasValue && entity.ToDate.HasValue && entity.FromDate >= h.CommissionStartsOn
+                        Require(entity.FromDate.HasValue && entity.ToDate.HasValue && entity.FromDate >= h!.CommissionStartsOn
                             && entity.ToDate >= entity.FromDate && entity.ToDate.Value.DayNumber - entity.FromDate.Value.DayNumber <= 731,
                             JahezErrors.Invalid("فترة عمولة النسبة غير صالحة."));
                         break;
@@ -84,7 +91,14 @@ internal sealed partial class JahezWorkflowService
                 var entity = await db.Set<JahezApprovalRequest>().SingleAsync(x => x.Id == id, ct);
                 Require(entity.Status == JahezApprovalStatus.Pending, JahezErrors.Conflict("تم البت في الطلب بالفعل."));
                 Require(entity.RequestedByUserId != Actor, JahezErrors.Forbidden);
-                var h = await Handover(entity.HandoverId, ct);
+                var administrativeDebt = entity.Kind == JahezApprovalKind.Adjustment
+                    && entity.AdjustmentTarget == JahezAdjustmentTarget.AdministrativeDebt;
+                Require(administrativeDebt || entity.HandoverId.HasValue, JahezErrors.Invalid("حدد إسناد الحساب لهذا النوع من الطلبات."));
+                var h = entity.HandoverId.HasValue ? await Handover(entity.HandoverId.Value, ct) : null!;
+                var accountId = entity.AccountId ?? h?.PlatformRiderAccountId;
+                Require(accountId.HasValue, JahezErrors.Invalid("حدد حساب جاهز."));
+                Require(h is null || h!.PlatformRiderAccountId == accountId, JahezErrors.Invalid("الإسناد لا يتبع الحساب المحدد."));
+                await Account(accountId!.Value, ct);
                 var operation = entity.OperationId.HasValue ? await db.Set<JahezOperation>().SingleAsync(x => x.Id == entity.OperationId, ct) : null;
                 if (operation is not null)
                 {
@@ -96,36 +110,36 @@ internal sealed partial class JahezWorkflowService
                     switch (entity.Kind)
                     {
                         case JahezApprovalKind.FeeException:
-                            var fee = await db.Set<JahezAccountFee>().SingleAsync(x => x.HandoverId == h.Id, ct);
-                            var unpaid = await BucketBalance(h.Id, JahezLedgerBucket.AccountFees, Today, ct);
+                            var fee = await db.Set<JahezAccountFee>().SingleAsync(x => x.HandoverId == h!.Id, ct);
+                            var unpaid = await BucketBalance(h!.Id, JahezLedgerBucket.AccountFees, Today, ct);
                             Require(entity.WaiverAmount <= unpaid && fee.WaivedAmount + entity.WaiverAmount <= fee.Amount,
                                 JahezErrors.Conflict("الإعفاء يتجاوز الرسوم غير المدفوعة."));
                             fee.WaivedAmount += entity.WaiverAmount; fee.ApprovalRequestId = entity.Id;
-                            Entry(h, JahezLedgerBucket.AccountFees, JahezLedgerKind.Adjustment, -entity.WaiverAmount, entity.Id, request.Reason);
+                            Entry(h!, JahezLedgerBucket.AccountFees, JahezLedgerKind.Adjustment, -entity.WaiverAmount, entity.Id, request.Reason);
                             break;
                         case JahezApprovalKind.FreeSwitch:
                             await AuthorizeAsync(JahezWorkflowPermissions.Withdraw, ct);
                             await AuthorizeAsync(PermissionKeys.Jahez.HandoversCreate, ct);
-                            Require(!await db.Set<JahezOperation>().AnyAsync(x => x.HandoverId == h.Id && x.ExecutedAtUtc == null, ct),
+                            Require(!await db.Set<JahezOperation>().AnyAsync(x => x.HandoverId == h!.Id && x.ExecutedAtUtc == null, ct),
                                 JahezErrors.Conflict("أكمل العملية المفتوحة قبل تبديل الحساب."));
-                            await WithdrawOperationally(h, entity.EffectiveAtUtc!.Value, entity.Reason, ct);
-                            db.Add(new JahezOperation { HandoverId = h.Id, Mode = JahezOperationMode.Withdraw,
+                            await WithdrawOperationally(h!, entity.EffectiveAtUtc!.Value, entity.Reason, ct);
+                            db.Add(new JahezOperation { HandoverId = h!.Id, Mode = JahezOperationMode.Withdraw,
                                 Status = JahezOperationStatus.Executed, PaymentStatus = JahezOperationPaymentStatus.Deferred,
                                 ThroughDate = JahezRules.RiyadhDate(entity.EffectiveAtUtc.Value), EffectiveAtUtc = entity.EffectiveAtUtc.Value,
                                 Reason = entity.Reason, ApprovedRequestId = entity.Id, ExecutedAtUtc = Now, ExecutedByUserId = Actor });
                             await SynchronizeTreasuryAsync(ct);
                             await db.SaveChangesAsync(ct); // Release unique assignment slot within the owning transaction.
-                            await CreateHandover(entity.TargetAccountId!.Value, h.RiderProfileId, entity.EffectiveAtUtc.Value,
-                                entity.Reason, entity.WaiverAmount, entity.Id, ct);
+                            await CreateHandover(entity.TargetAccountId!.Value, h!.RiderProfileId, entity.EffectiveAtUtc.Value,
+                                entity.Reason, entity.WaiverAmount, entity.Id, ct, request.PreviousDayUsages);
                             break;
                         case JahezApprovalKind.PercentageCommission:
-                            Require(!h.CommissionPostedThrough.HasValue || entity.FromDate > h.CommissionPostedThrough,
+                            Require(!h!.CommissionPostedThrough.HasValue || entity.FromDate > h!.CommissionPostedThrough,
                                 JahezErrors.Conflict("الفترة تتداخل مع عمولة مرحلة."));
-                            Require((!h.EndedAtUtc.HasValue || entity.ToDate <= JahezRules.RiyadhDate(h.EndedAtUtc.Value)),
+                            Require((!h!.EndedAtUtc.HasValue || entity.ToDate <= JahezRules.RiyadhDate(h!.EndedAtUtc.Value)),
                                 JahezErrors.Conflict("الفترة تتجاوز نهاية احتساب العمولة."));
-                            Require(!await db.Set<JahezCommissionPolicyPeriod>().AnyAsync(x => x.HandoverId == h.Id
+                            Require(!await db.Set<JahezCommissionPolicyPeriod>().AnyAsync(x => x.HandoverId == h!.Id
                                 && x.FromDate <= entity.ToDate && x.ToDate >= entity.FromDate, ct), JahezErrors.Conflict("تداخل فترات العمولة."));
-                            db.Add(new JahezCommissionPolicyPeriod { HandoverId = h.Id, ApprovalRequestId = id,
+                            db.Add(new JahezCommissionPolicyPeriod { HandoverId = h!.Id, ApprovalRequestId = id,
                                 FromDate = entity.FromDate!.Value, ToDate = entity.ToDate!.Value });
                             break;
                         case JahezApprovalKind.ResetAccount:
@@ -149,7 +163,9 @@ internal sealed partial class JahezWorkflowService
                             var delta = request.ApprovedDebtAdjustment ?? entity.DebtAdjustment!.Value;
                             WorkflowMoney(delta);
                             Require(delta != 0, JahezErrors.Invalid("قيمة تعديل المديونية لا تساوي صفراً."));
-                            Entry(h, JahezLedgerBucket.PlatformDebt, JahezLedgerKind.Adjustment, JahezRules.Money(delta), entity.Id, request.Reason);
+                            db.Add(new JahezLedgerEntry { AccountId = accountId, HandoverId = h?.Id,
+                                Bucket = JahezLedgerBucket.PlatformDebt, Kind = JahezLedgerKind.Adjustment,
+                                Amount = JahezRules.Money(delta), SourceId = entity.Id, OccurredAtUtc = Now, Reason = request.Reason });
                             break;
                     }
                 }

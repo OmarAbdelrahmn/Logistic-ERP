@@ -1,0 +1,17 @@
+{
+  "Mode": "AppliedAndVerified",
+  "BatchId": "01a173a0-341b-72bb-93fc-b28dafcc0961",
+  "Passed": true,
+  "PlanHash": "25CC44E670EA7DDA404B55BF3D18D51E182C7FF12E671B258AF922C3694B824F",
+  "SqlHash": "3EE771BA1CE3C3950E9B9FFA86781A64979FAFF28AA6672F66700C7C1E968828",
+  "VerifyHash": "5F3F201C8513931DE7246DBFFAE0FE4024ACD4FF0D4DE56FDF65CD81D9A69C05",
+  "BackupPath": "C:\\Users\\omarf\\OneDrive\\Documents\\ChatGPT\\Logistic ERP\\artifacts\\ninja-workbook-sync-apply-20261025T152244586Z\\before-and-verification.xml",
+  "BackupHash": "FFE79650728B2BD87EF98B12D5BAD1C6098C0C1B82299E867E7F3806255B09F0",
+  "CurrentAssignments": 151,
+  "MatchedSourceRows": 229,
+  "HistoricalAssignments": 78,
+  "CredentialsPreserved": true,
+  "CompletedAtUtc": "2026-10-25T15:23:26.7565683+00:00",
+  "ServerBackupCreated": true,
+  "ServerRestoreVerificationSucceeded": false
+}

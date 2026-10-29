@@ -45,7 +45,7 @@ public sealed record AssignSimplePlatformAccountRequest(
     DateOnly EffectiveFrom,
     string? Reason,
     bool WasBackdated,
-    string? BackdatedReason);
+    string? BackdatedReason, IReadOnlyList<PreviousDayUsageInput>? PreviousDayUsages = null);
 
 public sealed record ReleaseSimplePlatformAccountRequest(
     DateOnly EffectiveTo,
@@ -125,7 +125,7 @@ public sealed record RiderPlatformHistoryItemResponse(
     string? StartReason,
     string? EndReason,
     bool WasBackdated,
-    string? BackdatedReason);
+    string? BackdatedReason, IReadOnlyList<PreviousDayUsageInput>? PreviousDayUsages = null);
 
 public sealed record RiderPlatformHistoryResponse(
     Guid RiderProfileId,
@@ -161,7 +161,13 @@ public sealed record SimplePlatformAccountResponse(
     DateOnly? EndDate,
     string? Notes,
     SimplePlatformAssignmentResponse? CurrentAssignment,
-    string RowVersion);
+    string RowVersion) : LogisticsERP.Application.Features.Hr.IMonthlyAccountUsageResponse
+{
+    [global::System.Text.Json.Serialization.JsonIgnore]
+    public Guid UsageAccountId => Id;
+    public string MonthlyUsageStatus { get; set; } = "Unused";
+    public string UsageMonth { get; set; } = string.Empty;
+}
 
 public interface ISimplePlatformService
 {

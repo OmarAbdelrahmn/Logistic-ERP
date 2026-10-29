@@ -138,6 +138,7 @@ The private document root is `src/LogisticsERP.Api/wwwroot/private/employee-docu
 - [Complete Chefz frontend handoff: Arabic screens, API contracts, settlements, imports, and permissions](docs/chefz-frontend-handoff.md)
 - [Ninja: full endpoint reference, enriched account details, status controls and performance reports](docs/ninja-full-api-reference.md)
 - [Ninja system details: permissions, ownership, actual users, imports and history](docs/ninja-system-details.md)
+- [Ninja performance evaluation and suggested earnings: APIs, imports, services, Arabic frontend handoff and deployment](docs/ninja-evaluation/README.md)
 - [Ninja sheet checkups: saved statuses, missing accounts, city/iqama problems and upload notes](docs/ninja-account-sheet-updates.md)
 - [New Ninja sheet-checkup services: frontend API handoff](docs/ninja-sheet-checkup-services-frontend-handoff.md)
 - [Ninja sheet-checkup hosted database deployment and verification](docs/ninja-account-sheet-reviews-hosted-deployment-20261015.md)

@@ -69,7 +69,7 @@ public sealed partial class NinjaWorkflowTests
     {
         await using var f = await Fixture.Create(); var ct = TestContext.Current.CancellationToken;
         var first = Value(await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, new(2026, 10, 12), "0501111111", "initial", RiderType: "InternalCar", PaymentModel: "PayPerOrder"), ct));
-        Value(await f.Service.ReturnAsync(f.Account.Id, new(new(2026, 10, 12), "0502222222", null, "Return", first.Assignment.RowVersion), ct));
+        Value(await f.Service.ReturnAsync(f.Account.Id, new(new(2026, 10, 12), "0502222222", null, "Return", first.Assignment.RowVersion, DayUsage: new(2)), ct));
         var next = Value(await f.Service.AssignAsync(f.Account.Id, new(f.OwnerRider.Id, new(2026, 10, 12), "0503333333", "next", RiderType: "InternalCar", PaymentModel: "PayPerOrder"), ct));
         Assert.NotNull(next.Credentials.Notification); Assert.False(next.Credentials.PasswordChanged);
         Assert.Equal("initial", f.Password()); Assert.Equal("0503333333", next.Credentials.PhoneNumber);

@@ -315,8 +315,14 @@ internal static class AuthorizationSeedCatalog
         AddRolePermissions(seeds, SystemRoles.SystemAdminId,
             LogisticsERP.Application.Features.Jahez.JahezWorkflowPermissions.All, ref sequence);
         AddRolePermissions(seeds, SystemRoles.SystemAdminId,
-            PermissionKeys.All.Where(key => key.StartsWith("ninja.", StringComparison.Ordinal)).Order(StringComparer.Ordinal), ref sequence);
+            PermissionKeys.All.Where(key => key.StartsWith("ninja.", StringComparison.Ordinal) && !key.StartsWith("ninja.evaluation.", StringComparison.Ordinal)
+                && key != PermissionKeys.Ninja.AssignmentDatesUpdate).Order(StringComparer.Ordinal), ref sequence);
         AddRolePermissions(seeds, SystemRoles.SystemAdminId, LogisticsERP.Application.Features.Jahez.JahezTreasuryPermissions.All, ref sequence);
+        // Append new grants so the immutable IDs of existing role permissions never shift.
+        AddRolePermissions(seeds, SystemRoles.SystemAdminId,
+            [PermissionKeys.Ninja.EvaluationManage, PermissionKeys.Ninja.EvaluationExport], ref sequence);
+        AddRolePermissions(seeds, SystemRoles.SystemAdminId,
+            [PermissionKeys.Ninja.AssignmentDatesUpdate], ref sequence);
         return seeds;
     }
 

@@ -5,10 +5,13 @@ namespace LogisticsERP.Application.Features.Ninja;
 
 public sealed record NinjaAssignRequest(Guid ActualRiderProfileId, DateOnly EffectiveFrom, string PhoneNumber,
     string? NewPassword = null, string? Reason = null, bool WasBackdated = false, string? BackdatedReason = null,
-    string? RiderType = null, string? PaymentModel = null);
+    string? RiderType = null, string? PaymentModel = null, IReadOnlyList<PreviousDayUsageInput>? PreviousDayUsages = null);
 public sealed record NinjaReturnRequest(DateOnly EffectiveTo, string PhoneNumber, string? NewPassword,
     string Reason, string RowVersion, string Status = "Ended", PlatformAccountDayUsageInput? DayUsage = null);
 public sealed record NinjaCredentialRequest(string? NewPassword, string? PhoneNumber, string Reason, string RowVersion);
+public sealed record NinjaAssignmentDatesRequest(DateOnly EffectiveFrom, DateOnly? EffectiveTo, string Reason, string RowVersion);
+public sealed record NinjaAssignmentDatesResponse(Guid AccountId, Guid AssignmentId, DateOnly EffectiveFrom, DateOnly? EffectiveTo,
+    string Status, string RowVersion);
 public sealed record NinjaPasswordNotification(string Code, string MessageAr, string MessageEn, DateTimeOffset ChangeAllowedAtUtc);
 public sealed record NinjaCredentialResponse(Guid AccountId, string? PhoneNumber, bool HasPassword,
     bool PasswordChanged, DateTimeOffset? PasswordChangeAllowedAtUtc, NinjaPasswordNotification? Notification, string RowVersion);
@@ -17,8 +20,13 @@ public sealed record NinjaPersonResponse(Guid EmployeeId, string NameAr, string?
 public sealed record NinjaAccountStatusRequest(string Status, string RowVersion, string? Reason = null);
 public sealed record NinjaAccountResponse(Guid AccountId, string CaptainId, string Status, Guid? OwnerEmployeeId,
     Guid? ActualRiderProfileId, string? PhoneNumber, bool HasPassword, DateTimeOffset? PasswordChangeAllowedAtUtc, string RowVersion,
-    Guid? CurrentAssignmentId = null, string? AssignmentRowVersion = null)
+    Guid? CurrentAssignmentId = null, string? AssignmentRowVersion = null) : LogisticsERP.Application.Features.Hr.IMonthlyAccountUsageResponse
 {
+    [global::System.Text.Json.Serialization.JsonIgnore]
+    public Guid UsageAccountId => AccountId;
+    public string MonthlyUsageStatus { get; set; } = "Unused";
+    public string UsageMonth { get; set; } = string.Empty;
+
     public NinjaPersonResponse? Owner { get; init; }
     public NinjaPersonResponse? ActualRider { get; init; }
     public string? Password { get; init; }
@@ -60,6 +68,7 @@ public interface INinjaService
     Task<Result<NinjaPage<NinjaRiderReport>>> GetRiderReportAsync(DateOnly dateFrom, DateOnly dateTo, Guid? accountId, Guid? riderId, int page, int pageSize, CancellationToken ct = default);
     Task<Result<NinjaLifecycleResponse>> AssignAsync(Guid accountId, NinjaAssignRequest request, CancellationToken ct = default);
     Task<Result<NinjaLifecycleResponse>> ReturnAsync(Guid accountId, NinjaReturnRequest request, CancellationToken ct = default);
+    Task<Result<NinjaAssignmentDatesResponse>> UpdateAssignmentDatesAsync(Guid accountId, Guid assignmentId, NinjaAssignmentDatesRequest request, CancellationToken ct = default);
     Task<Result<NinjaCredentialResponse>> UpdateCredentialsAsync(Guid accountId, NinjaCredentialRequest request, CancellationToken ct = default);
     Task<Result<NinjaImportResponse>> ImportAsync(bool deductions, DateOnly reportDate, string fileName, byte[] content, CancellationToken ct = default);
     Task<Result<NinjaPage<NinjaPerformanceResponse>>> GetPerformanceAsync(DateOnly dateFrom, DateOnly dateTo, Guid? accountId, Guid? riderId, int page, int pageSize, CancellationToken ct = default);
@@ -73,4 +82,6 @@ public static class NinjaErrors
     public static readonly OperationError UseNinjaWorkflow = new("ninja.use_workflow", "استخدم مسارات نينجا لإدارة الحالة والتكليف والهاتف ومهلة كلمة المرور.", ErrorType.Conflict);
     public static OperationError Invalid(string message) => new("ninja.invalid", message, ErrorType.Validation);
     public static readonly OperationError Conflict = new("ninja.conflict", "تعارض في البيانات؛ أعد تحميل السجل وحاول مجدداً.", ErrorType.Conflict);
+    public static readonly OperationError AssignmentNotFound = new("ninja.assignment_not_found", "تكليف نينجا غير موجود لهذا الحساب.", ErrorType.NotFound);
+    public static OperationError AssignmentDatesConflict(string message) => new("ninja.assignment_dates_conflict", message, ErrorType.Conflict);
 }

@@ -1,3 +1,4 @@
+import type { MonthlyAccountUsage, WithPreviousDayUsages } from "./shared-account-day-usage-contracts";
 // Jahez V2. JSON enum values are numeric; dates are ISO strings; rowversions are Base64.
 export type Id = string;
 export type DateOnly = string;
@@ -31,7 +32,7 @@ export interface Audit { id: Id; createdAtUtc: Instant; createdByUserId: Id | nu
   deletedByUserId: Id | null; deletionReason: string | null }
 export interface Person { employeeId: Id; riderProfileId: Id | null; nameAr: string; nameEn: string | null;
   iqamaNo: string | null; mobile: string | null; sponsorId: Id | null }
-export interface Account { accountId: Id; code: string; externalAccountId: string; userName: string | null;
+export interface Account extends MonthlyAccountUsage { accountId: Id; code: string; externalAccountId: string; userName: string | null;
   vehicleType: 'Motorcycle' | 'Car' | 'Van' | 'Truck' | 'Other' | null;
   operatingCityId: Id; cityNameAr: string; sponsorId: Id | null; sponsorNameAr: string | null;
   status: 'Available' | 'Assigned' | 'Suspended' | 'Retired' | 'Archived'; statusReason: string | null;
@@ -76,16 +77,17 @@ export interface OperationNetUpdate { net: number; reason: string; rowVersion: s
   fund?: Fund | null; paymentReference?: string | null }
 export interface OperationCommissionStartUpdate { startDate: DateOnly; reason: string; rowVersion: string;
   fund?: Fund | null; paymentReference?: string | null }
-export interface RequestCreate { handoverId: Id; kind: ApprovalKind; reason: string; operationId?: Id | null;
+// AdministrativeDebt accepts accountId with no handoverId; other kinds require handoverId.
+export interface RequestCreate { handoverId?: Id | null; accountId?: Id | null; kind: ApprovalKind; reason: string; operationId?: Id | null;
   targetAccountId?: Id | null; waiverAmount?: number; fromDate?: DateOnly | null; toDate?: DateOnly | null;
   effectiveAtUtc?: Instant | null; adjustmentTarget?: AdjustmentTarget | null; proposedNet?: number | null;
   proposedCommission?: number | null; debtAdjustment?: number | null }
-export interface ApprovalRequest extends Audit { handoverId: Id; kind: ApprovalKind; status: ApprovalStatus;
+export interface ApprovalRequest extends Audit { handoverId: Id | null; accountId: Id | null; kind: ApprovalKind; status: ApprovalStatus;
   requestedByUserId: Id; operationId: Id | null; targetAccountId: Id | null; waiverAmount: number;
   fromDate: DateOnly | null; toDate: DateOnly | null; effectiveAtUtc: Instant | null; reason: string;
   adjustmentTarget: AdjustmentTarget | null; proposedNet: number | null; proposedCommission: number | null;
   debtAdjustment: number | null }
-export interface DecisionRequest { approve: boolean; reason: string; approvedNet?: number | null;
+export interface DecisionRequest extends WithPreviousDayUsages { approve: boolean; reason: string; approvedNet?: number | null;
   approvedCommission?: number | null; approvedDebtAdjustment?: number | null; useOriginalValues?: boolean }
 export interface Decision { id: Id; requestId: Id; actorUserId: Id; status: ApprovalStatus; decidedAtUtc: Instant;
   reason: string; decisionJson: string | null; createdAtUtc: Instant; createdByUserId: Id | null }
@@ -99,7 +101,7 @@ export interface ApprovalAssignment { assignmentId: Id; handoverId: Id; accountI
   startedAtUtc: Instant; endedAtUtc: Instant | null; effectiveFrom: DateOnly | null; effectiveTo: DateOnly | null;
   status: string | null; startReason: string | null; endReason: string | null; commissionStartsOn: DateOnly;
   commissionPostedThrough: DateOnly | null; lastSettlementPaymentAtUtc: Instant | null }
-export interface ApprovalAccount { accountId: Id; code: string; externalAccountId: string; userName: string | null;
+export interface ApprovalAccount extends MonthlyAccountUsage { accountId: Id; code: string; externalAccountId: string; userName: string | null;
   status: string; statusReason: string | null; operatingCityId: Id; cityNameAr: string | null;
   sponsorId: Id | null; sponsorNameAr: string | null }
 export interface ApprovalDetails { request: ApprovalRequestRow; decisions: Decision[] }
@@ -161,7 +163,7 @@ export interface CashboxHandoverConfirm { cashboxAmount: number; petroAppAmount:
 export interface CashboxHandoverCancel { reason: string; rowVersion: string }
 export interface AccountStatusUpdate { status: Account['status']; reason: string; rowVersion: string }
 export interface AccountFee extends Audit { handoverId: Id; amount: number; waivedAmount: number; approvalRequestId: Id | null }
-export interface HandoverCreate { accountId: Id; riderProfileId: Id; effectiveAtUtc: Instant; reason: string;
+export interface HandoverCreate extends WithPreviousDayUsages { accountId: Id; riderProfileId: Id; effectiveAtUtc: Instant; reason: string;
   initialFeePayment?: number; paymentReference?: string | null }
 export interface Handover { id: Id; accountId: Id; externalAccountId: string; riderProfileId: Id; assignmentId: Id;
   startedAtUtc: Instant; endedAtUtc: Instant | null; commissionStartsOn: DateOnly; commissionPostedThrough: DateOnly | null;
@@ -170,8 +172,9 @@ export interface EarningsRequest { handoverId: Id; fromDate: DateOnly; toDate: D
   totalPenalties: number; totalCashAmount: number; totalDriverDebit: number; totalServiceDeduction: number;
   totalDriverCredit: number; totalBonuses: number; totalTips: number; totalFreeOrders: number; reason: string; supersedesId?: Id | null }
 export interface EarningsStatement extends EarningsRequest { id: Id; createdAtUtc: Instant; createdByUserId: Id | null }
-export interface AdministrativeDebt { handoverId: Id; accountId: Id; externalAccountId: string; riderProfileId: Id;
-  riderNameAr: string; platformDebt: number }
+// One balance per account; assignment/rider fields describe current optional context only.
+export interface AdministrativeDebt { handoverId: Id | null; accountId: Id; externalAccountId: string; riderProfileId: Id | null;
+  riderNameAr: string | null; platformDebt: number }
 export enum ImportKind { Transactions = 1, DailyOrders = 2 }
 export interface ImportBatch extends Audit { kind: ImportKind; contentHash: string; uploadedByUserId: Id;
   committedAtUtc: Instant | null; replacesBatchId: Id | null; correctionReason: string | null }

@@ -22,13 +22,13 @@ public sealed record JahezOperationNetUpdate(decimal Net, string Reason, string 
     JahezMoneyFund? Fund = null, string? PaymentReference = null);
 public sealed record JahezOperationCommissionStartUpdate(DateOnly StartDate, string Reason, string RowVersion,
     JahezMoneyFund? Fund = null, string? PaymentReference = null);
-public sealed record JahezWorkflowRequestCreate(Guid HandoverId, JahezApprovalKind Kind, string Reason,
+public sealed record JahezWorkflowRequestCreate(Guid? HandoverId, JahezApprovalKind Kind, string Reason,
     Guid? OperationId = null, Guid? TargetAccountId = null, decimal WaiverAmount = 0,
     DateOnly? FromDate = null, DateOnly? ToDate = null, DateTimeOffset? EffectiveAtUtc = null,
     JahezAdjustmentTarget? AdjustmentTarget = null, decimal? ProposedNet = null,
-    decimal? ProposedCommission = null, decimal? DebtAdjustment = null);
+    decimal? ProposedCommission = null, decimal? DebtAdjustment = null, Guid? AccountId = null);
 public sealed record JahezWorkflowDecision(bool Approve, string Reason, decimal? ApprovedNet = null,
-    decimal? ApprovedCommission = null, decimal? ApprovedDebtAdjustment = null, bool UseOriginalValues = false);
+    decimal? ApprovedCommission = null, decimal? ApprovedDebtAdjustment = null, bool UseOriginalValues = false, IReadOnlyList<PreviousDayUsageInput>? PreviousDayUsages = null);
 public sealed record JahezWorkflowApproval(JahezApprovalRequest Request, IReadOnlyList<JahezApprovalDecision> Decisions)
 {
     public JahezSettlementAmounts? Amounts { get; init; }
@@ -62,11 +62,18 @@ public sealed record JahezAccountRow(Guid AccountId, string Code, string Externa
     string? StatusReason, bool IsAssigned, bool HasPassword, JahezAccountPerson? Owner,
     JahezAccountPerson? ActualRider, Guid? CurrentAssignmentId, Guid? CurrentHandoverId,
     DateOnly? AcquisitionDate, DateOnly? StartDate, DateOnly? EndDate, string? OwnershipNotes,
-    string? OperationalNotes, int? YesterdayOrders, DateOnly? LastOrderDate, int? LastOrderCount, string RowVersion)
+    string? OperationalNotes, int? YesterdayOrders, DateOnly? LastOrderDate, int? LastOrderCount, string RowVersion) : LogisticsERP.Application.Features.Hr.IMonthlyAccountUsageResponse
 {
+    [global::System.Text.Json.Serialization.JsonIgnore]
+    public Guid UsageAccountId => AccountId;
+    public string MonthlyUsageStatus { get; set; } = "Unused";
+    public string UsageMonth { get; set; } = string.Empty;
+
     public string? VehicleType { get; init; }
 }
 public sealed record JahezAccountsPage(IReadOnlyList<JahezAccountRow> Items, int Page, int PageSize, int TotalCount);
+public sealed record JahezSettlementReminder(Guid HandoverId, Guid AccountId, string ExternalAccountId,
+    Guid RiderProfileId, string? RiderName, DateTimeOffset ReminderAnchorAtUtc, int DaysSinceSettlement);
 public sealed record JahezSponsorStatistics(Guid SponsorId, string NameAr, int Accounts, int AssignedAccounts,
     int ActualRiders, int SponsoredRiders, int SponsoredRidersUsingOtherSponsorsAccounts);
 public sealed record JahezAccountStatistics(DateOnly Yesterday, int TotalAccounts, int ActiveAccounts,
@@ -84,6 +91,7 @@ public sealed record JahezCashboxHandoverCancel(string Reason, string RowVersion
 
 public interface IJahezWorkflowService
 {
+    Task<Result<JahezPage<JahezSettlementReminder>>> SettlementRemindersAsync(int page, int pageSize, CancellationToken ct = default);
     Task<Result<JahezHandoverResponse>> HandoverAsync(string key, JahezHandoverRequest request, CancellationToken ct = default);
     Task<Result<JahezEarningsStatement>> RecordEarningsAsync(string key, JahezEarningsRequest request, CancellationToken ct = default);
     Task<Result<JahezImportPreview>> UploadAsync(string key, JahezImportCreateRequest request, CancellationToken ct = default);

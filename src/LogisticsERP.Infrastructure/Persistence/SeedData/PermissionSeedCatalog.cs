@@ -21,6 +21,9 @@ internal static class PermissionSeedCatalog
 {
     public static IReadOnlyList<PermissionSeed> All { get; } =
     [
+        Create(317, PermissionKeys.Ninja.EvaluationManage, "Ninja", "إدارة تقييم نينجا", "Manage Ninja evaluation", "إدارة المسؤولية والتسعير وحفظ نسخ التقييم التقديري.", "Manage suggestion responsibility, pricing context and snapshots.", clientScope: true, sensitive: true),
+        Create(318, PermissionKeys.Ninja.EvaluationExport, "Ninja", "تصدير تقييم نينجا", "Export Ninja evaluation", "تصدير التقييم التقديري المسموح.", "Export authorized Ninja monitoring suggestions.", clientScope: true, sensitive: true),
+        Create(319, PermissionKeys.Ninja.AssignmentDatesUpdate, "Ninja", "تعديل تواريخ تكليفات نينجا", "Edit Ninja assignment dates", "تصحيح تاريخ بداية التكليف الحالي وتاريخي بداية ونهاية التكليف المنتهي دون تغيير الأداء المسجل.", "Correct the current assignment start date or an ended assignment's start and end dates without changing recorded performance.", clientScope: true, sensitive: true),
         Create(310, PermissionKeys.Ninja.Read, "Ninja", "عرض نينجا", "Read Ninja", "عرض حسابات وتقارير وأداء وخصومات ومراجعات ملفات نينجا.", "Read Ninja accounts, reports, performance, deductions and sheet reviews.", clientScope: true, sensitive: true),
         Create(311, PermissionKeys.Ninja.AccountsUpdate, "Ninja", "تعديل حسابات نينجا", "Edit Ninja accounts", "تعديل حالة ورقم هاتف الحساب ورفع مراجعات الملفات وتعديل ملاحظاتها.", "Update Ninja account status and phone, upload sheet reviews and edit their notes.", clientScope: true, sensitive: true),
         Create(312, PermissionKeys.Ninja.AssignmentsCreate, "Ninja", "تسليم حسابات نينجا", "Assign Ninja accounts", "تسليم حساب نينجا للمندوب الفعلي.", "Assign a Ninja account to its actual rider.", clientScope: true, sensitive: true),

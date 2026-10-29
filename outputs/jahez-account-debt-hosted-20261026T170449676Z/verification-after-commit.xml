@@ -1,0 +1,89 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="MigrationId" type="xs:string" minOccurs="0" />
+                <xs:element name="ProductVersion" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Requests" type="xs:long" minOccurs="0" />
+                <xs:element name="AccountLinkedRequests" type="xs:long" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table2">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="LedgerEntries" type="xs:long" minOccurs="0" />
+                <xs:element name="AccountLinkedEntries" type="xs:long" minOccurs="0" />
+                <xs:element name="LedgerAmount" type="xs:decimal" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table3">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Transactions" type="xs:long" minOccurs="0" />
+                <xs:element name="AccountLinkedTransactions" type="xs:long" minOccurs="0" />
+                <xs:element name="NetAmount" type="xs:decimal" minOccurs="0" />
+                <xs:element name="SupersededTransactions" type="xs:long" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table4">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="DailyOrders" type="xs:long" minOccurs="0" />
+                <xs:element name="OrderCount" type="xs:long" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table5">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="MoneyMovements" type="xs:long" minOccurs="0" />
+                <xs:element name="MovementAmount" type="xs:decimal" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <MigrationId>20261026165219_MakeJahezAdministrativeDebtAccountBased</MigrationId>
+    <ProductVersion>10.0.11</ProductVersion>
+  </Table>
+  <Table1>
+    <Requests>12</Requests>
+    <AccountLinkedRequests>12</AccountLinkedRequests>
+  </Table1>
+  <Table2>
+    <LedgerEntries>2294</LedgerEntries>
+    <AccountLinkedEntries>2294</AccountLinkedEntries>
+    <LedgerAmount>59875.903000</LedgerAmount>
+  </Table2>
+  <Table3>
+    <Transactions>1736</Transactions>
+    <AccountLinkedTransactions>1736</AccountLinkedTransactions>
+    <NetAmount>-57075.903000</NetAmount>
+    <SupersededTransactions>0</SupersededTransactions>
+  </Table3>
+  <Table4>
+    <DailyOrders>1925</DailyOrders>
+    <OrderCount>14126</OrderCount>
+  </Table4>
+  <Table5>
+    <MoneyMovements>243</MoneyMovements>
+    <MovementAmount>76596.70</MovementAmount>
+  </Table5>
+</NewDataSet>

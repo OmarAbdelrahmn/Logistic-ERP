@@ -1,0 +1,22 @@
+{
+  "Mode": "COMMITTED",
+  "Correlation": "ninja-delete-performance-20261026-16bd6399f9bc492b8c87c8d46759a066",
+  "Evidence": "C:\\Users\\omarf\\OneDrive\\Documents\\ChatGPT\\Logistic ERP\\outputs\\ninja-delete-performance-20261026-16bd6399f9bc492b8c87c8d46759a066",
+  "Deleted": [
+    {
+      "Table": "ninja.NinjaDailyImports",
+      "Rows": 1
+    },
+    {
+      "Table": "ninja.NinjaDailyPerformance",
+      "Rows": 61
+    },
+    {
+      "Table": "ninja.NinjaDailyPerformanceSources",
+      "Rows": 61
+    }
+  ],
+  "RemainingPerformance": 0,
+  "RemainingSources": 0,
+  "RemainingImports": 0
+}

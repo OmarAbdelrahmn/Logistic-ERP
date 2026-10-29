@@ -18,6 +18,7 @@ public sealed partial class NinjaWorkflowTests
     [InlineData(PermissionKeys.Ninja.AccountsUpdate, PermissionKeys.Operations.PlatformAccountsUpdate)]
     [InlineData(PermissionKeys.Ninja.AssignmentsCreate, PermissionKeys.Operations.PlatformAssignmentsCreate)]
     [InlineData(PermissionKeys.Ninja.AssignmentsDelete, PermissionKeys.Operations.PlatformAssignmentsDelete)]
+    [InlineData(PermissionKeys.Ninja.AssignmentDatesUpdate, PermissionKeys.Operations.PlatformAssignmentsUpdate)]
     [InlineData(PermissionKeys.Ninja.CredentialsRotate, PermissionKeys.Operations.PlatformCredentialsRotate)]
     [InlineData(PermissionKeys.Ninja.PerformanceImport, PermissionKeys.Operations.PlatformAccountsUpdate)]
     [InlineData(PermissionKeys.Ninja.DeductionsImport, PermissionKeys.Operations.PlatformAccountsUpdate)]
@@ -55,7 +56,7 @@ public sealed partial class NinjaWorkflowTests
     public void NinjaPermissionsHaveTheirOwnCatalogGroupAndAdminGrants()
     {
         var permissions = PermissionKeys.All.Where(k => k.StartsWith("ninja.", StringComparison.Ordinal)).ToArray();
-        Assert.Equal(7, permissions.Length);
+        Assert.Equal(10, permissions.Length);
         foreach (var key in permissions)
         {
             var definition = Assert.Single(PermissionSeedCatalog.All, p => p.Key == key);
@@ -83,6 +84,7 @@ public sealed partial class NinjaWorkflowTests
             async () => await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, new(2026, 10, 12), "0501111111", "x", RiderType: "InternalCar", PaymentModel: "PayPerOrder"), ct),
             async () => await f.Service.ReturnAsync(f.Account.Id, new(new(2026, 10, 12), "0501111111", "x", "Return", "AQ=="), ct),
             async () => await f.Service.UpdateCredentialsAsync(f.Account.Id, new("x", "0501111111", "Change", "AQ=="), ct),
+            async () => await f.Service.UpdateAssignmentDatesAsync(f.Account.Id, Guid.NewGuid(), new(new(2026, 10, 12), null, "Correct dates", "AQ=="), ct),
             async () => await f.Service.ImportAsync(false, new(2026, 10, 12), "x.xlsx", [], ct),
             async () => await f.Service.ImportAsync(true, new(2026, 10, 12), "x.xlsx", [], ct),
             async () => await f.Service.UploadAccountSheetAsync("x.xlsx", [], null, ct),

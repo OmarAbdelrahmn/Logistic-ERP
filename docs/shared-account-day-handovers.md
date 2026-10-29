@@ -1,5 +1,7 @@
 # Shared-day account handovers
 
+**29 October 2026 update:** New assignments to a different same-day rider now require previous orders. Consecutive same-rider assignments use grouped contributions. Account HTTP responses include current-month usage. See [assignment workflow and frontend integration](assignment-day-contributions-20261029.md). The return-input behavior below remains supported for older clients.
+
 **Hosted database update applied and verified on 21 October 2026.** API deployment is still pending. See [the deployment record and historical review items](shared-account-day-hosted-deployment-20261021.md).
 
 Implemented for Jahez, Ninja, Chefz Freelancer, and the generic platform lifecycle. This is a backend change; applying the migration and deploying the API are separate release steps. Existing local changes are retained.

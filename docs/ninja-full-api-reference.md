@@ -41,6 +41,7 @@ The permission names below are checked against the `NINJA` client-platform scope
 | 17 | GET | `/api/ninja/accounts/sheet-updates/{uploadId}` | read | `NinjaAccountUpdateUploadResponse` |
 | 18 | GET | `/api/ninja/accounts/sheet-updates/{uploadId}/rows` | read | `NinjaAccountUpdatePage<NinjaAccountUpdateRowResponse>` |
 | 19 | PUT | `/api/ninja/accounts/sheet-updates/{uploadId}/note` | update | `NinjaAccountUpdateUploadResponse` |
+| 20 | PUT | `/api/ninja/accounts/{accountId}/assignments/{assignmentId}/dates` | `ninja.assignments.dates.update` only | `NinjaAssignmentDatesResponse` |
 
 For endpoints 5–7, any non-null `newPassword` additionally requires `ninja.credentials.rotate`. This applies even when cooldown retains the old password.
 
@@ -320,10 +321,22 @@ Coverage counts are distinct dates/accounts/riders across the selected facts, no
 Same dates and optional account/rider filters as the summary, plus pagination. One row per date observed in either performance or deductions; order is earliest first. Missing dates are omitted, not turned into invented zero-performance rows.
 
 ```text
-{ items: [{ date: "2026-10-15", metrics: NinjaReportMetrics }], page: 1, pageSize: 50 }
+{
+  items: [{
+    date: "2026-10-15",
+    metrics: NinjaReportMetrics,
+    sponsors: [{ sponsorId: Guid | null, sponsorNameAr: string | null, metrics: NinjaReportMetrics }]
+  }],
+  page: 1,
+  pageSize: 50
+}
 ```
 
 `metrics` is the exact contract in section 12. A date may have only a deduction record or an uploaded zero-performance observation; use the record counts to distinguish them.
+
+Each day's `sponsors` contains the same metrics grouped by the account's current `sponsorId`, ordered by sponsor ID, with only groups having observations that day. Sponsor names remain available for inactive or soft-deleted sponsors. Accounts without a sponsor form one group with null `sponsorId` and `sponsorNameAr`; retain this group in the UI as "بدون كفيل" so totals reconcile. Changing an account's sponsor moves its historical report contributions to that sponsor. The date/account/rider filters apply equally to the totals and breakdown; pagination applies to dates, never to sponsors within a date.
+
+Sum sponsor record counts, orders, hours, collected amounts and deductions to obtain the corresponding daily totals. Shared-account source records count once per sponsor even if allocated across multiple riders. Productivity is a ratio, so recompute it from total orders / total hours (four decimal places, null for zero hours); do not sum sponsor productivity values.
 
 ## 14. Rider performance report
 
@@ -347,6 +360,27 @@ Same dates and optional filters, plus pagination. One row per historically attri
 ```
 
 `rider` is currently visible employee identity information; null means the person reference is unavailable, not that the totals belong to the owner. Historical rider IDs and totals remain. No ratings, acceptance rates, net salaries or payouts are implied by this report.
+
+## 20. Correct current or ended assignment dates
+
+`PUT /api/ninja/accounts/{accountId}/assignments/{assignmentId}/dates`
+
+Requires only the dedicated `ninja.assignments.dates.update` permission in the `NINJA` platform scope. Other assignment/account permissions do not authorize this action. Current assignments accept a changed `effectiveFrom` and null `effectiveTo`. Ended assignments require both dates; send the unchanged value for any date you are keeping. Cancelled/planned assignments cannot be corrected here. Dates cannot be in the future, the end cannot precede the start, and a nonblank reason of at most 1000 characters is required. Use the assignment's Base64 `rowVersion`.
+
+```json
+{
+  "effectiveFrom": "2026-10-10",
+  "effectiveTo": "2026-10-20",
+  "reason": "Correct the reviewed assignment period",
+  "rowVersion": "AAAAAAAAB9E="
+}
+```
+
+Success is HTTP 200 with `{ accountId, assignmentId, effectiveFrom, effectiveTo, status, rowVersion }`. Retain the returned assignment token. Status, rider, phone, password, payment model, original start/end reasons and other assignments are not changed. Identical dates are an idempotent no-op after token validation.
+
+Corrections reject overlaps beyond an inclusive handover boundary, excluded saved performance/deductions or entered day figures (including zero), and excluded responsibility lines in the latest reviewed revision. Adding/removing coverage on an already imported account day also requires resolving that import first. Empty day markers excluded by a correction are retired; new boundaries have blank figures and no assumed handover sequence. The existing day-usage workflow resolves ambiguous same-day ordering before a new import. Every actual correction appends an assignment event with user, reason and old/new dates.
+
+HTTP 400 indicates invalid dates, an unsupported assignment status, or an attempted close/reopen. HTTP 403 indicates missing dedicated permission/scope. HTTP 404 means the Ninja account or its requested assignment was not found. HTTP 409 uses `ninja.conflict` for stale tokens/writes or `ninja.assignment_dates_conflict` for overlap/recorded-data conflicts. See [the deployment and frontend handoff](ninja-assignment-date-corrections.md).
 
 ## Shared ERP endpoints used for setup and history
 

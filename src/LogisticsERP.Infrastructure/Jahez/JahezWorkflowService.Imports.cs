@@ -13,6 +13,26 @@ namespace LogisticsERP.Infrastructure.Jahez;
 
 internal sealed partial class JahezWorkflowService
 {
+    private IQueryable<JahezTransaction> CurrentTransactions => db.JahezTransactions.Where(x => x.SupersededByBatchId == null);
+
+    private async Task ReplaceAccountTransactions(JahezImportBatch batch, Guid[] accountIds, CancellationToken ct)
+    {
+        var sessions = db.JahezAccountSessions.IgnoreQueryFilters().Where(h => accountIds.Contains(h.PlatformRiderAccountId)).Select(h => h.Id);
+        var previous = await CurrentTransactions.Where(x => x.BatchId != batch.Id
+            && (x.AccountId.HasValue && accountIds.Contains(x.AccountId.Value)
+                || x.HandoverId.HasValue && sessions.Contains(x.HandoverId.Value))).ToArrayAsync(ct);
+        var ids = previous.Select(x => x.Id).ToArray();
+        var charges = await db.JahezLedgerEntries.Where(x => ids.Contains(x.SourceId) && x.Kind == JahezLedgerKind.Charge
+            && x.Bucket == JahezLedgerBucket.PlatformDebt
+            && !db.JahezLedgerEntries.Any(r => r.ReversesEntryId == x.Id)).ToArrayAsync(ct);
+        foreach (var charge in charges)
+            db.Add(new JahezLedgerEntry { AccountId = charge.AccountId, HandoverId = charge.HandoverId,
+                Bucket = charge.Bucket, Kind = JahezLedgerKind.Adjustment, Amount = -charge.Amount,
+                SourceId = charge.Id, ReversesEntryId = charge.Id, OccurredAtUtc = charge.OccurredAtUtc,
+                Reason = batch.CorrectionReason ?? "استبدال بيانات الحساب بملف جاهز المحدث" });
+        foreach (var row in previous) row.SupersededByBatchId = batch.Id;
+    }
+
     public Task<Result<JahezImportPreview>> UploadAsync(string key, JahezImportCreateRequest request, CancellationToken ct = default) =>
         ExecuteAsync(key, "upload", new { request.Kind, Files = request.Files.Select(f => new { f.FileName, Hash = Hash(f.Content) }), request.ReplacesBatchId, request.CorrectionReason },
             PermissionKeys.Jahez.ImportsCreate, async () =>
@@ -24,7 +44,8 @@ internal sealed partial class JahezWorkflowService
             var hashes = request.Files.Select(f => Hash(f.Content)).ToArray();
             Require(hashes.Distinct(StringComparer.Ordinal).Count() == hashes.Length, JahezErrors.Invalid("الملف نفسه مكرر في الطلب."));
             var combined = Hash(Encoding.UTF8.GetBytes(string.Join(':', hashes.Order(StringComparer.Ordinal))));
-            var existing = await db.Set<JahezImportBatch>().SingleOrDefaultAsync(x => x.Kind == request.Kind && x.ContentHash == combined, ct);
+            var existing = await db.Set<JahezImportBatch>().FirstOrDefaultAsync(x => x.Kind == request.Kind && x.ContentHash == combined
+                && (request.Kind == JahezImportKind.DailyDispatches || x.CommittedAtUtc == null && x.ReplacesBatchId == request.ReplacesBatchId), ct);
             if (existing is not null)
             {
                 Require(existing.ReplacesBatchId == request.ReplacesBatchId, JahezErrors.Conflict("الملفات موجودة ضمن عملية مختلفة."));
@@ -87,7 +108,8 @@ internal sealed partial class JahezWorkflowService
         List<JahezImportRowPreview> previews = [];
         List<JahezDispatchAllocation> resolvedAllocations = [];
         var allocator = new PlatformAccountDayAllocationService(db);
-        if (rows.Length > 0) await allocator.Preload(accountIds, rows.Min(r => JahezRules.RiyadhDate(r.OccurredAtUtc)), rows.Max(r => JahezRules.RiyadhDate(r.OccurredAtUtc)), ct);
+        if (batch.Kind == JahezImportKind.DailyDispatches && rows.Length > 0)
+            await allocator.Preload(accountIds, rows.Min(r => JahezRules.RiyadhDate(r.OccurredAtUtc)), rows.Max(r => JahezRules.RiyadhDate(r.OccurredAtUtc)), ct);
         var savedDispatches = batch.CommittedAtUtc.HasValue
             ? await db.Set<JahezDailyDispatch>().AsNoTracking().Where(d => d.BatchId == batch.Id).ToArrayAsync(ct) : [];
         var duplicatedDaily = rows.GroupBy(x => new { x.DriverId, Date = JahezRules.RiyadhDate(x.OccurredAtUtc) }).Where(g => g.Count() > 1).SelectMany(g => g).Select(x => x.Id).ToHashSet();
@@ -103,8 +125,7 @@ internal sealed partial class JahezWorkflowService
             else if (batch.Kind == JahezImportKind.Transactions)
             {
                 var matches = handovers.Where(h => h.PlatformRiderAccountId == account.Id && JahezRules.Contains(h, row.OccurredAtUtc)).ToArray();
-                if (matches.Length != 1) Issue("assignment_missing", "لم يُحدد مستخدم واحد للحساب وقت الحركة؛ استكمل سجل الاستلام.");
-                else handover = matches[0];
+                if (matches.Length == 1) handover = matches[0];
             }
             else
             {
@@ -136,6 +157,15 @@ internal sealed partial class JahezWorkflowService
                             if (recorded.HasValue && recorded.Value != supplied)
                                 Issue("checkpoint_conflict", $"Rider {session.RiderProfileId}, assignment {session.RiderClientAssignmentId}: manual orders contradict recorded day usage.");
                         }
+                        foreach (var contribution in await allocator.Contributions(account.Id, date, ct))
+                        {
+                            var ids = PlatformAccountDayAllocationService.Ids(contribution);
+                            var groupedTotal = matches.Where(h => ids.Contains(h.RiderClientAssignmentId))
+                                .Sum(h => manual.SingleOrDefault(a => a.HandoverId == h.Id)?.Count ?? 0);
+                            var declared = PlatformAccountDayAllocationService.ContributionFigures(contribution, usages.ToDictionary(u => u.RiderClientAssignmentId)).OrdersCount;
+                            if (declared.HasValue && declared != groupedTotal)
+                                Issue("checkpoint_conflict", "Manual orders contradict recorded grouped day contribution.");
+                        }
                         resolvedAllocations.AddRange(manual);
                     }
                 }
@@ -157,7 +187,7 @@ internal sealed partial class JahezWorkflowService
         }
         if (allocations?.Any(a => !knownRows.Contains(a.RowId)) == true)
             issues.Add(new(Guid.Empty, string.Empty, 0, "unknown_allocation_row", "التوزيع يشير إلى صف غير موجود في العملية."));
-        if (!batch.CommittedAtUtc.HasValue)
+        if (!batch.CommittedAtUtc.HasValue && batch.Kind == JahezImportKind.DailyDispatches)
         {
             var otherBatches = db.Set<JahezImportBatch>().Where(b => b.CommittedAtUtc != null && b.Id != batch.Id && b.Id != batch.ReplacesBatchId
                 && !db.Set<JahezImportBatch>().Any(n => n.ReplacesBatchId == b.Id && n.CommittedAtUtc != null));
@@ -165,19 +195,8 @@ internal sealed partial class JahezWorkflowService
             foreach (var group in previews.Where(x => x.AccountId.HasValue).GroupBy(x => x.AccountId!.Value))
             {
                 var ids = handovers.Where(x => x.PlatformRiderAccountId == group.Key).Select(x => x.Id).ToArray();
-                var from = group.Min(x => x.OccurredAtUtc); var to = group.Max(x => x.OccurredAtUtc);
-                bool overlap;
-                if (batch.Kind == JahezImportKind.Transactions)
-                {
-                    var ranges = await db.Set<JahezTransaction>().Where(x => otherIds.Contains(x.BatchId) && ids.Contains(x.HandoverId))
-                        .GroupBy(x => x.BatchId).Select(g => new { From = g.Min(x => x.OccurredAtUtc), To = g.Max(x => x.OccurredAtUtc) }).ToArrayAsync(ct);
-                    overlap = ranges.Any(x => x.From <= to && x.To >= from);
-                }
-                else
-                {
-                    var dates = group.Select(x => JahezRules.RiyadhDate(x.OccurredAtUtc)).Distinct().ToArray();
-                    overlap = await db.Set<JahezDailyDispatch>().AnyAsync(x => otherIds.Contains(x.BatchId) && ids.Contains(x.HandoverId) && dates.Contains(x.Date), ct);
-                }
+                var dates = group.Select(x => JahezRules.RiyadhDate(x.OccurredAtUtc)).Distinct().ToArray();
+                var overlap = await db.Set<JahezDailyDispatch>().AnyAsync(x => otherIds.Contains(x.BatchId) && ids.Contains(x.HandoverId) && dates.Contains(x.Date), ct);
                 if (overlap)
                 {
                     var first = group.First();
@@ -211,59 +230,62 @@ internal sealed partial class JahezWorkflowService
             if (batch!.CommittedAtUtc.HasValue) return await ImportPreview(batch, request.Allocations, ct);
             var preview = await ImportPreview(batch, request.Allocations, ct);
             Require(preview.Issues.Count == 0, JahezErrors.Conflict("حل جميع مشاكل المعاينة قبل الترحيل."));
-            if (batch.ReplacesBatchId.HasValue)
-            {
-                Require(!await db.Set<JahezImportBatch>().AnyAsync(x => x.ReplacesBatchId == batch.ReplacesBatchId && x.CommittedAtUtc != null, ct), JahezErrors.Conflict("العملية الأصلية مستبدلة بالفعل."));
-                var oldBatch = await db.Set<JahezImportBatch>().SingleAsync(x => x.Id == batch.ReplacesBatchId, ct);
-                var oldPreview = await ImportPreview(oldBatch, null, ct);
-                var originalScope = oldPreview.Rows.GroupBy(x => x.DriverId).Select(g => (g.Key, From: JahezRules.RiyadhDate(g.Min(x => x.OccurredAtUtc)), To: JahezRules.RiyadhDate(g.Max(x => x.OccurredAtUtc)))).OrderBy(x => x.Key, StringComparer.Ordinal).ToArray();
-                var newScope = preview.Rows.GroupBy(x => x.DriverId).Select(g => (g.Key, From: JahezRules.RiyadhDate(g.Min(x => x.OccurredAtUtc)), To: JahezRules.RiyadhDate(g.Max(x => x.OccurredAtUtc)))).OrderBy(x => x.Key, StringComparer.Ordinal).ToArray();
-                Require(originalScope.SequenceEqual(newScope), JahezErrors.Conflict("الاستبدال يجب أن يغطي الحسابات وحدود الأيام نفسها؛ لا يستبدل جزءًا من العملية الأصلية."));
-                var oldIds = await db.Set<JahezTransaction>().Where(x => x.BatchId == oldBatch.Id).Select(x => x.Id).ToArrayAsync(ct);
-                var entries = await db.Set<JahezLedgerEntry>().Where(x => oldIds.Contains(x.SourceId) && x.Kind == JahezLedgerKind.Charge).ToArrayAsync(ct);
-                foreach (var entry in entries)
-                {
-                    var h = await Handover(entry.HandoverId, ct);
-                    Entry(h, entry.Bucket, JahezLedgerKind.Adjustment, -entry.Amount, entry.Id, batch.CorrectionReason!, entry.OccurredAtUtc, entry.Id);
-                }
-            }
+            if (batch.Kind == JahezImportKind.DailyDispatches) return await CommitDailyImport(batch, preview, ct);
+            await ReplaceAccountTransactions(batch, preview.Rows.Select(r => r.AccountId!.Value).Distinct().ToArray(), ct);
             var rowIds = preview.Rows.Select(x => x.RowId).ToArray();
             var sourceRows = await db.Set<JahezImportRow>().Where(x => rowIds.Contains(x.Id)).ToDictionaryAsync(x => x.Id, ct);
-            var hIds = preview.Rows.Where(x => x.HandoverId.HasValue).Select(x => x.HandoverId!.Value)
-                .Concat(preview.ResolvedAllocations.Select(x => x.HandoverId)).Distinct().ToArray();
-            var handovers = await db.Set<JahezAccountSession>().Where(x => hIds.Contains(x.Id)).ToDictionaryAsync(x => x.Id, ct);
-            var allocationRows = preview.ResolvedAllocations.GroupBy(x => x.RowId).ToDictionary(g => g.Key, g => g.ToArray());
             foreach (var row in preview.Rows)
             {
                 var source = sourceRows[row.RowId];
-                if (batch.Kind == JahezImportKind.Transactions)
-                {
-                    var transaction = new JahezTransaction { BatchId = batch.Id, ImportRowId = row.RowId, HandoverId = row.HandoverId!.Value,
-                        OccurredAtUtc = source.OccurredAtUtc, DeliveryPrice = source.DeliveryPrice, CashAmount = source.CashAmount,
-                        NetAmount = source.NetAmount, DriverAdjustment = source.DriverAdjustment };
-                    db.Add(transaction);
-                    Entry(handovers[transaction.HandoverId], JahezLedgerBucket.PlatformDebt, JahezLedgerKind.Charge, -source.NetAmount,
-                        transaction.Id, "حركة جاهز مستوردة", source.OccurredAtUtc);
-                }
-                else
-                {
-                    var manual = allocationRows.GetValueOrDefault(row.RowId) ?? [];
-                    if (manual.Length == 0) db.Add(new JahezDailyDispatch { BatchId = batch.Id, ImportRowId = row.RowId,
-                        HandoverId = row.HandoverId!.Value, Date = JahezRules.RiyadhDate(row.OccurredAtUtc), Count = source.Dispatches!.Value });
-                    else foreach (var allocation in manual)
-                    {
-                        var businessDate = JahezRules.RiyadhDate(row.OccurredAtUtc);
-                        var session = handovers[allocation.HandoverId];
-                        var usageId = await db.Set<PlatformAccountDayUsage>().Where(u => u.PlatformRiderAccountId == session.PlatformRiderAccountId
-                            && u.RiderClientAssignmentId == session.RiderClientAssignmentId && u.BusinessDate == businessDate).Select(u => (Guid?)u.Id).SingleOrDefaultAsync(ct);
-                        db.Add(new JahezDailyDispatch { BatchId = batch.Id, ImportRowId = row.RowId, DayUsageId = usageId,
-                            HandoverId = allocation.HandoverId, Date = businessDate, Count = allocation.Count, AllocationReason = allocation.Reason });
-                    }
-                }
+                var transaction = new JahezTransaction { BatchId = batch.Id, ImportRowId = row.RowId,
+                    AccountId = row.AccountId, HandoverId = row.HandoverId,
+                    OccurredAtUtc = source.OccurredAtUtc, DeliveryPrice = source.DeliveryPrice, CashAmount = source.CashAmount,
+                    NetAmount = source.NetAmount, DriverAdjustment = source.DriverAdjustment };
+                db.Add(transaction);
+                db.Add(new JahezLedgerEntry { AccountId = row.AccountId, HandoverId = row.HandoverId,
+                    Bucket = JahezLedgerBucket.PlatformDebt, Kind = JahezLedgerKind.Charge, Amount = -source.NetAmount,
+                    SourceId = transaction.Id, OccurredAtUtc = source.OccurredAtUtc, Reason = "حركة جاهز مستوردة" });
             }
             batch.CommittedAtUtc = Now;
             return preview with { Committed = true };
         }, ct);
+
+    private async Task<JahezImportPreview> CommitDailyImport(JahezImportBatch batch, JahezImportPreview preview, CancellationToken ct)
+    {
+        if (batch.ReplacesBatchId.HasValue)
+        {
+            Require(!await db.Set<JahezImportBatch>().AnyAsync(x => x.ReplacesBatchId == batch.ReplacesBatchId && x.CommittedAtUtc != null, ct), JahezErrors.Conflict("العملية الأصلية مستبدلة بالفعل."));
+            var oldBatch = await db.Set<JahezImportBatch>().SingleAsync(x => x.Id == batch.ReplacesBatchId, ct);
+            var oldPreview = await ImportPreview(oldBatch, null, ct);
+            var originalScope = oldPreview.Rows.GroupBy(x => x.DriverId).Select(g => (g.Key, From: JahezRules.RiyadhDate(g.Min(x => x.OccurredAtUtc)), To: JahezRules.RiyadhDate(g.Max(x => x.OccurredAtUtc)))).OrderBy(x => x.Key, StringComparer.Ordinal).ToArray();
+            var newScope = preview.Rows.GroupBy(x => x.DriverId).Select(g => (g.Key, From: JahezRules.RiyadhDate(g.Min(x => x.OccurredAtUtc)), To: JahezRules.RiyadhDate(g.Max(x => x.OccurredAtUtc)))).OrderBy(x => x.Key, StringComparer.Ordinal).ToArray();
+            Require(originalScope.SequenceEqual(newScope), JahezErrors.Conflict("الاستبدال يجب أن يغطي الحسابات وحدود الأيام نفسها؛ لا يستبدل جزءًا من العملية الأصلية."));
+        }
+        var rowIds = preview.Rows.Select(x => x.RowId).ToArray();
+        var sourceRows = await db.Set<JahezImportRow>().Where(x => rowIds.Contains(x.Id)).ToDictionaryAsync(x => x.Id, ct);
+        var hIds = preview.Rows.Where(x => x.HandoverId.HasValue).Select(x => x.HandoverId!.Value)
+            .Concat(preview.ResolvedAllocations.Select(x => x.HandoverId)).Distinct().ToArray();
+        var handovers = await db.Set<JahezAccountSession>().Where(x => hIds.Contains(x.Id)).ToDictionaryAsync(x => x.Id, ct);
+        var allocationRows = preview.ResolvedAllocations.GroupBy(x => x.RowId).ToDictionary(g => g.Key, g => g.ToArray());
+        foreach (var row in preview.Rows)
+        {
+            var source = sourceRows[row.RowId];
+            var manual = allocationRows.GetValueOrDefault(row.RowId) ?? [];
+            if (manual.Length == 0) db.Add(new JahezDailyDispatch { BatchId = batch.Id, ImportRowId = row.RowId,
+                HandoverId = row.HandoverId!.Value, Date = JahezRules.RiyadhDate(row.OccurredAtUtc), Count = source.Dispatches!.Value });
+            else foreach (var allocation in manual)
+            {
+                var businessDate = JahezRules.RiyadhDate(row.OccurredAtUtc);
+                var session = handovers[allocation.HandoverId];
+                var usageId = await db.Set<PlatformAccountDayUsage>().Where(u => u.PlatformRiderAccountId == session.PlatformRiderAccountId
+                    && u.RiderClientAssignmentId == session.RiderClientAssignmentId && u.BusinessDate == businessDate).Select(u => (Guid?)u.Id).SingleOrDefaultAsync(ct);
+                db.Add(new JahezDailyDispatch { BatchId = batch.Id, ImportRowId = row.RowId, DayUsageId = usageId,
+                    HandoverId = allocation.HandoverId, Date = businessDate, Count = allocation.Count, AllocationReason = allocation.Reason });
+            }
+        }
+        batch.CommittedAtUtc = Now;
+        return preview with { Committed = true };
+    }
 
     public Task<Result<JahezImportFileResponse>> GetImportFileAsync(Guid id, CancellationToken ct = default) =>
         ReadAsync(PermissionKeys.Jahez.ImportsRead, async () =>

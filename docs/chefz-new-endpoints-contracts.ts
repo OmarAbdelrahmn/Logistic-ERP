@@ -1,3 +1,4 @@
+import type { MonthlyAccountUsage, WithPreviousDayUsages } from "./shared-account-day-usage-contracts";
 /** Implemented Chefz workbook-update contracts. Dates are Riyadh calendar dates (YYYY-MM-DD). */
 export type Guid = string;
 export type DateOnly = string;
@@ -144,6 +145,8 @@ export interface ChefzPerformanceResponse {
   id: Guid;
   accountId: Guid;
   externalAccountId: string;
+  /** Current account type; not a historical snapshot. */
+  accountType: "Freelancer" | "FullTime" | "Unconfigured";
   assignmentId: Guid;
   riderProfileId: Guid;
   riderName: string;
@@ -208,7 +211,7 @@ export interface ChefzAccountReminder {
   message: string;
 }
 
-export interface ChefzAccountResponse {
+export interface ChefzAccountResponse extends MonthlyAccountUsage {
   /** Account list: current assigned worker's ERP iqama; null when unavailable. */
   riderIqamaNo: string | null;
   accountId: Guid;

@@ -86,7 +86,7 @@ public sealed partial class NinjaWorkflowTests
     }
 
     [Fact]
-    public async Task StatusValidationPermissionsConcurrencyAndDebtBlockPreventMutations()
+    public async Task StatusValidationPermissionsConcurrencyAndTransferredDebtDoesNotSuspendOperation()
     {
         var ct = TestContext.Current.CancellationToken;
         await using var f = await Fixture.Create();
@@ -105,9 +105,9 @@ public sealed partial class NinjaWorkflowTests
         f.Db.Set<JahezTransferredDebt>().Add(new() { OperationId = Guid.NewGuid(), RiderProfileId = f.Rider.Id, Amount = 10 });
         await f.Db.SaveChangesAsync(ct);
         var blocked = Value(await f.Service.SetAccountStatusAsync(f.Account.Id, new("Suspended", active.RowVersion), ct));
-        Assert.True(blocked.IsOperationallyBlocked);
-        Assert.Equal("rider.jahez_debt_block", (await f.Service.SetAccountStatusAsync(f.Account.Id, new("Active", blocked.RowVersion), ct)).Error.Code);
-        Assert.Equal(PlatformRiderAccountStatus.Suspended, f.Account.Status);
+        Assert.False(blocked.IsOperationallyBlocked);
+        Assert.True((await f.Service.SetAccountStatusAsync(f.Account.Id, new("Active", blocked.RowVersion), ct)).IsSuccess);
+        Assert.Equal(PlatformRiderAccountStatus.Assigned, f.Account.Status);
         f.Checker.Denied = PermissionKeys.Ninja.Read;
         Assert.True((await f.Service.GetAccountAsync(f.Account.Id, ct)).IsFailure);
     }

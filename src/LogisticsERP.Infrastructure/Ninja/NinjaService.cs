@@ -82,7 +82,7 @@ internal sealed partial class NinjaService(ApplicationDbContext db, ICurrentUser
         {
             result = assign is not null
                 ? await platforms.AssignNinjaAccountAsync(accountId, new(assign.ActualRiderProfileId, assign.EffectiveFrom,
-                    assign.Reason, assign.WasBackdated, assign.BackdatedReason), riderType, paymentModel, () => Stage(account, p), ct)
+                    assign.Reason, assign.WasBackdated, assign.BackdatedReason, assign.PreviousDayUsages), riderType, paymentModel, () => Stage(account, p), ct)
                 : await platforms.ReleaseNinjaAccountAsync(accountId, new(release!.EffectiveTo, release.Status,
                     release.Reason, release.RowVersion, release.DayUsage), () => Stage(account, p), ct);
         }

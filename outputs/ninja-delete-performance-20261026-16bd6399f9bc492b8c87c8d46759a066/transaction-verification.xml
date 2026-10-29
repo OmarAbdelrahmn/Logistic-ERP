@@ -1,0 +1,45 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="TableName" type="xs:string" minOccurs="0" />
+                <xs:element name="DeletedRows" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="RemainingPerformance" type="xs:int" minOccurs="0" />
+                <xs:element name="RemainingSources" type="xs:int" minOccurs="0" />
+                <xs:element name="RemainingImports" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <TableName>ninja.NinjaDailyImports</TableName>
+    <DeletedRows>1</DeletedRows>
+  </Table>
+  <Table>
+    <TableName>ninja.NinjaDailyPerformance</TableName>
+    <DeletedRows>61</DeletedRows>
+  </Table>
+  <Table>
+    <TableName>ninja.NinjaDailyPerformanceSources</TableName>
+    <DeletedRows>61</DeletedRows>
+  </Table>
+  <Table1>
+    <RemainingPerformance>0</RemainingPerformance>
+    <RemainingSources>0</RemainingSources>
+    <RemainingImports>0</RemainingImports>
+  </Table1>
+</NewDataSet>

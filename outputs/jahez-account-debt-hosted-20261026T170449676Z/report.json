@@ -1,0 +1,22 @@
+{
+  "Server": "db67927.public.databaseasp.net",
+  "Database": "db67927",
+  "AppliedMigration": "20261026165219_MakeJahezAdministrativeDebtAccountBased",
+  "VerifiedAtUtc": "2026-10-26T20:05:08.2514919+03:00",
+  "PostCommitVerified": true,
+  "ServerBackupCompleted": true,
+  "RestoreVerifyOnlyPerformed": false,
+  "ProtectedTables": 30,
+  "OriginalValuesPreserved": true,
+  "RequestRowVersionsRefreshed": true,
+  "DailyOrdersUnchanged": true,
+  "Requests": 12,
+  "LedgerEntries": 2294,
+  "Transactions": 1736,
+  "DailyOrders": 1925,
+  "MoneyMovements": 243,
+  "SqlSha256": "4D342D59337F4F7A635C97EDC3364C75F6FD42E6FC596938011B9A55B57AF6B6",
+  "ApiDeployed": false,
+  "EvidenceDirectory": "C:\\Users\\omarf\\OneDrive\\Documents\\ChatGPT\\Logistic ERP\\outputs\\jahez-account-debt-hosted-20261026T170449676Z",
+  "HostedBackendReadVerificationPassed": true
+}

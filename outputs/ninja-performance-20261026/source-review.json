@@ -1,0 +1,496 @@
+{
+  "summary": {
+    "rows": 3072,
+    "from": "2026-10-01",
+    "to": "2026-10-24",
+    "counts": {
+      "Matched": 3032,
+      "MissingAssignment": 37,
+      "SharedDay": 3
+    },
+    "totalOrders": 42489,
+    "totalHours": "35247.48333328"
+  },
+  "conflicts": [],
+  "unresolved": [
+    {
+      "row": 27,
+      "captainId": "215723",
+      "date": "2026-10-01",
+      "orders": 16,
+      "hours": "12.85000000",
+      "avgHours": "12.85472222",
+      "accountId": "01a13935-9d88-7190-a05d-da5e4af73c1b",
+      "status": "MissingAssignment",
+      "assignments": []
+    },
+    {
+      "row": 39,
+      "captainId": "215460",
+      "date": "2026-10-01",
+      "orders": 17,
+      "hours": "13.28333333",
+      "avgHours": "13.29222222",
+      "accountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+      "status": "MissingAssignment",
+      "assignments": []
+    },
+    {
+      "row": 45,
+      "captainId": "214310",
+      "date": "2026-10-01",
+      "orders": 11,
+      "hours": "9.70000000",
+      "avgHours": "9.704722222",
+      "accountId": "01a13935-9d88-7406-8e5e-d81bea21d7c0",
+      "status": "MissingAssignment",
+      "assignments": []
+    },
+    {
+      "row": 53,
+      "captainId": "214271",
+      "date": "2026-10-01",
+      "orders": 2,
+      "hours": "3.31666667",
+      "avgHours": "3.325833333",
+      "accountId": "01a13935-9d87-7253-b391-67405a68b533",
+      "status": "MissingAssignment",
+      "assignments": []
+    },
+    {
+      "row": 115,
+      "captainId": "215810",
+      "date": "2026-10-01",
+      "orders": 13,
+      "hours": "9.13333333",
+      "avgHours": "9.141944444",
+      "accountId": "01a13935-9d8a-7226-80ab-1b467bc9a2e7",
+      "status": "SharedDay",
+      "assignments": [
+        {
+          "id": "01a16e49-ed0b-7a30-b05a-83bd55776417",
+          "riderId": "01a0f7a7-10d4-79a9-8541-963c1137e3dd",
+          "from": "2026-10-01",
+          "to": null
+        },
+        {
+          "id": "01a16d80-d260-770a-a774-960f95ff49d3",
+          "riderId": "01a16d7f-7a2e-7183-8e3f-a76acfcdc6fa",
+          "from": "2026-10-01",
+          "to": "2026-10-01"
+        }
+      ]
+    },
+    {
+      "row": 152,
+      "captainId": "215723",
+      "date": "2026-10-02",
+      "orders": 19,
+      "hours": "13.61666667",
+      "avgHours": "13.61944444",
+      "accountId": "01a13935-9d88-7190-a05d-da5e4af73c1b",
+      "status": "MissingAssignment",
+      "assignments": []
+    },
+    {
+      "row": 167,
+      "captainId": "215460",
+      "date": "2026-10-02",
+      "orders": 17,
+      "hours": "12.25000000",
+      "avgHours": "12.25777778",
+      "accountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+      "status": "MissingAssignment",
+      "assignments": []
+    },
+    {
+      "row": 201,
+      "captainId": "26528",
+      "date": "2026-10-02",
+      "orders": 14,
+      "hours": "11.95000000",
+      "avgHours": "11.95333333",
+      "accountId": "01a13935-9d88-7a5a-8197-3b40bcdd77dc",
+      "status": "MissingAssignment",
+      "assignments": []
+    },
+    {
+      "row": 321,
+      "captainId": "215774",
+      "date": "2026-10-03",
+      "orders": 3,
+      "hours": "2.60000000",
+      "avgHours": "2.608055556",
+      "accountId": "01a13935-9d8d-73a4-92a7-255ca12b44f9",
+      "status": "MissingAssignment",
+      "assignments": []
+    },
+    {
+      "row": 323,
+      "captainId": "215769",
+      "date": "2026-10-03",
+      "orders": 8,
+      "hours": "6.65000000",
+      "avgHours": "6.663888889",
+      "accountId": "01a13935-9d8c-7f44-b2a7-d590fdfd3b41",
+      "status": "MissingAssignment",
+      "assignments": []
+    },
+    {
+      "row": 344,
+      "captainId": "215460",
+      "date": "2026-10-03",
+      "orders": 17,
+      "hours": "12.73333333",
+      "avgHours": "12.74",
+      "accountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+      "status": "MissingAssignment",
+      "assignments": []
+    },
+    {
+      "row": 378,
+      "captainId": "26528",
+      "date": "2026-10-03",
+      "orders": 6,
+      "hours": "7.33333333",
+      "avgHours": "7.346666667",
+      "accountId": "01a13935-9d88-7a5a-8197-3b40bcdd77dc",
+      "status": "MissingAssignment",
+      "assignments": []
+    },
+    {
+      "row": 472,
+      "captainId": "215460",
+      "date": "2026-10-04",
+      "orders": 15,
+      "hours": "13.53333333",
+      "avgHours": "13.54888889",
+      "accountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+      "status": "MissingAssignment",
+      "assignments": []
+    },
+    {
+      "row": 502,
+      "captainId": "214197",
+      "date": "2026-10-04",
+      "orders": 7,
+      "hours": "5.93333333",
+      "avgHours": "5.947777778",
+      "accountId": "01a13935-9d88-790d-9e5b-e95435d1a19d",
+      "status": "MissingAssignment",
+      "assignments": []
+    },
+    {
+      "row": 550,
+      "captainId": "215460",
+      "date": "2026-10-05",
+      "orders": 16,
+      "hours": "13.70000000",
+      "avgHours": "13.71444444",
+      "accountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+      "status": "MissingAssignment",
+      "assignments": []
+    },
+    {
+      "row": 674,
+      "captainId": "215460",
+      "date": "2026-10-06",
+      "orders": 18,
+      "hours": "13.60000000",
+      "avgHours": "13.60472222",
+      "accountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+      "status": "MissingAssignment",
+      "assignments": []
+    },
+    {
+      "row": 848,
+      "captainId": "215460",
+      "date": "2026-10-07",
+      "orders": 18,
+      "hours": "12.40000000",
+      "avgHours": "12.405",
+      "accountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+      "status": "MissingAssignment",
+      "assignments": []
+    },
+    {
+      "row": 922,
+      "captainId": "215460",
+      "date": "2026-10-08",
+      "orders": 18,
+      "hours": "13.41666667",
+      "avgHours": "13.42166667",
+      "accountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+      "status": "MissingAssignment",
+      "assignments": []
+    },
+    {
+      "row": 1006,
+      "captainId": "295975",
+      "date": "2026-10-08",
+      "orders": 13,
+      "hours": "12.85000000",
+      "avgHours": "12.86361111",
+      "accountId": "01a13935-9d88-7b7c-b69d-c8574866bd64",
+      "status": "MissingAssignment",
+      "assignments": []
+    },
+    {
+      "row": 1007,
+      "captainId": "295966",
+      "date": "2026-10-09",
+      "orders": 2,
+      "hours": "6.61666667",
+      "avgHours": "6.6175",
+      "accountId": "01a13935-9d88-7d6a-ac82-b4f0b329eff7",
+      "status": "MissingAssignment",
+      "assignments": []
+    },
+    {
+      "row": 1014,
+      "captainId": "222883",
+      "date": "2026-10-09",
+      "orders": 4,
+      "hours": "5.93333333",
+      "avgHours": "5.949444444",
+      "accountId": "01a13935-9d8d-7123-bc42-e10d3cc7f3e7",
+      "status": "MissingAssignment",
+      "assignments": []
+    },
+    {
+      "row": 1042,
+      "captainId": "215460",
+      "date": "2026-10-09",
+      "orders": 14,
+      "hours": "12.45000000",
+      "avgHours": "12.45083333",
+      "accountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+      "status": "MissingAssignment",
+      "assignments": []
+    },
+    {
+      "row": 1143,
+      "captainId": "222883",
+      "date": "2026-10-10",
+      "orders": 4,
+      "hours": "4.23333333",
+      "avgHours": "4.249444444",
+      "accountId": "01a13935-9d8d-7123-bc42-e10d3cc7f3e7",
+      "status": "MissingAssignment",
+      "assignments": []
+    },
+    {
+      "row": 1167,
+      "captainId": "215460",
+      "date": "2026-10-10",
+      "orders": 16,
+      "hours": "12.70000000",
+      "avgHours": "12.70722222",
+      "accountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+      "status": "MissingAssignment",
+      "assignments": []
+    },
+    {
+      "row": 1290,
+      "captainId": "215460",
+      "date": "2026-10-11",
+      "orders": 16,
+      "hours": "13.31666667",
+      "avgHours": "13.32972222",
+      "accountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+      "status": "MissingAssignment",
+      "assignments": []
+    },
+    {
+      "row": 1416,
+      "captainId": "215460",
+      "date": "2026-10-12",
+      "orders": 14,
+      "hours": "12.90000000",
+      "avgHours": "12.91222222",
+      "accountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+      "status": "MissingAssignment",
+      "assignments": []
+    },
+    {
+      "row": 1544,
+      "captainId": "215460",
+      "date": "2026-10-13",
+      "orders": 16,
+      "hours": "13.46666667",
+      "avgHours": "13.4725",
+      "accountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+      "status": "MissingAssignment",
+      "assignments": []
+    },
+    {
+      "row": 1676,
+      "captainId": "215460",
+      "date": "2026-10-14",
+      "orders": 17,
+      "hours": "12.26666667",
+      "avgHours": "12.26916667",
+      "accountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+      "status": "MissingAssignment",
+      "assignments": []
+    },
+    {
+      "row": 1681,
+      "captainId": "214330",
+      "date": "2026-10-14",
+      "orders": 10,
+      "hours": "11.63333333",
+      "avgHours": "11.64861111",
+      "accountId": "01a13935-9d87-72f8-b596-f2191febeb04",
+      "status": "SharedDay",
+      "assignments": [
+        {
+          "id": "01a16dc7-1bf1-75ad-9380-85ed7d683bc5",
+          "riderId": "01a139ab-392e-725f-af5a-b0fbea81f897",
+          "from": "2026-10-14",
+          "to": "2026-10-15"
+        },
+        {
+          "id": "01a16dc3-5e0f-7505-b71e-9a601f25c097",
+          "riderId": "01a0bf9d-e099-7717-a547-d1036d992928",
+          "from": "2026-10-01",
+          "to": "2026-10-14"
+        }
+      ]
+    },
+    {
+      "row": 1838,
+      "captainId": "279831",
+      "date": "2026-10-15",
+      "orders": 5,
+      "hours": "6.08333333",
+      "avgHours": "6.088333333",
+      "accountId": "751f1fab-7946-4615-ae64-5f1f3c58035e",
+      "status": "MissingAssignment",
+      "assignments": []
+    },
+    {
+      "row": 1852,
+      "captainId": "215771",
+      "date": "2026-10-15",
+      "orders": 4,
+      "hours": "3.11666667",
+      "avgHours": "3.122222222",
+      "accountId": "01a13935-9d8d-74d9-a5ac-f928a96d8860",
+      "status": "MissingAssignment",
+      "assignments": []
+    },
+    {
+      "row": 1872,
+      "captainId": "215460",
+      "date": "2026-10-15",
+      "orders": 12,
+      "hours": "11.91666667",
+      "avgHours": "11.92388889",
+      "accountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+      "status": "MissingAssignment",
+      "assignments": []
+    },
+    {
+      "row": 1940,
+      "captainId": "215460",
+      "date": "2026-10-16",
+      "orders": 13,
+      "hours": "12.05000000",
+      "avgHours": "12.05388889",
+      "accountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+      "status": "MissingAssignment",
+      "assignments": []
+    },
+    {
+      "row": 2133,
+      "captainId": "215460",
+      "date": "2026-10-17",
+      "orders": 9,
+      "hours": "10.95000000",
+      "avgHours": "10.95333333",
+      "accountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+      "status": "MissingAssignment",
+      "assignments": []
+    },
+    {
+      "row": 2203,
+      "captainId": "215460",
+      "date": "2026-10-18",
+      "orders": 13,
+      "hours": "12.46666667",
+      "avgHours": "12.47138889",
+      "accountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+      "status": "MissingAssignment",
+      "assignments": []
+    },
+    {
+      "row": 2223,
+      "captainId": "214205",
+      "date": "2026-10-18",
+      "orders": 4,
+      "hours": "5.16666667",
+      "avgHours": "5.178055556",
+      "accountId": "01a13935-9d8c-7988-8075-a0199a17f5c9",
+      "status": "MissingAssignment",
+      "assignments": []
+    },
+    {
+      "row": 2382,
+      "captainId": "215460",
+      "date": "2026-10-19",
+      "orders": 13,
+      "hours": "12.03333333",
+      "avgHours": "12.04333333",
+      "accountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+      "status": "MissingAssignment",
+      "assignments": []
+    },
+    {
+      "row": 2659,
+      "captainId": "203023",
+      "date": "2026-10-21",
+      "orders": 1,
+      "hours": "1.60000000",
+      "avgHours": "1.613611111",
+      "accountId": "01a13935-9d88-7a91-a1c9-7ee9960ea970",
+      "status": "MissingAssignment",
+      "assignments": []
+    },
+    {
+      "row": 2680,
+      "captainId": "272575",
+      "date": "2026-10-22",
+      "orders": 11,
+      "hours": "7.68333333",
+      "avgHours": "7.687222222",
+      "accountId": "f809e56c-909b-43a4-ab92-be6bc7f14fd0",
+      "status": "MissingAssignment",
+      "assignments": []
+    },
+    {
+      "row": 3000,
+      "captainId": "159271",
+      "date": "2026-10-24",
+      "orders": 1,
+      "hours": "2.18333333",
+      "avgHours": "2.194722222",
+      "accountId": "01a13935-9d88-70e8-ad7f-1ae0c9bd1bd4",
+      "status": "SharedDay",
+      "assignments": [
+        {
+          "id": "01a16e33-6eb7-76cf-81ed-22c33d54afbf",
+          "riderId": "01a16415-71ad-7171-914d-e91567461828",
+          "from": "2026-10-23",
+          "to": "2026-10-24"
+        },
+        {
+          "id": "01a16eba-5d4c-7b3c-ae78-d02a1348cb9a",
+          "riderId": "01a16d10-10a6-7e91-9051-efc1af4b2b10",
+          "from": "2026-10-24",
+          "to": null
+        }
+      ]
+    }
+  ]
+}

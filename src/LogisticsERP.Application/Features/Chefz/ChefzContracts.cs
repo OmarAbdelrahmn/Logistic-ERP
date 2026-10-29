@@ -12,8 +12,13 @@ public sealed record ChefzAssignmentStartDateResponse(Guid AssignmentId, Guid Ac
 public sealed record ChefzAccountResponse(Guid AccountId, string ExternalAccountId, string ReportIdNumber,
     string AccountType, decimal CommissionRate, decimal DailyFee, bool HasPassword, string RowVersion,
     Guid? SponsorId = null, Guid? OperatingCityId = null, string VehicleType = "Car", string DashboardStatus = "active",
-    string Status = "Available", string? StatusReason = null, string AccountRowVersion = "")
+    string Status = "Available", string? StatusReason = null, string AccountRowVersion = "") : LogisticsERP.Application.Features.Hr.IMonthlyAccountUsageResponse
 {
+    [global::System.Text.Json.Serialization.JsonIgnore]
+    public Guid UsageAccountId => AccountId;
+    public string MonthlyUsageStatus { get; set; } = "Unused";
+    public string UsageMonth { get; set; } = string.Empty;
+
     public string? RiderIqamaNo { get; init; }
     public bool IsOperationallyBlocked { get; init; }
     public string? OperationalBlockReason { get; init; }
@@ -39,6 +44,7 @@ public sealed record ChefzPerformanceResponse(Guid Id, Guid AccountId, Guid Assi
     int DeclinedOffers, int MissedOffers, decimal AcceptanceRate)
 {
     public string ExternalAccountId { get; init; } = "";
+    public string AccountType { get; init; } = "Unconfigured";
     public string RiderName { get; init; } = "";
     public string? RiderIqamaNo { get; init; }
 }

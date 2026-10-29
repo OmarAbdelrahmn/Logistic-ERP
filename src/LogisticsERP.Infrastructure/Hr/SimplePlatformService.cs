@@ -416,6 +416,8 @@ internal sealed class SimplePlatformService(
             account.RegisteredEmployeeId = actualRider.EmployeeId;
         }
 
+        var previous = await dayAllocation.PrepareAssignment(accountId, request.EffectiveFrom, request.ActualRiderProfileId, request.PreviousDayUsages, request.Reason ?? "Account assigned", cancellationToken);
+        if (previous.IsFailure) { dbContext.ChangeTracker.Clear(); return Result.Failure<SimplePlatformAssignmentResponse>(previous.Error); }
         stageCredentials?.Invoke();
         var contract = await GetOrCreateInternalContractAsync(account.ClientPlatformId, account.Id, cancellationToken);
         await EnsureInternalRegistrationAsync(account, owner, contract.Id, cancellationToken);
@@ -438,6 +440,7 @@ internal sealed class SimplePlatformService(
         dbContext.RiderClientAssignments.Add(assignment);
         var stagedUsage = await dayAllocation.Stage(accountId, assignment.Id, request.EffectiveFrom, null, request.Reason ?? "Account assigned", true, cancellationToken);
         if (stagedUsage.IsFailure) { dbContext.ChangeTracker.Clear(); return Result.Failure<SimplePlatformAssignmentResponse>(stagedUsage.Error); }
+        await dayAllocation.LinkContinuation(accountId, request.EffectiveFrom, request.Reason ?? "Account assigned", cancellationToken);
         dbContext.RiderAssignmentEvents.Add(new RiderAssignmentEvent
         {
             RiderClientAssignmentId = assignment.Id,

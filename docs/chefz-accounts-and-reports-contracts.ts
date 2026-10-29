@@ -1,9 +1,10 @@
+import type { MonthlyAccountUsage, WithPreviousDayUsages } from "./shared-account-day-usage-contracts";
 /** Chefz accounts/report handoff, 15 October 2026. These are transport contracts, not frontend implementation. */
 export * from './chefz-new-endpoints-contracts';
 import type { Guid, DateOnly, RowVersion, ChefzAccountStatus, ChefzProblemDetails } from './chefz-new-endpoints-contracts';
 
 export type PlatformPaymentModel = 'PayPerOrder' | 'Salary';
-export interface AssignChefzAccountRequest {
+export interface AssignChefzAccountRequest extends WithPreviousDayUsages {
   actualRiderProfileId: Guid;
   effectiveFrom: DateOnly;
   reason: string | null;
@@ -38,7 +39,7 @@ export interface PlatformAssignment {
   isOperationallyBlocked: boolean;
   operationalBlockReason: string | null;
 }
-export interface BasePlatformAccount {
+export interface BasePlatformAccount extends MonthlyAccountUsage {
   id: Guid;
   platformId: Guid;
   platformCode: string;

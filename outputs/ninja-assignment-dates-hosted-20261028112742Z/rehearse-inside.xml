@@ -1,0 +1,127 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="Key" type="xs:string" minOccurs="0" />
+                <xs:element name="Category" type="xs:string" minOccurs="0" />
+                <xs:element name="NameAr" type="xs:string" minOccurs="0" />
+                <xs:element name="NameEn" type="xs:string" minOccurs="0" />
+                <xs:element name="IsDeleted" type="xs:boolean" minOccurs="0" />
+                <xs:element name="IsDeprecated" type="xs:boolean" minOccurs="0" />
+                <xs:element name="IsSensitive" type="xs:boolean" minOccurs="0" />
+                <xs:element name="IsHighTrust" type="xs:boolean" minOccurs="0" />
+                <xs:element name="RequiresClientScope" type="xs:boolean" minOccurs="0" />
+                <xs:element name="RequiresHousingScope" type="xs:boolean" minOccurs="0" />
+                <xs:element name="Version" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RoleId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="PermissionKey" type="xs:string" minOccurs="0" />
+                <xs:element name="IsDeleted" type="xs:boolean" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table2">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="ApplicationApplied" type="xs:boolean" minOccurs="0" />
+                <xs:element name="IdentityApplied" type="xs:boolean" minOccurs="0" />
+                <xs:element name="ApplicationPrerequisite" type="xs:boolean" minOccurs="0" />
+                <xs:element name="IdentityPrerequisite" type="xs:boolean" minOccurs="0" />
+                <xs:element name="NinjaPlatforms" type="xs:int" minOccurs="0" />
+                <xs:element name="ActiveAdministratorRoles" type="xs:int" minOccurs="0" />
+                <xs:element name="NinjaDefinitions" type="xs:int" minOccurs="0" />
+                <xs:element name="AdministratorNinjaGrants" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table3">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Dataset" type="xs:string" minOccurs="0" />
+                <xs:element name="Records" type="xs:long" minOccurs="0" />
+                <xs:element name="Fingerprint" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <Id>019c18d5-62e1-7000-a000-000000000319</Id>
+    <Key>ninja.assignments.dates.update</Key>
+    <Category>Ninja</Category>
+    <NameAr>تعديل تواريخ تكليفات نينجا</NameAr>
+    <NameEn>Edit Ninja assignment dates</NameEn>
+    <IsDeleted>false</IsDeleted>
+    <IsDeprecated>false</IsDeprecated>
+    <IsSensitive>true</IsSensitive>
+    <IsHighTrust>false</IsHighTrust>
+    <RequiresClientScope>true</RequiresClientScope>
+    <RequiresHousingScope>false</RequiresHousingScope>
+    <Version>1</Version>
+  </Table>
+  <Table1>
+    <Id>019c18d5-62e1-7000-b000-000000000283</Id>
+    <RoleId>019c18d5-62e1-7000-9000-000000000001</RoleId>
+    <PermissionKey>ninja.assignments.dates.update</PermissionKey>
+    <IsDeleted>false</IsDeleted>
+  </Table1>
+  <Table2>
+    <ApplicationApplied>true</ApplicationApplied>
+    <IdentityApplied>true</IdentityApplied>
+    <ApplicationPrerequisite>true</ApplicationPrerequisite>
+    <IdentityPrerequisite>true</IdentityPrerequisite>
+    <NinjaPlatforms>1</NinjaPlatforms>
+    <ActiveAdministratorRoles>1</ActiveAdministratorRoles>
+    <NinjaDefinitions>10</NinjaDefinitions>
+    <AdministratorNinjaGrants>10</AdministratorNinjaGrants>
+  </Table2>
+  <Table3>
+    <Dataset>NinjaAccounts</Dataset>
+    <Records>328</Records>
+    <Fingerprint>-208607591</Fingerprint>
+  </Table3>
+  <Table3>
+    <Dataset>NinjaAssignments</Dataset>
+    <Records>235</Records>
+    <Fingerprint>-1191317191</Fingerprint>
+  </Table3>
+  <Table3>
+    <Dataset>Performance</Dataset>
+    <Records>3390</Records>
+    <Fingerprint>1190761101</Fingerprint>
+  </Table3>
+  <Table3>
+    <Dataset>Deductions</Dataset>
+    <Records>10</Records>
+    <Fingerprint>-1295936926</Fingerprint>
+  </Table3>
+  <Table3>
+    <Dataset>NinjaDayUsages</Dataset>
+    <Records>299</Records>
+    <Fingerprint>13738663</Fingerprint>
+  </Table3>
+  <Table3>
+    <Dataset>ExistingDefinitions</Dataset>
+    <Records>330</Records>
+    <Fingerprint>-939753152</Fingerprint>
+  </Table3>
+  <Table3>
+    <Dataset>ExistingRoleGrants</Dataset>
+    <Records>1572</Records>
+    <Fingerprint>-1510969154</Fingerprint>
+  </Table3>
+</NewDataSet>

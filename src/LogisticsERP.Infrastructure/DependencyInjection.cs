@@ -74,10 +74,13 @@ public static class DependencyInjection
         services.AddScoped<IHousingWarehouseService, HousingWarehouseService>();
         services.AddScoped<IPlatformOperationsService, PlatformOperationsService>();
         services.AddScoped<LogisticsERP.Application.Features.Hr.IPlatformAccountDayAllocationService, LogisticsERP.Infrastructure.Hr.PlatformAccountDayAllocationService>();
+        services.AddScoped<LogisticsERP.Application.Features.Hr.IMonthlyAccountUsageService, LogisticsERP.Infrastructure.Hr.MonthlyAccountUsageService>();
         services.AddScoped<LogisticsERP.Application.Features.Hr.IPlatformAccountDayUsageService, LogisticsERP.Infrastructure.Hr.PlatformAccountDayUsageService>();
         services.AddScoped<SimplePlatformService>();
         services.AddScoped<ISimplePlatformService>(provider => provider.GetRequiredService<SimplePlatformService>());
         services.AddScoped<LogisticsERP.Application.Features.Ninja.INinjaService, LogisticsERP.Infrastructure.Ninja.NinjaService>();
+        services.AddScoped<LogisticsERP.Application.Features.Ninja.INinjaEvaluationService, LogisticsERP.Infrastructure.Ninja.NinjaEvaluationService>();
+        services.AddScoped<LogisticsERP.Application.Features.Ninja.INinjaPerformanceImportService, LogisticsERP.Infrastructure.Ninja.NinjaPerformanceImportService>();
         services.AddScoped<LogisticsERP.Application.Features.Chefz.IChefzService, LogisticsERP.Infrastructure.Chefz.ChefzService>();
         services.AddScoped<JahezWorkflowService>();
         services.AddScoped<IJahezWorkflowService>(provider => provider.GetRequiredService<JahezWorkflowService>());

@@ -22,9 +22,28 @@ internal sealed partial class NinjaService
         if (!ValidPage(page, pageSize)) return Result.Failure<NinjaPage<NinjaDailyReport>>(NinjaErrors.Invalid("حجم الصفحة من 1 إلى 100."));
         var source = await ReportSource(dateFrom, dateTo, accountId, riderId, ct);
         if (source.IsFailure) return Result.Failure<NinjaPage<NinjaDailyReport>>(source.Error);
-        var rows = await GroupReport(source.Value!, true, false).OrderBy(r => r.Date)
-            .Skip((page - 1) * pageSize).Take(pageSize).ToArrayAsync(ct);
-        return Result.Success(new NinjaPage<NinjaDailyReport>(rows.Select(r => new NinjaDailyReport(r.Date, Metrics(r))).ToArray(), page, pageSize));
+        var facts = source.Value!;
+        var dates = facts.Select(f => f.Date).Distinct().OrderBy(date => date)
+            .Skip((page - 1) * pageSize).Take(pageSize);
+        var rows = await GroupReport(facts.Where(f => dates.Contains(f.Date)), true, false, sponsors: true)
+            .OrderBy(r => r.Date).ThenBy(r => r.SponsorId).ToArrayAsync(ct);
+        if (rows.Length == 0) return Result.Success(new NinjaPage<NinjaDailyReport>([], page, pageSize));
+        var sponsorIds = rows.Where(r => r.SponsorId.HasValue).Select(r => r.SponsorId!.Value).Distinct().ToArray();
+        var names = await db.Sponsors.IgnoreQueryFilters().AsNoTracking().Where(s => sponsorIds.Contains(s.Id))
+            .ToDictionaryAsync(s => s.Id, s => s.RegistryNameAr, ct);
+        return Result.Success(new NinjaPage<NinjaDailyReport>(rows.GroupBy(r => r.Date).Select(day => new NinjaDailyReport(day.Key,
+            // Each source belongs to one account/sponsor, so distinct source counts are additive across sponsors.
+            // Build totals from this same read to keep them consistent with the breakdown during concurrent imports.
+            Metrics(new ReportGroup
+            {
+                PerformanceRecords = day.Sum(s => s.PerformanceRecords), DeductionRecords = day.Sum(s => s.DeductionRecords),
+                Orders = day.Sum(s => s.Orders), Hours = day.Sum(s => s.Hours),
+                Collected = day.Sum(s => s.Collected), Deductions = day.Sum(s => s.Deductions)
+            }))
+        {
+            Sponsors = day.Select(s => new NinjaSponsorReport(s.SponsorId,
+                s.SponsorId is { } id ? names.GetValueOrDefault(id) : null, Metrics(s))).ToArray()
+        }).ToArray(), page, pageSize));
     }
 
     public async Task<Result<NinjaPage<NinjaRiderReport>>> GetRiderReportAsync(DateOnly dateFrom, DateOnly dateTo, Guid? accountId, Guid? riderId,
@@ -61,35 +80,42 @@ internal sealed partial class NinjaService
             join a in accounts on p.PlatformRiderAccountId equals a.Id
             where p.ReportDate >= dateFrom && p.ReportDate <= dateTo && (accountId == null || p.PlatformRiderAccountId == accountId)
                 && (riderId == null || p.RiderProfileId == riderId)
-            select new ReportFact { Date = p.ReportDate, AccountId = p.PlatformRiderAccountId, RiderId = p.RiderProfileId, SourceId = p.SourceId == Guid.Empty ? p.Id : p.SourceId,
+            select new ReportFact { Date = p.ReportDate, AccountId = p.PlatformRiderAccountId, SponsorId = a.SponsorId, RiderId = p.RiderProfileId, SourceId = p.SourceId == Guid.Empty ? p.Id : p.SourceId,
                 PerformanceRecords = 1, DeductionRecords = 0, Orders = (long)p.TotalOrders, Hours = p.TotalWorkingHours, Collected = 0m, Deductions = 0m };
         var deductions = from p in db.NinjaDailyDeductions.AsNoTracking()
             join a in accounts on p.PlatformRiderAccountId equals a.Id
             where p.ReportDate >= dateFrom && p.ReportDate <= dateTo && (accountId == null || p.PlatformRiderAccountId == accountId)
                 && (riderId == null || p.RiderProfileId == riderId)
-            select new ReportFact { Date = p.ReportDate, AccountId = p.PlatformRiderAccountId, RiderId = p.RiderProfileId, SourceId = p.SourceId == Guid.Empty ? p.Id : p.SourceId,
+            select new ReportFact { Date = p.ReportDate, AccountId = p.PlatformRiderAccountId, SponsorId = a.SponsorId, RiderId = p.RiderProfileId, SourceId = p.SourceId == Guid.Empty ? p.Id : p.SourceId,
                 PerformanceRecords = 0, DeductionRecords = 1, Orders = 0L, Hours = 0m, Collected = p.TotalCollectedAmountAtDelivery, Deductions = p.TotalDeductions };
         // UNION ALL keeps both independent observations, avoiding a many-to-many join that multiplies totals.
         return Result.Success(performance.Concat(deductions));
     }
 
     // The bucket is always one, and keeps summary grouping tied to SQL columns rather than a constant object.
-    private static IQueryable<ReportGroup> GroupReport(IQueryable<ReportFact> facts, bool daily, bool riders) =>
-        facts.GroupBy(f => new { Date = daily ? f.Date : DateOnly.MinValue, RiderId = riders ? f.RiderId : Guid.Empty,
+    private static IQueryable<ReportGroup> GroupReport(IQueryable<ReportFact> facts, bool daily, bool riders, bool sponsors = false)
+    {
+        // Capture the placeholder so EF sends a typed uniqueidentifier parameter. A GUID
+        // literal projected through UNION/GROUP BY can otherwise be returned as SQL text.
+        var ungroupedRiderId = Guid.Empty;
+        return facts.GroupBy(f => new { Date = daily ? f.Date : DateOnly.MinValue, RiderId = riders ? f.RiderId : ungroupedRiderId,
+            SponsorId = sponsors ? f.SponsorId : null,
             Bucket = f.PerformanceRecords + f.DeductionRecords })
-            .Select(g => new ReportGroup { Date = g.Key.Date, RiderId = g.Key.RiderId,
+            .Select(g => new ReportGroup { Date = g.Key.Date, RiderId = g.Key.RiderId, SponsorId = g.Key.SponsorId,
                 PerformanceRecords = g.Where(f => f.PerformanceRecords == 1).Select(f => f.SourceId).Distinct().Count(),
                 DeductionRecords = g.Where(f => f.DeductionRecords == 1).Select(f => f.SourceId).Distinct().Count(),
                 Orders = g.Sum(f => f.Orders), Hours = g.Sum(f => f.Hours), Collected = g.Sum(f => f.Collected), Deductions = g.Sum(f => f.Deductions),
                 PerformanceDays = g.Where(f => f.PerformanceRecords == 1).Select(f => f.Date).Distinct().Count(),
                 DeductionDays = g.Where(f => f.DeductionRecords == 1).Select(f => f.Date).Distinct().Count(),
                 Accounts = g.Select(f => f.AccountId).Distinct().Count(), Riders = g.Select(f => f.RiderId).Distinct().Count() });
+    }
 
     private static NinjaReportMetrics Metrics(ReportGroup r) => new(r.PerformanceRecords, r.DeductionRecords, r.Orders,
         r.Hours, r.Hours == 0 ? null : decimal.Round(r.Orders / r.Hours, 4), r.Collected, r.Deductions);
 
     private sealed class ReportFact
     {
+        public Guid? SponsorId { get; init; }
         public Guid SourceId { get; init; }
         public DateOnly Date { get; init; }
         public Guid AccountId { get; init; }
@@ -104,6 +130,7 @@ internal sealed partial class NinjaService
 
     private sealed class ReportGroup
     {
+        public Guid? SponsorId { get; init; }
         public DateOnly Date { get; init; }
         public Guid RiderId { get; init; }
         public int PerformanceRecords { get; init; }

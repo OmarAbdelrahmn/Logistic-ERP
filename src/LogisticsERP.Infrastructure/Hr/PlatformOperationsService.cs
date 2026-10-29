@@ -458,6 +458,10 @@ internal sealed class PlatformOperationsService(
         var dayAllocation = new PlatformAccountDayAllocationService(dbContext);
         var validDates = await dayAllocation.ValidateStart(account.Id, request.EffectiveFrom, null, null, cancellationToken);
         if (validDates.IsFailure) return Result.Failure<PlatformAssignmentResponse>(validDates.Error);
+        var previous = status == RiderAssignmentStatus.Active
+            ? await dayAllocation.PrepareAssignment(account.Id, request.EffectiveFrom, request.RiderProfileId, request.PreviousDayUsages, request.StartReason ?? "Account assigned", cancellationToken)
+            : Result.Success();
+        if (previous.IsFailure) { dbContext.ChangeTracker.Clear(); return Result.Failure<PlatformAssignmentResponse>(previous.Error); }
         var entity = new RiderClientAssignment
         {
             RiderProfileId = request.RiderProfileId,
@@ -477,6 +481,7 @@ internal sealed class PlatformOperationsService(
         dbContext.RiderClientAssignments.Add(entity);
         var stagedUsage = await dayAllocation.Stage(account.Id, entity.Id, request.EffectiveFrom, null, request.StartReason ?? "Account assigned", true, cancellationToken);
         if (stagedUsage.IsFailure) { dbContext.ChangeTracker.Clear(); return Result.Failure<PlatformAssignmentResponse>(stagedUsage.Error); }
+        await dayAllocation.LinkContinuation(account.Id, request.EffectiveFrom, request.StartReason ?? "Account assigned", cancellationToken);
         dbContext.RiderAssignmentEvents.Add(new RiderAssignmentEvent
         {
             RiderClientAssignmentId = entity.Id,

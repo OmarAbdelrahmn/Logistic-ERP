@@ -1,0 +1,25 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="ServerBackupPath" type="xs:string" minOccurs="0" />
+                <xs:element name="BackupCommandCompleted" type="xs:boolean" minOccurs="0" />
+                <xs:element name="CompletedAtUtc" type="xs:dateTime" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <ServerBackupPath>D:\Services\MSSQL\Backup\db67927-before-jahez-account-debt-3A7A21EC78874568B7DAA8285B62BE85.bak</ServerBackupPath>
+    <BackupCommandCompleted>true</BackupCommandCompleted>
+    <CompletedAtUtc>2026-10-26T17:04:56.2322864+03:00</CompletedAtUtc>
+  </Table>
+</NewDataSet>

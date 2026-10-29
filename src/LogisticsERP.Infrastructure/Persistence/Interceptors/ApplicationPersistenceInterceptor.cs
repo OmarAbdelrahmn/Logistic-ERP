@@ -203,6 +203,12 @@ internal sealed class ApplicationPersistenceInterceptor(
 
             if (entry.State == EntityState.Modified)
             {
+                // A reupload retires an imported row once, preserving its original values and audit identity.
+                if (history is JahezTransaction
+                    && entry.Property(nameof(JahezTransaction.SupersededByBatchId)).OriginalValue is null
+                    && entry.Property(nameof(JahezTransaction.SupersededByBatchId)).CurrentValue is Guid
+                    && entry.Properties.Where(property => property.IsModified)
+                        .All(property => property.Metadata.Name == nameof(JahezTransaction.SupersededByBatchId))) return;
                 if (IsJahezPaymentMethodCorrection(entry) || IsJahezCommissionStartCorrection(entry) || IsJahezNetCorrection(entry)) return;
                 // Daily performance is corrected by reupload; preserve its account/day and creation identity.
                 // Other history records remain append-only except the authorized Jahez corrections above.
@@ -331,7 +337,9 @@ internal sealed class ApplicationPersistenceInterceptor(
 
             // The immutable import file already retains its bytes; audit its identity and hash without duplicating the whole workbook.
             foreach (var property in entry.Properties.Where(property => !IsSensitiveAuditProperty(property.Metadata.Name)
-                && !(entry.Entity is JahezImportFile && property.Metadata.Name == nameof(JahezImportFile.Content))))
+                && !(entry.Entity is JahezImportFile && property.Metadata.Name == nameof(JahezImportFile.Content))
+                && !(entry.Entity is LogisticsERP.Domain.Entities.Ninja.NinjaPerformanceArtifact && property.Metadata.Name is "Content" or "ResultJson")
+                && !(entry.Entity is LogisticsERP.Domain.Entities.Ninja.NinjaEvaluationSnapshot && property.Metadata.Name == "ResultJson")))
             {
                 if (entry.State != EntityState.Added && (entry.State == EntityState.Deleted || property.IsModified))
                 {

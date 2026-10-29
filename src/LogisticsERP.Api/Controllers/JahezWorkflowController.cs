@@ -12,6 +12,9 @@ namespace LogisticsERP.Api.Controllers;
 [Route("api/jahez/v2")]
 public sealed class JahezWorkflowController(IJahezWorkflowService service) : ControllerBase
 {
+    [HttpGet("settlement-reminders"), RequirePermission(PermissionKeys.Jahez.Read)]
+    public Task<IActionResult> SettlementReminders(int page = 1, int pageSize = 50, CancellationToken ct = default) =>
+        Respond(service.SettlementRemindersAsync(page, pageSize, ct));
     [HttpPost("fees/refunds/preview"), RequirePermission(JahezWorkflowPermissions.FeeApprove)]
     public Task<IActionResult> PreviewFeeRefund(JahezFeeRefundPreviewRequest request, CancellationToken ct) => Respond(service.PreviewFeeRefundAsync(request, ct));
     [HttpPost("fees/refunds"), RequirePermission(JahezWorkflowPermissions.FeeApprove)]

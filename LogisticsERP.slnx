@@ -13,5 +13,6 @@
   </Folder>
   <Folder Name="/tools/">
     <Project Path="tools/LogisticsERP.Bootstrap/LogisticsERP.Bootstrap.csproj" />
+    <Project Path="tools/LogisticsERP.NinjaPerformance/LogisticsERP.NinjaPerformance.csproj" />
   </Folder>
 </Solution>

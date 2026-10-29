@@ -1,0 +1,47 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="ReceiptNumber" type="xs:string" minOccurs="0" />
+                <xs:element name="Subtotal" type="xs:decimal" minOccurs="0" />
+                <xs:element name="TaxAmount" type="xs:decimal" minOccurs="0" />
+                <xs:element name="TotalAmount" type="xs:decimal" minOccurs="0" />
+                <xs:element name="PackageCount" type="xs:decimal" minOccurs="0" />
+                <xs:element name="ReceivedBaseQuantity" type="xs:decimal" minOccurs="0" />
+                <xs:element name="PackageUnitPrice" type="xs:decimal" minOccurs="0" />
+                <xs:element name="OriginalQuantity" type="xs:decimal" minOccurs="0" />
+                <xs:element name="RemainingQuantity" type="xs:decimal" minOccurs="0" />
+                <xs:element name="MovementQuantity" type="xs:decimal" minOccurs="0" />
+                <xs:element name="QuantityOnHand" type="xs:decimal" minOccurs="0" />
+                <xs:element name="BarrelCount" type="xs:int" minOccurs="0" />
+                <xs:element name="BarrelLiters" type="xs:decimal" minOccurs="0" />
+                <xs:element name="AuditCount" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <ReceiptNumber>BILL-20261026-B1809E6D</ReceiptNumber>
+    <Subtotal>7652.20</Subtotal>
+    <TaxAmount>1147.84</TaxAmount>
+    <TotalAmount>8800.04</TotalAmount>
+    <PackageCount>2.000</PackageCount>
+    <ReceivedBaseQuantity>416.000</ReceivedBaseQuantity>
+    <PackageUnitPrice>3826.10</PackageUnitPrice>
+    <OriginalQuantity>416.000</OriginalQuantity>
+    <RemainingQuantity>416.000</RemainingQuantity>
+    <MovementQuantity>416.000</MovementQuantity>
+    <QuantityOnHand>418.000</QuantityOnHand>
+    <BarrelCount>2</BarrelCount>
+    <BarrelLiters>416.000</BarrelLiters>
+    <AuditCount>1</AuditCount>
+  </Table>
+</NewDataSet>

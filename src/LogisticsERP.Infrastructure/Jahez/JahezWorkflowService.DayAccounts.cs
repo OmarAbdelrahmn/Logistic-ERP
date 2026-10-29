@@ -35,10 +35,11 @@ internal sealed partial class JahezWorkflowService
         if (referenceIds.Count > 0)
         {
             var requestReferences = await db.Set<JahezApprovalRequest>().AsNoTracking().Where(r => referenceIds.Contains(r.Id))
-                .Select(r => new { r.HandoverId, r.TargetAccountId, r.OperationId }).ToArrayAsync(ct);
+                .Select(r => new { r.HandoverId, r.AccountId, r.TargetAccountId, r.OperationId }).ToArrayAsync(ct);
             foreach (var request in requestReferences)
             {
-                handoverIds.Add(request.HandoverId);
+                if (request.HandoverId.HasValue) handoverIds.Add(request.HandoverId.Value);
+                if (request.AccountId.HasValue) accountIds.Add(request.AccountId.Value);
                 if (request.TargetAccountId.HasValue) accountIds.Add(request.TargetAccountId.Value);
                 if (request.OperationId.HasValue) referenceIds.Add(request.OperationId.Value);
             }

@@ -100,6 +100,15 @@ public sealed class ApplicationDbContext(
     public DbSet<LogisticsERP.Domain.Entities.Ninja.NinjaAccountUpdateUpload> NinjaAccountUpdateUploads => Set<LogisticsERP.Domain.Entities.Ninja.NinjaAccountUpdateUpload>();
     public DbSet<LogisticsERP.Domain.Entities.Ninja.NinjaAccountUpdateRow> NinjaAccountUpdateRows => Set<LogisticsERP.Domain.Entities.Ninja.NinjaAccountUpdateRow>();
     public DbSet<LogisticsERP.Domain.Entities.Ninja.NinjaDailyImport> NinjaDailyImports => Set<LogisticsERP.Domain.Entities.Ninja.NinjaDailyImport>();
+    public DbSet<LogisticsERP.Domain.Entities.Ninja.NinjaSuggestionPolicy> NinjaSuggestionPolicies => Set<LogisticsERP.Domain.Entities.Ninja.NinjaSuggestionPolicy>();
+    public DbSet<LogisticsERP.Domain.Entities.Ninja.NinjaEvaluationContextRevision> NinjaEvaluationContexts => Set<LogisticsERP.Domain.Entities.Ninja.NinjaEvaluationContextRevision>();
+    public DbSet<LogisticsERP.Domain.Entities.Ninja.NinjaResponsibilityRevision> NinjaResponsibilityRevisions => Set<LogisticsERP.Domain.Entities.Ninja.NinjaResponsibilityRevision>();
+    public DbSet<LogisticsERP.Domain.Entities.Ninja.NinjaResponsibilityLine> NinjaResponsibilityLines => Set<LogisticsERP.Domain.Entities.Ninja.NinjaResponsibilityLine>();
+    public DbSet<LogisticsERP.Domain.Entities.Ninja.NinjaPerformancePreview> NinjaPerformancePreviews => Set<LogisticsERP.Domain.Entities.Ninja.NinjaPerformancePreview>();
+    public DbSet<LogisticsERP.Domain.Entities.Ninja.NinjaPerformanceArtifact> NinjaPerformanceArtifacts => Set<LogisticsERP.Domain.Entities.Ninja.NinjaPerformanceArtifact>();
+    public DbSet<LogisticsERP.Domain.Entities.Ninja.NinjaPerformanceImportArtifact> NinjaPerformanceImportArtifacts => Set<LogisticsERP.Domain.Entities.Ninja.NinjaPerformanceImportArtifact>();
+    public DbSet<LogisticsERP.Domain.Entities.Ninja.NinjaAllocationProvenance> NinjaAllocationProvenance => Set<LogisticsERP.Domain.Entities.Ninja.NinjaAllocationProvenance>();
+    public DbSet<LogisticsERP.Domain.Entities.Ninja.NinjaEvaluationSnapshot> NinjaEvaluationSnapshots => Set<LogisticsERP.Domain.Entities.Ninja.NinjaEvaluationSnapshot>();
     public DbSet<LogisticsERP.Domain.Entities.Ninja.NinjaDailyPerformance> NinjaDailyPerformance => Set<LogisticsERP.Domain.Entities.Ninja.NinjaDailyPerformance>();
     public DbSet<LogisticsERP.Domain.Entities.Ninja.NinjaDailyDeduction> NinjaDailyDeductions => Set<LogisticsERP.Domain.Entities.Ninja.NinjaDailyDeduction>();
     public DbSet<LogisticsERP.Domain.Entities.Chefz.ChefzAccountDetails> ChefzAccountDetails => Set<LogisticsERP.Domain.Entities.Chefz.ChefzAccountDetails>();

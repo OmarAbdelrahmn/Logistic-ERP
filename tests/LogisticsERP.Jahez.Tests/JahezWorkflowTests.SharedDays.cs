@@ -10,6 +10,26 @@ namespace LogisticsERP.Jahez.Tests;
 public sealed partial class JahezWorkflowTests
 {
     [Fact]
+    public async Task HandoverRequiresPreviousOrdersAndPersistsThemWithNewSession()
+    {
+        await using var f = await Fixture.Create(); var ct = TestContext.Current.CancellationToken;
+        var account = await f.Account("assign-figures");
+        var first = Success(await f.Service.HandoverAsync("assign-start", new(account.Id, f.RiderId, At(1), "Start"), ct));
+        var withdrawal = Success(await f.Service.CreateOperationAsync("assign-stop-draft", new(first.Id, JahezOperationMode.Withdraw,
+            new(2026, 10, 6), At(6, 12), 0, "Return"), ct));
+        Success(await f.Service.ExecuteOperationAsync("assign-stop", withdrawal.Id, ct));
+        Assert.True((await f.Service.HandoverAsync("missing-assign", new(account.Id, f.OtherRiderId, At(6, 13), "Next"), ct)).IsFailure);
+        Assert.Single(await f.Db.Set<JahezAccountSession>().Where(h => h.PlatformRiderAccountId == account.Id).ToArrayAsync(ct));
+        var allocator = new LogisticsERP.Infrastructure.Hr.PlatformAccountDayAllocationService(f.Db);
+        var group = Assert.Single(Success(await allocator.Context(account.Id, new(2026, 10, 6), f.OtherRiderId, ct)).Contributions);
+        Success(await f.Service.HandoverAsync("valid-assign", new(account.Id, f.OtherRiderId, At(6, 13), "Next",
+            PreviousDayUsages: [new(group.AssignmentIds, new(2), group.RowVersion, group.UsageRowVersions)]), ct));
+        var upload = Success(await f.Service.UploadAsync("assign-upload", new(JahezImportKind.DailyDispatches,
+            [new("daily.xlsx", Dispatches("assign-figures", "06/10/2026", 6))]), ct));
+        Assert.Empty(upload.Issues); Assert.Equal(6, upload.ResolvedAllocations.Sum(a => a.Count));
+    }
+
+    [Fact]
     public async Task WithdrawalDraftRetainsUsageAndDailyImportAutomaticallySplitsTwoAndFour()
     {
         await using var f = await Fixture.Create(); var ct = TestContext.Current.CancellationToken;

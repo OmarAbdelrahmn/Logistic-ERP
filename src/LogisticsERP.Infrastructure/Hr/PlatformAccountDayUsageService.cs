@@ -12,6 +12,12 @@ namespace LogisticsERP.Infrastructure.Hr;
 internal sealed class PlatformAccountDayUsageService(ApplicationDbContext db, ICurrentUser user,
     IPermissionChecker permissions, TimeProvider clock) : IPlatformAccountDayUsageService
 {
+    public async Task<Result<PlatformAssignmentContextResponse>> AssignmentContextAsync(Guid accountId, DateOnly date, Guid riderProfileId, CancellationToken ct = default)
+    {
+        if (await Access(accountId, date, false, ct) is { } error) return Result.Failure<PlatformAssignmentContextResponse>(error);
+        if (riderProfileId == Guid.Empty) return Result.Failure<PlatformAssignmentContextResponse>(HrErrors.InvalidRequest);
+        return await Allocation.Context(accountId, date, riderProfileId, ct);
+    }
     private PlatformAccountDayAllocationService Allocation => new(db);
     private async Task<OperationError?> Access(Guid accountId, DateOnly date, bool write, CancellationToken ct)
     {
@@ -53,7 +59,7 @@ internal sealed class PlatformAccountDayUsageService(ApplicationDbContext db, IC
             _ => [PlatformDayMetric.OrdersCount]
         };
         var orderedIds = order.IsSuccess ? order.Value!.Select((a, i) => (a.Id, Sequence: i + 1)).ToDictionary(x => x.Id, x => x.Sequence) : [];
-        return new(accountId, date, assignments.Select(a =>
+        var response = new PlatformAccountDayResponse(accountId, date, assignments.Select(a =>
         {
             var usage = usages.GetValueOrDefault(a.Id); var figures = PlatformAccountDayAllocationService.Figures(usage);
             return new PlatformAccountDayParticipant(a.Id, a.RiderProfileId, orderedIds.TryGetValue(a.Id, out var sequence) ? sequence : null,
@@ -62,6 +68,12 @@ internal sealed class PlatformAccountDayUsageService(ApplicationDbContext db, IC
                     : relevantMetrics.Where(m => PlatformAccountDayAllocationService.Value(figures, m) is null).Select(m => m.ToString())
                         .Concat(order.IsFailure ? ["Sequence"] : Array.Empty<string>()).ToArray());
         }).OrderBy(a => a.Sequence).ThenBy(a => a.AssignmentId).ToArray());
+        if (order.IsSuccess)
+        {
+            var context = await Allocation.Context(accountId, date, order.Value![^1].RiderProfileId, ct);
+            if (context.IsSuccess) response = response with { Contributions = context.Value!.Contributions };
+        }
+        return response;
     }
 
     public async Task<Result<PlatformAccountDayResponse>> UpdateAsync(Guid accountId, DateOnly date,
@@ -104,6 +116,13 @@ internal sealed class PlatformAccountDayUsageService(ApplicationDbContext db, IC
         if (!await Allocation.SequenceAgreesWithSessions(ids, ct))
             return Result.Failure<PlatformAccountDayResponse>(PlatformAccountDayAllocationService.Error(accountId, date, "The requested order contradicts Jahez session timestamps."));
         var usages = (await Allocation.Usages(accountId, date, ct)).ToDictionary(u => u.RiderClientAssignmentId);
+        foreach (var contribution in await Allocation.Contributions(accountId, date, ct))
+        {
+            var members = PlatformAccountDayAllocationService.Ids(contribution);
+            var position = Array.IndexOf(ids, members[0]);
+            if (position < 0 || !ids.Skip(position).Take(members.Length).SequenceEqual(members))
+                return Result.Failure<PlatformAccountDayResponse>(PlatformAccountDayAllocationService.Error(accountId, date, "Saved group membership and order cannot be changed."));
+        }
         var frozen = await Allocation.Frozen(accountId, date, ct);
         if (frozen.Count > 0)
         {
@@ -111,8 +130,12 @@ internal sealed class PlatformAccountDayUsageService(ApplicationDbContext db, IC
             if (existingOrder.IsFailure || !ids.SequenceEqual(existingOrder.Value!.Select(a => a.Id)))
                 return Result.Failure<PlatformAccountDayResponse>(PlatformAccountDayAllocationService.Error(accountId, date, "Saved allocation sequence cannot be changed."));
         }
+        var groupedIds = (await Allocation.Contributions(accountId, date, ct)).SelectMany(PlatformAccountDayAllocationService.Ids).ToHashSet();
         foreach (var change in request.Assignments)
         {
+            if (groupedIds.Contains(change.AssignmentId) && change.Figures is not null
+                && change.Figures != PlatformAccountDayAllocationService.Figures(usages.GetValueOrDefault(change.AssignmentId)))
+                return Result.Failure<PlatformAccountDayResponse>(PlatformAccountDayAllocationService.Error(accountId, date, "Correct the grouped contribution instead of individual figures."));
             var usage = usages.GetValueOrDefault(change.AssignmentId);
             if (usage is null ? change.RowVersion is not null : !HrServiceSupport.MatchesRowVersion(usage.RowVersion, change.RowVersion ?? ""))
                 return Result.Failure<PlatformAccountDayResponse>(HrErrors.ConcurrencyConflict);
@@ -120,6 +143,15 @@ internal sealed class PlatformAccountDayUsageService(ApplicationDbContext db, IC
                 != PlatformAccountDayAllocationService.Value(PlatformAccountDayAllocationService.Figures(usage), m)))
                 return Result.Failure<PlatformAccountDayResponse>(PlatformAccountDayAllocationService.Error(accountId, date,
                     "Saved allocations reference these figures; use their correction workflow.", change.AssignmentId));
+        }
+        if (request.Contributions is { Count: > 0 })
+        {
+            // The last existing rider makes only earlier contributions mandatory.
+            var orderedContext = await Allocation.Ordered(accountId, date, ct);
+            if (orderedContext.IsFailure) return Result.Failure<PlatformAccountDayResponse>(orderedContext.Error);
+            var corrected = await Allocation.PrepareAssignment(accountId, date, orderedContext.Value![^1].RiderProfileId,
+                request.Contributions, request.Reason, ct, true);
+            if (corrected.IsFailure) { db.ChangeTracker.Clear(); return Result.Failure<PlatformAccountDayResponse>(corrected.Error); }
         }
         await using var transaction = db.Database.IsRelational() ? await db.Database.BeginTransactionAsync(ct) : null;
         // Release unique sequence slots inside the transaction before applying a reordered list.

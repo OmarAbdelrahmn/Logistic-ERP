@@ -1,0 +1,11 @@
+{
+  "Passed": true,
+  "Mode": "Rehearse",
+  "Database": "db67927",
+  "ScriptHashes": [
+    "2BCB6A11BE244520C71F51E8FA0F6CD0F54F5973416129022F6D8C40CEED53C1",
+    "7E6098D421B828943EE61E1C7EA3ACD2A6D27EBA99E1113C8C2A27EB13DF7FA7"
+  ],
+  "ExistingPerformancePreserved": true,
+  "CompletedAtUtc": "2026-10-26T18:24:45.0648332+00:00"
+}

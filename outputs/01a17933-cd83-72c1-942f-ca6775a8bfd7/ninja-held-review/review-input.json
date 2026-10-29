@@ -1,0 +1,2174 @@
+{
+  "headers": [
+    "Date",
+    "Supplier ID",
+    "Captain ID",
+    "Captain Name",
+    "Total Orders",
+    "Avg Orders",
+    "Total Working Hours",
+    "Avg Working Hours",
+    "Active Working Hours",
+    "Committed Working Hours",
+    "Pickup On-Time %",
+    "Delivery On-Time %",
+    "Return To Area On-Time %",
+    "Delivery & Return On-Time %",
+    "Shift Compliance %",
+    "Attendance On-Time %",
+    "Avg Delay (Min)",
+    "Avg Roaming (Min)",
+    "Avg Offline (Min)"
+  ],
+  "rows": [
+    {
+      "row": 53,
+      "captainId": "214271",
+      "date": "2026-10-01",
+      "orders": 2,
+      "hours": "3.31666667",
+      "avgHours": "3.325833333",
+      "accountId": "01a13935-9d87-7253-b391-67405a68b533",
+      "status": "MissingAssignment",
+      "assignments": [],
+      "raw": [
+        {
+          "kind": "date",
+          "value": "2026-10-01T00:00:00"
+        },
+        "2277",
+        "214271",
+        "ALAMGIR JAHANAR",
+        2,
+        2,
+        {
+          "kind": "time",
+          "value": 0.13819444444444445
+        },
+        3.325833333,
+        3.294444444,
+        3.31,
+        100,
+        100,
+        100,
+        100,
+        23.75595238,
+        0,
+        0,
+        1.233333333,
+        0
+      ],
+      "history": [
+        {
+          "AccountId": "01a13935-9d87-7253-b391-67405a68b533",
+          "CaptainId": "214271",
+          "AssignmentId": "01a16dba-5d39-78df-95b3-dd322a743205",
+          "RiderProfileId": "01a13b3c-e3d0-7b8d-8f8e-d9ffb9e652a9",
+          "EffectiveFrom": "2026-10-02",
+          "EffectiveTo": "2026-10-03",
+          "Status": 3,
+          "FullNameAr": "مد راجا شريف ( PrimeX Gate Logistics7 )",
+          "FullNameEn": null,
+          "IqamaNo": "7000000004"
+        },
+        {
+          "AccountId": "01a13935-9d87-7253-b391-67405a68b533",
+          "CaptainId": "214271",
+          "AssignmentId": "01a16e9b-db9d-7eb9-8936-047c68a6a916",
+          "RiderProfileId": "01a09667-03c8-7307-a61a-313c41cf903c",
+          "EffectiveFrom": "2026-10-04",
+          "EffectiveTo": null,
+          "Status": 2,
+          "FullNameAr": "FAYSAL MUNSHI",
+          "FullNameEn": "FAYSAL MUNSHI",
+          "IqamaNo": "2522312970"
+        }
+      ]
+    },
+    {
+      "row": 45,
+      "captainId": "214310",
+      "date": "2026-10-01",
+      "orders": 11,
+      "hours": "9.70000000",
+      "avgHours": "9.704722222",
+      "accountId": "01a13935-9d88-7406-8e5e-d81bea21d7c0",
+      "status": "MissingAssignment",
+      "assignments": [],
+      "raw": [
+        {
+          "kind": "date",
+          "value": "2026-10-01T00:00:00"
+        },
+        "2277",
+        "214310",
+        "MUHAMMAD NAZAR",
+        11,
+        11,
+        {
+          "kind": "time",
+          "value": 0.4041666666666667
+        },
+        9.704722222,
+        7.396388889,
+        9.5825,
+        72.72727273,
+        72.72727273,
+        100,
+        75,
+        69.31944444,
+        0,
+        24.18333333,
+        1.95,
+        197
+      ],
+      "history": [
+        {
+          "AccountId": "01a13935-9d88-7406-8e5e-d81bea21d7c0",
+          "CaptainId": "214310",
+          "AssignmentId": "01a16ec6-ba30-7a91-8a2f-02f352ab6185",
+          "RiderProfileId": "01a13b3d-f36b-714b-9fbc-7d1d5f06d9df",
+          "EffectiveFrom": "2026-10-02",
+          "EffectiveTo": null,
+          "Status": 2,
+          "FullNameAr": "منيرال اسلام ( PrimeX Gate Logistics3 )",
+          "FullNameEn": null,
+          "IqamaNo": "7000000006"
+        }
+      ]
+    },
+    {
+      "row": 39,
+      "captainId": "215460",
+      "date": "2026-10-01",
+      "orders": 17,
+      "hours": "13.28333333",
+      "avgHours": "13.29222222",
+      "accountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+      "status": "MissingAssignment",
+      "assignments": [],
+      "raw": [
+        {
+          "kind": "date",
+          "value": "2026-10-01T00:00:00"
+        },
+        "2277",
+        "215460",
+        "MOHAMED ABDELAZIZ AHMED HUSSEIN",
+        17,
+        17,
+        {
+          "kind": "time",
+          "value": 0.5534722222222223
+        },
+        13.29222222,
+        11.415,
+        12.82722222,
+        82.35294118,
+        58.82352941,
+        50,
+        57.89473684,
+        94.94444444,
+        0,
+        38.2,
+        0,
+        41.98333333
+      ],
+      "history": [
+        {
+          "AccountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+          "CaptainId": "215460",
+          "AssignmentId": "01a17279-6ca2-7ffb-ba2e-d686f9c877d6",
+          "RiderProfileId": "01a0bf9d-e0a2-7dc2-81d2-24f29e65a959",
+          "EffectiveFrom": "2026-10-20",
+          "EffectiveTo": null,
+          "Status": 2,
+          "FullNameAr": "رجب علوى ابراهيم ابوفاطمه",
+          "FullNameEn": null,
+          "IqamaNo": "2251786147"
+        }
+      ]
+    },
+    {
+      "row": 27,
+      "captainId": "215723",
+      "date": "2026-10-01",
+      "orders": 16,
+      "hours": "12.85000000",
+      "avgHours": "12.85472222",
+      "accountId": "01a13935-9d88-7190-a05d-da5e4af73c1b",
+      "status": "MissingAssignment",
+      "assignments": [],
+      "raw": [
+        {
+          "kind": "date",
+          "value": "2026-10-01T00:00:00"
+        },
+        "2277",
+        "215723",
+        "ZABED HOSSAIN",
+        16,
+        16,
+        {
+          "kind": "time",
+          "value": 0.5354166666666667
+        },
+        12.85472222,
+        9.631944444,
+        12.85472222,
+        68.75,
+        93.75,
+        0,
+        93.75,
+        91.81944444,
+        0,
+        36.75,
+        0,
+        67.4
+      ],
+      "history": [
+        {
+          "AccountId": "01a13935-9d88-7190-a05d-da5e4af73c1b",
+          "CaptainId": "215723",
+          "AssignmentId": "01a16eca-bd24-7225-a903-fe48b8b0f4a9",
+          "RiderProfileId": "01a13b3f-20fb-7556-b9d2-e012f1100cc2",
+          "EffectiveFrom": "2026-10-03",
+          "EffectiveTo": null,
+          "Status": 2,
+          "FullNameAr": "محسن حسن ( PrimeX Gate Logistics11 )",
+          "FullNameEn": null,
+          "IqamaNo": "7000000008"
+        }
+      ]
+    },
+    {
+      "row": 115,
+      "captainId": "215810",
+      "date": "2026-10-01",
+      "orders": 13,
+      "hours": "9.13333333",
+      "avgHours": "9.141944444",
+      "accountId": "01a13935-9d8a-7226-80ab-1b467bc9a2e7",
+      "status": "SharedDay",
+      "assignments": [
+        {
+          "id": "01a16e49-ed0b-7a30-b05a-83bd55776417",
+          "riderId": "01a0f7a7-10d4-79a9-8541-963c1137e3dd",
+          "from": "2026-10-01",
+          "to": null
+        },
+        {
+          "id": "01a16d80-d260-770a-a774-960f95ff49d3",
+          "riderId": "01a16d7f-7a2e-7183-8e3f-a76acfcdc6fa",
+          "from": "2026-10-01",
+          "to": "2026-10-01"
+        }
+      ],
+      "raw": [
+        {
+          "kind": "date",
+          "value": "2026-10-01T00:00:00"
+        },
+        "2298",
+        "215810",
+        "Qais Kamel Qaid Al sharabi",
+        13,
+        13,
+        {
+          "kind": "time",
+          "value": 0.38055555555555554
+        },
+        9.141944444,
+        7.290833333,
+        8.728333333,
+        84.61538462,
+        100,
+        0,
+        92.85714286,
+        65.29960317,
+        0,
+        33.31666667,
+        2.516666667,
+        288.1833333
+      ],
+      "history": [
+        {
+          "AccountId": "01a13935-9d8a-7226-80ab-1b467bc9a2e7",
+          "CaptainId": "215810",
+          "AssignmentId": "01a16e49-ed0b-7a30-b05a-83bd55776417",
+          "RiderProfileId": "01a0f7a7-10d4-79a9-8541-963c1137e3dd",
+          "EffectiveFrom": "2026-10-01",
+          "EffectiveTo": null,
+          "Status": 2,
+          "FullNameAr": "محمود السيد حامد علي",
+          "FullNameEn": null,
+          "IqamaNo": "2556559553"
+        },
+        {
+          "AccountId": "01a13935-9d8a-7226-80ab-1b467bc9a2e7",
+          "CaptainId": "215810",
+          "AssignmentId": "01a16d80-d260-770a-a774-960f95ff49d3",
+          "RiderProfileId": "01a16d7f-7a2e-7183-8e3f-a76acfcdc6fa",
+          "EffectiveFrom": "2026-10-01",
+          "EffectiveTo": "2026-10-01",
+          "Status": 3,
+          "FullNameAr": "منصور العزي (شركة السهالة 18)",
+          "FullNameEn": null,
+          "IqamaNo": "8000000009"
+        }
+      ]
+    },
+    {
+      "row": 167,
+      "captainId": "215460",
+      "date": "2026-10-02",
+      "orders": 17,
+      "hours": "12.25000000",
+      "avgHours": "12.25777778",
+      "accountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+      "status": "MissingAssignment",
+      "assignments": [],
+      "raw": [
+        {
+          "kind": "date",
+          "value": "2026-10-02T00:00:00"
+        },
+        "2277",
+        "215460",
+        "MOHAMED ABDELAZIZ AHMED HUSSEIN",
+        17,
+        17,
+        {
+          "kind": "time",
+          "value": 0.5104166666666666
+        },
+        12.25777778,
+        10.19111111,
+        12.13111111,
+        64.70588235,
+        88.23529412,
+        0,
+        83.33333333,
+        87.55555556,
+        0,
+        67.68333333,
+        2.433333333,
+        102.35
+      ],
+      "history": [
+        {
+          "AccountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+          "CaptainId": "215460",
+          "AssignmentId": "01a17279-6ca2-7ffb-ba2e-d686f9c877d6",
+          "RiderProfileId": "01a0bf9d-e0a2-7dc2-81d2-24f29e65a959",
+          "EffectiveFrom": "2026-10-20",
+          "EffectiveTo": null,
+          "Status": 2,
+          "FullNameAr": "رجب علوى ابراهيم ابوفاطمه",
+          "FullNameEn": null,
+          "IqamaNo": "2251786147"
+        }
+      ]
+    },
+    {
+      "row": 152,
+      "captainId": "215723",
+      "date": "2026-10-02",
+      "orders": 19,
+      "hours": "13.61666667",
+      "avgHours": "13.61944444",
+      "accountId": "01a13935-9d88-7190-a05d-da5e4af73c1b",
+      "status": "MissingAssignment",
+      "assignments": [],
+      "raw": [
+        {
+          "kind": "date",
+          "value": "2026-10-02T00:00:00"
+        },
+        "2277",
+        "215723",
+        "ZABED HOSSAIN",
+        19,
+        19,
+        {
+          "kind": "time",
+          "value": 0.5673611111111111
+        },
+        13.61944444,
+        10.46055556,
+        12.97388889,
+        78.94736842,
+        89.47368421,
+        66.66666667,
+        86.36363636,
+        97.28174603,
+        0,
+        46.21666667,
+        1.7,
+        0
+      ],
+      "history": [
+        {
+          "AccountId": "01a13935-9d88-7190-a05d-da5e4af73c1b",
+          "CaptainId": "215723",
+          "AssignmentId": "01a16eca-bd24-7225-a903-fe48b8b0f4a9",
+          "RiderProfileId": "01a13b3f-20fb-7556-b9d2-e012f1100cc2",
+          "EffectiveFrom": "2026-10-03",
+          "EffectiveTo": null,
+          "Status": 2,
+          "FullNameAr": "محسن حسن ( PrimeX Gate Logistics11 )",
+          "FullNameEn": null,
+          "IqamaNo": "7000000008"
+        }
+      ]
+    },
+    {
+      "row": 201,
+      "captainId": "26528",
+      "date": "2026-10-02",
+      "orders": 14,
+      "hours": "11.95000000",
+      "avgHours": "11.95333333",
+      "accountId": "01a13935-9d88-7a5a-8197-3b40bcdd77dc",
+      "status": "MissingAssignment",
+      "assignments": [],
+      "raw": [
+        {
+          "kind": "date",
+          "value": "2026-10-02T00:00:00"
+        },
+        "2277",
+        "26528",
+        "Md anwer FL BIKE",
+        14,
+        14,
+        {
+          "kind": "time",
+          "value": 0.4979166666666667
+        },
+        11.95333333,
+        8.422222222,
+        11.80027778,
+        71.42857143,
+        92.85714286,
+        100,
+        93.33333333,
+        85.38095238,
+        0,
+        22.48333333,
+        8.216666667,
+        114.75
+      ],
+      "history": [
+        {
+          "AccountId": "01a13935-9d88-7a5a-8197-3b40bcdd77dc",
+          "CaptainId": "26528",
+          "AssignmentId": "01a16dc1-05ad-753b-b763-038cd45b25ca",
+          "RiderProfileId": "01a11b3d-757d-7662-9ace-ed590a26f5bd",
+          "EffectiveFrom": "2026-10-09",
+          "EffectiveTo": "2026-10-11",
+          "Status": 3,
+          "FullNameAr": "حبيب الله محمد اسماعيل شاه",
+          "FullNameEn": null,
+          "IqamaNo": "2584401513"
+        }
+      ]
+    },
+    {
+      "row": 344,
+      "captainId": "215460",
+      "date": "2026-10-03",
+      "orders": 17,
+      "hours": "12.73333333",
+      "avgHours": "12.74",
+      "accountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+      "status": "MissingAssignment",
+      "assignments": [],
+      "raw": [
+        {
+          "kind": "date",
+          "value": "2026-10-03T00:00:00"
+        },
+        "2277",
+        "215460",
+        "MOHAMED ABDELAZIZ AHMED HUSSEIN",
+        17,
+        17,
+        {
+          "kind": "time",
+          "value": 0.5305555555555556
+        },
+        12.74,
+        9.402222222,
+        12.74,
+        70.58823529,
+        82.35294118,
+        0,
+        82.35294118,
+        91,
+        0,
+        87.05,
+        0,
+        75.75
+      ],
+      "history": [
+        {
+          "AccountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+          "CaptainId": "215460",
+          "AssignmentId": "01a17279-6ca2-7ffb-ba2e-d686f9c877d6",
+          "RiderProfileId": "01a0bf9d-e0a2-7dc2-81d2-24f29e65a959",
+          "EffectiveFrom": "2026-10-20",
+          "EffectiveTo": null,
+          "Status": 2,
+          "FullNameAr": "رجب علوى ابراهيم ابوفاطمه",
+          "FullNameEn": null,
+          "IqamaNo": "2251786147"
+        }
+      ]
+    },
+    {
+      "row": 323,
+      "captainId": "215769",
+      "date": "2026-10-03",
+      "orders": 8,
+      "hours": "6.65000000",
+      "avgHours": "6.663888889",
+      "accountId": "01a13935-9d8c-7f44-b2a7-d590fdfd3b41",
+      "status": "MissingAssignment",
+      "assignments": [],
+      "raw": [
+        {
+          "kind": "date",
+          "value": "2026-10-03T00:00:00"
+        },
+        "2277",
+        "215769",
+        "Hassan Sayed",
+        8,
+        8,
+        {
+          "kind": "time",
+          "value": 0.27708333333333335
+        },
+        6.663888889,
+        6.026944444,
+        6.556944444,
+        37.5,
+        100,
+        100,
+        100,
+        47.59920635,
+        0,
+        16.21666667,
+        0,
+        40.75
+      ],
+      "history": [
+        {
+          "AccountId": "01a13935-9d8c-7f44-b2a7-d590fdfd3b41",
+          "CaptainId": "215769",
+          "AssignmentId": "01a16da3-d217-74e8-9c72-584b6fbfdcf1",
+          "RiderProfileId": "01a0bf9d-e0a2-7380-874d-357d5947d0c7",
+          "EffectiveFrom": "2026-10-01",
+          "EffectiveTo": "2026-10-01",
+          "Status": 3,
+          "FullNameAr": "نبيل سعد عبده حسين جعوان",
+          "FullNameEn": null,
+          "IqamaNo": "2450325804"
+        },
+        {
+          "AccountId": "01a13935-9d8c-7f44-b2a7-d590fdfd3b41",
+          "CaptainId": "215769",
+          "AssignmentId": "01a1729e-c2b3-7836-87c8-53b295eefea5",
+          "RiderProfileId": "01a11593-7826-7b70-9732-8eceea25c92a",
+          "EffectiveFrom": "2026-10-04",
+          "EffectiveTo": null,
+          "Status": 2,
+          "FullNameAr": "محمد محمود يحى العبدى",
+          "FullNameEn": null,
+          "IqamaNo": "2268920499"
+        }
+      ]
+    },
+    {
+      "row": 321,
+      "captainId": "215774",
+      "date": "2026-10-03",
+      "orders": 3,
+      "hours": "2.60000000",
+      "avgHours": "2.608055556",
+      "accountId": "01a13935-9d8d-73a4-92a7-255ca12b44f9",
+      "status": "MissingAssignment",
+      "assignments": [],
+      "raw": [
+        {
+          "kind": "date",
+          "value": "2026-10-03T00:00:00"
+        },
+        "2277",
+        "215774",
+        "Ali Ali",
+        3,
+        3,
+        {
+          "kind": "time",
+          "value": 0.10833333333333334
+        },
+        2.608055556,
+        1.780555556,
+        2.184722222,
+        100,
+        100,
+        0,
+        75,
+        18.62896825,
+        0,
+        8.066666667,
+        0,
+        0
+      ],
+      "history": [
+        {
+          "AccountId": "01a13935-9d8d-73a4-92a7-255ca12b44f9",
+          "CaptainId": "215774",
+          "AssignmentId": "01a16dea-1ea7-72f5-b701-25f72b5104f5",
+          "RiderProfileId": "01a0f26f-8e79-7be0-b59e-a7cac1ea051a",
+          "EffectiveFrom": "2026-10-04",
+          "EffectiveTo": "2026-10-06",
+          "Status": 3,
+          "FullNameAr": "احمد اسماعيل احمد يوسف",
+          "FullNameEn": null,
+          "IqamaNo": "2530745104"
+        }
+      ]
+    },
+    {
+      "row": 378,
+      "captainId": "26528",
+      "date": "2026-10-03",
+      "orders": 6,
+      "hours": "7.33333333",
+      "avgHours": "7.346666667",
+      "accountId": "01a13935-9d88-7a5a-8197-3b40bcdd77dc",
+      "status": "MissingAssignment",
+      "assignments": [],
+      "raw": [
+        {
+          "kind": "date",
+          "value": "2026-10-03T00:00:00"
+        },
+        "2277",
+        "26528",
+        "Md anwer FL BIKE",
+        6,
+        6,
+        {
+          "kind": "time",
+          "value": 0.3055555555555556
+        },
+        7.346666667,
+        3.300277778,
+        7.346666667,
+        83.33333333,
+        100,
+        0,
+        100,
+        52.47619048,
+        0,
+        1.866666667,
+        3.583333333,
+        157.5
+      ],
+      "history": [
+        {
+          "AccountId": "01a13935-9d88-7a5a-8197-3b40bcdd77dc",
+          "CaptainId": "26528",
+          "AssignmentId": "01a16dc1-05ad-753b-b763-038cd45b25ca",
+          "RiderProfileId": "01a11b3d-757d-7662-9ace-ed590a26f5bd",
+          "EffectiveFrom": "2026-10-09",
+          "EffectiveTo": "2026-10-11",
+          "Status": 3,
+          "FullNameAr": "حبيب الله محمد اسماعيل شاه",
+          "FullNameEn": null,
+          "IqamaNo": "2584401513"
+        }
+      ]
+    },
+    {
+      "row": 502,
+      "captainId": "214197",
+      "date": "2026-10-04",
+      "orders": 7,
+      "hours": "5.93333333",
+      "avgHours": "5.947777778",
+      "accountId": "01a13935-9d88-790d-9e5b-e95435d1a19d",
+      "status": "MissingAssignment",
+      "assignments": [],
+      "raw": [
+        {
+          "kind": "date",
+          "value": "2026-10-04T00:00:00"
+        },
+        "2277",
+        "214197",
+        "MONTASSER MAMDOUH",
+        7,
+        7,
+        {
+          "kind": "time",
+          "value": 0.24722222222222223
+        },
+        5.947777778,
+        3.295,
+        5.947777778,
+        100,
+        85.71428571,
+        0,
+        85.71428571,
+        42.48412698,
+        0,
+        1.816666667,
+        10.55,
+        472.35
+      ],
+      "history": [
+        {
+          "AccountId": "01a13935-9d88-790d-9e5b-e95435d1a19d",
+          "CaptainId": "214197",
+          "AssignmentId": "01a16dc8-babf-7b75-bed8-d3759e5c51d6",
+          "RiderProfileId": "01a16dc7-4fce-7f06-bc3e-21f13c6ed0a2",
+          "EffectiveFrom": "2026-10-01",
+          "EffectiveTo": "2026-10-03",
+          "Status": 3,
+          "FullNameAr": "عبدالرحمن باسل حسين حسين",
+          "FullNameEn": null,
+          "IqamaNo": "2551446905"
+        }
+      ]
+    },
+    {
+      "row": 472,
+      "captainId": "215460",
+      "date": "2026-10-04",
+      "orders": 15,
+      "hours": "13.53333333",
+      "avgHours": "13.54888889",
+      "accountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+      "status": "MissingAssignment",
+      "assignments": [],
+      "raw": [
+        {
+          "kind": "date",
+          "value": "2026-10-04T00:00:00"
+        },
+        "2277",
+        "215460",
+        "MOHAMED ABDELAZIZ AHMED HUSSEIN",
+        15,
+        15,
+        {
+          "kind": "time",
+          "value": 0.5638888888888889
+        },
+        13.54888889,
+        7.719722222,
+        13.09805556,
+        80,
+        93.33333333,
+        100,
+        93.75,
+        96.77777778,
+        0,
+        33.06666667,
+        0,
+        27.06666667
+      ],
+      "history": [
+        {
+          "AccountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+          "CaptainId": "215460",
+          "AssignmentId": "01a17279-6ca2-7ffb-ba2e-d686f9c877d6",
+          "RiderProfileId": "01a0bf9d-e0a2-7dc2-81d2-24f29e65a959",
+          "EffectiveFrom": "2026-10-20",
+          "EffectiveTo": null,
+          "Status": 2,
+          "FullNameAr": "رجب علوى ابراهيم ابوفاطمه",
+          "FullNameEn": null,
+          "IqamaNo": "2251786147"
+        }
+      ]
+    },
+    {
+      "row": 550,
+      "captainId": "215460",
+      "date": "2026-10-05",
+      "orders": 16,
+      "hours": "13.70000000",
+      "avgHours": "13.71444444",
+      "accountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+      "status": "MissingAssignment",
+      "assignments": [],
+      "raw": [
+        {
+          "kind": "date",
+          "value": "2026-10-05T00:00:00"
+        },
+        "2277",
+        "215460",
+        "MOHAMED ABDELAZIZ AHMED HUSSEIN",
+        16,
+        16,
+        {
+          "kind": "time",
+          "value": 0.5708333333333333
+        },
+        13.71444444,
+        10.91666667,
+        13.71444444,
+        68.75,
+        87.5,
+        0,
+        87.5,
+        97.96031746,
+        0,
+        67.76666667,
+        0,
+        16
+      ],
+      "history": [
+        {
+          "AccountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+          "CaptainId": "215460",
+          "AssignmentId": "01a17279-6ca2-7ffb-ba2e-d686f9c877d6",
+          "RiderProfileId": "01a0bf9d-e0a2-7dc2-81d2-24f29e65a959",
+          "EffectiveFrom": "2026-10-20",
+          "EffectiveTo": null,
+          "Status": 2,
+          "FullNameAr": "رجب علوى ابراهيم ابوفاطمه",
+          "FullNameEn": null,
+          "IqamaNo": "2251786147"
+        }
+      ]
+    },
+    {
+      "row": 674,
+      "captainId": "215460",
+      "date": "2026-10-06",
+      "orders": 18,
+      "hours": "13.60000000",
+      "avgHours": "13.60472222",
+      "accountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+      "status": "MissingAssignment",
+      "assignments": [],
+      "raw": [
+        {
+          "kind": "date",
+          "value": "2026-10-06T00:00:00"
+        },
+        "2277",
+        "215460",
+        "MOHAMED ABDELAZIZ AHMED HUSSEIN",
+        18,
+        18,
+        {
+          "kind": "time",
+          "value": 0.5666666666666667
+        },
+        13.60472222,
+        10.99777778,
+        13.60472222,
+        66.66666667,
+        72.22222222,
+        0,
+        72.22222222,
+        97.1765873,
+        0,
+        93.13333333,
+        0,
+        22.86666667
+      ],
+      "history": [
+        {
+          "AccountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+          "CaptainId": "215460",
+          "AssignmentId": "01a17279-6ca2-7ffb-ba2e-d686f9c877d6",
+          "RiderProfileId": "01a0bf9d-e0a2-7dc2-81d2-24f29e65a959",
+          "EffectiveFrom": "2026-10-20",
+          "EffectiveTo": null,
+          "Status": 2,
+          "FullNameAr": "رجب علوى ابراهيم ابوفاطمه",
+          "FullNameEn": null,
+          "IqamaNo": "2251786147"
+        }
+      ]
+    },
+    {
+      "row": 848,
+      "captainId": "215460",
+      "date": "2026-10-07",
+      "orders": 18,
+      "hours": "12.40000000",
+      "avgHours": "12.405",
+      "accountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+      "status": "MissingAssignment",
+      "assignments": [],
+      "raw": [
+        {
+          "kind": "date",
+          "value": "2026-10-07T00:00:00"
+        },
+        "2277",
+        "215460",
+        "MOHAMED ABDELAZIZ AHMED HUSSEIN",
+        18,
+        18,
+        {
+          "kind": "time",
+          "value": 0.5166666666666667
+        },
+        12.405,
+        10.07583333,
+        12.3575,
+        61.11111111,
+        88.88888889,
+        100,
+        89.47368421,
+        88.60714286,
+        0,
+        75.53333333,
+        0,
+        94.8
+      ],
+      "history": [
+        {
+          "AccountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+          "CaptainId": "215460",
+          "AssignmentId": "01a17279-6ca2-7ffb-ba2e-d686f9c877d6",
+          "RiderProfileId": "01a0bf9d-e0a2-7dc2-81d2-24f29e65a959",
+          "EffectiveFrom": "2026-10-20",
+          "EffectiveTo": null,
+          "Status": 2,
+          "FullNameAr": "رجب علوى ابراهيم ابوفاطمه",
+          "FullNameEn": null,
+          "IqamaNo": "2251786147"
+        }
+      ]
+    },
+    {
+      "row": 922,
+      "captainId": "215460",
+      "date": "2026-10-08",
+      "orders": 18,
+      "hours": "13.41666667",
+      "avgHours": "13.42166667",
+      "accountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+      "status": "MissingAssignment",
+      "assignments": [],
+      "raw": [
+        {
+          "kind": "date",
+          "value": "2026-10-08T00:00:00"
+        },
+        "2277",
+        "215460",
+        "MOHAMED ABDELAZIZ AHMED HUSSEIN",
+        18,
+        18,
+        {
+          "kind": "time",
+          "value": 0.5590277777777778
+        },
+        13.42166667,
+        12.24666667,
+        13.42166667,
+        72.22222222,
+        72.22222222,
+        0,
+        72.22222222,
+        95.86904762,
+        0,
+        68.25,
+        0,
+        33.56666667
+      ],
+      "history": [
+        {
+          "AccountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+          "CaptainId": "215460",
+          "AssignmentId": "01a17279-6ca2-7ffb-ba2e-d686f9c877d6",
+          "RiderProfileId": "01a0bf9d-e0a2-7dc2-81d2-24f29e65a959",
+          "EffectiveFrom": "2026-10-20",
+          "EffectiveTo": null,
+          "Status": 2,
+          "FullNameAr": "رجب علوى ابراهيم ابوفاطمه",
+          "FullNameEn": null,
+          "IqamaNo": "2251786147"
+        }
+      ]
+    },
+    {
+      "row": 1006,
+      "captainId": "295975",
+      "date": "2026-10-08",
+      "orders": 13,
+      "hours": "12.85000000",
+      "avgHours": "12.86361111",
+      "accountId": "01a13935-9d88-7b7c-b69d-c8574866bd64",
+      "status": "MissingAssignment",
+      "assignments": [],
+      "raw": [
+        {
+          "kind": "date",
+          "value": "2026-10-08T00:00:00"
+        },
+        "2277",
+        "295975",
+        "MOHAMED MOSTAFA ABDELALIM MOSTAFA",
+        13,
+        13,
+        {
+          "kind": "time",
+          "value": 0.5354166666666667
+        },
+        12.86361111,
+        7.769444444,
+        12.69166667,
+        76.92307692,
+        92.30769231,
+        0,
+        85.71428571,
+        91.88293651,
+        0,
+        72.11666667,
+        0,
+        67.3
+      ],
+      "history": []
+    },
+    {
+      "row": 1042,
+      "captainId": "215460",
+      "date": "2026-10-09",
+      "orders": 14,
+      "hours": "12.45000000",
+      "avgHours": "12.45083333",
+      "accountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+      "status": "MissingAssignment",
+      "assignments": [],
+      "raw": [
+        {
+          "kind": "date",
+          "value": "2026-10-09T00:00:00"
+        },
+        "2277",
+        "215460",
+        "MOHAMED ABDELAZIZ AHMED HUSSEIN",
+        14,
+        14,
+        {
+          "kind": "time",
+          "value": 0.51875
+        },
+        12.45083333,
+        8.877777778,
+        12.45083333,
+        50,
+        64.28571429,
+        0,
+        64.28571429,
+        88.93452381,
+        0,
+        70.81666667,
+        0,
+        91.98333333
+      ],
+      "history": [
+        {
+          "AccountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+          "CaptainId": "215460",
+          "AssignmentId": "01a17279-6ca2-7ffb-ba2e-d686f9c877d6",
+          "RiderProfileId": "01a0bf9d-e0a2-7dc2-81d2-24f29e65a959",
+          "EffectiveFrom": "2026-10-20",
+          "EffectiveTo": null,
+          "Status": 2,
+          "FullNameAr": "رجب علوى ابراهيم ابوفاطمه",
+          "FullNameEn": null,
+          "IqamaNo": "2251786147"
+        }
+      ]
+    },
+    {
+      "row": 1014,
+      "captainId": "222883",
+      "date": "2026-10-09",
+      "orders": 4,
+      "hours": "5.93333333",
+      "avgHours": "5.949444444",
+      "accountId": "01a13935-9d8d-7123-bc42-e10d3cc7f3e7",
+      "status": "MissingAssignment",
+      "assignments": [],
+      "raw": [
+        {
+          "kind": "date",
+          "value": "2026-10-09T00:00:00"
+        },
+        "2277",
+        "222883",
+        "ABDELRAHMAN ABDALLA ZAGHLOUL ATTIA",
+        4,
+        4,
+        {
+          "kind": "time",
+          "value": 0.24722222222222223
+        },
+        5.949444444,
+        3.046388889,
+        4.354722222,
+        75,
+        50,
+        0,
+        40,
+        42.49603175,
+        0,
+        80.73333333,
+        0,
+        0
+      ],
+      "history": [
+        {
+          "AccountId": "01a13935-9d8d-7123-bc42-e10d3cc7f3e7",
+          "CaptainId": "222883",
+          "AssignmentId": "01a16dfe-51d2-7756-9196-512dc642f0ca",
+          "RiderProfileId": "01a12aff-02ea-79a7-a4ab-1bbe26f22c9e",
+          "EffectiveFrom": "2026-10-01",
+          "EffectiveTo": "2026-10-08",
+          "Status": 3,
+          "FullNameAr": "احمد محمد زكى احمد",
+          "FullNameEn": null,
+          "IqamaNo": "2509740854"
+        }
+      ]
+    },
+    {
+      "row": 1007,
+      "captainId": "295966",
+      "date": "2026-10-09",
+      "orders": 2,
+      "hours": "6.61666667",
+      "avgHours": "6.6175",
+      "accountId": "01a13935-9d88-7d6a-ac82-b4f0b329eff7",
+      "status": "MissingAssignment",
+      "assignments": [],
+      "raw": [
+        {
+          "kind": "date",
+          "value": "2026-10-09T00:00:00"
+        },
+        "2277",
+        "295966",
+        "MOHAMED GALAL MAHMOUD FAHMY",
+        2,
+        2,
+        {
+          "kind": "time",
+          "value": 0.27569444444444446
+        },
+        6.6175,
+        3.333611111,
+        6.433055556,
+        100,
+        0,
+        100,
+        33.33333333,
+        47.26785714,
+        0,
+        18.71666667,
+        0,
+        440.8333333
+      ],
+      "history": []
+    },
+    {
+      "row": 1167,
+      "captainId": "215460",
+      "date": "2026-10-10",
+      "orders": 16,
+      "hours": "12.70000000",
+      "avgHours": "12.70722222",
+      "accountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+      "status": "MissingAssignment",
+      "assignments": [],
+      "raw": [
+        {
+          "kind": "date",
+          "value": "2026-10-10T00:00:00"
+        },
+        "2277",
+        "215460",
+        "MOHAMED ABDELAZIZ AHMED HUSSEIN",
+        16,
+        16,
+        {
+          "kind": "time",
+          "value": 0.5291666666666667
+        },
+        12.70722222,
+        9.112222222,
+        12.68527778,
+        81.25,
+        75,
+        100,
+        76.47058824,
+        90.76587302,
+        0,
+        53.03333333,
+        0,
+        75.88333333
+      ],
+      "history": [
+        {
+          "AccountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+          "CaptainId": "215460",
+          "AssignmentId": "01a17279-6ca2-7ffb-ba2e-d686f9c877d6",
+          "RiderProfileId": "01a0bf9d-e0a2-7dc2-81d2-24f29e65a959",
+          "EffectiveFrom": "2026-10-20",
+          "EffectiveTo": null,
+          "Status": 2,
+          "FullNameAr": "رجب علوى ابراهيم ابوفاطمه",
+          "FullNameEn": null,
+          "IqamaNo": "2251786147"
+        }
+      ]
+    },
+    {
+      "row": 1143,
+      "captainId": "222883",
+      "date": "2026-10-10",
+      "orders": 4,
+      "hours": "4.23333333",
+      "avgHours": "4.249444444",
+      "accountId": "01a13935-9d8d-7123-bc42-e10d3cc7f3e7",
+      "status": "MissingAssignment",
+      "assignments": [],
+      "raw": [
+        {
+          "kind": "date",
+          "value": "2026-10-10T00:00:00"
+        },
+        "2277",
+        "222883",
+        "ABDELRAHMAN ABDALLA ZAGHLOUL ATTIA",
+        4,
+        4,
+        {
+          "kind": "time",
+          "value": 0.1763888888888889
+        },
+        4.249444444,
+        3.231944444,
+        4.133333333,
+        75,
+        75,
+        100,
+        80,
+        30.3531746,
+        0,
+        31.6,
+        0,
+        0
+      ],
+      "history": [
+        {
+          "AccountId": "01a13935-9d8d-7123-bc42-e10d3cc7f3e7",
+          "CaptainId": "222883",
+          "AssignmentId": "01a16dfe-51d2-7756-9196-512dc642f0ca",
+          "RiderProfileId": "01a12aff-02ea-79a7-a4ab-1bbe26f22c9e",
+          "EffectiveFrom": "2026-10-01",
+          "EffectiveTo": "2026-10-08",
+          "Status": 3,
+          "FullNameAr": "احمد محمد زكى احمد",
+          "FullNameEn": null,
+          "IqamaNo": "2509740854"
+        }
+      ]
+    },
+    {
+      "row": 1290,
+      "captainId": "215460",
+      "date": "2026-10-11",
+      "orders": 16,
+      "hours": "13.31666667",
+      "avgHours": "13.32972222",
+      "accountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+      "status": "MissingAssignment",
+      "assignments": [],
+      "raw": [
+        {
+          "kind": "date",
+          "value": "2026-10-11T00:00:00"
+        },
+        "2277",
+        "215460",
+        "MOHAMED ABDELAZIZ AHMED HUSSEIN",
+        16,
+        16,
+        {
+          "kind": "time",
+          "value": 0.5548611111111111
+        },
+        13.32972222,
+        9.627222222,
+        12.94944444,
+        50,
+        81.25,
+        0,
+        76.47058824,
+        95.21230159,
+        0,
+        95.63333333,
+        0,
+        40.11666667
+      ],
+      "history": [
+        {
+          "AccountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+          "CaptainId": "215460",
+          "AssignmentId": "01a17279-6ca2-7ffb-ba2e-d686f9c877d6",
+          "RiderProfileId": "01a0bf9d-e0a2-7dc2-81d2-24f29e65a959",
+          "EffectiveFrom": "2026-10-20",
+          "EffectiveTo": null,
+          "Status": 2,
+          "FullNameAr": "رجب علوى ابراهيم ابوفاطمه",
+          "FullNameEn": null,
+          "IqamaNo": "2251786147"
+        }
+      ]
+    },
+    {
+      "row": 1416,
+      "captainId": "215460",
+      "date": "2026-10-12",
+      "orders": 14,
+      "hours": "12.90000000",
+      "avgHours": "12.91222222",
+      "accountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+      "status": "MissingAssignment",
+      "assignments": [],
+      "raw": [
+        {
+          "kind": "date",
+          "value": "2026-10-12T00:00:00"
+        },
+        "2277",
+        "215460",
+        "MOHAMED ABDELAZIZ AHMED HUSSEIN",
+        14,
+        14,
+        {
+          "kind": "time",
+          "value": 0.5375
+        },
+        12.91222222,
+        7.666111111,
+        12.77555556,
+        64.28571429,
+        85.71428571,
+        0,
+        80,
+        92.23015873,
+        0,
+        53.75,
+        0,
+        64.28333333
+      ],
+      "history": [
+        {
+          "AccountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+          "CaptainId": "215460",
+          "AssignmentId": "01a17279-6ca2-7ffb-ba2e-d686f9c877d6",
+          "RiderProfileId": "01a0bf9d-e0a2-7dc2-81d2-24f29e65a959",
+          "EffectiveFrom": "2026-10-20",
+          "EffectiveTo": null,
+          "Status": 2,
+          "FullNameAr": "رجب علوى ابراهيم ابوفاطمه",
+          "FullNameEn": null,
+          "IqamaNo": "2251786147"
+        }
+      ]
+    },
+    {
+      "row": 1544,
+      "captainId": "215460",
+      "date": "2026-10-13",
+      "orders": 16,
+      "hours": "13.46666667",
+      "avgHours": "13.4725",
+      "accountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+      "status": "MissingAssignment",
+      "assignments": [],
+      "raw": [
+        {
+          "kind": "date",
+          "value": "2026-10-13T00:00:00"
+        },
+        "2277",
+        "215460",
+        "MOHAMED ABDELAZIZ AHMED HUSSEIN",
+        16,
+        16,
+        {
+          "kind": "time",
+          "value": 0.5611111111111111
+        },
+        13.4725,
+        6.640555556,
+        13.38527778,
+        93.75,
+        100,
+        100,
+        100,
+        96.23214286,
+        0,
+        3.35,
+        0,
+        25.6
+      ],
+      "history": [
+        {
+          "AccountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+          "CaptainId": "215460",
+          "AssignmentId": "01a17279-6ca2-7ffb-ba2e-d686f9c877d6",
+          "RiderProfileId": "01a0bf9d-e0a2-7dc2-81d2-24f29e65a959",
+          "EffectiveFrom": "2026-10-20",
+          "EffectiveTo": null,
+          "Status": 2,
+          "FullNameAr": "رجب علوى ابراهيم ابوفاطمه",
+          "FullNameEn": null,
+          "IqamaNo": "2251786147"
+        }
+      ]
+    },
+    {
+      "row": 1681,
+      "captainId": "214330",
+      "date": "2026-10-14",
+      "orders": 10,
+      "hours": "11.63333333",
+      "avgHours": "11.64861111",
+      "accountId": "01a13935-9d87-72f8-b596-f2191febeb04",
+      "status": "SharedDay",
+      "assignments": [
+        {
+          "id": "01a16dc7-1bf1-75ad-9380-85ed7d683bc5",
+          "riderId": "01a139ab-392e-725f-af5a-b0fbea81f897",
+          "from": "2026-10-14",
+          "to": "2026-10-15"
+        },
+        {
+          "id": "01a16dc3-5e0f-7505-b71e-9a601f25c097",
+          "riderId": "01a0bf9d-e099-7717-a547-d1036d992928",
+          "from": "2026-10-01",
+          "to": "2026-10-14"
+        }
+      ],
+      "raw": [
+        {
+          "kind": "date",
+          "value": "2026-10-14T00:00:00"
+        },
+        "2277",
+        "214330",
+        "HASSAN NOEMAN HASSAN",
+        10,
+        10,
+        {
+          "kind": "time",
+          "value": 0.4847222222222222
+        },
+        11.64861111,
+        9.046666667,
+        11.35583333,
+        30,
+        20,
+        0,
+        18.18181818,
+        83.20436508,
+        0,
+        143.9666667,
+        5.483333333,
+        132.5666667
+      ],
+      "history": [
+        {
+          "AccountId": "01a13935-9d87-72f8-b596-f2191febeb04",
+          "CaptainId": "214330",
+          "AssignmentId": "01a16dc3-5e0f-7505-b71e-9a601f25c097",
+          "RiderProfileId": "01a0bf9d-e099-7717-a547-d1036d992928",
+          "EffectiveFrom": "2026-10-01",
+          "EffectiveTo": "2026-10-14",
+          "Status": 3,
+          "FullNameAr": "احمد فتحى عبدالله احمد",
+          "FullNameEn": null,
+          "IqamaNo": "2573661085"
+        },
+        {
+          "AccountId": "01a13935-9d87-72f8-b596-f2191febeb04",
+          "CaptainId": "214330",
+          "AssignmentId": "01a16dc7-1bf1-75ad-9380-85ed7d683bc5",
+          "RiderProfileId": "01a139ab-392e-725f-af5a-b0fbea81f897",
+          "EffectiveFrom": "2026-10-14",
+          "EffectiveTo": "2026-10-15",
+          "Status": 3,
+          "FullNameAr": "ماجد مصطفى عثمان عبد الله",
+          "FullNameEn": null,
+          "IqamaNo": "2592472308"
+        }
+      ]
+    },
+    {
+      "row": 1676,
+      "captainId": "215460",
+      "date": "2026-10-14",
+      "orders": 17,
+      "hours": "12.26666667",
+      "avgHours": "12.26916667",
+      "accountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+      "status": "MissingAssignment",
+      "assignments": [],
+      "raw": [
+        {
+          "kind": "date",
+          "value": "2026-10-14T00:00:00"
+        },
+        "2277",
+        "215460",
+        "MOHAMED ABDELAZIZ AHMED HUSSEIN",
+        17,
+        17,
+        {
+          "kind": "time",
+          "value": 0.5111111111111111
+        },
+        12.26916667,
+        7.657777778,
+        12.26888889,
+        76.47058824,
+        88.23529412,
+        100,
+        88.88888889,
+        87.63690476,
+        0,
+        42.5,
+        0,
+        102.4666667
+      ],
+      "history": [
+        {
+          "AccountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+          "CaptainId": "215460",
+          "AssignmentId": "01a17279-6ca2-7ffb-ba2e-d686f9c877d6",
+          "RiderProfileId": "01a0bf9d-e0a2-7dc2-81d2-24f29e65a959",
+          "EffectiveFrom": "2026-10-20",
+          "EffectiveTo": null,
+          "Status": 2,
+          "FullNameAr": "رجب علوى ابراهيم ابوفاطمه",
+          "FullNameEn": null,
+          "IqamaNo": "2251786147"
+        }
+      ]
+    },
+    {
+      "row": 1872,
+      "captainId": "215460",
+      "date": "2026-10-15",
+      "orders": 12,
+      "hours": "11.91666667",
+      "avgHours": "11.92388889",
+      "accountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+      "status": "MissingAssignment",
+      "assignments": [],
+      "raw": [
+        {
+          "kind": "date",
+          "value": "2026-10-15T00:00:00"
+        },
+        "2277",
+        "215460",
+        "MOHAMED ABDELAZIZ AHMED HUSSEIN",
+        12,
+        12,
+        {
+          "kind": "time",
+          "value": 0.4965277777777778
+        },
+        11.92388889,
+        7.025833333,
+        11.86888889,
+        83.33333333,
+        91.66666667,
+        100,
+        92.30769231,
+        85.17063492,
+        0,
+        16.3,
+        1.55,
+        122.6666667
+      ],
+      "history": [
+        {
+          "AccountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+          "CaptainId": "215460",
+          "AssignmentId": "01a17279-6ca2-7ffb-ba2e-d686f9c877d6",
+          "RiderProfileId": "01a0bf9d-e0a2-7dc2-81d2-24f29e65a959",
+          "EffectiveFrom": "2026-10-20",
+          "EffectiveTo": null,
+          "Status": 2,
+          "FullNameAr": "رجب علوى ابراهيم ابوفاطمه",
+          "FullNameEn": null,
+          "IqamaNo": "2251786147"
+        }
+      ]
+    },
+    {
+      "row": 1852,
+      "captainId": "215771",
+      "date": "2026-10-15",
+      "orders": 4,
+      "hours": "3.11666667",
+      "avgHours": "3.122222222",
+      "accountId": "01a13935-9d8d-74d9-a5ac-f928a96d8860",
+      "status": "MissingAssignment",
+      "assignments": [],
+      "raw": [
+        {
+          "kind": "date",
+          "value": "2026-10-15T00:00:00"
+        },
+        "2277",
+        "215771",
+        "AMIR BADR",
+        4,
+        4,
+        {
+          "kind": "time",
+          "value": 0.12986111111111112
+        },
+        3.122222222,
+        2.526111111,
+        2.768055556,
+        100,
+        100,
+        100,
+        100,
+        22.3015873,
+        0,
+        0,
+        0,
+        115
+      ],
+      "history": [
+        {
+          "AccountId": "01a13935-9d8d-74d9-a5ac-f928a96d8860",
+          "CaptainId": "215771",
+          "AssignmentId": "01a172a2-b712-7022-9e1f-78e0f27319dd",
+          "RiderProfileId": "01a0bf9d-e0a2-77de-a454-e5bf3e80ca1f",
+          "EffectiveFrom": "2026-10-16",
+          "EffectiveTo": null,
+          "Status": 2,
+          "FullNameAr": "محمد احمد احمد عجير",
+          "FullNameEn": null,
+          "IqamaNo": "2265714200"
+        }
+      ]
+    },
+    {
+      "row": 1838,
+      "captainId": "279831",
+      "date": "2026-10-15",
+      "orders": 5,
+      "hours": "6.08333333",
+      "avgHours": "6.088333333",
+      "accountId": "751f1fab-7946-4615-ae64-5f1f3c58035e",
+      "status": "MissingAssignment",
+      "assignments": [],
+      "raw": [
+        {
+          "kind": "date",
+          "value": "2026-10-15T00:00:00"
+        },
+        "2277",
+        "279831",
+        "MOHAMED HAMDY ZAKARIA YOUSSEF",
+        5,
+        5,
+        {
+          "kind": "time",
+          "value": 0.2534722222222222
+        },
+        6.088333333,
+        5.034444444,
+        6.051388889,
+        40,
+        20,
+        100,
+        33.33333333,
+        43.48809524,
+        0,
+        85.68333333,
+        0,
+        140.7333333
+      ],
+      "history": [
+        {
+          "AccountId": "751f1fab-7946-4615-ae64-5f1f3c58035e",
+          "CaptainId": "279831",
+          "AssignmentId": "01a16e14-4f0f-72cd-b2a1-416dc1b8ada5",
+          "RiderProfileId": "01a139ab-392e-725f-af5a-b0fbea81f897",
+          "EffectiveFrom": "2026-10-16",
+          "EffectiveTo": "2026-10-17",
+          "Status": 3,
+          "FullNameAr": "ماجد مصطفى عثمان عبد الله",
+          "FullNameEn": null,
+          "IqamaNo": "2592472308"
+        },
+        {
+          "AccountId": "751f1fab-7946-4615-ae64-5f1f3c58035e",
+          "CaptainId": "279831",
+          "AssignmentId": "01a16ebf-f9ee-7ee3-a868-b45f6591ccb9",
+          "RiderProfileId": "01a149b5-b7a2-775c-8f03-8186e9d6c13e",
+          "EffectiveFrom": "2026-10-18",
+          "EffectiveTo": null,
+          "Status": 2,
+          "FullNameAr": "داوود طاهر محمد احمد فرج",
+          "FullNameEn": null,
+          "IqamaNo": "2555924428"
+        }
+      ]
+    },
+    {
+      "row": 1940,
+      "captainId": "215460",
+      "date": "2026-10-16",
+      "orders": 13,
+      "hours": "12.05000000",
+      "avgHours": "12.05388889",
+      "accountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+      "status": "MissingAssignment",
+      "assignments": [],
+      "raw": [
+        {
+          "kind": "date",
+          "value": "2026-10-16T00:00:00"
+        },
+        "2277",
+        "215460",
+        "MOHAMED ABDELAZIZ AHMED HUSSEIN",
+        13,
+        13,
+        {
+          "kind": "time",
+          "value": 0.5020833333333333
+        },
+        12.05388889,
+        6.393611111,
+        12.05388889,
+        69.23076923,
+        100,
+        0,
+        100,
+        86.09920635,
+        0,
+        59.46666667,
+        0,
+        116.1333333
+      ],
+      "history": [
+        {
+          "AccountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+          "CaptainId": "215460",
+          "AssignmentId": "01a17279-6ca2-7ffb-ba2e-d686f9c877d6",
+          "RiderProfileId": "01a0bf9d-e0a2-7dc2-81d2-24f29e65a959",
+          "EffectiveFrom": "2026-10-20",
+          "EffectiveTo": null,
+          "Status": 2,
+          "FullNameAr": "رجب علوى ابراهيم ابوفاطمه",
+          "FullNameEn": null,
+          "IqamaNo": "2251786147"
+        }
+      ]
+    },
+    {
+      "row": 2133,
+      "captainId": "215460",
+      "date": "2026-10-17",
+      "orders": 9,
+      "hours": "10.95000000",
+      "avgHours": "10.95333333",
+      "accountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+      "status": "MissingAssignment",
+      "assignments": [],
+      "raw": [
+        {
+          "kind": "date",
+          "value": "2026-10-17T00:00:00"
+        },
+        "2277",
+        "215460",
+        "MOHAMED ABDELAZIZ AHMED HUSSEIN",
+        9,
+        9,
+        {
+          "kind": "time",
+          "value": 0.45625
+        },
+        10.95333333,
+        4.520277778,
+        10.94833333,
+        88.88888889,
+        100,
+        100,
+        100,
+        78.23809524,
+        0,
+        18.85,
+        1.5,
+        181.4166667
+      ],
+      "history": [
+        {
+          "AccountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+          "CaptainId": "215460",
+          "AssignmentId": "01a17279-6ca2-7ffb-ba2e-d686f9c877d6",
+          "RiderProfileId": "01a0bf9d-e0a2-7dc2-81d2-24f29e65a959",
+          "EffectiveFrom": "2026-10-20",
+          "EffectiveTo": null,
+          "Status": 2,
+          "FullNameAr": "رجب علوى ابراهيم ابوفاطمه",
+          "FullNameEn": null,
+          "IqamaNo": "2251786147"
+        }
+      ]
+    },
+    {
+      "row": 2223,
+      "captainId": "214205",
+      "date": "2026-10-18",
+      "orders": 4,
+      "hours": "5.16666667",
+      "avgHours": "5.178055556",
+      "accountId": "01a13935-9d8c-7988-8075-a0199a17f5c9",
+      "status": "MissingAssignment",
+      "assignments": [],
+      "raw": [
+        {
+          "kind": "date",
+          "value": "2026-10-18T00:00:00"
+        },
+        "2277",
+        "214205",
+        "MOHAMED ELWAN",
+        4,
+        4,
+        {
+          "kind": "time",
+          "value": 0.2152777777777778
+        },
+        5.178055556,
+        2.116944444,
+        5.026111111,
+        100,
+        100,
+        100,
+        100,
+        36.98611111,
+        0,
+        0,
+        0.983333333,
+        527.9666667
+      ],
+      "history": [
+        {
+          "AccountId": "01a13935-9d8c-7988-8075-a0199a17f5c9",
+          "CaptainId": "214205",
+          "AssignmentId": "01a16e27-61b8-70c5-8f2a-7e8c08221a46",
+          "RiderProfileId": "01a0bf9d-e0a2-70a0-be41-0c9dfb95519f",
+          "EffectiveFrom": "2026-10-01",
+          "EffectiveTo": "2026-10-17",
+          "Status": 3,
+          "FullNameAr": "محمد نصحى عبدالعزيز عبدالصمد",
+          "FullNameEn": null,
+          "IqamaNo": "2584605303"
+        }
+      ]
+    },
+    {
+      "row": 2203,
+      "captainId": "215460",
+      "date": "2026-10-18",
+      "orders": 13,
+      "hours": "12.46666667",
+      "avgHours": "12.47138889",
+      "accountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+      "status": "MissingAssignment",
+      "assignments": [],
+      "raw": [
+        {
+          "kind": "date",
+          "value": "2026-10-18T00:00:00"
+        },
+        "2277",
+        "215460",
+        "MOHAMED ABDELAZIZ AHMED HUSSEIN",
+        13,
+        13,
+        {
+          "kind": "time",
+          "value": 0.5194444444444445
+        },
+        12.47138889,
+        6.330555556,
+        12.10638889,
+        69.23076923,
+        100,
+        0,
+        92.85714286,
+        89.08134921,
+        0,
+        41.56666667,
+        0,
+        91.26666667
+      ],
+      "history": [
+        {
+          "AccountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+          "CaptainId": "215460",
+          "AssignmentId": "01a17279-6ca2-7ffb-ba2e-d686f9c877d6",
+          "RiderProfileId": "01a0bf9d-e0a2-7dc2-81d2-24f29e65a959",
+          "EffectiveFrom": "2026-10-20",
+          "EffectiveTo": null,
+          "Status": 2,
+          "FullNameAr": "رجب علوى ابراهيم ابوفاطمه",
+          "FullNameEn": null,
+          "IqamaNo": "2251786147"
+        }
+      ]
+    },
+    {
+      "row": 2382,
+      "captainId": "215460",
+      "date": "2026-10-19",
+      "orders": 13,
+      "hours": "12.03333333",
+      "avgHours": "12.04333333",
+      "accountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+      "status": "MissingAssignment",
+      "assignments": [],
+      "raw": [
+        {
+          "kind": "date",
+          "value": "2026-10-19T00:00:00"
+        },
+        "2277",
+        "215460",
+        "MOHAMED ABDELAZIZ AHMED HUSSEIN",
+        13,
+        13,
+        {
+          "kind": "time",
+          "value": 0.5013888888888889
+        },
+        12.04333333,
+        6.323888889,
+        11.70194444,
+        69.23076923,
+        100,
+        0,
+        92.85714286,
+        86.02380952,
+        0,
+        64.26666667,
+        0,
+        116.85
+      ],
+      "history": [
+        {
+          "AccountId": "01a13935-9d8c-7bd7-9f51-c20d32c71dcd",
+          "CaptainId": "215460",
+          "AssignmentId": "01a17279-6ca2-7ffb-ba2e-d686f9c877d6",
+          "RiderProfileId": "01a0bf9d-e0a2-7dc2-81d2-24f29e65a959",
+          "EffectiveFrom": "2026-10-20",
+          "EffectiveTo": null,
+          "Status": 2,
+          "FullNameAr": "رجب علوى ابراهيم ابوفاطمه",
+          "FullNameEn": null,
+          "IqamaNo": "2251786147"
+        }
+      ]
+    },
+    {
+      "row": 2659,
+      "captainId": "203023",
+      "date": "2026-10-21",
+      "orders": 1,
+      "hours": "1.60000000",
+      "avgHours": "1.613611111",
+      "accountId": "01a13935-9d88-7a91-a1c9-7ee9960ea970",
+      "status": "MissingAssignment",
+      "assignments": [],
+      "raw": [
+        {
+          "kind": "date",
+          "value": "2026-10-21T00:00:00"
+        },
+        "2277",
+        "203023",
+        "Tamer Abdeldayem",
+        1,
+        1,
+        {
+          "kind": "time",
+          "value": 0.06666666666666667
+        },
+        1.613611111,
+        0.316944444,
+        1.613611111,
+        100,
+        100,
+        0,
+        100,
+        11.52579365,
+        0,
+        0,
+        0,
+        742.4833333
+      ],
+      "history": []
+    },
+    {
+      "row": 2680,
+      "captainId": "272575",
+      "date": "2026-10-22",
+      "orders": 11,
+      "hours": "7.68333333",
+      "avgHours": "7.687222222",
+      "accountId": "f809e56c-909b-43a4-ab92-be6bc7f14fd0",
+      "status": "MissingAssignment",
+      "assignments": [],
+      "raw": [
+        {
+          "kind": "date",
+          "value": "2026-10-22T00:00:00"
+        },
+        "2277",
+        "272575",
+        "AMR ELSAYED ABDOU MAREY",
+        11,
+        11,
+        {
+          "kind": "time",
+          "value": 0.32013888888888886
+        },
+        7.687222222,
+        6.021111111,
+        7.687222222,
+        90.90909091,
+        72.72727273,
+        0,
+        72.72727273,
+        54.90873016,
+        0,
+        26.03333333,
+        0,
+        335.55
+      ],
+      "history": [
+        {
+          "AccountId": "f809e56c-909b-43a4-ab92-be6bc7f14fd0",
+          "CaptainId": "272575",
+          "AssignmentId": "01a16ed7-3d27-76a6-b8ef-75625448809a",
+          "RiderProfileId": "01a163bf-605c-72e7-ac22-d223338106a3",
+          "EffectiveFrom": "2026-10-23",
+          "EffectiveTo": null,
+          "Status": 2,
+          "FullNameAr": "احمد عبده علي الحاج",
+          "FullNameEn": null,
+          "IqamaNo": "2557296874"
+        }
+      ]
+    },
+    {
+      "row": 3000,
+      "captainId": "159271",
+      "date": "2026-10-24",
+      "orders": 1,
+      "hours": "2.18333333",
+      "avgHours": "2.194722222",
+      "accountId": "01a13935-9d88-70e8-ad7f-1ae0c9bd1bd4",
+      "status": "SharedDay",
+      "assignments": [
+        {
+          "id": "01a16e33-6eb7-76cf-81ed-22c33d54afbf",
+          "riderId": "01a16415-71ad-7171-914d-e91567461828",
+          "from": "2026-10-23",
+          "to": "2026-10-24"
+        },
+        {
+          "id": "01a16eba-5d4c-7b3c-ae78-d02a1348cb9a",
+          "riderId": "01a16d10-10a6-7e91-9051-efc1af4b2b10",
+          "from": "2026-10-24",
+          "to": null
+        }
+      ],
+      "raw": [
+        "10/24/2026",
+        "2277",
+        "159271",
+        "ELSAYED FARAG",
+        1,
+        1,
+        {
+          "kind": "time",
+          "value": 0.09097222222222222
+        },
+        2.194722222,
+        0.8075,
+        2.023055556,
+        100,
+        100,
+        100,
+        100,
+        15.6765873,
+        0,
+        0,
+        0,
+        445.75
+      ],
+      "history": [
+        {
+          "AccountId": "01a13935-9d88-70e8-ad7f-1ae0c9bd1bd4",
+          "CaptainId": "159271",
+          "AssignmentId": "01a16e33-6eb7-76cf-81ed-22c33d54afbf",
+          "RiderProfileId": "01a16415-71ad-7171-914d-e91567461828",
+          "EffectiveFrom": "2026-10-23",
+          "EffectiveTo": "2026-10-24",
+          "Status": 3,
+          "FullNameAr": "اسلام محمد عبيد و عبد المقصود",
+          "FullNameEn": null,
+          "IqamaNo": "2625862954"
+        },
+        {
+          "AccountId": "01a13935-9d88-70e8-ad7f-1ae0c9bd1bd4",
+          "CaptainId": "159271",
+          "AssignmentId": "01a16eba-5d4c-7b3c-ae78-d02a1348cb9a",
+          "RiderProfileId": "01a16d10-10a6-7e91-9051-efc1af4b2b10",
+          "EffectiveFrom": "2026-10-24",
+          "EffectiveTo": null,
+          "Status": 2,
+          "FullNameAr": "محمد السيد على زيدان",
+          "FullNameEn": null,
+          "IqamaNo": "2593458090"
+        }
+      ]
+    }
+  ]
+}

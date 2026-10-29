@@ -895,6 +895,79 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.ToTable("PlatformAccountCredentialVersions", "app");
                 });
 
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Clients.PlatformAccountDayContribution", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AssignmentIdsJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateOnly>("BusinessDate")
+                        .HasColumnType("date");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("FiguresJson")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("PlatformRiderAccountId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<Guid>("RepresentativeAssignmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("RiderProfileId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("RepresentativeAssignmentId");
+
+                    b.HasIndex("PlatformRiderAccountId", "BusinessDate", "RepresentativeAssignmentId")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.ToTable("PlatformAccountDayContributions", "app");
+                });
+
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Clients.PlatformAccountDayUsage", b =>
                 {
                     b.Property<Guid>("Id")
@@ -6443,6 +6516,9 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("AccountId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<int?>("AdjustmentTarget")
                         .HasColumnType("int");
 
@@ -6472,7 +6548,7 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<DateOnly?>("FromDate")
                         .HasColumnType("date");
 
-                    b.Property<Guid>("HandoverId")
+                    b.Property<Guid?>("HandoverId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsDeleted")
@@ -6527,6 +6603,8 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.HasKey("Id");
 
+                    b.HasIndex("AccountId");
+
                     b.HasIndex("HandoverId");
 
                     b.HasIndex("IsDeleted");
@@ -6539,7 +6617,10 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.HasIndex("Status", "CreatedAtUtc");
 
-                    b.ToTable("Requests", "jahez_v2");
+                    b.ToTable("Requests", "jahez_v2", t =>
+                        {
+                            t.HasCheckConstraint("CK_JahezRequest_AccountScope", "[HandoverId] IS NOT NULL OR ([AccountId] IS NOT NULL AND [Kind] = 5 AND [AdjustmentTarget] IS NOT NULL AND [AdjustmentTarget] = 2)");
+                        });
                 });
 
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.JahezCashboxHandover", b =>
@@ -6962,10 +7043,13 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.HasIndex("ReplacesBatchId")
                         .IsUnique()
-                        .HasFilter("[ReplacesBatchId] IS NOT NULL AND [CommittedAtUtc] IS NOT NULL");
+                        .HasFilter("[ReplacesBatchId] IS NOT NULL AND [CommittedAtUtc] IS NOT NULL AND [Kind] = 2");
 
-                    b.HasIndex("Kind", "ContentHash")
-                        .IsUnique();
+                    b.HasIndex("Kind", "ContentHash");
+
+                    b.HasIndex(new[] { "Kind", "ContentHash" }, "UX_JahezDailyImport_ContentHash")
+                        .IsUnique()
+                        .HasFilter("[Kind] = 2");
 
                     b.ToTable("ImportBatches", "jahez_v2");
                 });
@@ -7073,6 +7157,9 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("AccountId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<decimal>("Amount")
                         .HasPrecision(19, 6)
                         .HasColumnType("decimal(19,6)");
@@ -7092,7 +7179,7 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<DateOnly?>("FromDate")
                         .HasColumnType("date");
 
-                    b.Property<Guid>("HandoverId")
+                    b.Property<Guid?>("HandoverId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Kind")
@@ -7117,6 +7204,8 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.HasKey("Id");
 
+                    b.HasIndex("AccountId");
+
                     b.HasIndex("ReversesEntryId")
                         .IsUnique()
                         .HasFilter("[ReversesEntryId] IS NOT NULL");
@@ -7128,6 +7217,8 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.ToTable("AccountingEntries", "jahez_v2", t =>
                         {
+                            t.HasCheckConstraint("CK_JahezLedger_AccountScope", "[HandoverId] IS NOT NULL OR ([AccountId] IS NOT NULL AND [Bucket] = 2)");
+
                             t.HasCheckConstraint("CK_JahezLedger_StatusAmount", "[Kind] <> 6 OR [Amount] = 0");
                         });
                 });
@@ -7409,6 +7500,9 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("AccountId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("BatchId")
                         .HasColumnType("uniqueidentifier");
 
@@ -7430,7 +7524,7 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .HasPrecision(19, 6)
                         .HasColumnType("decimal(19,6)");
 
-                    b.Property<Guid>("HandoverId")
+                    b.Property<Guid?>("HandoverId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("ImportRowId")
@@ -7443,6 +7537,9 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<DateTimeOffset>("OccurredAtUtc")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<Guid?>("SupersededByBatchId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
                     b.HasIndex("BatchId");
@@ -7450,9 +7547,16 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.HasIndex("ImportRowId")
                         .IsUnique();
 
+                    b.HasIndex("SupersededByBatchId");
+
+                    b.HasIndex("AccountId", "OccurredAtUtc");
+
                     b.HasIndex("HandoverId", "OccurredAtUtc");
 
-                    b.ToTable("PlatformTransactions", "jahez_v2");
+                    b.ToTable("PlatformTransactions", "jahez_v2", t =>
+                        {
+                            t.HasCheckConstraint("CK_JahezTransaction_AccountScope", "[AccountId] IS NOT NULL OR [HandoverId] IS NOT NULL");
+                        });
                 });
 
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.JahezTransferredDebt", b =>
@@ -11549,6 +11653,43 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.ToTable("NinjaAccountUpdateUploads", "ninja");
                 });
 
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Ninja.NinjaAllocationProvenance", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("EvidenceReference")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Origin")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<Guid>("RiderClientAssignmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SourceId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RiderClientAssignmentId");
+
+                    b.HasIndex("SourceId", "RiderClientAssignmentId")
+                        .IsUnique();
+
+                    b.ToTable("AllocationProvenance", "ninja");
+                });
+
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Ninja.NinjaDailyDeduction", b =>
                 {
                     b.Property<Guid>("Id")
@@ -11813,6 +11954,341 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.ToTable("NinjaDailyPerformanceSources", "ninja", t =>
                         {
                             t.HasCheckConstraint("CK_NinjaPerformanceSource_Values", "[TotalOrders] >= 0 AND [TotalWorkingHours] BETWEEN 0 AND 24");
+                        });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Ninja.NinjaEvaluationContextRevision", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly?>("ConfirmedFirstDeliveryDate")
+                        .HasColumnType("date");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("PlatformRiderAccountId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("PricingPeriodsJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<Guid?>("ReviewedSnapshotId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Revision")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("SupersedesId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReviewedSnapshotId");
+
+                    b.HasIndex("SupersedesId");
+
+                    b.HasIndex("PlatformRiderAccountId", "Revision")
+                        .IsUnique();
+
+                    b.ToTable("EvaluationContexts", "ninja");
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Ninja.NinjaEvaluationSnapshot", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AccountIdsJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("Frozen")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("InputRevision")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<string>("PolicyVersion")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<string>("QueryJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("ResultJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("SupersedesId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAtUtc");
+
+                    b.HasIndex("SupersedesId");
+
+                    b.ToTable("EvaluationSnapshots", "ninja");
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Ninja.NinjaPerformanceArtifact", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("Content")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("ContentHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("Format")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
+
+                    b.Property<Guid?>("OriginalArtifactId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("PreviewId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ResultJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ContentHash");
+
+                    b.HasIndex("OriginalArtifactId");
+
+                    b.HasIndex("PreviewId")
+                        .IsUnique()
+                        .HasFilter("[PreviewId] IS NOT NULL");
+
+                    b.ToTable("PerformanceArtifacts", "ninja");
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Ninja.NinjaPerformanceImportArtifact", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ArtifactId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ImportId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ImportId");
+
+                    b.HasIndex("ArtifactId", "ImportId")
+                        .IsUnique();
+
+                    b.ToTable("PerformanceImportArtifacts", "ninja");
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Ninja.NinjaPerformancePreview", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ContentHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("ExpiresAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("InputRevision")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<string>("OptionsJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExpiresAtUtc");
+
+                    b.ToTable("PerformancePreviews", "ninja");
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Ninja.NinjaResponsibilityLine", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly>("BusinessDate")
+                        .HasColumnType("date");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("RevisionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("RiderClientAssignmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Weight")
+                        .HasPrecision(18, 8)
+                        .HasColumnType("decimal(18,8)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RiderClientAssignmentId");
+
+                    b.HasIndex("RevisionId", "BusinessDate", "RiderClientAssignmentId")
+                        .IsUnique();
+
+                    b.ToTable("ResponsibilityLines", "ninja", t =>
+                        {
+                            t.HasCheckConstraint("CK_NinjaResponsibility_Weight", "[Weight] BETWEEN 0 AND 1");
+                        });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Ninja.NinjaResponsibilityRevision", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly>("Month")
+                        .HasColumnType("date");
+
+                    b.Property<Guid>("PlatformRiderAccountId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<Guid?>("ReviewedSnapshotId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Revision")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("SupersedesId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReviewedSnapshotId");
+
+                    b.HasIndex("SupersedesId");
+
+                    b.HasIndex("PlatformRiderAccountId", "Month", "Revision")
+                        .IsUnique();
+
+                    b.ToTable("ResponsibilityRevisions", "ninja");
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Ninja.NinjaSuggestionPolicy", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DefinitionJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Version")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Version")
+                        .IsUnique();
+
+                    b.ToTable("SuggestionPolicies", "ninja");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-8000-000000000390"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 10, 26, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DefinitionJson = "{\"monthBasis\":\"CalendarDays\",\"attendance\":0.85,\"hours\":8,\"reduction\":0.15,\"rounding\":\"AwayFromZero\",\"bike\":[450,5700,11,16,17,18,9],\"car\":[460,6500,12,22,22.5,23,10],\"invoice\":\"External\"}",
+                            Version = "NINJA-SUGGESTION-V1"
                         });
                 });
 
@@ -12362,6 +12838,69 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.ToTable("PermissionDefinitions", "platform");
 
                     b.HasData(
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000317"),
+                            Category = "Ninja",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "إدارة المسؤولية والتسعير وحفظ نسخ التقييم التقديري.",
+                            DescriptionEn = "Manage suggestion responsibility, pricing context and snapshots.",
+                            DisplayOrder = 317,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "ninja.evaluation.manage",
+                            NameAr = "إدارة تقييم نينجا",
+                            NameEn = "Manage Ninja evaluation",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000318"),
+                            Category = "Ninja",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "تصدير التقييم التقديري المسموح.",
+                            DescriptionEn = "Export authorized Ninja monitoring suggestions.",
+                            DisplayOrder = 318,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "ninja.evaluation.export",
+                            NameAr = "تصدير تقييم نينجا",
+                            NameEn = "Export Ninja evaluation",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000319"),
+                            Category = "Ninja",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "تصحيح تاريخ بداية التكليف الحالي وتاريخي بداية ونهاية التكليف المنتهي دون تغيير الأداء المسجل.",
+                            DescriptionEn = "Correct the current assignment start date or an ended assignment's start and end dates without changing recorded performance.",
+                            DisplayOrder = 319,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "ninja.assignments.dates.update",
+                            NameAr = "تعديل تواريخ تكليفات نينجا",
+                            NameEn = "Edit Ninja assignment dates",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
                         new
                         {
                             Id = new Guid("019c18d5-62e1-7000-a000-000000000310"),
@@ -22801,6 +23340,21 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .OnDelete(DeleteBehavior.Restrict);
                 });
 
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Clients.PlatformAccountDayContribution", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Clients.PlatformRiderAccount", null)
+                        .WithMany()
+                        .HasForeignKey("PlatformRiderAccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Clients.RiderClientAssignment", null)
+                        .WithMany()
+                        .HasForeignKey("RepresentativeAssignmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Clients.PlatformAccountDayUsage", b =>
                 {
                     b.HasOne("LogisticsERP.Domain.Entities.Clients.PlatformRiderAccount", null)
@@ -23859,11 +24413,15 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.JahezApprovalRequest", b =>
                 {
+                    b.HasOne("LogisticsERP.Domain.Entities.Clients.PlatformRiderAccount", null)
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("LogisticsERP.Domain.Entities.Jahez.JahezAccountSession", null)
                         .WithMany()
                         .HasForeignKey("HandoverId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("LogisticsERP.Domain.Entities.Jahez.JahezOperation", null)
                         .WithMany()
@@ -23974,11 +24532,15 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.JahezLedgerEntry", b =>
                 {
+                    b.HasOne("LogisticsERP.Domain.Entities.Clients.PlatformRiderAccount", null)
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("LogisticsERP.Domain.Entities.Jahez.JahezAccountSession", null)
                         .WithMany()
                         .HasForeignKey("HandoverId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("LogisticsERP.Domain.Entities.Jahez.JahezLedgerEntry", null)
                         .WithMany()
@@ -24036,6 +24598,11 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.JahezTransaction", b =>
                 {
+                    b.HasOne("LogisticsERP.Domain.Entities.Clients.PlatformRiderAccount", null)
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("LogisticsERP.Domain.Entities.Jahez.JahezImportBatch", null)
                         .WithMany()
                         .HasForeignKey("BatchId")
@@ -24045,14 +24612,18 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.HasOne("LogisticsERP.Domain.Entities.Jahez.JahezAccountSession", null)
                         .WithMany()
                         .HasForeignKey("HandoverId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("LogisticsERP.Domain.Entities.Jahez.JahezImportRow", null)
                         .WithMany()
                         .HasForeignKey("ImportRowId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Jahez.JahezImportBatch", null)
+                        .WithMany()
+                        .HasForeignKey("SupersededByBatchId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Jahez.JahezTransferredDebt", b =>
@@ -24897,6 +25468,21 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Ninja.NinjaAllocationProvenance", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Clients.RiderClientAssignment", null)
+                        .WithMany()
+                        .HasForeignKey("RiderClientAssignmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Ninja.NinjaDailyPerformanceSource", null)
+                        .WithMany()
+                        .HasForeignKey("SourceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Ninja.NinjaDailyDeduction", b =>
                 {
                     b.HasOne("LogisticsERP.Domain.Entities.Ninja.NinjaDailyImport", null)
@@ -24991,6 +25577,95 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .HasForeignKey("PlatformRiderAccountId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Ninja.NinjaEvaluationContextRevision", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Clients.PlatformRiderAccount", null)
+                        .WithMany()
+                        .HasForeignKey("PlatformRiderAccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Ninja.NinjaEvaluationSnapshot", null)
+                        .WithMany()
+                        .HasForeignKey("ReviewedSnapshotId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Ninja.NinjaEvaluationContextRevision", null)
+                        .WithMany()
+                        .HasForeignKey("SupersedesId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Ninja.NinjaEvaluationSnapshot", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Ninja.NinjaEvaluationSnapshot", null)
+                        .WithMany()
+                        .HasForeignKey("SupersedesId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Ninja.NinjaPerformanceArtifact", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Ninja.NinjaPerformanceArtifact", null)
+                        .WithMany()
+                        .HasForeignKey("OriginalArtifactId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Ninja.NinjaPerformancePreview", null)
+                        .WithMany()
+                        .HasForeignKey("PreviewId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Ninja.NinjaPerformanceImportArtifact", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Ninja.NinjaPerformanceArtifact", null)
+                        .WithMany()
+                        .HasForeignKey("ArtifactId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Ninja.NinjaDailyImport", null)
+                        .WithMany()
+                        .HasForeignKey("ImportId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Ninja.NinjaResponsibilityLine", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Ninja.NinjaResponsibilityRevision", null)
+                        .WithMany()
+                        .HasForeignKey("RevisionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Clients.RiderClientAssignment", null)
+                        .WithMany()
+                        .HasForeignKey("RiderClientAssignmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Ninja.NinjaResponsibilityRevision", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Clients.PlatformRiderAccount", null)
+                        .WithMany()
+                        .HasForeignKey("PlatformRiderAccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Ninja.NinjaEvaluationSnapshot", null)
+                        .WithMany()
+                        .HasForeignKey("ReviewedSnapshotId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Ninja.NinjaResponsibilityRevision", null)
+                        .WithMany()
+                        .HasForeignKey("SupersedesId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Platform.CompanyProfile", b =>

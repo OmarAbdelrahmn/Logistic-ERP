@@ -1,0 +1,109 @@
+﻿code,severity,sheet,row,account,field,workbook,database,detail
+RIDER_NAME_DIFFERENCE,Review,البدلاء,7,214754,,احمد ابراهيم عبد الغني بسطويسي,احمد ابراهيم عبدالغني بسطويسي,Match identity first; aliases/contractor annotations may explain the difference.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,البدلاء,7,214754,,راتب,عمولة,
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,البدلاء,8,264401,,راتب,عمولة,
+RIDER_NAME_DIFFERENCE,Review,البدلاء,19,215809,,محمد نويون ميا,MD NOYON MIA,Match identity first; aliases/contractor annotations may explain the difference.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,البدلاء,19,215809,,راتب,عمولة,
+RIDER_NAME_DIFFERENCE,Review,البدلاء,23,215459,,حسن سليم عبدالكريم سليم,حسن سليم عبد الكريم سليم,Match identity first; aliases/contractor annotations may explain the difference.
+RIDER_NAME_DIFFERENCE,Review,البدلاء,25,214299,,اسماعيل حسين شاون شاوون,اسماعيل حسين شاون,Match identity first; aliases/contractor annotations may explain the difference.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,البدلاء,26,214754,,راتب,عمولة,
+RIDER_NAME_DIFFERENCE,Review,البدلاء,34,215459,,حسن سليم عبدالكريم سليم,حسن سليم عبد الكريم سليم,Match identity first; aliases/contractor annotations may explain the difference.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,البدلاء,45,215814,,راتب,عمولة,
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,البدلاء,46,215710,,راتب,عمولة,
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,البدلاء,47,215806,,راتب,عمولة,
+RIDER_NAME_DIFFERENCE,Review,البدلاء,53,282046,,محمد محمود عبدالمنعم محمود,محمد محمود عبد المنعم محمود,Match identity first; aliases/contractor annotations may explain the difference.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,البدلاء,53,282046,,راتب,عمولة,
+RIDER_NAME_DIFFERENCE,Review,البدلاء,55,272702,,محمد أرفال اسلام ا رفعت,MD ASHRAFUL ISLAM RIFAT,Match identity first; aliases/contractor annotations may explain the difference.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,البدلاء,55,272702,,راتب,عمولة,
+RIDER_NAME_DIFFERENCE,Review,البدلاء,58,215746,,محمد خالد علي,محمد خالد علي محمد,Match identity first; aliases/contractor annotations may explain the difference.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,البدلاء,60,279576,,راتب,عمولة,
+RIDER_NAME_DIFFERENCE,Review,البدلاء,64,215731,,مصطفى فتحي سيد ابراهيم,مصطفى فتحى سيد ابراهيم,Match identity first; aliases/contractor annotations may explain the difference.
+RIDER_NAME_DIFFERENCE,Review,البدلاء,67,246108,,حسن كريم كريم ال,HASANUL KARIM,Match identity first; aliases/contractor annotations may explain the difference.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,البدلاء,67,246108,,راتب,عمولة,
+ACCOUNT_CITY_DIFFERENCE,Review,البدلاء,73,286366,,Jeddah,Riyadh,Workbook says actual work city; account registration city is a separate concept.
+RIDER_NAME_DIFFERENCE,Review,البدلاء,74,267561,,الأمين العبيد الأمين احمد,الامين العبيد الامين احمد,Match identity first; aliases/contractor annotations may explain the difference.
+RIDER_NAME_DIFFERENCE,Review,البدلاء,75,214312,,دكتور رافيول تشودري يعرف,MD RAFIUL ALAM CHOWDHURY,Match identity first; aliases/contractor annotations may explain the difference.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,البدلاء,75,214312,,راتب,عمولة,
+RIDER_NAME_DIFFERENCE,Review,البدلاء,76,226083,,رشوان عبد الجابر عبد ربه رشوان,رشوان عبدالجابر عبد ربه رشوان,Match identity first; aliases/contractor annotations may explain the difference.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,البدلاء,76,226083,,راتب,عمولة,
+ACCOUNT_CITY_DIFFERENCE,Review,البدلاء,78,286371,,Jeddah,Riyadh,Workbook says actual work city; account registration city is a separate concept.
+ACCOUNT_CITY_DIFFERENCE,Review,البدلاء,79,159271,,Jeddah,Taif,Workbook says actual work city; account registration city is a separate concept.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,البدلاء,79,159271,,راتب,عمولة,
+RIDER_NAME_DIFFERENCE,Review,الداتا الحالية,6,282009,,محمد أرفال اسلام ا رفعت,MD ASHRAFUL ISLAM RIFAT,Match identity first; aliases/contractor annotations may explain the difference.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,6,282009,,راتب,عمولة,
+LOGIN_PHONE_DIFFERENCE,Change,الداتا الحالية,6,282009,,0530129311,0569084538,
+ACCOUNT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,6,282009,,راتب,عمولة,
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,11,215810,,راتب,عمولة,
+ACCOUNT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,11,215810,,راتب,عمولة,
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,18,215812,,راتب,عمولة,
+ACCOUNT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,18,215812,,راتب,عمولة,
+RIDER_PROPERTY_DIFFERENCE,Change,الداتا الحالية,21,215794,rider phone,0540983494,0560438481,
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,22,246107,,راتب,عمولة,
+ACCOUNT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,22,246107,,راتب,عمولة,
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,27,215322,,راتب,عمولة,
+ACCOUNT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,27,215322,,راتب,عمولة,
+RIDER_NAME_DIFFERENCE,Review,الداتا الحالية,29,246094,,فارس البدري ابراهيم,فارس البدري ابراهيم الحاج,Match identity first; aliases/contractor annotations may explain the difference.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,29,246094,,راتب,عمولة,
+ACCOUNT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,29,246094,,راتب,عمولة,
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,33,87492,,راتب,عمولة,
+ACCOUNT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,33,87492,,راتب,عمولة,
+RIDER_NAME_DIFFERENCE,Review,الداتا الحالية,45,214211,,محمود ربيع جنيدي خالد,محمود ربيع جنيدى خالد,Match identity first; aliases/contractor annotations may explain the difference.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,45,214211,,راتب,عمولة,
+ACCOUNT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,45,214211,,راتب,عمولة,
+RIDER_NAME_DIFFERENCE,Review,الداتا الحالية,52,214271,,فيصل مونشي فيصل مونشي,FAYSAL MUNSHI,Match identity first; aliases/contractor annotations may explain the difference.
+RIDER_PROPERTY_DIFFERENCE,Change,الداتا الحالية,52,214271,rider phone,0508798746,0578526764,
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,54,215799,,راتب,عمولة,
+ACCOUNT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,54,215799,,راتب,عمولة,
+RIDER_NAME_DIFFERENCE,Review,الداتا الحالية,58,279546,,محمد سيف ال ا ا اسلام,MD SAIFUL ISLAM,Match identity first; aliases/contractor annotations may explain the difference.
+RIDER_NAME_DIFFERENCE,Review,الداتا الحالية,59,279579,,محمد منير أوسين,MD MONIR HOSSEN,Match identity first; aliases/contractor annotations may explain the difference.
+RIDER_PROPERTY_DIFFERENCE,Change,الداتا الحالية,59,279579,rider phone,0543556705,0570954973,
+RIDER_NAME_DIFFERENCE,Review,الداتا الحالية,60,279669,,محمد أسيكور رحمن آفاز عاشق,محمد اسيكور رحمن افاز عاشق,Match identity first; aliases/contractor annotations may explain the difference.
+RIDER_PROPERTY_DIFFERENCE,Change,الداتا الحالية,60,279669,rider phone,0570493310,0572136137,
+RIDER_NAME_DIFFERENCE,Review,الداتا الحالية,61,279577,,أخترا ا حوسان,AKTER HOSSAN,Match identity first; aliases/contractor annotations may explain the difference.
+RIDER_NAME_DIFFERENCE,Review,الداتا الحالية,62,279571,,سين علام ١١ روفين,SAHIN ALAM ROVEN,Match identity first; aliases/contractor annotations may explain the difference.
+RIDER_NAME_DIFFERENCE,Review,الداتا الحالية,63,279565,,محمد روني 11 أحمد,MD RONY AHMED,Match identity first; aliases/contractor annotations may explain the difference.
+RIDER_PROPERTY_DIFFERENCE,Change,الداتا الحالية,64,246589,rider phone,0536189321,0,
+LOGIN_PHONE_DIFFERENCE,Change,الداتا الحالية,65,215473,,0571166051,0578933603,
+RIDER_PROPERTY_DIFFERENCE,Change,الداتا الحالية,71,82581,nationality,السودان,يمني,
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,71,82581,,راتب,عمولة,
+ACCOUNT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,71,82581,,راتب,عمولة,
+RIDER_PROPERTY_DIFFERENCE,Change,الداتا الحالية,76,214291,rider phone,0507970469,0582217118,
+RIDER_NAME_DIFFERENCE,Review,الداتا الحالية,78,279581,,محمد خيري محمد احمد,محمد خيرى محمد احمد,Match identity first; aliases/contractor annotations may explain the difference.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,78,279581,,راتب,عمولة,
+ACCOUNT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,78,279581,,راتب,عمولة,
+RIDER_PROPERTY_DIFFERENCE,Change,الداتا الحالية,79,279550,rider phone,0557314582,0541746204,
+RIDER_NAME_DIFFERENCE,Review,الداتا الحالية,81,267201,,محمد عبده عبدالله الوصابي,محمدعبدة عبدالله الوصابي,Match identity first; aliases/contractor annotations may explain the difference.
+RIDER_NAME_DIFFERENCE,Review,الداتا الحالية,83,215720,,محمد المصطفى صديق عبد الرحمن عثمان,محمد المصطفي صديق عبدالرحمن,Match identity first; aliases/contractor annotations may explain the difference.
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,83,215720,,راتب,عمولة,
+ACCOUNT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,83,215720,,راتب,عمولة,
+ACCOUNT_CITY_DIFFERENCE,Review,الداتا الحالية,84,159271,,Jeddah,Taif,Workbook says actual work city; account registration city is a separate concept.
+RIDER_PROPERTY_DIFFERENCE,Change,الداتا الحالية,84,159271,rider phone,0537920797,0544463081,
+LOGIN_PHONE_DIFFERENCE,Change,الداتا الحالية,84,159271,,0537920797,0548617278,
+RIDER_PROPERTY_DIFFERENCE,Change,الداتا الحالية,86,295969,nationality,اثيوبيا,برمي,
+RIDER_PROPERTY_DIFFERENCE,Change,الداتا الحالية,86,295969,rider phone,0590053019,0543960996,
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,87,295968,,راتب,عمولة,
+ACCOUNT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,87,295968,,راتب,عمولة,
+RIDER_PROPERTY_DIFFERENCE,Change,الداتا الحالية,89,295965,rider phone,0594483865,0593383865,
+LOGIN_PHONE_DIFFERENCE,Change,الداتا الحالية,91,279831,,0538691034,0565535606,
+RIDER_PROPERTY_DIFFERENCE,Change,الداتا الحالية,93,223613,nationality,باكستان,بنغلاديشي,
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,96,69412,,راتب,عمولة,
+ACCOUNT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,96,69412,,راتب,عمولة,
+RIDER_PROPERTY_DIFFERENCE,Change,الداتا الحالية,97,246106,rider phone,0540640312,0570785879,
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,97,246106,,راتب,عمولة,
+ACCOUNT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,97,246106,,راتب,عمولة,
+LOGIN_PHONE_DIFFERENCE,Change,الداتا الحالية,99,215814,,0560796815,0534153934,
+ASSIGNMENT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,103,246095,,راتب,عمولة,
+LOGIN_PHONE_DIFFERENCE,Change,الداتا الحالية,103,246095,,0563687380,0556371995,
+ACCOUNT_PAYMENT_DIFFERENCE,Change,الداتا الحالية,103,246095,,راتب,عمولة,
+ACCOUNT_CITY_DIFFERENCE,Review,الداتا الحالية,104,214308,,Jeddah,Riyadh,Workbook says actual work city; account registration city is a separate concept.
+ACCOUNT_CITY_DIFFERENCE,Review,الداتا الحالية,105,272575,,Jeddah,Riyadh,Workbook says actual work city; account registration city is a separate concept.
+LOGIN_PHONE_DIFFERENCE,Change,الداتا الحالية,108,222872,,0564926978,,
+LOGIN_PHONE_DIFFERENCE,Change,الداتا الحالية,117,272573,,0540292673,,
+RIDER_PROPERTY_DIFFERENCE,Change,الداتا الحالية,135,215770,rider phone,0534680145,0575764060,
+LOGIN_PHONE_DIFFERENCE,Change,الداتا الحالية,136,215459,,0548006139,0568238394,
+ACCOUNT_CITY_DIFFERENCE,Review,الداتا الحالية,137,286370,,Jeddah,Riyadh,Workbook says actual work city; account registration city is a separate concept.
+ACCOUNT_CITY_DIFFERENCE,Review,الداتا الحالية,138,286356,,Jeddah,Riyadh,Workbook says actual work city; account registration city is a separate concept.
+RIDER_PROPERTY_DIFFERENCE,Change,الداتا الحالية,146,292604,rider phone,0539858760,0538958760,
+RIDER_NAME_DIFFERENCE,Review,الداتا الحالية,149,292599,,ولي الدين محمد عمر,والى الدين محمد عمر الياس,Match identity first; aliases/contractor annotations may explain the difference.
+RIDER_PROPERTY_DIFFERENCE,Change,الداتا الحالية,149,292599,rider phone,0574477167,0532101559,
+LOGIN_PHONE_DIFFERENCE,Change,الداتا الحالية,75,215731,login phone,0558006043,0570787133,User selected first source number; rider primary phone already matches.

@@ -1,0 +1,19 @@
+{
+  "Passed": true,
+  "Mode": "Preflight",
+  "Server": "db67927.public.databaseasp.net",
+  "Database": "db67927",
+  "VerifiedAtUtc": "2026-10-28T11:28:11.6298907+00:00",
+  "Permission": "ninja.assignments.dates.update",
+  "Applied": false,
+  "AlreadyAppliedBeforeRun": false,
+  "NinjaDefinitions": 9,
+  "AdministratorNinjaGrants": 9,
+  "FreshConnectionVerified": true,
+  "ScriptSha256": {
+    "ninja-assignment-dates-application.sql": "04BD9312383EDBEE80160AAC63B82001A3A2942EF848CAE6BA42D019B73665E9",
+    "ninja-assignment-dates-identity.sql": "8A03561B36DF6D5CE87041CDBF5F6D9CB493FFA3E4485E277A2FAA1A97DB0215"
+  },
+  "EvidenceDirectory": "C:\\Users\\omarf\\OneDrive\\Documents\\ChatGPT\\Logistic ERP\\outputs\\ninja-assignment-dates-hosted-20261028112742Z",
+  "ApiPublishedByThisRun": false
+}

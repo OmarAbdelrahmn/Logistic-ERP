@@ -23,10 +23,12 @@ internal sealed partial class ChefzService
         var accountIds = rows.Select(p => p.PlatformRiderAccountId).Distinct().ToArray();
         var accounts = await db.PlatformRiderAccounts.IgnoreQueryFilters().AsNoTracking().Where(a => accountIds.Contains(a.Id))
             .Select(a => new { a.Id, a.ExternalAccountId }).ToDictionaryAsync(a => a.Id, ct);
+        var accountTypes = await ReportAccountTypes(accountIds, ct);
         var riders = await RiderIdentities(rows.Select(p => p.RiderProfileId), ct);
         return rows.Select(p => PerformanceResponse(p) with
         {
             ExternalAccountId = accounts.GetValueOrDefault(p.PlatformRiderAccountId)?.ExternalAccountId ?? p.PlatformRiderAccountId.ToString(),
+            AccountType = accountTypes.GetValueOrDefault(p.PlatformRiderAccountId, "Unconfigured"),
             RiderName = riders.GetValueOrDefault(p.RiderProfileId)?.RiderName ?? "مندوب سابق",
             RiderIqamaNo = riders.GetValueOrDefault(p.RiderProfileId)?.RiderIqamaNo
         }).ToArray();

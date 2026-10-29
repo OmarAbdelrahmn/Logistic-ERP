@@ -4,7 +4,7 @@ using LogisticsERP.Domain.Entities.Jahez;
 namespace LogisticsERP.Application.Features.Jahez;
 
 public sealed record JahezHandoverRequest(Guid AccountId, Guid RiderProfileId, DateTimeOffset EffectiveAtUtc, string Reason,
-    decimal InitialFeePayment = 0, string? PaymentReference = null);
+    decimal InitialFeePayment = 0, string? PaymentReference = null, IReadOnlyList<LogisticsERP.Application.Features.Hr.PreviousDayUsageInput>? PreviousDayUsages = null);
 public sealed record JahezHandoverResponse(Guid Id, Guid AccountId, string ExternalAccountId, Guid RiderProfileId,
     Guid AssignmentId, DateTimeOffset StartedAtUtc, DateTimeOffset? EndedAtUtc, DateOnly CommissionStartsOn,
     DateOnly? CommissionPostedThrough, DateTimeOffset? LastSettlementPaymentAtUtc);
@@ -34,8 +34,8 @@ public sealed record JahezImportFileResponse(Guid Id, string FileName, byte[] Co
 
 public sealed record JahezDispatchReportRow(Guid AccountId, string ExternalAccountId, Guid RiderProfileId,
     Guid HandoverId, DateOnly Date, int Count);
-public sealed record JahezAdministrativeDebt(Guid HandoverId, Guid AccountId, string ExternalAccountId,
-    Guid RiderProfileId, string RiderNameAr, decimal PlatformDebt);
+public sealed record JahezAdministrativeDebt(Guid? HandoverId, Guid AccountId, string ExternalAccountId,
+    Guid? RiderProfileId, string? RiderNameAr, decimal PlatformDebt);
 public interface IJahezReminderService { Task RunAsync(CancellationToken ct = default); }
 
 public static class JahezErrors

@@ -71,7 +71,7 @@ public sealed partial class NinjaWorkflowTests
         var daily = Value(await f.Service.GetDailyReportAsync(day, day.AddDays(3), null, null, 1, 50, ct)).Items;
         Assert.Equal(4, daily.Count); Assert.Equal(day, daily[0].Date); Assert.Null(daily[2].Metrics.OrdersPerWorkingHour);
         Assert.Equal(0, daily[3].Metrics.PerformanceRecords); Assert.Equal(-3, daily[3].Metrics.TotalDeductions);
-        Assert.Equal(daily[2], Assert.Single(Value(await f.Service.GetDailyReportAsync(day, day.AddDays(3), null, null, 3, 1, ct)).Items));
+        Assert.Equivalent(daily[2], Assert.Single(Value(await f.Service.GetDailyReportAsync(day, day.AddDays(3), null, null, 3, 1, ct)).Items));
         f.Account.IsDeleted = true; await f.Db.SaveChangesAsync(ct);
         Assert.Equal(30, Value(await f.Service.GetPerformanceReportAsync(day, day.AddDays(3), f.Account.Id, null, ct)).Metrics.TotalOrders);
     }

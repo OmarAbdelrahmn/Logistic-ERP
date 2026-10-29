@@ -183,7 +183,10 @@ public sealed partial class JahezWorkflowTests
         Success(await f.Service.ConfirmTreasuryHandoverAsync("confirm", handover.Handover.Id,
             new(handover.Lines.Select(x => new TreasuryCashCount(x.SubAccountId, x.Amount)).ToArray(), "استلام", Convert.ToBase64String(handover.Handover.RowVersion)), ct));
         Success(await f.Service.RefundFeeAsync("refund", new(h.Id, true, "refund", "استرداد"), ct));
-        var next = Success(await f.Service.HandoverAsync("next", new(account.Id, f.OtherRiderId, At(6, 23), "استلام جديد", 50, "new-fee"), ct));
+        var context = Success(await new LogisticsERP.Infrastructure.Hr.PlatformAccountDayAllocationService(f.Db).Context(account.Id, new(2026, 10, 6), f.OtherRiderId, ct));
+        var prior = Assert.Single(context.Contributions);
+        var next = Success(await f.Service.HandoverAsync("next", new(account.Id, f.OtherRiderId, At(6, 23), "استلام جديد", 50, "new-fee",
+            PreviousDayUsages: [new(prior.AssignmentIds, new(0), prior.RowVersion, prior.UsageRowVersions)]), ct));
         var custody = await TreasuryAccount(f, account.SponsorId!.Value, TreasuryLocation.Supervisor, TreasuryPurpose.AccountFee);
         Assert.Equal(-150, Success(await f.Service.TreasuryBalancesAsync(ct)).Single(x => x.SubAccountId == custody.Id).Balance);
         Assert.NotEqual(h.Id, next.Id);

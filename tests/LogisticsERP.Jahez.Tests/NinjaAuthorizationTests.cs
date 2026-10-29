@@ -33,6 +33,7 @@ public sealed class NinjaAuthorizationTests
     [InlineData(nameof(NinjaController.Assign), PermissionKeys.Ninja.AssignmentsCreate)]
     [InlineData(nameof(NinjaController.Return), PermissionKeys.Ninja.AssignmentsDelete)]
     [InlineData(nameof(NinjaController.Credentials), PermissionKeys.Ninja.AccountsUpdate)]
+    [InlineData(nameof(NinjaController.UpdateAssignmentDates), PermissionKeys.Ninja.AssignmentDatesUpdate)]
     [InlineData(nameof(NinjaController.ImportPerformance), PermissionKeys.Ninja.PerformanceImport)]
     [InlineData(nameof(NinjaController.ImportDeductions), PermissionKeys.Ninja.DeductionsImport)]
     [InlineData(nameof(NinjaController.Performance), PermissionKeys.Ninja.Read)]
@@ -48,7 +49,7 @@ public sealed class NinjaAuthorizationTests
     public void EveryNinjaEndpointUsesOnlyNinjaPermissionKeys()
     {
         var actions = typeof(NinjaController).GetMethods().Where(m => m.GetCustomAttributes().OfType<HttpMethodAttribute>().Any()).ToArray();
-        Assert.Equal(19, actions.Length);
+        Assert.Equal(20, actions.Length);
         Assert.All(actions, action => Assert.StartsWith(AuthenticationPolicies.PermissionPrefix + "ninja.",
             action.GetCustomAttribute<RequirePermissionAttribute>()!.Policy, StringComparison.Ordinal));
     }
@@ -74,6 +75,8 @@ public sealed class NinjaAuthorizationTests
     [InlineData(false, "/api/ninja/accounts/sheet-updates/00000000-0000-0000-0000-000000000001/rows")]
     [InlineData(true, "/api/ninja/accounts/sheet-updates/00000000-0000-0000-0000-000000000001/note")]
     [InlineData(false, "/api/ninja/accounts/sheet-updates/00000000-0000-0000-0000-000000000001/note")]
+    [InlineData(true, "/api/ninja/accounts/00000000-0000-0000-0000-000000000001/assignments/00000000-0000-0000-0000-000000000002/dates")]
+    [InlineData(false, "/api/ninja/accounts/00000000-0000-0000-0000-000000000001/assignments/00000000-0000-0000-0000-000000000002/dates")]
     public async Task NinjaEndpointsCheckTheirPlatformScopeBeforeReachingTheService(bool granted, string path)
     {
         var ct = TestContext.Current.CancellationToken;
@@ -88,7 +91,7 @@ public sealed class NinjaAuthorizationTests
             new Claim(AuthenticationClaimNames.AuthorizationVersion, "1"),
             new Claim(AuthenticationClaimNames.PasswordChangeRequired, "false") }, "test"));
         foreach (var permission in new[] { PermissionKeys.Ninja.Read, PermissionKeys.Ninja.AccountsUpdate,
-            PermissionKeys.Ninja.AssignmentsCreate, PermissionKeys.Ninja.AssignmentsDelete,
+            PermissionKeys.Ninja.AssignmentsCreate, PermissionKeys.Ninja.AssignmentsDelete, PermissionKeys.Ninja.AssignmentDatesUpdate,
             PermissionKeys.Ninja.CredentialsRotate, PermissionKeys.Ninja.PerformanceImport, PermissionKeys.Ninja.DeductionsImport })
         {
             var http = new DefaultHttpContext(); http.Request.Path = path;

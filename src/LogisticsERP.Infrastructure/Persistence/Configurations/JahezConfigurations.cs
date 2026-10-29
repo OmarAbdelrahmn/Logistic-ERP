@@ -51,12 +51,15 @@ internal sealed class JahezConfigurations : IEntityTypeConfiguration<JahezAccoun
         b.ConfigureAuditable("Requests", "jahez_v2");
         Values(b);
         Handover(b, x => x.HandoverId);
+        b.HasOne<PlatformRiderAccount>().WithMany().HasForeignKey(x => x.AccountId).OnDelete(DeleteBehavior.Restrict);
         b.HasOne<PlatformRiderAccount>().WithMany().HasForeignKey(x => x.TargetAccountId).OnDelete(DeleteBehavior.Restrict);
         b.HasIndex(x => new { x.Status, x.CreatedAtUtc });
         b.HasOne<JahezOperation>().WithMany().HasForeignKey(x => x.OperationId).OnDelete(DeleteBehavior.Restrict);
         b.Property(x => x.ProposedNet).HasPrecision(18, 2);
         b.Property(x => x.ProposedCommission).HasPrecision(18, 2);
         b.Property(x => x.DebtAdjustment).HasPrecision(18, 2);
+        b.ToTable(t => t.HasCheckConstraint("CK_JahezRequest_AccountScope",
+            "[HandoverId] IS NOT NULL OR ([AccountId] IS NOT NULL AND [Kind] = 5 AND [AdjustmentTarget] IS NOT NULL AND [AdjustmentTarget] = 2)"));
         b.HasIndex(x => x.OperationId).IsUnique().HasFilter("[OperationId] IS NOT NULL AND [Status] = 1 AND [IsDeleted] = 0");
     }
 
@@ -95,9 +98,10 @@ internal sealed class JahezConfigurations : IEntityTypeConfiguration<JahezAccoun
         b.ConfigureAuditable("ImportBatches", "jahez_v2");
         Values(b);
         b.Property(x => x.ContentHash).HasMaxLength(64);
-        b.HasIndex(x => new { x.Kind, x.ContentHash }).IsUnique();
+        b.HasIndex(x => new { x.Kind, x.ContentHash });
+        b.HasIndex(x => new { x.Kind, x.ContentHash }, "UX_JahezDailyImport_ContentHash").IsUnique().HasFilter("[Kind] = 2");
         b.HasOne<JahezImportBatch>().WithMany().HasForeignKey(x => x.ReplacesBatchId).OnDelete(DeleteBehavior.Restrict);
-        b.HasIndex(x => x.ReplacesBatchId).IsUnique().HasFilter("[ReplacesBatchId] IS NOT NULL AND [CommittedAtUtc] IS NOT NULL");
+        b.HasIndex(x => x.ReplacesBatchId).IsUnique().HasFilter("[ReplacesBatchId] IS NOT NULL AND [CommittedAtUtc] IS NOT NULL AND [Kind] = 2");
     }
 
     public void Configure(EntityTypeBuilder<JahezImportFile> b)
@@ -124,6 +128,10 @@ internal sealed class JahezConfigurations : IEntityTypeConfiguration<JahezAccoun
         b.ConfigureHistory("PlatformTransactions", "jahez_v2");
         Values(b);
         Handover(b, x => x.HandoverId);
+        b.HasOne<PlatformRiderAccount>().WithMany().HasForeignKey(x => x.AccountId).OnDelete(DeleteBehavior.Restrict);
+        b.HasOne<JahezImportBatch>().WithMany().HasForeignKey(x => x.SupersededByBatchId).OnDelete(DeleteBehavior.Restrict);
+        b.HasIndex(x => new { x.AccountId, x.OccurredAtUtc });
+        b.ToTable(t => t.HasCheckConstraint("CK_JahezTransaction_AccountScope", "[AccountId] IS NOT NULL OR [HandoverId] IS NOT NULL"));
         b.HasOne<JahezImportBatch>().WithMany().HasForeignKey(x => x.BatchId).OnDelete(DeleteBehavior.Restrict);
         b.HasOne<JahezImportRow>().WithMany().HasForeignKey(x => x.ImportRowId).OnDelete(DeleteBehavior.Restrict);
         b.HasIndex(x => x.ImportRowId).IsUnique();
@@ -150,6 +158,9 @@ internal sealed class JahezConfigurations : IEntityTypeConfiguration<JahezAccoun
         b.ConfigureHistory("AccountingEntries", "jahez_v2");
         Values(b);
         Handover(b, x => x.HandoverId);
+        b.HasOne<PlatformRiderAccount>().WithMany().HasForeignKey(x => x.AccountId).OnDelete(DeleteBehavior.Restrict);
+        b.ToTable(t => t.HasCheckConstraint("CK_JahezLedger_AccountScope",
+            "[HandoverId] IS NOT NULL OR ([AccountId] IS NOT NULL AND [Bucket] = 2)"));
         b.HasOne<JahezLedgerEntry>().WithMany().HasForeignKey(x => x.ReversesEntryId).OnDelete(DeleteBehavior.Restrict);
         b.HasIndex(x => x.ReversesEntryId).IsUnique().HasFilter("[ReversesEntryId] IS NOT NULL");
         b.HasIndex(x => new { x.HandoverId, x.Bucket, x.OccurredAtUtc });

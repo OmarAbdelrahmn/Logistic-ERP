@@ -101,6 +101,11 @@ public sealed class NinjaController(INinjaService service) : ControllerBase
     [RequirePermission(PermissionKeys.Ninja.AccountsUpdate)]
     public Task<IActionResult> Credentials(Guid accountId, NinjaCredentialRequest request, CancellationToken ct) => ToAction(service.UpdateCredentialsAsync(accountId, request, ct));
 
+    [HttpPut("accounts/{accountId:guid}/assignments/{assignmentId:guid}/dates")]
+    [RequirePermission(PermissionKeys.Ninja.AssignmentDatesUpdate)]
+    public Task<IActionResult> UpdateAssignmentDates(Guid accountId, Guid assignmentId, NinjaAssignmentDatesRequest request, CancellationToken ct) =>
+        ToAction(service.UpdateAssignmentDatesAsync(accountId, assignmentId, request, ct));
+
     [HttpPost("performance/import")]
     [RequirePermission(PermissionKeys.Ninja.PerformanceImport)]
     [Consumes("multipart/form-data")]

@@ -180,7 +180,7 @@ HTTP 200 with `issues.length > 0` is a failed/invalid import result, not success
 
 Reuploading daily data corrects only the corresponding account/date row and retains its identity. Exact replay normally reports zero imported and the applicable skipped rows. Reuploading an older file after a later correction can intentionally restore its figures: the backend rechecks current rows, rather than treating every old file hash as an immutable no-op. Keep selected-file/date context visible and refresh stored rows after upload.
 
-GET `/api/chefz/performance?from=YYYY-MM-DD&to=YYYY-MM-DD&page=1&pageSize=50` returns stored rows, now with rider name and external account ID. Optional `accountId` and `riderId` combine with AND. It uses `ChefzPage`, not a rider-group envelope.
+GET `/api/chefz/performance?from=YYYY-MM-DD&to=YYYY-MM-DD&page=1&pageSize=50` returns stored rows with rider name, external account ID, and `accountType` (`Freelancer`, `FullTime`, or `Unconfigured`). The type is the current account configuration, not a historical snapshot. Optional `accountId` and `riderId` combine with AND. It uses `ChefzPage`, not a rider-group envelope.
 
 ## 8. Rider/account performance report
 

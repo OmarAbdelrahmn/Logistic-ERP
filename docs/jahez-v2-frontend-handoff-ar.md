@@ -219,7 +219,7 @@ Enums في JSON أرقام، ومفاتيح JSON بصيغة camelCase. حقول 
 
 - `POST /api/jahez/v2/handovers`: `{accountId,riderProfileId,effectiveAtUtc,reason,initialFeePayment,paymentReference}`؛ riderProfileId هو المستخدم الفعلي. يفضل initialFeePayment=0 وتسجيل الرسوم لاحقاً من `/fees/receipts`. إذا كان هناك قبض أولي يلزم paymentReference وصلاحيتا fees.record وmoney.receive. ينشئ التسليم فترة جديدة ورسوم 200 وعمولة تبدأ من اليوم التالي.
 - `POST /earnings`: بيان أرباح لفترة سياسة 15% معتمدة. المدخل EarningsRequest في الأنواع المرفقة. جميع مكونات الأرباح التسعة مطلوبة، غير سالبة، ودقتها حتى 6 منازل. الفترة لا تتداخل مع بيان قائم أو عمولة مصفاة. التصحيح بـsupersedesId لنفس الفترة.
-- `GET /administrative-debts?page=1&pageSize=50`: معلومات مديونية جاهز المستقلة لكل فترة استخدام، مع رقم الحساب والمندوب وplatformDebt. لا تدخل هذه القيمة في معادلة التصفية ولا تنتج بلوكاً تلقائياً.
+- `GET /administrative-debts?page=1&pageSize=50`: معلومات مديونية جاهز المستقلة لكل حساب، مع رقم الحساب وplatformDebt. الإسناد والمندوب الحالي اختياريان. لا تدخل هذه القيمة في معادلة التصفية ولا تنتج بلوكاً تلقائياً. [تحديث ربط المديونية بالحساب واستبدال ملفات الحركات](jahez-account-administrative-debt-20261026.md).
 - `POST /imports`: multipart/form-data بحقوق ImportsCreate. الحقول kind=1 للمعاملات أو 2 للطلبات اليومية، وfiles كملفات xlsx متعددة، وreplacesBatchId/correctionReason عند التصحيح.
 - حدود الملفات: 1–10 ملفات؛ 10MB للملف و30MB للعملية و50,000 صف. لا يتكرر الملف نفسه في الطلب.
 - الرفع يعيد ImportPreview دون تعديل الرصيد أو الطلبات. يعرض الصفوف والأخطاء وملخص كل حساب، ويحتفظ بالملفات الأصلية.
