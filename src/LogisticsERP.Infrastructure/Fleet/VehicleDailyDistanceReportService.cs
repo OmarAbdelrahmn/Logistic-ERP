@@ -27,15 +27,50 @@ internal sealed partial class VehicleDailyDistanceService
             .ToDictionaryAsync(x => x.WorkDate, cancellationToken);
         var cityNames = await GetOperatingCityNamesAsync(
             vehicle.OperatingCityId.HasValue ? [vehicle.OperatingCityId.Value] : [], cancellationToken);
+        return Result.Success(BuildPeriodReport(vehicle, cityNames, fromDate, toDate, ReportDates(fromDate, toDate), distances));
+    }
+
+    public async Task<Result<VehicleDistancePeriodReportsPageResponse>> GetVehiclesPeriodReportsAsync(
+        DateOnly fromDate, DateOnly toDate, int page, int pageSize, CancellationToken cancellationToken = default)
+    {
+        if (!await support.HasPermissionAsync(PermissionKeys.Fleet.DailyDistancesRead, null, cancellationToken))
+            return Result.Failure<VehicleDistancePeriodReportsPageResponse>(FleetErrors.Forbidden);
+        if (!ValidReportPeriod(fromDate, toDate))
+            return Result.Failure<VehicleDistancePeriodReportsPageResponse>(FleetErrors.InvalidDistanceReportPeriod);
+
+        page = Math.Max(1, page);
+        pageSize = Math.Clamp(pageSize <= 0 ? 20 : pageSize, 1, 100);
+        var distances = dbContext.VehicleDailyDistances.AsNoTracking()
+            .Where(x => x.WorkDate >= fromDate && x.WorkDate <= toDate);
+        var vehicles = dbContext.Vehicles.AsNoTracking().Where(v => distances.Any(d =>
+            d.VehicleId == v.Id && d.AppliedSource != VehicleDailyDistanceSource.None));
+        var totalCount = await vehicles.CountAsync(cancellationToken);
+        var offset = ((long)page - 1) * pageSize;
+        var selected = offset >= totalCount ? [] : await vehicles.OrderBy(x => x.AssetNumber).ThenBy(x => x.Id)
+            .Skip((int)offset).Take(pageSize).ToArrayAsync(cancellationToken);
+        var ids = selected.Select(x => x.Id).ToArray();
+        var records = ids.Length == 0 ? [] : await distances.Where(x => ids.Contains(x.VehicleId)).ToArrayAsync(cancellationToken);
+        var byVehicle = records.ToLookup(x => x.VehicleId);
+        var cityNames = await GetOperatingCityNamesAsync(
+            selected.Where(x => x.OperatingCityId.HasValue).Select(x => x.OperatingCityId!.Value), cancellationToken);
         var dates = ReportDates(fromDate, toDate);
+        var items = selected.Select(v => BuildPeriodReport(v, cityNames, fromDate, toDate, dates,
+            byVehicle[v.Id].ToDictionary(x => x.WorkDate))).ToArray();
+        return Result.Success(new VehicleDistancePeriodReportsPageResponse(fromDate, toDate, page, pageSize, totalCount, items));
+    }
+
+    private static VehicleDistancePeriodReportResponse BuildPeriodReport(
+        Vehicle vehicle, Dictionary<Guid, string> cityNames, DateOnly fromDate, DateOnly toDate,
+        DateOnly[] dates, IReadOnlyDictionary<DateOnly, VehicleDailyDistance> distances)
+    {
         var days = dates.Select(date => MapReportDay(date, distances.GetValueOrDefault(date))).ToArray();
-        return Result.Success(new VehicleDistancePeriodReportResponse(
+        return new VehicleDistancePeriodReportResponse(
             MapReportVehicle(vehicle, cityNames), fromDate, toDate, dates.Length,
             days.Count(x => x.HasDistance), days.Count(x => x.GpsDistanceKm.HasValue),
             days.Count(x => x.ManualDistanceKm.HasValue),
             days.Count(x => x.AppliedSource == VehicleDailyDistanceSource.Manual),
             days.Count(x => !x.HasDistance), days.Sum(x => x.GpsDistanceKm ?? 0m),
-            days.Sum(x => x.ManualDistanceKm ?? 0m), days.Sum(x => x.AppliedDistanceKm), days));
+            days.Sum(x => x.ManualDistanceKm ?? 0m), days.Sum(x => x.AppliedDistanceKm), days);
     }
 
     public async Task<Result<VehicleMissingDistanceReportResponse>> GetMissingRecordsReportAsync(
@@ -106,7 +141,8 @@ internal sealed partial class VehicleDailyDistanceService
     private static VehicleDistanceReportVehicleResponse MapReportVehicle(Vehicle vehicle, Dictionary<Guid, string> cityNames) =>
         new(vehicle.Id, vehicle.AssetNumber, vehicle.PlateNumberAr, vehicle.PlateNumberEn,
             vehicle.VehicleType, vehicle.CurrentOperationalStatus, vehicle.OperatingCityId,
-            vehicle.OperatingCityId.HasValue ? cityNames.GetValueOrDefault(vehicle.OperatingCityId.Value) : null);
+            vehicle.OperatingCityId.HasValue ? cityNames.GetValueOrDefault(vehicle.OperatingCityId.Value) : null,
+            vehicle.SerialNumber);
 
     private static VehicleDistanceReportDayResponse MapReportDay(DateOnly date, VehicleDailyDistance? distance) =>
         new(distance?.Id, date, distance is not null,

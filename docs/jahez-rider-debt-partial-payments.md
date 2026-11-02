@@ -20,7 +20,9 @@ Permissions: `jahez.transferred-debt.repay` and `jahez.money.receive` in the Jah
 }
 ```
 
-`expectedAmounts` is the latest rider summary's `amounts` object. A stale balance returns 409. The supported collection fund is Cashbox (1); this endpoint does not initiate any external payout or bank/platform transfer.
+`expectedAmounts` is the latest rider summary's `amounts` object. A stale balance returns 409. Collection methods match settlement receipts: Cashbox (1) and PetroApp (2). This applies to individual full repayment, rider full repayment, and rider partial repayment. Keep purpose `TransferredDebtRepayment` (4); selecting PetroApp does not turn a debt receipt into a fuel purchase. Bank (3) remains unavailable for incoming settlement and debt receipts. These endpoints record collection and do not initiate an external transfer.
+
+Frontend: offer الخزنة (`fund: 1`) and بترواب (`fund: 2`) in all debt repayment dialogs, using the same incoming-payment options as settlement. No request or response fields changed. Requires migration `AllowJahezPetroAppDebtReceipts` and deployment of the updated API.
 
 The payment covers **all outstanding dashboard balances first**, across the rider's unpaid debts, then commission. Each phase allocates oldest debts first (`createdAtUtc`, then ID). One receipt is added per affected debt, retaining its original account, rider, and sponsor. The receipts share the submitted reference and record their exact dashboard/commission allocations. Their sum is the submitted payment. Overpayments are rejected, rather than creating unrequested credit.
 

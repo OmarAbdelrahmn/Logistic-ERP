@@ -150,9 +150,10 @@ public sealed class MaintenanceInventoryController(IMaintenanceService service) 
     [RequirePermission(PermissionKeys.Inventory.CostLayersRead)]
     [RequirePermission(PermissionKeys.Maintenance.OilRead)]
     public async Task<IActionResult> GetOilBarrelUsage(Guid id, [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 50, CancellationToken cancellationToken = default)
+        [FromQuery] int pageSize = 50, [FromQuery] int lossPage = 1, [FromQuery] int lossPageSize = 50,
+        CancellationToken cancellationToken = default)
     {
-        var result = await service.GetOilBarrelUsageAsync(id, page, pageSize, cancellationToken);
+        var result = await service.GetOilBarrelUsageAsync(id, page, pageSize, lossPage, lossPageSize, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 

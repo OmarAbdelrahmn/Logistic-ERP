@@ -44,15 +44,17 @@ public sealed partial class JahezWorkflowTests
         Success(await f.Service.RidersWithTransferredDebtsAsync(1, 100, TestContext.Current.CancellationToken)).Items.Single(x => x.RiderProfileId == f.RiderId);
 
     [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public async Task PartialDebtPaymentPaysDashboardFirstAndLegacyFullRepaymentPaysOnlyTheRemainder(bool sql)
+    [InlineData(false, JahezMoneyFund.Cashbox)]
+    [InlineData(false, JahezMoneyFund.PetroApp)]
+    [InlineData(true, JahezMoneyFund.Cashbox)]
+    [InlineData(true, JahezMoneyFund.PetroApp)]
+    public async Task PartialDebtPaymentPaysDashboardFirstAndLegacyFullRepaymentPaysOnlyTheRemainder(bool sql, JahezMoneyFund fund)
     {
         Assert.SkipUnless(!sql || Environment.GetEnvironmentVariable("LOGISTICS_JAHEZ_SQL_TESTS") == "1", "Enable disposable SQL tests.");
         await using var f = await Fixture.Create(sql, createCurrentSchema: sql); var ct = TestContext.Current.CancellationToken;
         await EnableTreasury(f);
         var debt = await TransferWithCommission(f, "partial-user-example");
-        var input = new JahezRiderDebtPartialRepayment(350, new(300, 200, 500), JahezMoneyFund.Cashbox, "first-350", "دفعة جزئية");
+        var input = new JahezRiderDebtPartialRepayment(350, new(300, 200, 500), fund, "first-350", "دفعة جزئية");
         var result = Success(await f.Service.PartiallyRepayRiderTransferredDebtsAsync("partial", f.RiderId, input, ct));
         Assert.Equal(300, result.DashboardDebtPaid); Assert.Equal(50, result.CommissionPaid);
         Assert.Equal(new JahezSettlementAmounts(0, 150, 150), result.RemainingAmounts);
@@ -66,18 +68,43 @@ public sealed partial class JahezWorkflowTests
         var movement = Assert.Single(Success(await f.Service.MovementsV2Async(1, 50, ct: ct)).Items);
         Assert.Equal(300, movement.DashboardDebtPaid); Assert.Equal(50, movement.CommissionPaid);
         Assert.Equal(350, movement.Amount); Assert.Equal(debt.Id, movement.TransferredDebtId);
+        Assert.Equal(fund, movement.Fund);
+        Assert.Equal(JahezMoneyPurpose.TransferredDebtRepayment, movement.Purpose);
         Success(await f.Service.PartiallyRepayRiderTransferredDebtsAsync("partial", f.RiderId, input, ct));
         Assert.Single(await f.Db.JahezMoneyMovements.ToArrayAsync(ct));
         Success(await f.Service.RepayRiderTransferredDebtsAsync("full-remainder", f.RiderId,
-            new(150, JahezMoneyFund.Cashbox, "remaining-150", "إكمال السداد"), ct));
+            new(150, fund, "remaining-150", "إكمال السداد"), ct));
         var receipts = await f.Db.JahezMoneyMovements.OrderBy(x => x.Amount).ToArrayAsync(ct);
         Assert.Equal(2, receipts.Length); Assert.Equal(500, receipts.Sum(x => x.Amount));
+        Assert.All(receipts, x => Assert.Equal(fund, x.Fund));
         Assert.Equal(0, receipts[0].DashboardDebtPaid); Assert.Equal(150, receipts[0].CommissionPaid);
         var paid = await f.Db.JahezTransferredDebts.AsNoTracking().SingleAsync(ct);
         Assert.Equal(500, paid.PaidAmount); Assert.NotNull(paid.PaidAtUtc);
         Assert.Empty(Success(await f.Service.RidersWithTransferredDebtsAsync(1, 50, ct)).Items);
         Assert.Equal(500, (await f.Db.Set<TreasuryPosting>().Where(x => x.MoneyMovementId != null).ToArrayAsync(ct)).Sum(x => x.Amount));
+        var location = fund == JahezMoneyFund.PetroApp ? TreasuryLocation.PetroApp : TreasuryLocation.Supervisor;
+        var postingAccounts = await f.Db.Set<TreasurySubAccount>().Where(x => x.Location == location).Select(x => x.Id).ToArrayAsync(ct);
+        Assert.All(await f.Db.Set<TreasuryPosting>().Where(x => x.MoneyMovementId != null).ToArrayAsync(ct),
+            x => Assert.Contains(x.SubAccountId, postingAccounts));
         Assert.Equal(200, Success(await f.Service.ProfitReportAsync(ct: ct)).SettlementCommissionTotal);
+    }
+
+    [Theory]
+    [InlineData(JahezMoneyFund.Cashbox)]
+    [InlineData(JahezMoneyFund.PetroApp)]
+    public async Task IndividualDebtFullRepaymentUsesSettlementCollectionMethods(JahezMoneyFund fund)
+    {
+        await using var f = await Fixture.Create(); var ct = TestContext.Current.CancellationToken;
+        await EnableTreasury(f);
+        var debt = await TransferWithCommission(f, "individual-method");
+        var request = new JahezMoneyRecord(fund, "full-500", "سداد المديونية");
+        var result = Success(await f.Service.RepayTransferredDebtAsync("full", debt.Id, request, ct));
+        Assert.Equal(500, result.PaidAmount); Assert.NotNull(result.PaidAtUtc);
+        Success(await f.Service.RepayTransferredDebtAsync("full", debt.Id, request, ct));
+        var receipt = Assert.Single(await f.Db.JahezMoneyMovements.AsNoTracking().ToArrayAsync(ct));
+        Assert.Equal(fund, receipt.Fund); Assert.Equal(500, receipt.Amount);
+        Assert.Equal(JahezMoneyPurpose.TransferredDebtRepayment, receipt.Purpose);
+        Assert.Equal(300, receipt.DashboardDebtPaid); Assert.Equal(200, receipt.CommissionPaid);
     }
 
     [Theory]
@@ -193,7 +220,7 @@ public sealed partial class JahezWorkflowTests
         var input = new JahezRiderDebtPartialRepayment(350, new(300, 200, 500), JahezMoneyFund.Cashbox, "350", "دفعة");
         foreach (var invalid in new[] { input with { Amount = 0 }, input with { Amount = 501 }, input with { Amount = 1.001m },
             input with { Amount = decimal.MinValue }, input with { Reason = " " }, input with { Reference = " " },
-            input with { Fund = JahezMoneyFund.Bank }, input with { Fund = JahezMoneyFund.PetroApp }, input with { ExpectedAmounts = new(0, 200, 500) } })
+            input with { Fund = JahezMoneyFund.Bank }, input with { Fund = (JahezMoneyFund)99 }, input with { ExpectedAmounts = new(0, 200, 500) } })
         {
             Assert.True((await f.Service.PartiallyRepayRiderTransferredDebtsAsync(Guid.NewGuid().ToString(), f.RiderId, invalid, ct)).IsFailure);
             Assert.False(f.Db.ChangeTracker.HasChanges());

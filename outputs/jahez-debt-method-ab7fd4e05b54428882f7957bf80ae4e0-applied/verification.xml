@@ -1,0 +1,69 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="Fund" type="xs:int" minOccurs="0" />
+                <xs:element name="Amount" type="xs:decimal" minOccurs="0" />
+                <xs:element name="Reference" type="xs:string" minOccurs="0" />
+                <xs:element name="Purpose" type="xs:int" minOccurs="0" />
+                <xs:element name="CommissionPaid" type="xs:decimal" minOccurs="0" />
+                <xs:element name="DashboardDebtPaid" type="xs:decimal" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="VerifiedRoutes" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table2">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="MovementCount" type="xs:long" minOccurs="0" />
+                <xs:element name="MovementTotal" type="xs:decimal" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table3">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="name" type="xs:string" minOccurs="0" />
+                <xs:element name="is_disabled" type="xs:boolean" minOccurs="0" />
+                <xs:element name="is_not_trusted" type="xs:boolean" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <Id>01a19250-7397-7943-828b-7e919ff916b3</Id>
+    <Fund>2</Fund>
+    <Amount>40.66</Amount>
+    <Reference>JHZ/2026/10/00821</Reference>
+    <Purpose>4</Purpose>
+    <CommissionPaid>40.66</CommissionPaid>
+    <DashboardDebtPaid>0.00</DashboardDebtPaid>
+  </Table>
+  <Table1>
+    <VerifiedRoutes>40</VerifiedRoutes>
+  </Table1>
+  <Table2>
+    <MovementCount>415</MovementCount>
+    <MovementTotal>131022.25</MovementTotal>
+  </Table2>
+  <Table3>
+    <name>CK_JahezMoney_Routing</name>
+    <is_disabled>false</is_disabled>
+    <is_not_trusted>false</is_not_trusted>
+  </Table3>
+</NewDataSet>

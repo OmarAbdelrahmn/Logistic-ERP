@@ -4,6 +4,14 @@ namespace LogisticsERP.Domain.Entities.Chefz;
 
 public enum ChefzAccountType { Freelancer = 1, FullTime = 2 }
 
+public sealed class ChefzAccountTypeChange : HistoryEntity
+{
+    public Guid PlatformRiderAccountId { get; set; }
+    public ChefzAccountType PreviousType { get; set; }
+    public ChefzAccountType AccountType { get; set; }
+    public DateOnly EffectiveFrom { get; set; }
+}
+
 public sealed class ChefzAccountDetails : AuditableEntity
 {
     public Guid PlatformRiderAccountId { get; set; }
@@ -78,6 +86,8 @@ public sealed class ChefzWalletSettlement : HistoryEntity
     public decimal DailyFee { get; set; }
     public decimal CompanyAmount { get; set; }
     public decimal RiderAmount { get; set; }
+    public int? FullTimeDays { get; set; }
+    public decimal? FreelancerCommissionBase { get; set; }
 }
 
 public sealed class ChefzOrderSettlementImport : HistoryEntity

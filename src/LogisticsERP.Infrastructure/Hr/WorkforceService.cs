@@ -266,13 +266,22 @@ internal sealed class WorkforceService(
         return Result.Success();
     }
 
-    public async Task<Result<EmployeeDetailsResponse>> ChangeStatusAsync(Guid employeeId, ChangeEmployeeStatusRequest request, CancellationToken cancellationToken = default)
+    public Task<Result<EmployeeDetailsResponse>> ChangeStatusAsync(Guid employeeId, ChangeEmployeeStatusRequest request, CancellationToken cancellationToken = default)
+        => ChangeStatusCoreAsync(employeeId, request, false, cancellationToken);
+
+    public Task<Result<EmployeeDetailsResponse>> ReactivateEmployeeAsync(Guid employeeId, ReactivateEmployeeRequest request, CancellationToken cancellationToken = default)
+        => request.EffectiveDate == default
+            ? Task.FromResult(Result.Failure<EmployeeDetailsResponse>(HrErrors.InvalidRequest))
+            : ChangeStatusCoreAsync(employeeId, new("Active", request.EffectiveDate, request.Reason), true, cancellationToken);
+
+    private async Task<Result<EmployeeDetailsResponse>> ChangeStatusCoreAsync(Guid employeeId, ChangeEmployeeStatusRequest request, bool requireTerminated, CancellationToken cancellationToken)
     {
         if (!TryParseEnum<EmployeeStatus>(request.Status, out var status) || status == EmployeeStatus.Archived
             || !HrServiceSupport.HasText(request.Reason))
             return Result.Failure<EmployeeDetailsResponse>(HrErrors.InvalidRequest);
         var employee = await dbContext.Employees.SingleOrDefaultAsync(item => item.Id == employeeId, cancellationToken);
         if (employee is null) return Result.Failure<EmployeeDetailsResponse>(HrErrors.NotFound);
+        if (requireTerminated && employee.Status != EmployeeStatus.Terminated) return Result.Failure<EmployeeDetailsResponse>(HrErrors.Conflict);
         if (employee.Status == status) return Result.Failure<EmployeeDetailsResponse>(HrErrors.Conflict);
         if (status == EmployeeStatus.Active && (!IsValidIqama(employee.IqamaNo)
             || employee.EngagementType == EmployeeRelationshipType.SponsoredInternal && employee.SponsorId is null
@@ -288,6 +297,7 @@ internal sealed class WorkforceService(
             ? request.Reason.Trim()
             : null;
         if (status == EmployeeStatus.Terminated) employee.TerminationDate = request.EffectiveDate;
+        else if (status == EmployeeStatus.Active && previousStatus == EmployeeStatus.Terminated) employee.TerminationDate = null;
         await dbContext.SaveChangesAsync(cancellationToken);
         await AddStatusNotificationsAsync(employee, previousStatus, status, actor, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);

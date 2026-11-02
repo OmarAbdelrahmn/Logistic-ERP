@@ -30,6 +30,18 @@ public sealed partial class NinjaWorkflowTests
         Assert.Equal(Enum.Parse<NinjaRiderType>(riderType), (await f.Db.RiderClientAssignments.SingleAsync(ct)).NinjaRiderType);
         Assert.Equal(riderType, Value(await f.Service.GetAccountAsync(f.Account.Id, ct)).RiderType);
         Assert.Equal(riderType, Assert.Single(Value(await f.Service.GetAccountsAsync(1, 50, ct)).Items).RiderType);
+        var account = Value(await f.Service.GetAccountAsync(f.Account.Id, ct));
+        Assert.True(account.IsAssigned);
+        Assert.Equal("مسند", account.AssignmentStatusAr);
+        Assert.Null(account.IsValidForOperation);
+        Assert.Equal("لم يبدأ التقييم", account.OperationalValidityAr);
+        Assert.Equal(riderType.StartsWith("Internal", StringComparison.Ordinal) ? "Company" : "Private", account.VehicleOwnership);
+        Assert.Equal(riderType.StartsWith("Internal", StringComparison.Ordinal) ? "مركبة شركة" : "مركبة خاصة", account.VehicleOwnershipAr);
+        Assert.Equal(riderType.EndsWith("Car", StringComparison.Ordinal) ? "Car" : "Motorcycle", account.VehicleType);
+        Assert.Equal(riderType.EndsWith("Car", StringComparison.Ordinal) ? "سيارة" : "دباب", account.VehicleTypeAr);
+        var json = System.Text.Json.JsonSerializer.SerializeToElement(account, System.Text.Json.JsonSerializerOptions.Web);
+        Assert.Equal("Assigned", json.GetProperty("assignmentStatus").GetString());
+        Assert.Equal("Pending", json.GetProperty("operationalValidity").GetString());
         if (sql)
         {
             var error = await Assert.ThrowsAsync<SqlException>(() => f.Db.Database.ExecuteSqlInterpolatedAsync(
@@ -41,6 +53,13 @@ public sealed partial class NinjaWorkflowTests
             new(day, "0502222222", null, "Return", assigned.Assignment.RowVersion), ct));
         Assert.Equal(riderType, returned.Assignment.RiderType);
         Assert.Null(Value(await f.Service.GetAccountAsync(f.Account.Id, ct)).RiderType);
+        var available = Value(await f.Service.GetAccountAsync(f.Account.Id, ct));
+        Assert.False(available.IsAssigned);
+        Assert.Equal("Unassigned", available.AssignmentStatus);
+        Assert.Equal("غير مسند", available.AssignmentStatusAr);
+        Assert.Null(available.IsValidForOperation);
+        Assert.Null(available.VehicleOwnership);
+        Assert.Null(available.VehicleType);
         f.Clock.Now = f.Clock.Now.AddDays(1);
         var nextType = riderType == "ExternalMotorcycle" ? "InternalCar" : "ExternalMotorcycle";
         Value(await f.Service.AssignAsync(f.Account.Id,
@@ -87,6 +106,12 @@ public sealed partial class NinjaWorkflowTests
         await f.Db.SaveChangesAsync(ct);
         f.Db.ChangeTracker.Clear();
         Assert.Null(Value(await f.Service.GetAccountAsync(f.Account.Id, ct)).RiderType);
+        var legacy = Value(await f.Service.GetAccountAsync(f.Account.Id, ct));
+        Assert.True(legacy.IsAssigned);
+        Assert.Null(legacy.VehicleOwnership);
+        Assert.Null(legacy.VehicleOwnershipAr);
+        Assert.Null(legacy.VehicleType);
+        Assert.Null(legacy.VehicleTypeAr);
         Assert.Null(Assert.Single(Value(await f.Simple.GetAccountAssignmentHistoryAsync(f.Account.Id, ct))).RiderType);
         var returned = Value(await f.Service.ReturnAsync(f.Account.Id,
             new(new(2026, 10, 12), "0502222222", "return", "Return", assigned.Assignment.RowVersion), ct));

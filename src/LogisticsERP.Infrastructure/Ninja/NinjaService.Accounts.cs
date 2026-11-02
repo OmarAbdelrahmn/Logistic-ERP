@@ -93,6 +93,7 @@ internal sealed partial class NinjaService
             .Concat(riders.Values.Select(r => r.EmployeeId)).Distinct().ToArray();
         var people = await People(employeeIds, ct);
         var accountIds = rows.Select(r => r.Account.Id).ToArray();
+        var attendance = await AccountAttendance(accountIds, ct);
         var latestSheets = await db.NinjaAccountUpdateRows.AsNoTracking().Where(r => r.PlatformRiderAccountId != null
                 && accountIds.Contains(r.PlatformRiderAccountId.Value) && r.MatchStatus == "Found")
             .GroupBy(r => r.PlatformRiderAccountId!.Value)
@@ -110,6 +111,7 @@ internal sealed partial class NinjaService
             Owner = r.Account.RegisteredEmployeeId is { } ownerId ? people.GetValueOrDefault(ownerId) : null,
             ActualRider = r.RiderId is { } riderId && riders.TryGetValue(riderId, out var rider) ? people.GetValueOrDefault(rider.EmployeeId) : null,
             RiderType = r.RiderType?.ToString(),
+            Attendance = attendance[r.Account.Id],
             PaymentModel = r.PaymentModel.ToString(),
             StatusReason = r.Account.StatusReason, Code = r.Account.Code, OperatingCityId = r.Account.OperatingCityId, SponsorId = r.Account.SponsorId,
             LatestSheetStatus = latestSheets.GetValueOrDefault(r.Account.Id)?.SheetStatus,

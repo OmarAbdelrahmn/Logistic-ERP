@@ -12,6 +12,17 @@ namespace LogisticsERP.Api.Controllers;
 [Route("api/vehicle-daily-distances")]
 public sealed class VehicleDailyDistancesController(IVehicleDailyDistanceService service) : ControllerBase
 {
+    [HttpGet("reports/vehicles")]
+    [RequirePermission(PermissionKeys.Fleet.DailyDistancesRead)]
+    public async Task<IActionResult> GetVehiclesPeriodReports(
+        [FromQuery] DateOnly fromDate, [FromQuery] DateOnly toDate,
+        [FromQuery] int page = 1, [FromQuery] int pageSize = 20,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await service.GetVehiclesPeriodReportsAsync(fromDate, toDate, page, pageSize, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext, "تعذر عرض تقرير مسافات المركبات");
+    }
+
     [HttpGet("reports/vehicles/{vehicleId:guid}")]
     [RequirePermission(PermissionKeys.Fleet.DailyDistancesRead)]
     public async Task<IActionResult> GetVehiclePeriodReport(

@@ -127,91 +127,8 @@ internal sealed partial class MaintenanceService
             var result = await strategy.ExecuteAsync(async () =>
             {
                 await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
-                var original = await dbContext.MaintenanceMaterialUsages.AsNoTracking().SingleOrDefaultAsync(x => x.Id == usageId && x.Direction == MaintenanceUsageDirection.Issue, cancellationToken);
-                if (original is null) return Result.Failure<Guid>(MaintenanceErrors.NotFound);
-                if (await dbContext.OilChangeOperations.AsNoTracking().AnyAsync(x =>
-                        x.OilMaterialUsageId == usageId || x.OilFilterMaterialUsageId == usageId, cancellationToken))
-                    return Result.Failure<Guid>(MaintenanceErrors.InvalidState);
-                if (await dbContext.MaintenanceMaterialUsages.AsNoTracking().AnyAsync(x => x.ReversalOfUsageId == usageId, cancellationToken))
-                    return Result.Failure<Guid>(MaintenanceErrors.AlreadyReversed);
-                var workOrder = original.MaintenanceWorkOrderId.HasValue
-                    ? await dbContext.MaintenanceWorkOrders.SingleAsync(x => x.Id == original.MaintenanceWorkOrderId.Value, cancellationToken)
-                    : null;
-                var allocations = await dbContext.StockCostAllocations.AsNoTracking().Where(x => x.MaintenanceMaterialUsageId == usageId).ToArrayAsync(cancellationToken);
-                if (allocations.Length == 0) return Result.Failure<Guid>(MaintenanceErrors.InvalidState);
-                var layerIds = allocations.Select(x => x.StockCostLayerId).ToArray();
-                var layers = await dbContext.StockCostLayers.Where(x => layerIds.Contains(x.Id)).ToDictionaryAsync(x => x.Id, cancellationToken);
-                var movementId = Guid.CreateVersion7();
-                var movementLineId = Guid.CreateVersion7();
-                var movement = NewMovement(movementId, StockMovementType.Reversal, request.ReversedAtUtc, null, original.InventoryLocationId, nameof(MaintenanceMaterialUsage), reversalId, request.Reason, actor.Value);
-                movement.ReversalOfMovementId = original.StockMovementId;
-                dbContext.StockMovements.Add(movement);
-                dbContext.StockMovementLines.Add(new StockMovementLine { Id = movementLineId, StockMovementId = movementId, InventoryItemId = original.InventoryItemId, Quantity = original.Quantity, BaseUnitOfMeasure = original.UnitOfMeasure, UnitCost = original.TotalCost / original.Quantity, TotalCost = original.TotalCost });
-                dbContext.MaintenanceMaterialUsages.Add(new MaintenanceMaterialUsage
-                {
-                    Id = reversalId,
-                    MaintenanceWorkOrderId = original.MaintenanceWorkOrderId,
-                    InventoryItemId = original.InventoryItemId,
-                    InventoryLocationId = original.InventoryLocationId,
-                    UsageType = original.UsageType,
-                    Direction = MaintenanceUsageDirection.Reversal,
-                    Quantity = original.Quantity,
-                    UnitOfMeasure = original.UnitOfMeasure,
-                    TotalCost = original.TotalCost,
-                    StockMovementId = movementId,
-                    StockMovementLineId = movementLineId,
-                    VehicleId = original.VehicleId,
-                    RiderVehicleAssignmentId = original.RiderVehicleAssignmentId,
-                    RiderProfileId = original.RiderProfileId,
-                    AttributionStatus = original.AttributionStatus,
-                    UsedAtUtc = request.ReversedAtUtc,
-                    UsedByUserId = actor.Value,
-                    Notes = request.Reason.Trim(),
-                    ReversalOfUsageId = usageId
-                });
-                if (original.UsageType == MaintenanceUsageType.Oil)
-                {
-                    var barrelRestore = await RestoreOilBarrelsAsync(usageId, reversalId, cancellationToken);
-                    if (barrelRestore.IsFailure) return Result.Failure<Guid>(barrelRestore.Error);
-                }
-                foreach (var allocation in allocations)
-                {
-                    var layer = layers[allocation.StockCostLayerId];
-                    layer.RemainingQuantity += allocation.AllocatedQuantity;
-                    dbContext.StockCostAllocations.Add(new StockCostAllocation { StockMovementLineId = movementLineId, MaintenanceMaterialUsageId = reversalId, StockCostLayerId = layer.Id, AllocatedQuantity = allocation.AllocatedQuantity, UnitCost = allocation.UnitCost, AllocatedCost = allocation.AllocatedCost });
-                }
-                var balance = await GetOrCreateBalanceAsync(original.InventoryItemId, original.InventoryLocationId, cancellationToken);
-                AddToBalance(balance, original.Quantity, original.TotalCost, request.ReversedAtUtc);
-                if (workOrder is not null)
-                {
-                    workOrder.ActualMaterialCost -= original.TotalCost;
-                    workOrder.ActualTotalCost = workOrder.ServiceSubjectType == MaintenanceServiceSubjectType.CompanyVehicle
-                        ? workOrder.ActualMaterialCost
-                        : workOrder.ActualMaterialCost + workOrder.ActualLaborCost + workOrder.ActualOtherCost;
-                }
-                if (workOrder?.ServiceSubjectType == MaintenanceServiceSubjectType.ExternalVehicle)
-                {
-                    var originalEntryId = await dbContext.ExternalMaintenanceFinancialEntries.AsNoTracking()
-                        .Where(x => x.MaintenanceWorkOrderId == workOrder.Id
-                            && x.SourceType == ExternalFinancialSourceType.InventoryCost
-                            && x.SourceEntityId == usageId
-                            && !x.ReversalOfEntryId.HasValue)
-                        .Select(x => (Guid?)x.Id)
-                        .SingleOrDefaultAsync(cancellationToken);
-                    if (!originalEntryId.HasValue) return Result.Failure<Guid>(MaintenanceErrors.InvalidState);
-                    AddExternalFinancialEntry(workOrder.Id, ExternalFinancialEntryType.Expense, ExternalFinancialSourceType.InventoryCost, reversalId, request.ReversedAtUtc, -original.TotalCost, 0, $"Reversal: {request.Reason.Trim()}", actor.Value, reversalOfEntryId: originalEntryId);
-                }
-                else if (original.VehicleId.HasValue)
-                {
-                    var originalExpenseId = await dbContext.VehicleExpenses.AsNoTracking()
-                        .Where(x => x.SourceEntityType == nameof(MaintenanceMaterialUsage)
-                            && x.SourceEntityId == usageId
-                            && !x.ReversalOfExpenseId.HasValue)
-                        .Select(x => (Guid?)x.Id)
-                        .SingleOrDefaultAsync(cancellationToken);
-                    if (!originalExpenseId.HasValue) return Result.Failure<Guid>(MaintenanceErrors.InvalidState);
-                    AddVehicleExpense(original, reversalId, request.ReversedAtUtc, -original.TotalCost, $"Reversal: {request.Reason.Trim()}", originalExpenseId);
-                }
+                var staged = await StageMaterialReversalAsync(usageId, reversalId, request, actor.Value, false, cancellationToken);
+                if (staged.IsFailure) return staged;
                 await dbContext.SaveChangesAsync(cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
                 return Result.Success(reversalId);
@@ -220,6 +137,100 @@ internal sealed partial class MaintenanceService
         }
         catch (DbUpdateConcurrencyException) { return Result.Failure<MaintenanceMaterialUsageResponse>(MaintenanceErrors.ConcurrencyConflict); }
         return await MapUsageAsync(reversalId, cancellationToken);
+    }
+
+    // The caller owns the transaction and SaveChanges, allowing coordinated workflows
+    // to reuse the reversal bookkeeping without committing materials separately.
+    private async Task<Result<Guid>> StageMaterialReversalAsync(Guid usageId, Guid reversalId,
+        ReverseMaterialUsageRequest request, Guid actor, bool allowOilChange, CancellationToken cancellationToken, bool postFinancials = true,
+        bool closedBarrelWaste = false)
+    {
+        var original = await dbContext.MaintenanceMaterialUsages.AsNoTracking().SingleOrDefaultAsync(x => x.Id == usageId && x.Direction == MaintenanceUsageDirection.Issue, cancellationToken);
+        if (original is null) return Result.Failure<Guid>(MaintenanceErrors.NotFound);
+        if (!allowOilChange && await dbContext.OilChangeOperations.AsNoTracking().AnyAsync(x =>
+                x.OilMaterialUsageId == usageId || x.OilFilterMaterialUsageId == usageId, cancellationToken))
+            return Result.Failure<Guid>(MaintenanceErrors.InvalidState);
+        if (await dbContext.MaintenanceMaterialUsages.AsNoTracking().AnyAsync(x => x.ReversalOfUsageId == usageId, cancellationToken))
+            return Result.Failure<Guid>(MaintenanceErrors.AlreadyReversed);
+        var workOrder = original.MaintenanceWorkOrderId.HasValue
+            ? await dbContext.MaintenanceWorkOrders.SingleAsync(x => x.Id == original.MaintenanceWorkOrderId.Value, cancellationToken)
+            : null;
+        var allocations = await dbContext.StockCostAllocations.AsNoTracking().Where(x => x.MaintenanceMaterialUsageId == usageId).ToArrayAsync(cancellationToken);
+        if (allocations.Length == 0) return Result.Failure<Guid>(MaintenanceErrors.InvalidState);
+        var layerIds = allocations.Select(x => x.StockCostLayerId).ToArray();
+        var layers = await dbContext.StockCostLayers.Where(x => layerIds.Contains(x.Id)).ToDictionaryAsync(x => x.Id, cancellationToken);
+        var movementId = Guid.CreateVersion7();
+        var movementLineId = Guid.CreateVersion7();
+        var movement = NewMovement(movementId, StockMovementType.Reversal, request.ReversedAtUtc, null, original.InventoryLocationId, nameof(MaintenanceMaterialUsage), reversalId, request.Reason, actor);
+        movement.ReversalOfMovementId = original.StockMovementId;
+        dbContext.StockMovements.Add(movement);
+        dbContext.StockMovementLines.Add(new StockMovementLine { Id = movementLineId, StockMovementId = movementId, InventoryItemId = original.InventoryItemId, Quantity = original.Quantity, BaseUnitOfMeasure = original.UnitOfMeasure, UnitCost = original.TotalCost / original.Quantity, TotalCost = original.TotalCost });
+        dbContext.MaintenanceMaterialUsages.Add(new MaintenanceMaterialUsage
+        {
+            Id = reversalId,
+            MaintenanceWorkOrderId = original.MaintenanceWorkOrderId,
+            InventoryItemId = original.InventoryItemId,
+            InventoryLocationId = original.InventoryLocationId,
+            UsageType = original.UsageType,
+            Direction = MaintenanceUsageDirection.Reversal,
+            Quantity = original.Quantity,
+            UnitOfMeasure = original.UnitOfMeasure,
+            TotalCost = original.TotalCost,
+            StockMovementId = movementId,
+            StockMovementLineId = movementLineId,
+            VehicleId = original.VehicleId,
+            RiderVehicleAssignmentId = original.RiderVehicleAssignmentId,
+            RiderProfileId = original.RiderProfileId,
+            AttributionStatus = original.AttributionStatus,
+            UsedAtUtc = request.ReversedAtUtc,
+            UsedByUserId = actor,
+            Notes = request.Reason.Trim(),
+            ReversalOfUsageId = usageId
+        });
+        if (original.UsageType == MaintenanceUsageType.Oil)
+        {
+            var barrelRestore = await RestoreOilBarrelsAsync(usageId, reversalId, cancellationToken, closedBarrelWaste);
+            if (barrelRestore.IsFailure) return Result.Failure<Guid>(barrelRestore.Error);
+        }
+        foreach (var allocation in allocations)
+        {
+            var layer = layers[allocation.StockCostLayerId];
+            layer.RemainingQuantity += allocation.AllocatedQuantity;
+            dbContext.StockCostAllocations.Add(new StockCostAllocation { StockMovementLineId = movementLineId, MaintenanceMaterialUsageId = reversalId, StockCostLayerId = layer.Id, AllocatedQuantity = allocation.AllocatedQuantity, UnitCost = allocation.UnitCost, AllocatedCost = allocation.AllocatedCost });
+        }
+        var balance = await GetOrCreateBalanceAsync(original.InventoryItemId, original.InventoryLocationId, cancellationToken);
+        AddToBalance(balance, original.Quantity, original.TotalCost, request.ReversedAtUtc);
+        if (workOrder is not null)
+        {
+            workOrder.ActualMaterialCost -= original.TotalCost;
+            workOrder.ActualTotalCost = workOrder.ServiceSubjectType == MaintenanceServiceSubjectType.CompanyVehicle
+                ? workOrder.ActualMaterialCost
+                : workOrder.ActualMaterialCost + workOrder.ActualLaborCost + workOrder.ActualOtherCost;
+        }
+        if (postFinancials && workOrder?.ServiceSubjectType == MaintenanceServiceSubjectType.ExternalVehicle)
+        {
+            var originalEntryId = await dbContext.ExternalMaintenanceFinancialEntries.AsNoTracking()
+                .Where(x => x.MaintenanceWorkOrderId == workOrder.Id
+                    && x.SourceType == ExternalFinancialSourceType.InventoryCost
+                    && x.SourceEntityId == usageId
+                    && !x.ReversalOfEntryId.HasValue)
+                .Select(x => (Guid?)x.Id)
+                .SingleOrDefaultAsync(cancellationToken);
+            if (!originalEntryId.HasValue) return Result.Failure<Guid>(MaintenanceErrors.InvalidState);
+            AddExternalFinancialEntry(workOrder.Id, ExternalFinancialEntryType.Expense, ExternalFinancialSourceType.InventoryCost, reversalId, request.ReversedAtUtc, -original.TotalCost, 0, $"Reversal: {request.Reason.Trim()}", actor, reversalOfEntryId: originalEntryId);
+        }
+        else if (postFinancials && original.VehicleId.HasValue)
+        {
+            var originalExpenseId = await dbContext.VehicleExpenses.AsNoTracking()
+                .Where(x => x.SourceEntityType == nameof(MaintenanceMaterialUsage)
+                    && x.SourceEntityId == usageId
+                    && !x.ReversalOfExpenseId.HasValue)
+                .Select(x => (Guid?)x.Id)
+                .SingleOrDefaultAsync(cancellationToken);
+            if (!originalExpenseId.HasValue) return Result.Failure<Guid>(MaintenanceErrors.InvalidState);
+            AddVehicleExpense(original, reversalId, request.ReversedAtUtc, -original.TotalCost, $"Reversal: {request.Reason.Trim()}", originalExpenseId);
+        }
+        return Result.Success(reversalId);
     }
 
     public Task<Result<IReadOnlyList<MaintenanceMaterialUsageResponse>>> GetVehicleMaterialHistoryAsync(Guid vehicleId, CancellationToken cancellationToken = default) =>
@@ -345,7 +356,7 @@ internal sealed partial class MaintenanceService
                     await UpdateOilScheduleAsync(workOrder.VehicleId.Value, workOrder.Id, operation, vehicleType, cancellationToken);
                 await dbContext.SaveChangesAsync(cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
-                response = new OilChangeResponse(operation.Id, operation.MaintenanceWorkOrderId, operation.PerformedAtUtc, operation.OdometerAtChange, operation.VehicleTypeSnapshot, operation.OilQuantityLiters, operation.OilCost, operation.OilFilterChanged, operation.OilFilterCost, operation.LaborCost, operation.OtherCost, operation.TotalCost, workOrder.VehicleId, oilPosting.Value!.Usage.RiderProfileId);
+                response = new OilChangeResponse(operation.Id, operation.MaintenanceWorkOrderId, operation.PerformedAtUtc, operation.OdometerAtChange, operation.VehicleTypeSnapshot, operation.OilQuantityLiters, operation.OilCost, operation.OilFilterChanged, operation.OilFilterCost, operation.LaborCost, operation.OtherCost, operation.TotalCost, workOrder.VehicleId, oilPosting.Value!.Usage.RiderProfileId, EncodeRowVersion(operation.RowVersion));
                 return Result.Success();
             });
             if (result.IsFailure) return Result.Failure<OilChangeResponse>(result.Error);
@@ -360,7 +371,7 @@ internal sealed partial class MaintenanceService
         var vehicles = await dbContext.Vehicles.AsNoTracking().Where(x => x.VehicleType == VehicleType.Car || x.VehicleType == VehicleType.Motorcycle).OrderBy(x => x.AssetNumber).ToArrayAsync(cancellationToken);
         var vehicleIds = vehicles.Select(x => x.Id).ToArray();
         var operations = await dbContext.OilChangeOperations.AsNoTracking()
-            .Where(x => x.VehicleId.HasValue && vehicleIds.Contains(x.VehicleId.Value))
+            .Where(x => !x.IsCancelled && x.VehicleId.HasValue && vehicleIds.Contains(x.VehicleId.Value))
             .Select(x => new { VehicleId = x.VehicleId!.Value, Operation = x })
             .ToArrayAsync(cancellationToken);
         var latest = operations.GroupBy(x => x.VehicleId).ToDictionary(group => group.Key, group => group.OrderByDescending(x => x.Operation.PerformedAtUtc).ThenByDescending(x => x.Operation.OdometerAtChange).First().Operation);
@@ -451,7 +462,12 @@ internal sealed partial class MaintenanceService
         var riyadhOffset = TimeSpan.FromHours(3);
         var fromUtc = new DateTimeOffset(startDate.ToDateTime(TimeOnly.MinValue), riyadhOffset).ToUniversalTime();
         var toUtc = new DateTimeOffset(endDate.AddDays(1).ToDateTime(TimeOnly.MinValue), riyadhOffset).ToUniversalTime();
-        var workOrders = await dbContext.MaintenanceWorkOrders.AsNoTracking().Where(x => x.MaintenanceLocationId == maintenanceLocationId && x.ServiceSubjectType == MaintenanceServiceSubjectType.ExternalVehicle && x.OpenedAtUtc >= fromUtc && x.OpenedAtUtc < toUtc).OrderBy(x => x.OpenedAtUtc).ToArrayAsync(cancellationToken);
+        var workOrders = await dbContext.MaintenanceWorkOrders.AsNoTracking().Where(x =>
+            x.MaintenanceLocationId == maintenanceLocationId && x.ServiceSubjectType == MaintenanceServiceSubjectType.ExternalVehicle
+            && (x.MaintenanceType == MaintenanceType.OilChange
+                ? dbContext.OilChangeOperations.Any(o => o.MaintenanceWorkOrderId == x.Id && o.PerformedAtUtc >= fromUtc && o.PerformedAtUtc < toUtc)
+                : x.OpenedAtUtc >= fromUtc && x.OpenedAtUtc < toUtc))
+            .OrderBy(x => x.OpenedAtUtc).ToArrayAsync(cancellationToken);
         var ids = workOrders.Select(x => x.Id).ToArray();
         var entries = await dbContext.ExternalMaintenanceFinancialEntries.AsNoTracking().Where(x => ids.Contains(x.MaintenanceWorkOrderId)).ToArrayAsync(cancellationToken);
         var payments = await dbContext.ExternalCustomerPayments.AsNoTracking().Where(x => ids.Contains(x.MaintenanceWorkOrderId)).ToArrayAsync(cancellationToken);
@@ -652,7 +668,7 @@ internal sealed partial class MaintenanceService
     {
         var query = dbContext.MaintenanceMaterialUsages.AsNoTracking();
         query = vehicleId.HasValue ? query.Where(x => x.VehicleId == vehicleId.Value) : query.Where(x => x.RiderProfileId == riderProfileId!.Value);
-        var ids = await query.OrderByDescending(x => x.UsedAtUtc).Select(x => x.Id).ToArrayAsync(cancellationToken);
+        var ids = await query.OrderByDescending(x => x.EffectiveServiceAtUtc ?? x.UsedAtUtc).Select(x => x.Id).ToArrayAsync(cancellationToken);
         var result = new List<MaintenanceMaterialUsageResponse>(ids.Length);
         foreach (var id in ids)
         {
@@ -671,7 +687,7 @@ internal sealed partial class MaintenanceService
         if (row is null) return Result.Failure<MaintenanceMaterialUsageResponse>(MaintenanceErrors.NotFound);
         var allocations = await dbContext.StockCostAllocations.AsNoTracking().Where(x => x.MaintenanceMaterialUsageId == id).OrderBy(x => x.CreatedAtUtc).Select(x => new StockCostAllocationResponse(x.StockCostLayerId, x.AllocatedQuantity, x.UnitCost, x.AllocatedCost)).ToArrayAsync(cancellationToken);
         var usage = row.Usage;
-        return Result.Success(new MaintenanceMaterialUsageResponse(usage.Id, usage.MaintenanceWorkOrderId, usage.InventoryItemId, row.Sku, row.NameAr, usage.InventoryLocationId, usage.UsageType, usage.Direction, usage.Quantity, usage.UnitOfMeasure, usage.TotalCost, usage.VehicleId, usage.RiderVehicleAssignmentId, usage.RiderProfileId, usage.AttributionStatus, usage.UsedAtUtc, usage.ReversalOfUsageId, allocations));
+        return Result.Success(new MaintenanceMaterialUsageResponse(usage.Id, usage.MaintenanceWorkOrderId, usage.InventoryItemId, row.Sku, row.NameAr, usage.InventoryLocationId, usage.UsageType, usage.Direction, usage.Quantity, usage.UnitOfMeasure, usage.TotalCost, usage.VehicleId, usage.RiderVehicleAssignmentId, usage.RiderProfileId, usage.AttributionStatus, usage.UsedAtUtc, usage.ReversalOfUsageId, allocations, usage.EffectiveServiceAtUtc));
     }
 
     private static ExternalFinancialEntryResponse MapFinancialEntry(ExternalMaintenanceFinancialEntry entry) => new(entry.Id, entry.MaintenanceWorkOrderId, entry.EntryType, entry.SourceType, entry.AmountBeforeTax, entry.TaxAmount, entry.TotalAmount, entry.OccurredAtUtc, entry.Description, entry.MechanicEmployeeId, entry.ExternalMechanicName);

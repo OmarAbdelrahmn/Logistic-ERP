@@ -6,6 +6,11 @@ namespace LogisticsERP.Application.Features.Maintenance;
 
 public interface IMaintenanceService
 {
+    Task<Result<OilChangeWorkflowDetails>> GetOilChangeDetailsAsync(Guid id, CancellationToken ct = default);
+    Task<Result<OilChangeRevisionPage>> GetOilChangeRevisionsAsync(Guid id, int page, int pageSize, CancellationToken ct = default);
+    Task<Result<OilChangeWorkflowResponse>> EditOilChangeAsync(Guid id, OilChangeEditRequest request, string key, bool preview, CancellationToken ct = default);
+    Task<Result<OilChangeWorkflowResponse>> CancelOilChangeAsync(Guid id, OilChangeCancelRequest request, string key, bool preview, CancellationToken ct = default);
+
     Task<Result<IReadOnlyList<MaintenanceLocationResponse>>> GetLocationsAsync(CancellationToken cancellationToken = default);
     Task<Result<MaintenanceLocationResponse>> UpsertLocationAsync(Guid? id, MaintenanceLocationRequest request, CancellationToken cancellationToken = default);
     Task<Result<IReadOnlyList<InventoryItemResponse>>> GetItemsAsync(string? search, VehicleType? vehicleType, CancellationToken cancellationToken = default);
@@ -21,7 +26,7 @@ public interface IMaintenanceService
     Task<Result<IReadOnlyList<OilBarrelResponse>>> GetOilBarrelsAsync(Guid? inventoryLocationId, Guid? inventoryItemId, string? status, VehicleType? vehicleType = null, CancellationToken cancellationToken = default);
     Task<Result<OpenOilBarrelResponse>> OpenOilBarrelAsync(Guid id, OpenOilBarrelRequest request, CancellationToken cancellationToken = default);
     Task<Result<OilBarrelResponse>> SetOilBarrelVehicleTypeAsync(Guid id, SetOilBarrelVehicleTypeRequest request, CancellationToken cancellationToken = default);
-    Task<Result<OilBarrelUsageResponse>> GetOilBarrelUsageAsync(Guid id, int page, int pageSize, CancellationToken cancellationToken = default);
+    Task<Result<OilBarrelUsageResponse>> GetOilBarrelUsageAsync(Guid id, int page, int pageSize, int lossPage = 1, int lossPageSize = 50, CancellationToken cancellationToken = default);
     Task<Result<OilBarrelLossResponse>> RecordOilBarrelLossAsync(Guid id, RecordOilBarrelLossRequest request, CancellationToken cancellationToken = default);
     Task<Result<OilBarrelMissingResponse>> RecordOilBarrelMissingAsync(Guid id, RecordOilBarrelMissingRequest request, CancellationToken cancellationToken = default);
     Task<Result<OilBarrelMissingHistoryResponse>> GetOilBarrelMissingHistoryAsync(Guid id, int page, int pageSize, CancellationToken cancellationToken = default);

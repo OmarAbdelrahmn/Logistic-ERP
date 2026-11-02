@@ -12,6 +12,25 @@ namespace LogisticsERP.Fleet.UnitTests;
 public sealed partial class NinjaWorkflowTests
 {
     [Fact]
+    public async Task AccountAttendanceQueriesCompileAccountScopedStartsContextAndDailyTotalsForSqlServer()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var recorder = new NinjaSqlRecorder(Guid.NewGuid());
+        await using var db = new ApplicationDbContext(new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseSqlServer("Server=invalid;Database=diagnostic;Trusted_Connection=True")
+            .AddInterceptors(new NinjaNoConnection(), recorder).Options);
+        var clock = new Clock(); var user = new CurrentUser(); var protector = new PlatformCredentialProtector(() => new byte[32]);
+        var service = new NinjaService(db, user, new Checker(), clock, protector, new SimplePlatformService(db, user, clock, protector));
+        var result = await service.AccountAttendance([Guid.NewGuid()], ct);
+        Assert.Equal("Pending", Assert.Single(result).Value.Status);
+        Assert.Equal(5, recorder.Commands.Count);
+        Assert.All(recorder.Commands, sql => Assert.Contains("PlatformRiderAccountId", sql));
+        Assert.Equal(2, recorder.Commands.Count(sql => sql.Contains("MIN(", StringComparison.Ordinal)));
+        Assert.Contains(recorder.Commands, sql => sql.Contains("SUM(", StringComparison.Ordinal));
+        Assert.Contains(recorder.Commands, sql => sql.Contains("ROW_NUMBER()", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public async Task ReportQueriesCompileUnionAggregatesDistinctCoverageAndPagingForSqlServer()
     {
         var ct = TestContext.Current.CancellationToken;

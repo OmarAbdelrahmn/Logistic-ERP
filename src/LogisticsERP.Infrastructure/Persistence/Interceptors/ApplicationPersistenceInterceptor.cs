@@ -4,6 +4,8 @@ using LogisticsERP.Domain.Common;
 using LogisticsERP.Domain.Entities.Chefz;
 using LogisticsERP.Domain.Entities.Jahez;
 using LogisticsERP.Domain.Entities.System;
+using LogisticsERP.Domain.Entities.Maintenance;
+using LogisticsERP.Domain.Entities.Fleet;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -203,6 +205,7 @@ internal sealed class ApplicationPersistenceInterceptor(
 
             if (entry.State == EntityState.Modified)
             {
+                if (IsOilChangeRevisionWrite(entry)) return;
                 // A reupload retires an imported row once, preserving its original values and audit identity.
                 if (history is JahezTransaction
                     && entry.Property(nameof(JahezTransaction.SupersededByBatchId)).OriginalValue is null
@@ -228,6 +231,34 @@ internal sealed class ApplicationPersistenceInterceptor(
         {
             throw new InvalidOperationException($"Hard deletion is prohibited for {entry.Metadata.ClrType.Name}.");
         }
+    }
+
+    private static bool IsOilChangeRevisionWrite(EntityEntry<Entity> entry)
+    {
+        if (entry.Context is not ApplicationDbContext db || db.ActiveOilChangeRevisionId is not Guid id) return false;
+        var revision = db.ChangeTracker.Entries<OilChangeRevision>().Select(x => x.Entity).SingleOrDefault(x => x.Id == id);
+        if (revision is null) return false;
+        var changed = entry.Properties.Where(x => x.IsModified).Select(x => x.Metadata.Name).ToArray();
+        if (entry.Entity is OilChangeRevision r)
+            return r.Id == id && changed.All(x => x is nameof(OilChangeRevision.AfterJson) or nameof(OilChangeRevision.EffectsJson) or nameof(OilChangeRevision.ResultJson));
+        if (entry.Entity is OilChangeOperation operation)
+            return operation.Id == revision.OilChangeOperationId && changed.All(x => x is not
+                (nameof(OilChangeOperation.VehicleId) or nameof(OilChangeOperation.MaintenanceWorkOrderId)
+                 or nameof(OilChangeOperation.CreatedAtUtc) or nameof(OilChangeOperation.CreatedByUserId)
+                 or nameof(OilChangeOperation.IdempotencyKey) or nameof(OilChangeOperation.RequestHash)));
+        if (entry.Entity is VehicleOdometerReading reading)
+            return reading.SourceEntityId == revision.OilChangeOperationId && reading.VoidedByRevisionId == id
+                && changed.All(x => x is nameof(VehicleOdometerReading.IsVoided) or nameof(VehicleOdometerReading.VoidedByRevisionId));
+        if (entry.Entity is MaintenanceMaterialUsage usage)
+        {
+            var op = db.ChangeTracker.Entries<OilChangeOperation>().Select(x => x.Entity).SingleOrDefault(x => x.Id == revision.OilChangeOperationId);
+            return (usage.Id == revision.OldOilUsageId || usage.Id == revision.OldFilterUsageId
+                    || usage.Id == op?.OilMaterialUsageId || usage.Id == op?.OilFilterMaterialUsageId)
+                && changed.All(x => x is nameof(MaintenanceMaterialUsage.EffectiveServiceAtUtc)
+                    or nameof(MaintenanceMaterialUsage.RiderVehicleAssignmentId) or nameof(MaintenanceMaterialUsage.RiderProfileId)
+                    or nameof(MaintenanceMaterialUsage.AttributionStatus));
+        }
+        return false;
     }
 
     // Executed payouts permit cash/bank metadata corrections only. Amounts, ownership,

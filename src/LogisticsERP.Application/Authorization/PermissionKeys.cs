@@ -24,6 +24,7 @@ public static class PermissionKeys
         public const string AccountsUpdate = "chefz.accounts.update";
         public const string PerformanceImport = "chefz.performance.import";
         public const string SettlementsCreate = "chefz.settlements.create";
+        public const string SettlementsDelete = "chefz.settlements.delete";
     }
     public static class Security
     {
@@ -251,6 +252,9 @@ public static class PermissionKeys
         public const string WorkOrdersDelete = "maintenance.work_orders.delete";
         public const string OilRead = "maintenance.oil.read";
         public const string OilComplete = "maintenance.oil.complete";
+        public const string OilEdit = "maintenance.oil.edit";
+        public const string OilDateEdit = "maintenance.oil.date_edit";
+        public const string OilCancel = "maintenance.oil.cancel";
         public const string ExternalJobsRead = "maintenance.external_jobs.read";
         public const string ExternalJobsCreate = "maintenance.external_jobs.create";
         public const string ExternalJobsUpdate = "maintenance.external_jobs.update";
@@ -330,7 +334,7 @@ public static class PermissionKeys
         Ninja.EvaluationManage, Ninja.EvaluationExport,
         Ninja.Read, Ninja.AccountsUpdate, Ninja.AssignmentsCreate, Ninja.AssignmentsDelete, Ninja.AssignmentDatesUpdate,
         Ninja.CredentialsRotate, Ninja.PerformanceImport, Ninja.DeductionsImport,
-        Chefz.Read, Chefz.AccountsUpdate, Chefz.PerformanceImport, Chefz.SettlementsCreate,
+        Chefz.Read, Chefz.AccountsUpdate, Chefz.PerformanceImport, Chefz.SettlementsCreate, Chefz.SettlementsDelete,
         Security.UsersRead,
         Security.UsersCreate,
         Security.UsersUpdate,
@@ -515,6 +519,9 @@ public static class PermissionKeys
         Maintenance.WorkOrdersDelete,
         Maintenance.OilRead,
         Maintenance.OilComplete,
+        Maintenance.OilEdit,
+        Maintenance.OilDateEdit,
+        Maintenance.OilCancel,
         Maintenance.ExternalJobsRead,
         Maintenance.ExternalJobsCreate,
         Maintenance.ExternalJobsUpdate,

@@ -1,0 +1,82 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="MigrationId" type="xs:string" minOccurs="0" />
+                <xs:element name="ProductVersion" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="SettlementCount" type="xs:long" minOccurs="0" />
+                <xs:element name="CompanyTotal" type="xs:decimal" minOccurs="0" />
+                <xs:element name="RiderTotal" type="xs:decimal" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table2">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="AccountDetailsCount" type="xs:long" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table3">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="name" type="xs:string" minOccurs="0" />
+                <xs:element name="SqlType" type="xs:string" minOccurs="0" />
+                <xs:element name="precision" type="xs:unsignedByte" minOccurs="0" />
+                <xs:element name="scale" type="xs:unsignedByte" minOccurs="0" />
+                <xs:element name="is_nullable" type="xs:boolean" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table4">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="VerifiedAtUtc" type="xs:dateTime" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <MigrationId>20261101140621_AddChefzAccountTypeHistory</MigrationId>
+    <ProductVersion>10.0.11</ProductVersion>
+  </Table>
+  <Table1>
+    <SettlementCount>494</SettlementCount>
+    <CompanyTotal>63270.83</CompanyTotal>
+    <RiderTotal>310705.81</RiderTotal>
+  </Table1>
+  <Table2>
+    <AccountDetailsCount>464</AccountDetailsCount>
+  </Table2>
+  <Table3>
+    <name>FreelancerCommissionBase</name>
+    <SqlType>decimal</SqlType>
+    <precision>18</precision>
+    <scale>2</scale>
+    <is_nullable>true</is_nullable>
+  </Table3>
+  <Table3>
+    <name>FullTimeDays</name>
+    <SqlType>int</SqlType>
+    <precision>10</precision>
+    <scale>0</scale>
+    <is_nullable>true</is_nullable>
+  </Table3>
+  <Table4>
+    <VerifiedAtUtc>2026-11-01T14:17:12.1211779+03:00</VerifiedAtUtc>
+  </Table4>
+</NewDataSet>

@@ -76,6 +76,14 @@ public sealed class EmployeesController(IWorkforceService service) : ControllerB
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
     }
 
+    [HttpPost("{employeeId:guid}/reactivate")]
+    [RequirePermission(PermissionKeys.Workforce.EmployeesUpdate)]
+    public async Task<IActionResult> Reactivate(Guid employeeId, [FromBody] ReactivateEmployeeRequest request, CancellationToken cancellationToken)
+    {
+        var result = await service.ReactivateEmployeeAsync(employeeId, request, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
     [HttpPost("{employeeId:guid}/role-transitions")]
     [RequirePermission(PermissionKeys.Workforce.EmployeesUpdate)]
     public async Task<IActionResult> ChangeRole(Guid employeeId, [FromBody] ChangeEmployeeRoleRequest request, CancellationToken cancellationToken)

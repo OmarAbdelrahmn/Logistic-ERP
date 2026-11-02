@@ -140,7 +140,7 @@ internal sealed partial class MaintenanceService
                 await transaction.CommitAsync(cancellationToken);
                 response = new OilChangeResponse(operation.Id, null, operation.PerformedAtUtc, operation.OdometerAtChange,
                     operation.VehicleTypeSnapshot, operation.OilQuantityLiters, operation.OilCost, operation.OilFilterChanged,
-                    operation.OilFilterCost, 0, operation.OtherCost, operation.TotalCost, vehicle.Id, oil.Value.Usage.RiderProfileId);
+                    operation.OilFilterCost, 0, operation.OtherCost, operation.TotalCost, vehicle.Id, oil.Value.Usage.RiderProfileId, EncodeRowVersion(operation.RowVersion), operation.IsCancelled, operation.RevisionNumber);
                 return Result.Success();
             });
             if (result.IsFailure) return Result.Failure<OilChangeResponse>(result.Error);
@@ -174,7 +174,7 @@ internal sealed partial class MaintenanceService
             x.PerformedAtUtc, x.OdometerAtChange, x.VehicleTypeSnapshot, x.OilInventoryItemId,
             x.OilQuantityLiters, x.OilCost, x.OilFilterChanged, x.OilFilterInventoryItemId, x.OilFilterCost,
             x.LaborCost, x.OtherCost, x.TotalCost, x.OilMaterialUsageId, x.OilFilterMaterialUsageId,
-            x.PerformedByUserId, x.Notes)).ToArray());
+            x.PerformedByUserId, x.Notes, EncodeRowVersion(x.RowVersion), x.IsCancelled, x.RevisionNumber)).ToArray());
     }
 
     private async Task<OilChangeResponse> MapOilChangeResponseAsync(OilChangeOperation operation, CancellationToken cancellationToken)
@@ -184,6 +184,6 @@ internal sealed partial class MaintenanceService
         return new OilChangeResponse(operation.Id, operation.MaintenanceWorkOrderId, operation.PerformedAtUtc,
             operation.OdometerAtChange, operation.VehicleTypeSnapshot, operation.OilQuantityLiters, operation.OilCost,
             operation.OilFilterChanged, operation.OilFilterCost, operation.LaborCost, operation.OtherCost,
-            operation.TotalCost, operation.VehicleId, riderId);
+            operation.TotalCost, operation.VehicleId, riderId, EncodeRowVersion(operation.RowVersion), operation.IsCancelled, operation.RevisionNumber);
     }
 }

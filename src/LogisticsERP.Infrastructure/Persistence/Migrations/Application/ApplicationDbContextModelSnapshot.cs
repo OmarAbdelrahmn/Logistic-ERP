@@ -98,6 +98,40 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         });
                 });
 
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Chefz.ChefzAccountTypeChange", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("AccountType")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly>("EffectiveFrom")
+                        .HasColumnType("date");
+
+                    b.Property<Guid>("PlatformRiderAccountId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("PreviousType")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlatformRiderAccountId", "EffectiveFrom")
+                        .IsUnique();
+
+                    b.ToTable("AccountTypeChanges", "chefz", t =>
+                        {
+                            t.HasCheckConstraint("CK_ChefzTypeChange_Types", "[PreviousType] IN (1, 2) AND [AccountType] IN (1, 2) AND [PreviousType] <> [AccountType]");
+                        });
+                });
+
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Chefz.ChefzDailyPerformance", b =>
                 {
                     b.Property<Guid>("Id")
@@ -659,6 +693,13 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<decimal>("EndWalletAmount")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("FreelancerCommissionBase")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int?>("FullTimeDays")
+                        .HasColumnType("int");
 
                     b.Property<decimal>("GrossEarnings")
                         .HasPrecision(18, 2)
@@ -3620,6 +3661,9 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsOdometerCorrection")
+                        .HasColumnType("bit");
+
                     b.Property<Guid?>("LastGpsImportId")
                         .HasColumnType("uniqueidentifier");
 
@@ -3684,7 +3728,7 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                             t.HasCheckConstraint("CK_VehicleDailyDistances_ManualDistance", "[ManualDistanceKm] IS NULL OR [ManualDistanceKm] >= 0");
 
-                            t.HasCheckConstraint("CK_VehicleDailyDistances_ManualOdometer", "[ManualOdometerReading] IS NULL OR ([ManualBaselineOdometerReading] IS NOT NULL AND [ManualOdometerReading] >= [ManualBaselineOdometerReading])");
+                            t.HasCheckConstraint("CK_VehicleDailyDistances_ManualOdometer", "[ManualOdometerReading] IS NULL OR ([ManualBaselineOdometerReading] IS NOT NULL AND [ManualOdometerReading] >= 0 AND ([IsOdometerCorrection] = 1 OR [ManualOdometerReading] >= [ManualBaselineOdometerReading]))");
 
                             t.HasCheckConstraint("CK_VehicleDailyDistances_Source", "[AppliedSource] BETWEEN 0 AND 2");
                         });
@@ -4321,6 +4365,9 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<bool>("IsCorrection")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsVoided")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Notes")
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
@@ -4340,7 +4387,12 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<Guid>("VehicleId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("VoidedByRevisionId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("VoidedByRevisionId");
 
                     b.HasIndex("VehicleId", "RecordedAtUtc");
 
@@ -4349,6 +4401,8 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                             t.HasCheckConstraint("CK_VehicleOdometerReadings_Correction", "[IsCorrection] = 0 OR [CorrectionReason] IS NOT NULL");
 
                             t.HasCheckConstraint("CK_VehicleOdometerReadings_Value", "[Reading] >= 0");
+
+                            t.HasCheckConstraint("CK_VehicleOdometerReadings_Void", "([IsVoided] = 0 AND [VoidedByRevisionId] IS NULL) OR ([IsVoided] = 1 AND [VoidedByRevisionId] IS NOT NULL)");
                         });
                 });
 
@@ -7304,7 +7358,7 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                             t.HasCheckConstraint("CK_JahezMoney_DebtAllocation", "([DashboardDebtPaid] IS NULL AND [CommissionPaid] IS NULL) OR ([DashboardDebtPaid] IS NOT NULL AND [CommissionPaid] IS NOT NULL AND [TransferredDebtId] IS NOT NULL AND [Direction] = 1 AND [DashboardDebtPaid] >= 0 AND [CommissionPaid] >= 0 AND [DashboardDebtPaid] + [CommissionPaid] = [Amount])");
 
-                            t.HasCheckConstraint("CK_JahezMoney_Routing", "([Direction] = 1 AND ([Fund] = 1 OR ([Fund] = 2 AND [Purpose] IN (1, 2)))) OR ([Direction] = 2 AND [Fund] IN (1, 3) AND [Purpose] <> 2) OR ([Direction] = 0 AND [Amount] = 0 AND [Purpose] = 1 AND [OperationId] IS NOT NULL AND [Fund] IN (1, 2, 3))");
+                            t.HasCheckConstraint("CK_JahezMoney_Routing", "([Direction] = 1 AND ([Fund] = 1 OR ([Fund] = 2 AND [Purpose] IN (1, 2, 4)))) OR ([Direction] = 2 AND [Fund] IN (1, 3) AND [Purpose] <> 2) OR ([Direction] = 0 AND [Amount] = 0 AND [Purpose] = 1 AND [OperationId] IS NOT NULL AND [Fund] IN (1, 2, 3))");
                         });
                 });
 
@@ -8629,7 +8683,9 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.HasIndex("MechanicEmployeeId");
 
-                    b.HasIndex("ReversalOfEntryId");
+                    b.HasIndex("ReversalOfEntryId")
+                        .IsUnique()
+                        .HasFilter("[ReversalOfEntryId] IS NOT NULL");
 
                     b.HasIndex("MaintenanceWorkOrderId", "SourceType");
 
@@ -9414,6 +9470,9 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<int>("Direction")
                         .HasColumnType("int");
 
+                    b.Property<DateTimeOffset?>("EffectiveServiceAtUtc")
+                        .HasColumnType("datetimeoffset");
+
                     b.Property<Guid>("InventoryItemId")
                         .HasColumnType("uniqueidentifier");
 
@@ -9473,7 +9532,9 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.HasIndex("MaintenanceWorkOrderId");
 
-                    b.HasIndex("ReversalOfUsageId");
+                    b.HasIndex("ReversalOfUsageId")
+                        .IsUnique()
+                        .HasFilter("[ReversalOfUsageId] IS NOT NULL");
 
                     b.HasIndex("RiderVehicleAssignmentId");
 
@@ -10060,6 +10121,9 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("CorrectionRevisionId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<decimal>("CostAmount")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
@@ -10101,6 +10165,8 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CorrectionRevisionId");
 
                     b.HasIndex("ResponsibleInventoryLocationId");
 
@@ -10147,7 +10213,9 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.HasIndex("OilBarrelId");
 
-                    b.HasIndex("ReversalOfAllocationId");
+                    b.HasIndex("ReversalOfAllocationId")
+                        .IsUnique()
+                        .HasFilter("[ReversalOfAllocationId] IS NOT NULL");
 
                     b.HasIndex("MaintenanceMaterialUsageId", "OilBarrelId", "Direction");
 
@@ -10162,6 +10230,16 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("CancellationReason")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTimeOffset?>("CancelledAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CancelledByUserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .HasColumnType("datetimeoffset");
 
@@ -10171,6 +10249,9 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<string>("IdempotencyKey")
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
+
+                    b.Property<bool>("IsCancelled")
+                        .HasColumnType("bit");
 
                     b.Property<decimal>("LaborCost")
                         .HasPrecision(18, 2)
@@ -10227,6 +10308,15 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .HasMaxLength(64)
                         .HasColumnType("nvarchar(64)");
 
+                    b.Property<int>("RevisionNumber")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
                     b.Property<decimal>("TotalCost")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
@@ -10265,7 +10355,92 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                             t.HasCheckConstraint("CK_OilChangeOperations_Filter", "([OilFilterChanged] = 0 AND [OilFilterInventoryItemId] IS NULL AND [OilFilterMaterialUsageId] IS NULL AND [OilFilterCost] = 0) OR ([OilFilterChanged] = 1 AND [OilFilterInventoryItemId] IS NOT NULL AND [OilFilterMaterialUsageId] IS NOT NULL)");
 
+                            t.HasCheckConstraint("CK_OilChangeOperations_Lifecycle", "[RevisionNumber] >= 0 AND (([IsCancelled] = 0 AND [CancelledAtUtc] IS NULL AND [CancelledByUserId] IS NULL AND [CancellationReason] IS NULL) OR ([IsCancelled] = 1 AND [CancelledAtUtc] IS NOT NULL AND [CancelledByUserId] IS NOT NULL AND [CancellationReason] IS NOT NULL))");
+
                             t.HasCheckConstraint("CK_OilChangeOperations_Values", "[OdometerAtChange] >= 0 AND [OilQuantityLiters] > 0 AND [OilCost] >= 0 AND [OilFilterCost] >= 0 AND [LaborCost] >= 0 AND [OtherCost] >= 0 AND [TotalCost] >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Maintenance.OilChangeRevision", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<Guid>("ActorUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AfterJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("BeforeJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("EffectsJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("IdempotencyKey")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<Guid>("OilChangeOperationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("OldFilterUsageId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("OldOilUsageId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("PostedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("RequestHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<string>("ResultJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("RevisionNumber")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OldFilterUsageId");
+
+                    b.HasIndex("OldOilUsageId");
+
+                    b.HasIndex("OilChangeOperationId", "IdempotencyKey")
+                        .IsUnique();
+
+                    b.HasIndex("OilChangeOperationId", "RevisionNumber")
+                        .IsUnique();
+
+                    b.ToTable("OilChangeRevisions", "maintenance", t =>
+                        {
+                            t.HasCheckConstraint("CK_OilChangeRevisions_Number", "[RevisionNumber] > 0");
                         });
                 });
 
@@ -11350,7 +11525,9 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ReversalOfExpenseId");
+                    b.HasIndex("ReversalOfExpenseId")
+                        .IsUnique()
+                        .HasFilter("[ReversalOfExpenseId] IS NOT NULL");
 
                     b.HasIndex("RiderVehicleAssignmentId");
 
@@ -13127,6 +13304,27 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                             Key = "chefz.settlements.create",
                             NameAr = "إنشاء تصفيات شيفز",
                             NameEn = "Create Chefz settlements",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000320"),
+                            Category = "Chefz",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "حذف تصفيات شيفز لفترة لإعادة استيرادها.",
+                            DescriptionEn = "Delete Chefz settlements for a period for reimport.",
+                            DisplayOrder = 320,
+                            GrantabilityRule = "HIGH_TRUST_ONLY",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = true,
+                            IsSensitive = true,
+                            Key = "chefz.settlements.delete",
+                            NameAr = "حذف تصفيات شيفز",
+                            NameEn = "Delete Chefz settlements",
                             RequiresClientScope = true,
                             RequiresHousingScope = false,
                             RowVersion = new byte[0],
@@ -18194,6 +18392,69 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         },
                         new
                         {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000900"),
+                            Category = "Maintenance",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "تعديل عملية زيت مكتملة مع تدقيق.",
+                            DescriptionEn = "Correct completed oil changes with audit.",
+                            DisplayOrder = 900,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "maintenance.oil.edit",
+                            NameAr = "تعديل تغيير الزيت",
+                            NameEn = "Edit oil changes",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000901"),
+                            Category = "Maintenance",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "تصحيح تاريخ خدمة الزيت.",
+                            DescriptionEn = "Correct oil service dates.",
+                            DisplayOrder = 901,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "maintenance.oil.date_edit",
+                            NameAr = "تعديل تاريخ تغيير الزيت",
+                            NameEn = "Edit oil-change dates",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000902"),
+                            Category = "Maintenance",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "إلغاء الزيت بعكس المخزون والتكاليف.",
+                            DescriptionEn = "Cancel oil changes with linked reversals.",
+                            DisplayOrder = 902,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "maintenance.oil.cancel",
+                            NameAr = "إلغاء تغيير الزيت",
+                            NameEn = "Cancel oil changes",
+                            RequiresClientScope = false,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
                             Id = new Guid("019c18d5-62e1-7000-a000-000000000750"),
                             Category = "Jahez",
                             CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
@@ -23213,6 +23474,15 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Chefz.ChefzAccountTypeChange", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Clients.PlatformRiderAccount", null)
+                        .WithMany()
+                        .HasForeignKey("PlatformRiderAccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Chefz.ChefzDailyPerformance", b =>
                 {
                     b.HasOne("LogisticsERP.Domain.Entities.Chefz.ChefzPerformanceImport", null)
@@ -23939,6 +24209,11 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .HasForeignKey("VehicleId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Maintenance.OilChangeRevision", null)
+                        .WithMany()
+                        .HasForeignKey("VoidedByRevisionId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Fleet.VehicleOperationCard", b =>
@@ -25012,6 +25287,11 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Maintenance.OilBarrelLoss", b =>
                 {
+                    b.HasOne("LogisticsERP.Domain.Entities.Maintenance.OilChangeRevision", null)
+                        .WithMany()
+                        .HasForeignKey("CorrectionRevisionId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("LogisticsERP.Domain.Entities.Maintenance.OilBarrel", null)
                         .WithMany()
                         .HasForeignKey("OilBarrelId")
@@ -25089,6 +25369,26 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .WithMany()
                         .HasForeignKey("VehicleId")
                         .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Maintenance.OilChangeRevision", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Maintenance.OilChangeOperation", null)
+                        .WithMany()
+                        .HasForeignKey("OilChangeOperationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Maintenance.MaintenanceMaterialUsage", null)
+                        .WithMany()
+                        .HasForeignKey("OldFilterUsageId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Maintenance.MaintenanceMaterialUsage", null)
+                        .WithMany()
+                        .HasForeignKey("OldOilUsageId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Maintenance.PurchaseReceipt", b =>

@@ -16,6 +16,65 @@ public sealed class VehicleDistanceReportTests
     private static readonly DateOnly Start = new(2026, 9, 1);
 
     [Fact]
+    public async Task AllVehicleReportsIncludeOnlyVehiclesWithDistancesAndMatchSingleVehicleReport()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var db = Context();
+        var first = AddVehicle(db, "A-FIRST", VehicleOperationalStatus.Available);
+        first.SerialNumber = "123456";
+        var second = AddVehicle(db, "B-SECOND");
+        var noDistance = AddVehicle(db, "C-NONE");
+        var deleted = AddVehicle(db, "D-DELETED", deleted: true);
+        AddDay(db, first, 1, VehicleDailyDistanceSource.Gps, 0m, gps: 0m);
+        AddDay(db, first, 2, VehicleDailyDistanceSource.Manual, 4m, manual: 4m);
+        AddDay(db, second, 2, VehicleDailyDistanceSource.Gps, 7m, gps: 7m, manual: 8m);
+        AddDay(db, noDistance, 1, VehicleDailyDistanceSource.None, 0m);
+        AddDay(db, noDistance, 2, VehicleDailyDistanceSource.Gps, 5m, gps: 5m, deleted: true);
+        AddDay(db, deleted, 1, VehicleDailyDistanceSource.Gps, 3m, gps: 3m);
+        await db.SaveChangesAsync(ct);
+        db.ChangeTracker.Clear();
+        var service = Service(db);
+
+        var firstPage = await service.GetVehiclesPeriodReportsAsync(Start, Start.AddDays(2), 1, 1, ct);
+        Assert.True(firstPage.IsSuccess, firstPage.Error.Description);
+        Assert.Equal(2, firstPage.Value!.TotalCount);
+        var report = Assert.Single(firstPage.Value.Items);
+        Assert.Equal(first.Id, report.Vehicle.VehicleId);
+        Assert.Equal("123456", report.Vehicle.SerialNumber);
+        Assert.Equal(3, report.Days.Count);
+        Assert.True(report.Days[0].HasDistance);
+        Assert.Equal(0m, report.Days[0].GpsDistanceKm);
+        Assert.False(report.Days[2].HasDistance);
+        var single = await service.GetVehiclePeriodReportAsync(first.Id, Start, Start.AddDays(2), ct);
+        Assert.Equal(single.Value!.AppliedTotalKm, report.AppliedTotalKm);
+        Assert.Equal(single.Value.Days, report.Days);
+        var secondPage = await service.GetVehiclesPeriodReportsAsync(Start, Start.AddDays(2), 2, 1, ct);
+        var secondReport = Assert.Single(secondPage.Value!.Items);
+        Assert.Equal(second.Id, secondReport.Vehicle.VehicleId);
+        Assert.Equal(7m, secondReport.AppliedTotalKm);
+        Assert.Equal(8m, secondReport.ManualTotalKm);
+        Assert.Empty((await service.GetVehiclesPeriodReportsAsync(Start, Start.AddDays(2), int.MaxValue, 100, ct)).Value!.Items);
+        Assert.Empty(db.ChangeTracker.Entries());
+    }
+
+    [Fact]
+    public async Task AllVehicleReportsValidateDatesAndPermission()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var db = Context();
+        var service = Service(db);
+        Assert.Equal(FleetErrors.InvalidDistanceReportPeriod.Code,
+            (await service.GetVehiclesPeriodReportsAsync(Start, Start.AddDays(366), 1, 20, ct)).Error.Code);
+        Assert.Equal(FleetErrors.Forbidden.Code,
+            (await Service(db, false).GetVehiclesPeriodReportsAsync(Start, Start, 1, 20, ct)).Error.Code);
+        var empty = await service.GetVehiclesPeriodReportsAsync(Start, Start, 0, 999, ct);
+        Assert.True(empty.IsSuccess, empty.Error.Description);
+        Assert.Equal(1, empty.Value!.Page);
+        Assert.Equal(100, empty.Value.PageSize);
+        Assert.Empty(empty.Value.Items);
+    }
+
+    [Fact]
     public async Task SingleVehicleReturnsInclusiveCalendarBothSourcesAndAppliedTotalWithoutDoubleCounting()
     {
         var ct = TestContext.Current.CancellationToken;
@@ -188,6 +247,13 @@ public sealed class VehicleDistanceReportTests
         await using var db = new ApplicationDbContext(new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseSqlServer(connectionString).Options);
         var service = Service(db);
+        var all = await service.GetVehiclesPeriodReportsAsync(Start, Start.AddDays(29), 1, 5, ct);
+        Assert.True(all.IsSuccess, all.Error.Description);
+        Assert.All(all.Value!.Items, item =>
+        {
+            Assert.Equal(30, item.Days.Count);
+            Assert.True(item.RecordedDays > 0);
+        });
         var missing = await service.GetMissingRecordsReportAsync(Start, Start.AddDays(29), null, null, null, 1, 5, ct);
         Assert.True(missing.IsSuccess, missing.Error.Description);
         Assert.All(missing.Value!.Items, item =>

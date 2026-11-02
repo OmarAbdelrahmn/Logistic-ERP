@@ -3,12 +3,13 @@ using LogisticsERP.Application.Common.Results;
 namespace LogisticsERP.Application.Features.Chefz;
 
 public sealed record ChefzAccountDetailsRequest(string AccountType, string? ReportIdNumber = null, string? RowVersion = null,
-    string? VehicleType = null, string? DashboardStatus = null);
+    string? VehicleType = null, string? DashboardStatus = null, DateOnly? AccountTypeChangeDate = null);
 public sealed record ChefzPasswordRequest(string Password, string Reason);
 public sealed record ChefzAccountStatusRequest(string Status, string RowVersion, string? Reason = null);
 public sealed record ChefzAssignmentStartDateRequest(DateOnly EffectiveFrom, string RowVersion);
 public sealed record ChefzAssignmentStartDateResponse(Guid AssignmentId, Guid AccountId, Guid RiderProfileId,
     DateOnly EffectiveFrom, DateOnly? EffectiveTo, string Status, string RowVersion);
+public sealed record ChefzAccountTypeChangeResponse(string PreviousType, string AccountType, DateOnly ChangeDate, DateOnly EffectiveFrom);
 public sealed record ChefzAccountResponse(Guid AccountId, string ExternalAccountId, string ReportIdNumber,
     string AccountType, decimal CommissionRate, decimal DailyFee, bool HasPassword, string RowVersion,
     Guid? SponsorId = null, Guid? OperatingCityId = null, string VehicleType = "Car", string DashboardStatus = "active",
@@ -22,9 +23,11 @@ public sealed record ChefzAccountResponse(Guid AccountId, string ExternalAccount
     public string? RiderIqamaNo { get; init; }
     public bool IsOperationallyBlocked { get; init; }
     public string? OperationalBlockReason { get; init; }
+    public IReadOnlyList<ChefzAccountTypeChangeResponse> AccountTypeHistory { get; init; } = [];
 }
 public sealed record ChefzSettlementRequest(Guid AssignmentId, int Year, int Month, int Half,
-    decimal StartWalletAmount, decimal EndWalletAmount);
+    decimal StartWalletAmount, decimal EndWalletAmount,
+    IReadOnlyDictionary<DateOnly, decimal>? WalletAmountsAtTypeChanges = null);
 public sealed record ChefzSettlementResponse(Guid Id, Guid AccountId, Guid AssignmentId, Guid RiderProfileId,
     string AccountType, DateOnly PeriodFrom, DateOnly PeriodTo, DateOnly ChargedFrom, DateOnly ChargedTo,
     int AssignedDays, decimal StartWalletAmount, decimal EndWalletAmount, decimal GrossEarnings,
@@ -38,6 +41,8 @@ public sealed record ChefzSettlementResponse(Guid Id, Guid AccountId, Guid Assig
     public string RiderName { get; init; } = "";
     public string? RiderIqamaNo { get; init; }
     public string? RiderIban { get; init; }
+    public int? FullTimeDays { get; init; }
+    public decimal? FreelancerCommissionBase { get; init; }
 }
 public sealed record ChefzPerformanceResponse(Guid Id, Guid AccountId, Guid AssignmentId, Guid RiderProfileId,
     DateOnly ReportDate, string ReportIdNumber, int TotalValidOffers, int AcceptedOffers,
@@ -66,8 +71,11 @@ public sealed record ChefzSponsorAccountCounts(Guid? SponsorId, string SponsorNa
 public sealed record ChefzAccountsResponse(IReadOnlyList<ChefzAccountResponse> Items, int Page, int PageSize,
     int TotalCount, ChefzAccountCounts Summary, IReadOnlyList<ChefzSponsorAccountCounts> Sponsors);
 
+public sealed record ChefzSettlementDeletionResponse(DateOnly PeriodFrom, DateOnly PeriodTo, int SettlementsDeleted, int ImportsDeleted, int OrderRowsDeleted);
+
 public interface IChefzService
 {
+    Task<Result<ChefzSettlementDeletionResponse>> DeleteSettlementsAsync(int year, int month, int half, CancellationToken ct = default);
     Task<Result<ChefzOrderSettlementImportResponse>> ProcessOrderSettlementsAsync(string fileName, byte[] content, bool preview, CancellationToken ct = default);
     Task<Result<ChefzOrderSettlementImportResponse>> GetOrderSettlementImportAsync(Guid importId, CancellationToken ct = default);
     Task<Result<ChefzSettingsResponse>> GetSettingsAsync(CancellationToken ct = default);

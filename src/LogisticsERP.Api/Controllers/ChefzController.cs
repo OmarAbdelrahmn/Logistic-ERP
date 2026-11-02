@@ -11,6 +11,11 @@ namespace LogisticsERP.Api.Controllers;
 [Route("api/chefz")]
 public sealed class ChefzController(IChefzService service) : ControllerBase
 {
+    [HttpDelete("settlements")]
+    [RequirePermission(PermissionKeys.Chefz.SettlementsDelete)]
+    public Task<IActionResult> DeleteSettlements(int year, int month, int half, CancellationToken ct) =>
+        ToAction(service.DeleteSettlementsAsync(year, month, half, ct));
+
     [HttpPut("assignments/{assignmentId:guid}/start-date")]
     [RequirePermission(PermissionKeys.Chefz.AccountsUpdate)]
     public Task<IActionResult> UpdateAssignmentStartDate(Guid assignmentId, ChefzAssignmentStartDateRequest request, CancellationToken ct) =>

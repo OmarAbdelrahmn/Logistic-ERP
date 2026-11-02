@@ -15,7 +15,7 @@ public static class JahezSettlementRules
         : direction switch
         {
             JahezMoneyDirection.Receipt => fund == JahezMoneyFund.Cashbox
-                || fund == JahezMoneyFund.PetroApp && purpose is JahezMoneyPurpose.Settlement or JahezMoneyPurpose.Fuel,
+                || fund == JahezMoneyFund.PetroApp && purpose is JahezMoneyPurpose.Settlement or JahezMoneyPurpose.Fuel or JahezMoneyPurpose.TransferredDebtRepayment,
             JahezMoneyDirection.Disbursement => purpose != JahezMoneyPurpose.Fuel
                 && fund is JahezMoneyFund.Cashbox or JahezMoneyFund.Bank,
             _ => false

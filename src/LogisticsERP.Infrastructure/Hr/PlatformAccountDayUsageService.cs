@@ -107,7 +107,7 @@ internal sealed class PlatformAccountDayUsageService(ApplicationDbContext db, IC
         var ids = request.Assignments.Select(a => a.AssignmentId).ToArray();
         if (ids.Distinct().Count() != ids.Length || !ids.Order().SequenceEqual(candidates.Select(a => a.Id).Order()))
             return Result.Failure<PlatformAccountDayResponse>(PlatformAccountDayAllocationService.Error(accountId, date, "Include every eligible assignment exactly once, in handover order."));
-        if (candidates.Length > 1 && await Allocation.IsFullTime(accountId, ct))
+        if (candidates.Length > 1 && await Allocation.IsFullTime(accountId, date, ct))
             return Result.Failure<PlatformAccountDayResponse>(PlatformAccountDayAllocationService.Error(accountId, date, "Chefz FullTime accounts cannot be shared."));
         var byId = candidates.ToDictionary(a => a.Id);
         for (var i = 0; i < ids.Length - 1; i++)

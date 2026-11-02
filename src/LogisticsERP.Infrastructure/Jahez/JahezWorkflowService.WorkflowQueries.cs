@@ -18,42 +18,45 @@ internal sealed partial class JahezWorkflowService
         {
             Page(page, pageSize);
             var today = Today;
-            var cutoff = JahezRules.StartOfDay(today.AddDays(-10)).ToUniversalTime();
+            var now = clock.GetUtcNow();
             var query = from h in db.JahezAccountSessions.AsNoTracking()
                         join a in db.PlatformRiderAccounts.AsNoTracking() on h.PlatformRiderAccountId equals a.Id
                         join r in db.RiderProfiles.AsNoTracking() on h.RiderProfileId equals r.Id
                         join e in db.Employees.AsNoTracking() on r.EmployeeId equals e.Id
-                        where (h.LastSettlementPaymentAtUtc ?? h.StartedAtUtc) < cutoff
+                        where h.EndedAtUtc == null && h.StartedAtUtc <= now
                         orderby h.Id
                         select new
                         {
                             h.Id, h.PlatformRiderAccountId, a.ExternalAccountId, h.RiderProfileId, e.FullNameAr,
-                            h.StartedAtUtc, h.EndedAtUtc, h.LastSettlementPaymentAtUtc,
-                            Settled = db.Set<JahezOperation>().Where(o => o.HandoverId == h.Id && o.ExecutedAtUtc != null && o.Mode != JahezOperationMode.Withdraw)
-                                .Select(o => (DateOnly?)o.ThroughDate).Max(),
-                            Debt = db.Set<JahezTransferredDebt>().Any(d => d.PaidAtUtc == null && db.Set<JahezOperation>()
-                                .Any(o => o.Id == d.OperationId && o.HandoverId == h.Id && o.ExecutedAtUtc != null))
+                            h.StartedAtUtc, h.EndedAtUtc, h.LastSettlementPaymentAtUtc
                         };
-            var items = new List<JahezSettlementReminder>();
-            var matched = 0;
-            var offset = 0;
-            while (items.Count < pageSize)
+            var rows = await query.Skip((page - 1) * pageSize).Take(pageSize).ToArrayAsync(ct);
+            var accountIds = rows.Select(h => h.PlatformRiderAccountId).Distinct().ToArray();
+            var debts = accountIds.Length == 0 ? new Dictionary<Guid, decimal>()
+                : await AdministrativeDebtAccountsFor(accountIds)
+                    .ToDictionaryAsync(x => x.AccountId, x => x.PlatformDebt, ct);
+            var sessionIds = rows.Where(h => h.EndedAtUtc == null).Select(h => h.Id).ToArray();
+            var lastOrders = await db.Set<JahezDailyDispatch>().AsNoTracking()
+                .Where(d => sessionIds.Contains(d.HandoverId) && d.Count > 0 && d.Date <= today
+                    && db.Set<JahezImportBatch>().Any(b => b.Id == d.BatchId && b.CommittedAtUtc != null)
+                    && !db.Set<JahezImportBatch>().Any(b => b.ReplacesBatchId == d.BatchId && b.CommittedAtUtc != null))
+                .GroupBy(d => d.HandoverId)
+                .Select(g => new { HandoverId = g.Key, Date = g.Max(d => d.Date) })
+                .ToDictionaryAsync(x => x.HandoverId, x => x.Date, ct);
+            var items = rows.Select(h =>
             {
-                var batch = await query.Skip(offset).Take(200).ToArrayAsync(ct);
-                if (batch.Length == 0) break;
-                offset += batch.Length;
-                foreach (var h in batch)
-                {
-                    var due = h.EndedAtUtc == null || !h.Settled.HasValue || h.Settled < JahezRules.RiyadhDate(h.EndedAtUtc.Value) || h.Debt;
-                    if (!due) continue;
-                    if (matched++ < (page - 1) * pageSize) continue;
-                    var anchor = h.LastSettlementPaymentAtUtc ?? h.StartedAtUtc;
-                    items.Add(new JahezSettlementReminder(h.Id, h.PlatformRiderAccountId, h.ExternalAccountId,
-                        h.RiderProfileId, h.FullNameAr, anchor, today.DayNumber - JahezRules.RiyadhDate(anchor).DayNumber));
-                    if (items.Count == pageSize) break;
-                }
-                if (batch.Length < 200) break;
-            }
+                var anchor = h.LastSettlementPaymentAtUtc ?? h.StartedAtUtc;
+                var assigned = h.EndedAtUtc == null && h.StartedAtUtc <= now;
+                DateOnly? lastOrder = lastOrders.TryGetValue(h.Id, out var date) ? date : null;
+                var start = JahezRules.RiyadhDate(h.StartedAtUtc);
+                var inactivityAnchor = lastOrder.HasValue && lastOrder.Value > start ? lastOrder.Value : start;
+                int? daysWithoutOrders = assigned ? today.DayNumber - inactivityAnchor.DayNumber : null;
+                return new JahezSettlementReminder(h.Id, h.PlatformRiderAccountId, h.ExternalAccountId,
+                    h.RiderProfileId, h.FullNameAr, anchor, today.DayNumber - JahezRules.RiyadhDate(anchor).DayNumber)
+                { AdministrativeDebt = debts.GetValueOrDefault(h.PlatformRiderAccountId), IsAssigned = assigned,
+                    LastOrderDate = assigned ? lastOrder : null, DaysWithoutOrders = daysWithoutOrders,
+                    NoOrdersForThreeDays = daysWithoutOrders >= 3 };
+            }).ToArray();
             return new JahezPage<JahezSettlementReminder>(items, page, pageSize);
         }, ct);
     public Task<Result<JahezPage<JahezImportBatch>>> ImportBatchesAsync(int page, int pageSize, CancellationToken ct = default) =>
@@ -66,9 +69,12 @@ internal sealed partial class JahezWorkflowService
                 .Skip((page - 1) * pageSize).Take(pageSize).ToArrayAsync(ct);
             return new JahezPage<JahezAdministrativeDebt>(rows, page, pageSize);
         }, ct);
-    private IQueryable<JahezAdministrativeDebt> AdministrativeDebtAccounts() =>
+    private IQueryable<JahezAdministrativeDebt> AdministrativeDebtAccounts() => AdministrativeDebtAccountsFor(null);
+
+    private IQueryable<JahezAdministrativeDebt> AdministrativeDebtAccountsFor(Guid[]? accountIds) =>
         from a in db.PlatformRiderAccounts.AsNoTracking()
         where db.ClientPlatforms.Any(p => p.Id == a.ClientPlatformId && p.Code == "JAHEZ")
+            && (accountIds == null || accountIds.Contains(a.Id))
         join h in db.JahezAccountSessions.Where(x => x.EndedAtUtc == null) on a.Id equals h.PlatformRiderAccountId into handovers
         from h in handovers.DefaultIfEmpty()
         join r in db.RiderProfiles on h.RiderProfileId equals r.Id into riders

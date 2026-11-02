@@ -1,0 +1,176 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="HandoverId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RiderProfileId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="OperationId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="TransferredDebtId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="Fund" type="xs:int" minOccurs="0" />
+                <xs:element name="Direction" type="xs:int" minOccurs="0" />
+                <xs:element name="Purpose" type="xs:int" minOccurs="0" />
+                <xs:element name="Amount" type="xs:decimal" minOccurs="0" />
+                <xs:element name="ActorUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="OccurredAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="Reference" type="xs:string" minOccurs="0" />
+                <xs:element name="Reason" type="xs:string" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="CommissionPaid" type="xs:decimal" minOccurs="0" />
+                <xs:element name="DashboardDebtPaid" type="xs:decimal" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="OperationId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RiderProfileId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="Amount" type="xs:decimal" minOccurs="0" />
+                <xs:element name="PaidAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="PaidByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="UpdatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="UpdatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RowVersion" type="xs:base64Binary" minOccurs="0" />
+                <xs:element name="IsDeleted" type="xs:boolean" minOccurs="0" />
+                <xs:element name="DeletedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="DeletedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DeletionReason" type="xs:string" minOccurs="0" />
+                <xs:element name="PaidAmount" type="xs:decimal" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table2">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="Source" type="xs:int" minOccurs="0" />
+                <xs:element name="SourceId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="PlatformAccountId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="SponsorId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="SponsorIdentifier" type="xs:string" minOccurs="0" />
+                <xs:element name="SponsorNameAr" type="xs:string" minOccurs="0" />
+                <xs:element name="Evidence" type="xs:string" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table3">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="name" type="xs:string" minOccurs="0" />
+                <xs:element name="definition" type="xs:string" minOccurs="0" />
+                <xs:element name="is_disabled" type="xs:boolean" minOccurs="0" />
+                <xs:element name="is_not_trusted" type="xs:boolean" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table4">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="MovementCount" type="xs:long" minOccurs="0" />
+                <xs:element name="MovementTotal" type="xs:decimal" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table5">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Id" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="ModuleKey" type="xs:string" minOccurs="0" />
+                <xs:element name="Version" type="xs:long" minOccurs="0" />
+                <xs:element name="LastChangedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="CreatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="UpdatedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="UpdatedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="RowVersion" type="xs:base64Binary" minOccurs="0" />
+                <xs:element name="IsDeleted" type="xs:boolean" minOccurs="0" />
+                <xs:element name="DeletedAtUtc" msdata:DataType="System.DateTimeOffset" type="xs:anyType" minOccurs="0" />
+                <xs:element name="DeletedByUserId" msdata:DataType="System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e" type="xs:string" minOccurs="0" />
+                <xs:element name="DeletionReason" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <Id>01a19250-7397-7943-828b-7e919ff916b3</Id>
+    <HandoverId>3eb11e91-f189-4d99-aa42-c530144d53fe</HandoverId>
+    <RiderProfileId>01a12a33-d65c-7fc9-8a16-d1a37f81b2b8</RiderProfileId>
+    <TransferredDebtId>01a186be-0eaa-78d5-a22f-2a4ceee00b0d</TransferredDebtId>
+    <Fund>1</Fund>
+    <Direction>1</Direction>
+    <Purpose>4</Purpose>
+    <Amount>40.66</Amount>
+    <ActorUserId>019c18d5-62e1-7000-c000-000000000001</ActorUserId>
+    <OccurredAtUtc>2026-10-31T14:15:08.4394512Z</OccurredAtUtc>
+    <Reference>JHZ/2026/10/00821</Reference>
+    <Reason>تحصيل كامل المديونيات المرحلة على المندوب</Reason>
+    <CreatedAtUtc>2026-10-31T14:15:08.5081699Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <CommissionPaid>40.66</CommissionPaid>
+    <DashboardDebtPaid>0.00</DashboardDebtPaid>
+  </Table>
+  <Table1>
+    <Id>01a186be-0eaa-78d5-a22f-2a4ceee00b0d</Id>
+    <OperationId>01a182cc-1a00-706d-9fea-52c381b17ad1</OperationId>
+    <RiderProfileId>01a12a33-d65c-7fc9-8a16-d1a37f81b2b8</RiderProfileId>
+    <Amount>40.66</Amount>
+    <PaidAtUtc>2026-10-31T14:15:08.4402691Z</PaidAtUtc>
+    <PaidByUserId>019c18d5-62e1-7000-c000-000000000001</PaidByUserId>
+    <CreatedAtUtc>2026-10-29T08:19:24.9772957Z</CreatedAtUtc>
+    <CreatedByUserId>5e8dbbf5-f4a8-447d-d933-08df10cc8271</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-31T14:15:08.5081699Z</UpdatedAtUtc>
+    <UpdatedByUserId>019c18d5-62e1-7000-c000-000000000001</UpdatedByUserId>
+    <RowVersion>AAAAAAAEQQQ=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+    <PaidAmount>40.66</PaidAmount>
+  </Table1>
+  <Table2>
+    <Id>01a19250-73da-7afe-93d5-b3b5b230bb5d</Id>
+    <Source>4</Source>
+    <SourceId>01a19250-7397-7943-828b-7e919ff916b3</SourceId>
+    <PlatformAccountId>9ae54550-fc53-421a-9600-1d9364426508</PlatformAccountId>
+    <SponsorId>019c18d5-62e1-7000-8000-000000000041</SponsorId>
+    <SponsorIdentifier>7015658094</SponsorIdentifier>
+    <SponsorNameAr>البوابا الموكبلا</SponsorNameAr>
+    <Evidence>Inherited from Debt:01a186be-0eaa-78d5-a22f-2a4ceee00b0d</Evidence>
+    <CreatedAtUtc>2026-10-31T14:15:08.5081699Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+  </Table2>
+  <Table3>
+    <name>CK_JahezMoney_Routing</name>
+    <definition>([Direction]=(1) AND ([Fund]=(1) OR [Fund]=(2) AND ([Purpose]=(2) OR [Purpose]=(1))) OR [Direction]=(2) AND ([Fund]=(3) OR [Fund]=(1)) AND [Purpose]&lt;&gt;(2) OR [Direction]=(0) AND [Amount]=(0) AND [Purpose]=(1) AND [OperationId] IS NOT NULL AND ([Fund]=(3) OR [Fund]=(2) OR [Fund]=(1)))</definition>
+    <is_disabled>false</is_disabled>
+    <is_not_trusted>false</is_not_trusted>
+  </Table3>
+  <Table4>
+    <MovementCount>415</MovementCount>
+    <MovementTotal>131022.25</MovementTotal>
+  </Table4>
+  <Table5>
+    <Id>01a10681-712e-7b26-93e0-8f9df3b1a024</Id>
+    <ModuleKey>jahez</ModuleKey>
+    <Version>2731</Version>
+    <LastChangedAtUtc>2026-10-31T14:33:04.1871279Z</LastChangedAtUtc>
+    <CreatedAtUtc>2026-10-04T10:41:48.8464462Z</CreatedAtUtc>
+    <CreatedByUserId>019c18d5-62e1-7000-c000-000000000001</CreatedByUserId>
+    <UpdatedAtUtc>2026-10-31T14:33:04.1872144Z</UpdatedAtUtc>
+    <UpdatedByUserId>bade1c20-d7ea-4ae4-d3fc-08df14b0e9ba</UpdatedByUserId>
+    <RowVersion>AAAAAAAEQWo=</RowVersion>
+    <IsDeleted>false</IsDeleted>
+  </Table5>
+</NewDataSet>

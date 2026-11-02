@@ -79,21 +79,21 @@ internal static class ChefzOrderSpreadsheetParser
                         CultureInfo.InvariantCulture, DateTimeStyles.None, out date))
                         throw new FormatException("Date يجب أن يكون تاريخ Excel أو yyyy-MM-dd أو dd/MM/yyyy.");
                     if (date == default) throw new FormatException("تاريخ الطلب غير صالح.");
-                    decimal Money(string h)
+                    decimal Money(string h, bool truncateFraction = false)
                     {
                         var text = Text(h);
                         if (text.Length == 0) return 0;
                         if (!decimal.TryParse(text, NumberStyles.Number | NumberStyles.AllowParentheses,
                             CultureInfo.InvariantCulture, out var value) || Math.Abs(value) > 1000000000m
-                            || decimal.Round(value, 2) != value)
+                            || (!truncateFraction && decimal.Round(value, 2) != value))
                             throw new FormatException($"قيمة غير صالحة في {h}؛ أدخل مبلغاً بحد أقصى منزلتين عشريتين.");
-                        return value;
+                        return truncateFraction ? decimal.Truncate(value) : value;
                     }
                     var orderId = Text("Chef Order ID");
                     if (orderId.Length > 100) throw new FormatException("Chef Order ID طويل جداً.");
                     var delivery = Money("Driver Delivery Fees"); var tips = Money("Driver Tip");
                     var compensation = Money("Driver Compensate"); var bonus = Money("Bonus Amount");
-                    var collectedCash = Math.Abs(Money("Cash Collected By Driver"));
+                    var collectedCash = Math.Abs(Money("Cash Collected By Driver", truncateFraction: true));
                     var deduction = Math.Abs(Money("Deduction Amount")) + collectedCash;
                     if (orderId.Length != 0 && !orderIds.Add((id, orderId)))
                         throw new FormatException("طلب مكرر لنفس Driver ID في الملف؛ لم تتم مضاعفة المبلغ.");

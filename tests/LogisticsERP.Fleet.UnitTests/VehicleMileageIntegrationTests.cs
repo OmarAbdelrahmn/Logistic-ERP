@@ -2,6 +2,7 @@ using ClosedXML.Excel;
 using LogisticsERP.Application.Abstractions.Authentication;
 using LogisticsERP.Application.Abstractions.Files;
 using LogisticsERP.Application.Authorization;
+using LogisticsERP.Application.Features.Fleet;
 using LogisticsERP.Domain.Entities.Fleet;
 using LogisticsERP.Domain.Entities.Platform;
 using LogisticsERP.Domain.Enums;
@@ -16,6 +17,52 @@ namespace LogisticsERP.Fleet.UnitTests;
 
 public sealed class VehicleMileageIntegrationTests
 {
+    [Fact]
+    public async Task LowerManualReadingCorrectsVehicleMileageAndRemainsStableOnLaterEntries()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var user = new TestCurrentUser();
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseInMemoryDatabase($"MileageCorrection_{Guid.NewGuid():N}")
+            .AddInterceptors(new ApplicationPersistenceInterceptor(user, TimeProvider.System)).Options;
+        await using var db = new ApplicationDbContext(options);
+        var vehicle = new Vehicle { Id = Guid.CreateVersion7(), AssetNumber = "CORRECTION", NormalizedAssetNumber = "CORRECTION", CurrentOdometer = 100, TrackedDistanceKm = 100m };
+        db.Vehicles.Add(vehicle);
+        db.VehicleDailyDistances.Add(new VehicleDailyDistance
+        {
+            Id = Guid.CreateVersion7(), VehicleId = vehicle.Id, WorkDate = new DateOnly(2026, 10, 29),
+            ManualOdometerReading = 100, ManualBaselineOdometerReading = 0, ManualDistanceKm = 100,
+            AppliedDistanceKm = 100, AppliedSource = VehicleDailyDistanceSource.Manual, EffectiveOdometerAfterKm = 100
+        });
+        await db.SaveChangesAsync(ct);
+        var service = new VehicleDailyDistanceService(db, new FleetServiceSupport(user, new PermitAll(), TimeProvider.System));
+
+        var result = await service.UpsertManualAsync(vehicle.Id, new DateOnly(2026, 10, 30), new UpsertManualVehicleDistanceRequest(20, 50, null, null), ct);
+        Assert.True(result.IsSuccess, result.Error.Description);
+        Assert.Equal(20, vehicle.CurrentOdometer);
+        var correction = await db.VehicleDailyDistances.SingleAsync(x => x.WorkDate == new DateOnly(2026, 10, 30), ct);
+        Assert.True(correction.IsOdometerCorrection);
+        Assert.Equal(100m, correction.ManualBaselineOdometerReading);
+        Assert.Equal(0m, correction.ManualDistanceKm);
+
+        var next = await service.UpsertManualAsync(vehicle.Id, new DateOnly(2026, 10, 31), new UpsertManualVehicleDistanceRequest(30, null, null, null), ct);
+        Assert.True(next.IsSuccess, next.Error.Description);
+        Assert.Equal(30, vehicle.CurrentOdometer);
+        Assert.Equal(10m, next.Value!.ManualDistanceKm);
+        Assert.Equal(100m, (await db.VehicleDailyDistances.SingleAsync(x => x.WorkDate == new DateOnly(2026, 10, 29), ct)).EffectiveOdometerAfterKm);
+    }
+
+    [Fact]
+    public void CorrectionRemainsEffectiveWhenEarlierDaysAreRecalculated()
+    {
+        var correction = new VehicleDailyDistance { ManualOdometerReading = 20, IsOdometerCorrection = true, GpsDistanceKm = 5 };
+        var next = new VehicleDailyDistance { ManualOdometerReading = 30 };
+        Assert.True(VehicleDailyDistanceRules.TryRecalculate([correction, next], 100, out var effective));
+        Assert.Equal(5m, correction.AppliedDistanceKm);
+        Assert.Equal(20m, correction.EffectiveOdometerAfterKm);
+        Assert.Equal(10m, next.ManualDistanceKm);
+        Assert.Equal(30m, effective);
+    }
     [Fact]
     public async Task GpsImportUpdatesVehicleOdometerAndCorrectionAppliesOnlyTheDelta()
     {

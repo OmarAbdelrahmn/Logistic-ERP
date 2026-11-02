@@ -75,14 +75,24 @@ public sealed partial class NinjaWorkflowTests
         var assigned = Value(await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, new(2026, 10, 12), "0501111111", "initial", RiderType: "InternalCar", PaymentModel: "PayPerOrder"), ct));
         var changed = Value(await f.Service.SetAccountStatusAsync(f.Account.Id, new(status, assigned.Credentials.RowVersion, "  Admin choice  "), ct));
         Assert.Equal(status, changed.Status); Assert.Equal("Admin choice", changed.StatusReason);
+        Assert.True(changed.IsAssigned);
+        Assert.Null(changed.IsValidForOperation);
+        Assert.Equal("Pending", changed.OperationalValidity);
+        Assert.Equal("لم يبدأ التقييم", changed.OperationalValidityAr);
+        Assert.Equal("Company", changed.VehicleOwnership);
         Assert.Equal(f.Rider.Id, changed.ActualRiderProfileId); Assert.False(f.Account.IsDeleted);
         Value(await f.Service.ReturnAsync(f.Account.Id, new(new(2026, 10, 12), "0502222222", null, "Return", assigned.Assignment.RowVersion), ct));
         var returned = Value(await f.Service.GetAccountAsync(f.Account.Id, ct));
         Assert.Equal(status, returned.Status); Assert.Equal("Admin choice", returned.StatusReason); Assert.Null(returned.ActualRider);
+        Assert.False(returned.IsAssigned);
+        Assert.Null(returned.IsValidForOperation);
+        Assert.Null(returned.VehicleOwnership);
+        Assert.Null(returned.VehicleType);
         Assert.Equal(changed.Owner, returned.Owner); Assert.Single(f.Db.RiderClientAssignments);
         Assert.True((await f.Service.AssignAsync(f.Account.Id, new(f.Rider.Id, new(2026, 10, 12), "0501111111", RiderType: "InternalCar", PaymentModel: "PayPerOrder"), ct)).IsFailure);
         var active = Value(await f.Service.SetAccountStatusAsync(f.Account.Id, new("Active", returned.RowVersion), ct));
         Assert.Equal("Available", active.Status); Assert.Null(active.StatusReason);
+        Assert.Null(active.IsValidForOperation);
     }
 
     [Fact]

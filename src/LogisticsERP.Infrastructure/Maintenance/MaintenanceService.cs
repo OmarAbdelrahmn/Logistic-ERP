@@ -18,17 +18,20 @@ internal sealed partial class MaintenanceService : IMaintenanceService
     private readonly ICurrentUser currentUser;
     private readonly TimeProvider timeProvider;
     private readonly IPrivateFileStorage fileStorage;
+    private readonly LogisticsERP.Application.Authorization.IPermissionChecker? oilPermissionChecker;
 
     public MaintenanceService(
         ApplicationDbContext dbContext,
         ICurrentUser currentUser,
         TimeProvider timeProvider,
-        IPrivateFileStorage fileStorage)
+        IPrivateFileStorage fileStorage,
+        LogisticsERP.Application.Authorization.IPermissionChecker? oilPermissionChecker = null)
     {
         this.dbContext = dbContext;
         this.currentUser = currentUser;
         this.timeProvider = timeProvider;
         this.fileStorage = fileStorage;
+        this.oilPermissionChecker = oilPermissionChecker;
     }
 
     public async Task<Result<IReadOnlyList<MaintenanceLocationResponse>>> GetLocationsAsync(CancellationToken cancellationToken = default)

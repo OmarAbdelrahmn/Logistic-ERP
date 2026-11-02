@@ -237,7 +237,15 @@ public sealed record OilBarrelVehicleUsageResponse(
 public sealed record OilBarrelUsageResponse(
     OilBarrelResponse Barrel, decimal TotalIssuedLiters, decimal TotalReversedLiters,
     decimal NetUsedLiters, IReadOnlyList<OilBarrelVehicleUsageResponse> Vehicles,
-    int Page, int PageSize, int TotalCount);
+    int Page, int PageSize, int TotalCount,
+    IReadOnlyList<OilBarrelUsageLossEntryResponse> LossEntries,
+    int LossPage, int LossPageSize, int LossTotalCount);
+
+public sealed record OilBarrelUsageLossEntryResponse(
+    Guid Id, DateTimeOffset OccurredAtUtc, decimal QuantityLiters, decimal CostAmount,
+    string Reason, OilBarrelMissingReason? MissingReason, Guid? ResponsibleInventoryLocationId,
+    Guid RecordedByUserId, DateTimeOffset RecordedAtUtc, Guid StockMovementId, Guid StockMovementLineId,
+    Guid? CorrectionRevisionId = null);
 
 public sealed record OpenOilBarrelResponse(
     OilBarrelResponse Barrel,
@@ -447,7 +455,7 @@ public sealed record MaintenanceMaterialUsageResponse(
     InventoryAttributionStatus AttributionStatus,
     DateTimeOffset UsedAtUtc,
     Guid? ReversalOfUsageId,
-    IReadOnlyList<StockCostAllocationResponse> CostAllocations);
+    IReadOnlyList<StockCostAllocationResponse> CostAllocations, DateTimeOffset? EffectiveServiceAtUtc = null);
 
 public sealed record ReverseMaterialUsageRequest(DateTimeOffset ReversedAtUtc, string Reason);
 
@@ -512,7 +520,7 @@ public sealed record DirectOilChangeRequest(
     string? Notes,
     string VehicleRowVersion);
 
-public sealed record CorrectCompletedOilChangeVehicleRequest(Guid VehicleId, string Reason);
+public sealed record CorrectCompletedOilChangeVehicleRequest(Guid VehicleId, string Reason, string? RowVersion = null);
 
 public sealed record DirectOilInventoryLocationResponse(
     Guid InventoryLocationId,
@@ -544,7 +552,8 @@ public sealed record OilChangeResponse(
     decimal OtherCost,
     decimal TotalCost,
     Guid? VehicleId,
-    Guid? RiderProfileId);
+    Guid? RiderProfileId,
+    string? RowVersion = null, bool IsCancelled = false, int RevisionNumber = 0);
 
 public sealed record OilChangeReportResponse(
     Guid Id, Guid? MaintenanceWorkOrderId, Guid? VehicleId, string? VehicleAssetNumber,
@@ -552,7 +561,8 @@ public sealed record OilChangeReportResponse(
     Guid OilInventoryItemId, decimal OilQuantityLiters, decimal OilCost,
     bool OilFilterChanged, Guid? OilFilterInventoryItemId, decimal OilFilterCost,
     decimal LaborCost, decimal OtherCost, decimal TotalCost,
-    Guid OilMaterialUsageId, Guid? OilFilterMaterialUsageId, Guid PerformedByUserId, string? Notes);
+    Guid OilMaterialUsageId, Guid? OilFilterMaterialUsageId, Guid PerformedByUserId, string? Notes,
+    string? RowVersion = null, bool IsCancelled = false, int RevisionNumber = 0);
 
 public sealed record OilReminderResponse(
     Guid VehicleId,

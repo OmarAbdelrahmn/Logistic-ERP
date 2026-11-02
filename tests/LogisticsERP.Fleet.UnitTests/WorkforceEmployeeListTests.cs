@@ -14,6 +14,56 @@ namespace LogisticsERP.Fleet.UnitTests;
 public sealed class WorkforceEmployeeListTests
 {
     [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task ReactivationRestoresTerminatedEmployeesAndRidersWithHistory(bool isEmployee)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var db = CreateContext();
+        await using var identity = CreateIdentityContext();
+        var person = CreatePerson("1234567890", "Person", isEmployee, EmployeeRelationshipType.SponsoredInternal);
+        person.SponsorId = Guid.NewGuid();
+        person.TerminationDate = new(2026, 1, 1);
+        person.StatusReason = "End of service";
+        db.Employees.Add(person);
+        if (!isEmployee) db.RiderProfiles.Add(new RiderProfile { EmployeeId = person.Id });
+        await db.SaveChangesAsync(ct);
+        var service = new WorkforceService(db, identity, new TestCurrentUser());
+        var date = new DateOnly(2026, 11, 1);
+
+        var result = await service.ReactivateEmployeeAsync(person.Id, new(date, "Return to work"), ct);
+
+        Assert.True(result.IsSuccess, result.Error.Description);
+        Assert.Equal(EmployeeStatus.Active, person.Status);
+        Assert.Null(person.TerminationDate);
+        Assert.Null(person.StatusReason);
+        var history = await db.EmployeeWorkHistory.SingleAsync(ct);
+        Assert.Equal("Terminated", history.OldValue);
+        Assert.Equal("Active", history.NewValue);
+        Assert.Equal(date, history.EffectiveDate);
+        Assert.Equal("Return to work", history.Reason);
+        var repeat = await service.ReactivateEmployeeAsync(person.Id, new(date, "Again"), ct);
+        Assert.Equal(HrErrors.Conflict.Code, repeat.Error.Code);
+        Assert.Single(await db.EmployeeWorkHistory.ToArrayAsync(ct));
+    }
+
+    [Fact]
+    public async Task ReactivationRequiresValidActivationData()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var db = CreateContext();
+        await using var identity = CreateIdentityContext();
+        var person = CreatePerson("1234567890", "Rider", false, EmployeeRelationshipType.SponsoredInternal);
+        db.Employees.Add(person);
+        await db.SaveChangesAsync(ct);
+        var result = await new WorkforceService(db, identity, new TestCurrentUser())
+            .ReactivateEmployeeAsync(person.Id, new(new(2026, 11, 1), "Return"), ct);
+        Assert.Equal(HrErrors.InvalidRequest.Code, result.Error.Code);
+        Assert.Equal(EmployeeStatus.Terminated, person.Status);
+        Assert.Empty(await db.EmployeeWorkHistory.ToArrayAsync(ct));
+    }
+
+    [Theory]
     [InlineData(false)]
     [InlineData(true)]
     public async Task EmployeeRiderProfileProvisioningIsIdempotentAndPreservesEmployeeData(bool existingProfile)

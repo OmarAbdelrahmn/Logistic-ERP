@@ -2,13 +2,24 @@
 
 ## Shared contract
 
-Both endpoints require authentication and `fleet.daily_distances.read`. Responses use camelCase JSON and numeric enums. They are read-only and use existing daily-distance records; no database migration is required.
+All endpoints require authentication and `fleet.daily_distances.read`. Responses use camelCase JSON and numeric enums. They are read-only and use existing daily-distance records; no database migration is required for this report.
 
 `fromDate` and `toDate` are required query parameters in `yyyy-MM-dd` format. Both dates are included, with a maximum of **366 calendar days**. These are the existing `workDate` calendar dates used by the GPS/manual distance module. Do not convert date strings into UTC instants or shift them when displaying them.
 
 A recorded day has an applied GPS or manual distance. **Zero kilometers is a valid recorded day.** A day is missing when there is no nondeleted daily row, or its `appliedSource` is `None` (neither usable source). A GPS-only gap with usable manual distance is covered. Soft-deleted vehicles and daily rows are excluded.
 
 GPS takes priority when both sources exist. Show GPS and manual values side by side, but use `appliedTotalKm` for the actual period distance. Adding the GPS and manual totals would double-count days with both sources. Manual odometer readings are cumulative meter readings; `manualDistanceKm` is the calculated distance for that day.
+
+## All vehicles with readings in the period
+
+```http
+GET /api/vehicle-daily-distances/reports/vehicles?fromDate=2026-10-01&toDate=2026-10-31&page=1&pageSize=20
+Authorization: Bearer <token>
+```
+
+The response is `{ "fromDate": "2026-10-01", "toDate": "2026-10-31", "page": 1, "pageSize": 20, "totalCount": 42, "items": [...] }`. Each item has exactly the same structure as the single-vehicle response below, including its vehicle, totals and an entry for every date in `days`. Vehicle identity also includes nullable `serialNumber`. Use each item to render one section like the single-vehicle report, including missing dates.
+
+Only nondeleted vehicles with at least one nondeleted day whose applied source is GPS or manual in the period appear; a zero-distance reading qualifies. All current operational statuses and vehicle types are included. Vehicles with no usable distance in the period do not appear. Sort order is asset number then vehicle ID. Paging is by vehicle: `page` defaults to 1 and `pageSize` defaults to 20 (maximum 100). Request subsequent pages until all `totalCount` vehicles have been loaded; do not assume one page contains the whole fleet. Invalid date ranges use the same error as the single-vehicle report. The maximum range remains 366 inclusive days. GPS and manual data are not added together; use `appliedTotalKm`.
 
 ## 1. One vehicle: daily GPS and manual details
 

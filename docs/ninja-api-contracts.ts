@@ -99,7 +99,37 @@ export interface NinjaLifecycleResponse {
   credentials: NinjaCredentialResponse;
 }
 
+export interface NinjaAccountAttendanceResponse {
+  month: string;
+  firstDeliveryDate: DateOnly | null;
+  evaluatedFrom: DateOnly | null;
+  evaluatedThrough: DateOnly | null;
+  evaluatedDays: number;
+  qualifiedDays: number;
+  requiredQualifiedDays: number;
+  absentDays: number;
+  shortHoursDays: number;
+  /** Fraction from 0 to 1; null when there are no completed days. */
+  attendanceRate: number | null;
+  protectedDayAbsences: DateOnly[];
+  reasons: ("FirstDeliveryNotRecorded" | "NoCompletedDays" | "AttendanceBelow85Percent" | "LeaveOnProtectedDay")[];
+  status: "Valid" | "Invalid" | "Pending";
+}
+
 export interface NinjaAccountResponse extends MonthlyAccountUsage {
+  isAssigned: boolean;
+  assignmentStatus: "Assigned" | "Unassigned";
+  assignmentStatusAr: "مسند" | "غير مسند";
+  /** Monthly attendance compliance, independent of ERP status and operational blocks. */
+  attendance: NinjaAccountAttendanceResponse;
+  isValidForOperation: boolean | null;
+  operationalValidity: "Valid" | "Invalid" | "Pending";
+  operationalValidityAr: "صالح" | "غير صالح" | "لم يبدأ التقييم";
+  /** Only for current assignments with a recorded rider type. */
+  vehicleOwnership: "Company" | "Private" | null;
+  vehicleOwnershipAr: "مركبة شركة" | "مركبة خاصة" | null;
+  vehicleType: "Car" | "Motorcycle" | null;
+  vehicleTypeAr: "سيارة" | "دباب" | null;
   /** Latest decrypted password on GET reads with platform_credentials.read for this platform; otherwise null. */
   password: string | null;
   /** Current assignment type; null when unassigned or on an unclassified legacy assignment. */

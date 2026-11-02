@@ -358,6 +358,7 @@ internal sealed class OilBarrelUsageAllocationConfiguration : IEntityTypeConfigu
     public void Configure(EntityTypeBuilder<OilBarrelUsageAllocation> builder)
     {
         builder.ConfigureHistory("OilBarrelUsageAllocations", "maintenance");
+        builder.HasIndex(x => x.ReversalOfAllocationId).IsUnique().HasFilter("[ReversalOfAllocationId] IS NOT NULL");
         builder.Property(x => x.QuantityLiters).HasPrecision(18, 3);
         builder.HasOne<MaintenanceMaterialUsage>().WithMany().HasForeignKey(x => x.MaintenanceMaterialUsageId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<OilBarrel>().WithMany().HasForeignKey(x => x.OilBarrelId).OnDelete(DeleteBehavior.Restrict);
@@ -372,6 +373,7 @@ internal sealed class OilBarrelLossConfiguration : IEntityTypeConfiguration<OilB
     public void Configure(EntityTypeBuilder<OilBarrelLoss> builder)
     {
         builder.ConfigureHistory("OilBarrelLosses", "maintenance");
+        builder.HasOne<OilChangeRevision>().WithMany().HasForeignKey(x => x.CorrectionRevisionId).OnDelete(DeleteBehavior.Restrict);
         builder.Property(x => x.QuantityLiters).HasPrecision(18, 3);
         builder.Property(x => x.CostAmount).HasPrecision(18, 2);
         builder.Property(x => x.Reason).HasMaxLength(1000).IsRequired();
@@ -592,6 +594,7 @@ internal sealed class MaintenanceMaterialUsageConfiguration : IEntityTypeConfigu
         builder.HasOne<RiderVehicleAssignment>().WithMany().HasForeignKey(x => x.RiderVehicleAssignmentId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<RiderProfile>().WithMany().HasForeignKey(x => x.RiderProfileId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<MaintenanceMaterialUsage>().WithMany().HasForeignKey(x => x.ReversalOfUsageId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(x => x.ReversalOfUsageId).IsUnique().HasFilter("[ReversalOfUsageId] IS NOT NULL");
         builder.HasIndex(x => new { x.VehicleId, x.UsedAtUtc });
         builder.HasIndex(x => new { x.RiderProfileId, x.UsedAtUtc });
         builder.ToTable(table => table.HasCheckConstraint("CK_MaterialUsages_Values", "[Quantity] > 0 AND [TotalCost] >= 0"));
@@ -680,6 +683,10 @@ internal sealed class OilChangeOperationConfiguration : IEntityTypeConfiguration
     public void Configure(EntityTypeBuilder<OilChangeOperation> builder)
     {
         builder.ConfigureHistory("OilChangeOperations", "maintenance");
+        builder.Property(x => x.CancellationReason).HasMaxLength(1000);
+        builder.ToTable(t => t.HasCheckConstraint("CK_OilChangeOperations_Lifecycle",
+            "[RevisionNumber] >= 0 AND (([IsCancelled] = 0 AND [CancelledAtUtc] IS NULL AND [CancelledByUserId] IS NULL AND [CancellationReason] IS NULL) OR ([IsCancelled] = 1 AND [CancelledAtUtc] IS NOT NULL AND [CancelledByUserId] IS NOT NULL AND [CancellationReason] IS NOT NULL))"));
+        builder.Property(x => x.RowVersion).IsRowVersion();
         builder.Property(x => x.OilQuantityLiters).HasPrecision(9, 3);
         builder.Property(x => x.OilCost).HasPrecision(18, 2);
         builder.Property(x => x.OilFilterCost).HasPrecision(18, 2);
@@ -724,6 +731,7 @@ internal sealed class VehicleExpenseConfiguration : IEntityTypeConfiguration<Veh
         builder.HasOne<RiderVehicleAssignment>().WithMany().HasForeignKey(x => x.RiderVehicleAssignmentId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<RiderProfile>().WithMany().HasForeignKey(x => x.RiderProfileId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<VehicleExpense>().WithMany().HasForeignKey(x => x.ReversalOfExpenseId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(x => x.ReversalOfExpenseId).IsUnique().HasFilter("[ReversalOfExpenseId] IS NOT NULL");
         builder.HasIndex(x => new { x.VehicleId, x.OccurredOn });
         builder.HasIndex(x => new { x.RiderProfileId, x.OccurredOn });
     }
@@ -762,6 +770,7 @@ internal sealed class ExternalMaintenanceFinancialEntryConfiguration : IEntityTy
         builder.HasOne<MaintenanceWorkOrder>().WithMany().HasForeignKey(x => x.MaintenanceWorkOrderId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<Employee>().WithMany().HasForeignKey(x => x.MechanicEmployeeId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<ExternalMaintenanceFinancialEntry>().WithMany().HasForeignKey(x => x.ReversalOfEntryId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(x => x.ReversalOfEntryId).IsUnique().HasFilter("[ReversalOfEntryId] IS NOT NULL");
         builder.HasIndex(x => new { x.MaintenanceWorkOrderId, x.SourceType });
         builder.HasIndex(x => new { x.OccurredAtUtc, x.EntryType });
         builder.ToTable(table => table.HasCheckConstraint("CK_ExternalFinancialEntries_Reversal", "[ReversalOfEntryId] IS NOT NULL OR ([AmountBeforeTax] >= 0 AND [TaxAmount] >= 0 AND [TotalAmount] >= 0)"));
@@ -779,5 +788,23 @@ internal sealed class ExternalCustomerPaymentConfiguration : IEntityTypeConfigur
         builder.HasOne<ExternalCustomerPayment>().WithMany().HasForeignKey(x => x.ReversalOfPaymentId).OnDelete(DeleteBehavior.Restrict);
         builder.HasIndex(x => new { x.MaintenanceWorkOrderId, x.PaidAtUtc });
         builder.ToTable(table => table.HasCheckConstraint("CK_ExternalCustomerPayments_Amount", "[ReversalOfPaymentId] IS NOT NULL OR [Amount] > 0"));
+    }
+}
+
+internal sealed class OilChangeRevisionConfiguration : IEntityTypeConfiguration<OilChangeRevision>
+{
+    public void Configure(EntityTypeBuilder<OilChangeRevision> b)
+    {
+        b.ConfigureHistory("OilChangeRevisions", "maintenance");
+        b.Property(x => x.Action).HasMaxLength(20);
+        b.Property(x => x.IdempotencyKey).HasMaxLength(200);
+        b.Property(x => x.RequestHash).HasMaxLength(64);
+        b.Property(x => x.Reason).HasMaxLength(1000);
+        b.HasIndex(x => new { x.OilChangeOperationId, x.RevisionNumber }).IsUnique();
+        b.HasIndex(x => new { x.OilChangeOperationId, x.IdempotencyKey }).IsUnique();
+        b.HasOne<OilChangeOperation>().WithMany().HasForeignKey(x => x.OilChangeOperationId).OnDelete(DeleteBehavior.Restrict);
+        b.HasOne<MaintenanceMaterialUsage>().WithMany().HasForeignKey(x => x.OldOilUsageId).OnDelete(DeleteBehavior.Restrict);
+        b.HasOne<MaintenanceMaterialUsage>().WithMany().HasForeignKey(x => x.OldFilterUsageId).OnDelete(DeleteBehavior.Restrict);
+        b.ToTable(t => t.HasCheckConstraint("CK_OilChangeRevisions_Number", "[RevisionNumber] > 0"));
     }
 }

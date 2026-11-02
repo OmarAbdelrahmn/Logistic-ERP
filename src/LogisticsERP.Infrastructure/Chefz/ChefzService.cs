@@ -85,8 +85,12 @@ internal sealed partial class ChefzService(ApplicationDbContext db, ICurrentUser
         var details = await db.ChefzAccountDetails.AsNoTracking().SingleOrDefaultAsync(d => d.PlatformRiderAccountId == accountId, ct);
         if (account is null) return Result.Failure<ChefzAccountResponse>(ChefzErrors.NotFound);
         var blocked = await RiderOperationalBlock.IsAccountBlocked(db, accountId, ct);
+        var history = await db.Set<ChefzAccountTypeChange>().AsNoTracking().Where(c => c.PlatformRiderAccountId == accountId)
+            .OrderBy(c => c.EffectiveFrom).ToArrayAsync(ct);
         return Result.Success(AccountResponse(account, details, await db.PlatformAccountCredentialVersions.AnyAsync(v => v.PlatformRiderAccountId == accountId, ct))
-            with { IsOperationallyBlocked = blocked, OperationalBlockReason = blocked ? RiderOperationalBlock.Reason : null });
+            with { IsOperationallyBlocked = blocked, OperationalBlockReason = blocked ? RiderOperationalBlock.Reason : null,
+                AccountTypeHistory = history.Select(c => new ChefzAccountTypeChangeResponse(c.PreviousType.ToString(),
+                    c.AccountType.ToString(), c.EffectiveFrom.AddDays(-1), c.EffectiveFrom)).ToArray() });
     }
 
     public async Task<Result<ChefzAccountResponse>> SaveAccountAsync(Guid accountId, ChefzAccountDetailsRequest request, CancellationToken ct = default)
@@ -110,12 +114,30 @@ internal sealed partial class ChefzService(ApplicationDbContext db, ICurrentUser
         var details = await db.ChefzAccountDetails.SingleOrDefaultAsync(d => d.PlatformRiderAccountId == accountId, ct);
         if (details is not null && !HrServiceSupport.MatchesRowVersion(details.RowVersion, request.RowVersion))
             return Result.Failure<ChefzAccountResponse>(ChefzErrors.Conflict("تم تعديل البيانات؛ أعد تحميل الحساب."));
+        ChefzAccountTypeChange? typeChange = null;
+        if (details is not null && details.AccountType != type)
+        {
+            var today = DateOnly.FromDateTime(clock.GetUtcNow().ToOffset(TimeSpan.FromHours(3)).DateTime);
+            var changeDate = request.AccountTypeChangeDate ?? today;
+            if (changeDate > today || changeDate == DateOnly.MaxValue)
+                return Result.Failure<ChefzAccountResponse>(ChefzErrors.Invalid("تاريخ التحويل يجب ألا يكون مستقبلياً."));
+            var effective = changeDate.AddDays(1);
+            if (await db.Set<ChefzAccountTypeChange>().AnyAsync(c =>
+                c.PlatformRiderAccountId == accountId && c.EffectiveFrom >= effective, ct))
+                return Result.Failure<ChefzAccountResponse>(ChefzErrors.Invalid("تاريخ التحويل يجب ألا يكون مستقبلياً ويجب أن يلي آخر تحويل مسجل."));
+            if (await db.ChefzWalletSettlements.AnyAsync(s => s.PlatformRiderAccountId == accountId && s.ChargedTo >= effective, ct))
+                return Result.Failure<ChefzAccountResponse>(ChefzErrors.Conflict("تاريخ التحويل يتداخل مع تصفية محفوظة؛ اختر تاريخاً بعد آخر يوم تمت تصفيته."));
+            typeChange = new() { PlatformRiderAccountId = accountId, PreviousType = details.AccountType,
+                AccountType = type, EffectiveFrom = effective };
+        }
         if (type == ChefzAccountType.FullTime && (details is null || details.AccountType != ChefzAccountType.FullTime))
         {
             var assignments = await db.RiderClientAssignments.AsNoTracking().Where(a => a.PlatformRiderAccountId == accountId
                 && a.Status != RiderAssignmentStatus.Cancelled).ToArrayAsync(ct);
+            var fullTimeFrom = typeChange?.EffectiveFrom ?? DateOnly.MinValue;
             if (assignments.Any(a => assignments.Any(b => b.Id != a.Id && a.EffectiveFrom <= (b.EffectiveTo ?? DateOnly.MaxValue)
-                && b.EffectiveFrom <= (a.EffectiveTo ?? DateOnly.MaxValue))))
+                && b.EffectiveFrom <= (a.EffectiveTo ?? DateOnly.MaxValue)
+                && (a.EffectiveTo ?? DateOnly.MaxValue) >= fullTimeFrom && (b.EffectiveTo ?? DateOnly.MaxValue) >= fullTimeFrom)))
                 return Result.Failure<ChefzAccountResponse>(ChefzErrors.Conflict("Cannot convert an account with shared-day assignments to FullTime."));
         }
         if (details is null)
@@ -124,6 +146,7 @@ internal sealed partial class ChefzService(ApplicationDbContext db, ICurrentUser
             db.ChefzAccountDetails.Add(details);
         }
         details.AccountType = type;
+        if (typeChange is not null) db.Set<ChefzAccountTypeChange>().Add(typeChange);
         details.ReportIdNumber = reportId;
         if (request.VehicleType is not null) details.VehicleType = request.VehicleType;
         // Workbook metadata must not override an admin's lifecycle selection.
@@ -167,7 +190,8 @@ internal sealed partial class ChefzService(ApplicationDbContext db, ICurrentUser
         s.PlatformRiderAccountId, s.RiderClientAssignmentId, s.RiderProfileId, s.AccountType.ToString(),
         s.PeriodFrom, s.PeriodTo, s.ChargedFrom, s.ChargedTo, s.AssignedDays, s.StartWalletAmount,
         s.EndWalletAmount, s.GrossEarnings, s.CommissionRate, s.DailyFee, s.CompanyAmount, s.RiderAmount,
-        s.Source, s.ImportId, s.SourceRows, s.DeliveryFees, s.VatAmount, s.Tips, s.Compensation, s.Bonuses, s.Deductions);
+        s.Source, s.ImportId, s.SourceRows, s.DeliveryFees, s.VatAmount, s.Tips, s.Compensation, s.Bonuses, s.Deductions)
+        { FullTimeDays = s.FullTimeDays, FreelancerCommissionBase = s.FreelancerCommissionBase };
 
     private sealed record RiderIdentity(Guid RiderProfileId, string RiderName, string? RiderIqamaNo, string? RiderIban);
 
@@ -220,6 +244,29 @@ internal sealed partial class ChefzService(ApplicationDbContext db, ICurrentUser
         {
             var settlement = ChefzRules.Calculate(details.AccountType, request.Year, request.Month, request.Half,
                 assignment.EffectiveFrom, assignment.EffectiveTo, request.StartWalletAmount, request.EndWalletAmount);
+            var changes = await db.Set<ChefzAccountTypeChange>().AsNoTracking()
+                .Where(c => c.PlatformRiderAccountId == assignment.PlatformRiderAccountId).ToArrayAsync(ct);
+            var segments = ChefzAccountTypeTimeline.Split(details.AccountType, changes, settlement.ChargedFrom, settlement.ChargedTo);
+            if (segments.Length == 1)
+                settlement = ChefzRules.Calculate(segments[0].Type, request.Year, request.Month, request.Half,
+                    assignment.EffectiveFrom, assignment.EffectiveTo, request.StartWalletAmount, request.EndWalletAmount);
+            else
+            {
+                settlement.AccountType = segments[^1].Type;
+                decimal previous = request.StartWalletAmount, freelancerBase = 0;
+                for (var i = 0; i < segments.Length; i++)
+                {
+                    var end = request.EndWalletAmount;
+                    if (i < segments.Length - 1 && (request.WalletAmountsAtTypeChanges is null ||
+                        !request.WalletAmountsAtTypeChanges.TryGetValue(segments[i + 1].From, out end)))
+                        return Result.Failure<ChefzWalletSettlement>(ChefzErrors.Invalid("أدخل رصيد المحفظة بنهاية يوم التحويل (بداية اليوم التالي) لحساب نسبة الفترة السابقة بدقة."));
+                    if (end < previous || end > request.EndWalletAmount || decimal.Round(end, 2) != end)
+                        return Result.Failure<ChefzWalletSettlement>(ChefzErrors.Invalid("أرصدة التحويل يجب أن تكون متزايدة وبين رصيدي بداية ونهاية الفترة وبحد أقصى منزلتين عشريتين."));
+                    if (segments[i].Type == ChefzAccountType.Freelancer) freelancerBase += end - previous;
+                    previous = end;
+                }
+                ChefzAccountTypeTimeline.ApplyMixed(settlement, segments.Where(s => s.Type == ChefzAccountType.FullTime).Sum(s => s.Days), freelancerBase);
+            }
             settlement.PlatformRiderAccountId = assignment.PlatformRiderAccountId;
             settlement.RiderClientAssignmentId = assignment.Id;
             settlement.RiderProfileId = assignment.RiderProfileId;
@@ -240,6 +287,9 @@ internal sealed partial class ChefzService(ApplicationDbContext db, ICurrentUser
     public async Task<Result<ChefzSettlementResponse>> SaveSettlementAsync(ChefzSettlementRequest request, CancellationToken ct = default)
     {
         if (!await Allowed(PermissionKeys.Chefz.SettlementsCreate, ct)) return Result.Failure<ChefzSettlementResponse>(ChefzErrors.Forbidden);
+        var accountId = await db.RiderClientAssignments.AsNoTracking().Where(a => a.Id == request.AssignmentId)
+            .Select(a => a.PlatformRiderAccountId).SingleOrDefaultAsync(ct);
+        await using var accountScope = await PlatformAccountWriteScope.AcquireAsync(db, [accountId], ct);
         var result = await Calculate(request, ct);
         if (result.IsFailure) return Result.Failure<ChefzSettlementResponse>(result.Error);
         var settlement = result.Value!;
@@ -247,6 +297,7 @@ internal sealed partial class ChefzService(ApplicationDbContext db, ICurrentUser
             && s.PeriodFrom == settlement.PeriodFrom, ct);
         if (existing is not null)
             return existing.Source == "Wallet" && existing.StartWalletAmount == request.StartWalletAmount && existing.EndWalletAmount == request.EndWalletAmount
+                && existing.CompanyAmount == settlement.CompanyAmount && existing.FreelancerCommissionBase == settlement.FreelancerCommissionBase
                 ? Result.Success(await SettlementWithSponsor(existing, ct))
                 : Result.Failure<ChefzSettlementResponse>(ChefzErrors.Conflict("تم حفظ تصفية لهذه الفترة؛ لا يمكن تكرارها بمبالغ مختلفة."));
         // Do not freeze future days on an assignment that is still in progress.

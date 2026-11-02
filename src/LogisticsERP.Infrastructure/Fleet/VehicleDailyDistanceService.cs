@@ -166,7 +166,7 @@ internal sealed partial class VehicleDailyDistanceService(
             return Result.Failure<VehicleDailyDistanceResponse>(FleetErrors.ManualBaselineRequired);
         }
 
-        var recalculation = await RecalculateMileageAsync(vehicle, workDate, explicitBaseline, cancellationToken);
+        var recalculation = await RecalculateMileageAsync(vehicle, workDate, explicitBaseline, cancellationToken, current);
         if (recalculation.IsFailure)
         {
             return Result.Failure<VehicleDailyDistanceResponse>(recalculation.Error);
@@ -465,7 +465,8 @@ internal sealed partial class VehicleDailyDistanceService(
         Vehicle vehicle,
         DateOnly fromWorkDate,
         decimal? explicitBaseline,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        VehicleDailyDistance? correctedReading = null)
     {
         var persisted = await dbContext.VehicleDailyDistances
             .Where(x => x.VehicleId == vehicle.Id && x.WorkDate >= fromWorkDate)
@@ -482,11 +483,16 @@ internal sealed partial class VehicleDailyDistanceService(
             .OrderBy(x => x.WorkDate)
             .ToArray();
 
-        var previousAffectedTotal = affected.Sum(x => x.AppliedDistanceKm);
-        var runningOdometer = explicitBaseline
-            ?? Math.Max(0m, vehicle.TrackedDistanceKm - previousAffectedTotal);
+        var runningOdometer = vehicle.TrackedDistanceKm;
+        foreach (var distance in affected.Reverse())
+        {
+            runningOdometer = distance.IsOdometerCorrection && distance.ManualBaselineOdometerReading.HasValue
+                ? distance.ManualBaselineOdometerReading.Value
+                : Math.Max(0m, runningOdometer - distance.AppliedDistanceKm);
+        }
+        runningOdometer = explicitBaseline ?? runningOdometer;
 
-        if (!VehicleDailyDistanceRules.TryRecalculate(affected, runningOdometer, out runningOdometer))
+        if (!VehicleDailyDistanceRules.TryRecalculate(affected, runningOdometer, out runningOdometer, correctedReading))
         {
             return Result.Failure(FleetErrors.InvalidManualOdometer);
         }
@@ -542,7 +548,8 @@ internal sealed partial class VehicleDailyDistanceService(
             distance?.ManualEnteredAtUtc,
             distance?.ManualEnteredByUserId,
             distance?.ManualNotes,
-            distance is null ? null : FleetServiceSupport.EncodeRowVersion(distance.RowVersion));
+            distance is null ? null : FleetServiceSupport.EncodeRowVersion(distance.RowVersion),
+            distance?.IsOdometerCorrection ?? false);
 
     private static Dictionary<string, List<Vehicle>> BuildVehiclePlateIndex(IEnumerable<Vehicle> vehicles)
     {

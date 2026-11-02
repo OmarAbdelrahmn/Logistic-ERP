@@ -18,6 +18,8 @@ public sealed class VehicleOperationalStatusPeriod : AuditableEntity
 
 public sealed class VehicleOdometerReading : HistoryEntity
 {
+    public bool IsVoided { get; set; }
+    public Guid? VoidedByRevisionId { get; set; }
     public Guid VehicleId { get; set; }
     public long Reading { get; set; }
     public DateTimeOffset RecordedAtUtc { get; set; }

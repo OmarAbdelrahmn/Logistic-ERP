@@ -341,7 +341,7 @@ internal sealed partial class MaintenanceService
     private async Task<Result> RestoreOilBarrelsAsync(
         Guid originalUsageId,
         Guid reversalUsageId,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken, bool closedBarrelWaste = false)
     {
         var allocations = await dbContext.OilBarrelUsageAllocations.AsNoTracking()
             .Where(x => x.MaintenanceMaterialUsageId == originalUsageId && x.Direction == MaintenanceUsageDirection.Issue)
@@ -352,7 +352,23 @@ internal sealed partial class MaintenanceService
         foreach (var allocation in allocations)
         {
             var barrel = barrels[allocation.OilBarrelId];
+            if (closedBarrelWaste && barrel.Status is OilBarrelStatus.Depleted or OilBarrelStatus.Returned)
+            {
+                dbContext.OilBarrelUsageAllocations.Add(new OilBarrelUsageAllocation
+                {
+                    MaintenanceMaterialUsageId = reversalUsageId, OilBarrelId = barrel.Id,
+                    QuantityLiters = allocation.QuantityLiters, Direction = MaintenanceUsageDirection.Reversal,
+                    ReversalOfAllocationId = allocation.Id
+                });
+                continue;
+            }
             if (barrel.Status == OilBarrelStatus.Returned || barrel.RemainingLiters + allocation.QuantityLiters > barrel.NominalCapacityLiters)
+                return Result.Failure(MaintenanceErrors.InvalidState);
+            if (dbContext.OilBarrels.Local.Any(x => x.Id != barrel.Id
+                && x.InventoryLocationId == barrel.InventoryLocationId && x.InventoryItemId == barrel.InventoryItemId
+                && (barrel.AllowBothVehicleTypes || x.AllowBothVehicleTypes || x.AllowedVehicleType == null
+                    || barrel.AllowedVehicleType == null || x.AllowedVehicleType == barrel.AllowedVehicleType)
+                && x.Status == OilBarrelStatus.Open))
                 return Result.Failure(MaintenanceErrors.InvalidState);
             if (await dbContext.OilBarrels.AnyAsync(x => x.Id != barrel.Id
                 && x.InventoryLocationId == barrel.InventoryLocationId && x.InventoryItemId == barrel.InventoryItemId

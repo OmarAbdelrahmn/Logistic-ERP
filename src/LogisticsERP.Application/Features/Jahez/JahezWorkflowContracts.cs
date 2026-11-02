@@ -73,7 +73,14 @@ public sealed record JahezAccountRow(Guid AccountId, string Code, string Externa
 }
 public sealed record JahezAccountsPage(IReadOnlyList<JahezAccountRow> Items, int Page, int PageSize, int TotalCount);
 public sealed record JahezSettlementReminder(Guid HandoverId, Guid AccountId, string ExternalAccountId,
-    Guid RiderProfileId, string? RiderName, DateTimeOffset ReminderAnchorAtUtc, int DaysSinceSettlement);
+    Guid RiderProfileId, string? RiderName, DateTimeOffset ReminderAnchorAtUtc, int DaysSinceSettlement)
+{
+    public decimal AdministrativeDebt { get; init; }
+    public bool IsAssigned { get; init; }
+    public DateOnly? LastOrderDate { get; init; }
+    public int? DaysWithoutOrders { get; init; }
+    public bool NoOrdersForThreeDays { get; init; }
+}
 public sealed record JahezSponsorStatistics(Guid SponsorId, string NameAr, int Accounts, int AssignedAccounts,
     int ActualRiders, int SponsoredRiders, int SponsoredRidersUsingOtherSponsorsAccounts);
 public sealed record JahezAccountStatistics(DateOnly Yesterday, int TotalAccounts, int ActiveAccounts,

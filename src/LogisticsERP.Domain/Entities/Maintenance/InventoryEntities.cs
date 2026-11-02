@@ -228,6 +228,7 @@ public sealed class OilBarrelUsageAllocation : HistoryEntity
 
 public sealed class OilBarrelLoss : HistoryEntity
 {
+    public Guid? CorrectionRevisionId { get; set; }
     public OilBarrelMissingReason? MissingReason { get; set; }
     public Guid? ResponsibleInventoryLocationId { get; set; }
     public Guid OilBarrelId { get; set; }

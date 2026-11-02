@@ -18,6 +18,10 @@ public sealed record NinjaCredentialResponse(Guid AccountId, string? PhoneNumber
 public sealed record NinjaLifecycleResponse(SimplePlatformAssignmentResponse Assignment, NinjaCredentialResponse Credentials);
 public sealed record NinjaPersonResponse(Guid EmployeeId, string NameAr, string? NameEn, string? PhoneNumber, string? IqamaNo);
 public sealed record NinjaAccountStatusRequest(string Status, string RowVersion, string? Reason = null);
+public sealed record NinjaAccountAttendanceResponse(string Month, DateOnly? FirstDeliveryDate, DateOnly? EvaluatedFrom,
+    DateOnly? EvaluatedThrough, int EvaluatedDays, int QualifiedDays, int RequiredQualifiedDays, int AbsentDays,
+    int ShortHoursDays, decimal? AttendanceRate, IReadOnlyList<DateOnly> ProtectedDayAbsences,
+    IReadOnlyList<string> Reasons, string Status);
 public sealed record NinjaAccountResponse(Guid AccountId, string CaptainId, string Status, Guid? OwnerEmployeeId,
     Guid? ActualRiderProfileId, string? PhoneNumber, bool HasPassword, DateTimeOffset? PasswordChangeAllowedAtUtc, string RowVersion,
     Guid? CurrentAssignmentId = null, string? AssignmentRowVersion = null) : LogisticsERP.Application.Features.Hr.IMonthlyAccountUsageResponse
@@ -31,6 +35,42 @@ public sealed record NinjaAccountResponse(Guid AccountId, string CaptainId, stri
     public NinjaPersonResponse? ActualRider { get; init; }
     public string? Password { get; init; }
     public string? RiderType { get; init; }
+    public bool IsAssigned => CurrentAssignmentId.HasValue;
+    public string AssignmentStatus => IsAssigned ? "Assigned" : "Unassigned";
+    public string AssignmentStatusAr => IsAssigned ? "مسند" : "غير مسند";
+    public NinjaAccountAttendanceResponse? Attendance { get; init; }
+    public bool? IsValidForOperation => Attendance?.Status switch { "Valid" => true, "Invalid" => false, _ => null };
+    public string OperationalValidity => Attendance?.Status ?? "Pending";
+    public string OperationalValidityAr => OperationalValidity switch
+    {
+        "Valid" => "صالح",
+        "Invalid" => "غير صالح",
+        _ => "لم يبدأ التقييم"
+    };
+    public string? VehicleOwnership => !IsAssigned ? null : RiderType switch
+    {
+        "InternalCar" or "InternalMotorcycle" => "Company",
+        "ExternalCar" or "ExternalMotorcycle" => "Private",
+        _ => null
+    };
+    public string? VehicleOwnershipAr => VehicleOwnership switch
+    {
+        "Company" => "مركبة شركة",
+        "Private" => "مركبة خاصة",
+        _ => null
+    };
+    public string? VehicleType => !IsAssigned ? null : RiderType switch
+    {
+        "InternalCar" or "ExternalCar" => "Car",
+        "InternalMotorcycle" or "ExternalMotorcycle" => "Motorcycle",
+        _ => null
+    };
+    public string? VehicleTypeAr => VehicleType switch
+    {
+        "Car" => "سيارة",
+        "Motorcycle" => "دباب",
+        _ => null
+    };
     public string PaymentModel { get; init; } = string.Empty;
     public string? StatusReason { get; init; }
     public string Code { get; init; } = string.Empty;

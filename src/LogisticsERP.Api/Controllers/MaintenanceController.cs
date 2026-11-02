@@ -12,6 +12,69 @@ namespace LogisticsERP.Api.Controllers;
 [Route("api/maintenance")]
 public sealed class MaintenanceController(IMaintenanceService service) : ControllerBase
 {
+
+    [HttpGet("oil-changes/{id:guid}")]
+    [RequirePermission(PermissionKeys.Maintenance.OilRead)]
+    [RequirePermission(PermissionKeys.Inventory.StockRead)]
+    [RequirePermission(PermissionKeys.Inventory.CostLayersRead)]
+    public async Task<IActionResult> OilChangeDetails(Guid id, CancellationToken ct)
+    {
+        var result = await service.GetOilChangeDetailsAsync(id, ct);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpGet("oil-changes/{id:guid}/revisions")]
+    [RequirePermission(PermissionKeys.Maintenance.OilRead)]
+    [RequirePermission(PermissionKeys.Inventory.StockRead)]
+    [RequirePermission(PermissionKeys.Inventory.CostLayersRead)]
+    public async Task<IActionResult> OilChangeRevisions(Guid id, int page = 1, int pageSize = 50, CancellationToken ct = default)
+    {
+        var result = await service.GetOilChangeRevisionsAsync(id, page, pageSize, ct);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpPost("oil-changes/{id:guid}/corrections/preview")]
+    [RequirePermission(PermissionKeys.Maintenance.OilEdit)]
+    [RequirePermission(PermissionKeys.Inventory.StockMove)]
+    [RequirePermission(PermissionKeys.Inventory.CostLayersRead)]
+    public async Task<IActionResult> PreviewOilChangeEdit(Guid id, OilChangeEditRequest request, CancellationToken ct)
+    {
+        var result = await service.EditOilChangeAsync(id, request, string.Empty, true, ct);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpPut("oil-changes/{id:guid}")]
+    [RequirePermission(PermissionKeys.Maintenance.OilEdit)]
+    [RequirePermission(PermissionKeys.Inventory.StockMove)]
+    [RequirePermission(PermissionKeys.Inventory.CostLayersRead)]
+    public async Task<IActionResult> EditOilChange(Guid id, OilChangeEditRequest request,
+        [FromHeader(Name = "Idempotency-Key")] string? key, CancellationToken ct)
+    {
+        var result = await service.EditOilChangeAsync(id, request, key ?? string.Empty, false, ct);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpPost("oil-changes/{id:guid}/cancellation/preview")]
+    [RequirePermission(PermissionKeys.Maintenance.OilCancel)]
+    [RequirePermission(PermissionKeys.Inventory.StockAdjust)]
+    [RequirePermission(PermissionKeys.Inventory.CostLayersRead)]
+    public async Task<IActionResult> PreviewOilChangeCancel(Guid id, OilChangeCancelRequest request, CancellationToken ct)
+    {
+        var result = await service.CancelOilChangeAsync(id, request, string.Empty, true, ct);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
+    [HttpPost("oil-changes/{id:guid}/cancel")]
+    [RequirePermission(PermissionKeys.Maintenance.OilCancel)]
+    [RequirePermission(PermissionKeys.Inventory.StockAdjust)]
+    [RequirePermission(PermissionKeys.Inventory.CostLayersRead)]
+    public async Task<IActionResult> CancelOilChange(Guid id, OilChangeCancelRequest request,
+        [FromHeader(Name = "Idempotency-Key")] string? key, CancellationToken ct)
+    {
+        var result = await service.CancelOilChangeAsync(id, request, key ?? string.Empty, false, ct);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem(HttpContext);
+    }
+
     [HttpGet("plans")]
     [RequirePermission(PermissionKeys.Maintenance.WorkOrdersRead)]
     public async Task<IActionResult> GetPlans(CancellationToken cancellationToken)

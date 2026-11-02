@@ -71,7 +71,11 @@ public sealed partial class ChefzWorkflowTests
         f.Second.RowVersion = [1]; await f.Db.SaveChangesAsync(ct);
         Value(await f.Service.UpdateAssignmentStartDateAsync(f.Second.Id, new(new(2026, 10, 15), "AQ=="), ct));
         var details = f.Db.ChefzAccountDetails.Single();
-        Assert.True((await f.Service.SaveAccountAsync(f.Account.Id, new("FullTime", RowVersion: Convert.ToBase64String(details.RowVersion)), ct)).IsFailure);
+        details.RowVersion = [1];
+        await f.Db.SaveChangesAsync(ct);
+        Assert.True((await f.Service.SaveAccountAsync(f.Account.Id, new("FullTime", RowVersion: Convert.ToBase64String(details.RowVersion),
+            AccountTypeChangeDate: new(2026, 10, 14)), ct)).IsFailure);
+        Assert.True((await f.Service.SaveAccountAsync(f.Account.Id, new("FullTime", RowVersion: Convert.ToBase64String(details.RowVersion)), ct)).IsSuccess);
         Assert.Equal(new DateOnly(2026, 10, 15), f.Second.EffectiveFrom);
     }
 }

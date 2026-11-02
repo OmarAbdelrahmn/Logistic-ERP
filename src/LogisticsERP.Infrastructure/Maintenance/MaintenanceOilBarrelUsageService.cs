@@ -44,12 +44,18 @@ internal sealed partial class MaintenanceService
     }
 
     public async Task<Result<OilBarrelUsageResponse>> GetOilBarrelUsageAsync(Guid id,
-        int page, int pageSize, CancellationToken cancellationToken = default)
+        int page, int pageSize, int lossPage = 1, int lossPageSize = 50, CancellationToken cancellationToken = default)
     {
         var barrel = await dbContext.OilBarrels.AsNoTracking().SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (barrel is null) return Result.Failure<OilBarrelUsageResponse>(MaintenanceErrors.NotFound);
         var normalizedPage = Math.Max(1, page);
         var normalizedSize = Math.Clamp(pageSize <= 0 ? 50 : pageSize, 1, 200);
+        var normalizedLossPage = Math.Max(1, lossPage);
+        var normalizedLossSize = Math.Clamp(lossPageSize <= 0 ? 50 : lossPageSize, 1, 200);
+        var vehicleOffset = ((long)normalizedPage - 1) * normalizedSize;
+        var lossOffset = ((long)normalizedLossPage - 1) * normalizedLossSize;
+        if (vehicleOffset > int.MaxValue || lossOffset > int.MaxValue)
+            return Result.Failure<OilBarrelUsageResponse>(MaintenanceErrors.InvalidRequest);
         var query = from allocation in dbContext.OilBarrelUsageAllocations.AsNoTracking()
                     join usage in dbContext.MaintenanceMaterialUsages.AsNoTracking()
                         on allocation.MaintenanceMaterialUsageId equals usage.Id
@@ -71,7 +77,7 @@ internal sealed partial class MaintenanceService
                         VehicleType = vehicle == null ? external == null ? null : external.VehicleType : (VehicleType?)vehicle.VehicleType,
                         IssuedLiters = allocation.Direction == MaintenanceUsageDirection.Issue ? allocation.QuantityLiters : 0m,
                         ReversedLiters = allocation.Direction == MaintenanceUsageDirection.Reversal ? allocation.QuantityLiters : 0m,
-                        usage.UsedAtUtc,
+                        UsedAtUtc = usage.EffectiveServiceAtUtc ?? usage.UsedAtUtc,
                         allocation.Direction
                     };
         var issued = await query.SumAsync(x => x.IssuedLiters, cancellationToken);
@@ -93,12 +99,20 @@ internal sealed partial class MaintenanceService
         var count = await grouped.CountAsync(cancellationToken);
         var rows = await grouped.OrderByDescending(x => x.LastUsedAtUtc)
             .ThenBy(x => x.VehicleId).ThenBy(x => x.ExternalWorkOrderId)
-            .Skip((normalizedPage - 1) * normalizedSize).Take(normalizedSize).ToArrayAsync(cancellationToken);
+            .Skip((int)vehicleOffset).Take(normalizedSize).ToArrayAsync(cancellationToken);
+        var losses = dbContext.OilBarrelLosses.AsNoTracking().Where(x => x.OilBarrelId == id);
+        var lossTotalCount = await losses.CountAsync(cancellationToken);
+        var lossEntries = await losses.OrderByDescending(x => x.OccurredAtUtc).ThenByDescending(x => x.Id)
+            .Skip((int)lossOffset).Take(normalizedLossSize)
+            .Select(x => new OilBarrelUsageLossEntryResponse(x.Id, x.OccurredAtUtc, x.QuantityLiters,
+                x.CostAmount, x.Reason, x.MissingReason, x.ResponsibleInventoryLocationId,
+                x.RecordedByUserId, x.CreatedAtUtc, x.StockMovementId, x.StockMovementLineId, x.CorrectionRevisionId))
+            .ToArrayAsync(cancellationToken);
         return Result.Success(new OilBarrelUsageResponse(MapOilBarrel(barrel), issued, reversed,
             issued - reversed, rows.Select(x => new OilBarrelVehicleUsageResponse(
                 x.VehicleId, x.ExternalWorkOrderId, x.AssetNumber, x.PlateNumberAr, x.PlateNumberEn,
                 x.ExternalPlateOrReference, x.VehicleType, x.IssuedLiters, x.ReversedLiters,
                 x.IssuedLiters - x.ReversedLiters, x.IssueCount, x.LastUsedAtUtc)).ToArray(),
-            normalizedPage, normalizedSize, count));
+            normalizedPage, normalizedSize, count, lossEntries, normalizedLossPage, normalizedLossSize, lossTotalCount));
     }
 }

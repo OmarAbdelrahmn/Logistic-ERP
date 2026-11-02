@@ -6,6 +6,10 @@ namespace LogisticsERP.Application.Features.Fleet;
 
 public interface IVehicleDailyDistanceService
 {
+    Task<Result<VehicleDistancePeriodReportsPageResponse>> GetVehiclesPeriodReportsAsync(
+        DateOnly fromDate, DateOnly toDate, int page, int pageSize,
+        CancellationToken cancellationToken = default);
+
     Task<Result<VehicleDistancePeriodReportResponse>> GetVehiclePeriodReportAsync(
         Guid vehicleId, DateOnly fromDate, DateOnly toDate,
         CancellationToken cancellationToken = default);

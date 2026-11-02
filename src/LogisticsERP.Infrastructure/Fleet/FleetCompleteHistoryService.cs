@@ -200,12 +200,12 @@ internal sealed partial class FleetService
         foreach (var usage in usages)
         {
             itemNames.TryGetValue(usage.InventoryItemId, out var itemName);
-            Add(usage.UsedAtUtc, "material_usage", usage.UsageType.ToString(), usage.Id,
+            Add(usage.EffectiveServiceAtUtc ?? usage.UsedAtUtc, "material_usage", usage.UsageType.ToString(), usage.Id,
                 usage.VehicleId, usage.RiderProfileId, usage.RiderVehicleAssignmentId,
                 itemName ?? usage.InventoryItemId.ToString(),
                 new { usage.MaintenanceWorkOrderId, usage.InventoryItemId, usage.InventoryLocationId,
                     usage.Direction, usage.Quantity, usage.UnitOfMeasure, usage.TotalCost,
-                    usage.StockMovementId, usage.AttributionStatus, usage.ReversalOfUsageId, usage.Notes }, usage.UsedByUserId);
+                    usage.StockMovementId, usage.AttributionStatus, usage.ReversalOfUsageId, usage.Notes, usage.EffectiveServiceAtUtc, usage.UsedAtUtc }, usage.UsedByUserId);
         }
         var oilOperations = await dbContext.OilChangeOperations.IgnoreQueryFilters().AsNoTracking()
             .Where(x => vehicleId.HasValue ? x.VehicleId == vehicleId.Value : x.VehicleId.HasValue && vehicleIds.Contains(x.VehicleId.Value))
@@ -219,7 +219,20 @@ internal sealed partial class FleetService
                 new { oil.MaintenanceWorkOrderId, oil.OdometerAtChange, oil.VehicleTypeSnapshot,
                     oil.OilInventoryItemId, oil.OilQuantityLiters, oil.OilMaterialUsageId, oil.OilCost,
                     oil.OilFilterChanged, oil.OilFilterInventoryItemId, oil.OilFilterMaterialUsageId,
-                    oil.OilFilterCost, oil.OtherCost, oil.TotalCost, oil.PerformedByUserId, oil.Notes }, oil.PerformedByUserId);
+                    oil.OilFilterCost, oil.OtherCost, oil.TotalCost, oil.PerformedByUserId, oil.Notes, oil.IsCancelled, oil.RevisionNumber }, oil.PerformedByUserId);
+        }
+
+        var oilOperationIds = oilOperations.Select(x => x.Id).ToArray();
+        var oilRevisions = await dbContext.OilChangeRevisions.AsNoTracking()
+            .Where(x => oilOperationIds.Contains(x.OilChangeOperationId)).ToArrayAsync(ct);
+        foreach (var revision in oilRevisions)
+        {
+            var oil = oilOperations.Single(x => x.Id == revision.OilChangeOperationId);
+            var revisionRider = usages.FirstOrDefault(x => x.Id == oil.OilMaterialUsageId)?.RiderProfileId;
+            if (riderId.HasValue && revisionRider != riderId) continue;
+            Add(revision.PostedAtUtc, "oil_change_revision", revision.Action, revision.Id, oil.VehicleId,
+                revisionRider, null, revision.Reason, new { revision.OilChangeOperationId, revision.RevisionNumber,
+                    revision.BeforeJson, revision.AfterJson, revision.EffectsJson }, revision.ActorUserId);
         }
 
         var expenses = await dbContext.VehicleExpenses.IgnoreQueryFilters().AsNoTracking()
@@ -277,7 +290,7 @@ internal sealed partial class FleetService
             foreach (var reading in readings)
                 Add(reading.RecordedAtUtc, "odometer", reading.SourceType.ToString(), reading.Id,
                     vehicleId, null, null, $"{reading.Reading} km",
-                    new { reading.Reading, reading.SourceEntityId, reading.IsCorrection, reading.CorrectionReason, reading.Notes }, reading.CreatedByUserId);
+                    new { reading.Reading, reading.SourceEntityId, reading.IsCorrection, reading.CorrectionReason, reading.Notes, reading.IsVoided, reading.VoidedByRevisionId }, reading.CreatedByUserId);
             var corrections = await dbContext.VehicleIdentityCorrections.IgnoreQueryFilters().AsNoTracking()
                 .Where(x => x.VehicleId == vehicleId.Value).ToArrayAsync(ct);
             foreach (var correction in corrections)

@@ -17,7 +17,8 @@ internal sealed partial class ChefzService
         s.Id, s.PlatformRiderAccountId, s.DriverId, s.RiderClientAssignmentId, s.RiderProfileId,
         s.RiderName, s.AccountType.ToString(), s.PeriodFrom, s.PeriodTo, s.ChargedFrom, s.ChargedTo,
         s.AssignedDays, s.SourceRows, s.DeliveryFees, s.VatAmount, s.DeliveryFees - s.VatAmount,
-        s.Tips, s.Compensation, s.Bonuses, s.Deductions, s.GrossEarnings, s.CompanyAmount, s.RiderAmount);
+        s.Tips, s.Compensation, s.Bonuses, s.Deductions, s.GrossEarnings, s.CompanyAmount, s.RiderAmount)
+        { FullTimeDays = s.FullTimeDays, FreelancerCommissionBase = s.FreelancerCommissionBase };
 
     private async Task<ChefzOrderSettlementImportResponse> OrderImportResponse(Guid? id, bool preview,
         bool alreadyImported, int sourceRows, IReadOnlyList<ChefzWalletSettlement> settlements,
@@ -74,9 +75,12 @@ internal sealed partial class ChefzService
         // Driver ID identifies the platform account, never the payable employee.
         var details = await (from d in db.ChefzAccountDetails.AsNoTracking() join a in Accounts.AsNoTracking()
             on d.PlatformRiderAccountId equals a.Id where driverIds.Contains(d.ReportIdNumber) select d).ToArrayAsync(ct);
-        var byDriver = details.ToLookup(d => d.ReportIdNumber, StringComparer.Ordinal);
         var accountIds = details.Select(d => d.PlatformRiderAccountId).ToArray();
         await using var accountScope = await PlatformAccountWriteScope.AcquireAsync(db, accountIds, ct);
+        details = await db.ChefzAccountDetails.AsNoTracking().Where(d => accountIds.Contains(d.PlatformRiderAccountId)).ToArrayAsync(ct);
+        var byDriver = details.ToLookup(d => d.ReportIdNumber, StringComparer.Ordinal);
+        var typeChanges = await db.Set<ChefzAccountTypeChange>().AsNoTracking()
+            .Where(c => accountIds.Contains(c.PlatformRiderAccountId)).ToArrayAsync(ct);
         oldImport = await db.ChefzOrderSettlementImports.AsNoTracking().SingleOrDefaultAsync(i => i.ContentHash == hash, ct);
         if (oldImport is not null) return Result.Success(await ReadOrderImport(oldImport, preview, true, ct));
         var from = parsed.Rows.Min(r => ChefzRules.Period(r.Date.Year, r.Date.Month, r.Date.Day <= 15 ? 1 : 2).From);
@@ -120,9 +124,21 @@ internal sealed partial class ChefzService
             ct.ThrowIfCancellationRequested();
             var assignment = byAssignment[group.Key.AssignmentId];
             var detail = accountDetails[assignment.PlatformRiderAccountId];
-            var settlement = ChefzOrderSettlementRules.Calculate(detail.AccountType, group.Key.Year, group.Key.Month, group.Key.Half,
+            var period = ChefzRules.Period(group.Key.Year, group.Key.Month, group.Key.Half);
+            var chargedFrom = assignment.EffectiveFrom > period.From ? assignment.EffectiveFrom : period.From;
+            var chargedTo = assignment.EffectiveTo is { } end && end < period.To ? end : period.To;
+            var segments = ChefzAccountTypeTimeline.Split(detail.AccountType,
+                typeChanges.Where(c => c.PlatformRiderAccountId == assignment.PlatformRiderAccountId), chargedFrom, chargedTo);
+            var settlement = ChefzOrderSettlementRules.Calculate(segments[^1].Type, group.Key.Year, group.Key.Month, group.Key.Half,
                 assignment.EffectiveFrom, assignment.EffectiveTo, group.Count(), group.Sum(r => r.Row.DeliveryFees),
                 group.Sum(r => r.Row.Tips), group.Sum(r => r.Row.Compensation), group.Sum(r => r.Row.Bonuses), group.Sum(r => r.Row.Deductions));
+            if (segments.Length > 1)
+            {
+                var freelancerFees = group.Where(r => segments.Any(s => s.Type == ChefzAccountType.Freelancer
+                    && r.Row.Date >= s.From && r.Row.Date <= s.To)).Sum(r => r.Row.DeliveryFees);
+                ChefzAccountTypeTimeline.ApplyMixed(settlement, segments.Where(s => s.Type == ChefzAccountType.FullTime).Sum(s => s.Days),
+                    ChefzOrderSettlementRules.Money(freelancerFees / (1 + ChefzOrderSettlementRules.VatRate)));
+            }
             settlement.PlatformRiderAccountId = assignment.PlatformRiderAccountId;
             settlement.RiderClientAssignmentId = assignment.Id;
             settlement.RiderProfileId = assignment.RiderProfileId;
@@ -139,9 +155,12 @@ internal sealed partial class ChefzService
         var today = DateOnly.FromDateTime(clock.GetUtcNow().ToOffset(TimeSpan.FromHours(3)).DateTime);
         foreach (var s in pending)
         {
-            if (s.AccountType == ChefzAccountType.FullTime && byAccount[s.PlatformRiderAccountId].Any(a =>
-                a.Id != s.RiderClientAssignmentId && a.EffectiveFrom <= s.ChargedTo
-                && (a.EffectiveTo == null || a.EffectiveTo >= s.ChargedFrom)))
+            var fullTimeSegments = ChefzAccountTypeTimeline.Split(accountDetails[s.PlatformRiderAccountId].AccountType,
+                typeChanges.Where(c => c.PlatformRiderAccountId == s.PlatformRiderAccountId), s.ChargedFrom, s.ChargedTo)
+                .Where(segment => segment.Type == ChefzAccountType.FullTime);
+            if (fullTimeSegments.Any(segment => byAccount[s.PlatformRiderAccountId].Any(a =>
+                a.Id != s.RiderClientAssignmentId && a.EffectiveFrom <= segment.To
+                && (a.EffectiveTo == null || a.EffectiveTo >= segment.From))))
                 issues.Add(new(0, s.DriverId, "توجد تكليفات متداخلة خلال أيام رسوم الحساب الكامل؛ صحح التواريخ لمنع احتساب رسوم اليوم مرتين."));
             if (existingKeys.Contains((s.RiderClientAssignmentId, s.PeriodFrom)))
                 issues.Add(new(0, s.DriverId, $"توجد تصفية محفوظة للتكليف والفترة {s.PeriodFrom:yyyy-MM-dd}؛ لا يمكن تكرارها أو استبدالها."));

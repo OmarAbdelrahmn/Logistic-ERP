@@ -22,12 +22,14 @@ public sealed class OilBarrelUsageSqlTranslationTests
             .UseSqlServer("Server=invalid;Database=diagnostic;Trusted_Connection=True")
             .AddInterceptors(new NoConnection(), recorder).Options);
         var service = new MaintenanceService(db, new User(), TimeProvider.System, new Files());
-        var result = await service.GetOilBarrelUsageAsync(Guid.NewGuid(), 1, 50, TestContext.Current.CancellationToken);
+        var result = await service.GetOilBarrelUsageAsync(Guid.NewGuid(), 1, 50, cancellationToken: TestContext.Current.CancellationToken);
         Assert.True(result.IsSuccess);
-        Assert.Equal(5, recorder.Commands.Count);
+        Assert.Equal(7, recorder.Commands.Count);
         Assert.Contains("GROUP BY", recorder.Commands[3]);
         Assert.Contains("GROUP BY", recorder.Commands[4]);
         Assert.Contains("OFFSET", recorder.Commands[4]);
+        Assert.Contains("OilBarrelLosses", recorder.Commands[5]);
+        Assert.Contains("OFFSET", recorder.Commands[6]);
     }
     private sealed class NoConnection : DbConnectionInterceptor
     {
@@ -63,9 +65,9 @@ public sealed class OilBarrelUsageSqlTranslationTests
                 }
                 table.Rows.Add(values.ToArray());
             }
-            else if (Commands.Count < 5)
+            else if (Commands.Count < 5 || Commands.Count == 6)
             {
-                table.Columns.Add("Value", Commands.Count == 4 ? typeof(int) : typeof(decimal));
+                table.Columns.Add("Value", Commands.Count is 4 or 6 ? typeof(int) : typeof(decimal));
                 table.Rows.Add(0);
             }
             return ValueTask.FromResult(InterceptionResult<DbDataReader>.SuppressWithResult(table.CreateDataReader()));

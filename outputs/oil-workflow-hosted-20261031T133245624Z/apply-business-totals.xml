@@ -1,0 +1,60 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Dataset" type="xs:string" minOccurs="0" />
+                <xs:element name="RecordCount" type="xs:long" minOccurs="0" />
+                <xs:element name="Amount" type="xs:decimal" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <Dataset>operations</Dataset>
+    <RecordCount>1201</RecordCount>
+    <Amount>17938.65</Amount>
+  </Table>
+  <Table>
+    <Dataset>usages</Dataset>
+    <RecordCount>1221</RecordCount>
+    <Amount>18116.45</Amount>
+  </Table>
+  <Table>
+    <Dataset>vehicle_expenses</Dataset>
+    <RecordCount>1221</RecordCount>
+    <Amount>17938.65</Amount>
+  </Table>
+  <Table>
+    <Dataset>external_entries</Dataset>
+    <RecordCount>0</RecordCount>
+    <Amount>0.00</Amount>
+  </Table>
+  <Table>
+    <Dataset>barrel_losses</Dataset>
+    <RecordCount>12</RecordCount>
+    <Amount>114.50</Amount>
+  </Table>
+  <Table>
+    <Dataset>barrels</Dataset>
+    <RecordCount>19</RecordCount>
+    <Amount>1837.50</Amount>
+  </Table>
+  <Table>
+    <Dataset>balances</Dataset>
+    <RecordCount>14</RecordCount>
+    <Amount>2178.50</Amount>
+  </Table>
+  <Table>
+    <Dataset>odometers</Dataset>
+    <RecordCount>11542</RecordCount>
+    <Amount>4231881703.00</Amount>
+  </Table>
+</NewDataSet>

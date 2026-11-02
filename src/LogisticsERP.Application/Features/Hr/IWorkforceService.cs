@@ -13,6 +13,7 @@ public interface IWorkforceService
     Task<Result<EmployeeDetailsResponse>> UpdateEmployeeAsync(Guid employeeId, EmployeeUpsertRequest request, CancellationToken cancellationToken = default);
     Task<Result> ArchiveEmployeeAsync(Guid employeeId, ArchiveRequest request, CancellationToken cancellationToken = default);
     Task<Result<EmployeeDetailsResponse>> ChangeStatusAsync(Guid employeeId, ChangeEmployeeStatusRequest request, CancellationToken cancellationToken = default);
+    Task<Result<EmployeeDetailsResponse>> ReactivateEmployeeAsync(Guid employeeId, ReactivateEmployeeRequest request, CancellationToken cancellationToken = default);
     Task<Result<EmployeeDetailsResponse>> ChangeRoleAsync(Guid employeeId, ChangeEmployeeRoleRequest request, CancellationToken cancellationToken = default);
     Task<Result<IReadOnlyList<EmployeeWorkHistoryResponse>>> GetWorkHistoryAsync(Guid employeeId, CancellationToken cancellationToken = default);
     Task<Result<IReadOnlyList<RiderDetailsResponse>>> GetRidersAsync(bool? outsideOnly, CancellationToken cancellationToken = default);

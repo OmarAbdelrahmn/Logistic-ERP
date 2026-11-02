@@ -15,7 +15,7 @@
 
 1. `gpsDistanceKm` هي مسافة اليوم فقط، وتقبل منزلتين عشريتين.
 2. `manualOdometerReading` هي قراءة عداد المركبة الإجمالية وليست مسافة اليوم.
-3. `manualDistanceKm = manualOdometerReading - manualBaselineOdometerReading`.
+3. عادةً `manualDistanceKm = manualOdometerReading - manualBaselineOdometerReading`؛ عند تصحيح العداد إلى قيمة أقل تكون المسافة اليدوية لذلك اليوم صفرًا.
 4. `appliedDistanceKm = gpsDistanceKm` عند توفر GPS.
 5. إذا لم يتوفر GPS: `appliedDistanceKm = manualDistanceKm`.
 6. `vehicleTrackedDistanceKm` هو العداد الفعلي التشغيلي الدقيق للمركبة بعد إضافة المسافة المعتمدة مرة واحدة فقط، ويحتفظ بالكسور العشرية القادمة من GPS.
@@ -148,7 +148,7 @@
 - `baselineOdometerReading` اختياري عندما يستطيع النظام إيجاد قراءة سابقة.
 - أرسله عند أول قراءة أو عندما يعيد API الخطأ `fleet.daily_distance.manual_baseline_required`.
 - أرسل `rowVersion` عند تعديل سجل موجود.
-- لا تسمح الواجهة بقراءة حالية أقل من قراءة الأساس.
+- تقبل الواجهة قراءة أقل من العداد السابق لتصحيح العداد. يحفظ النظام القراءة السابقة في سجلها، ويجعل القراءة الجديدة أساس العداد ابتداءً من اليوم المحدد. تعرض الاستجابة `isOdometerCorrection = true`، وتكون المسافة اليدوية لذلك اليوم صفرًا لأن مسافة اليوم غير معروفة. تبقى مسافة GPS مطبقة إن توفرت، لكن العداد بعد اليوم يساوي القراءة المصححة. يعاد حساب الأيام التالية؛ إذا كانت هناك أيام لاحقة فقد يختلف عداد المركبة الحالي عن القراءة المصححة.
 
 ### رفع تقرير GPS
 
@@ -186,7 +186,7 @@
 - `fleet.daily_distance.gps_frameset_missing_sheet`: ملف XLS هو صفحة ربط والبيانات موجودة في مجلد `.files` المرافق؛ اطلب من المستخدم رفع `sheet001.htm` أو ZIP يحتوي الملف والمجلد، أو حفظ التقرير كـ XLSX.
 - `fleet.daily_distance.gps_date_mismatch`: تاريخ التقرير لا يطابق التاريخ المختار.
 - `fleet.daily_distance.duplicate_gps_import`: الملف نفسه مرفوع مسبقًا لليوم.
-- `fleet.daily_distance.invalid_manual_odometer`: القراءة أقل من الأساس أو تكسر تسلسل القراءات اللاحقة.
+- `fleet.daily_distance.invalid_manual_odometer`: القراءة سالبة أو أن التصحيح يكسر تسلسل قراءة يدوية لاحقة.
 - `fleet.daily_distance.manual_baseline_required`: لا توجد قراءة أساس تلقائية.
 - `fleet.concurrency_conflict`: السجل عُدّل من مستخدم آخر؛ أعد تحميل الصف.
 

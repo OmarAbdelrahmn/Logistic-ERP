@@ -1,0 +1,14 @@
+{
+    "Database":  "db67927",
+    "Migrations":  [
+                       "20261031112328_AddOilChangeConcurrency",
+                       "20261031132700_AddOilChangeEditCancellationWorkflow"
+                   ],
+    "BackupCompleted":  true,
+    "RehearsalRolledBack":  true,
+    "Applied":  true,
+    "PostCommitVerified":  true,
+    "BusinessTotalsPreserved":  true,
+    "ApiDeployed":  false,
+    "EvidenceDirectory":  "C:\\Users\\omarf\\OneDrive\\Documents\\ChatGPT\\Logistic ERP\\outputs\\oil-workflow-hosted-20261031T133245624Z"
+}

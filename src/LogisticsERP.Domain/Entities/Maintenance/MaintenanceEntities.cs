@@ -48,6 +48,7 @@ public sealed class ExternalVehicleSnapshot : HistoryEntity
 
 public sealed class MaintenanceMaterialUsage : HistoryEntity
 {
+    public DateTimeOffset? EffectiveServiceAtUtc { get; set; }
     public Guid? MaintenanceWorkOrderId { get; set; }
     public Guid InventoryItemId { get; set; }
     public Guid InventoryLocationId { get; set; }
@@ -120,6 +121,12 @@ public sealed class VehicleMaintenanceSchedule : AuditableEntity
 
 public sealed class OilChangeOperation : HistoryEntity
 {
+    public byte[] RowVersion { get; set; } = [];
+    public bool IsCancelled { get; set; }
+    public DateTimeOffset? CancelledAtUtc { get; set; }
+    public Guid? CancelledByUserId { get; set; }
+    public string? CancellationReason { get; set; }
+    public int RevisionNumber { get; set; }
     public Guid? MaintenanceWorkOrderId { get; set; }
     public Guid? VehicleId { get; set; }
     public string? IdempotencyKey { get; set; }
@@ -200,4 +207,22 @@ public sealed class ExternalCustomerPayment : HistoryEntity
     public string? Reference { get; set; }
     public Guid RecordedByUserId { get; set; }
     public Guid? ReversalOfPaymentId { get; set; }
+}
+
+public sealed class OilChangeRevision : HistoryEntity
+{
+    public Guid OilChangeOperationId { get; set; }
+    public int RevisionNumber { get; set; }
+    public string Action { get; set; } = string.Empty;
+    public string IdempotencyKey { get; set; } = string.Empty;
+    public string RequestHash { get; set; } = string.Empty;
+    public string Reason { get; set; } = string.Empty;
+    public Guid ActorUserId { get; set; }
+    public DateTimeOffset PostedAtUtc { get; set; }
+    public Guid OldOilUsageId { get; set; }
+    public Guid? OldFilterUsageId { get; set; }
+    public string BeforeJson { get; set; } = string.Empty;
+    public string AfterJson { get; set; } = string.Empty;
+    public string EffectsJson { get; set; } = string.Empty;
+    public string ResultJson { get; set; } = string.Empty;
 }

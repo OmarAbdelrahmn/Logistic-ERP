@@ -41,7 +41,7 @@ For each order, exactly one Active or Ended rider assignment must cover its date
 | `Driver Compensate` | Add directly. |
 | `Bonus Amount` | Add directly, as confirmed by the user. Optional column; absent means zero. |
 | `Deduction Amount` | Subtract its magnitude; positive and negative deduction notation both represent a deduction. |
-| `Cash Collected By Driver` | Add its magnitude to deductions, reducing the rider's payout without changing the company commission. Optional; absent or blank means zero. |
+| `Cash Collected By Driver` | Discard the fractional part, then add its magnitude to deductions, reducing the rider's payout without changing the company commission. For example, `21.2121212` becomes `21`. Optional; absent or blank means zero. |
 
 `Date`, `Driver ID`, and fees/tips/compensation/deduction headers are required. Blank financial cells mean zero. Values support at most two decimal places and absolute values up to SAR 1 billion per source cell. Negative fee/tip/compensation/bonus values represent reversals. Formulas in processed fields are rejected; upload original values. `Chef Order ID` is optional; repeated nonblank IDs for the same Driver ID are rejected. Blank order IDs are allowed for adjustment rows. `sourceRows` counts financial source rows, not necessarily completed orders.
 

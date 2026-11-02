@@ -1,0 +1,11 @@
+{
+  "Database": "db67927",
+  "Migration": "20261101140621_AddChefzAccountTypeHistory",
+  "Applied": true,
+  "ScriptSha256": "1B43248DAC526C2B48376D95AA7DEA5DF0650854542F6E98970712823B7E27AF",
+  "OriginalSettlementValuesPreserved": true,
+  "OriginalAccountDetailsPreserved": true,
+  "SettlementCount": 494,
+  "AccountDetailsCount": 464,
+  "VerifiedAtUtc": "2026-11-01T14:17:12.1211779Z"
+}

@@ -15,6 +15,7 @@ internal sealed partial class PlatformAccountDayAllocationService(ApplicationDbC
     private ILookup<(Guid AccountId, DateOnly Date), PlatformAccountDayUsage>? cachedUsages;
     private ILookup<Guid, JahezAccountSession>? cachedSessions;
     private HashSet<Guid>? fullTimeAccounts;
+    private ILookup<Guid, ChefzAccountTypeChange>? cachedTypeChanges;
     private ILookup<(Guid AccountId, DateOnly Date), PlatformAccountDayContribution>? cachedContributions;
 
     internal async Task Preload(Guid[] accountIds, DateOnly from, DateOnly to, CancellationToken ct)
@@ -29,6 +30,8 @@ internal sealed partial class PlatformAccountDayAllocationService(ApplicationDbC
             .ToLookup(h => h.RiderClientAssignmentId);
         fullTimeAccounts = (await db.ChefzAccountDetails.Where(d => accountIds.Contains(d.PlatformRiderAccountId)
             && d.AccountType == ChefzAccountType.FullTime).Select(d => d.PlatformRiderAccountId).ToArrayAsync(ct)).ToHashSet();
+        cachedTypeChanges = (await db.Set<ChefzAccountTypeChange>().AsNoTracking()
+            .Where(c => accountIds.Contains(c.PlatformRiderAccountId)).ToArrayAsync(ct)).ToLookup(c => c.PlatformRiderAccountId);
     }
     internal static OperationError Error(Guid account, DateOnly date, string message, Guid? assignment = null, string? metric = null) =>
         new("platform.day_allocation", $"Account {account}, {date:yyyy-MM-dd}: {message}", ErrorType.Conflict,
@@ -99,7 +102,7 @@ internal sealed partial class PlatformAccountDayAllocationService(ApplicationDbC
         var candidates = await Candidates(account, date, ct);
         if (candidates.Length == 0) return Result.Failure<RiderClientAssignment[]>(Error(account, date, "No actual rider assignment covers this day."));
         if (candidates.Length == 1) return Result.Success(candidates);
-        if (await IsFullTime(account, ct)) return Result.Failure<RiderClientAssignment[]>(Error(account, date, "Chefz FullTime accounts cannot be shared on the same day."));
+        if (await IsFullTime(account, date, ct)) return Result.Failure<RiderClientAssignment[]>(Error(account, date, "Chefz FullTime accounts cannot be shared on the same day."));
         // Only an inclusive boundary day may be shared, never several overlapping days.
         for (var i = 0; i < candidates.Length; i++)
             for (var j = i + 1; j < candidates.Length; j++)
@@ -185,6 +188,14 @@ internal sealed partial class PlatformAccountDayAllocationService(ApplicationDbC
     internal Task<bool> IsFullTime(Guid account, CancellationToken ct) => fullTimeAccounts is not null ? Task.FromResult(fullTimeAccounts.Contains(account)) : db.ChefzAccountDetails.AnyAsync(
         d => d.PlatformRiderAccountId == account && d.AccountType == ChefzAccountType.FullTime, ct);
 
+    internal async Task<bool> IsFullTime(Guid account, DateOnly date, CancellationToken ct)
+    {
+        var changes = cachedTypeChanges?[account].ToArray() ?? await db.Set<ChefzAccountTypeChange>().AsNoTracking()
+            .Where(c => c.PlatformRiderAccountId == account).ToArrayAsync(ct);
+        var current = await IsFullTime(account, ct) ? ChefzAccountType.FullTime : ChefzAccountType.Freelancer;
+        return LogisticsERP.Domain.Chefz.ChefzAccountTypeTimeline.Split(current, changes, date, date)[0].Type == ChefzAccountType.FullTime;
+    }
+
     internal async Task<Result> ValidateEnd(RiderClientAssignment assignment, DateOnly end, bool cancelled, CancellationToken ct)
     {
         var id = assignment.Id;
@@ -219,10 +230,13 @@ internal sealed partial class PlatformAccountDayAllocationService(ApplicationDbC
         var others = await db.RiderClientAssignments.Where(a => a.PlatformRiderAccountId == account && a.Id != excluded
             && a.Status != RiderAssignmentStatus.Cancelled && (to == null || a.EffectiveFrom <= to)
             && (a.EffectiveTo == null || a.EffectiveTo >= from)).ToArrayAsync(ct);
-        var fullTime = await IsFullTime(account, ct);
-        if (others.Any(a => fullTime || (a.EffectiveTo ?? DateOnly.MaxValue) > from
-            && (to ?? DateOnly.MaxValue) > a.EffectiveFrom))
-            return Result.Failure(Error(account, from, "Assignment overlaps another usage period or shares a Chefz FullTime day."));
+        foreach (var other in others)
+        {
+            var boundary = other.EffectiveFrom > from ? other.EffectiveFrom : from;
+            if ((other.EffectiveTo ?? DateOnly.MaxValue) > from && (to ?? DateOnly.MaxValue) > other.EffectiveFrom
+                || await IsFullTime(account, boundary, ct))
+                return Result.Failure(Error(account, from, "Assignment overlaps another usage period or shares a Chefz FullTime day."));
+        }
         if ((await Frozen(account, from, ct)).Count > 0 && others.Length > 0)
             return Result.Failure(Error(account, from, "Saved allocations already cover this boundary day; correct the import before changing assignments."));
         if (to.HasValue && to != from && (await Frozen(account, to.Value, ct)).Count > 0 && others.Length > 0)

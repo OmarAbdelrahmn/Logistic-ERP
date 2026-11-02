@@ -1,0 +1,12 @@
+{
+    "Database":  "db67927",
+    "Migration":  "20261031095204_AllowDailyOdometerCorrections",
+    "BackupCompleted":  true,
+    "RehearsalRolledBack":  true,
+    "Applied":  true,
+    "PostCommitVerified":  true,
+    "RejectedInvalidCases":  3,
+    "Rows":  8905,
+    "ApiDeployed":  false,
+    "EvidenceDirectory":  "C:\\Users\\omarf\\OneDrive\\Documents\\ChatGPT\\Logistic ERP\\outputs\\odometer-constraint-hosted-20261031T095337233Z"
+}

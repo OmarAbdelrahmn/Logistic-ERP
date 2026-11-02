@@ -8,6 +8,8 @@ public sealed record ChefzOrderSettlementResponse(Guid Id, Guid AccountId, strin
     decimal Deductions, decimal NetEarnings, decimal CompanyAmount, decimal RiderAmount)
 {
     public string? RiderIqamaNo { get; init; }
+    public int? FullTimeDays { get; init; }
+    public decimal? FreelancerCommissionBase { get; init; }
 }
 
 public sealed record ChefzRiderCycleSettlement(Guid RiderProfileId, string RiderName,

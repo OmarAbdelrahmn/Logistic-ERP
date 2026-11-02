@@ -30,7 +30,8 @@ public static class VehicleDailyDistanceRules
     public static bool TryRecalculate(
         IEnumerable<VehicleDailyDistance> orderedDistances,
         decimal baselineOdometerKm,
-        out decimal effectiveOdometerKm)
+        out decimal effectiveOdometerKm,
+        VehicleDailyDistance? correctedReading = null)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(baselineOdometerKm);
         effectiveOdometerKm = baselineOdometerKm;
@@ -39,6 +40,21 @@ public static class VehicleDailyDistanceRules
         {
             if (distance.ManualOdometerReading.HasValue)
             {
+                if (ReferenceEquals(distance, correctedReading))
+                    distance.IsOdometerCorrection = distance.ManualOdometerReading.Value < effectiveOdometerKm;
+
+                if (distance.IsOdometerCorrection)
+                {
+                    distance.ManualBaselineOdometerReading = effectiveOdometerKm;
+                    distance.ManualDistanceKm = 0m;
+                    var correctionSource = SelectAppliedDistance(distance.GpsDistanceKm, distance.ManualDistanceKm);
+                    distance.AppliedDistanceKm = correctionSource.DistanceKm;
+                    distance.AppliedSource = correctionSource.Source;
+                    effectiveOdometerKm = distance.ManualOdometerReading.Value;
+                    distance.EffectiveOdometerAfterKm = effectiveOdometerKm;
+                    continue;
+                }
+
                 if (distance.ManualOdometerReading.Value < effectiveOdometerKm)
                 {
                     return false;

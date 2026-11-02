@@ -31,6 +31,9 @@ internal sealed partial class MaintenanceService
                 var operation = await dbContext.OilChangeOperations.AsNoTracking()
                     .SingleOrDefaultAsync(x => x.Id == oilChangeId, cancellationToken);
                 if (operation is null) return Result.Failure<OilChangeResponse>(MaintenanceErrors.NotFound);
+                if (operation.IsCancelled) return Result.Failure<OilChangeResponse>(MaintenanceErrors.InvalidState);
+                if (request.RowVersion is not null && !MatchesRowVersion(operation.RowVersion, request.RowVersion))
+                    return Result.Failure<OilChangeResponse>(MaintenanceErrors.ConcurrencyConflict);
                 if (operation.MaintenanceWorkOrderId.HasValue || !operation.VehicleId.HasValue)
                     return Result.Failure<OilChangeResponse>(MaintenanceErrors.OilChangeCorrectionWorkOrder);
                 var oldVehicleId = operation.VehicleId.Value;
@@ -63,7 +66,8 @@ internal sealed partial class MaintenanceService
                 if (readingCount != 1) return Result.Failure<OilChangeResponse>(MaintenanceErrors.InvalidState);
 
                 var changed = await dbContext.OilChangeOperations
-                    .Where(x => x.Id == oilChangeId && x.VehicleId == oldVehicleId && x.MaintenanceWorkOrderId == null)
+                    .Where(x => x.Id == oilChangeId && x.VehicleId == oldVehicleId && x.MaintenanceWorkOrderId == null
+                        && x.RowVersion == operation.RowVersion)
                     .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.VehicleId, request.VehicleId), cancellationToken);
                 if (changed != 1) return Result.Failure<OilChangeResponse>(MaintenanceErrors.ConcurrencyConflict);
                 changed = await dbContext.MaintenanceMaterialUsages
@@ -80,10 +84,13 @@ internal sealed partial class MaintenanceService
                     .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.VehicleId, request.VehicleId), cancellationToken);
                 if (changed != 1) return Result.Failure<OilChangeResponse>(MaintenanceErrors.ConcurrencyConflict);
 
+                var revisionIds = await dbContext.OilChangeRevisions.AsNoTracking()
+                    .Where(x => x.OilChangeOperationId == oilChangeId).Select(x => x.Id).ToArrayAsync(cancellationToken);
                 var expenseIds = await dbContext.VehicleExpenses.AsNoTracking()
                     .Where(x => x.VehicleId == oldVehicleId &&
                         (x.SourceEntityType == nameof(MaintenanceMaterialUsage) && usageIds.Contains(x.SourceEntityId) ||
-                         x.SourceEntityType == nameof(OilChangeOperation) && x.SourceEntityId == oilChangeId))
+                         x.SourceEntityType == nameof(OilChangeOperation) && x.SourceEntityId == oilChangeId ||
+                         x.SourceEntityType == nameof(OilChangeRevision) && revisionIds.Contains(x.SourceEntityId)))
                     .Select(x => x.Id).ToArrayAsync(cancellationToken);
                 await dbContext.VehicleExpenses
                     .Where(x => x.VehicleId == oldVehicleId &&
@@ -125,8 +132,9 @@ internal sealed partial class MaintenanceService
                     }
                 }
                 await dbContext.SaveChangesAsync(cancellationToken);
-                operation.VehicleId = request.VehicleId;
-                var response = await MapOilChangeResponseAsync(operation, cancellationToken);
+                var updatedOperation = await dbContext.OilChangeOperations.AsNoTracking()
+                    .SingleAsync(x => x.Id == oilChangeId, cancellationToken);
+                var response = await MapOilChangeResponseAsync(updatedOperation, cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
                 return Result.Success(response);
             });
@@ -142,7 +150,7 @@ internal sealed partial class MaintenanceService
             .OrderBy(x => x.Code).FirstOrDefaultAsync(cancellationToken);
         if (plan is null) return;
         var latest = await dbContext.OilChangeOperations.AsNoTracking()
-            .Where(x => x.VehicleId == vehicleId)
+            .Where(x => !x.IsCancelled && x.VehicleId == vehicleId)
             .OrderByDescending(x => x.PerformedAtUtc).ThenByDescending(x => x.OdometerAtChange)
             .FirstOrDefaultAsync(cancellationToken);
         var schedule = await dbContext.VehicleMaintenanceSchedules

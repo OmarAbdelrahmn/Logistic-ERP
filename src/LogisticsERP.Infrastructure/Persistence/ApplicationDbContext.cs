@@ -212,6 +212,8 @@ public sealed class ApplicationDbContext(
     public DbSet<MaintenancePlan> MaintenancePlans => Set<MaintenancePlan>();
     public DbSet<VehicleMaintenanceSchedule> VehicleMaintenanceSchedules => Set<VehicleMaintenanceSchedule>();
     public DbSet<OilChangeOperation> OilChangeOperations => Set<OilChangeOperation>();
+    internal Guid? ActiveOilChangeRevisionId { get; set; }
+    public DbSet<OilChangeRevision> OilChangeRevisions => Set<OilChangeRevision>();
     public DbSet<VehicleExpense> VehicleExpenses => Set<VehicleExpense>();
     public DbSet<ExternalPartSaleLine> ExternalPartSaleLines => Set<ExternalPartSaleLine>();
     public DbSet<ExternalMaintenanceFinancialEntry> ExternalMaintenanceFinancialEntries => Set<ExternalMaintenanceFinancialEntry>();

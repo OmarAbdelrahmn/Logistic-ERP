@@ -234,8 +234,8 @@ public sealed partial class ChefzWorkflowTests
         Assert.Equal(25m, updated.DailyFee);
         Assert.Equal("Freelancer", Assert.Single(Value(await f.Service.GetSettlementsAsync(f.Account.Id, f.First.RiderProfileId, 1, 50, ct)).Items).AccountType);
         var preview = Value(await f.Service.PreviewSettlementAsync(new(f.First.Id, 2026, 10, 1, 0, 500), ct));
-        Assert.Equal(375m, preview.CompanyAmount);
-        Assert.Equal(125m, preview.RiderAmount);
+        Assert.Equal(75m, preview.CompanyAmount);
+        Assert.Equal(425m, preview.RiderAmount);
         Assert.Equal(sponsor.RegistryNameAr, preview.SponsorNameAr);
         Assert.Equal(sponsor.RegistryNameEn, preview.SponsorNameEn);
         var settlements = Value(await f.Service.GetSettlementsAsync(f.Account.Id, null, 1, 50, ct));

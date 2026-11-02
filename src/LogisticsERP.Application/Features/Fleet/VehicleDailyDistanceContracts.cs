@@ -33,7 +33,8 @@ public sealed record VehicleDailyDistanceResponse(
     DateTimeOffset? ManualEnteredAtUtc,
     Guid? ManualEnteredByUserId,
     string? ManualNotes,
-    string? RowVersion);
+    string? RowVersion,
+    bool IsOdometerCorrection = false);
 
 public sealed record VehicleDailyDistancePageResponse(
     IReadOnlyList<VehicleDailyDistanceResponse> Items,

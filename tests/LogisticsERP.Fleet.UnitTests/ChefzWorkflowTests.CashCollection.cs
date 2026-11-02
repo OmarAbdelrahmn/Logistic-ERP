@@ -108,7 +108,6 @@ public sealed partial class ChefzWorkflowTests
     [InlineData("blank")]
     [InlineData("formula")]
     [InlineData("text")]
-    [InlineData("precision")]
     [InlineData("range")]
     [InlineData("duplicate")]
     public async Task CashColumnUsesExistingFinancialValidationAndInvalidBatchSavesNothing(string variant)
@@ -125,7 +124,6 @@ public sealed partial class ChefzWorkflowTests
             case "blank": cell.Clear(); break;
             case "formula": cell.FormulaA1 = "10+10"; break;
             case "text": cell.Value = "invalid"; break;
-            case "precision": cell.Value = 20.123; break;
             case "range": cell.Value = 1000000001; break;
             case "duplicate": sheet.Cell(1, 10).Value = "Cash Collected By Driver"; break;
         }
@@ -148,6 +146,26 @@ public sealed partial class ChefzWorkflowTests
             Assert.Empty(f.Db.ChefzOrderSettlementImports);
             Assert.False(f.Db.ChangeTracker.HasChanges());
         }
+    }
+
+    [Theory]
+    [InlineData(21.2121212, 21)]
+    [InlineData(-21.999, 21)]
+    [InlineData(0.99, 0)]
+    public async Task CashFractionIsDiscardedBeforeSettlement(double cash, decimal expectedCash)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var f = await Fixture.Create(false);
+        Value(await f.Service.SaveAccountAsync(f.Account.Id, new("Freelancer"), ct));
+        var bytes = WithCashColumn(OrderSheet((new(2026, 10, 1), 115, 0, 0, 0, 5)), (decimal)cash);
+        var parsed = ChefzOrderSpreadsheetParser.Parse(bytes, ct);
+        Assert.Empty(parsed.Issues);
+        Assert.Equal(expectedCash, Assert.Single(parsed.Rows).CashCollected);
+        var result = Value(await f.Service.ProcessOrderSettlementsAsync("cash-fraction.xlsx", bytes, false, ct));
+        Assert.Empty(result.Issues);
+        Assert.Equal(5 + expectedCash, Assert.Single(result.Riders).Deductions);
+        Assert.Equal(95 - expectedCash, result.NetEarnings);
+        Assert.Equal(expectedCash, (await f.Db.ChefzImportedOrderRows.SingleAsync(ct)).CashCollected);
     }
 
     private static byte[] WithCashColumn(byte[] source, decimal cash)

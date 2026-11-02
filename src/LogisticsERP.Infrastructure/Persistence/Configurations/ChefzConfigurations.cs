@@ -9,8 +9,16 @@ namespace LogisticsERP.Infrastructure.Persistence.Configurations;
 internal sealed class ChefzConfigurations : IEntityTypeConfiguration<ChefzAccountDetails>,
     IEntityTypeConfiguration<ChefzWalletSettlement>, IEntityTypeConfiguration<ChefzDailyPerformance>,
     IEntityTypeConfiguration<ChefzPerformanceImport>, IEntityTypeConfiguration<ChefzPerformanceSettings>,
-    IEntityTypeConfiguration<ChefzSponsorStatistics>, IEntityTypeConfiguration<ChefzOrderSettlementImport>
+    IEntityTypeConfiguration<ChefzSponsorStatistics>, IEntityTypeConfiguration<ChefzOrderSettlementImport>,
+    IEntityTypeConfiguration<ChefzAccountTypeChange>
 {
+    public void Configure(EntityTypeBuilder<ChefzAccountTypeChange> b)
+    {
+        b.ConfigureHistory("AccountTypeChanges", "chefz");
+        b.HasOne<PlatformRiderAccount>().WithMany().HasForeignKey(x => x.PlatformRiderAccountId).OnDelete(DeleteBehavior.Restrict);
+        b.HasIndex(x => new { x.PlatformRiderAccountId, x.EffectiveFrom }).IsUnique();
+        b.ToTable(t => t.HasCheckConstraint("CK_ChefzTypeChange_Types", "[PreviousType] IN (1, 2) AND [AccountType] IN (1, 2) AND [PreviousType] <> [AccountType]"));
+    }
     public void Configure(EntityTypeBuilder<ChefzAccountDetails> b)
     {
         b.ConfigureAuditable("AccountDetails", "chefz");
@@ -63,6 +71,7 @@ internal sealed class ChefzConfigurations : IEntityTypeConfiguration<ChefzAccoun
             nameof(ChefzWalletSettlement.Bonuses), nameof(ChefzWalletSettlement.Deductions) })
             b.Property<decimal>(property).HasPrecision(18, 2);
         b.Property(x => x.CommissionRate).HasPrecision(5, 4);
+        b.Property(x => x.FreelancerCommissionBase).HasPrecision(18, 2);
         b.ToTable(t => t.HasCheckConstraint("CK_ChefzSettlement_Amounts",
             "(([Source] = 'Wallet' AND [ImportId] IS NULL AND [StartWalletAmount] >= 0 AND [EndWalletAmount] >= [StartWalletAmount] AND [GrossEarnings] = [EndWalletAmount] - [StartWalletAmount]) OR ([Source] = 'Orders' AND [ImportId] IS NOT NULL AND [SourceRows] > 0 AND [StartWalletAmount] = 0 AND [EndWalletAmount] = 0 AND [Deductions] >= 0 AND [GrossEarnings] = [DeliveryFees] - [VatAmount] + [Tips] + [Compensation] + [Bonuses] - [Deductions])) AND [RiderAmount] = [GrossEarnings] - [CompanyAmount] AND [AssignedDays] > 0 AND [ChargedFrom] >= [PeriodFrom] AND [ChargedTo] <= [PeriodTo] AND [ChargedTo] >= [ChargedFrom] AND [AccountType] IN (1, 2)"));
     }

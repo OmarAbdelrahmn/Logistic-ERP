@@ -20,6 +20,68 @@ public sealed class OilBarrelVehicleTypeTests
     private static readonly DateTimeOffset Now = new(2026, 10, 1, 9, 0, 0, TimeSpan.Zero);
 
     [Fact]
+    public void OilChangeUsesDatabaseGeneratedConcurrencyToken()
+    {
+        using var db = new ApplicationDbContext(new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=OilChangeModel;Trusted_Connection=True").Options);
+        var property = db.GetService<IDesignTimeModel>().Model.FindEntityType(typeof(OilChangeOperation))!
+            .FindProperty(nameof(OilChangeOperation.RowVersion))!;
+        Assert.True(property.IsConcurrencyToken);
+        Assert.Equal(Microsoft.EntityFrameworkCore.Metadata.ValueGenerated.OnAddOrUpdate, property.ValueGenerated);
+        Assert.Equal("rowversion", property.GetColumnType());
+    }
+
+    [Fact]
+    public async Task OrdinaryMaterialReversalStillRejectsOilChangeMaterials()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var db = CreateContext();
+        var (service, car, _, item, location) = await SeedAsync(db);
+        var barrel = AddBarrel(db, item, location, VehicleType.Car, 20, 10, 1, open: true);
+        await db.SaveChangesAsync(ct);
+        var created = await service.CompleteDirectOilChangeAsync(car.Id, Request(car, item, location), "reversal-guard", ct);
+        Assert.True(created.IsSuccess, created.Error.Description);
+        var operation = await db.OilChangeOperations.SingleAsync(ct);
+        var remaining = barrel.RemainingLiters;
+        var result = await service.ReverseMaterialUsageAsync(operation.OilMaterialUsageId, new(Now, "wrong material"), ct);
+        Assert.Equal(MaintenanceErrors.InvalidState.Code, result.Error.Code);
+        Assert.Equal(remaining, barrel.RemainingLiters);
+        Assert.False(await db.MaintenanceMaterialUsages.AnyAsync(x => x.ReversalOfUsageId == operation.OilMaterialUsageId, ct));
+    }
+
+    [Fact]
+    public async Task OrdinaryMaterialReversalRestoresStockOnceAndRecordsAReversal()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var db = CreateContext();
+        var (service, car, _, item, location) = await SeedAsync(db);
+        var barrel = AddBarrel(db, item, location, VehicleType.Car, 10, 10, 1, open: true);
+        await db.SaveChangesAsync(ct);
+        var layer = await db.StockCostLayers.SingleAsync(x => x.Id == barrel.StockCostLayerId, ct);
+        var balance = db.StockBalances.Local.Single(x => x.InventoryItemId == item.Id);
+        layer.RemainingQuantity = 8;
+        balance.QuantityOnHand = 8;
+        var usage = new MaintenanceMaterialUsage { VehicleId = car.Id, InventoryItemId = item.Id,
+            InventoryLocationId = location.Id, UsageType = MaintenanceUsageType.SparePart,
+            Direction = MaintenanceUsageDirection.Issue, Quantity = 2, TotalCost = 20,
+            UnitOfMeasure = InventoryUnitOfMeasure.Liter, StockMovementId = Guid.NewGuid(), UsedAtUtc = Now };
+        db.Add(usage);
+        db.StockCostAllocations.Add(new StockCostAllocation { MaintenanceMaterialUsageId = usage.Id,
+            StockCostLayerId = layer.Id, AllocatedQuantity = 2, UnitCost = 10, AllocatedCost = 20 });
+        db.VehicleExpenses.Add(new VehicleExpense { VehicleId = car.Id, SourceEntityType = nameof(MaintenanceMaterialUsage),
+            SourceEntityId = usage.Id, TotalAmount = 20, AmountBeforeTax = 20 });
+        await db.SaveChangesAsync(ct);
+        var result = await service.ReverseMaterialUsageAsync(usage.Id, new(Now, "correction"), ct);
+        Assert.True(result.IsSuccess, result.Error.Description);
+        Assert.Equal(10, layer.RemainingQuantity);
+        Assert.Equal(10, balance.QuantityOnHand);
+        Assert.Equal(usage.Id, result.Value!.ReversalOfUsageId);
+        var repeated = await service.ReverseMaterialUsageAsync(usage.Id, new(Now, "retry"), ct);
+        Assert.Equal(MaintenanceErrors.AlreadyReversed.Code, repeated.Error.Code);
+        Assert.Equal(10, balance.QuantityOnHand);
+    }
+
+    [Fact]
     public async Task SqlServerMigrationWriteOffConcurrencyAndSharedScopeConstraints()
     {
         Assert.SkipUnless(Environment.GetEnvironmentVariable("LOGISTICS_OIL_SQL_TESTS") == "1",
@@ -231,9 +293,12 @@ public sealed class OilBarrelVehicleTypeTests
             new(motorcycle.Id, "Wrong vehicle selected"), TestContext.Current.CancellationToken);
         var linkedWorkOrder = await service.CorrectCompletedOilChangeVehicleAsync(workOrder.Id,
             new(motorcycle.Id, "Wrong vehicle selected"), TestContext.Current.CancellationToken);
+        var stale = await service.CorrectCompletedOilChangeVehicleAsync(direct.Id,
+            new(motorcycle.Id, "Wrong vehicle selected", Convert.ToBase64String(new byte[] { 1, 2, 3 })), TestContext.Current.CancellationToken);
 
         Assert.Equal(MaintenanceErrors.OilChangeCorrectionVehicleType.Code, differentType.Error.Code);
         Assert.Equal(MaintenanceErrors.OilChangeCorrectionWorkOrder.Code, linkedWorkOrder.Error.Code);
+        Assert.Equal(MaintenanceErrors.ConcurrencyConflict.Code, stale.Error.Code);
         Assert.Equal(car.Id, direct.VehicleId);
         Assert.Empty(db.AuditEntries);
     }
@@ -339,6 +404,38 @@ public sealed class OilBarrelVehicleTypeTests
     }
 
     [Fact]
+    public async Task UsageReturnsPaginatedLossAndMissingDetailsIndependentlyOfVehiclePage()
+    {
+        await using var db = CreateContext();
+        var (service, _, _, item, location) = await SeedAsync(db);
+        var barrel = AddBarrel(db, item, location, VehicleType.Car, 10, 10, 1, open: true);
+        var other = AddBarrel(db, item, location, VehicleType.Car, 10, 10, 2);
+        var actor = Guid.NewGuid();
+        var older = new OilBarrelLoss { OilBarrelId = barrel.Id, OccurredAtUtc = Now,
+            QuantityLiters = 0.25m, CostAmount = 2.50m, Reason = "spill", RecordedByUserId = actor };
+        var newer = new OilBarrelLoss { OilBarrelId = barrel.Id, OccurredAtUtc = Now.AddHours(1),
+            QuantityLiters = 0.5m, CostAmount = 5m, Reason = "damaged", MissingReason = OilBarrelMissingReason.Wasted,
+            ResponsibleInventoryLocationId = location.Id, RecordedByUserId = actor };
+        db.OilBarrelLosses.AddRange(older, newer, new OilBarrelLoss { OilBarrelId = other.Id,
+            OccurredAtUtc = Now, QuantityLiters = 9m, Reason = "other barrel" });
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+        var result = await service.GetOilBarrelUsageAsync(barrel.Id, 1, 50, 1, 1, cancellationToken: TestContext.Current.CancellationToken);
+        Assert.True(result.IsSuccess, result.Error.Description);
+        Assert.Equal(2, result.Value!.LossTotalCount);
+        var first = Assert.Single(result.Value.LossEntries);
+        Assert.Equal(newer.Id, first.Id);
+        Assert.Equal(0.5m, first.QuantityLiters);
+        Assert.Equal(5m, first.CostAmount);
+        Assert.Equal(OilBarrelMissingReason.Wasted, first.MissingReason);
+        Assert.Equal(location.Id, first.ResponsibleInventoryLocationId);
+        var next = await service.GetOilBarrelUsageAsync(barrel.Id, 1, 50, 2, 1, TestContext.Current.CancellationToken);
+        Assert.Equal(older.Id, Assert.Single(next.Value!.LossEntries).Id);
+        Assert.Null(next.Value.LossEntries[0].MissingReason);
+        var overflow = await service.GetOilBarrelUsageAsync(barrel.Id, 1, 50, int.MaxValue, 200, TestContext.Current.CancellationToken);
+        Assert.Equal(MaintenanceErrors.InvalidRequest.Code, overflow.Error.Code);
+    }
+
+    [Fact]
     public async Task UsageGroupsVehiclesIncludesReversalsAndKeepsTotalsAcrossPages()
     {
         await using var db = CreateContext();
@@ -366,7 +463,7 @@ public sealed class OilBarrelVehicleTypeTests
         }
         car.IsDeleted = true;
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
-        var report = await service.GetOilBarrelUsageAsync(barrel.Id, 1, 50, TestContext.Current.CancellationToken);
+        var report = await service.GetOilBarrelUsageAsync(barrel.Id, 1, 50, cancellationToken: TestContext.Current.CancellationToken);
         Assert.Equal(8m, report.Value!.TotalIssuedLiters);
         Assert.Equal(4m, report.Value.TotalReversedLiters);
         Assert.Equal(4m, report.Value.NetUsedLiters);
@@ -374,7 +471,7 @@ public sealed class OilBarrelVehicleTypeTests
         Assert.Equal(3m, carRow.NetUsedLiters);
         Assert.Equal(2, carRow.IssueCount);
         Assert.Equal("CAR", carRow.PlateNumberEn);
-        var page = await service.GetOilBarrelUsageAsync(barrel.Id, 1, 1, TestContext.Current.CancellationToken);
+        var page = await service.GetOilBarrelUsageAsync(barrel.Id, 1, 1, cancellationToken: TestContext.Current.CancellationToken);
         Assert.Single(page.Value!.Vehicles);
         Assert.Equal(2, page.Value.TotalCount);
         Assert.Equal(4m, page.Value.NetUsedLiters);
@@ -432,7 +529,7 @@ public sealed class OilBarrelVehicleTypeTests
             OilBarrelId = barrel.Id, MaintenanceMaterialUsageId = usage.Id, QuantityLiters = 3m
         });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
-        var report = await service.GetOilBarrelUsageAsync(barrel.Id, 1, 50, TestContext.Current.CancellationToken);
+        var report = await service.GetOilBarrelUsageAsync(barrel.Id, 1, 50, cancellationToken: TestContext.Current.CancellationToken);
         var row = Assert.Single(report.Value!.Vehicles);
         Assert.Null(row.VehicleId);
         Assert.Equal(workOrderId, row.ExternalWorkOrderId);

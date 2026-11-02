@@ -179,6 +179,11 @@ internal sealed class VehicleOdometerReadingConfiguration : IEntityTypeConfigura
     public void Configure(EntityTypeBuilder<VehicleOdometerReading> builder)
     {
         builder.ConfigureHistory("VehicleOdometerReadings");
+        builder.HasQueryFilter(x => !x.IsVoided);
+        builder.HasOne<LogisticsERP.Domain.Entities.Maintenance.OilChangeRevision>().WithMany()
+            .HasForeignKey(x => x.VoidedByRevisionId).OnDelete(DeleteBehavior.Restrict);
+        builder.ToTable(t => t.HasCheckConstraint("CK_VehicleOdometerReadings_Void",
+            "([IsVoided] = 0 AND [VoidedByRevisionId] IS NULL) OR ([IsVoided] = 1 AND [VoidedByRevisionId] IS NOT NULL)"));
         builder.Property(x => x.Notes).HasMaxLength(1000);
         builder.Property(x => x.CorrectionReason).HasMaxLength(1000);
         builder.HasOne<Vehicle>().WithMany().HasForeignKey(x => x.VehicleId).OnDelete(DeleteBehavior.Restrict);
@@ -214,7 +219,7 @@ internal sealed class VehicleDailyDistanceConfiguration : IEntityTypeConfigurati
             table.HasCheckConstraint("CK_VehicleDailyDistances_AppliedDistance", "[AppliedDistanceKm] >= 0");
             table.HasCheckConstraint("CK_VehicleDailyDistances_EffectiveOdometer", "[EffectiveOdometerAfterKm] >= 0");
             table.HasCheckConstraint("CK_VehicleDailyDistances_Source", "[AppliedSource] BETWEEN 0 AND 2");
-            table.HasCheckConstraint("CK_VehicleDailyDistances_ManualOdometer", "[ManualOdometerReading] IS NULL OR ([ManualBaselineOdometerReading] IS NOT NULL AND [ManualOdometerReading] >= [ManualBaselineOdometerReading])");
+            table.HasCheckConstraint("CK_VehicleDailyDistances_ManualOdometer", "[ManualOdometerReading] IS NULL OR ([ManualBaselineOdometerReading] IS NOT NULL AND [ManualOdometerReading] >= 0 AND ([IsOdometerCorrection] = 1 OR [ManualOdometerReading] >= [ManualBaselineOdometerReading]))");
         });
     }
 }

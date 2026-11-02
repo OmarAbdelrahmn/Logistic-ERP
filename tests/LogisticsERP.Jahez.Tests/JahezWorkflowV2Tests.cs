@@ -67,7 +67,7 @@ public sealed partial class JahezWorkflowTests
     [InlineData(JahezMoneyFund.PetroApp, JahezMoneyDirection.Receipt, JahezMoneyPurpose.Settlement, true)]
     [InlineData(JahezMoneyFund.PetroApp, JahezMoneyDirection.Receipt, JahezMoneyPurpose.Fuel, true)]
     [InlineData(JahezMoneyFund.PetroApp, JahezMoneyDirection.Receipt, JahezMoneyPurpose.AccountFee, false)]
-    [InlineData(JahezMoneyFund.PetroApp, JahezMoneyDirection.Receipt, JahezMoneyPurpose.TransferredDebtRepayment, false)]
+    [InlineData(JahezMoneyFund.PetroApp, JahezMoneyDirection.Receipt, JahezMoneyPurpose.TransferredDebtRepayment, true)]
     [InlineData(JahezMoneyFund.PetroApp, JahezMoneyDirection.Disbursement, JahezMoneyPurpose.Settlement, false)]
     [InlineData(JahezMoneyFund.PetroApp, JahezMoneyDirection.Disbursement, JahezMoneyPurpose.Fuel, false)]
     public void V2MoneyRouting(JahezMoneyFund fund, JahezMoneyDirection direction, JahezMoneyPurpose purpose, bool allowed) =>

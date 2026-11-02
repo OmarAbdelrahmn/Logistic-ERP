@@ -1,0 +1,7 @@
+# Oil barrel usage: loss details
+
+`GET /api/maintenance-inventory/oil-barrels/{id}/usage?page=1&pageSize=50&lossPage=1&lossPageSize=50` returns the existing barrel and paginated vehicle usage fields plus `lossEntries`, `lossPage`, `lossPageSize` and `lossTotalCount`. The same existing read permissions apply. This is a read-only response change; no database migration is required.
+
+`lossEntries` contains the recorded loss history for the selected barrel, ordered by occurrence time descending then ID descending. Each entry has `id`, `occurredAtUtc`, `quantityLiters`, `costAmount`, `reason`, `missingReason`, `responsibleInventoryLocationId`, `recordedByUserId`, `recordedAtUtc`, `stockMovementId` and `stockMovementLineId`. `missingReason` is null for a legacy/ordinary loss or numeric `1` = Missing, `2` = Wasted, `3` = Theft for a classified missing entry. The responsible location is nullable for ordinary loss entries.
+
+Loss entries are paginated independently from `vehicles`: `lossPage` defaults to 1 and `lossPageSize` to 50, with a maximum size of 200. Use `lossTotalCount` to navigate. `barrel.recordedLossLiters` totals ordinary losses, while `barrel.recordedMissingLiters` totals the separately classified missing entries, including wasted and theft. `netUsedLiters` continues to describe vehicle usage and excludes losses; avoid adding it to gross issued liters or subtracting losses a second time from the barrel's remaining liters.

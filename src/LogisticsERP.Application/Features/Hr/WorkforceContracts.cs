@@ -119,6 +119,7 @@ public sealed record EmployeeUpsertRequest(
     string? RowVersion);
 
 public sealed record ChangeEmployeeStatusRequest(string Status, DateOnly EffectiveDate, string Reason);
+public sealed record ReactivateEmployeeRequest(DateOnly EffectiveDate, string Reason);
 public sealed record ChangeEmployeeRoleRequest(bool IsEmployee, DateOnly EffectiveDate, string Reason, RiderProfileUpsertRequest? Rider);
 
 public sealed record RiderProfileUpsertRequest(string? TShirtSize, string? OperationalNotes, string? RowVersion = null);
