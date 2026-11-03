@@ -152,6 +152,11 @@ public sealed class ChefzController(IChefzService service) : ControllerBase
         return await ToAction(service.ProcessOrderSettlementsAsync(file.FileName, content.ToArray(), preview, ct));
     }
 
+    [HttpDelete("performance")]
+    [RequirePermission(PermissionKeys.Chefz.PerformanceDelete)]
+    public Task<IActionResult> DeletePerformance([FromQuery] DateOnly reportDate, CancellationToken ct) =>
+        ToAction(service.DeletePerformanceAsync(reportDate, ct));
+
     [HttpGet("performance")]
     [RequirePermission(PermissionKeys.Chefz.Read)]
     public Task<IActionResult> Performance(DateOnly from, DateOnly to, Guid? accountId, Guid? riderId,

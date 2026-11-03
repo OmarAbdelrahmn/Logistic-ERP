@@ -23,6 +23,7 @@ public static class PermissionKeys
         public const string Read = "chefz.read";
         public const string AccountsUpdate = "chefz.accounts.update";
         public const string PerformanceImport = "chefz.performance.import";
+        public const string PerformanceDelete = "chefz.performance.delete";
         public const string SettlementsCreate = "chefz.settlements.create";
         public const string SettlementsDelete = "chefz.settlements.delete";
     }
@@ -334,7 +335,7 @@ public static class PermissionKeys
         Ninja.EvaluationManage, Ninja.EvaluationExport,
         Ninja.Read, Ninja.AccountsUpdate, Ninja.AssignmentsCreate, Ninja.AssignmentsDelete, Ninja.AssignmentDatesUpdate,
         Ninja.CredentialsRotate, Ninja.PerformanceImport, Ninja.DeductionsImport,
-        Chefz.Read, Chefz.AccountsUpdate, Chefz.PerformanceImport, Chefz.SettlementsCreate, Chefz.SettlementsDelete,
+        Chefz.Read, Chefz.AccountsUpdate, Chefz.PerformanceImport, Chefz.PerformanceDelete, Chefz.SettlementsCreate, Chefz.SettlementsDelete,
         Security.UsersRead,
         Security.UsersCreate,
         Security.UsersUpdate,

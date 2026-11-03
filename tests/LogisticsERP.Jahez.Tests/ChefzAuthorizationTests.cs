@@ -52,6 +52,15 @@ public sealed class ChefzAuthorizationTests
     }
 
     [Fact]
+    public void DeletePerformanceRequiresDedicatedPermission()
+    {
+        var action = typeof(ChefzController).GetMethod(nameof(ChefzController.DeletePerformance))!;
+        Assert.Equal("performance", action.GetCustomAttribute<HttpDeleteAttribute>()!.Template);
+        Assert.Equal(AuthenticationPolicies.PermissionPrefix + PermissionKeys.Chefz.PerformanceDelete,
+            action.GetCustomAttribute<RequirePermissionAttribute>()!.Policy);
+    }
+
+    [Fact]
     public void DeleteSettlementsRequiresDedicatedPermission()
     {
         var action = typeof(ChefzController).GetMethod(nameof(ChefzController.DeleteSettlements))!;
@@ -95,7 +104,7 @@ public sealed class ChefzAuthorizationTests
         var checker = new Checker(platform.Id, granted);
         var handler = new PermissionAuthorizationHandler(checker, db);
         foreach (var permission in new[] { PermissionKeys.Chefz.Read, PermissionKeys.Chefz.AccountsUpdate,
-            PermissionKeys.Chefz.PerformanceImport, PermissionKeys.Chefz.SettlementsCreate, PermissionKeys.Chefz.SettlementsDelete })
+            PermissionKeys.Chefz.PerformanceImport, PermissionKeys.Chefz.PerformanceDelete, PermissionKeys.Chefz.SettlementsCreate, PermissionKeys.Chefz.SettlementsDelete })
         {
             var requirement = new PermissionRequirement(permission);
             var user = new ClaimsPrincipal(new ClaimsIdentity(new[] {

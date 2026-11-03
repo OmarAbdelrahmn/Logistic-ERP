@@ -71,6 +71,8 @@ public sealed record ChefzSponsorAccountCounts(Guid? SponsorId, string SponsorNa
 public sealed record ChefzAccountsResponse(IReadOnlyList<ChefzAccountResponse> Items, int Page, int PageSize,
     int TotalCount, ChefzAccountCounts Summary, IReadOnlyList<ChefzSponsorAccountCounts> Sponsors);
 
+public sealed record ChefzPerformanceDeletionResponse(DateOnly ReportDate, int PerformanceRowsDeleted, int SourcesDeleted, int ImportsDeleted);
+
 public sealed record ChefzSettlementDeletionResponse(DateOnly PeriodFrom, DateOnly PeriodTo, int SettlementsDeleted, int ImportsDeleted, int OrderRowsDeleted);
 
 public interface IChefzService
@@ -99,6 +101,7 @@ public interface IChefzService
     Task<Result<ChefzSettlementResponse>> PreviewSettlementAsync(ChefzSettlementRequest request, CancellationToken ct = default);
     Task<Result<ChefzSettlementResponse>> SaveSettlementAsync(ChefzSettlementRequest request, CancellationToken ct = default);
     Task<Result<ChefzPage<ChefzSettlementResponse>>> GetSettlementsAsync(Guid? accountId, Guid? riderId, int page, int pageSize, CancellationToken ct = default);
+    Task<Result<ChefzPerformanceDeletionResponse>> DeletePerformanceAsync(DateOnly reportDate, CancellationToken ct = default);
     Task<Result<ChefzImportResponse>> ImportPerformanceAsync(DateOnly reportDate, string fileName, byte[] content, CancellationToken ct = default);
     Task<Result<ChefzPage<ChefzPerformanceResponse>>> GetPerformanceAsync(Guid? accountId, Guid? riderId, DateOnly fromDate, DateOnly toDate, int page, int pageSize, CancellationToken ct = default);
 }

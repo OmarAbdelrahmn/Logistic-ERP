@@ -737,7 +737,8 @@ public sealed partial class ChefzWorkflowTests
     private sealed class Checker : IPermissionChecker
     {
         public bool Allow { get; set; } = true;
-        public Task<bool> HasPermissionAsync(Guid userId, long authorizationVersion, string permissionKey, PermissionScope? scope = null, CancellationToken cancellationToken = default) => Task.FromResult(Allow);
+        public string? DeniedPermission { get; set; }
+        public Task<bool> HasPermissionAsync(Guid userId, long authorizationVersion, string permissionKey, PermissionScope? scope = null, CancellationToken cancellationToken = default) => Task.FromResult(Allow && permissionKey != DeniedPermission);
         public void InvalidateUser(Guid userId, long authorizationVersion) { }
     }
     private sealed class Clock : TimeProvider { public override DateTimeOffset GetUtcNow() => new(2026, 10, 31, 20, 0, 0, TimeSpan.Zero); }
