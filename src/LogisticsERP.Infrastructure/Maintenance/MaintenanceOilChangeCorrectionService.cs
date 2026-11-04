@@ -60,11 +60,6 @@ internal sealed partial class MaintenanceService
                         (!x.EndedAtUtc.HasValue || x.EndedAtUtc >= operation.PerformedAtUtc))
                     .OrderByDescending(x => x.StartedAtUtc).FirstOrDefaultAsync(cancellationToken);
                 var attribution = assignment is null ? InventoryAttributionStatus.Unassigned : InventoryAttributionStatus.AssignedRider;
-                var readingCount = await dbContext.VehicleOdometerReadings.AsNoTracking()
-                    .CountAsync(x => x.SourceType == VehicleOdometerSourceType.Maintenance &&
-                        x.SourceEntityId == oilChangeId && x.VehicleId == oldVehicleId, cancellationToken);
-                if (readingCount != 1) return Result.Failure<OilChangeResponse>(MaintenanceErrors.InvalidState);
-
                 var changed = await dbContext.OilChangeOperations
                     .Where(x => x.Id == oilChangeId && x.VehicleId == oldVehicleId && x.MaintenanceWorkOrderId == null
                         && x.RowVersion == operation.RowVersion)
@@ -78,11 +73,10 @@ internal sealed partial class MaintenanceService
                         .SetProperty(x => x.RiderProfileId, assignment == null ? null : assignment.RiderProfileId)
                         .SetProperty(x => x.AttributionStatus, attribution), cancellationToken);
                 if (changed != usageIds.Length) return Result.Failure<OilChangeResponse>(MaintenanceErrors.ConcurrencyConflict);
-                changed = await dbContext.VehicleOdometerReadings
+                await dbContext.VehicleOdometerReadings
                     .Where(x => x.SourceType == VehicleOdometerSourceType.Maintenance &&
                         x.SourceEntityId == oilChangeId && x.VehicleId == oldVehicleId)
                     .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.VehicleId, request.VehicleId), cancellationToken);
-                if (changed != 1) return Result.Failure<OilChangeResponse>(MaintenanceErrors.ConcurrencyConflict);
 
                 var revisionIds = await dbContext.OilChangeRevisions.AsNoTracking()
                     .Where(x => x.OilChangeOperationId == oilChangeId).Select(x => x.Id).ToArrayAsync(cancellationToken);

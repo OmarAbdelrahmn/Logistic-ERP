@@ -20,7 +20,9 @@ internal sealed partial class PlatformAccountDayAllocationService
         var inputs = Ids(c).Select(id => Figures(usages.GetValueOrDefault(id))).ToArray();
         decimal? Sum(PlatformDayMetric m) => inputs.All(i => Value(i, m).HasValue) ? inputs.Sum(i => Value(i, m)!.Value) : null;
         return new((int?)Sum(PlatformDayMetric.OrdersCount), Sum(PlatformDayMetric.WorkingHours), Sum(PlatformDayMetric.CollectedAmount),
-            Sum(PlatformDayMetric.DeductionsAmount), (int?)Sum(PlatformDayMetric.TotalValidOffers), (int?)Sum(PlatformDayMetric.DeclinedOffers), (int?)Sum(PlatformDayMetric.MissedOffers));
+            Sum(PlatformDayMetric.DeductionsAmount), (int?)Sum(PlatformDayMetric.TotalValidOffers), (int?)Sum(PlatformDayMetric.DeclinedOffers), (int?)Sum(PlatformDayMetric.MissedOffers),
+            (int?)Sum(PlatformDayMetric.QualityGrossOrders), (int?)Sum(PlatformDayMetric.QualityCompletedOrders), (int?)Sum(PlatformDayMetric.QualityCompletedOrdersInTime),
+            (int?)Sum(PlatformDayMetric.QualityVerificationRequests), (int?)Sum(PlatformDayMetric.QualitySuccessfulVerifications), (int?)Sum(PlatformDayMetric.QualityFailedOrders));
     }
     internal async Task<Result<PlatformAssignmentContextResponse>> Context(Guid account, DateOnly date, Guid rider, CancellationToken ct)
     {

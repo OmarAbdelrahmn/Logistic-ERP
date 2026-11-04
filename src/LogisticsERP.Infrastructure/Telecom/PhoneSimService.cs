@@ -803,7 +803,8 @@ internal sealed class PhoneSimService(
             row.Sim.ReceiptFormSha256Checksum!),
         row.Sim.CreatedAtUtc,
         row.Sim.UpdatedAtUtc,
-        EncodeRowVersion(row.Sim.RowVersion));
+        EncodeRowVersion(row.Sim.RowVersion))
+        { Ownership = row.Sim.Ownership, OwnershipEvidence = row.Sim.OwnershipEvidence, OwnershipEffectiveFrom = row.Sim.OwnershipEffectiveFrom };
 
     private static PhoneSimAssignmentResponse MapAssignment(AssignmentProjection row) => new(
         row.Assignment.Id,

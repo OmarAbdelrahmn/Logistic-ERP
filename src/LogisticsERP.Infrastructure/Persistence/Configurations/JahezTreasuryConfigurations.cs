@@ -41,6 +41,10 @@ internal sealed class JahezTreasuryConfigurations : IEntityTypeConfiguration<Tre
 
     public void Configure(EntityTypeBuilder<TreasuryPosting> b)
     {
+        // Existing Jahez queries keep their historical scope. Shared platform services opt in explicitly.
+        b.HasQueryFilter(x => x.ClientPlatformId == null);
+        b.HasIndex(x => new { x.ClientPlatformId, x.SupervisorEmployeeId, x.SubAccountId });
+        b.HasIndex(x => new { x.SourceEventId, x.SubAccountId }).IsUnique().HasFilter("[SourceEventId] IS NOT NULL");
         b.ConfigureHistory("Postings", "jahez_v3");
         b.ToTable(t => t.UseSqlOutputClause(false));
         b.Property(x => x.ActorNameAr).HasMaxLength(200);

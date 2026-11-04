@@ -4,6 +4,32 @@ namespace LogisticsERP.Application.Authorization;
 
 public static class PermissionKeys
 {
+    public static class PlatformFields
+    {
+        public const string Identity = "platform_accounts.fields.identity";
+        public const string Owner = "platform_accounts.fields.owner";
+        public const string City = "platform_accounts.fields.city";
+        public const string Registry = "platform_accounts.fields.registry";
+        public const string Contact = "platform_accounts.fields.contact";
+        public const string Vehicle = "platform_accounts.fields.registered_vehicle";
+        public const string Settlement = "platform_accounts.fields.settlement";
+        public const string Compensation = "platform_assignments.fields.compensation";
+        public const string Reveal = "platform_accounts.credentials.reveal";
+    }
+    public static class Hunger
+    {
+        public const string Read = "hunger.read";
+        public const string QualityImport = "hunger.quality.import";
+        public const string QualityExport = "hunger.quality.export";
+        public const string AccountsImport = "hunger.accounts.import";
+        public const string AccountsUpdate = "hunger.accounts.update";
+        public const string PerformanceImport = "hunger.performance.import";
+        public const string PerformanceExport = "hunger.performance.export";
+        public const string AlertsManage = "hunger.alerts.manage";
+        public const string FinanceManage = "hunger.finance.manage";
+        public const string FinanceConfigure = "hunger.finance.configure";
+        public const string RemittancesConfirm = "hunger.remittances.confirm";
+    }
     public static class Ninja
     {
         public const string EvaluationManage = "ninja.evaluation.manage";
@@ -332,6 +358,10 @@ public static class PermissionKeys
 
     public static FrozenSet<string> All { get; } = new[]
     {
+        PlatformFields.Identity, PlatformFields.Owner, PlatformFields.City, PlatformFields.Registry, PlatformFields.Contact,
+        PlatformFields.Vehicle, PlatformFields.Settlement, PlatformFields.Compensation, PlatformFields.Reveal,
+        Hunger.Read, Hunger.QualityImport, Hunger.QualityExport, Hunger.AccountsImport, Hunger.AccountsUpdate,
+        Hunger.PerformanceImport, Hunger.PerformanceExport, Hunger.AlertsManage, Hunger.FinanceManage, Hunger.FinanceConfigure, Hunger.RemittancesConfirm,
         Ninja.EvaluationManage, Ninja.EvaluationExport,
         Ninja.Read, Ninja.AccountsUpdate, Ninja.AssignmentsCreate, Ninja.AssignmentsDelete, Ninja.AssignmentDatesUpdate,
         Ninja.CredentialsRotate, Ninja.PerformanceImport, Ninja.DeductionsImport,

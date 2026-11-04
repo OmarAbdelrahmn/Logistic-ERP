@@ -4,7 +4,9 @@ namespace LogisticsERP.Application.Features.Hr;
 
 public sealed record PlatformAccountDayUsageInput(int? OrdersCount = null, decimal? WorkingHours = null,
     decimal? CollectedAmount = null, decimal? DeductionsAmount = null, int? TotalValidOffers = null,
-    int? DeclinedOffers = null, int? MissedOffers = null);
+    int? DeclinedOffers = null, int? MissedOffers = null,
+    int? QualityGrossOrders = null, int? QualityCompletedOrders = null, int? QualityCompletedOrdersInTime = null,
+    int? QualityVerificationRequests = null, int? QualitySuccessfulVerifications = null, int? QualityFailedOrders = null);
 public sealed record PlatformAccountDayUsageUpdate(Guid AssignmentId, PlatformAccountDayUsageInput? Figures,
     string? RowVersion = null);
 public sealed record PlatformAccountDayUpdateRequest(IReadOnlyList<PlatformAccountDayUsageUpdate> Assignments, string Reason, IReadOnlyList<PreviousDayUsageInput>? Contributions = null);
@@ -15,7 +17,8 @@ public sealed record PlatformAccountDayResponse(Guid AccountId, DateOnly Busines
 {
     public IReadOnlyList<PlatformDayContributionResponse> Contributions { get; init; } = [];
 }
-public enum PlatformDayMetric { OrdersCount, WorkingHours, CollectedAmount, DeductionsAmount, TotalValidOffers, DeclinedOffers, MissedOffers }
+public enum PlatformDayMetric { OrdersCount, WorkingHours, CollectedAmount, DeductionsAmount, TotalValidOffers, DeclinedOffers, MissedOffers,
+    QualityGrossOrders, QualityCompletedOrders, QualityCompletedOrdersInTime, QualityVerificationRequests, QualitySuccessfulVerifications, QualityFailedOrders }
 public sealed record PlatformDayShare(Guid AssignmentId, Guid RiderProfileId, int Sequence,
     IReadOnlyDictionary<PlatformDayMetric, decimal> Values)
 {

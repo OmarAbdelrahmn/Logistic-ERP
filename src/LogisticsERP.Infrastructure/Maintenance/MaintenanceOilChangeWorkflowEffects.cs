@@ -111,8 +111,10 @@ internal sealed partial class MaintenanceService
         if (vehicle is null) return Result.Failure<decimal?>(MaintenanceErrors.NotFound);
         var source = await dbContext.VehicleOdometerReadings.Where(x => x.VehicleId == vehicleId
             && x.SourceType == VehicleOdometerSourceType.Maintenance && x.SourceEntityId == op.Id).ToArrayAsync(ct);
-        if (source.Length != 1) return Result.Failure<decimal?>(MaintenanceErrors.InvalidState);
-        if (!op.IsCancelled && source[0].RecordedAtUtc == op.PerformedAtUtc && source[0].Reading == op.OdometerAtChange)
+        // Legacy operations may have missing or duplicate mileage evidence. Neither
+        // condition should prevent correcting or cancelling the oil service.
+        if (!op.IsCancelled && source.Length == 1
+            && source[0].RecordedAtUtc == op.PerformedAtUtc && source[0].Reading == op.OdometerAtChange)
             return Result.Success<decimal?>(vehicle.TrackedDistanceKm);
         foreach (var reading in source) { reading.IsVoided = true; reading.VoidedByRevisionId = revision.Id; }
         if (!op.IsCancelled) dbContext.VehicleOdometerReadings.Add(new VehicleOdometerReading
@@ -130,27 +132,32 @@ internal sealed partial class MaintenanceService
             .Concat(days.Select(x => new MileageEvent(new DateTimeOffset(x.WorkDate.ToDateTime(TimeOnly.MaxValue),
                 TimeSpan.FromHours(3)).ToUniversalTime(), x.Id, null, x)))
             .OrderBy(x => x.At).ThenBy(x => x.Id).ToArray();
-        decimal running;
-        if (suppliedBasis.HasValue) running = suppliedBasis.Value;
-        else if (evidence.FirstOrDefault()?.Reading is { SourceType: not VehicleOdometerSourceType.Maintenance } first)
-            running = first.Reading;
-        else return Result.Failure<decimal?>(OilChangeWorkflowErrors.MissingMileageBasis);
+        // Prefer remaining recorded evidence. With no evidence, retain the cached
+        // vehicle mileage rather than inventing a zero baseline or rejecting the request.
+        var first = evidence.FirstOrDefault();
+        var inferredBasis = first?.Reading?.Reading
+            ?? (first?.Day is { } firstDay
+                ? firstDay.ManualBaselineOdometerReading
+                    ?? firstDay.EffectiveOdometerAfterKm - firstDay.AppliedDistanceKm
+                : vehicle.TrackedDistanceKm);
+        var running = suppliedBasis is >= 0 and <= 9_999_999_999_999_999m
+            ? suppliedBasis.Value : Math.Max(0m, inferredBasis);
         foreach (var e in evidence)
         {
             if (e.Day is { } day)
             {
-                if (!VehicleDailyDistanceRules.TryRecalculate([day], running, out running))
-                    return Result.Failure<decimal?>(OilChangeWorkflowErrors.InvalidMileage);
+                // A lower later manual reading becomes a correction, using the
+                // existing correction rules instead of blocking the oil operation.
+                VehicleDailyDistanceRules.TryRecalculate([day], running, out running,
+                    day.ManualOdometerReading < running ? day : null);
             }
             else if (e.Reading is { } reading)
             {
-                if (reading.SourceType == VehicleOdometerSourceType.Maintenance && reading.Reading < running)
-                    return Result.Failure<decimal?>(OilChangeWorkflowErrors.InvalidMileage);
                 running = reading.Reading;
             }
         }
         vehicle.CurrentOdometer = decimal.ToInt64(decimal.Floor(running)); vehicle.TrackedDistanceKm = running;
-        vehicle.LastOdometerAtUtc = evidence.LastOrDefault()?.At;
+        vehicle.LastOdometerAtUtc = evidence.LastOrDefault()?.At ?? vehicle.LastOdometerAtUtc;
         return Result.Success<decimal?>(running);
     }
 

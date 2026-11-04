@@ -34,7 +34,7 @@ Explain that the historical record remains and costs are reversed in the current
 - On a version or preview-effects conflict, preserve the draft, reload current details and show a fresh comparison before committing again.
 - On already-cancelled, refresh the row and display its cancellation details.
 - On barrel restoration conflict, show the API detail and the involved operation/barrel context from the preview/details. Do not retry silently or select another barrel automatically.
-- On missing mileage basis, obtain a documented value through the authorized workflow. Do not automatically fill zero or the vehicle's current odometer.
+- Mileage history must not block edit or cancellation. Leave `mileageBaselineKm` null unless a documented baseline is supplied. The server handles missing/duplicate readings and decreasing mileage; mileage-only changes after preview do not require another preview. Display the mileage returned by commit.
 - Display ProblemDetails `detail`; retain `correlationId` for support. Treat an unsuccessful request as no completed correction, then reload if the network result was ambiguous.
 
 ## Refresh after success

@@ -346,6 +346,7 @@ public sealed class ApplicationDbContext(
         if (entityNamespace.EndsWith(".Jahez", StringComparison.Ordinal)) return "jahez";
         if (entityNamespace.EndsWith(".Chefz", StringComparison.Ordinal)) return "chefz";
         if (entityNamespace.EndsWith(".Ninja", StringComparison.Ordinal)) return "ninja";
+        if (entityNamespace.EndsWith(".Hunger", StringComparison.Ordinal)) return "hunger";
         if (entityNamespace.EndsWith(".Fleet", StringComparison.Ordinal)) return "fleet";
         if (entityNamespace.EndsWith(".Fuel", StringComparison.Ordinal)) return "fuel";
         if (entityNamespace.EndsWith(".Maintenance", StringComparison.Ordinal)) return "maintenance";

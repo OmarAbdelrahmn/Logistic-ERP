@@ -45,7 +45,7 @@ public sealed record AssignSimplePlatformAccountRequest(
     DateOnly EffectiveFrom,
     string? Reason,
     bool WasBackdated,
-    string? BackdatedReason, IReadOnlyList<PreviousDayUsageInput>? PreviousDayUsages = null);
+    string? BackdatedReason, IReadOnlyList<PreviousDayUsageInput>? PreviousDayUsages = null, string? CompensationModel = null);
 
 public sealed record ReleaseSimplePlatformAccountRequest(
     DateOnly EffectiveTo,
@@ -76,6 +76,7 @@ public sealed record SimplePlatformAssignmentResponse(
     string RowVersion)
 {
     public string? RiderType { get; init; }
+    public string? CompensationModel { get; init; }
     public bool IsOperationallyBlocked { get; init; }
     public string? OperationalBlockReason { get; init; }
 }

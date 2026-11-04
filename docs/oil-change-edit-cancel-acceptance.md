@@ -29,7 +29,7 @@ Database migrations were applied and verified on hosted `db67927` on 31 October 
 
 ## Explicit outcomes
 
-No reliable mileage basis produces `maintenance.oil_change_mileage_basis_required`; conflicting evidence produces `maintenance.oil_change_mileage_conflict`. The backend does not guess a baseline. Moved or inconsistent barrel/layer sources can require inventory reconciliation. Customer-payment reversal is not automatic: cancelling an oil service retains the receipt and keeps a work order with payment evidence available for its financial workflow.
+Missing mileage baselines, missing/duplicate operation readings and decreasing mileage history do not reject an edit or cancellation. Replay infers its starting mileage from remaining evidence and retains cached vehicle mileage when no evidence remains. Lower daily manual readings become corrections. Mileage-only changes after preview do not invalidate the effects hash. Moved or inconsistent barrel/layer sources can require inventory reconciliation. Customer-payment reversal is not automatic: cancelling an oil service retains the receipt and keeps a work order with payment evidence available for its financial workflow.
 
 See [API contract](oil-change-edit-cancel-api.md) and [frontend integration](oil-change-edit-cancel-frontend.md). Test output from this session is retained under `outputs/oil-workflow-test.log`.
 

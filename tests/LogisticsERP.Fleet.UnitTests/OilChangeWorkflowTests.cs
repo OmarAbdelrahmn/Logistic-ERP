@@ -246,6 +246,158 @@ public sealed class OilChangeWorkflowTests
         Assert.Equal(70m, (await f.Db.VehicleDailyDistances.SingleAsync(Ct)).EffectiveOdometerAfterKm);
     }
 
+    [Theory]
+    [InlineData(false, 0)]
+    [InlineData(true, 0)]
+    [InlineData(false, 2)]
+    [InlineData(true, 2)]
+    public async Task MissingOrDuplicateMileageDoesNotBlockEditOrCancellation(bool cancel, int sourceCount)
+    {
+        await using var f = await Fixture.Create();
+        var detail = await f.Detail();
+        // Simulate incomplete imported history outside the immutable-history API.
+        if (sourceCount == 0)
+            await f.Db.VehicleOdometerReadings.Where(x => x.SourceEntityId == f.OperationId).ExecuteDeleteAsync(Ct);
+        else f.Db.VehicleOdometerReadings.Add(new VehicleOdometerReading
+        {
+            VehicleId = detail.Operation.VehicleId!.Value, Reading = 100, RecordedAtUtc = detail.Operation.PerformedAtUtc,
+            SourceType = VehicleOdometerSourceType.Maintenance, SourceEntityId = f.OperationId
+        });
+        // Also remove the independent initial basis, reproducing incomplete legacy history.
+        await f.Db.VehicleOdometerReadings.Where(x => x.SourceType == VehicleOdometerSourceType.Manual).ExecuteDeleteAsync(Ct);
+        await f.Db.SaveChangesAsync(Ct);
+        var edit = f.Edit(detail) with { OdometerAtChange = 80, MileageBaselineKm = -1 };
+        var cancellation = new OilChangeCancelRequest("legacy mileage", detail.Operation.RowVersion!, MileageBaselineKm: -1);
+        var preview = cancel
+            ? await f.Service.CancelOilChangeAsync(f.OperationId, cancellation, "", true, Ct)
+            : await f.Service.EditOilChangeAsync(f.OperationId, edit, "", true, Ct);
+        Assert.True(preview.IsSuccess, preview.Error.Description);
+        Assert.Equal(sourceCount, await f.Db.VehicleOdometerReadings.CountAsync(x => x.SourceEntityId == f.OperationId, Ct));
+        var saved = cancel
+            ? await f.Service.CancelOilChangeAsync(f.OperationId, cancellation with { ExpectedEffectsHash = preview.Value!.EffectsHash }, "legacy", false, Ct)
+            : await f.Service.EditOilChangeAsync(f.OperationId, edit with { ExpectedEffectsHash = preview.Value!.EffectsHash }, "legacy", false, Ct);
+        Assert.True(saved.IsSuccess, saved.Error.Description);
+        Assert.Equal(cancel ? 100m : 80m, saved.Value!.Effects.VehicleMileageKm);
+        Assert.Equal(cancel ? 0 : 1, await f.Db.VehicleOdometerReadings.CountAsync(x => x.SourceEntityId == f.OperationId, Ct));
+        Assert.Equal(sourceCount, await f.Db.VehicleOdometerReadings.IgnoreQueryFilters()
+            .CountAsync(x => x.SourceEntityId == f.OperationId && x.IsVoided, Ct));
+        Assert.Equal(cancel ? 30m : 26.5m, await f.OilStock());
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task LowerLaterReadingsDoNotBlockOilCorrection(bool cancel)
+    {
+        await using var f = await Fixture.Create();
+        var detail = await f.Detail();
+        var vehicleId = detail.Operation.VehicleId!.Value;
+        f.Db.VehicleDailyDistances.Add(new VehicleDailyDistance
+        {
+            VehicleId = vehicleId, WorkDate = new DateOnly(2026, 10, 30), ManualOdometerReading = 40,
+            ManualBaselineOdometerReading = 30, ManualDistanceKm = 10, AppliedDistanceKm = 10,
+            AppliedSource = VehicleDailyDistanceSource.Manual, EffectiveOdometerAfterKm = 40
+        });
+        f.Db.VehicleOdometerReadings.Add(new VehicleOdometerReading
+        {
+            VehicleId = vehicleId, Reading = 35, RecordedAtUtc = Now,
+            SourceType = VehicleOdometerSourceType.Maintenance, SourceEntityId = Guid.NewGuid()
+        });
+        await f.Db.SaveChangesAsync(Ct);
+        var edit = f.Edit(detail) with { OdometerAtChange = 150 };
+        var cancellation = new OilChangeCancelRequest("conflicting history", detail.Operation.RowVersion!);
+        var preview = cancel
+            ? await f.Service.CancelOilChangeAsync(f.OperationId, cancellation, "", true, Ct)
+            : await f.Service.EditOilChangeAsync(f.OperationId, edit, "", true, Ct);
+        Assert.True(preview.IsSuccess, preview.Error.Description);
+        Assert.False((await f.Db.VehicleDailyDistances.AsNoTracking().SingleAsync(Ct)).IsOdometerCorrection);
+        var saved = cancel
+            ? await f.Service.CancelOilChangeAsync(f.OperationId, cancellation with { ExpectedEffectsHash = preview.Value!.EffectsHash }, "lower", false, Ct)
+            : await f.Service.EditOilChangeAsync(f.OperationId, edit with { ExpectedEffectsHash = preview.Value!.EffectsHash }, "lower", false, Ct);
+        Assert.True(saved.IsSuccess, saved.Error.Description);
+        Assert.Equal(35m, saved.Value!.Effects.VehicleMileageKm);
+        var day = await f.Db.VehicleDailyDistances.AsNoTracking().SingleAsync(Ct);
+        Assert.True(day.IsOdometerCorrection);
+        Assert.Equal(0m, day.ManualDistanceKm);
+        Assert.Equal(40m, day.EffectiveOdometerAfterKm);
+    }
+
+    [Fact]
+    public async Task CancellationUsesDailyRecordBasisWhenNoIndependentReadingRemains()
+    {
+        await using var f = await Fixture.Create();
+        var detail = await f.Detail();
+        await f.Db.VehicleOdometerReadings.Where(x => x.SourceType == VehicleOdometerSourceType.Manual).ExecuteDeleteAsync(Ct);
+        f.Db.VehicleDailyDistances.Add(new VehicleDailyDistance
+        {
+            VehicleId = detail.Operation.VehicleId!.Value, WorkDate = new DateOnly(2026, 10, 30),
+            GpsDistanceKm = 20, AppliedDistanceKm = 20, AppliedSource = VehicleDailyDistanceSource.Gps,
+            EffectiveOdometerAfterKm = 120
+        });
+        await f.Db.SaveChangesAsync(Ct);
+        var request = new OilChangeCancelRequest("daily basis", detail.Operation.RowVersion!);
+        var preview = await f.Service.CancelOilChangeAsync(f.OperationId, request, "", true, Ct);
+        Assert.True(preview.IsSuccess, preview.Error.Description);
+        var saved = await f.Service.CancelOilChangeAsync(f.OperationId,
+            request with { ExpectedEffectsHash = preview.Value!.EffectsHash }, "daily-basis", false, Ct);
+        Assert.True(saved.IsSuccess, saved.Error.Description);
+        Assert.Equal(120m, saved.Value!.Effects.VehicleMileageKm);
+        Assert.Equal(120m, (await f.Db.VehicleDailyDistances.AsNoTracking().SingleAsync(Ct)).EffectiveOdometerAfterKm);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(2)]
+    public async Task VehicleCorrectionAcceptsMissingOrDuplicateOperationReadings(int sourceCount)
+    {
+        await using var f = await Fixture.Create();
+        var detail = await f.Detail();
+        var original = await f.Db.Vehicles.SingleAsync(x => x.Id == detail.Operation.VehicleId, Ct);
+        var target = new Vehicle
+        {
+            AssetNumber = "TARGET", NormalizedAssetNumber = "TARGET", VehicleType = original.VehicleType,
+            VehicleManufacturerId = original.VehicleManufacturerId, VehicleModelId = original.VehicleModelId
+        };
+        f.Db.Vehicles.Add(target);
+        if (sourceCount == 0)
+            await f.Db.VehicleOdometerReadings.Where(x => x.SourceEntityId == f.OperationId).ExecuteDeleteAsync(Ct);
+        else f.Db.VehicleOdometerReadings.Add(new VehicleOdometerReading
+        {
+            VehicleId = original.Id, Reading = 100, RecordedAtUtc = detail.Operation.PerformedAtUtc,
+            SourceType = VehicleOdometerSourceType.Maintenance, SourceEntityId = f.OperationId
+        });
+        await f.Db.SaveChangesAsync(Ct);
+        f.Db.ChangeTracker.Clear();
+        var result = await f.Service.CorrectCompletedOilChangeVehicleAsync(f.OperationId,
+            new(target.Id, "wrong vehicle", detail.Operation.RowVersion), Ct);
+        Assert.True(result.IsSuccess, result.Error.Description);
+        Assert.Equal(target.Id, (await f.Detail()).Operation.VehicleId);
+        var readings = await f.Db.VehicleOdometerReadings.Where(x => x.SourceEntityId == f.OperationId).ToArrayAsync(Ct);
+        Assert.Equal(sourceCount, readings.Length);
+        Assert.All(readings, x => Assert.Equal(target.Id, x.VehicleId));
+    }
+
+    [Fact]
+    public async Task MileageOnlyChangeAfterPreviewDoesNotRejectCancellation()
+    {
+        await using var f = await Fixture.Create();
+        var detail = await f.Detail();
+        var request = new OilChangeCancelRequest("cancel", detail.Operation.RowVersion!);
+        var preview = await f.Service.CancelOilChangeAsync(f.OperationId, request, "", true, Ct);
+        Assert.True(preview.IsSuccess, preview.Error.Description);
+        f.Db.VehicleOdometerReadings.Add(new VehicleOdometerReading
+        {
+            VehicleId = detail.Operation.VehicleId!.Value, Reading = 200, RecordedAtUtc = Now,
+            SourceType = VehicleOdometerSourceType.Manual
+        });
+        await f.Db.SaveChangesAsync(Ct);
+        var saved = await f.Service.CancelOilChangeAsync(f.OperationId,
+            request with { ExpectedEffectsHash = preview.Value!.EffectsHash }, "mileage-change", false, Ct);
+        Assert.True(saved.IsSuccess, saved.Error.Description);
+        Assert.Equal(200m, saved.Value!.Effects.VehicleMileageKm);
+        Assert.Equal(30m, await f.OilStock());
+    }
+
     [Fact]
     public async Task ExternalWorkOrderCancellationReversesCostsAndPreservesCustomerPayment()
     {

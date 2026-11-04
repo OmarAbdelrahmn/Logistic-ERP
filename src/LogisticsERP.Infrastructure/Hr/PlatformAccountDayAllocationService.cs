@@ -39,7 +39,9 @@ internal sealed partial class PlatformAccountDayAllocationService(ApplicationDbC
                 ["assignmentId"] = assignment, ["metric"] = metric });
 
     internal static PlatformAccountDayUsageInput Figures(PlatformAccountDayUsage? u) => u is null ? new() :
-        new(u.OrdersCount, u.WorkingHours, u.CollectedAmount, u.DeductionsAmount, u.TotalValidOffers, u.DeclinedOffers, u.MissedOffers);
+        new(u.OrdersCount, u.WorkingHours, u.CollectedAmount, u.DeductionsAmount, u.TotalValidOffers, u.DeclinedOffers, u.MissedOffers,
+            u.QualityGrossOrders, u.QualityCompletedOrders, u.QualityCompletedOrdersInTime,
+            u.QualityVerificationRequests, u.QualitySuccessfulVerifications, u.QualityFailedOrders);
     internal static decimal? Value(PlatformAccountDayUsageInput u, PlatformDayMetric metric) => metric switch
     {
         PlatformDayMetric.OrdersCount => u.OrdersCount,
@@ -49,6 +51,12 @@ internal sealed partial class PlatformAccountDayAllocationService(ApplicationDbC
         PlatformDayMetric.TotalValidOffers => u.TotalValidOffers,
         PlatformDayMetric.DeclinedOffers => u.DeclinedOffers,
         PlatformDayMetric.MissedOffers => u.MissedOffers,
+        PlatformDayMetric.QualityGrossOrders => u.QualityGrossOrders,
+        PlatformDayMetric.QualityCompletedOrders => u.QualityCompletedOrders,
+        PlatformDayMetric.QualityCompletedOrdersInTime => u.QualityCompletedOrdersInTime,
+        PlatformDayMetric.QualityVerificationRequests => u.QualityVerificationRequests,
+        PlatformDayMetric.QualitySuccessfulVerifications => u.QualitySuccessfulVerifications,
+        PlatformDayMetric.QualityFailedOrders => u.QualityFailedOrders,
         _ => throw new ArgumentOutOfRangeException(nameof(metric))
     };
 
@@ -59,6 +67,9 @@ internal sealed partial class PlatformAccountDayAllocationService(ApplicationDbC
         && (u.WorkingHours is null || decimal.Round(u.WorkingHours.Value, 8) == u.WorkingHours)
         && (u.CollectedAmount is null || decimal.Round(u.CollectedAmount.Value, 2) == u.CollectedAmount)
         && (u.DeductionsAmount is null || decimal.Round(u.DeductionsAmount.Value, 2) == u.DeductionsAmount)
+        && u.QualityGrossOrders is null or >= 0 && u.QualityCompletedOrders is null or >= 0
+        && u.QualityCompletedOrdersInTime is null or >= 0 && u.QualityVerificationRequests is null or >= 0
+        && u.QualitySuccessfulVerifications is null or >= 0
         && u.CollectedAmount is null or <= 1000000000m && u.DeductionsAmount is null or >= -1000000000m and <= 1000000000m);
 
     internal async Task<RiderClientAssignment[]> Candidates(Guid account, DateOnly date, CancellationToken ct)
@@ -169,14 +180,14 @@ internal sealed partial class PlatformAccountDayAllocationService(ApplicationDbC
                         $"Rider {assignment.RiderProfileId} is missing {metric}; blank is not zero.", assignment.Id, metric.ToString()));
                 var value = i == ordered.Length - 1 ? remaining[metric] : entered!.Value;
                 // Deductions can be signed in Ninja reports; other metrics cannot.
-                if (metric != PlatformDayMetric.DeductionsAmount && (total < 0 || value < 0 || value > remaining[metric])
+                if (metric is not (PlatformDayMetric.DeductionsAmount or PlatformDayMetric.QualityFailedOrders) && (total < 0 || value < 0 || value > remaining[metric])
                     || i == ordered.Length - 1 && entered.HasValue && entered.Value != value)
                     return Result.Failure<IReadOnlyList<PlatformDayShare>>(Error(accountId, date,
                         $"{metric} does not reconcile to the imported total {total}.", assignment.Id, metric.ToString()));
                 values[metric] = value; remaining[metric] -= value;
             }
             if (contribution is not null && contribution.FiguresJson is null)
-                foreach (var metric in totals.Keys.Where(m => m != PlatformDayMetric.DeductionsAmount))
+                foreach (var metric in totals.Keys.Where(m => m is not (PlatformDayMetric.DeductionsAmount or PlatformDayMetric.QualityFailedOrders)))
                     if (Ids(contribution).Sum(id => Value(Figures(usages.GetValueOrDefault(id)), metric) ?? 0) > values[metric])
                         return Result.Failure<IReadOnlyList<PlatformDayShare>>(Error(accountId, date, "Group total contradicts recorded individual figures."));
             shares.Add(new PlatformDayShare(assignment.Id, assignment.RiderProfileId, i + 1, values)
@@ -210,6 +221,14 @@ internal sealed partial class PlatformAccountDayAllocationService(ApplicationDbC
     internal async Task<HashSet<PlatformDayMetric>> Frozen(Guid account, DateOnly date, CancellationToken ct)
     {
         var frozen = new HashSet<PlatformDayMetric>();
+        if (await db.Set<LogisticsERP.Domain.Entities.Hunger.HungerDailyOperation>().AnyAsync(p => p.PlatformRiderAccountId == account
+            && p.ReportDate == date && p.AllocationStatus == "Resolved", ct))
+            frozen.UnionWith([PlatformDayMetric.OrdersCount, PlatformDayMetric.WorkingHours]);
+        if (await db.Set<LogisticsERP.Domain.Entities.Hunger.HungerQualitySnapshot>().AnyAsync(p => p.PlatformRiderAccountId == account
+            && p.ReportDate == date && p.CoverageFrom == date && p.AllocationStatus == "Resolved", ct))
+            frozen.UnionWith([PlatformDayMetric.QualityGrossOrders, PlatformDayMetric.QualityCompletedOrders,
+                PlatformDayMetric.QualityCompletedOrdersInTime, PlatformDayMetric.QualityVerificationRequests,
+                PlatformDayMetric.QualitySuccessfulVerifications, PlatformDayMetric.QualityFailedOrders]);
         if (await db.NinjaDailyPerformance.AnyAsync(p => p.PlatformRiderAccountId == account && p.ReportDate == date, ct))
             frozen.UnionWith([PlatformDayMetric.OrdersCount, PlatformDayMetric.WorkingHours]);
         if (await db.NinjaDailyDeductions.AnyAsync(p => p.PlatformRiderAccountId == account && p.ReportDate == date, ct))
@@ -296,5 +315,8 @@ internal sealed partial class PlatformAccountDayAllocationService(ApplicationDbC
         u.OrdersCount = input.OrdersCount; u.WorkingHours = input.WorkingHours;
         u.CollectedAmount = input.CollectedAmount; u.DeductionsAmount = input.DeductionsAmount;
         u.TotalValidOffers = input.TotalValidOffers; u.DeclinedOffers = input.DeclinedOffers; u.MissedOffers = input.MissedOffers;
+        u.QualityGrossOrders = input.QualityGrossOrders; u.QualityCompletedOrders = input.QualityCompletedOrders;
+        u.QualityCompletedOrdersInTime = input.QualityCompletedOrdersInTime; u.QualityVerificationRequests = input.QualityVerificationRequests;
+        u.QualitySuccessfulVerifications = input.QualitySuccessfulVerifications; u.QualityFailedOrders = input.QualityFailedOrders;
     }
 }

@@ -103,6 +103,7 @@ internal sealed class RiderClientAssignmentConfiguration : IEntityTypeConfigurat
             .HasDefaultValue(PlatformAccountPaymentModel.PayPerOrder);
         builder.Property(entity => entity.RiderAccountSlot).HasDefaultValue(1);
         builder.Property(entity => entity.NinjaRiderType).HasConversion<string>().HasMaxLength(32);
+        builder.Property(entity => entity.CompensationModel).HasMaxLength(150);
         builder.HasOne<RiderProfile>().WithMany().HasForeignKey(entity => entity.RiderProfileId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<ClientContract>().WithMany().HasForeignKey(entity => entity.ClientContractId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<PlatformRiderAccount>().WithMany().HasForeignKey(entity => entity.PlatformRiderAccountId).OnDelete(DeleteBehavior.Restrict);

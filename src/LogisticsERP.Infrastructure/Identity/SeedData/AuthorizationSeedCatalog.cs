@@ -209,6 +209,9 @@ internal static class AuthorizationSeedCatalog
     public static IReadOnlyList<string> SystemAdminPermissions { get; } = ExpandPermissions(OriginalSystemAdminPermissions)
         .Concat(LogisticsERP.Application.Features.Jahez.JahezWorkflowPermissions.All)
         .Concat(PermissionKeys.All.Where(key => key.StartsWith("ninja.", StringComparison.Ordinal)).Order(StringComparer.Ordinal))
+        .Concat(PermissionKeys.All.Where(key => key.StartsWith("hunger.", StringComparison.Ordinal)
+            || key.StartsWith("platform_accounts.fields.", StringComparison.Ordinal)
+            || key == PermissionKeys.PlatformFields.Compensation || key == PermissionKeys.PlatformFields.Reveal).Order(StringComparer.Ordinal))
         .Concat(LogisticsERP.Application.Features.Jahez.JahezTreasuryPermissions.All).ToArray();
     public static IReadOnlyList<string> ManagerPermissions { get; } = ExpandPermissions(OriginalManagerPermissions);
 
@@ -323,6 +326,10 @@ internal static class AuthorizationSeedCatalog
             [PermissionKeys.Ninja.EvaluationManage, PermissionKeys.Ninja.EvaluationExport], ref sequence);
         AddRolePermissions(seeds, SystemRoles.SystemAdminId,
             [PermissionKeys.Ninja.AssignmentDatesUpdate], ref sequence);
+        AddRolePermissions(seeds, SystemRoles.SystemAdminId,
+            PermissionKeys.All.Where(key => key.StartsWith("hunger.", StringComparison.Ordinal)
+                || key.StartsWith("platform_accounts.fields.", StringComparison.Ordinal)
+                || key == PermissionKeys.PlatformFields.Compensation || key == PermissionKeys.PlatformFields.Reveal).Order(StringComparer.Ordinal), ref sequence);
         return seeds;
     }
 

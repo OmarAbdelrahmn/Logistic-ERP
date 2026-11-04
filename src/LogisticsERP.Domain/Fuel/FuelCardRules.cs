@@ -37,6 +37,7 @@ public static class FuelCardRules
     {
         var internalNumber = NormalizeInternalNumber(value);
         return HasNumericSuffix(internalNumber, "BW") || HasNumericSuffix(internalNumber, "BAWABA")
+                || HasNumericSuffix(internalNumber, "TOGARE")
                 ? FuelCardIdentifierType.InternalNumber
                 : FuelCardIdentifierType.PlateNumber;
     }

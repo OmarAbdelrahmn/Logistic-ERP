@@ -1,0 +1,33 @@
+﻿BEGIN TRANSACTION;
+IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'IsDeleted', N'PermissionKey', N'RoleId', N'UpdatedAtUtc', N'UpdatedByUserId') AND [object_id] = OBJECT_ID(N'[identity].[RolePermissions]'))
+    SET IDENTITY_INSERT [identity].[RolePermissions] ON;
+INSERT INTO [identity].[RolePermissions] ([Id], [CreatedAtUtc], [CreatedByUserId], [DeletedAtUtc], [DeletedByUserId], [DeletionReason], [IsDeleted], [PermissionKey], [RoleId], [UpdatedAtUtc], [UpdatedByUserId])
+VALUES ('019c18d5-62e1-7000-b000-000000000284', '2026-01-01T00:00:00.0000000+00:00', NULL, NULL, NULL, NULL, CAST(0 AS bit), N'hunger.accounts.import', '019c18d5-62e1-7000-9000-000000000001', NULL, NULL),
+('019c18d5-62e1-7000-b000-000000000285', '2026-01-01T00:00:00.0000000+00:00', NULL, NULL, NULL, NULL, CAST(0 AS bit), N'hunger.accounts.update', '019c18d5-62e1-7000-9000-000000000001', NULL, NULL),
+('019c18d5-62e1-7000-b000-000000000286', '2026-01-01T00:00:00.0000000+00:00', NULL, NULL, NULL, NULL, CAST(0 AS bit), N'hunger.alerts.manage', '019c18d5-62e1-7000-9000-000000000001', NULL, NULL),
+('019c18d5-62e1-7000-b000-000000000287', '2026-01-01T00:00:00.0000000+00:00', NULL, NULL, NULL, NULL, CAST(0 AS bit), N'hunger.finance.configure', '019c18d5-62e1-7000-9000-000000000001', NULL, NULL),
+('019c18d5-62e1-7000-b000-000000000288', '2026-01-01T00:00:00.0000000+00:00', NULL, NULL, NULL, NULL, CAST(0 AS bit), N'hunger.finance.manage', '019c18d5-62e1-7000-9000-000000000001', NULL, NULL),
+('019c18d5-62e1-7000-b000-000000000289', '2026-01-01T00:00:00.0000000+00:00', NULL, NULL, NULL, NULL, CAST(0 AS bit), N'hunger.performance.export', '019c18d5-62e1-7000-9000-000000000001', NULL, NULL),
+('019c18d5-62e1-7000-b000-000000000290', '2026-01-01T00:00:00.0000000+00:00', NULL, NULL, NULL, NULL, CAST(0 AS bit), N'hunger.performance.import', '019c18d5-62e1-7000-9000-000000000001', NULL, NULL),
+('019c18d5-62e1-7000-b000-000000000291', '2026-01-01T00:00:00.0000000+00:00', NULL, NULL, NULL, NULL, CAST(0 AS bit), N'hunger.quality.export', '019c18d5-62e1-7000-9000-000000000001', NULL, NULL),
+('019c18d5-62e1-7000-b000-000000000292', '2026-01-01T00:00:00.0000000+00:00', NULL, NULL, NULL, NULL, CAST(0 AS bit), N'hunger.quality.import', '019c18d5-62e1-7000-9000-000000000001', NULL, NULL),
+('019c18d5-62e1-7000-b000-000000000293', '2026-01-01T00:00:00.0000000+00:00', NULL, NULL, NULL, NULL, CAST(0 AS bit), N'hunger.read', '019c18d5-62e1-7000-9000-000000000001', NULL, NULL),
+('019c18d5-62e1-7000-b000-000000000294', '2026-01-01T00:00:00.0000000+00:00', NULL, NULL, NULL, NULL, CAST(0 AS bit), N'hunger.remittances.confirm', '019c18d5-62e1-7000-9000-000000000001', NULL, NULL),
+('019c18d5-62e1-7000-b000-000000000295', '2026-01-01T00:00:00.0000000+00:00', NULL, NULL, NULL, NULL, CAST(0 AS bit), N'platform_accounts.credentials.reveal', '019c18d5-62e1-7000-9000-000000000001', NULL, NULL),
+('019c18d5-62e1-7000-b000-000000000296', '2026-01-01T00:00:00.0000000+00:00', NULL, NULL, NULL, NULL, CAST(0 AS bit), N'platform_accounts.fields.city', '019c18d5-62e1-7000-9000-000000000001', NULL, NULL),
+('019c18d5-62e1-7000-b000-000000000297', '2026-01-01T00:00:00.0000000+00:00', NULL, NULL, NULL, NULL, CAST(0 AS bit), N'platform_accounts.fields.contact', '019c18d5-62e1-7000-9000-000000000001', NULL, NULL),
+('019c18d5-62e1-7000-b000-000000000298', '2026-01-01T00:00:00.0000000+00:00', NULL, NULL, NULL, NULL, CAST(0 AS bit), N'platform_accounts.fields.identity', '019c18d5-62e1-7000-9000-000000000001', NULL, NULL),
+('019c18d5-62e1-7000-b000-000000000299', '2026-01-01T00:00:00.0000000+00:00', NULL, NULL, NULL, NULL, CAST(0 AS bit), N'platform_accounts.fields.owner', '019c18d5-62e1-7000-9000-000000000001', NULL, NULL),
+('019c18d5-62e1-7000-b000-000000000300', '2026-01-01T00:00:00.0000000+00:00', NULL, NULL, NULL, NULL, CAST(0 AS bit), N'platform_accounts.fields.registered_vehicle', '019c18d5-62e1-7000-9000-000000000001', NULL, NULL),
+('019c18d5-62e1-7000-b000-000000000301', '2026-01-01T00:00:00.0000000+00:00', NULL, NULL, NULL, NULL, CAST(0 AS bit), N'platform_accounts.fields.registry', '019c18d5-62e1-7000-9000-000000000001', NULL, NULL),
+('019c18d5-62e1-7000-b000-000000000302', '2026-01-01T00:00:00.0000000+00:00', NULL, NULL, NULL, NULL, CAST(0 AS bit), N'platform_accounts.fields.settlement', '019c18d5-62e1-7000-9000-000000000001', NULL, NULL),
+('019c18d5-62e1-7000-b000-000000000303', '2026-01-01T00:00:00.0000000+00:00', NULL, NULL, NULL, NULL, CAST(0 AS bit), N'platform_assignments.fields.compensation', '019c18d5-62e1-7000-9000-000000000001', NULL, NULL);
+IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'CreatedAtUtc', N'CreatedByUserId', N'DeletedAtUtc', N'DeletedByUserId', N'DeletionReason', N'IsDeleted', N'PermissionKey', N'RoleId', N'UpdatedAtUtc', N'UpdatedByUserId') AND [object_id] = OBJECT_ID(N'[identity].[RolePermissions]'))
+    SET IDENTITY_INSERT [identity].[RolePermissions] OFF;
+
+INSERT INTO [migration].[__IdentityMigrationsHistory] ([MigrationId], [ProductVersion])
+VALUES (N'20261104115200_GrantHungerAndPlatformFieldPermissions', N'10.0.11');
+
+COMMIT;
+GO
+

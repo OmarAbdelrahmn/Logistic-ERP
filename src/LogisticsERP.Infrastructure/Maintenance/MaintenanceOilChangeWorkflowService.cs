@@ -86,7 +86,7 @@ internal sealed partial class MaintenanceService
         var expected = edit?.ExpectedEffectsHash ?? cancel?.ExpectedEffectsHash;
         var basis = edit?.MileageBaselineKm ?? cancel?.MileageBaselineKm;
         if (id == Guid.Empty || string.IsNullOrWhiteSpace(reason) || reason.Trim().Length > 1000
-            || string.IsNullOrWhiteSpace(version) || basis < 0
+            || string.IsNullOrWhiteSpace(version)
             || !preview && (string.IsNullOrWhiteSpace(key) || key.Length > 200 || string.IsNullOrWhiteSpace(expected)))
             return Result.Failure<OilChangeWorkflowResponse>(MaintenanceErrors.InvalidRequest);
         if (edit is not null && (edit.PerformedAtUtc == default || edit.PerformedAtUtc > UtcNow
@@ -261,7 +261,10 @@ internal sealed partial class MaintenanceService
                         usages[0].RiderProfileId, mileage.Value, barrelEffects, workOrder?.Status,
                         await dbContext.OilBarrelLosses.Where(x => x.CorrectionRevisionId == revision.Id).SumAsync(x => x.QuantityLiters, ct));
                     var fingerprint = OilHash(new { originalVersion, workVersion, op.PerformedAtUtc, op.OdometerAtChange,
-                        op.OilInventoryItemId, op.OilFilterInventoryItemId, op.Notes, Effects = effects,
+                        // Mileage history can change independently; it must not block
+                        // committing otherwise unchanged oil/stock/financial effects.
+                        op.OilInventoryItemId, op.OilFilterInventoryItemId, op.Notes,
+                        Effects = effects with { VehicleMileageKm = null },
                         PostingDate = revision.PostedAtUtc.ToOffset(TimeSpan.FromHours(3)).ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture) });
                     if (!preview && fingerprint != expected)
                         return Result.Failure<OilChangeWorkflowResponse>(OilChangeWorkflowErrors.PreviewChanged);

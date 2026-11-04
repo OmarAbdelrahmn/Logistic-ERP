@@ -23,7 +23,12 @@ public sealed record PhoneSimResponse(
     PhoneSimReceiptFormResponse? ReceiptForm,
     DateTimeOffset CreatedAtUtc,
     DateTimeOffset? UpdatedAtUtc,
-    string RowVersion);
+    string RowVersion)
+{
+    public string Ownership { get; init; } = "Unknown";
+    public string? OwnershipEvidence { get; init; }
+    public DateOnly? OwnershipEffectiveFrom { get; init; }
+}
 
 public sealed record PhoneSimReceiptFormResponse(
     string OriginalFileName,

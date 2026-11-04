@@ -106,6 +106,12 @@ public sealed class FuelSpreadsheetParserTests
     [InlineData("\u200Fbawaba ١٤٩\u200E", FuelCardIdentifierType.InternalNumber, "BAWABA149")]
     [InlineData("BAWABA-149", FuelCardIdentifierType.InternalNumber, "BAWABA149")]
     [InlineData("BW203", FuelCardIdentifierType.InternalNumber, "BW203")]
+    [InlineData("togare1", FuelCardIdentifierType.InternalNumber, "TOGARE1")]
+    [InlineData("TOGARE39", FuelCardIdentifierType.InternalNumber, "TOGARE39")]
+    [InlineData("\u200Ftogare ٣٩\u200E", FuelCardIdentifierType.InternalNumber, "TOGARE39")]
+    [InlineData("togare-۳۹", FuelCardIdentifierType.InternalNumber, "TOGARE39")]
+    [InlineData("TOGARE", FuelCardIdentifierType.PlateNumber, "TOGARE")]
+    [InlineData("TOGARE39X", FuelCardIdentifierType.PlateNumber, "39TOGAREX")]
     [InlineData("ب ب و ٨٣٥", FuelCardIdentifierType.PlateNumber, "835BBU")]
     [InlineData("ABC 1234", FuelCardIdentifierType.PlateNumber, "1234ABC")]
     [InlineData("BAWABA", FuelCardIdentifierType.PlateNumber, "BAWABA")]
@@ -116,6 +122,49 @@ public sealed class FuelSpreadsheetParserTests
         var type = FuelCardRules.DetectIdentifierType(value);
         Assert.Equal(expectedType, type);
         Assert.Equal(expectedKey, FuelCardRules.NormalizeCardNumber(value, type));
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void TogareCardsKeepRegisteredInternalNumberKeysInBothReportFormats(bool detailed)
+    {
+        using var workbook = new XLWorkbook();
+        var sheet = workbook.AddWorksheet("Usage");
+        sheet.Cell(1, 1).Value = "تقرير أستهلاك المركبة - 02/09/2026 05:56:34 م";
+        string[] headers = detailed
+            ? ["رقم الفاتورة", "المركبة", "الرقم الداخلي", "عدد اللترات", "التكلفة", "التاريخ"]
+            : ["الرقم التسلسلي", "لوحة المركبة", "رقم المركبة الداخلي", "الاستهلاك بالليتر", "التكلفة"];
+        for (var column = 0; column < headers.Length; column++)
+            sheet.Cell(3, column + 1).Value = headers[column];
+
+        for (var number = 1; number <= 39; number++)
+        {
+            var row = number + 3;
+            sheet.Cell(row, 1).Value = $"INV-{number}";
+            sheet.Cell(row, 2).Value = "ABC 1234";
+            sheet.Cell(row, 3).Value = $"togare{number}";
+            sheet.Cell(row, 4).Value = 10m;
+            sheet.Cell(row, 5).Value = 21.8m;
+            if (detailed)
+                sheet.Cell(row, 6).Value = new DateTime(2026, 9, 1, 10, 0, 0);
+        }
+        using var stream = Save(workbook);
+
+        var report = FuelSpreadsheetParser.Parse(stream);
+
+        Assert.Equal(detailed ? FuelCardProvider.PetroApp : FuelCardProvider.SayaraApp, report.Provider);
+        Assert.Equal(39, report.SourceRows);
+        Assert.Equal(39, report.Cards.Count);
+        Assert.Empty(report.Errors);
+        for (var number = 1; number <= 39; number++)
+        {
+            var card = Assert.Single(report.Cards, card => card.CardNumber == $"togare{number}");
+            Assert.Equal($"TOGARE{number}", card.NormalizedCardNumber);
+            Assert.Equal(FuelCardIdentifierType.InternalNumber, card.IdentifierType);
+            Assert.Equal(10m, card.TotalLiters);
+            Assert.Equal(21.8m, card.TotalAmount);
+        }
     }
 
     [Fact]

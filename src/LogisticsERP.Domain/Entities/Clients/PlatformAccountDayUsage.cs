@@ -15,5 +15,11 @@ public sealed class PlatformAccountDayUsage : AuditableEntity
     public int? TotalValidOffers { get; set; }
     public int? DeclinedOffers { get; set; }
     public int? MissedOffers { get; set; }
+    public int? QualityGrossOrders { get; set; }
+    public int? QualityCompletedOrders { get; set; }
+    public int? QualityCompletedOrdersInTime { get; set; }
+    public int? QualityVerificationRequests { get; set; }
+    public int? QualitySuccessfulVerifications { get; set; }
+    public int? QualityFailedOrders { get; set; }
     public string Reason { get; set; } = string.Empty;
 }

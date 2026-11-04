@@ -32,6 +32,7 @@ internal sealed class PlatformAccountDayUsageService(ApplicationDbContext db, IC
             "JAHEZ" => write ? new[] { PermissionKeys.Jahez.HandoversUpdate, LogisticsERP.Application.Features.Jahez.JahezWorkflowPermissions.Withdraw }
                 : [PermissionKeys.Jahez.Read],
             "NINJA" => write ? new[] { PermissionKeys.Ninja.AssignmentsDelete, PermissionKeys.Ninja.AccountsUpdate } : [PermissionKeys.Ninja.Read],
+            "HUNGER" => write ? new[] { PermissionKeys.Hunger.AccountsUpdate } : [PermissionKeys.Hunger.Read],
             _ => write ? new[] { PermissionKeys.Operations.PlatformAssignmentsUpdate } : [PermissionKeys.Operations.PlatformAssignmentsRead]
         };
         foreach (var key in keys)

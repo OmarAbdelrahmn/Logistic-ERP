@@ -5,6 +5,17 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace LogisticsERP.Infrastructure.Persistence.Configurations;
 
+internal sealed class PhoneSimOwnershipRevisionConfiguration : IEntityTypeConfiguration<PhoneSimOwnershipRevision>
+{
+    public void Configure(EntityTypeBuilder<PhoneSimOwnershipRevision> b)
+    {
+        b.ConfigureHistory("PhoneSimOwnershipRevisions", "app");
+        b.HasOne<PhoneSimCard>().WithMany().HasForeignKey(x => x.PhoneSimCardId).OnDelete(DeleteBehavior.Restrict);
+        b.Property(x => x.Ownership).HasMaxLength(16); b.Property(x => x.EvidenceReference).HasMaxLength(1000);
+        b.HasIndex(x => new { x.PhoneSimCardId, x.EffectiveFrom });
+    }
+}
+
 internal sealed class PlaceConfiguration : IEntityTypeConfiguration<Place>
 {
     public void Configure(EntityTypeBuilder<Place> builder)
@@ -26,6 +37,9 @@ internal sealed class PhoneSimCardConfiguration : IEntityTypeConfiguration<Phone
         builder.Property(entity => entity.Iccid).HasMaxLength(22).IsUnicode(false);
         builder.Property(entity => entity.NormalizedIccid).HasMaxLength(22).IsUnicode(false);
         builder.Property(entity => entity.CarrierName).HasMaxLength(200);
+        builder.Property(entity => entity.Ownership).HasMaxLength(16).HasDefaultValue("Unknown");
+        builder.Property(entity => entity.OwnershipEvidence).HasMaxLength(1000);
+        builder.ToTable(t => t.HasCheckConstraint("CK_PhoneSim_Ownership", "[Ownership] IN ('Company','Private','Unknown')"));
         builder.Property(entity => entity.StatusReason).HasMaxLength(500);
         builder.Property(entity => entity.Notes).HasMaxLength(4000);
         builder.Property(entity => entity.ReceiptFormOriginalFileName).HasMaxLength(255);

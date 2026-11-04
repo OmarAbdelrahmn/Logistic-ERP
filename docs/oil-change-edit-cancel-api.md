@@ -92,7 +92,7 @@ Examples use illustrative IDs and amounts. `barrels` describes the involved old/
 
 To commit, use `PUT /oil-changes/{id}`, the reviewed edit payload with `expectedEffectsHash` set to `effectsHash`, and an `Idempotency-Key` header (nonblank, maximum 200 characters). Do not replace the input versions with a locally invented value. Successful response has `preview=false`, a `revisionId`, updated versions and final effects.
 
-Preview executes the calculation inside a transaction that is rolled back. It saves no business effects and reserves no stock. Commit repeats validation. Changed calculation, stock selection, costs, mileage or versions can require a fresh preview. A preview made on a previous Riyadh calendar date must be refreshed because the posting date participates in the fingerprint.
+Preview executes the calculation inside a transaction that is rolled back. It saves no business effects and reserves no stock. Commit repeats validation. Changed stock selection, costs or versions can require a fresh preview. Mileage-only changes do not invalidate the preview hash; commit returns the recalculated mileage. A preview made on a previous Riyadh calendar date must be refreshed because the posting date participates in the fingerprint.
 
 ## Cancel
 
@@ -120,7 +120,7 @@ Customer receipts are retained. An order with customer payments or unrelated rem
 - Service date and stock/accounting posting time are separate. Corrections/reversals post using server time in the current month; original financial rows remain, with linked negative and replacement rows. Vehicle expense posting dates use Riyadh dates.
 - Corrected rider attribution uses the assignment covering the corrected service instant, with start inclusive/end exclusive, excluding cancelled/corrected assignments. No covering assignment yields unassigned attribution.
 - Oil reminders use the latest active operation. Oil-change workshop service reporting uses the effective service date; other workshop jobs retain their existing opened-date filtering. Accounting evidence retains its own posting dates.
-- Mileage reconciliation preserves later authoritative readings and replays daily GPS/manual records. Old maintenance evidence is voided, not deleted. If there is no reliable initial basis, the API returns `maintenance.oil_change_mileage_basis_required`. A documented `mileageBaselineKm` may then be supplied; never automatically send zero. It is the basis before the earliest replayed evidence, not an arbitrary desired current reading.
+- Mileage history does not block edits or cancellations. Missing or duplicate operation readings are accepted; existing operation evidence is voided when replaced or cancelled. Replay uses a valid optional `mileageBaselineKm`, otherwise the first remaining reading or daily record's recorded baseline; with no remaining evidence it retains the cached vehicle mileage. Negative or out-of-range optional baselines are ignored. Later readings may decrease the odometer, and lower daily manual readings are treated as corrections. The API no longer emits `maintenance.oil_change_mileage_basis_required` or `maintenance.oil_change_mileage_conflict`. Entered `odometerAtChange` must still fit the nonnegative storage range.
 
 ## Errors and retries
 
@@ -133,8 +133,6 @@ Use ProblemDetails `errorCode`, `detail` and `correlationId`.
 | `maintenance.oil_change_cancelled` | Refresh and display cancelled state; do not retry as an edit |
 | `maintenance.oil_change_idempotency_conflict` | Do not reuse a key for different content |
 | `maintenance.oil_change_barrel_restore_conflict` | Show the detail; inventory reconciliation is required before retrying |
-| `maintenance.oil_change_mileage_basis_required` | Obtain a documented baseline or correct the mileage evidence first |
-| `maintenance.oil_change_mileage_conflict` | Explain that the recorded mileage sequence prevents the proposed correction |
 | `maintenance.invalid_state` | Show the detail; original usage/cost integrity or a persistence constraint prevented the action |
 | Stock/item/filter validation errors | Correct the input or stock issue, then preview again |
 | Forbidden | Hide the unauthorized action and display the server message if requested |

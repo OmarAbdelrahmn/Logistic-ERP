@@ -10,6 +10,9 @@ public sealed class PhoneSimCard : AuditableEntity
     public string? Iccid { get; set; }
     public string? NormalizedIccid { get; set; }
     public string? CarrierName { get; set; }
+    public string Ownership { get; set; } = "Unknown";
+    public string? OwnershipEvidence { get; set; }
+    public DateOnly? OwnershipEffectiveFrom { get; set; }
     public Guid ResponsibleEmployeeId { get; set; }
     public Guid? PlaceId { get; set; }
     public Place? Place { get; set; }

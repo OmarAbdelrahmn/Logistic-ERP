@@ -38,6 +38,10 @@ public sealed class TreasuryOwnership : HistoryEntity
 
 public sealed class TreasuryPosting : HistoryEntity
 {
+    // Legacy Jahez postings remain null; shared writers explicitly set a platform and retain isolation.
+    public Guid? ClientPlatformId { get; set; }
+    public Guid? SupervisorEmployeeId { get; set; }
+    public Guid? SourceEventId { get; set; }
     public Guid SubAccountId { get; set; }
     public Guid SponsorId { get; set; }
     public Guid? MoneyMovementId { get; set; }

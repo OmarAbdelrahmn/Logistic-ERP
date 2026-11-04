@@ -77,7 +77,15 @@ public static class DependencyInjection
         services.AddScoped<LogisticsERP.Application.Features.Hr.IMonthlyAccountUsageService, LogisticsERP.Infrastructure.Hr.MonthlyAccountUsageService>();
         services.AddScoped<LogisticsERP.Application.Features.Hr.IPlatformAccountDayUsageService, LogisticsERP.Infrastructure.Hr.PlatformAccountDayUsageService>();
         services.AddScoped<SimplePlatformService>();
+        services.AddScoped<LogisticsERP.Infrastructure.Hunger.HungerQualityService>();
+        services.AddScoped<LogisticsERP.Application.Features.Hunger.IHungerQualityService>(p => p.GetRequiredService<LogisticsERP.Infrastructure.Hunger.HungerQualityService>());
+        services.AddScoped<LogisticsERP.Application.Features.Hunger.IHungerAccountsService>(p => p.GetRequiredService<LogisticsERP.Infrastructure.Hunger.HungerQualityService>());
+        services.AddScoped<LogisticsERP.Application.Features.Hunger.IHungerOperationsService>(p => p.GetRequiredService<LogisticsERP.Infrastructure.Hunger.HungerQualityService>());
+        services.AddScoped<LogisticsERP.Application.Features.Hunger.IHungerFinanceService>(p => p.GetRequiredService<LogisticsERP.Infrastructure.Hunger.HungerQualityService>());
+        services.AddScoped<LogisticsERP.Application.Features.Hunger.IHungerReportingService>(p => p.GetRequiredService<LogisticsERP.Infrastructure.Hunger.HungerQualityService>());
+        services.AddScoped<LogisticsERP.Application.Features.Hunger.IHungerSettlementService>(p => p.GetRequiredService<LogisticsERP.Infrastructure.Hunger.HungerQualityService>());
         services.AddScoped<ISimplePlatformService>(provider => provider.GetRequiredService<SimplePlatformService>());
+        services.AddScoped<IPlatformAccountBusinessService, PlatformAccountBusinessService>();
         services.AddScoped<LogisticsERP.Application.Features.Ninja.INinjaService, LogisticsERP.Infrastructure.Ninja.NinjaService>();
         services.AddScoped<LogisticsERP.Application.Features.Ninja.INinjaEvaluationService, LogisticsERP.Infrastructure.Ninja.NinjaEvaluationService>();
         services.AddScoped<LogisticsERP.Application.Features.Ninja.INinjaPerformanceImportService, LogisticsERP.Infrastructure.Ninja.NinjaPerformanceImportService>();
