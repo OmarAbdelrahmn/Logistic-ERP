@@ -36,12 +36,15 @@ public static class FuelCardRules
     public static FuelCardIdentifierType DetectIdentifierType(string value)
     {
         var internalNumber = NormalizeInternalNumber(value);
-        return internalNumber.StartsWith("BW", StringComparison.Ordinal)
-            && internalNumber.AsSpan(2).Length > 0
-            && internalNumber.AsSpan(2).ContainsAnyExceptInRange('0', '9') == false
+        return HasNumericSuffix(internalNumber, "BW") || HasNumericSuffix(internalNumber, "BAWABA")
                 ? FuelCardIdentifierType.InternalNumber
                 : FuelCardIdentifierType.PlateNumber;
     }
+
+    private static bool HasNumericSuffix(string value, string prefix) =>
+        value.StartsWith(prefix, StringComparison.Ordinal)
+        && value.Length > prefix.Length
+        && !value.AsSpan(prefix.Length).ContainsAnyExceptInRange('0', '9');
 
     public static DateOnly MonthStart(DateOnly value) => new(value.Year, value.Month, 1);
 

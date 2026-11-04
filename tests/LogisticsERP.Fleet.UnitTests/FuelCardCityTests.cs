@@ -134,6 +134,50 @@ public sealed class FuelCardCityTests
         Assert.Single(await db.FuelCardMonthlyUsages.ToArrayAsync(ct));
     }
 
+    [Theory]
+    [InlineData("BAWABA149", "-")]
+    [InlineData("bawaba 149", "-")]
+    [InlineData("ب ب و 835", "BAWABA149")]
+    public async Task MonthlyUsageMatchesRegisteredBawabaCardAndUpdatesItOnReimport(string vehicle, string internalNumber)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var db = CreateContext();
+        await db.SaveChangesAsync(ct);
+        var service = Service(db);
+        var sponsorId = Assert.Single(db.Sponsors.Local).Id;
+        using var numbers = Workbook(["number"], ["BAWABA149"]);
+        var registration = await service.ImportCardNumbersAsync(numbers, sponsorId, false, null, ct);
+        Assert.True(registration.IsSuccess, registration.Error.Description);
+        var card = Assert.Single(await db.FuelCards.ToArrayAsync(ct));
+
+        using var detailed = Workbook(
+            ["رقم الفاتورة", "المركبة", "الرقم الداخلي", "نوع الوقود", "التكلفة", "التكلفة قبل الضريبة", "عدد اللترات", "التاريخ"],
+            ["INV-1", vehicle, internalNumber, "91", "20", "17.39", "9.174", "2026-10-15 10:00:00"],
+            ["INV-2", vehicle, internalNumber, "91", "50", "43.48", "22.936", "2026-10-31 22:00:00"]);
+        var upload = new PrivateFileUpload(detailed, "fuel.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", detailed.Length);
+        var month = new DateOnly(2026, 10, 1);
+        var first = await service.ImportAsync(upload, month, ct);
+        Assert.True(first.IsSuccess, first.Error.Description);
+        Assert.Equal(1, first.Value!.CreatedMonthlyRecords);
+        Assert.Equal(0, first.Value.InvalidRows);
+        Assert.DoesNotContain(first.Value.Errors, error => error.Code == "card_not_found");
+        var usage = Assert.Single(await db.FuelCardMonthlyUsages.ToArrayAsync(ct));
+        Assert.Equal(card.Id, usage.FuelCardId);
+        Assert.Equal(month, usage.ReportMonth);
+        Assert.Equal(70m, usage.TotalAmount);
+        Assert.Equal(32.110m, usage.TotalLiters);
+        Assert.Equal(2, usage.TransactionCount);
+
+        detailed.Position = 0;
+        var second = await service.ImportAsync(upload, month, ct);
+        Assert.True(second.IsSuccess, second.Error.Description);
+        Assert.Equal(0, second.Value!.CreatedMonthlyRecords);
+        Assert.Equal(1, second.Value.UpdatedMonthlyRecords);
+        Assert.Equal(0, second.Value.InvalidRows);
+        Assert.Single(await db.FuelCardMonthlyUsages.ToArrayAsync(ct));
+        Assert.Single(await db.FuelCards.ToArrayAsync(ct));
+    }
+
     [Fact]
     public async Task CardNumberImportRejectsUnknownCityAndUsageImportRejectsInvalidFile()
     {

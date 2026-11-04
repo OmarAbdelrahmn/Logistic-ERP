@@ -64,6 +64,8 @@ Use isolated bidirectional rendering for every plate/card cell so mixed Arabic l
 
 Card numbers are stored without whitespace. Manual creation and all three fuel-card spreadsheet imports remove spaces (including tabs and nonbreaking spaces) from the card number before saving or matching it. Existing saved numbers are cleaned by the `RemoveFuelCardNumberWhitespace` data migration. The separate plate text remains as supplied for display.
 
+Monthly usage imports recognize `BW` and `BAWABA` followed by digits as internal card numbers, including when supplied in the vehicle column with a blank or `-` internal-number cell. For example, `BAWABA149` matches the registered internal card `BAWABA149`; it is not converted to the plate key `149BAWABA`.
+
 ## Endpoint summary
 
 | Method | Route | Permission | Success |

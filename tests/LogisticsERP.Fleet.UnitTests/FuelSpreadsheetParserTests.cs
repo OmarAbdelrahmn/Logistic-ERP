@@ -101,6 +101,23 @@ public sealed class FuelSpreadsheetParserTests
         Assert.Equal("835BBU", FuelCardRules.NormalizeCardNumber(plate, FuelCardIdentifierType.PlateNumber));
     }
 
+    [Theory]
+    [InlineData("BAWABA149", FuelCardIdentifierType.InternalNumber, "BAWABA149")]
+    [InlineData("\u200Fbawaba ١٤٩\u200E", FuelCardIdentifierType.InternalNumber, "BAWABA149")]
+    [InlineData("BAWABA-149", FuelCardIdentifierType.InternalNumber, "BAWABA149")]
+    [InlineData("BW203", FuelCardIdentifierType.InternalNumber, "BW203")]
+    [InlineData("ب ب و ٨٣٥", FuelCardIdentifierType.PlateNumber, "835BBU")]
+    [InlineData("ABC 1234", FuelCardIdentifierType.PlateNumber, "1234ABC")]
+    [InlineData("BAWABA", FuelCardIdentifierType.PlateNumber, "BAWABA")]
+    [InlineData("BAWABA149X", FuelCardIdentifierType.PlateNumber, "149BAWABAX")]
+    public void CardIdentifierDetectionPreservesKnownInternalNumbersAndPlateKeys(
+        string value, FuelCardIdentifierType expectedType, string expectedKey)
+    {
+        var type = FuelCardRules.DetectIdentifierType(value);
+        Assert.Equal(expectedType, type);
+        Assert.Equal(expectedKey, FuelCardRules.NormalizeCardNumber(value, type));
+    }
+
     [Fact]
     public void AttachedProviderSamplesMatchTheirKnownShapesWhenAvailable()
     {
