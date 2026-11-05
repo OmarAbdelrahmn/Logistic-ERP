@@ -123,7 +123,7 @@ internal sealed partial class HungerQualityService : IHungerAccountsService
         if (platforms.Length == 0) return Result.Failure<HungerAccountPage>(HungerErrors.Forbidden);
         if (page < 1 || pageSize is < 1 or > 100) return Result.Failure<HungerAccountPage>(HungerErrors.Invalid("صفحة غير صالحة."));
         var query = from a in db.PlatformRiderAccounts.AsNoTracking() join details in db.Set<PlatformAccountBusinessDetails>().AsNoTracking() on a.Id equals details.PlatformRiderAccountId into ds
-                    from d in ds.DefaultIfEmpty() where platforms.Contains(a.ClientPlatformId) && (disposition == null || (d != null ? d.OperationalDisposition : "Normal") == disposition)
+                    from d in ds.DefaultIfEmpty() where platforms.Contains(a.ClientPlatformId) && (disposition == null || (d != null ? d.OperationalDisposition : "Unknown") == disposition)
                     select new { Account = a, Details = d };
         var count = await query.CountAsync(ct);
         var selected = await query.OrderBy(x => x.Account.ExternalAccountId).ThenBy(x => x.Account.Id).Skip((page - 1) * pageSize).Take(pageSize).ToArrayAsync(ct);
@@ -132,15 +132,89 @@ internal sealed partial class HungerQualityService : IHungerAccountsService
         var ownerIds = selected.Select(x => x.Account.RegisteredEmployeeId).ToArray();
         var employees = await db.Employees.AsNoTracking().Where(e => ownerIds.Contains(e.Id)).ToArrayAsync(ct);
         var sourceIds = selected.Select(x => x.Details?.SourceActualRiderProfileId).ToArray();
-        var actual = await (from r in db.RiderProfiles.AsNoTracking() join e in db.Employees.AsNoTracking() on r.EmployeeId equals e.Id where sourceIds.Contains(r.Id) select new { r.Id, e.FullNameAr }).ToArrayAsync(ct);
+        var riderIds = sourceIds.Concat(assignments.Select(a => (Guid?)a.RiderProfileId)).Distinct().ToArray();
+        var actual = await (from r in db.RiderProfiles.AsNoTracking() join e in db.Employees.AsNoTracking() on r.EmployeeId equals e.Id where riderIds.Contains(r.Id)
+            select new { r.Id, Employee = e }).ToArrayAsync(ct);
+        var owners = await db.RiderProfiles.AsNoTracking().Where(r => ownerIds.Contains(r.EmployeeId)).ToArrayAsync(ct);
+        var cityIds = selected.Select(x => x.Account.OperatingCityId).Distinct().ToArray();
+        var cities = await (from oc in db.OperatingCities.AsNoTracking() join g in db.GlobalCities.AsNoTracking() on oc.GlobalCityId equals g.Id
+            where cityIds.Contains(oc.Id) select new { oc.Id, g.NameAr }).ToArrayAsync(ct);
+        var sponsorIds = selected.Select(x => x.Account.SponsorId).Distinct().ToArray();
+        var sponsors = await db.Sponsors.AsNoTracking().Where(s => sponsorIds.Contains(s.Id)).ToArrayAsync(ct);
+        var assignedRiders = assignments.Select(a => a.RiderProfileId).Distinct().ToArray();
+        var now = clock.GetUtcNow();
+        var today = DateOnly.FromDateTime(now.ToOffset(TimeSpan.FromHours(3)).DateTime);
+        var monthStart = new DateOnly(today.Year, today.Month, 1);
+        var monthUsages = await db.RiderClientAssignments.AsNoTracking().Where(a => ids.Contains(a.PlatformRiderAccountId)
+            && a.Status != RiderAssignmentStatus.Cancelled && a.Status != RiderAssignmentStatus.Planned && a.EffectiveFrom <= today
+            && (a.EffectiveTo == null || a.EffectiveTo >= monthStart)).Select(a => a.PlatformRiderAccountId).Distinct().ToArrayAsync(ct);
+        var quality = await db.Set<HungerQualitySnapshot>().AsNoTracking().Where(q => ids.Contains(q.PlatformRiderAccountId) && q.ReportDate >= monthStart && q.ReportDate <= today)
+            .OrderByDescending(q => q.ReportDate).ToArrayAsync(ct);
+        static Guid? SourceImportId(string? reference)
+        {
+            if (reference is null || !reference.StartsWith("Import:", StringComparison.Ordinal)) return null;
+            var end = reference.IndexOf('/', StringComparison.Ordinal);
+            return end > 7 && Guid.TryParse(reference.AsSpan(7, end - 7), out var id) ? id : null;
+        }
+        var sourceImportIds = selected.Select(x => SourceImportId(x.Details?.SourceReference)).Where(id => id.HasValue).Select(id => id!.Value).Distinct().ToArray();
+        var sourceImports = await db.Set<HungerImportPreview>().AsNoTracking().Where(p => sourceImportIds.Contains(p.Id) && p.Kind == "Accounts" && p.ResultJson != null)
+            .Select(p => new { p.Id, p.CreatedAtUtc }).ToArrayAsync(ct);
+        var credentialAccounts = await db.PlatformAccountCredentialVersions.AsNoTracking().Where(c => ids.Contains(c.PlatformRiderAccountId)).Select(c => c.PlatformRiderAccountId).Distinct().ToArrayAsync(ct);
+        var assignmentEvents = await (from e in db.RiderAssignmentEvents.AsNoTracking() join a in db.RiderClientAssignments.IgnoreQueryFilters().AsNoTracking() on e.RiderClientAssignmentId equals a.Id
+            where ids.Contains(a.PlatformRiderAccountId) orderby e.OccurredAtUtc descending, e.Id descending
+            select new { a.PlatformRiderAccountId, e.ToStatus, e.OccurredAtUtc }).ToArrayAsync(ct);
+        var fleet = await (from v in db.RiderVehicleAssignments.AsNoTracking() join vehicle in db.Vehicles.AsNoTracking() on v.VehicleId equals vehicle.Id
+            where assignedRiders.Contains(v.RiderProfileId) && v.IsRealRider && v.StartedAtUtc <= now && (v.EndedAtUtc == null || v.EndedAtUtc > now)
+                && v.Status != RiderVehicleAssignmentStatus.Cancelled && v.Status != RiderVehicleAssignmentStatus.Corrected
+            select new { v.RiderProfileId, Vehicle = vehicle }).ToArrayAsync(ct);
         return Result.Success(new HungerAccountPage(selected.Select(x =>
         {
             var owner = employees.SingleOrDefault(e => e.Id == x.Account.RegisteredEmployeeId); var assignment = assignments.SingleOrDefault(a => a.PlatformRiderAccountId == x.Account.Id);
+            var riderFleet = fleet.Where(v => v.RiderProfileId == assignment?.RiderProfileId).ToArray();
+            var vehicle = riderFleet.Length == 1 ? riderFleet[0].Vehicle : null;
+            var latestQuality = quality.FirstOrDefault(q => q.PlatformRiderAccountId == x.Account.Id);
+            var lastEvent = assignmentEvents.FirstOrDefault(e => e.PlatformRiderAccountId == x.Account.Id);
+            var assignmentUsed = monthUsages.Contains(x.Account.Id);
+            var import = sourceImports.SingleOrDefault(p => p.Id == SourceImportId(x.Details?.SourceReference));
+            var sourceObserved = import is null ? (DateOnly?)null : DateOnly.FromDateTime(import.CreatedAtUtc.ToOffset(TimeSpan.FromHours(3)).DateTime);
+            var usage = LogisticsERP.Domain.Hunger.HungerAccountUsageRules.Evaluate(today, assignmentUsed, x.Details?.SourceStatus,
+                x.Details?.SourceActualIqama, x.Details?.SourceAssignmentFrom, sourceObserved);
+            var importedUsed = usage.Source == "ImportedSource";
             return new HungerAccountItem(x.Account.Id, x.Account.ExternalAccountId, owner?.Id, owner?.FullNameAr, owner?.IqamaNo,
-                x.Details?.SourceActualRiderProfileId, actual.SingleOrDefault(a => a.Id == x.Details?.SourceActualRiderProfileId)?.FullNameAr,
-                x.Details?.SourceActualIqama, assignment?.RiderProfileId, x.Details?.OperationalDisposition ?? "Normal", assignment is null ? "Unassigned" : "Assigned",
+                x.Details?.SourceActualRiderProfileId, actual.SingleOrDefault(a => a.Id == x.Details?.SourceActualRiderProfileId)?.Employee.FullNameAr,
+                x.Details?.SourceActualIqama, assignment?.RiderProfileId, x.Details?.OperationalDisposition ?? "Unknown", assignment is null ? "Unassigned" : "Assigned",
                 x.Details?.PhoneNumber, x.Details?.RegistryIdentifier, x.Details?.SettlementModel, x.Details?.RegisteredVehicleType,
-                x.Details?.SourceCompensationModel, x.Details?.SourceStatus, Convert.ToBase64String(x.Details?.RowVersion ?? x.Account.RowVersion), x.Details?.DeferredUntil);
+                x.Details?.SourceCompensationModel, x.Details?.SourceStatus, Convert.ToBase64String(x.Details?.RowVersion ?? x.Account.RowVersion), x.Details?.DeferredUntil)
+            {
+                Owner = owner is null ? null : new(owner.Id, owners.SingleOrDefault(r => r.EmployeeId == owner.Id)?.Id, owner.FullNameAr, owner.FullNameEn, owner.IqamaNo, owner.PrimaryPhone)
+                    { Nationality = owner.Nationality, EmployeeStatus = owner.Status.ToString(), RelationshipType = owner.EngagementType.ToString() },
+                ActualRider = Person(assignment?.RiderProfileId), SourceActualRider = Person(x.Details?.SourceActualRiderProfileId),
+                ReportedCurrentRider = assignment is not null ? Person(assignment.RiderProfileId) : importedUsed ? Person(x.Details?.SourceActualRiderProfileId) : null,
+                CurrentRiderSource = assignment is not null ? "Assignment" : importedUsed ? "ImportedSource" : "None",
+                ReportedAssignmentStatus = assignment is not null ? "Assigned" : importedUsed ? "ReportedAssigned" : "Unknown",
+                CurrentAssignmentId = assignment?.Id, AssignmentFrom = assignment?.EffectiveFrom,
+                AssignmentRowVersion = assignment is null ? null : Convert.ToBase64String(assignment.RowVersion),
+                CompensationModel = assignment?.CompensationModel, PaymentModel = x.Account.PaymentModel.ToString(), AccountCode = x.Account.Code,
+                OperatingCityId = x.Account.OperatingCityId, OperatingCityNameAr = cities.SingleOrDefault(c => c.Id == x.Account.OperatingCityId)?.NameAr,
+                SponsorId = x.Account.SponsorId, SponsorNameAr = sponsors.SingleOrDefault(s => s.Id == x.Account.SponsorId)?.RegistryNameAr,
+                SimOwnership = x.Details?.SimOwnership, RegisteredVehiclePlate = x.Details?.RegisteredVehiclePlate,
+                RegisteredVehicleSerial = x.Details?.RegisteredVehicleSerial, SourceVehicleDescription = x.Details?.SourceVehicleDescription,
+                ActualVehicleType = vehicle?.VehicleType.ToString(), ActualVehiclePlate = vehicle?.PlateNumberAr ?? vehicle?.PlateNumberEn,
+                ActualVehicleOwnership = assignment is null || riderFleet.Length != 1 ? "Unknown" : vehicle!.OwnershipType == VehicleOwnershipType.ThirdParty ? "Private" : "Company",
+                MonthlyUsageStatus = usage.Status,
+                MonthlyUsageSource = usage.Source,
+                UsageMonth = monthStart.ToString("yyyy-MM", System.Globalization.CultureInfo.InvariantCulture),
+                LatestQualitySegment = latestQuality?.Segment, LatestQualityRank = LogisticsERP.Domain.Hunger.HungerQualityRules.Rank(latestQuality?.Segment),
+                LatestQualityScore = latestQuality?.FinalDeliveryQualityScore, LatestQualityReportDate = latestQuality?.ReportDate,
+                HasPassword = credentialAccounts.Contains(x.Account.Id), LastAssignmentEvent = lastEvent?.ToStatus.ToString(), LastAssignmentEventAtUtc = lastEvent?.OccurredAtUtc,
+                SourceAssignmentFrom = x.Details?.SourceAssignmentFrom, DispositionReason = x.Details?.DispositionReason
+            };
+            HungerPerson? Person(Guid? id)
+            {
+                var row = actual.SingleOrDefault(a => a.Id == id);
+                return row is null ? null : new(row.Employee.Id, row.Id, row.Employee.FullNameAr, row.Employee.FullNameEn, row.Employee.IqamaNo, row.Employee.PrimaryPhone)
+                    { Nationality = row.Employee.Nationality, EmployeeStatus = row.Employee.Status.ToString(), RelationshipType = row.Employee.EngagementType.ToString() };
+            }
         }).ToArray(), count, page, pageSize));
     }
     public async Task<Result> DispositionAsync(Guid accountId, HungerDispositionRequest request, CancellationToken ct = default)

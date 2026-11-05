@@ -8,6 +8,10 @@ public sealed class HungerSettlementDocument : HistoryEntity
     public Guid ClientPlatformId { get; set; }
     public Guid? PlatformRiderAccountId { get; set; }
     public Guid? InvoiceDocumentId { get; set; }
+    public Guid? ClosingSnapshotId { get; set; }
+    public string? SourceDocumentType { get; set; }
+    public string? SourceReference { get; set; }
+    public string? ReconciliationEvidence { get; set; }
     public string Kind { get; set; } = string.Empty;
     public DateOnly InvoicePeriod { get; set; }
     public DateOnly ChargeFrom { get; set; }

@@ -11,7 +11,7 @@ namespace LogisticsERP.Infrastructure.Hunger;
 
 internal sealed partial class HungerQualityService : IHungerFinanceService
 {
-    private static HungerMoneyResult MoneyResult(HungerFinancialEvent e) => new(e.Id, e.Kind, e.Amount, e.RiderBalanceChange);
+    private static HungerMoneyResult MoneyResult(HungerFinancialEvent e) => new(e.Id, e.Kind, e.Amount, e.RiderBalanceChange, e.Status);
     private DateOnly BusinessToday => DateOnly.FromDateTime(clock.GetUtcNow().ToOffset(TimeSpan.FromHours(3)).DateTime);
     private static bool Money(decimal value) => value > 0 && value <= 1000000000m && decimal.Round(value, 2) == value;
     private bool ValidEvent(DateOnly date, string key, string evidence) => date != default && date <= BusinessToday
@@ -80,6 +80,13 @@ internal sealed partial class HungerQualityService : IHungerFinanceService
         if (!await FinanceAccess(request.PlatformId, PermissionKeys.Hunger.FinanceManage, ct)) return Result.Failure<HungerMoneyResult>(HungerErrors.Forbidden);
         if (!Money(request.Amount) || !ValidEvent(request.BusinessDate, request.IdempotencyKey, request.EvidenceReference)
             || request.Kind is not ("Funding" or "TopUpAdvance" or "TopUpCollected" or "Collection" or "WithdrawalCompany" or "WithdrawalSupervisor" or "RiderPayment")) return Result.Failure<HungerMoneyResult>(HungerErrors.Invalid("حدد نوع العملية والمبلغ والتاريخ ومصدر الإثبات."));
+        var withdrawal = request.Kind is "WithdrawalCompany" or "WithdrawalSupervisor";
+        if (withdrawal && (!request.SourceWalletBalance.HasValue || !ValidBalance(request.SourceWalletBalance.Value)
+            || request.SourceWalletBalance < request.Amount || request.DestinationType is not ("Company" or "Supervisor")
+            || !request.DestinationOwnerId.HasValue || string.IsNullOrWhiteSpace(request.TransferReference) || request.TransferReference.Length > 200
+            || !request.TransferDate.HasValue || request.TransferDate != request.BusinessDate
+            || request.AgainstReservedRights && !request.RelatedEventId.HasValue))
+            return Result.Failure<HungerMoneyResult>(HungerErrors.Invalid("السحب يحتاج لقطة رصيد المصدر ومالك ونوع الوجهة ومرجع وتاريخ التحويل ومصدر الحق المحجوز إن وجد."));
         var hash = Hash(Serialize(request));
         return await FinancialWrite([request.PlatformId, request.SupervisorEmployeeId, request.AccountId ?? request.PlatformId], async () =>
         {
@@ -108,11 +115,25 @@ internal sealed partial class HungerQualityService : IHungerFinanceService
                 || !await db.RiderClientAssignments.AnyAsync(a => a.PlatformRiderAccountId == request.AccountId && a.RiderProfileId == request.RiderProfileId
                     && a.Status != LogisticsERP.Domain.Enums.RiderAssignmentStatus.Cancelled && a.EffectiveFrom <= request.BusinessDate
                     && (a.EffectiveTo == null || a.EffectiveTo >= request.BusinessDate), ct))) return Result.Failure<HungerMoneyResult>(HungerErrors.Invalid("الشحن يجب أن يخص المندوب المستخدم للحساب بتاريخ العملية."));
-            if (request.Kind is "WithdrawalCompany" or "WithdrawalSupervisor" && related is not null)
+            if (withdrawal)
+            {
+                var pending = await db.Set<HungerFinancialEvent>().Where(e => e.PlatformRiderAccountId == request.AccountId
+                    && (e.Kind == "WithdrawalCompany" || e.Kind == "WithdrawalSupervisor") && e.Status == "PendingArrival").SumAsync(e => e.Amount, ct);
+                if (pending + request.Amount > request.SourceWalletBalance!.Value)
+                    return Result.Failure<HungerMoneyResult>(HungerErrors.Conflict("رصيد المصدر لا يكفي بعد حجز السحوبات المنتظرة."));
+                var rights = await ReadWalletState(request.AccountId!.Value, ct);
+                if (related is null && request.Amount > request.SourceWalletBalance.Value - rights.Restricted)
+                    return Result.Failure<HungerMoneyResult>(HungerErrors.Invalid("السحب يمس حقوقًا محجوزة؛ حدد مصدر الحق المحجوز."));
+            }
+            if (withdrawal && !await ValidWithdrawalDestination(c, request.Kind, request.DestinationType, request.DestinationOwnerId, to, ct))
+                return Result.Failure<HungerMoneyResult>(HungerErrors.Invalid("مالك وجهة السحب ليس الشركة أو مشرفًا معتمدًا لهذه الوجهة."));
+            if (withdrawal && request.RelatedEventId.HasValue && related is null)
+                return Result.Failure<HungerMoneyResult>(HungerErrors.Invalid("مصدر الحق المحجوز غير موجود."));
+            if (withdrawal && related is not null)
             {
                 if (related.Kind != "WalletReturn" || related.PlatformRiderAccountId != request.AccountId || related.RiderBalanceChange <= 0)
                     return Result.Failure<HungerMoneyResult>(HungerErrors.Invalid("مصدر الحق المحجوز غير صالح."));
-                var withdrawn = await db.Set<HungerFinancialEvent>().Where(e => e.RelatedEventId == related.Id && (e.Kind == "WithdrawalCompany" || e.Kind == "WithdrawalSupervisor")).SumAsync(e => e.Amount, ct);
+                var withdrawn = await db.Set<HungerFinancialEvent>().Where(e => e.RelatedEventId == related.Id && (e.Kind == "WithdrawalCompany" || e.Kind == "WithdrawalSupervisor") && e.Status != "Cancelled").SumAsync(e => e.Amount, ct);
                 if (withdrawn + request.Amount > related.RiderBalanceChange) return Result.Failure<HungerMoneyResult>(HungerErrors.Conflict("السحب يتجاوز الحق المحجوز."));
             }
             var item = new HungerFinancialEvent { ClientPlatformId = request.PlatformId, SupervisorEmployeeId = request.SupervisorEmployeeId,
@@ -120,12 +141,59 @@ internal sealed partial class HungerQualityService : IHungerFinanceService
                 FromSubAccountId = from, ToSubAccountId = to, Kind = request.Kind, Amount = request.Amount,
                 RiderBalanceChange = request.Kind == "TopUpAdvance" || request.Kind == "RiderPayment" ? -request.Amount : request.Kind == "Collection" ? request.Amount : 0,
                 BusinessDate = request.BusinessDate, IdempotencyKey = request.IdempotencyKey, RequestHash = hash, EvidenceReference = request.EvidenceReference, DetailsJson = Serialize(request) };
-            db.Add(item); StageTransfer(c, item, from, to, request.Amount);
+            if (withdrawal)
+            {
+                item.Status = "PendingArrival"; item.SourceWalletBalance = request.SourceWalletBalance;
+                item.DestinationType = request.DestinationType; item.DestinationOwnerId = request.DestinationOwnerId;
+                item.TransferReference = request.TransferReference; item.TransferDate = request.TransferDate;
+            }
+            db.Add(item);
+            if (!withdrawal) StageTransfer(c, item, from, to, request.Amount);
             if (request.Kind == "TopUpCollected")
             {
                 if (!await PostingAccounts(c, c.RiderClearingSubAccountId, c.CollectionsSubAccountId, ct)) return Result.Failure<HungerMoneyResult>(HungerErrors.Invalid("ربط التحصيل غير صالح."));
                 StageTransfer(c, item, c.RiderClearingSubAccountId, c.CollectionsSubAccountId, request.Amount);
             }
+            return Result.Success(MoneyResult(item));
+        }, ct);
+    }
+    private async Task<bool> ValidWithdrawalDestination(HungerFinanceConfiguration c, string kind, string? type, Guid? owner, Guid destination, CancellationToken ct)
+    {
+        var account = await db.Set<TreasurySubAccount>().AsNoTracking().SingleOrDefaultAsync(a => a.Id == destination, ct);
+        if (account is null) return false;
+        if (kind == "WithdrawalCompany") return type == "Company" && owner == c.SponsorId && account.SponsorId == c.SponsorId
+            && account.Location is TreasuryLocation.Bank or TreasuryLocation.Central;
+        // The approved finance configuration authorizes this employee and their collections destination.
+        return type == "Supervisor" && owner == c.SupervisorEmployeeId && destination == c.CollectionsSubAccountId
+            && account.Location == TreasuryLocation.Supervisor && await db.Employees.AnyAsync(e => e.Id == owner, ct);
+    }
+    public Task<Result<HungerMoneyResult>> ConfirmWithdrawalArrivalAsync(Guid withdrawalId, HungerWithdrawalAction request, CancellationToken ct = default)
+        => CompleteWithdrawal(withdrawalId, request, false, ct);
+    public Task<Result<HungerMoneyResult>> CancelWithdrawalAsync(Guid withdrawalId, HungerWithdrawalAction request, CancellationToken ct = default)
+        => CompleteWithdrawal(withdrawalId, request, true, ct);
+    private async Task<Result<HungerMoneyResult>> CompleteWithdrawal(Guid id, HungerWithdrawalAction request, bool cancel, CancellationToken ct)
+    {
+        var source = await db.Set<HungerFinancialEvent>().AsNoTracking().SingleOrDefaultAsync(e => e.Id == id && (e.Kind == "WithdrawalCompany" || e.Kind == "WithdrawalSupervisor"), ct);
+        if (source is null) return Result.Failure<HungerMoneyResult>(HungerErrors.NotFound);
+        if (!await FinanceAccess(source.ClientPlatformId, PermissionKeys.Hunger.FinanceManage, ct)) return Result.Failure<HungerMoneyResult>(HungerErrors.Forbidden);
+        if (!ValidEvent(request.BusinessDate, request.IdempotencyKey, request.EvidenceReference) || request.BusinessDate < source.BusinessDate)
+            return Result.Failure<HungerMoneyResult>(HungerErrors.Invalid("تاريخ ودليل وصول أو إلغاء السحب مطلوبان."));
+        var hash = Hash(Serialize(new { id, request, cancel }));
+        return await FinancialWrite([source.ClientPlatformId, source.SupervisorEmployeeId, source.PlatformRiderAccountId!.Value], async () =>
+        {
+            var item = await db.Set<HungerFinancialEvent>().SingleAsync(e => e.Id == id, ct);
+            if (item.CompletionKey == request.IdempotencyKey && item.CompletionHash == hash) return Result.Success(MoneyResult(item));
+            if (item.Status != "PendingArrival") return Result.Failure<HungerMoneyResult>(HungerErrors.Conflict("السحب ليس في انتظار الوصول."));
+            if (!cancel)
+            {
+                var c = await FinanceConfig(item.ClientPlatformId, item.SupervisorEmployeeId, ct);
+                if (c is null || !await PostingAccounts(c, item.FromSubAccountId!.Value, item.ToSubAccountId!.Value, ct)
+                    || !await ValidWithdrawalDestination(c, item.Kind, item.DestinationType, item.DestinationOwnerId, item.ToSubAccountId.Value, ct))
+                    return Result.Failure<HungerMoneyResult>(HungerErrors.Invalid("ربط وجهة السحب لم يعد صالحًا."));
+                StageTransfer(c, item, item.FromSubAccountId.Value, item.ToSubAccountId.Value, item.Amount);
+            }
+            item.Status = cancel ? "Cancelled" : "Arrived"; item.ArrivalEvidence = request.EvidenceReference;
+            item.CompletionDate = request.BusinessDate; item.CompletionKey = request.IdempotencyKey; item.CompletionHash = hash;
             return Result.Success(MoneyResult(item));
         }, ct);
     }
@@ -145,7 +213,7 @@ internal sealed partial class HungerQualityService : IHungerFinanceService
             foreach (var line in request.Sources)
             {
                 var source = await db.Set<HungerFinancialEvent>().AsNoTracking().SingleOrDefaultAsync(e => e.Id == line.SourceEventId && e.ClientPlatformId == request.PlatformId && e.SupervisorEmployeeId == request.SupervisorEmployeeId, ct);
-                if (source is null || source.Kind is not ("Collection" or "TopUpCollected" or "WithdrawalSupervisor")) return Result.Failure<HungerMoneyResult>(HungerErrors.Invalid("مصدر التوريد لا يخص المشرف أو غير قابل للتوريد."));
+                if (source is null || source.Kind is not ("Collection" or "TopUpCollected" or "WithdrawalSupervisor") || source.Kind == "WithdrawalSupervisor" && source.Status != "Arrived") return Result.Failure<HungerMoneyResult>(HungerErrors.Invalid("مصدر التوريد لا يخص المشرف أو غير قابل للتوريد."));
                 var reserved = await db.Set<HungerRemittanceLine>().Where(l => l.SourceEventId == source.Id).SumAsync(l => l.Amount, ct);
                 if (reserved + line.Amount > source.Amount) return Result.Failure<HungerMoneyResult>(HungerErrors.Conflict("المصدر مخصص لتوريد آخر أو المبلغ يتجاوز المتبقي."));
                 db.Add(new HungerRemittanceLine { RemittanceEventId = item.Id, SourceEventId = source.Id, Amount = line.Amount });
@@ -207,9 +275,9 @@ internal sealed partial class HungerQualityService : IHungerFinanceService
         var query = db.Set<HungerFinancialEvent>().AsNoTracking().Where(e => e.ClientPlatformId == platformId && e.SupervisorEmployeeId == supervisorEmployeeId);
         var count = await query.CountAsync(ct);
         var events = await query.OrderByDescending(e => e.BusinessDate).ThenByDescending(e => e.Id).Skip((page - 1) * pageSize).Take(pageSize)
-            .Select(e => new HungerFinancialEventItem(e.Id, e.Kind, e.PlatformRiderAccountId, e.RiderProfileId, e.SupervisorEmployeeId, e.Amount, e.RiderBalanceChange, e.BusinessDate, e.EvidenceReference)).ToArrayAsync(ct);
+            .Select(e => new HungerFinancialEventItem(e.Id, e.Kind, e.PlatformRiderAccountId, e.RiderProfileId, e.SupervisorEmployeeId, e.Amount, e.RiderBalanceChange, e.BusinessDate, e.EvidenceReference, e.Status)).ToArrayAsync(ct);
         var c = await FinanceConfig(platformId, supervisorEmployeeId, ct);
-        var availableSources = await query.Where(e => e.Kind == "Collection" || e.Kind == "TopUpCollected" || e.Kind == "WithdrawalSupervisor").SumAsync(e => e.Amount, ct);
+        var availableSources = await query.Where(e => e.Kind == "Collection" || e.Kind == "TopUpCollected" || e.Kind == "WithdrawalSupervisor" && e.Status == "Arrived").SumAsync(e => e.Amount, ct);
         var confirmed = await query.Where(e => e.Kind == "RemittanceConfirmation").SumAsync(e => e.Amount, ct);
         var pending = availableSources - confirmed;
         return Result.Success(new HungerFinanceReport(events, count, c is null ? 0 : await CustodyBalance(c, ct), pending, page, pageSize));

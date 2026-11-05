@@ -9,7 +9,7 @@ namespace LogisticsERP.Infrastructure.Hunger;
 internal sealed partial class HungerQualityService : IHungerSettlementService
 {
     private static HungerSettlementResponse SettlementResponse(HungerSettlementDocument d) => new(d.Id, d.Kind, d.Status, d.InvoicePeriod,
-        d.ChargeFrom, d.ChargeThrough, d.WalletBalance, d.CanonicalGrossTotal, d.CompanyControlTotal);
+        d.ChargeFrom, d.ChargeThrough, d.WalletBalance, d.CanonicalGrossTotal, d.CompanyControlTotal, d.ClosingSnapshotId);
     public async Task<Result<HungerSettlementResponse>> RecordSettlementAsync(HungerSettlementRequest request, CancellationToken ct = default)
     {
         if (!await FinanceAccess(request.PlatformId, PermissionKeys.Hunger.FinanceManage, ct)) return Result.Failure<HungerSettlementResponse>(HungerErrors.Forbidden);
@@ -25,6 +25,10 @@ internal sealed partial class HungerQualityService : IHungerSettlementService
             || request.Lines.Select(l => (l.Level, l.SourceKey)).Distinct().Count() != request.Lines.Count)) return Result.Failure<HungerSettlementResponse>(HungerErrors.Invalid("حدد مصدرًا محاسبيًا واحدًا للفواتير وخطوطًا موثقة دون تكرار."));
         if (request.Kind != "Invoice" && (!request.AccountId.HasValue || !request.WalletBalance.HasValue || request.Lines is { Count: > 0 })) return Result.Failure<HungerSettlementResponse>(HungerErrors.Invalid("إغلاق المحفظة أو تسويتها يحتاج المعرف والرصيد الصريح."));
         if (request.Kind == "MonthClose" && (request.ChargeFrom.Day != 1 || request.ChargeThrough != request.ChargeFrom.AddMonths(1).AddDays(-1))) return Result.Failure<HungerSettlementResponse>(HungerErrors.Invalid("إغلاق الشهر يجب أن يغطي شهرًا كاملًا."));
+        if (request.Kind == "Adjustment" && (string.IsNullOrWhiteSpace(request.SourceDocumentType) || request.SourceDocumentType.Length > 64
+            || string.IsNullOrWhiteSpace(request.SourceReference) || request.SourceReference.Length > 200 || !request.ClosingSnapshotId.HasValue))
+            return Result.Failure<HungerSettlementResponse>(HungerErrors.Invalid("التسوية تحتاج نوع ومرجع المصدر وإغلاق الشهر المرتبط."));
+        request = request with { SourceDocumentType = request.SourceDocumentType?.Trim(), SourceReference = request.SourceReference?.Trim() };
         var hash = Hash(Serialize(request));
         return await FinancialWrite([request.PlatformId, request.AccountId ?? request.PlatformId], async () =>
         {
@@ -32,6 +36,14 @@ internal sealed partial class HungerQualityService : IHungerSettlementService
             if (old is not null) return old.RequestHash == hash ? Result.Success(SettlementResponse(old)) : Result.Failure<HungerSettlementResponse>(HungerErrors.Conflict("مفتاح المستند مستخدم لبيانات مختلفة."));
             if (request.AccountId.HasValue && !await db.PlatformRiderAccounts.AnyAsync(a => a.Id == request.AccountId && a.ClientPlatformId == request.PlatformId, ct)) return Result.Failure<HungerSettlementResponse>(HungerErrors.Invalid("المعرف لا يخص هنقر المسموح."));
             if (request.InvoiceDocumentId.HasValue && !await db.Set<HungerSettlementDocument>().AnyAsync(d => d.Id == request.InvoiceDocumentId && d.ClientPlatformId == request.PlatformId && d.Kind == "Invoice" && d.Status == "Matched", ct)) return Result.Failure<HungerSettlementResponse>(HungerErrors.Conflict("الفاتورة المرتبطة غير مطابقة أو خارج النطاق."));
+            if (request.Kind == "Adjustment")
+            {
+                if (!await ValidAdjustmentClose(request.PlatformId, request.AccountId, request.InvoicePeriod, request.ClosingSnapshotId!.Value, ct))
+                    return Result.Failure<HungerSettlementResponse>(HungerErrors.Invalid("إغلاق التسوية لا يطابق الحساب والفترة."));
+                if (await db.Set<HungerSettlementDocument>().AnyAsync(d => d.Kind == "Adjustment" && d.PlatformRiderAccountId == request.AccountId
+                    && d.InvoicePeriod == request.InvoicePeriod && d.SourceDocumentType == request.SourceDocumentType && d.SourceReference == request.SourceReference, ct))
+                    return Result.Failure<HungerSettlementResponse>(HungerErrors.Conflict("مصدر التسوية مسجل بالفعل ولو بمفتاح مختلف."));
+            }
             if (request.Lines is not null)
                 foreach (var line in request.Lines)
                 {
@@ -41,11 +53,33 @@ internal sealed partial class HungerQualityService : IHungerSettlementService
                 }
             var gross = request.Kind == "Invoice" ? request.Lines!.Where(l => l.Level == request.CanonicalLevel).Sum(l => l.SignedNetAmount + l.TaxAmount) : (decimal?)null;
             var item = new HungerSettlementDocument { ClientPlatformId = request.PlatformId, PlatformRiderAccountId = request.AccountId, InvoiceDocumentId = request.InvoiceDocumentId,
+                ClosingSnapshotId = request.ClosingSnapshotId, SourceDocumentType = request.SourceDocumentType, SourceReference = request.SourceReference,
                 Kind = request.Kind, InvoicePeriod = request.InvoicePeriod, ChargeFrom = request.ChargeFrom, ChargeThrough = request.ChargeThrough, ObservedOn = request.ObservedOn,
                 WalletBalance = request.WalletBalance, CompanyControlTotal = request.CompanyControlTotal, CanonicalGrossTotal = gross,
-                Status = request.Kind != "Invoice" || gross == request.CompanyControlTotal ? "Matched" : "NeedsReview", IdempotencyKey = request.IdempotencyKey,
+                Status = request.Kind == "Adjustment" ? "Unmatched" : request.Kind == "MonthClose" || gross == request.CompanyControlTotal ? "Matched" : "NeedsReview", IdempotencyKey = request.IdempotencyKey,
                 RequestHash = hash, EvidenceReference = request.EvidenceReference, DataJson = Serialize(request) };
             db.Add(item); return Result.Success(SettlementResponse(item));
+        }, ct);
+    }
+    private Task<bool> ValidAdjustmentClose(Guid platform, Guid? account, DateOnly period, Guid close, CancellationToken ct) =>
+        db.Set<HungerSettlementDocument>().AnyAsync(d => d.Id == close && d.Kind == "MonthClose" && d.Status == "Matched"
+            && d.ClientPlatformId == platform && d.PlatformRiderAccountId == account && d.ChargeFrom == period, ct);
+    public async Task<Result<HungerSettlementResponse>> ReconcileAdjustmentAsync(Guid documentId, HungerAdjustmentReconciliation request, CancellationToken ct = default)
+    {
+        var document = await db.Set<HungerSettlementDocument>().AsNoTracking().SingleOrDefaultAsync(d => d.Id == documentId && d.Kind == "Adjustment", ct);
+        if (document is null) return Result.Failure<HungerSettlementResponse>(HungerErrors.NotFound);
+        if (!await FinanceAccess(document.ClientPlatformId, PermissionKeys.Hunger.FinanceManage, ct)) return Result.Failure<HungerSettlementResponse>(HungerErrors.Forbidden);
+        if (string.IsNullOrWhiteSpace(request.EvidenceReference) || request.EvidenceReference.Length > 1000)
+            return Result.Failure<HungerSettlementResponse>(HungerErrors.Invalid("دليل المطابقة مطلوب."));
+        return await FinancialWrite([document.ClientPlatformId, document.PlatformRiderAccountId!.Value], async () =>
+        {
+            var item = await db.Set<HungerSettlementDocument>().SingleAsync(d => d.Id == documentId, ct);
+            if (item.ClosingSnapshotId != request.ClosingSnapshotId || !await ValidAdjustmentClose(item.ClientPlatformId, item.PlatformRiderAccountId, item.InvoicePeriod, request.ClosingSnapshotId, ct))
+                return Result.Failure<HungerSettlementResponse>(HungerErrors.Invalid("الإغلاق لا يطابق مصدر التسوية."));
+            if (item.Status == "Matched" && item.ReconciliationEvidence != request.EvidenceReference)
+                return Result.Failure<HungerSettlementResponse>(HungerErrors.Conflict("تمت مطابقة التسوية بدليل مختلف."));
+            item.Status = "Matched"; item.ReconciliationEvidence = request.EvidenceReference;
+            return Result.Success(SettlementResponse(item));
         }, ct);
     }
     public async Task<Result<IReadOnlyList<HungerSettlementResponse>>> SettlementsAsync(Guid platformId, DateOnly month, Guid? accountId, int page, int pageSize, CancellationToken ct = default)

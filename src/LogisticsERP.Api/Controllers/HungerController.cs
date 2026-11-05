@@ -24,6 +24,27 @@ public sealed partial class HungerController(IHungerQualityService quality, IHun
         var result = await finance.PostMoneyAsync(request, ct);
         return result.IsFailure ? result.ToProblem(HttpContext) : Ok(result.Value);
     }
+    [HttpPost("finance/withdrawals/{withdrawalId:guid}/confirm-arrival")]
+    [RequirePermission(PermissionKeys.Hunger.FinanceManage)]
+    public async Task<IActionResult> ConfirmWithdrawalArrival(Guid withdrawalId, HungerWithdrawalAction request, CancellationToken ct)
+    {
+        var result = await finance.ConfirmWithdrawalArrivalAsync(withdrawalId, request, ct);
+        return result.IsFailure ? result.ToProblem(HttpContext) : Ok(result.Value);
+    }
+    [HttpPost("finance/withdrawals/{withdrawalId:guid}/cancel")]
+    [RequirePermission(PermissionKeys.Hunger.FinanceManage)]
+    public async Task<IActionResult> CancelWithdrawal(Guid withdrawalId, HungerWithdrawalAction request, CancellationToken ct)
+    {
+        var result = await finance.CancelWithdrawalAsync(withdrawalId, request, ct);
+        return result.IsFailure ? result.ToProblem(HttpContext) : Ok(result.Value);
+    }
+    [HttpPost("finance/settlement-documents/{documentId:guid}/reconcile")]
+    [RequirePermission(PermissionKeys.Hunger.FinanceManage)]
+    public async Task<IActionResult> ReconcileAdjustment(Guid documentId, HungerAdjustmentReconciliation request, CancellationToken ct)
+    {
+        var result = await settlements.ReconcileAdjustmentAsync(documentId, request, ct);
+        return result.IsFailure ? result.ToProblem(HttpContext) : Ok(result.Value);
+    }
     [HttpGet("finance/events")]
     [RequirePermission(PermissionKeys.Hunger.FinanceManage)]
     public async Task<IActionResult> FinancialEvents(Guid platformId, Guid supervisorEmployeeId, int page = 1, int pageSize = 50, CancellationToken ct = default)

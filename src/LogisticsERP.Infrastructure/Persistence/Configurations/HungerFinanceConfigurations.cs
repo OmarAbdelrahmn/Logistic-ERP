@@ -34,6 +34,13 @@ internal sealed class HungerFinanceConfigurations : IEntityTypeConfiguration<Hun
         b.HasOne<HungerFinancialEvent>().WithMany().HasForeignKey(x => x.RelatedEventId).OnDelete(DeleteBehavior.Restrict);
         b.HasOne<TreasurySubAccount>().WithMany().HasForeignKey(x => x.FromSubAccountId).OnDelete(DeleteBehavior.Restrict);
         b.HasOne<TreasurySubAccount>().WithMany().HasForeignKey(x => x.ToSubAccountId).OnDelete(DeleteBehavior.Restrict);
+        b.Property(x => x.Status).HasMaxLength(32).HasDefaultValue("Posted");
+        b.Property(x => x.SourceWalletBalance).HasPrecision(18, 2);
+        b.Property(x => x.DestinationType).HasMaxLength(32);
+        b.Property(x => x.TransferReference).HasMaxLength(200);
+        b.Property(x => x.CompletionKey).HasMaxLength(150);
+        b.Property(x => x.CompletionHash).HasMaxLength(64);
+        b.Property(x => x.ArrivalEvidence).HasMaxLength(1000);
         b.Property(x => x.Amount).HasPrecision(18, 2); b.Property(x => x.RiderBalanceChange).HasPrecision(18, 2);
         b.Property(x => x.Kind).HasMaxLength(40); b.Property(x => x.IdempotencyKey).HasMaxLength(150);
         b.Property(x => x.RequestHash).HasMaxLength(64); b.Property(x => x.EvidenceReference).HasMaxLength(1000);

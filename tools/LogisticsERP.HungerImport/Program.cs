@@ -31,6 +31,18 @@ var identity = scope.ServiceProvider.GetRequiredService<IdentityDbContext>();
 var user = await identity.Users.AsNoTracking().SingleAsync(u => u.Id == actorId, ct);
 actor.Id = user.Id; actor.Version = user.AuthorizationVersion;
 var service = scope.ServiceProvider.GetRequiredService<IHungerAccountsService>();
+if (args.Contains("--verify-accounts", StringComparer.Ordinal))
+{
+    var accountPage = await service.AccountsAsync(null, 1, 20, ct);
+    if (accountPage.IsFailure) throw new InvalidOperationException(accountPage.Error.Description);
+    Console.WriteLine(JsonSerializer.Serialize(new { Verified = true, accountPage.Value!.TotalCount,
+        ReturnedRows = accountPage.Value.Items.Count, RowsWithOwner = accountPage.Value.Items.Count(i => i.Owner is not null),
+        RowsWithSourceRider = accountPage.Value.Items.Count(i => i.SourceActualRider is not null),
+        SourceReportedUsed = accountPage.Value.Items.Count(i => i.MonthlyUsageStatus == "Used" && i.MonthlyUsageSource == "ImportedSource"),
+        Target1302955 = accountPage.Value.Items.Where(i => i.ExternalAccountId == "1302955").Select(i => new { i.MonthlyUsageStatus, i.MonthlyUsageSource, i.CurrentRiderSource, HasReportedRider = i.ReportedCurrentRider != null }).SingleOrDefault(),
+        Dispositions = accountPage.Value.Items.GroupBy(i => i.OperationalDisposition).ToDictionary(g => g.Key, g => g.Count()) }));
+    return;
+}
 var preview = await service.PreviewAccountsAsync(Path.GetFileName(workbook), await File.ReadAllBytesAsync(workbook, ct), ct);
 if (preview.IsFailure) throw new InvalidOperationException(preview.Error.Description);
 Console.WriteLine(JsonSerializer.Serialize(new { Mode = apply ? "Apply" : "Preview", preview.Value!.PreviewId,

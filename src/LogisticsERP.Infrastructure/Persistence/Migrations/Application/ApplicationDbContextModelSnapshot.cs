@@ -6725,17 +6725,39 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<string>("ArrivalEvidence")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
                     b.Property<DateOnly>("BusinessDate")
                         .HasColumnType("date");
 
                     b.Property<Guid>("ClientPlatformId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateOnly?>("CompletionDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("CompletionHash")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<string>("CompletionKey")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<Guid?>("CreatedByUserId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("DestinationOwnerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DestinationType")
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
 
                     b.Property<string>("DetailsJson")
                         .IsRequired()
@@ -6777,11 +6799,29 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<Guid?>("RiderProfileId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<decimal?>("SourceWalletBalance")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)")
+                        .HasDefaultValue("Posted");
+
                     b.Property<Guid>("SupervisorEmployeeId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("ToSubAccountId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly?>("TransferDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("TransferReference")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.HasKey("Id");
 
@@ -7107,6 +7147,9 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<Guid>("ClientPlatformId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("ClosingSnapshotId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<decimal?>("CompanyControlTotal")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
@@ -7148,10 +7191,22 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<Guid?>("PlatformRiderAccountId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("ReconciliationEvidence")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
                     b.Property<string>("RequestHash")
                         .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("nvarchar(64)");
+
+                    b.Property<string>("SourceDocumentType")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<string>("SourceReference")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -7164,10 +7219,16 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ClosingSnapshotId");
+
                     b.HasIndex("InvoiceDocumentId");
 
                     b.HasIndex("ClientPlatformId", "IdempotencyKey")
                         .IsUnique();
+
+                    b.HasIndex("PlatformRiderAccountId", "InvoicePeriod", "SourceDocumentType", "SourceReference")
+                        .IsUnique()
+                        .HasFilter("[Kind]='Adjustment' AND [PlatformRiderAccountId] IS NOT NULL AND [SourceDocumentType] IS NOT NULL AND [SourceReference] IS NOT NULL");
 
                     b.HasIndex("PlatformRiderAccountId", "Kind", "ChargeFrom", "ChargeThrough")
                         .IsUnique()
@@ -26265,6 +26326,11 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .HasForeignKey("ClientPlatformId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Hunger.HungerSettlementDocument", null)
+                        .WithMany()
+                        .HasForeignKey("ClosingSnapshotId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("LogisticsERP.Domain.Entities.Hunger.HungerSettlementDocument", null)
                         .WithMany()

@@ -24,6 +24,16 @@ public sealed class HungerFinancialEvent : HistoryEntity
     public Guid? RelatedEventId { get; set; }
     public Guid? FromSubAccountId { get; set; }
     public Guid? ToSubAccountId { get; set; }
+    public string Status { get; set; } = "Posted";
+    public decimal? SourceWalletBalance { get; set; }
+    public string? DestinationType { get; set; }
+    public Guid? DestinationOwnerId { get; set; }
+    public string? TransferReference { get; set; }
+    public DateOnly? TransferDate { get; set; }
+    public string? CompletionKey { get; set; }
+    public string? CompletionHash { get; set; }
+    public string? ArrivalEvidence { get; set; }
+    public DateOnly? CompletionDate { get; set; }
     public string Kind { get; set; } = string.Empty;
     public decimal Amount { get; set; }
     public decimal RiderBalanceChange { get; set; }

@@ -85,7 +85,7 @@ internal sealed partial class HungerQualityService : IHungerReportingService
         var actuals = await db.RiderClientAssignments.AsNoTracking().Where(a => ids.Contains(a.PlatformRiderAccountId) && a.Status != RiderAssignmentStatus.Cancelled
             && a.EffectiveFrom < end && (a.EffectiveTo == null || a.EffectiveTo >= start)).ToArrayAsync(ct);
         var active = actuals.Where(a => a.Status == RiderAssignmentStatus.Active && a.EffectiveTo == null && a.EffectiveFrom <= BusinessToday).Select(a => a.PlatformRiderAccountId).ToHashSet();
-        string State(Guid id) => details.SingleOrDefault(d => d.PlatformRiderAccountId == id)?.OperationalDisposition ?? "Normal";
+        string State(Guid id) => details.SingleOrDefault(d => d.PlatformRiderAccountId == id)?.OperationalDisposition ?? "Unknown";
         return Result.Success(new HungerSummary(accounts.Length, accounts.Count(a => State(a.Id) == "Normal" && active.Contains(a.Id)),
             accounts.Count(a => State(a.Id) == "Normal" && !active.Contains(a.Id) && a.Status == PlatformRiderAccountStatus.Available),
             accounts.GroupBy(a => State(a.Id)).ToDictionary(g => g.Key, g => g.Count(), StringComparer.Ordinal), actuals.Select(a => a.RiderProfileId).Distinct().Count(),
