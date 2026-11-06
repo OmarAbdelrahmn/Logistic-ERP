@@ -1,4 +1,4 @@
-using LogisticsERP.Api.Authorization;
+﻿using LogisticsERP.Api.Authorization;
 using LogisticsERP.Api.ErrorHandling;
 using LogisticsERP.Application.Authorization;
 using LogisticsERP.Application.Features.Hunger;
@@ -18,21 +18,21 @@ public sealed partial class HungerController(IHungerQualityService quality, IHun
         return result.IsFailure ? result.ToProblem(HttpContext) : NoContent();
     }
     [HttpPost("finance/events")]
-    [RequirePermission(PermissionKeys.Hunger.FinanceManage)]
+    [RequirePermission(PermissionKeys.Hunger.FundingExecute, PermissionKeys.Hunger.TopUpExecute, PermissionKeys.Hunger.Collection, PermissionKeys.Hunger.WithdrawalRequest, PermissionKeys.Hunger.RiderPayment)]
     public async Task<IActionResult> PostMoney(HungerMoneyRequest request, CancellationToken ct)
     {
         var result = await finance.PostMoneyAsync(request, ct);
         return result.IsFailure ? result.ToProblem(HttpContext) : Ok(result.Value);
     }
     [HttpPost("finance/withdrawals/{withdrawalId:guid}/confirm-arrival")]
-    [RequirePermission(PermissionKeys.Hunger.FinanceManage)]
+    [RequirePermission(PermissionKeys.Hunger.WithdrawalArrivalConfirm)]
     public async Task<IActionResult> ConfirmWithdrawalArrival(Guid withdrawalId, HungerWithdrawalAction request, CancellationToken ct)
     {
         var result = await finance.ConfirmWithdrawalArrivalAsync(withdrawalId, request, ct);
         return result.IsFailure ? result.ToProblem(HttpContext) : Ok(result.Value);
     }
     [HttpPost("finance/withdrawals/{withdrawalId:guid}/cancel")]
-    [RequirePermission(PermissionKeys.Hunger.FinanceManage)]
+    [RequirePermission(PermissionKeys.Hunger.WithdrawalRequest)]
     public async Task<IActionResult> CancelWithdrawal(Guid withdrawalId, HungerWithdrawalAction request, CancellationToken ct)
     {
         var result = await finance.CancelWithdrawalAsync(withdrawalId, request, ct);
@@ -46,14 +46,14 @@ public sealed partial class HungerController(IHungerQualityService quality, IHun
         return result.IsFailure ? result.ToProblem(HttpContext) : Ok(result.Value);
     }
     [HttpGet("finance/events")]
-    [RequirePermission(PermissionKeys.Hunger.FinanceManage)]
+    [RequirePermission(PermissionKeys.Hunger.FinanceRead)]
     public async Task<IActionResult> FinancialEvents(Guid platformId, Guid supervisorEmployeeId, int page = 1, int pageSize = 50, CancellationToken ct = default)
     {
         var result = await finance.FinanceReportAsync(platformId, supervisorEmployeeId, page, pageSize, ct);
         return result.IsFailure ? result.ToProblem(HttpContext) : Ok(result.Value);
     }
     [HttpPost("finance/remittances")]
-    [RequirePermission(PermissionKeys.Hunger.FinanceManage)]
+    [RequirePermission(PermissionKeys.Hunger.RemittancesSubmit)]
     public async Task<IActionResult> SubmitRemittance(HungerRemittanceRequest request, CancellationToken ct)
     {
         var result = await finance.SubmitRemittanceAsync(request, ct);
@@ -66,18 +66,81 @@ public sealed partial class HungerController(IHungerQualityService quality, IHun
         var result = await finance.ConfirmRemittanceAsync(remittanceId, request, ct);
         return result.IsFailure ? result.ToProblem(HttpContext) : Ok(result.Value);
     }
+    [HttpPost("finance/requests")]
+    [RequirePermission(PermissionKeys.Hunger.FundingRequest, PermissionKeys.Hunger.TopUpRequest)]
+    public async Task<IActionResult> RequestMoney(HungerMoneyRequest request, CancellationToken ct)
+    {
+        var result = await finance.RequestMoneyAsync(request, ct);
+        return result.IsFailure ? result.ToProblem(HttpContext) : Ok(result.Value);
+    }
+    [HttpPost("finance/requests/{requestId:guid}/execute")]
+    [RequirePermission(PermissionKeys.Hunger.FundingExecute, PermissionKeys.Hunger.TopUpExecute)]
+    public async Task<IActionResult> ExecuteMoneyRequest(Guid requestId, CancellationToken ct)
+    {
+        var result = await finance.ExecuteMoneyRequestAsync(requestId, ct);
+        return result.IsFailure ? result.ToProblem(HttpContext) : Ok(result.Value);
+    }
+    [HttpPost("finance/remittances/drafts")]
+    [RequirePermission(PermissionKeys.Hunger.RemittancesSubmit)]
+    public async Task<IActionResult> CreateRemittanceDraft(HungerRemittanceRequest request, CancellationToken ct)
+    {
+        var result = await finance.CreateRemittanceDraftAsync(request, ct);
+        return result.IsFailure ? result.ToProblem(HttpContext) : Ok(result.Value);
+    }
+    [HttpPost("finance/remittances/{remittanceId:guid}/submit")]
+    [RequirePermission(PermissionKeys.Hunger.RemittancesSubmit)]
+    public async Task<IActionResult> SubmitRemittanceDraft(Guid remittanceId, HungerRemittanceAction request, CancellationToken ct)
+    {
+        var result = await finance.SubmitRemittanceDraftAsync(remittanceId, request, ct);
+        return result.IsFailure ? result.ToProblem(HttpContext) : Ok(result.Value);
+    }
+    [HttpPost("finance/remittances/{remittanceId:guid}/cancel")]
+    [RequirePermission(PermissionKeys.Hunger.ReceiptsCancelReverse)]
+    public async Task<IActionResult> CancelRemittance(Guid remittanceId, HungerRemittanceAction request, CancellationToken ct)
+    {
+        var result = await finance.CancelRemittanceAsync(remittanceId, request, ct);
+        return result.IsFailure ? result.ToProblem(HttpContext) : Ok(result.Value);
+    }
+    [HttpPost("finance/receipt-confirmations/{confirmationId:guid}/reverse")]
+    [RequirePermission(PermissionKeys.Hunger.ReceiptsCancelReverse)]
+    public async Task<IActionResult> ReverseRemittanceConfirmation(Guid confirmationId, HungerRemittanceAction request, CancellationToken ct)
+    {
+        var result = await finance.ReverseRemittanceConfirmationAsync(confirmationId, request, ct);
+        return result.IsFailure ? result.ToProblem(HttpContext) : Ok(result.Value);
+    }
+    [HttpGet("finance/pending-collections")]
+    [RequirePermission(PermissionKeys.Hunger.FinanceRead)]
+    public async Task<IActionResult> PendingCollections(Guid platformId, Guid supervisorEmployeeId, int page = 1, int pageSize = 50, CancellationToken ct = default)
+    {
+        var result = await finance.PendingCollectionsAsync(platformId, supervisorEmployeeId, page, pageSize, ct);
+        return result.IsFailure ? result.ToProblem(HttpContext) : Ok(result.Value);
+    }
     [HttpPost("accounts/{accountId:guid}/wallet-review")]
-    [RequirePermission(PermissionKeys.Hunger.FinanceManage)]
+    [RequirePermission(PermissionKeys.Hunger.WalletReview)]
     public async Task<IActionResult> ReviewWallet(Guid accountId, HungerWalletReviewRequest request, CancellationToken ct)
     {
         var result = await finance.ReviewWalletAsync(accountId, request, ct);
         return result.IsFailure ? result.ToProblem(HttpContext) : Ok(result.Value);
     }
     [HttpPost("wallet-reviews/{reviewId:guid}/confirm")]
-    [RequirePermission(PermissionKeys.Hunger.FinanceManage)]
+    [RequirePermission(PermissionKeys.Hunger.WalletReview)]
     public async Task<IActionResult> ConfirmWallet(Guid reviewId, CancellationToken ct)
     {
         var result = await finance.ConfirmWalletAsync(reviewId, ct);
+        return result.IsFailure ? result.ToProblem(HttpContext) : Ok(result.Value);
+    }
+    [HttpPost("accounts/{accountId:guid}/rider-swap/review")]
+    [RequirePermission(PermissionKeys.Hunger.WalletReview)]
+    public async Task<IActionResult> ReviewRiderSwap(Guid accountId, HungerRiderSwapRequest request, CancellationToken ct)
+    {
+        var result = await finance.ReviewRiderSwapAsync(accountId, request, ct);
+        return result.IsFailure ? result.ToProblem(HttpContext) : Ok(result.Value);
+    }
+    [HttpPost("rider-swaps/{swapId:guid}/confirm")]
+    [RequirePermission(PermissionKeys.Hunger.WalletReview)]
+    public async Task<IActionResult> ConfirmRiderSwap(Guid swapId, CancellationToken ct)
+    {
+        var result = await finance.ConfirmRiderSwapAsync(swapId, ct);
         return result.IsFailure ? result.ToProblem(HttpContext) : Ok(result.Value);
     }
     [HttpGet("operations/template")]
@@ -121,9 +184,9 @@ public sealed partial class HungerController(IHungerQualityService quality, IHun
     }
     [HttpGet("accounts")]
     [RequirePermission(PermissionKeys.Hunger.Read)]
-    public async Task<IActionResult> Accounts(string? disposition, int page = 1, int pageSize = 50, CancellationToken ct = default)
+    public async Task<IActionResult> Accounts([FromQuery] HungerAccountFilter filter, string? disposition, int page = 1, int pageSize = 50, CancellationToken ct = default)
     {
-        var result = await accounts.AccountsAsync(disposition, page, pageSize, ct);
+        var result = await accounts.AccountsFilteredAsync(filter with { OperationalDisposition = disposition ?? filter.OperationalDisposition }, page, pageSize, ct);
         return result.IsFailure ? result.ToProblem(HttpContext) : Ok(result.Value);
     }
     [HttpPut("accounts/{accountId:guid}/disposition")]
@@ -146,9 +209,9 @@ public sealed partial class HungerController(IHungerQualityService quality, IHun
     }
     [HttpPost("accounts/imports/{previewId:guid}/confirm")]
     [RequirePermission(PermissionKeys.Hunger.AccountsImport)]
-    public async Task<IActionResult> ConfirmAccounts(Guid previewId, CancellationToken ct)
+    public async Task<IActionResult> ConfirmAccounts(Guid previewId, HungerAccountImportConfirmation request, CancellationToken ct)
     {
-        var result = await accounts.ConfirmAccountsAsync(previewId, ct);
+        var result = await accounts.ConfirmAccountsAsync(previewId, request, ct);
         return result.IsFailure ? result.ToProblem(HttpContext) : Ok(result.Value);
     }
     [HttpGet("quality/template")]

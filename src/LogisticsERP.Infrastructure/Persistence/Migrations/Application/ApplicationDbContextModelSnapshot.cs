@@ -6504,6 +6504,9 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<DateOnly>("EffectiveFrom")
                         .HasColumnType("date");
 
+                    b.Property<DateOnly?>("EffectiveThrough")
+                        .HasColumnType("date");
+
                     b.Property<bool>("Enabled")
                         .HasColumnType("bit");
 
@@ -6511,6 +6514,29 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
+
+                    b.Property<string>("Metric")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<Guid?>("OperatingCityId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Operator")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<string>("Period")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
 
                     b.Property<string>("Severity")
                         .IsRequired()
@@ -6523,6 +6549,8 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.HasKey("Id");
 
+                    b.HasIndex("OperatingCityId");
+
                     b.HasIndex("ClientPlatformId", "Code", "EffectiveFrom", "CreatedAtUtc");
 
                     b.ToTable("AlertRules", "hunger");
@@ -6533,7 +6561,10 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<decimal>("ActualWorkingHours")
+                    b.Property<int?>("AcceptedOrders")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("ActualWorkingHours")
                         .HasPrecision(18, 8)
                         .HasColumnType("decimal(18,8)");
 
@@ -6548,6 +6579,10 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.Property<int?>("CancelledOrders")
                         .HasColumnType("int");
+
+                    b.Property<string>("CaptainClassification")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("CompletedOrders")
                         .HasColumnType("int");
@@ -6567,6 +6602,11 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<string>("DeletionReason")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("HoursUnit")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
 
                     b.Property<Guid>("ImportId")
                         .HasColumnType("uniqueidentifier");
@@ -6604,6 +6644,9 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .HasColumnType("rowversion");
 
                     b.Property<int>("SourceRowNumber")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("StackedOrders")
                         .HasColumnType("int");
 
                     b.Property<DateTimeOffset?>("UpdatedAtUtc")
@@ -6924,6 +6967,80 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.ToTable("ImportPreviews", "hunger");
                 });
 
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Hunger.HungerPotentialFine", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("DailyOperationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid?>("InvoiceDocumentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("InvoiceSourceKey")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("NoShowCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ResolutionEvidence")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DailyOperationId")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.HasIndex("InvoiceDocumentId");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.ToTable("PotentialFines", "hunger", t =>
+                        {
+                            t.HasCheckConstraint("CK_HungerPotentialFine_Status", "[NoShowCount]>0 AND [Status] IN ('Potential','Invoiced','Waived')");
+                        });
+                });
+
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Hunger.HungerQualityRevision", b =>
                 {
                     b.Property<Guid>("Id")
@@ -7061,6 +7178,40 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.ToTable("QualitySnapshots", "hunger", t =>
                         {
                             t.HasCheckConstraint("CK_HungerQuality_Rates", "[VerificationSuccessRate] BETWEEN 0 AND 1 AND [OnTimeDeliveryScore] BETWEEN 0 AND 1 AND [FinalDeliveryQualityScore] BETWEEN 0 AND 1");
+                        });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Hunger.HungerReceiptAllocation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("ConfirmationEventId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("RemittanceLineId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RemittanceLineId");
+
+                    b.HasIndex("ConfirmationEventId", "RemittanceLineId")
+                        .IsUnique();
+
+                    b.ToTable("ReceiptAllocations", "hunger", t =>
+                        {
+                            t.HasCheckConstraint("CK_HungerReceiptAllocation_Amount", "[Amount]>0");
                         });
                 });
 
@@ -7285,6 +7436,16 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("rowversion");
 
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasDefaultValue("Pending");
+
+                    b.Property<Guid?>("SwapId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTimeOffset?>("UpdatedAtUtc")
                         .HasColumnType("datetimeoffset");
 
@@ -7298,7 +7459,9 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.HasIndex("IsDeleted");
 
-                    b.HasIndex("PlatformRiderAccountId");
+                    b.HasIndex("SwapId");
+
+                    b.HasIndex("PlatformRiderAccountId", "Status");
 
                     b.HasIndex("UserId", "ExpiresAtUtc");
 
@@ -14042,6 +14205,258 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.HasData(
                         new
                         {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000371"),
+                            Category = "Hunger",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "صلاحية مالية مستقلة لهنقر.",
+                            DescriptionEn = "Independent Hunger finance action: FinanceRead.",
+                            DisplayOrder = 371,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "hunger.finance.read",
+                            NameAr = "عرض مالية هنقر",
+                            NameEn = "Read Hunger finance",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000372"),
+                            Category = "Hunger",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "صلاحية مالية مستقلة لهنقر.",
+                            DescriptionEn = "Independent Hunger finance action: FundingRequest.",
+                            DisplayOrder = 372,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "hunger.finance.funding.request",
+                            NameAr = "طلب تمويل عهدة هنقر",
+                            NameEn = "Request Hunger custody funding",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000373"),
+                            Category = "Hunger",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "صلاحية مالية مستقلة لهنقر.",
+                            DescriptionEn = "Independent Hunger finance action: FundingExecute.",
+                            DisplayOrder = 373,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "hunger.finance.funding.execute",
+                            NameAr = "تنفيذ تمويل عهدة هنقر",
+                            NameEn = "Execute Hunger custody funding",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000374"),
+                            Category = "Hunger",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "صلاحية مالية مستقلة لهنقر.",
+                            DescriptionEn = "Independent Hunger finance action: TopUpRequest.",
+                            DisplayOrder = 374,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "hunger.finance.topup.request",
+                            NameAr = "طلب شحن محفظة هنقر",
+                            NameEn = "Request Hunger wallet top-up",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000375"),
+                            Category = "Hunger",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "صلاحية مالية مستقلة لهنقر.",
+                            DescriptionEn = "Independent Hunger finance action: TopUpExecute.",
+                            DisplayOrder = 375,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "hunger.finance.topup.execute",
+                            NameAr = "تنفيذ شحن محفظة هنقر",
+                            NameEn = "Execute Hunger wallet top-up",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000376"),
+                            Category = "Hunger",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "صلاحية مالية مستقلة لهنقر.",
+                            DescriptionEn = "Independent Hunger finance action: Collection.",
+                            DisplayOrder = 376,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "hunger.finance.collection",
+                            NameAr = "تحصيل مستحقات هنقر",
+                            NameEn = "Collect Hunger rider payments",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000377"),
+                            Category = "Hunger",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "صلاحية مالية مستقلة لهنقر.",
+                            DescriptionEn = "Independent Hunger finance action: WithdrawalRequest.",
+                            DisplayOrder = 377,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "hunger.finance.withdrawal.request",
+                            NameAr = "طلب سحب محفظة هنقر",
+                            NameEn = "Request Hunger wallet withdrawal",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000378"),
+                            Category = "Hunger",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "صلاحية مالية مستقلة لهنقر.",
+                            DescriptionEn = "Independent Hunger finance action: WithdrawalArrivalConfirm.",
+                            DisplayOrder = 378,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "hunger.finance.withdrawal.arrival.confirm",
+                            NameAr = "تأكيد وصول سحب هنقر",
+                            NameEn = "Confirm Hunger withdrawal arrival",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000379"),
+                            Category = "Hunger",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "صلاحية مالية مستقلة لهنقر.",
+                            DescriptionEn = "Independent Hunger finance action: RiderPayment.",
+                            DisplayOrder = 379,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "hunger.finance.rider.payment",
+                            NameAr = "صرف مستحقات مندوب هنقر",
+                            NameEn = "Pay Hunger rider entitlement",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000380"),
+                            Category = "Hunger",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "صلاحية مالية مستقلة لهنقر.",
+                            DescriptionEn = "Independent Hunger finance action: WalletReview.",
+                            DisplayOrder = 380,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "hunger.finance.wallet.review",
+                            NameAr = "مراجعة محفظة هنقر",
+                            NameEn = "Review Hunger wallet",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000381"),
+                            Category = "Hunger",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "صلاحية مالية مستقلة لهنقر.",
+                            DescriptionEn = "Independent Hunger finance action: RemittancesSubmit.",
+                            DisplayOrder = 381,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "hunger.remittances.submit",
+                            NameAr = "تقديم توريد هنقر",
+                            NameEn = "Submit Hunger remittance",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000382"),
+                            Category = "Hunger",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "صلاحية مالية مستقلة لهنقر.",
+                            DescriptionEn = "Independent Hunger finance action: ReceiptsCancelReverse.",
+                            DisplayOrder = 382,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "hunger.remittances.cancel_reverse",
+                            NameAr = "إلغاء وعكس توريد هنقر",
+                            NameEn = "Cancel or reverse Hunger receipt",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
                             Id = new Guid("019c18d5-62e1-7000-a000-000000000369"),
                             Category = "Hunger",
                             CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
@@ -14099,6 +14514,27 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                             NameAr = "ربط حسابات هنقر المحاسبية",
                             NameEn = "Configure Hunger finance",
                             RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000383"),
+                            Category = "Fleet",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "تعديل هوية المركبة الأساسية.",
+                            DescriptionEn = "Change base vehicle identity.",
+                            DisplayOrder = 383,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "fleet.vehicles.fields.identity",
+                            NameAr = "هوية المركبة",
+                            NameEn = "Vehicle identity",
+                            RequiresClientScope = false,
                             RequiresHousingScope = false,
                             RowVersion = new byte[0],
                             Version = 1
@@ -26167,6 +26603,11 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .HasForeignKey("ClientPlatformId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Platform.OperatingCity", null)
+                        .WithMany()
+                        .HasForeignKey("OperatingCityId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Hunger.HungerDailyOperation", b =>
@@ -26269,6 +26710,20 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .OnDelete(DeleteBehavior.Restrict);
                 });
 
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Hunger.HungerPotentialFine", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Hunger.HungerDailyOperation", null)
+                        .WithMany()
+                        .HasForeignKey("DailyOperationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Hunger.HungerSettlementDocument", null)
+                        .WithMany()
+                        .HasForeignKey("InvoiceDocumentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Hunger.HungerQualityRevision", b =>
                 {
                     b.HasOne("LogisticsERP.Domain.Entities.Hunger.HungerQualitySnapshot", null)
@@ -26302,6 +26757,21 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .WithMany()
                         .HasForeignKey("SoleRiderProfileId")
                         .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Hunger.HungerReceiptAllocation", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Hunger.HungerFinancialEvent", null)
+                        .WithMany()
+                        .HasForeignKey("ConfirmationEventId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Hunger.HungerRemittanceLine", null)
+                        .WithMany()
+                        .HasForeignKey("RemittanceLineId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Hunger.HungerRemittanceLine", b =>

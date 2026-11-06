@@ -203,6 +203,11 @@ internal sealed partial class FleetService(
         var vehicle = id.HasValue ? await dbContext.Vehicles.SingleOrDefaultAsync(x => x.Id == id, cancellationToken) : null;
         if (id.HasValue && vehicle is null) return Result.Failure<VehicleDetailResponse>(FleetErrors.NotFound);
         if (vehicle is not null && !FleetServiceSupport.MatchesRowVersion(vehicle.RowVersion, request.RowVersion)) return Result.Failure<VehicleDetailResponse>(FleetErrors.ConcurrencyConflict);
+        if (vehicle is not null && (vehicle.NormalizedAssetNumber != normalizedAsset || vehicle.Vin != normalizedVin
+                || vehicle.VehicleType != request.VehicleType || vehicle.VehicleModelId != request.VehicleModelId
+                || vehicle.VehicleManufacturerId != request.VehicleManufacturerId)
+            && !await support.HasPermissionAsync(PermissionKeys.Fleet.VehicleIdentity, null, cancellationToken))
+            return Result.Failure<VehicleDetailResponse>(FleetErrors.Forbidden);
         if (vehicle is not null &&
             (!string.Equals(FleetServiceSupport.TrimOrNull(vehicle.SerialNumber), FleetServiceSupport.TrimOrNull(request.SerialNumber), StringComparison.Ordinal)
              || !string.Equals(FleetServiceSupport.TrimOrNull(vehicle.ChassisNumber), FleetServiceSupport.TrimOrNull(request.ChassisNumber), StringComparison.Ordinal)
@@ -340,6 +345,14 @@ internal sealed partial class FleetService(
         var normalizedAr = FleetServiceSupport.NormalizeIdentifier(request.PlateNumberAr);
         var normalizedEn = FleetServiceSupport.NormalizeIdentifier(request.PlateNumberEn);
         var vin = FleetServiceSupport.TrimOrNull(request.Vin)?.ToUpperInvariant();
+        if ((vehicle.NormalizedAssetNumber != normalizedAsset || vehicle.NormalizedSerialNumber != normalizedSerial
+                || vehicle.NormalizedChassisNumber != normalizedChassis || vehicle.NormalizedPlateNumberAr != normalizedAr
+                || vehicle.NormalizedPlateNumberEn != normalizedEn || vehicle.Vin != vin || vehicle.RegistrationType != request.RegistrationType
+                || FleetServiceSupport.TrimOrNull(vehicle.PlateLettersAr) != FleetServiceSupport.TrimOrNull(request.PlateLettersAr)
+                || FleetServiceSupport.TrimOrNull(vehicle.PlateLettersEn) != FleetServiceSupport.TrimOrNull(request.PlateLettersEn)
+                || FleetServiceSupport.TrimOrNull(vehicle.PlateDigits) != FleetServiceSupport.TrimOrNull(request.PlateDigits))
+            && !await support.HasPermissionAsync(PermissionKeys.Fleet.VehicleIdentity, null, cancellationToken))
+            return Result.Failure<VehicleDetailResponse>(FleetErrors.Forbidden);
         if (await dbContext.Vehicles.AnyAsync(x => x.Id != id && (x.NormalizedAssetNumber == normalizedAsset || x.NormalizedSerialNumber == normalizedSerial || x.NormalizedChassisNumber == normalizedChassis || x.NormalizedPlateNumberAr == normalizedAr || x.NormalizedPlateNumberEn == normalizedEn || vin != null && x.Vin == vin), cancellationToken)) return Result.Failure<VehicleDetailResponse>(FleetErrors.Duplicate);
         var actor = support.UserId;
         if (!actor.HasValue) return Result.Failure<VehicleDetailResponse>(FleetErrors.CurrentUserUnavailable);
@@ -373,6 +386,7 @@ internal sealed partial class FleetService(
     public async Task<Result<VehicleRegistrationTransitionResponse>> TransitionToPublicTransportAsync(Guid id, VehicleRegistrationTransitionRequest request, PrivateFileUpload istimara, PrivateFileUpload operationCard, CancellationToken cancellationToken = default)
     {
         if (!await support.HasPermissionAsync(PermissionKeys.Fleet.RegistrationTransitionsCreate, null, cancellationToken)) return Result.Failure<VehicleRegistrationTransitionResponse>(FleetErrors.Forbidden);
+        if (!await support.HasPermissionAsync(PermissionKeys.Fleet.VehicleIdentity, null, cancellationToken)) return Result.Failure<VehicleRegistrationTransitionResponse>(FleetErrors.Forbidden);
         var vehicle = await dbContext.Vehicles.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (vehicle is null) return Result.Failure<VehicleRegistrationTransitionResponse>(FleetErrors.NotFound);
         if (!FleetServiceSupport.MatchesRowVersion(vehicle.RowVersion, request.RowVersion)) return Result.Failure<VehicleRegistrationTransitionResponse>(FleetErrors.ConcurrencyConflict);

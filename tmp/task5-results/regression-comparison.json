@@ -1,0 +1,146 @@
+{
+  "fleet": {
+    "previous": {
+      "counters": {
+        "total": "1477",
+        "executed": "1438",
+        "passed": "1436",
+        "failed": "2",
+        "error": "0",
+        "timeout": "0",
+        "aborted": "0",
+        "inconclusive": "0",
+        "passedButRunAborted": "0",
+        "notRunnable": "0",
+        "notExecuted": "0",
+        "disconnected": "0",
+        "warning": "0",
+        "completed": "0",
+        "inProgress": "0",
+        "pending": "0"
+      },
+      "failed": [
+        "LogisticsERP.Fleet.UnitTests.PlatformAccountValidationTests.EmployeeWithProfileCanOwnAndUpdateAnAccountWithoutChangingRole(legacy: False)",
+        "LogisticsERP.Fleet.UnitTests.PlatformAccountValidationTests.ValidCreationNeedsOnlyTheExistingAccountSponsor"
+      ],
+      "granular": {
+        "Passed": 480,
+        "Failed": 0,
+        "NotExecuted": 0
+      }
+    },
+    "current": {
+      "counters": {
+        "total": "1495",
+        "executed": "1453",
+        "passed": "1451",
+        "failed": "2",
+        "error": "0",
+        "timeout": "0",
+        "aborted": "0",
+        "inconclusive": "0",
+        "passedButRunAborted": "0",
+        "notRunnable": "0",
+        "notExecuted": "0",
+        "disconnected": "0",
+        "warning": "0",
+        "completed": "0",
+        "inProgress": "0",
+        "pending": "0"
+      },
+      "failed": [
+        "LogisticsERP.Fleet.UnitTests.PlatformAccountValidationTests.EmployeeWithProfileCanOwnAndUpdateAnAccountWithoutChangingRole(legacy: False)",
+        "LogisticsERP.Fleet.UnitTests.PlatformAccountValidationTests.ValidCreationNeedsOnlyTheExistingAccountSponsor"
+      ],
+      "granular": {
+        "Passed": 480,
+        "Failed": 0,
+        "NotExecuted": 0
+      }
+    },
+    "newFailures": [],
+    "resolvedFailures": []
+  },
+  "jahez": {
+    "previous": {
+      "counters": {
+        "total": "364",
+        "executed": "330",
+        "passed": "318",
+        "failed": "12",
+        "error": "0",
+        "timeout": "0",
+        "aborted": "0",
+        "inconclusive": "0",
+        "passedButRunAborted": "0",
+        "notRunnable": "0",
+        "notExecuted": "0",
+        "disconnected": "0",
+        "warning": "0",
+        "completed": "0",
+        "inProgress": "0",
+        "pending": "0"
+      },
+      "failed": [
+        "LogisticsERP.Jahez.Tests.JahezWorkflowTests.RiderCanTakeTwoChefzPlusOneJahezInAnyOrderAndReplaceEither(code: \"CHEFSZ\", legacy: False, chefzBeforeJahez: 0)",
+        "LogisticsERP.Jahez.Tests.JahezWorkflowTests.RiderCanTakeTwoChefzPlusOneJahezInAnyOrderAndReplaceEither(code: \"CHEFSZ\", legacy: False, chefzBeforeJahez: 1)",
+        "LogisticsERP.Jahez.Tests.JahezWorkflowTests.RiderCanTakeTwoChefzPlusOneJahezInAnyOrderAndReplaceEither(code: \"CHEFSZ\", legacy: False, chefzBeforeJahez: 2)",
+        "LogisticsERP.Jahez.Tests.JahezWorkflowTests.RiderCanTakeTwoChefzPlusOneJahezInAnyOrderAndReplaceEither(code: \"CHEFZ\", legacy: False, chefzBeforeJahez: 0)",
+        "LogisticsERP.Jahez.Tests.JahezWorkflowTests.RiderCanTakeTwoChefzPlusOneJahezInAnyOrderAndReplaceEither(code: \"CHEFZ\", legacy: False, chefzBeforeJahez: 1)",
+        "LogisticsERP.Jahez.Tests.JahezWorkflowTests.RiderCanTakeTwoChefzPlusOneJahezInAnyOrderAndReplaceEither(code: \"CHEFZ\", legacy: False, chefzBeforeJahez: 2)",
+        "LogisticsERP.Jahez.Tests.JahezWorkflowTests.RiderCanTakeTwoChefzPlusOneJahezInAnyOrderAndReplaceEither(code: \"SHIFTZ\", legacy: False, chefzBeforeJahez: 0)",
+        "LogisticsERP.Jahez.Tests.JahezWorkflowTests.RiderCanTakeTwoChefzPlusOneJahezInAnyOrderAndReplaceEither(code: \"SHIFTZ\", legacy: False, chefzBeforeJahez: 1)",
+        "LogisticsERP.Jahez.Tests.JahezWorkflowTests.RiderCanTakeTwoChefzPlusOneJahezInAnyOrderAndReplaceEither(code: \"SHIFTZ\", legacy: False, chefzBeforeJahez: 2)",
+        "LogisticsERP.Jahez.Tests.JahezWorkflowTests.RiderCanTakeTwoChefzPlusOneJahezInAnyOrderAndReplaceEither(code: \"THECHEFZ\", legacy: False, chefzBeforeJahez: 0)",
+        "LogisticsERP.Jahez.Tests.JahezWorkflowTests.RiderCanTakeTwoChefzPlusOneJahezInAnyOrderAndReplaceEither(code: \"THECHEFZ\", legacy: False, chefzBeforeJahez: 1)",
+        "LogisticsERP.Jahez.Tests.JahezWorkflowTests.RiderCanTakeTwoChefzPlusOneJahezInAnyOrderAndReplaceEither(code: \"THECHEFZ\", legacy: False, chefzBeforeJahez: 2)"
+      ],
+      "granular": {
+        "Passed": 0,
+        "Failed": 0,
+        "NotExecuted": 0
+      }
+    },
+    "current": {
+      "counters": {
+        "total": "364",
+        "executed": "330",
+        "passed": "318",
+        "failed": "12",
+        "error": "0",
+        "timeout": "0",
+        "aborted": "0",
+        "inconclusive": "0",
+        "passedButRunAborted": "0",
+        "notRunnable": "0",
+        "notExecuted": "0",
+        "disconnected": "0",
+        "warning": "0",
+        "completed": "0",
+        "inProgress": "0",
+        "pending": "0"
+      },
+      "failed": [
+        "LogisticsERP.Jahez.Tests.JahezWorkflowTests.RiderCanTakeTwoChefzPlusOneJahezInAnyOrderAndReplaceEither(code: \"CHEFSZ\", legacy: False, chefzBeforeJahez: 0)",
+        "LogisticsERP.Jahez.Tests.JahezWorkflowTests.RiderCanTakeTwoChefzPlusOneJahezInAnyOrderAndReplaceEither(code: \"CHEFSZ\", legacy: False, chefzBeforeJahez: 1)",
+        "LogisticsERP.Jahez.Tests.JahezWorkflowTests.RiderCanTakeTwoChefzPlusOneJahezInAnyOrderAndReplaceEither(code: \"CHEFSZ\", legacy: False, chefzBeforeJahez: 2)",
+        "LogisticsERP.Jahez.Tests.JahezWorkflowTests.RiderCanTakeTwoChefzPlusOneJahezInAnyOrderAndReplaceEither(code: \"CHEFZ\", legacy: False, chefzBeforeJahez: 0)",
+        "LogisticsERP.Jahez.Tests.JahezWorkflowTests.RiderCanTakeTwoChefzPlusOneJahezInAnyOrderAndReplaceEither(code: \"CHEFZ\", legacy: False, chefzBeforeJahez: 1)",
+        "LogisticsERP.Jahez.Tests.JahezWorkflowTests.RiderCanTakeTwoChefzPlusOneJahezInAnyOrderAndReplaceEither(code: \"CHEFZ\", legacy: False, chefzBeforeJahez: 2)",
+        "LogisticsERP.Jahez.Tests.JahezWorkflowTests.RiderCanTakeTwoChefzPlusOneJahezInAnyOrderAndReplaceEither(code: \"SHIFTZ\", legacy: False, chefzBeforeJahez: 0)",
+        "LogisticsERP.Jahez.Tests.JahezWorkflowTests.RiderCanTakeTwoChefzPlusOneJahezInAnyOrderAndReplaceEither(code: \"SHIFTZ\", legacy: False, chefzBeforeJahez: 1)",
+        "LogisticsERP.Jahez.Tests.JahezWorkflowTests.RiderCanTakeTwoChefzPlusOneJahezInAnyOrderAndReplaceEither(code: \"SHIFTZ\", legacy: False, chefzBeforeJahez: 2)",
+        "LogisticsERP.Jahez.Tests.JahezWorkflowTests.RiderCanTakeTwoChefzPlusOneJahezInAnyOrderAndReplaceEither(code: \"THECHEFZ\", legacy: False, chefzBeforeJahez: 0)",
+        "LogisticsERP.Jahez.Tests.JahezWorkflowTests.RiderCanTakeTwoChefzPlusOneJahezInAnyOrderAndReplaceEither(code: \"THECHEFZ\", legacy: False, chefzBeforeJahez: 1)",
+        "LogisticsERP.Jahez.Tests.JahezWorkflowTests.RiderCanTakeTwoChefzPlusOneJahezInAnyOrderAndReplaceEither(code: \"THECHEFZ\", legacy: False, chefzBeforeJahez: 2)"
+      ],
+      "granular": {
+        "Passed": 0,
+        "Failed": 0,
+        "NotExecuted": 0
+      }
+    },
+    "newFailures": [],
+    "resolvedFailures": []
+  }
+}

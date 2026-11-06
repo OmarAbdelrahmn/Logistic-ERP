@@ -31,7 +31,27 @@ internal sealed class PermissionAuthorizationHandler(IPermissionChecker permissi
             return;
         }
 
+        if (requirement.PermissionKey.Contains('|'))
+        {
+            foreach (var key in requirement.PermissionKey.Split('|'))
+            {
+                var child = new PermissionRequirement(key);
+                var childContext = new AuthorizationHandlerContext([child], context.User, context.Resource);
+                await HandleRequirementAsync(childContext, child);
+                if (childContext.HasSucceeded) { context.Succeed(requirement); return; }
+            }
+            return;
+        }
+
         PermissionScope? scope = null;
+        if (requirement.PermissionKey.StartsWith("hunger.", StringComparison.Ordinal))
+        {
+            var platformId = await dbContext.ClientPlatforms.AsNoTracking().Where(x => x.Code == "HUNGER")
+                .Select(x => (Guid?)x.Id).SingleOrDefaultAsync(
+                    context.Resource is HttpContext request ? request.RequestAborted : CancellationToken.None);
+            if (!platformId.HasValue) return;
+            scope = new PermissionScope(AccessScopeType.ClientPlatform, platformId.Value);
+        }
         if (requirement.PermissionKey.StartsWith("ninja.", StringComparison.Ordinal)
             || context.Resource is HttpContext httpContext && httpContext.Request.Path.StartsWithSegments("/api/ninja"))
         {

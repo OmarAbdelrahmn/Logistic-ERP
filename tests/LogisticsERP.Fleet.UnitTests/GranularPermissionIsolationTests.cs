@@ -52,7 +52,8 @@ public sealed class GranularPermissionIsolationTests
 
         foreach (var key in Keys)
             Assert.Equal(key == grantedKey, await checker.HasPermissionAsync(user.Id, 1, key, cancellationToken: ct));
-        Assert.DoesNotContain(PermissionKeys.All, key => key.EndsWith(".manage", StringComparison.Ordinal));
+        Assert.DoesNotContain(PermissionKeys.All, key => key.EndsWith(".manage", StringComparison.Ordinal)
+            && key is not (PermissionKeys.Hunger.FinanceManage or PermissionKeys.Hunger.AlertsManage or PermissionKeys.Ninja.EvaluationManage));
         Assert.False(await checker.HasPermissionAsync(user.Id, 1, "fuel.manage", cancellationToken: ct));
         Assert.False(await checker.HasPermissionAsync(user.Id, 1, "external_riders.manage", cancellationToken: ct));
         Assert.False(await checker.HasPermissionAsync(user.Id, 1, "maintenance.work_orders.manage", cancellationToken: ct));

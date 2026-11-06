@@ -54,10 +54,19 @@ public sealed class HungerRemittanceLine : AuditableEntity
 
 public sealed class HungerWalletReview : AuditableEntity
 {
+    public string Status { get; set; } = "Pending";
+    public Guid? SwapId { get; set; }
     public Guid PlatformRiderAccountId { get; set; }
     public Guid UserId { get; set; }
     public string InputRevision { get; set; } = string.Empty;
     public string RequestJson { get; set; } = string.Empty;
     public string? ResultJson { get; set; }
     public DateTimeOffset ExpiresAtUtc { get; set; }
+}
+
+public sealed class HungerReceiptAllocation : HistoryEntity
+{
+    public Guid ConfirmationEventId { get; set; }
+    public Guid RemittanceLineId { get; set; }
+    public decimal Amount { get; set; }
 }

@@ -27,7 +27,7 @@ using HousingWarehouseItemBalance = LogisticsERP.Domain.Entities.Housing.Housing
 
 namespace LogisticsERP.Infrastructure.Persistence;
 
-public sealed class ApplicationDbContext(
+public sealed partial class ApplicationDbContext(
     DbContextOptions<ApplicationDbContext> options,
     TimeProvider? timeProvider = null)
     : DbContext(options), IApplicationDbContext
@@ -245,6 +245,7 @@ public sealed class ApplicationDbContext(
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
     {
+        SupersedeHungerWalletReviewsAsync(false, default).GetAwaiter().GetResult();
         UpdateDatasetVersions();
         return base.SaveChanges(acceptAllChangesOnSuccess);
     }
@@ -253,6 +254,7 @@ public sealed class ApplicationDbContext(
         bool acceptAllChangesOnSuccess,
         CancellationToken cancellationToken = default)
     {
+        await SupersedeHungerWalletReviewsAsync(true, cancellationToken);
         await UpdateDatasetVersionsAsync(cancellationToken);
         return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
     }

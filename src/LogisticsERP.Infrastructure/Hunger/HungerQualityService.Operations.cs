@@ -1,4 +1,5 @@
-using System.Globalization;
+﻿using System.Globalization;
+using LogisticsERP.Domain.Hunger;
 using ClosedXML.Excel;
 using LogisticsERP.Application.Authorization;
 using LogisticsERP.Application.Common.Results;
@@ -12,7 +13,7 @@ namespace LogisticsERP.Infrastructure.Hunger;
 
 internal sealed partial class HungerQualityService : IHungerOperationsService
 {
-    private static readonly string[] OperationHeaders = ["Captain ID", "CompletedOrders", "ActualWorkingHours", "RejectedOrders", "CancelledOrders", "NoShowCount"];
+    private static readonly string[] OperationHeaders = ["Captain ID", "CompletedOrders", "ActualWorkingHours", "RejectedOrders", "CancelledOrders", "NoShowCount", "HoursUnit", "AcceptedOrders", "StackedOrders", "CaptainClassification"];
     private sealed record OperationEnvelope(HungerOperationInput[] Inputs, HungerImportRow[] Errors);
     private sealed record OperationChange(HungerOperationInput Input, Guid AccountId, IReadOnlyList<PlatformDayShare> Shares);
     private sealed record OperationPlan(string Revision, HungerImportRow[] Rows, OperationChange[] Changes);
@@ -33,6 +34,7 @@ internal sealed partial class HungerQualityService : IHungerOperationsService
         foreach (var key in OperationHeaders)
         {
             var found = headers[new string(key.ToLowerInvariant().Where(char.IsLetterOrDigit).ToArray())].ToArray();
+            if (found.Length == 0 && key is "HoursUnit" or "AcceptedOrders" or "StackedOrders" or "CaptainClassification") continue;
             if (found.Length != 1) throw new FormatException($"العمود {key} مفقود أو مكرر.");
             columns[key] = found[0].Address.ColumnNumber;
         }
@@ -46,15 +48,27 @@ internal sealed partial class HungerQualityService : IHungerOperationsService
             {
                 decimal? Number(string key, decimal max, bool required)
                 {
-                    var cell = row.Cell(columns[key]); var text = cell.GetString();
+                    if (!columns.TryGetValue(key, out var column)) return null;
+                    var cell = row.Cell(column); var text = cell.GetString();
                     if (string.IsNullOrWhiteSpace(text) && !required) return null;
                     if (cell.HasFormula || !decimal.TryParse(text, NumberStyles.Number, CultureInfo.InvariantCulture, out var value) || value < 0 || value > max
                         || key != "ActualWorkingHours" && decimal.Truncate(value) != value) throw new FormatException($"قيمة {key} غير صالحة.");
                     return value;
                 }
                 if (string.IsNullOrWhiteSpace(account) || account.Length > 150) throw new FormatException("معرف هنقر مطلوب.");
-                values.Add(new(row.RowNumber(), account, (int)Number("CompletedOrders", int.MaxValue, true)!, Number("ActualWorkingHours", 24, true)!.Value,
-                    (int?)Number("RejectedOrders", int.MaxValue, false), (int?)Number("CancelledOrders", int.MaxValue, false), (int?)Number("NoShowCount", int.MaxValue, false)));
+                var hoursCell = row.Cell(columns["ActualWorkingHours"]);
+                var unit = columns.TryGetValue("HoursUnit", out var unitColumn) ? row.Cell(unitColumn).GetString().Trim() : "DecimalHours";
+                if (unit.Length == 0) unit = "DecimalHours";
+                if (hoursCell.HasFormula) throw new FormatException("Formula hours are not accepted.");
+                var raw = hoursCell.DataType == XLDataType.TimeSpan ? ((int)hoursCell.GetTimeSpan().TotalHours).ToString(CultureInfo.InvariantCulture) + hoursCell.GetTimeSpan().ToString(@"\:mm\:ss", CultureInfo.InvariantCulture) : hoursCell.DataType == XLDataType.Number ? hoursCell.GetDouble().ToString("R", CultureInfo.InvariantCulture) : hoursCell.GetString();
+                if (hoursCell.DataType == XLDataType.TimeSpan && unit != "Duration") throw new FormatException("Time cells require Duration unit.");
+                var hours = HungerPerformanceRules.Hours(raw, unit);
+                var classification = columns.TryGetValue("CaptainClassification", out var classificationColumn) ? row.Cell(classificationColumn).GetString().Trim() : null;
+                if (classification?.Length > 100 || classificationColumn > 0 && row.Cell(classificationColumn).HasFormula) throw new FormatException("Invalid CaptainClassification.");
+                if (string.IsNullOrEmpty(classification)) classification = null;
+                values.Add(new(row.RowNumber(), account, (int)Number("CompletedOrders", int.MaxValue, true)!, hours,
+                    (int?)Number("RejectedOrders", int.MaxValue, false), (int?)Number("CancelledOrders", int.MaxValue, false), (int?)Number("NoShowCount", int.MaxValue, false))
+                    { CaptainClassification = classification, HoursUnit = unit, AcceptedOrders = (int?)Number("AcceptedOrders", int.MaxValue, false), StackedOrders = (int?)Number("StackedOrders", int.MaxValue, false) });
             }
             catch (FormatException e) { errors.Add(new(row.RowNumber(), account, "Rejected", e.Message)); }
         }
@@ -79,11 +93,13 @@ internal sealed partial class HungerQualityService : IHungerOperationsService
             var old = saved.SingleOrDefault(s => s.PlatformRiderAccountId == account.Id);
             if (old is not null)
             {
-                var same = old.CompletedOrders == source.CompletedOrders && old.ActualWorkingHours == source.ActualWorkingHours && old.RejectedOrders == source.RejectedOrders && old.CancelledOrders == source.CancelledOrders && old.NoShowCount == source.NoShowCount;
+                var same = old.CompletedOrders == source.CompletedOrders && old.ActualWorkingHours == source.ActualWorkingHours && old.RejectedOrders == source.RejectedOrders && old.CancelledOrders == source.CancelledOrders && old.NoShowCount == source.NoShowCount && old.AcceptedOrders == source.AcceptedOrders && old.StackedOrders == source.StackedOrders && old.CaptainClassification == source.CaptainClassification;
                 rows.Add(new(source.RowNumber, source.AccountId, same ? "Skipped" : "Rejected", same ? null : "يوجد تقرير مختلف لهذا اليوم؛ لم يستبدل.")); continue;
             }
+            var metrics = new Dictionary<PlatformDayMetric, decimal> { [PlatformDayMetric.OrdersCount] = source.CompletedOrders };
+            if (source.ActualWorkingHours.HasValue) metrics[PlatformDayMetric.WorkingHours] = source.ActualWorkingHours.Value;
             var allocation = await new PlatformAccountDayAllocationService(db).AllocateAsync(account.Id, date,
-                new Dictionary<PlatformDayMetric, decimal> { [PlatformDayMetric.OrdersCount] = source.CompletedOrders, [PlatformDayMetric.WorkingHours] = source.ActualWorkingHours }, ct);
+                metrics, ct);
             var shares = allocation.IsSuccess ? allocation.Value! : [];
             changes.Add(new(source, account.Id, shares));
             rows.Add(new(source.RowNumber, source.AccountId, "New", null, AllocationStatus: shares.Count > 0 ? "Resolved" : "UnresolvedAllocation"));
@@ -126,10 +142,14 @@ internal sealed partial class HungerQualityService : IHungerOperationsService
                 if (current.ExpiresAtUtc <= clock.GetUtcNow() || current.InputRevision != plan.Revision) return Result.Failure<HungerImportResult>(HungerErrors.Conflict("تغيرت المعاينة؛ أعد الرفع."));
                 if (plan.Rows.Any(r => r.Status == "Rejected")) return Result.Failure<HungerImportResult>(HungerErrors.Invalid("أصلح الصفوف المرفوضة؛ لم يعتمد أي جزء من الدفعة."));
                 foreach (var change in plan.Changes)
-                    db.Add(new HungerDailyOperation { PlatformRiderAccountId = change.AccountId, ImportId = current.Id, ReportDate = current.ReportDate, SourceRowNumber = change.Input.RowNumber,
-                        CompletedOrders = change.Input.CompletedOrders, ActualWorkingHours = change.Input.ActualWorkingHours,
+                {
+                    var operation = new HungerDailyOperation { PlatformRiderAccountId = change.AccountId, ImportId = current.Id, ReportDate = current.ReportDate, SourceRowNumber = change.Input.RowNumber,
+                        CompletedOrders = change.Input.CompletedOrders, ActualWorkingHours = change.Input.ActualWorkingHours, HoursUnit = change.Input.HoursUnit, AcceptedOrders = change.Input.AcceptedOrders, CaptainClassification = change.Input.CaptainClassification, StackedOrders = change.Input.StackedOrders,
                         RejectedOrders = change.Input.RejectedOrders, CancelledOrders = change.Input.CancelledOrders, NoShowCount = change.Input.NoShowCount,
-                        AllocationsJson = Serialize(change.Shares), AllocationStatus = change.Shares.Count > 0 ? "Resolved" : "UnresolvedAllocation" });
+                        AllocationsJson = Serialize(change.Shares), AllocationStatus = change.Shares.Count > 0 ? "Resolved" : "UnresolvedAllocation" };
+                    db.Add(operation);
+                    if (operation.NoShowCount > 0) db.Add(new HungerPotentialFine { DailyOperationId = operation.Id, NoShowCount = operation.NoShowCount.Value });
+                }
                 var result = new HungerImportResult(current.Id, plan.Rows.Length, plan.Changes.Length, plan.Rows.Count(r => r.Status == "Skipped"), 0, 0, plan.Changes.Count(c => c.Shares.Count == 0), plan.Rows);
                 current.ResultJson = Serialize(result); await db.SaveChangesAsync(ct); return Result.Success(result);
             });
@@ -144,30 +164,32 @@ internal sealed partial class HungerQualityService : IHungerOperationsService
         var startDate = from;
         var rows = await (from s in db.Set<HungerDailyOperation>().AsNoTracking() join a in db.PlatformRiderAccounts.AsNoTracking() on s.PlatformRiderAccountId equals a.Id
             where platforms.Contains(a.ClientPlatformId) && s.ReportDate >= startDate && s.ReportDate <= through && (accountId == null || a.Id == accountId)
-            orderby s.ReportDate, a.ExternalAccountId select new { Source = s, a.ExternalAccountId, a.ClientPlatformId }).ToArrayAsync(ct);
+            orderby s.ReportDate, a.ExternalAccountId select new { Source = s, a.ExternalAccountId, a.ClientPlatformId, a.OperatingCityId }).ToArrayAsync(ct);
         var rules = await db.Set<HungerAlertRule>().AsNoTracking().Where(r => platforms.Contains(r.ClientPlatformId) && r.EffectiveFrom <= through).ToArrayAsync(ct);
         var items = rows.Select(r =>
         {
             var s = r.Source; var alerts = new List<string>(); var reasons = new List<HungerOperationAlert>();
             bool Alert(string code, decimal actual, decimal defaultThreshold, string defaultSeverity, bool greater = false)
             {
-                var rule = rules.Where(rule => rule.ClientPlatformId == r.ClientPlatformId && rule.Code == code && rule.EffectiveFrom <= s.ReportDate)
-                    .OrderByDescending(rule => rule.EffectiveFrom).ThenByDescending(rule => rule.CreatedAtUtc).ThenByDescending(rule => rule.Id).FirstOrDefault();
+                var rule = rules.Where(rule => rule.ClientPlatformId == r.ClientPlatformId && rule.Code == code && rule.EffectiveFrom <= s.ReportDate && (rule.EffectiveThrough == null || rule.EffectiveThrough >= s.ReportDate) && rule.Kind == "Alert" && rule.Period == "Day" && (rule.OperatingCityId == null || rule.OperatingCityId == r.OperatingCityId))
+                    .OrderByDescending(rule => rule.OperatingCityId.HasValue).ThenByDescending(rule => rule.EffectiveFrom).ThenByDescending(rule => rule.CreatedAtUtc).ThenByDescending(rule => rule.Id).FirstOrDefault();
                 var threshold = rule?.Threshold ?? defaultThreshold;
-                if (rule is { Enabled: false } || !(greater ? actual > threshold : actual < threshold)) return false;
+                if (rule is { Enabled: false } || !HungerPerformanceRules.Compare(actual, rule?.Operator ?? (greater ? "GreaterThan" : "LessThan"), threshold)) return false;
                 alerts.Add(code); reasons.Add(new(code, actual, threshold, rule?.Severity ?? defaultSeverity, rule?.Id)); return true;
             }
-            if (!Alert("HoursCritical", s.ActualWorkingHours, 8, "Critical")) Alert("HoursFollowUp", s.ActualWorkingHours, 10, "Warning");
+            if (s.ActualWorkingHours is { } hours)
+            { if (!Alert("HoursCritical", hours, 8, "High")) Alert("HoursFollowUp", hours, 10, "Warning"); }
+            else alerts.Add("MissingHoursCoverage");
             if (s.NoShowCount.HasValue) Alert("NoShowPositive", s.NoShowCount.Value, 0, "Warning", true);
             return new HungerOperationItem(s.Id, s.PlatformRiderAccountId, r.ExternalAccountId, s.ReportDate, s.CompletedOrders, s.ActualWorkingHours,
                 s.RejectedOrders, s.CancelledOrders, s.NoShowCount, s.ManualOrders, s.ManualHours, s.ManualOrders.HasValue ? s.CompletedOrders - s.ManualOrders : null,
-                s.AllocationStatus, Read<PlatformDayShare[]>(s.AllocationsJson), alerts, Convert.ToBase64String(s.RowVersion)) { AlertDetails = reasons };
+                s.AllocationStatus, Read<PlatformDayShare[]>(s.AllocationsJson), alerts, Convert.ToBase64String(s.RowVersion)) { AlertDetails = reasons, AcceptedOrders = s.AcceptedOrders, CaptainClassification = s.CaptainClassification, StackedOrders = s.StackedOrders };
         }).Where(i => !riderId.HasValue || i.Allocations.Any(a => a.RiderProfileId == riderId)).ToArray();
-        decimal Metric(HungerOperationItem item, PlatformDayMetric metric) => riderId.HasValue ? item.Allocations.Where(a => a.RiderProfileId == riderId).Sum(a => a.Values[metric])
-            : metric == PlatformDayMetric.OrdersCount ? item.CompletedOrders : item.ActualWorkingHours;
+        decimal Metric(HungerOperationItem item, PlatformDayMetric metric) => riderId.HasValue ? item.Allocations.Where(a => a.RiderProfileId == riderId).Sum(a => a.Values.GetValueOrDefault(metric))
+            : metric == PlatformDayMetric.OrdersCount ? item.CompletedOrders : item.ActualWorkingHours ?? 0;
         long? Total(Func<HungerOperationItem, int?> metric) => !riderId.HasValue && items.Length > 0 && items.All(i => metric(i).HasValue) ? items.Sum(i => (long)metric(i)!.Value) : null;
         return Result.Success(new HungerOperationReport(items.Skip((page - 1) * pageSize).Take(pageSize).ToArray(), items.Length,
-            (long)items.Sum(i => Metric(i, PlatformDayMetric.OrdersCount)), items.Sum(i => Metric(i, PlatformDayMetric.WorkingHours)), Total(i => i.RejectedOrders), Total(i => i.CancelledOrders), Total(i => i.NoShowCount), page, pageSize));
+            (long)items.Sum(i => Metric(i, PlatformDayMetric.OrdersCount)), items.Sum(i => Metric(i, PlatformDayMetric.WorkingHours)), Total(i => i.RejectedOrders), Total(i => i.CancelledOrders), Total(i => i.NoShowCount), page, pageSize) { AcceptedOrders = Total(i => i.AcceptedOrders), StackedOrders = Total(i => i.StackedOrders) });
     }
     public async Task<Result> ManualPerformanceAsync(Guid sourceId, HungerManualPerformanceRequest request, CancellationToken ct = default)
     {

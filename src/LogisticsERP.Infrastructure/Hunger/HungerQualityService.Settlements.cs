@@ -20,7 +20,7 @@ internal sealed partial class HungerQualityService : IHungerSettlementService
         if (request.Kind == "Invoice" && (request.CanonicalLevel is not ("RiderLVL" or "Breakdown") || request.Lines is null || request.Lines.Count is 0 or > 10000
             || !request.CompanyControlTotal.HasValue || request.Lines.Any(l => l.Level is not ("CoLVL" or "RiderLVL" or "Breakdown" or "Vehicle")
                 || string.IsNullOrWhiteSpace(l.SourceKey) || l.SourceKey.Length > 200 || string.IsNullOrWhiteSpace(l.EvidenceReference) || l.EvidenceReference.Length > 1000
-                || !ValidBalance(l.SignedNetAmount) || !ValidBalance(l.TaxAmount))
+                || !ValidBalance(l.SignedNetAmount) || !ValidBalance(l.TaxAmount) || l.NoShowCount < 0)
             || !request.Lines.Any(l => l.Level == request.CanonicalLevel)
             || request.Lines.Select(l => (l.Level, l.SourceKey)).Distinct().Count() != request.Lines.Count)) return Result.Failure<HungerSettlementResponse>(HungerErrors.Invalid("حدد مصدرًا محاسبيًا واحدًا للفواتير وخطوطًا موثقة دون تكرار."));
         if (request.Kind != "Invoice" && (!request.AccountId.HasValue || !request.WalletBalance.HasValue || request.Lines is { Count: > 0 })) return Result.Failure<HungerSettlementResponse>(HungerErrors.Invalid("إغلاق المحفظة أو تسويتها يحتاج المعرف والرصيد الصريح."));
@@ -84,7 +84,7 @@ internal sealed partial class HungerQualityService : IHungerSettlementService
     }
     public async Task<Result<IReadOnlyList<HungerSettlementResponse>>> SettlementsAsync(Guid platformId, DateOnly month, Guid? accountId, int page, int pageSize, CancellationToken ct = default)
     {
-        if (!await FinanceAccess(platformId, PermissionKeys.Hunger.FinanceManage, ct)) return Result.Failure<IReadOnlyList<HungerSettlementResponse>>(HungerErrors.Forbidden);
+        if (!await FinanceAccess(platformId, PermissionKeys.Hunger.FinanceRead, ct)) return Result.Failure<IReadOnlyList<HungerSettlementResponse>>(HungerErrors.Forbidden);
         if (month == default || page < 1 || pageSize is < 1 or > 100) return Result.Failure<IReadOnlyList<HungerSettlementResponse>>(HungerErrors.Invalid("حدد الشهر والصفحة."));
         var start = new DateOnly(month.Year, month.Month, 1);
         var source = await db.Set<HungerSettlementDocument>().AsNoTracking().Where(d => d.ClientPlatformId == platformId && d.InvoicePeriod == start

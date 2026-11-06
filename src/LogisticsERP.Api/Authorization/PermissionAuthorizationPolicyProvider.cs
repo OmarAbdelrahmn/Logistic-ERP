@@ -21,7 +21,7 @@ internal sealed class PermissionAuthorizationPolicyProvider(IOptions<Authorizati
         }
 
         var permissionKey = policyName[AuthenticationPolicies.PermissionPrefix.Length..];
-        if (!PermissionKeys.All.Contains(permissionKey))
+        if (permissionKey.Split('|').Any(key => !PermissionKeys.All.Contains(key)))
         {
             return base.GetPolicyAsync(policyName);
         }

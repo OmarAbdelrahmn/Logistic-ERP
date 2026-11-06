@@ -71,6 +71,10 @@ internal sealed class PermissionChecker(
             return true;
         }
 
+        if (PermissionKeys.HungerFinancePermissions.Contains(permissionKey)
+            && await HasPermissionAsync(userId, authorizationVersion, PermissionKeys.Hunger.FinanceManage, scope, cancellationToken))
+            return true;
+
         return snapshot.RoleAssignments.Any(assignment =>
             string.Equals(assignment.PermissionKey, permissionKey, StringComparison.Ordinal)
             && IsApplicable(definition, assignment, scope, targetClientPlatformId, denyWithoutScopeIsGlobal: false));

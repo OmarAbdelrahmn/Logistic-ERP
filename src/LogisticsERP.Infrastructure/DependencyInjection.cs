@@ -1,4 +1,4 @@
-using LogisticsERP.Application.Features.Jahez;
+﻿using LogisticsERP.Application.Features.Jahez;
 using LogisticsERP.Infrastructure.Jahez;
 using LogisticsERP.Application.Abstractions.Authentication;
 using LogisticsERP.Application.Abstractions.Persistence;
@@ -79,6 +79,7 @@ public static class DependencyInjection
         services.AddScoped<SimplePlatformService>();
         services.AddScoped<LogisticsERP.Infrastructure.Hunger.HungerQualityService>();
         services.AddScoped<LogisticsERP.Application.Features.Hunger.IHungerQualityService>(p => p.GetRequiredService<LogisticsERP.Infrastructure.Hunger.HungerQualityService>());
+        services.AddScoped<LogisticsERP.Application.Features.Hunger.IHungerDeferredReminderQuery, LogisticsERP.Infrastructure.Hunger.HungerDeferredReminderQuery>();
         services.AddScoped<LogisticsERP.Application.Features.Hunger.IHungerAccountsService>(p => p.GetRequiredService<LogisticsERP.Infrastructure.Hunger.HungerQualityService>());
         services.AddScoped<LogisticsERP.Application.Features.Hunger.IHungerOperationsService>(p => p.GetRequiredService<LogisticsERP.Infrastructure.Hunger.HungerQualityService>());
         services.AddScoped<LogisticsERP.Application.Features.Hunger.IHungerFinanceService>(p => p.GetRequiredService<LogisticsERP.Infrastructure.Hunger.HungerQualityService>());

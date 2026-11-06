@@ -15,7 +15,7 @@ using Xunit;
 
 namespace LogisticsERP.Fleet.UnitTests;
 
-public sealed class HungerQualityServiceTests
+public sealed partial class HungerQualityServiceTests
 {
     [Fact]
     public async Task LateImportDuplicateAndLatestSnapshotPreserveAccountMonth()
@@ -95,7 +95,8 @@ public sealed class HungerQualityServiceTests
     private sealed class Checker : IPermissionChecker
     {
         public bool Allowed { get; set; } = true;
-        public Task<bool> HasPermissionAsync(Guid userId, long authorizationVersion, string permissionKey, PermissionScope? scope = null, CancellationToken cancellationToken = default) => Task.FromResult(Allowed);
+        public string? OnlyPermission { get; set; }
+        public Task<bool> HasPermissionAsync(Guid userId, long authorizationVersion, string permissionKey, PermissionScope? scope = null, CancellationToken cancellationToken = default) => Task.FromResult(Allowed && (OnlyPermission == null || OnlyPermission == permissionKey));
         public void InvalidateUser(Guid userId, long authorizationVersion) { }
     }
     private sealed class Clock : TimeProvider

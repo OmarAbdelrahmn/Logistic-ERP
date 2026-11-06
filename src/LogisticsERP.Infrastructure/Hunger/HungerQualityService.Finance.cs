@@ -75,9 +75,11 @@ internal sealed partial class HungerQualityService : IHungerFinanceService
         }, ct);
         return result.IsFailure ? Result.Failure(result.Error) : Result.Success();
     }
-    public async Task<Result<HungerMoneyResult>> PostMoneyAsync(HungerMoneyRequest request, CancellationToken ct = default)
+    public Task<Result<HungerMoneyResult>> PostMoneyAsync(HungerMoneyRequest request, CancellationToken ct = default)
+        => PostMoneyCore(request, null, ct);
+    private async Task<Result<HungerMoneyResult>> PostMoneyCore(HungerMoneyRequest request, Guid? requestedEventId, CancellationToken ct)
     {
-        if (!await FinanceAccess(request.PlatformId, PermissionKeys.Hunger.FinanceManage, ct)) return Result.Failure<HungerMoneyResult>(HungerErrors.Forbidden);
+        if (!await FinanceAccess(request.PlatformId, MoneyPermission(request.Kind), ct)) return Result.Failure<HungerMoneyResult>(HungerErrors.Forbidden);
         if (!Money(request.Amount) || !ValidEvent(request.BusinessDate, request.IdempotencyKey, request.EvidenceReference)
             || request.Kind is not ("Funding" or "TopUpAdvance" or "TopUpCollected" or "Collection" or "WithdrawalCompany" or "WithdrawalSupervisor" or "RiderPayment")) return Result.Failure<HungerMoneyResult>(HungerErrors.Invalid("حدد نوع العملية والمبلغ والتاريخ ومصدر الإثبات."));
         var withdrawal = request.Kind is "WithdrawalCompany" or "WithdrawalSupervisor";
@@ -92,6 +94,12 @@ internal sealed partial class HungerQualityService : IHungerFinanceService
         {
             var old = await db.Set<HungerFinancialEvent>().AsNoTracking().SingleOrDefaultAsync(e => e.ClientPlatformId == request.PlatformId && e.IdempotencyKey == request.IdempotencyKey, ct);
             if (old is not null) return old.RequestHash == hash ? Result.Success(MoneyResult(old)) : Result.Failure<HungerMoneyResult>(HungerErrors.Conflict("مفتاح العملية مستخدم لطلب مختلف."));
+            if (requestedEventId.HasValue)
+            {
+                var pendingRequest = await db.Set<HungerFinancialEvent>().SingleAsync(e => e.Id == requestedEventId, ct);
+                if (pendingRequest.Status != "Requested") return Result.Failure<HungerMoneyResult>(HungerErrors.Conflict("الطلب منفذ مسبقًا."));
+                pendingRequest.Status = "Executed";
+            }
             var c = await FinanceConfig(request.PlatformId, request.SupervisorEmployeeId, ct);
             if (c is null) return Result.Failure<HungerMoneyResult>(HungerErrors.Conflict("لم يعتمد ربط حسابات المشرف المالية."));
             if (request.Kind != "Funding" && (!request.AccountId.HasValue || !await db.PlatformRiderAccounts.AnyAsync(a => a.Id == request.AccountId && a.ClientPlatformId == request.PlatformId, ct))) return Result.Failure<HungerMoneyResult>(HungerErrors.Invalid("حساب هنقر مطلوب."));
@@ -175,7 +183,7 @@ internal sealed partial class HungerQualityService : IHungerFinanceService
     {
         var source = await db.Set<HungerFinancialEvent>().AsNoTracking().SingleOrDefaultAsync(e => e.Id == id && (e.Kind == "WithdrawalCompany" || e.Kind == "WithdrawalSupervisor"), ct);
         if (source is null) return Result.Failure<HungerMoneyResult>(HungerErrors.NotFound);
-        if (!await FinanceAccess(source.ClientPlatformId, PermissionKeys.Hunger.FinanceManage, ct)) return Result.Failure<HungerMoneyResult>(HungerErrors.Forbidden);
+        if (!await FinanceAccess(source.ClientPlatformId, cancel ? PermissionKeys.Hunger.WithdrawalRequest : PermissionKeys.Hunger.WithdrawalArrivalConfirm, ct)) return Result.Failure<HungerMoneyResult>(HungerErrors.Forbidden);
         if (!ValidEvent(request.BusinessDate, request.IdempotencyKey, request.EvidenceReference) || request.BusinessDate < source.BusinessDate)
             return Result.Failure<HungerMoneyResult>(HungerErrors.Invalid("تاريخ ودليل وصول أو إلغاء السحب مطلوبان."));
         var hash = Hash(Serialize(new { id, request, cancel }));
@@ -197,24 +205,31 @@ internal sealed partial class HungerQualityService : IHungerFinanceService
             return Result.Success(MoneyResult(item));
         }, ct);
     }
-    public async Task<Result<HungerMoneyResult>> SubmitRemittanceAsync(HungerRemittanceRequest request, CancellationToken ct = default)
+    public Task<Result<HungerMoneyResult>> SubmitRemittanceAsync(HungerRemittanceRequest request, CancellationToken ct = default)
+        => CreateRemittance(request, false, ct);
+    public Task<Result<HungerMoneyResult>> CreateRemittanceDraftAsync(HungerRemittanceRequest request, CancellationToken ct = default)
+        => CreateRemittance(request, true, ct);
+    private async Task<Result<HungerMoneyResult>> CreateRemittance(HungerRemittanceRequest request, bool draft, CancellationToken ct)
     {
-        if (!await FinanceAccess(request.PlatformId, PermissionKeys.Hunger.FinanceManage, ct)) return Result.Failure<HungerMoneyResult>(HungerErrors.Forbidden);
+        if (!await FinanceAccess(request.PlatformId, PermissionKeys.Hunger.RemittancesSubmit, ct)) return Result.Failure<HungerMoneyResult>(HungerErrors.Forbidden);
         if (!ValidEvent(request.BusinessDate, request.IdempotencyKey, request.EvidenceReference) || request.Sources is null || request.Sources.Count is 0 or > 1000
-            || request.Sources.Any(s => !Money(s.Amount)) || request.Sources.Select(s => s.SourceEventId).Distinct().Count() != request.Sources.Count) return Result.Failure<HungerMoneyResult>(HungerErrors.Invalid("حدد مصادر توريد صحيحة دون تكرار."));
-        var hash = Hash(Serialize(request));
+            || request.Sources.Any(s => s is null || !Money(s.Amount)) || request.Sources.Select(s => s.SourceEventId).Distinct().Count() != request.Sources.Count) return Result.Failure<HungerMoneyResult>(HungerErrors.Invalid("حدد مصادر توريد صحيحة دون تكرار."));
+        var hash = draft ? Hash(Serialize(new { request, draft })) : Hash(Serialize(request));
         return await FinancialWrite([request.PlatformId, request.SupervisorEmployeeId], async () =>
         {
             var old = await db.Set<HungerFinancialEvent>().SingleOrDefaultAsync(e => e.ClientPlatformId == request.PlatformId && e.IdempotencyKey == request.IdempotencyKey, ct);
             if (old is not null) return old.RequestHash == hash ? Result.Success(MoneyResult(old)) : Result.Failure<HungerMoneyResult>(HungerErrors.Conflict("مفتاح مكرر لطلب مختلف."));
             if (await FinanceConfig(request.PlatformId, request.SupervisorEmployeeId, ct) is null) return Result.Failure<HungerMoneyResult>(HungerErrors.Conflict("الربط المالي غير معتمد."));
-            var item = new HungerFinancialEvent { ClientPlatformId = request.PlatformId, SupervisorEmployeeId = request.SupervisorEmployeeId, Kind = "Remittance",
+            var item = new HungerFinancialEvent { ClientPlatformId = request.PlatformId, SupervisorEmployeeId = request.SupervisorEmployeeId, Kind = "Remittance", Status = draft ? "Draft" : "Submitted",
                 Amount = request.Sources.Sum(s => s.Amount), BusinessDate = request.BusinessDate, IdempotencyKey = request.IdempotencyKey, RequestHash = hash, EvidenceReference = request.EvidenceReference, DetailsJson = Serialize(request) };
             foreach (var line in request.Sources)
             {
                 var source = await db.Set<HungerFinancialEvent>().AsNoTracking().SingleOrDefaultAsync(e => e.Id == line.SourceEventId && e.ClientPlatformId == request.PlatformId && e.SupervisorEmployeeId == request.SupervisorEmployeeId, ct);
-                if (source is null || source.Kind is not ("Collection" or "TopUpCollected" or "WithdrawalSupervisor") || source.Kind == "WithdrawalSupervisor" && source.Status != "Arrived") return Result.Failure<HungerMoneyResult>(HungerErrors.Invalid("مصدر التوريد لا يخص المشرف أو غير قابل للتوريد."));
-                var reserved = await db.Set<HungerRemittanceLine>().Where(l => l.SourceEventId == source.Id).SumAsync(l => l.Amount, ct);
+                if (source is null || source.BusinessDate > request.BusinessDate || source.Kind is not ("Collection" or "TopUpCollected" or "WithdrawalSupervisor") || source.Kind == "WithdrawalSupervisor" && source.Status != "Arrived") return Result.Failure<HungerMoneyResult>(HungerErrors.Invalid("مصدر التوريد لا يخص المشرف أو غير قابل للتوريد."));
+                var reserved = await (from l in db.Set<HungerRemittanceLine>()
+                    join batch in db.Set<HungerFinancialEvent>() on l.RemittanceEventId equals batch.Id
+                    where l.SourceEventId == source.Id && batch.Status != "Cancelled"
+                    select l.Amount).SumAsync(ct);
                 if (reserved + line.Amount > source.Amount) return Result.Failure<HungerMoneyResult>(HungerErrors.Conflict("المصدر مخصص لتوريد آخر أو المبلغ يتجاوز المتبقي."));
                 db.Add(new HungerRemittanceLine { RemittanceEventId = item.Id, SourceEventId = source.Id, Amount = line.Amount });
             }
@@ -225,19 +240,33 @@ internal sealed partial class HungerQualityService : IHungerFinanceService
     {
         var remit = await db.Set<HungerFinancialEvent>().AsNoTracking().SingleOrDefaultAsync(e => e.Id == remittanceId && e.Kind == "Remittance", ct);
         if (remit is null || !await FinanceAccess(remit.ClientPlatformId, PermissionKeys.Hunger.RemittancesConfirm, ct)) return Result.Failure<HungerMoneyResult>(HungerErrors.Forbidden);
-        if (!ValidEvent(request.BusinessDate, request.IdempotencyKey, request.EvidenceReference) || request.Sources?.Any(s => !Money(s.Amount)) == true
-            || request.Sources is { Count: 0 } || request.Sources is { Count: > 1000 } || request.Sources?.Select(s => s.SourceEventId).Distinct().Count() != request.Sources?.Count) return Result.Failure<HungerMoneyResult>(HungerErrors.Invalid("بيانات التأكيد غير صالحة."));
+        if (!ValidEvent(request.BusinessDate, request.IdempotencyKey, request.EvidenceReference) || request.Sources?.Any(s => s is null || !Money(s.Amount)) == true
+            || request.Sources is { Count: 0 } || request.Sources is { Count: > 1000 } || request.Sources?.Select(s => s.SourceEventId).Distinct().Count() != request.Sources?.Count
+            || request.SelectedSourceIds is { Count: 0 } or { Count: > 1000 }
+            || request.SelectedSourceIds?.Distinct().Count() != request.SelectedSourceIds?.Count
+            || request.SelectedSourceIds != null && request.Sources != null || request.BusinessDate < remit.BusinessDate) return Result.Failure<HungerMoneyResult>(HungerErrors.Invalid("بيانات التأكيد غير صالحة."));
         var hash = Hash(Serialize(new { remittanceId, request }));
+        var legacyHash = request.DestinationType is null && request.DestinationOwnerId is null && request.SelectedSourceIds is null
+            ? Hash(Serialize(new { remittanceId, request = new { request.DestinationSubAccountId, request.Sources,
+                request.IdempotencyKey, request.BusinessDate, request.EvidenceReference } })) : null;
         return await FinancialWrite([remit.ClientPlatformId, remit.SupervisorEmployeeId], async () =>
         {
             var old = await db.Set<HungerFinancialEvent>().SingleOrDefaultAsync(e => e.ClientPlatformId == remit.ClientPlatformId && e.IdempotencyKey == request.IdempotencyKey, ct);
-            if (old is not null) return old.RequestHash == hash ? Result.Success(MoneyResult(old)) : Result.Failure<HungerMoneyResult>(HungerErrors.Conflict("مفتاح مكرر لطلب مختلف."));
+            if (old is not null) return old.RequestHash == hash || old.RequestHash == legacyHash ? Result.Success(MoneyResult(old)) : Result.Failure<HungerMoneyResult>(HungerErrors.Conflict("مفتاح مكرر لطلب مختلف."));
             var c = await FinanceConfig(remit.ClientPlatformId, remit.SupervisorEmployeeId, ct);
             if (c is null) return Result.Failure<HungerMoneyResult>(HungerErrors.Conflict("الربط المالي غير نشط."));
+            var batch = await db.Set<HungerFinancialEvent>().SingleAsync(e => e.Id == remittanceId, ct);
+            if (batch.Status is not ("Submitted" or "PartiallyConfirmed")) return Result.Failure<HungerMoneyResult>(HungerErrors.Conflict("الدفعة ليست مقدمة أو لا يوجد متبق."));
+            if (!await ValidWithdrawalDestination(c, "WithdrawalCompany", request.DestinationType ?? "Company",
+                request.DestinationOwnerId ?? c.SponsorId, request.DestinationSubAccountId, ct))
+                return Result.Failure<HungerMoneyResult>(HungerErrors.Invalid("وجهة الاستلام يجب أن تكون خزنة أو بنك الشركة المعتمدة."));
             var lines = await db.Set<HungerRemittanceLine>().Where(l => l.RemittanceEventId == remittanceId).ToArrayAsync(ct);
-            var selected = request.Sources ?? lines.Where(l => l.ConfirmedAmount < l.Amount).Select(l => new HungerRemittanceSource(l.SourceEventId, l.Amount - l.ConfirmedAmount)).ToArray();
+            if (request.SelectedSourceIds != null && request.SelectedSourceIds.Any(id => !lines.Any(l => l.SourceEventId == id && l.Amount > l.ConfirmedAmount)))
+                return Result.Failure<HungerMoneyResult>(HungerErrors.Conflict("مصدر غير متبق ضمن الدفعة."));
+            var selected = request.Sources ?? lines.Where(l => l.ConfirmedAmount < l.Amount && (request.SelectedSourceIds == null || request.SelectedSourceIds.Contains(l.SourceEventId))).Select(l => new HungerRemittanceSource(l.SourceEventId, l.Amount - l.ConfirmedAmount)).ToArray();
             if (selected.Count == 0) return Result.Failure<HungerMoneyResult>(HungerErrors.Conflict("لا يوجد مبلغ متبق للتأكيد."));
             var item = new HungerFinancialEvent { ClientPlatformId = c.ClientPlatformId, SupervisorEmployeeId = c.SupervisorEmployeeId, Kind = "RemittanceConfirmation",
+                ToSubAccountId = request.DestinationSubAccountId, DestinationType = "Company", DestinationOwnerId = c.SponsorId,
                 RelatedEventId = remittanceId, Amount = selected.Sum(s => s.Amount), BusinessDate = request.BusinessDate, IdempotencyKey = request.IdempotencyKey,
                 RequestHash = hash, EvidenceReference = request.EvidenceReference, DetailsJson = Serialize(request) };
             foreach (var confirm in selected)
@@ -250,6 +279,7 @@ internal sealed partial class HungerQualityService : IHungerFinanceService
                     return Result.Failure<HungerMoneyResult>(HungerErrors.Invalid("وجهة التوريد غير صالحة؛ لا تمويل تلقائي للعهدة."));
                 // One confirmation may aggregate several sources against the same posting accounts.
                 line.ConfirmedAmount += confirm.Amount;
+                db.Add(new HungerReceiptAllocation { ConfirmationEventId = item.Id, RemittanceLineId = line.Id, Amount = confirm.Amount });
             }
             var transfers = new Dictionary<Guid, decimal>();
             foreach (var confirm in selected)
@@ -265,12 +295,13 @@ internal sealed partial class HungerQualityService : IHungerFinanceService
             db.Add(new TreasuryPosting { ClientPlatformId = c.ClientPlatformId, SupervisorEmployeeId = c.SupervisorEmployeeId, SourceEventId = item.Id,
                 SubAccountId = request.DestinationSubAccountId, SponsorId = c.SponsorId, BatchId = item.Id, Amount = item.Amount, Kind = TreasuryEntryKind.Business,
                 OccurredAtUtc = clock.GetUtcNow(), ActorUserId = user.UserId!.Value, ActorNameAr = "Hunger accountant receipt", Reference = $"Hunger:{item.Id:D}", Reason = item.Kind });
+            batch.Status = lines.All(l => l.ConfirmedAmount == l.Amount) ? "Confirmed" : "PartiallyConfirmed";
             db.Add(item); return Result.Success(MoneyResult(item));
         }, ct);
     }
     public async Task<Result<HungerFinanceReport>> FinanceReportAsync(Guid platformId, Guid supervisorEmployeeId, int page, int pageSize, CancellationToken ct = default)
     {
-        if (!await FinanceAccess(platformId, PermissionKeys.Hunger.FinanceManage, ct)) return Result.Failure<HungerFinanceReport>(HungerErrors.Forbidden);
+        if (!await FinanceAccess(platformId, PermissionKeys.Hunger.FinanceRead, ct)) return Result.Failure<HungerFinanceReport>(HungerErrors.Forbidden);
         if (page < 1 || pageSize is < 1 or > 100) return Result.Failure<HungerFinanceReport>(HungerErrors.Invalid("صفحة غير صالحة."));
         var query = db.Set<HungerFinancialEvent>().AsNoTracking().Where(e => e.ClientPlatformId == platformId && e.SupervisorEmployeeId == supervisorEmployeeId);
         var count = await query.CountAsync(ct);
@@ -279,7 +310,8 @@ internal sealed partial class HungerQualityService : IHungerFinanceService
         var c = await FinanceConfig(platformId, supervisorEmployeeId, ct);
         var availableSources = await query.Where(e => e.Kind == "Collection" || e.Kind == "TopUpCollected" || e.Kind == "WithdrawalSupervisor" && e.Status == "Arrived").SumAsync(e => e.Amount, ct);
         var confirmed = await query.Where(e => e.Kind == "RemittanceConfirmation").SumAsync(e => e.Amount, ct);
-        var pending = availableSources - confirmed;
+        var reversed = await query.Where(e => e.Kind == "RemittanceReversal").SumAsync(e => e.Amount, ct);
+        var pending = availableSources - confirmed + reversed;
         return Result.Success(new HungerFinanceReport(events, count, c is null ? 0 : await CustodyBalance(c, ct), pending, page, pageSize));
     }
 }

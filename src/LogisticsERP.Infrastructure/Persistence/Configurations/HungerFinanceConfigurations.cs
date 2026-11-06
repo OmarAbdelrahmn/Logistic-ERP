@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 namespace LogisticsERP.Infrastructure.Persistence.Configurations;
 
 internal sealed class HungerFinanceConfigurations : IEntityTypeConfiguration<HungerFinanceConfiguration>,
-    IEntityTypeConfiguration<HungerFinancialEvent>, IEntityTypeConfiguration<HungerRemittanceLine>, IEntityTypeConfiguration<HungerWalletReview>
+    IEntityTypeConfiguration<HungerReceiptAllocation>, IEntityTypeConfiguration<HungerFinancialEvent>, IEntityTypeConfiguration<HungerRemittanceLine>, IEntityTypeConfiguration<HungerWalletReview>
 {
     public void Configure(EntityTypeBuilder<HungerFinanceConfiguration> b)
     {
@@ -57,11 +57,23 @@ internal sealed class HungerFinanceConfigurations : IEntityTypeConfiguration<Hun
         b.HasIndex(x => new { x.RemittanceEventId, x.SourceEventId }).IsUnique();
         b.ToTable(t => t.HasCheckConstraint("CK_HungerRemittance_Amounts", "[Amount]>0 AND [ConfirmedAmount]>=0 AND [ConfirmedAmount]<=[Amount]"));
     }
+    public void Configure(EntityTypeBuilder<HungerReceiptAllocation> b)
+    {
+        b.ConfigureHistory("ReceiptAllocations", "hunger");
+        b.HasOne<HungerFinancialEvent>().WithMany().HasForeignKey(x => x.ConfirmationEventId).OnDelete(DeleteBehavior.Restrict);
+        b.HasOne<HungerRemittanceLine>().WithMany().HasForeignKey(x => x.RemittanceLineId).OnDelete(DeleteBehavior.Restrict);
+        b.Property(x => x.Amount).HasPrecision(18, 2);
+        b.HasIndex(x => new { x.ConfirmationEventId, x.RemittanceLineId }).IsUnique();
+        b.ToTable(t => t.HasCheckConstraint("CK_HungerReceiptAllocation_Amount", "[Amount]>0"));
+    }
     public void Configure(EntityTypeBuilder<HungerWalletReview> b)
     {
         b.ConfigureAuditable("WalletReviews", "hunger");
         b.HasOne<PlatformRiderAccount>().WithMany().HasForeignKey(x => x.PlatformRiderAccountId).OnDelete(DeleteBehavior.Restrict);
         b.Property(x => x.InputRevision).HasMaxLength(64);
+        b.Property(x => x.Status).HasMaxLength(20).HasDefaultValue("Pending");
+        b.HasIndex(x => new { x.PlatformRiderAccountId, x.Status });
+        b.HasIndex(x => x.SwapId);
         b.HasIndex(x => new { x.UserId, x.ExpiresAtUtc });
     }
 }

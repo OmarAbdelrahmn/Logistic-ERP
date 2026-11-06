@@ -212,7 +212,8 @@ internal static class AuthorizationSeedCatalog
         .Concat(PermissionKeys.All.Where(key => key.StartsWith("hunger.", StringComparison.Ordinal)
             || key.StartsWith("platform_accounts.fields.", StringComparison.Ordinal)
             || key == PermissionKeys.PlatformFields.Compensation || key == PermissionKeys.PlatformFields.Reveal).Order(StringComparer.Ordinal))
-        .Concat(LogisticsERP.Application.Features.Jahez.JahezTreasuryPermissions.All).ToArray();
+        .Concat(LogisticsERP.Application.Features.Jahez.JahezTreasuryPermissions.All)
+        .Append(PermissionKeys.Fleet.VehicleIdentity).ToArray();
     public static IReadOnlyList<string> ManagerPermissions { get; } = ExpandPermissions(OriginalManagerPermissions);
 
     public static IReadOnlyList<RolePermissionSeed> RolePermissions { get; } =
@@ -329,7 +330,15 @@ internal static class AuthorizationSeedCatalog
         AddRolePermissions(seeds, SystemRoles.SystemAdminId,
             PermissionKeys.All.Where(key => key.StartsWith("hunger.", StringComparison.Ordinal)
                 || key.StartsWith("platform_accounts.fields.", StringComparison.Ordinal)
-                || key == PermissionKeys.PlatformFields.Compensation || key == PermissionKeys.PlatformFields.Reveal).Order(StringComparer.Ordinal), ref sequence);
+                || key == PermissionKeys.PlatformFields.Compensation || key == PermissionKeys.PlatformFields.Reveal)
+                .Where(key => !PermissionKeys.HungerFinancePermissions.Contains(key)
+                    || key is PermissionKeys.Hunger.FinanceConfigure or PermissionKeys.Hunger.RemittancesConfirm)
+                .Order(StringComparer.Ordinal), ref sequence);
+        AddRolePermissions(seeds, SystemRoles.SystemAdminId,
+            PermissionKeys.HungerFinancePermissions.Where(key => key is not
+                (PermissionKeys.Hunger.FinanceConfigure or PermissionKeys.Hunger.RemittancesConfirm))
+                .Order(StringComparer.Ordinal), ref sequence);
+        AddRolePermissions(seeds, SystemRoles.SystemAdminId, [PermissionKeys.Fleet.VehicleIdentity], ref sequence);
         return seeds;
     }
 

@@ -3,6 +3,7 @@ using LogisticsERP.Application.Abstractions.Authentication;
 using LogisticsERP.Domain.Common;
 using LogisticsERP.Domain.Entities.Chefz;
 using LogisticsERP.Domain.Entities.Jahez;
+using LogisticsERP.Domain.Entities.Hunger;
 using LogisticsERP.Domain.Entities.System;
 using LogisticsERP.Domain.Entities.Maintenance;
 using LogisticsERP.Domain.Entities.Fleet;
@@ -205,6 +206,7 @@ internal sealed class ApplicationPersistenceInterceptor(
 
             if (entry.State == EntityState.Modified)
             {
+                if (IsHungerFinanceLifecycleWrite(entry)) return;
                 if (IsOilChangeRevisionWrite(entry)) return;
                 // A reupload retires an imported row once, preserving its original values and audit identity.
                 if (history is JahezTransaction
@@ -231,6 +233,50 @@ internal sealed class ApplicationPersistenceInterceptor(
         {
             throw new InvalidOperationException($"Hard deletion is prohibited for {entry.Metadata.ClrType.Name}.");
         }
+    }
+
+    private static bool IsHungerFinanceLifecycleWrite(EntityEntry<Entity> entry)
+    {
+        if (entry.Entity is not HungerFinancialEvent item) return false;
+        var before = entry.Property(nameof(HungerFinancialEvent.Status)).OriginalValue as string;
+        var after = item.Status;
+        // Preserve the existing withdrawal completion flow under the same production history guard.
+        if (item.Kind is "WithdrawalCompany" or "WithdrawalSupervisor")
+        {
+            if (before != "PendingArrival" || after is not ("Arrived" or "Cancelled")
+                || string.IsNullOrWhiteSpace(item.CompletionKey) || string.IsNullOrWhiteSpace(item.CompletionHash)
+                || string.IsNullOrWhiteSpace(item.ArrivalEvidence) || item.CompletionDate is null
+                || entry.Properties.Any(p => p.IsModified && p.Metadata.Name is not
+                    (nameof(HungerFinancialEvent.Status) or nameof(HungerFinancialEvent.CompletionKey)
+                    or nameof(HungerFinancialEvent.CompletionHash) or nameof(HungerFinancialEvent.ArrivalEvidence)
+                    or nameof(HungerFinancialEvent.CompletionDate)))) return false;
+            var postings = entry.Context.ChangeTracker.Entries<TreasuryPosting>()
+                .Where(p => p.State == EntityState.Added && p.Entity.SourceEventId == item.Id
+                    && p.Entity.ClientPlatformId == item.ClientPlatformId && p.Entity.SupervisorEmployeeId == item.SupervisorEmployeeId)
+                .Select(p => p.Entity).ToArray();
+            return after == "Cancelled" ? postings.Length == 0 : postings.Length == 2
+                && postings.Any(p => p.SubAccountId == item.FromSubAccountId && p.Amount == -item.Amount)
+                && postings.Any(p => p.SubAccountId == item.ToSubAccountId && p.Amount == item.Amount);
+        }
+        if (entry.Properties.Where(p => p.IsModified).Any(p => p.Metadata.Name != nameof(HungerFinancialEvent.Status))) return false;
+        var staged = entry.Context.ChangeTracker.Entries<HungerFinancialEvent>()
+            .Where(e => e.State == EntityState.Added && e.Entity.ClientPlatformId == item.ClientPlatformId
+                && e.Entity.SupervisorEmployeeId == item.SupervisorEmployeeId).Select(e => e.Entity).ToArray();
+        if (item.Kind == "MoneyRequest")
+            return before == "Requested" && after == "Executed" && staged.Any(e => e.RelatedEventId == item.Id
+                && e.Kind is "Funding" or "TopUpAdvance" or "TopUpCollected");
+        if (item.Kind != "Remittance") return false;
+        if (before == "Draft" && after == "Submitted")
+            return staged.Any(e => e.RelatedEventId == item.Id && e.Kind == "RemittanceSubmission");
+        if (before is "Draft" or "Submitted" && after == "Cancelled")
+            return staged.Any(e => e.RelatedEventId == item.Id && e.Kind == "RemittanceCancellation");
+        if (before is "Submitted" or "PartiallyConfirmed" && after is "PartiallyConfirmed" or "Confirmed")
+            return staged.Any(e => e.RelatedEventId == item.Id && e.Kind == "RemittanceConfirmation");
+        if (before is "PartiallyConfirmed" or "Confirmed" && after is "Submitted" or "PartiallyConfirmed")
+            return staged.Any(e => e.Kind == "RemittanceReversal"
+                && entry.Context.ChangeTracker.Entries<HungerFinancialEvent>().Any(c => c.Entity.Id == e.RelatedEventId
+                    && c.Entity.Kind == "RemittanceConfirmation" && c.Entity.RelatedEventId == item.Id));
+        return false;
     }
 
     private static bool IsOilChangeRevisionWrite(EntityEntry<Entity> entry)

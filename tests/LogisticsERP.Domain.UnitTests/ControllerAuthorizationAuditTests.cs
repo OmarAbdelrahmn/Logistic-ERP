@@ -75,7 +75,8 @@ public sealed class ControllerAuthorizationAuditTests
             .Select(attribute => attribute.Policy)
             .Where(policy => policy is null
                 || !policy.StartsWith(AuthenticationPolicies.PermissionPrefix, StringComparison.Ordinal)
-                || !PermissionKeys.All.Contains(policy[AuthenticationPolicies.PermissionPrefix.Length..]))
+                || policy[AuthenticationPolicies.PermissionPrefix.Length..].Split('|')
+                    .Any(key => !PermissionKeys.All.Contains(key)))
             .ToArray();
 
         Assert.Empty(unknownPolicies);

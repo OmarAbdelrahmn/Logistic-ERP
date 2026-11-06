@@ -1,9 +1,14 @@
+using System.Text.Json.Serialization;
 using LogisticsERP.Application.Common.Results;
 
 namespace LogisticsERP.Application.Features.Hunger;
 
 public sealed record HungerInvoiceSourceLine(string SourceKey, string Level, Guid? AccountId, Guid? RiderProfileId,
-    decimal SignedNetAmount, decimal TaxAmount, Guid? ExistingFinancialEventId, string EvidenceReference);
+    decimal SignedNetAmount, decimal TaxAmount, Guid? ExistingFinancialEventId, string EvidenceReference)
+{
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? NoShowCount { get; init; }
+}
 public sealed record HungerSettlementRequest(Guid PlatformId, Guid? AccountId, string Kind, DateOnly InvoicePeriod,
     DateOnly ChargeFrom, DateOnly ChargeThrough, DateOnly ObservedOn, decimal? WalletBalance, decimal? CompanyControlTotal,
     string? CanonicalLevel, IReadOnlyList<HungerInvoiceSourceLine>? Lines, Guid? InvoiceDocumentId, string IdempotencyKey,

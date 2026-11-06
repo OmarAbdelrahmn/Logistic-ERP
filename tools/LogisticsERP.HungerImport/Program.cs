@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using LogisticsERP.Application.Abstractions.Authentication;
 using LogisticsERP.Application.Features.Hunger;
 using LogisticsERP.Domain.Entities.Hunger;
@@ -14,7 +14,7 @@ using Microsoft.Extensions.Logging;
 var ct = CancellationToken.None;
 string Option(string key) => args.SkipWhile(a => a != key).Skip(1).FirstOrDefault() ?? throw new ArgumentException($"Missing {key}.");
 var configPath = Path.GetFullPath(Option("--config"));
-var workbook = Path.GetFullPath(Option("--workbook"));
+var workbook = args.Contains("--verify-accounts", StringComparer.Ordinal) ? null : Path.GetFullPath(Option("--workbook"));
 var actorId = Guid.Parse(Option("--actor-user-id"));
 var apply = args.Contains("--apply", StringComparer.Ordinal);
 var config = new ConfigurationBuilder().AddJsonFile(configPath).AddEnvironmentVariables()
@@ -33,24 +33,25 @@ actor.Id = user.Id; actor.Version = user.AuthorizationVersion;
 var service = scope.ServiceProvider.GetRequiredService<IHungerAccountsService>();
 if (args.Contains("--verify-accounts", StringComparer.Ordinal))
 {
-    var accountPage = await service.AccountsAsync(null, 1, 20, ct);
-    if (accountPage.IsFailure) throw new InvalidOperationException(accountPage.Error.Description);
-    Console.WriteLine(JsonSerializer.Serialize(new { Verified = true, accountPage.Value!.TotalCount,
-        ReturnedRows = accountPage.Value.Items.Count, RowsWithOwner = accountPage.Value.Items.Count(i => i.Owner is not null),
-        RowsWithSourceRider = accountPage.Value.Items.Count(i => i.SourceActualRider is not null),
-        SourceReportedUsed = accountPage.Value.Items.Count(i => i.MonthlyUsageStatus == "Used" && i.MonthlyUsageSource == "ImportedSource"),
-        Target1302955 = accountPage.Value.Items.Where(i => i.ExternalAccountId == "1302955").Select(i => new { i.MonthlyUsageStatus, i.MonthlyUsageSource, i.CurrentRiderSource, HasReportedRider = i.ReportedCurrentRider != null }).SingleOrDefault(),
-        Dispositions = accountPage.Value.Items.GroupBy(i => i.OperationalDisposition).ToDictionary(g => g.Key, g => g.Count()) }));
+    var verified = await HungerAccountVerification.ReadAllAsync(service, ct);
+    if (verified.IsFailure) throw new InvalidOperationException(verified.Error.Description);
+    var rows = verified.Value!;
+    Console.WriteLine(JsonSerializer.Serialize(new { Verified = true, TotalCount = rows.Count,
+        ReturnedRows = rows.Count, RowsWithOwner = rows.Count(i => i.Owner is not null),
+        RowsWithSourceRider = rows.Count(i => i.SourceActualRider is not null),
+        SourceReportedUsed = rows.Count(i => i.MonthlyUsageStatus == "Used" && i.MonthlyUsageSource == "ImportedSource"),
+        Dispositions = rows.GroupBy(i => i.OperationalDisposition).ToDictionary(g => g.Key, g => g.Count()) }));
     return;
 }
-var preview = await service.PreviewAccountsAsync(Path.GetFileName(workbook), await File.ReadAllBytesAsync(workbook, ct), ct);
+var preview = await service.PreviewAccountsAsync(Path.GetFileName(workbook!), await File.ReadAllBytesAsync(workbook!, ct), ct);
 if (preview.IsFailure) throw new InvalidOperationException(preview.Error.Description);
 Console.WriteLine(JsonSerializer.Serialize(new { Mode = apply ? "Apply" : "Preview", preview.Value!.PreviewId,
     preview.Value.CanConfirm, Rows = preview.Value.Rows.Count, Rejected = preview.Value.Rows.Count(r => r.Error is not null),
-    MatchedActualUsers = preview.Value.Rows.Count(r => r.ActualRiderProfileId.HasValue) }));
+    MatchedActualUsers = preview.Value.Rows.Count(r => r.ActualRiderProfileId.HasValue), PreviewRows = preview.Value.Rows }));
 if (!apply) return;
-if (!preview.Value.CanConfirm) throw new InvalidOperationException("Account matching is not complete; no business data was imported.");
-var result = await service.ConfirmAccountsAsync(preview.Value.PreviewId, ct);
+var decisions = JsonSerializer.Deserialize<HungerAccountImportConfirmation>(await File.ReadAllTextAsync(Option("--resolutions"), ct), new JsonSerializerOptions(JsonSerializerDefaults.Web))
+    ?? throw new ArgumentException("A reviewed resolutions file is required.");
+var result = await service.ConfirmAccountsAsync(preview.Value.PreviewId, decisions, ct);
 if (result.IsFailure) throw new InvalidOperationException(result.Error.Description);
 var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 db.ChangeTracker.Clear();

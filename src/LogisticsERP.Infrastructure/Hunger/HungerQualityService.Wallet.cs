@@ -22,7 +22,10 @@ internal sealed partial class HungerQualityService
         var events = await db.Set<HungerFinancialEvent>().AsNoTracking().Where(e => e.PlatformRiderAccountId == accountId).OrderBy(e => e.Id).ToArrayAsync(ct);
         var usages = await db.PlatformAccountDayUsages.AsNoTracking().Where(u => u.PlatformRiderAccountId == accountId).OrderBy(u => u.Id).ToArrayAsync(ct);
         var contributions = await db.Set<PlatformAccountDayContribution>().AsNoTracking().Where(u => u.PlatformRiderAccountId == accountId).OrderBy(u => u.Id).ToArrayAsync(ct);
-        var settlements = await db.Set<HungerSettlementDocument>().AsNoTracking().Where(d => d.PlatformRiderAccountId == accountId).OrderBy(d => d.Id).ToArrayAsync(ct);
+        var settlements = await db.Set<HungerSettlementDocument>().AsNoTracking().Where(d => d.ClientPlatformId == account.ClientPlatformId).OrderBy(d => d.Id).ToArrayAsync(ct);
+        var snapshots = await db.Set<HungerQualitySnapshot>().AsNoTracking().Where(s => s.PlatformRiderAccountId == accountId).OrderBy(s => s.Id).ToArrayAsync(ct);
+        var operations = await db.Set<HungerDailyOperation>().AsNoTracking().Where(s => s.PlatformRiderAccountId == accountId).OrderBy(s => s.Id).ToArrayAsync(ct);
+        var relatedEvents = await db.Set<HungerFinancialEvent>().AsNoTracking().Where(e => e.ClientPlatformId == account.ClientPlatformId && e.PlatformRiderAccountId == null).OrderBy(e => e.Id).ToArrayAsync(ct);
         decimal restricted = 0;
         foreach (var credit in events.Where(e => e.Kind == "WalletReturn" && e.RiderBalanceChange > 0))
         {
@@ -33,7 +36,7 @@ internal sealed partial class HungerQualityService
         // Linked rights are already restricted above; reserve only additional, unrestricted withdrawals here.
         restricted += events.Where(e => (e.Kind is "WithdrawalCompany" or "WithdrawalSupervisor")
             && e.Status == "PendingArrival" && e.RelatedEventId == null).Sum(e => e.Amount);
-        return new(Hash(Serialize(new { account, assignments, details, events, usages, contributions, settlements })), restricted);
+        return new(Hash(Serialize(new { account, assignments, details, events, relatedEvents, usages, contributions, settlements, snapshots, operations })), restricted);
     }
     private static bool ValidBalance(decimal value) => Math.Abs(value) <= 1000000000m && decimal.Round(value, 2) == value;
     private async Task<OperationError?> ValidateWallet(Guid accountId, HungerWalletReviewRequest request, CancellationToken ct)
@@ -86,14 +89,16 @@ internal sealed partial class HungerQualityService
     public async Task<Result<HungerWalletReviewResponse>> ReviewWalletAsync(Guid accountId, HungerWalletReviewRequest request, CancellationToken ct = default)
     {
         var account = await db.PlatformRiderAccounts.AsNoTracking().SingleOrDefaultAsync(a => a.Id == accountId, ct);
-        if (account is null || !await FinanceAccess(account.ClientPlatformId, PermissionKeys.Hunger.FinanceManage, ct)) return Result.Failure<HungerWalletReviewResponse>(HungerErrors.Forbidden);
+        if (account is null || !await FinanceAccess(account.ClientPlatformId, PermissionKeys.Hunger.WalletReview, ct)) return Result.Failure<HungerWalletReviewResponse>(HungerErrors.Forbidden);
         if (await ValidateWallet(accountId, request, ct) is { } error) return Result.Failure<HungerWalletReviewResponse>(error);
+        await using var locks = await PlatformAccountWriteScope.AcquireAsync(db, [accountId, account.ClientPlatformId], ct);
         var state = await ReadWalletState(accountId, ct);
         var closing = await WalletClosing(accountId, request.BusinessDate, ct);
         decimal? period = closing.HasValue ? HungerWalletRules.CurrentPeriod(request.MobileBalance, closing.Value, request.ProvenAdjustments) : null;
         decimal? attributed = period.HasValue ? HungerWalletRules.Usable(period.Value, state.Restricted) : null;
         var preview = new HungerWalletReview { PlatformRiderAccountId = accountId, UserId = user.UserId!.Value,
             RequestJson = Serialize(request), InputRevision = state.Revision, ExpiresAtUtc = clock.GetUtcNow().AddMinutes(20) };
+        await SupersedePendingWalletReviews(accountId, ct);
         db.Add(preview); await db.SaveChangesAsync(ct);
         return Result.Success(new HungerWalletReviewResponse(preview.Id, period, state.Restricted, attributed,
             attributed.HasValue ? HungerWalletRules.RiderBalanceChange(request.Action, attributed.Value) : null, preview.ExpiresAtUtc, closing, closing.HasValue));
@@ -102,8 +107,9 @@ internal sealed partial class HungerQualityService
     {
         var preview = await db.Set<HungerWalletReview>().AsNoTracking().SingleOrDefaultAsync(p => p.Id == reviewId && p.UserId == user.UserId, ct);
         if (preview is null) return Result.Failure<HungerWalletConfirmation>(HungerErrors.NotFound);
+        if (preview.SwapId.HasValue) return Result.Failure<HungerWalletConfirmation>(HungerErrors.Conflict("أكد مراجعتَي التبديل معًا من مسار التبديل."));
         var account = await db.PlatformRiderAccounts.AsNoTracking().SingleOrDefaultAsync(a => a.Id == preview.PlatformRiderAccountId, ct);
-        if (account is null || !await FinanceAccess(account.ClientPlatformId, PermissionKeys.Hunger.FinanceManage, ct)) return Result.Failure<HungerWalletConfirmation>(HungerErrors.Forbidden);
+        if (account is null || !await FinanceAccess(account.ClientPlatformId, PermissionKeys.Hunger.WalletReview, ct)) return Result.Failure<HungerWalletConfirmation>(HungerErrors.Forbidden);
         var request = Read<HungerWalletReviewRequest>(preview.RequestJson);
         if (! (await WalletClosing(account.Id, request.BusinessDate, ct)).HasValue)
             return Result.Failure<HungerWalletConfirmation>(HungerErrors.Invalid("رصيد إغلاق الفترة السابقة غير معروف؛ التأكيد المالي محظور حتى تسجيل الإغلاق."));
@@ -116,6 +122,7 @@ internal sealed partial class HungerQualityService
                 await using var transaction = db.Database.IsRelational() ? await db.Database.BeginTransactionAsync(ct) : null;
                 var current = await db.Set<HungerWalletReview>().SingleAsync(p => p.Id == reviewId, ct);
                 if (current.ResultJson is not null) return Result.Success(Read<HungerWalletConfirmation>(current.ResultJson));
+                if (current.Status != "Pending") return Result.Failure<HungerWalletConfirmation>(HungerErrors.Conflict("تم استبدال مراجعة المحفظة؛ أعد المراجعة."));
                 if (current.ExpiresAtUtc <= clock.GetUtcNow()) return Result.Failure<HungerWalletConfirmation>(HungerErrors.Conflict("انتهت مراجعة المحفظة."));
                 if (await ValidateWallet(account.Id, request, ct) is { } error) return Result.Failure<HungerWalletConfirmation>(error);
                 var state = await ReadWalletState(account.Id, ct);
@@ -129,6 +136,7 @@ internal sealed partial class HungerQualityService
                     IdempotencyKey = $"WalletReview:{reviewId:D}", RequestHash = Hash(current.RequestJson), EvidenceReference = request.WalletEvidence,
                     DetailsJson = Serialize(new { request, state.Restricted, AttributedBalance = attributed }) };
                 Result<SimplePlatformAssignmentResponse> result;
+                current.Status = "Confirmed";
                 if (request.Action == "Deliver") result = await lifecycle.AssignHungerAccountAsync(account.Id, request.Assignment!, () => db.Add(item), ct);
                 else result = await lifecycle.ReturnHungerAccountAsync(account.Id, request.Return!, () => db.Add(item), ct);
                 if (result.IsFailure) { db.ChangeTracker.Clear(); return Result.Failure<HungerWalletConfirmation>(result.Error); }

@@ -6,13 +6,15 @@ namespace LogisticsERP.Api.Authorization;
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
 public sealed class RequirePermissionAttribute : AuthorizeAttribute
 {
-    public RequirePermissionAttribute(string permissionKey)
+    public RequirePermissionAttribute(string permissionKey) : this([permissionKey]) { }
+
+    public RequirePermissionAttribute(params string[] permissionKeys)
     {
-        if (!PermissionKeys.All.Contains(permissionKey))
+        if (permissionKeys.Length == 0 || permissionKeys.Any(key => !PermissionKeys.All.Contains(key)))
         {
-            throw new ArgumentException($"Unknown permission key '{permissionKey}'.", nameof(permissionKey));
+            throw new ArgumentException("Unknown permission key.", nameof(permissionKeys));
         }
 
-        Policy = AuthenticationPolicies.PermissionPrefix + permissionKey;
+        Policy = AuthenticationPolicies.PermissionPrefix + string.Join("|", permissionKeys);
     }
 }

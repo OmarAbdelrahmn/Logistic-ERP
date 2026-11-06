@@ -26,10 +26,38 @@ public static class PermissionKeys
         public const string PerformanceImport = "hunger.performance.import";
         public const string PerformanceExport = "hunger.performance.export";
         public const string AlertsManage = "hunger.alerts.manage";
+        public const string FinanceRead = "hunger.finance.read";
+        public const string FundingRequest = "hunger.finance.funding.request";
+        public const string FundingExecute = "hunger.finance.funding.execute";
+        public const string TopUpRequest = "hunger.finance.topup.request";
+        public const string TopUpExecute = "hunger.finance.topup.execute";
+        public const string Collection = "hunger.finance.collection";
+        public const string WithdrawalRequest = "hunger.finance.withdrawal.request";
+        public const string WithdrawalArrivalConfirm = "hunger.finance.withdrawal.arrival.confirm";
+        public const string RiderPayment = "hunger.finance.rider.payment";
+        public const string WalletReview = "hunger.finance.wallet.review";
+        public const string RemittancesSubmit = "hunger.remittances.submit";
+        public const string ReceiptsCancelReverse = "hunger.remittances.cancel_reverse";
         public const string FinanceManage = "hunger.finance.manage";
         public const string FinanceConfigure = "hunger.finance.configure";
         public const string RemittancesConfirm = "hunger.remittances.confirm";
     }
+    public static readonly FrozenSet<string> HungerFinancePermissions = new[]
+    {
+        Hunger.FinanceRead,
+        Hunger.FundingRequest,
+        Hunger.FundingExecute,
+        Hunger.TopUpRequest,
+        Hunger.TopUpExecute,
+        Hunger.Collection,
+        Hunger.WithdrawalRequest,
+        Hunger.WithdrawalArrivalConfirm,
+        Hunger.RiderPayment,
+        Hunger.WalletReview,
+        Hunger.RemittancesSubmit,
+        Hunger.ReceiptsCancelReverse,
+        Hunger.FinanceConfigure, Hunger.RemittancesConfirm
+    }.ToFrozenSet(StringComparer.Ordinal);
     public static class Ninja
     {
         public const string EvaluationManage = "ninja.evaluation.manage";
@@ -185,6 +213,7 @@ public static class PermissionKeys
 
     public static class Fleet
     {
+        public const string VehicleIdentity = "fleet.vehicles.fields.identity";
         public const string VehiclesRead = "fleet.vehicles.read";
         public const string VehiclesCreate = "fleet.vehicles.create";
         public const string VehiclesUpdate = "fleet.vehicles.update";
@@ -361,6 +390,7 @@ public static class PermissionKeys
         PlatformFields.Identity, PlatformFields.Owner, PlatformFields.City, PlatformFields.Registry, PlatformFields.Contact,
         PlatformFields.Vehicle, PlatformFields.Settlement, PlatformFields.Compensation, PlatformFields.Reveal,
         Hunger.Read, Hunger.QualityImport, Hunger.QualityExport, Hunger.AccountsImport, Hunger.AccountsUpdate,
+        Hunger.FinanceRead, Hunger.FundingRequest, Hunger.FundingExecute, Hunger.TopUpRequest, Hunger.TopUpExecute, Hunger.Collection, Hunger.WithdrawalRequest, Hunger.WithdrawalArrivalConfirm, Hunger.RiderPayment, Hunger.WalletReview, Hunger.RemittancesSubmit, Hunger.ReceiptsCancelReverse,
         Hunger.PerformanceImport, Hunger.PerformanceExport, Hunger.AlertsManage, Hunger.FinanceManage, Hunger.FinanceConfigure, Hunger.RemittancesConfirm,
         Ninja.EvaluationManage, Ninja.EvaluationExport,
         Ninja.Read, Ninja.AccountsUpdate, Ninja.AssignmentsCreate, Ninja.AssignmentsDelete, Ninja.AssignmentDatesUpdate,
@@ -468,6 +498,7 @@ public static class PermissionKeys
         Reporting.NotificationsCreate,
         Reporting.NotificationsUpdate,
         Reporting.NotificationsDelete,
+        Fleet.VehicleIdentity,
         Fleet.VehiclesRead,
         Fleet.VehiclesCreate,
         Fleet.VehiclesUpdate,

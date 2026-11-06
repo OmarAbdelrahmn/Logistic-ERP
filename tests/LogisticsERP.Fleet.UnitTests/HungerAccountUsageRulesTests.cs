@@ -6,10 +6,10 @@ namespace LogisticsERP.Fleet.UnitTests;
 public sealed class HungerAccountUsageRulesTests
 {
     [Fact]
-    public void SourceReportedRiderMakesAccountUsedInObservedMonth()
+    public void SourceReportedRiderDoesNotProveObservedWork()
     {
         var result = HungerAccountUsageRules.Evaluate(new(2026, 11, 4), false, "يعمل", "1234567890", new(2026, 11, 1), new(2026, 11, 4));
-        Assert.Equal(("Used", "ImportedSource"), result);
+        Assert.Equal(("Unknown", "None"), result);
     }
     [Fact]
     public void PreviousMonthSourceDoesNotProveCurrentMonthUsage()
@@ -27,9 +27,9 @@ public sealed class HungerAccountUsageRulesTests
         Assert.NotEqual("Used", result.Status);
     }
     [Fact]
-    public void ActualAssignmentWinsOverSource()
+    public void ObservedWorkWinsOverSource()
     {
         var result = HungerAccountUsageRules.Evaluate(new(2026, 11, 4), true, null, null, null, null);
-        Assert.Equal(("Used", "Assignment"), result);
+        Assert.Equal(("Used", "ObservedWorkingHours"), result);
     }
 }
