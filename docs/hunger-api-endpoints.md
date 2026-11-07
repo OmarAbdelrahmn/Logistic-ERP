@@ -79,9 +79,9 @@ Example: `/api/hunger/accounts?from=2026-11-01&through=2026-11-04&ownerName=Ahme
 
 حقول إضافية: `currentAssignmentId`, `assignmentFrom`, `assignmentRowVersion`, `compensationModel`, `paymentModel`, `accountCode`, `operatingCityId`, `operatingCityNameAr`, `sponsorId`, `sponsorNameAr`, `simOwnership`, `registeredVehiclePlate`, `registeredVehicleSerial`, `actualVehicleType`, `actualVehiclePlate`, `actualVehicleOwnership`, `sourceVehicleDescription`, `sourceAssignmentFrom`, `dispositionReason`, `monthlyUsageStatus`, `usageMonth`, `latestQualitySegment`, `latestQualityRank`, `latestQualityScore`, `latestQualityReportDate`, `hasPassword`, `lastAssignmentEvent`, `lastAssignmentEventAtUtc`. كائنات الأشخاص تضيف `nationality`, `employeeStatus`, `relationshipType`. لا تعاد كلمة المرور في القائمة.
 
-يمكن أن تكون حالة استخدام الشهر `Used` بدليل تكليف فعلي (`monthlyUsageSource=Assignment`) أو بدليل مستورد مسجل في الشهر يشير إلى حساب يعمل وهوية مستخدم وتاريخ استلام وصل (`ImportedSource`). لا يلزم أن تكون هوية المستخدم مطابقة حتى تشير حالة التشغيل المثبتة في المصدر إلى الاستخدام؛ في هذه الحالة لا ينشأ ملف شخص تلقائيًا. الدليل المستورد لا ينشئ تكليفًا فعليًا؛ يظل `actualRider` و`assignmentStatus` معبرين عن بيانات التكليف الحقيقي، و`sourceActualRider` عن الملف. لا يتكرر استنتاج الاستخدام تلقائيًا في شهر لاحق دون دليل جديد؛ يعاد `Unknown` عندما لا يوجد دليل حديث أو تكليف للشهر.
+القيمة المستوردة `يعمل` تعني أن الحساب نشط من الناحية التشغيلية (`operationalDisposition=Normal`) ومتاح للتكليف عند استيفاء شروط التسليم. تكون حالة استخدام الشهر `Used` عند تسجيل ساعات عمل فعلية موجبة في تقرير يومي خلال الشهر (`monthlyUsageSource=ObservedWorkingHours`)، وإلا تكون `Unknown`.
 
-`reportedCurrentRider` يعرض المندوب النشط المثبت، وإن لم يوجد يعرض مستخدم الملف للحساب العامل فقط. `currentRiderSource` يوضح `Assignment` أو `ImportedSource` أو `None`، ولا يغير أي تكليف أو واقعة مالية.
+يعرض جدول الحسابات عمودًا واحدًا للمندوب بعنوان **المندوب المكلف** من `actualRider` ويظل فارغًا عند عدم وجود تكليف نشط. بيانات `sourceActualRider` مرجع للاستيراد. للواجهات القائمة، `reportedCurrentRider` يطابق `actualRider` و`reportedAssignmentStatus` يطابق `assignmentStatus`. قيمة `currentRiderSource` هي `Assignment` عند وجود تكليف نشط و`None` في غير ذلك.
 
 ## الجودة والتشغيل
 

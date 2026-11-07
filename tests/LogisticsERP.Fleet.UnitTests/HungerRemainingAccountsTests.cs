@@ -39,6 +39,11 @@ public sealed partial class HungerQualityServiceTests
         Assert.Equal(result.ImportId, Value(await f.Service.ConfirmAccountsAsync(preview.PreviewId, Resolve(2, "Create"), ct)).ImportId);
         Assert.True((await f.Service.ConfirmAccountsAsync(preview.PreviewId, Resolve(2, "Skip"), ct)).IsFailure);
         Assert.Equal(2, await f.Db.PlatformRiderAccounts.CountAsync(ct)); Assert.Single(await f.Db.RiderClientAssignments.ToArrayAsync(ct));
+        var accounts = Value(await f.Service.AccountsFilteredAsync(new() { ExternalAccountId = "new-account" }, 1, 10, ct));
+        var account = Assert.Single(accounts.Items);
+        Assert.Equal("Normal", account.OperationalDisposition);
+        Assert.False(account.IsAssigned);
+        Assert.Null(account.ReportedCurrentRider);
         var unchanged = Value(await f.Service.PreviewAccountsAsync("again.xlsx", file, ct));
         Assert.Equal("Unchanged", Assert.Single(unchanged.Rows).Status);
         var keep = Value(await f.Service.ConfirmAccountsAsync(unchanged.PreviewId, Resolve(2, "Keep"), ct)); Assert.Equal(0, keep.ImportedAccounts);

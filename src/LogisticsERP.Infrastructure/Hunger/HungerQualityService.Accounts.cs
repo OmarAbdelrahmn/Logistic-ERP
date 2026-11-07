@@ -225,15 +225,6 @@ internal sealed partial class HungerQualityService : IHungerAccountsService
             .Select(a => a.PlatformRiderAccountId).Distinct().ToArrayAsync(ct);
         var quality = await db.Set<HungerQualitySnapshot>().AsNoTracking().Where(q => ids.Contains(q.PlatformRiderAccountId) && q.ReportDate >= monthStart && q.ReportDate <= today)
             .OrderByDescending(q => q.ReportDate).ToArrayAsync(ct);
-        static Guid? SourceImportId(string? reference)
-        {
-            if (reference is null || !reference.StartsWith("Import:", StringComparison.Ordinal)) return null;
-            var end = reference.IndexOf('/', StringComparison.Ordinal);
-            return end > 7 && Guid.TryParse(reference.AsSpan(7, end - 7), out var id) ? id : null;
-        }
-        var sourceImportIds = selected.Select(x => SourceImportId(x.Details?.SourceReference)).Where(id => id.HasValue).Select(id => id!.Value).Distinct().ToArray();
-        var sourceImports = await db.Set<HungerImportPreview>().AsNoTracking().Where(p => sourceImportIds.Contains(p.Id) && p.Kind == "Accounts" && p.ResultJson != null)
-            .Select(p => new { p.Id, p.CreatedAtUtc }).ToArrayAsync(ct);
         var credentialAccounts = await db.PlatformAccountCredentialVersions.AsNoTracking().Where(c => ids.Contains(c.PlatformRiderAccountId)).Select(c => c.PlatformRiderAccountId).Distinct().ToArrayAsync(ct);
         var assignmentEvents = await (from e in db.RiderAssignmentEvents.AsNoTracking() join a in db.RiderClientAssignments.IgnoreQueryFilters().AsNoTracking() on e.RiderClientAssignmentId equals a.Id
             where ids.Contains(a.PlatformRiderAccountId) orderby e.OccurredAtUtc descending, e.Id descending
@@ -250,13 +241,7 @@ internal sealed partial class HungerQualityService : IHungerAccountsService
             }
             var latestQuality = quality.FirstOrDefault(q => q.PlatformRiderAccountId == x.Account.Id);
             var lastEvent = assignmentEvents.FirstOrDefault(e => e.PlatformRiderAccountId == x.Account.Id);
-            var assignmentUsed = monthUsages.Contains(x.Account.Id);
-            var import = sourceImports.SingleOrDefault(p => p.Id == SourceImportId(x.Details?.SourceReference));
-            var sourceObserved = import is null ? (DateOnly?)null : DateOnly.FromDateTime(import.CreatedAtUtc.ToOffset(TimeSpan.FromHours(3)).DateTime);
-            var usage = LogisticsERP.Domain.Hunger.HungerAccountUsageRules.Evaluate(today, assignmentUsed, x.Details?.SourceStatus,
-                x.Details?.SourceActualIqama, x.Details?.SourceAssignmentFrom, sourceObserved);
-            var importedUsed = x.Details?.SourceStatus == "يعمل" && !string.IsNullOrWhiteSpace(x.Details.SourceActualIqama)
-                && x.Details.SourceAssignmentFrom <= today && sourceObserved >= monthStart && sourceObserved <= today;
+            var usage = LogisticsERP.Domain.Hunger.HungerAccountUsageRules.Evaluate(monthUsages.Contains(x.Account.Id));
             return new HungerAccountItem(x.Account.Id, x.Account.ExternalAccountId, owner?.Id, owner?.FullNameAr, owner?.IqamaNo,
                 x.Details?.SourceActualRiderProfileId, actual.SingleOrDefault(a => a.Id == x.Details?.SourceActualRiderProfileId)?.Employee.FullNameAr,
                 x.Details?.SourceActualIqama, assignment?.RiderProfileId, x.Details?.OperationalDisposition ?? "Unknown", assignment is null ? "Unassigned" : "Assigned",
@@ -266,9 +251,6 @@ internal sealed partial class HungerQualityService : IHungerAccountsService
                 Owner = owner is null ? null : new(owner.Id, owners.SingleOrDefault(r => r.EmployeeId == owner.Id)?.Id, owner.FullNameAr, owner.FullNameEn, owner.IqamaNo, owner.PrimaryPhone)
                     { Nationality = owner.Nationality, EmployeeStatus = owner.Status.ToString(), RelationshipType = owner.EngagementType.ToString() },
                 ActualRider = Person(assignment?.RiderProfileId), SourceActualRider = Person(x.Details?.SourceActualRiderProfileId),
-                ReportedCurrentRider = assignment is not null ? Person(assignment.RiderProfileId) : importedUsed ? Person(x.Details?.SourceActualRiderProfileId) : null,
-                CurrentRiderSource = assignment is not null ? "Assignment" : importedUsed ? "ImportedSource" : "None",
-                ReportedAssignmentStatus = assignment is not null ? "Assigned" : importedUsed ? "ReportedAssigned" : "Unknown",
                 CurrentAssignmentId = assignment?.Id, AssignmentFrom = assignment?.EffectiveFrom,
                 AssignmentRowVersion = assignment is null ? null : Convert.ToBase64String(assignment.RowVersion),
                 CompensationModel = assignment?.CompensationModel, PaymentModel = x.Account.PaymentModel.ToString(), AccountCode = x.Account.Code,

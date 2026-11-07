@@ -34,9 +34,9 @@ public sealed record HungerAccountItem(Guid AccountId, string ExternalAccountId,
     public HungerPerson? Owner { get; init; }
     public HungerPerson? ActualRider { get; init; }
     public HungerPerson? SourceActualRider { get; init; }
-    public HungerPerson? ReportedCurrentRider { get; init; }
-    public string CurrentRiderSource { get; init; } = "None";
-    public string ReportedAssignmentStatus { get; init; } = "Unknown";
+    public HungerPerson? ReportedCurrentRider => ActualRider;
+    public string CurrentRiderSource => IsAssigned ? "Assignment" : "None";
+    public string ReportedAssignmentStatus => AssignmentStatus;
     public Guid? CurrentAssignmentId { get; init; }
     public DateOnly? AssignmentFrom { get; init; }
     public string? AssignmentRowVersion { get; init; }

@@ -28,17 +28,37 @@ public sealed partial class HungerQualityServiceTests
         Assert.Equal(account.CompletedOrders, riders.CompletedOrders); Assert.Equal(account.WorkingHours, riders.WorkingHours);
     }
     [Fact]
-    public async Task SourceReportedRiderRemainsVisibleWhileUnobservedUsageStaysUnknown()
+    public async Task ActiveAccountShowsOnlyTheRiderFromItsCurrentAssignment()
     {
         await using var f = await Fixture.Create(); var ct = TestContext.Current.CancellationToken;
         var employee = new Employee { FullNameAr = "Reported rider", IqamaNo = "1234567890" };
         var rider = new RiderProfile { EmployeeId = employee.Id };
         var import = new HungerImportPreview { Kind = "Accounts", CreatedAtUtc = new Clock().GetUtcNow(), ResultJson = "{}" };
         f.Db.AddRange(employee, rider, import, new PlatformAccountBusinessDetails { PlatformRiderAccountId = f.Account.Id,
-            SourceStatus = "يعمل", SourceActualRiderProfileId = rider.Id, SourceActualIqama = employee.IqamaNo, SourceAssignmentFrom = new(2026, 11, 1), SourceReference = $"Import:{import.Id}/2" });
+            OperationalDisposition = "Normal", SourceStatus = "يعمل", SourceActualRiderProfileId = rider.Id,
+            SourceActualIqama = employee.IqamaNo, SourceAssignmentFrom = new(2026, 11, 1), SourceReference = $"Import:{import.Id}/2" });
         await f.Db.SaveChangesAsync(ct);
         var item = await Item(f);
-        Assert.Equal("Unknown", item.MonthlyUsageStatus); Assert.NotNull(item.ReportedCurrentRider); Assert.Equal(rider.Id, item.ReportedCurrentRider.RiderProfileId);
+        Assert.Equal("Normal", item.OperationalDisposition);
+        Assert.Equal("Unknown", item.MonthlyUsageStatus);
+        Assert.Equal(rider.Id, item.SourceActualRider?.RiderProfileId);
+        Assert.Null(item.ActualRider);
+        Assert.Null(item.ReportedCurrentRider);
+        Assert.Equal("Unassigned", item.ReportedAssignmentStatus);
+        Assert.Equal("None", item.CurrentRiderSource);
+
+        var assignedEmployee = new Employee { FullNameAr = "Assigned rider", IqamaNo = "9876543210" };
+        var assignedRider = new RiderProfile { EmployeeId = assignedEmployee.Id };
+        f.Db.AddRange(assignedEmployee, assignedRider, new RiderClientAssignment { PlatformRiderAccountId = f.Account.Id,
+            RiderProfileId = assignedRider.Id, EffectiveFrom = new(2026, 11, 1), Status = RiderAssignmentStatus.Active });
+        await f.Db.SaveChangesAsync(ct);
+
+        item = await Item(f);
+        Assert.Equal(assignedRider.Id, item.ActualRider?.RiderProfileId);
+        Assert.Equal(item.ActualRider, item.ReportedCurrentRider);
+        Assert.Equal("Assigned", item.ReportedAssignmentStatus);
+        Assert.Equal("Assignment", item.CurrentRiderSource);
+        Assert.Equal("Unknown", item.MonthlyUsageStatus);
     }
     [Fact]
     public async Task MonthlyNoShowInvoiceReconcilesSeveralDaysWithinItsObservedShiftCount()

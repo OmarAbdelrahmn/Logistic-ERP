@@ -6,30 +6,15 @@ namespace LogisticsERP.Fleet.UnitTests;
 public sealed class HungerAccountUsageRulesTests
 {
     [Fact]
-    public void SourceReportedRiderDoesNotProveObservedWork()
+    public void UsageStaysUnknownWithoutObservedWorkingDays()
     {
-        var result = HungerAccountUsageRules.Evaluate(new(2026, 11, 4), false, "يعمل", "1234567890", new(2026, 11, 1), new(2026, 11, 4));
+        var result = HungerAccountUsageRules.Evaluate(false);
         Assert.Equal(("Unknown", "None"), result);
     }
     [Fact]
-    public void PreviousMonthSourceDoesNotProveCurrentMonthUsage()
+    public void ObservedWorkingDaysEstablishUsage()
     {
-        var result = HungerAccountUsageRules.Evaluate(new(2026, 12, 1), false, "يعمل", "1234567890", new(2026, 11, 1), new(2026, 11, 4));
-        Assert.Equal(("Unknown", "None"), result);
-    }
-    [Theory]
-    [InlineData("الشهر الجديد")]
-    [InlineData("مشاكل")]
-    [InlineData("لايعمل")]
-    public void ExceptionsAreNotMarkedUsedBySourceAlone(string sourceStatus)
-    {
-        var result = HungerAccountUsageRules.Evaluate(new(2026, 11, 4), false, sourceStatus, "1234567890", new(2026, 11, 1), new(2026, 11, 4));
-        Assert.NotEqual("Used", result.Status);
-    }
-    [Fact]
-    public void ObservedWorkWinsOverSource()
-    {
-        var result = HungerAccountUsageRules.Evaluate(new(2026, 11, 4), true, null, null, null, null);
+        var result = HungerAccountUsageRules.Evaluate(true);
         Assert.Equal(("Used", "ObservedWorkingHours"), result);
     }
 }

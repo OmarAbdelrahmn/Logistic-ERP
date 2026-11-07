@@ -160,20 +160,12 @@ internal sealed class UserManagementService(
             parsedRoleScopes.Add(validation.Value!);
         }
 
-        var parsedPermissionScopes = new List<ParsedScope[]>(permissionAssignments.Count);
-        foreach (var assignment in permissionAssignments)
+        var permissionScopes = await ParseDirectPermissionScopesAsync(permissionAssignments, cancellationToken);
+        if (permissionScopes.IsFailure)
         {
-            var validation = await ParseAndValidateScopesAsync(
-                assignment.Scopes,
-                assignment.IsAllHousingScope,
-                assignment.IsAllClientScope,
-                cancellationToken);
-            if (validation.IsFailure)
-            {
-                return Result.Failure<CreatedManagedUserResponse>(validation.Error);
-            }
-            parsedPermissionScopes.Add(validation.Value!);
+            return Result.Failure<CreatedManagedUserResponse>(permissionScopes.Error);
         }
+        var parsedPermissionScopes = permissionScopes.Value!;
 
         await using var transaction = await identityDbContext.Database.BeginTransactionAsync(cancellationToken);
         var user = new ApplicationUser
@@ -890,16 +882,12 @@ internal sealed class UserManagementService(
         {
             return Result.Failure<ManagedUserAuthorizationResponse>(UserManagementErrors.InvalidRequest);
         }
-        var parsedScopes = new List<ParsedScope[]>();
-        foreach (var assignment in assignments)
+        var permissionScopes = await ParseDirectPermissionScopesAsync(assignments, cancellationToken);
+        if (permissionScopes.IsFailure)
         {
-            var validation = await ParseAndValidateScopesAsync(assignment.Scopes, assignment.IsAllHousingScope, assignment.IsAllClientScope, cancellationToken);
-            if (validation.IsFailure)
-            {
-                return Result.Failure<ManagedUserAuthorizationResponse>(validation.Error);
-            }
-            parsedScopes.Add(validation.Value!);
+            return Result.Failure<ManagedUserAuthorizationResponse>(permissionScopes.Error);
         }
+        var parsedScopes = permissionScopes.Value!;
 
         var oldAssignments = await identityDbContext.UserDirectPermissionAssignments.Where(item => item.UserId == userId).ToListAsync(cancellationToken);
         await SoftDeleteScopesAsync([], oldAssignments.Select(item => item.Id).ToArray(), cancellationToken);
@@ -957,6 +945,45 @@ internal sealed class UserManagementService(
                 item.Id, item.PermissionKey, item.Effect.ToString(), item.StartsAtUtc, item.ExpiresAtUtc, item.GrantReason,
                 item.IsAllHousingScope, item.IsAllClientScope, item.IncludesFuturePlatformContracts,
                 scopes.Where(scope => scope.DirectPermissionAssignmentId == item.Id).Select(ToScopeResponse).ToArray())).ToArray());
+    }
+
+    private async Task<Result<ParsedScope[][]>> ParseDirectPermissionScopesAsync(
+        IReadOnlyList<ManagedDirectPermissionAssignmentRequest> assignments,
+        CancellationToken cancellationToken)
+    {
+        var parsedScopes = new ParsedScope[assignments.Count][];
+        Guid? jahezPlatformId = null;
+        for (var index = 0; index < assignments.Count; index++)
+        {
+            var assignment = assignments[index];
+            var validation = await ParseAndValidateScopesAsync(
+                assignment.Scopes, assignment.IsAllHousingScope, assignment.IsAllClientScope, cancellationToken);
+            if (validation.IsFailure)
+            {
+                return Result.Failure<ParsedScope[][]>(validation.Error);
+            }
+
+            parsedScopes[index] = validation.Value!;
+            if (parsedScopes[index].Length != 0 || assignment.IsAllClientScope
+                || !assignment.PermissionKey.Trim().StartsWith("jahez.", StringComparison.Ordinal)
+                || Enum.Parse<PermissionEffect>(assignment.Effect, true) != PermissionEffect.Grant)
+            {
+                continue;
+            }
+
+            jahezPlatformId ??= await applicationDbContext.ClientPlatforms.AsNoTracking()
+                .Where(platform => platform.Code == "JAHEZ")
+                .Select(platform => (Guid?)platform.Id)
+                .SingleOrDefaultAsync(cancellationToken);
+            if (jahezPlatformId is not { } platformId)
+            {
+                return Result.Failure<ParsedScope[][]>(InvalidField("scopes", "The Jahez platform is required to grant Jahez permissions."));
+            }
+
+            parsedScopes[index] = [new ParsedScope(AccessScopeType.ClientPlatform, platformId)];
+        }
+
+        return Result.Success(parsedScopes);
     }
 
     private async Task<Result<ParsedScope[]>> ParseAndValidateScopesAsync(IReadOnlyList<AuthorizationScopeRequest>? scopes, bool isAllHousingScope, bool isAllClientScope, CancellationToken cancellationToken)
