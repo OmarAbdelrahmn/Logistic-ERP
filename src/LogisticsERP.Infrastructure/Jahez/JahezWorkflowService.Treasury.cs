@@ -3,16 +3,22 @@ using LogisticsERP.Application.Features.Jahez;
 using LogisticsERP.Domain.Entities.Jahez;
 using LogisticsERP.Domain.Entities.Workforce;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace LogisticsERP.Infrastructure.Jahez;
 
 internal sealed partial class JahezWorkflowService
 {
-    private async Task<bool> TreasuryActive(CancellationToken ct) =>
-        await db.Set<TreasuryState>().AnyAsync(x => x.Id == TreasuryState.SingletonId && x.IsActive, ct);
+    private bool TreasuryReportsOnly => configuration?.GetValue<bool>("Features:JahezTreasuryReportsOnly") == true;
 
-    private async Task RequireTreasury(CancellationToken ct) =>
+    private async Task<bool> TreasuryActive(CancellationToken ct) =>
+        !TreasuryReportsOnly && await db.Set<TreasuryState>().AnyAsync(x => x.Id == TreasuryState.SingletonId && x.IsActive, ct);
+
+    private async Task RequireTreasury(CancellationToken ct)
+    {
+        if (TreasuryReportsOnly) return;
         Require(await TreasuryActive(ct), JahezErrors.Conflict("الخزينة الجديدة غير مفعلة؛ أكمل مراجعة الترحيل أولاً."));
+    }
 
     private async Task<TreasuryOwnership?> Ownership(TreasurySource source, Guid id, CancellationToken ct) =>
         db.Set<TreasuryOwnership>().Local.FirstOrDefault(x => x.Source == source && x.SourceId == id)
@@ -100,8 +106,21 @@ internal sealed partial class JahezWorkflowService
             }
             // Once a legacy movement is migrated, permitted source corrections must keep its journal
             // synchronized even while finance is completing the pre-activation reconciliation.
-            if (owner is not null && (active || await db.Set<TreasuryPosting>().AnyAsync(p => p.MoneyMovementId == m.Id, ct)))
-                await PostMoney(m, owner, entry.State == EntityState.Modified, ct);
+            if (owner is not null && (TreasuryReportsOnly || active || await db.Set<TreasuryPosting>().AnyAsync(p => p.MoneyMovementId == m.Id, ct)))
+                await PostMoney(m, owner, entry.State == EntityState.Modified, ct, historical: TreasuryReportsOnly);
+        }
+        if (TreasuryReportsOnly)
+        {
+            var confirmed = db.ChangeTracker.Entries<JahezCashboxHandover>()
+                .Where(entry => entry.State is EntityState.Added or EntityState.Modified
+                    && entry.Entity.Status == JahezCashboxHandoverStatus.Confirmed
+                    && entry.Entity.TreasuryVersion != 3)
+                .Select(entry => entry.Entity).ToArray();
+            if (confirmed.Length != 0)
+            {
+                await db.SaveChangesAsync(ct);
+                await ReconstructTreasuryHandovers(confirmed, "Projection of confirmed Jahez cashbox handover", ct);
+            }
         }
     }
 
@@ -134,7 +153,7 @@ internal sealed partial class JahezWorkflowService
 
     private async Task EnsureAvailable(TreasurySubAccount account, decimal outgoing, CancellationToken ct, bool confirming = false)
     {
-        if (account.Location is TreasuryLocation.PetroApp) return;
+        if (TreasuryReportsOnly || account.Location is TreasuryLocation.PetroApp) return;
         var reserved = confirming ? 0 : await (from line in db.Set<TreasuryHandoverLine>()
             join h in db.JahezCashboxHandovers on line.HandoverId equals h.Id
             where h.Status == JahezCashboxHandoverStatus.Pending && line.SubAccountId == account.Id
@@ -181,7 +200,7 @@ internal sealed partial class JahezWorkflowService
             && m.Direction == JahezMoneyDirection.Disbursement && !correction
             && (db.JahezAccountFeeRefunds.Local.Any(x => x.MoneyMovementId == m.Id)
                 || await db.JahezAccountFeeRefunds.AnyAsync(x => x.MoneyMovementId == m.Id, ct));
-        Require(feeRefund || account.AllowedDirections == TreasuryDirections.Dual
+        Require(TreasuryReportsOnly || feeRefund || account.AllowedDirections == TreasuryDirections.Dual
             || amount > 0 && account.AllowedDirections == TreasuryDirections.InOnly
             || amount < 0 && account.AllowedDirections == TreasuryDirections.OutOnly, JahezErrors.Invalid("اتجاه الحركة غير مسموح للحساب."));
         if (!historical && !feeRefund && amount < 0) await EnsureAvailable(account, -amount, ct);

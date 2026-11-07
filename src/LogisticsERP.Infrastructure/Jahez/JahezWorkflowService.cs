@@ -18,13 +18,15 @@ using LogisticsERP.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using LogisticsERP.Infrastructure.Identity;
+using Microsoft.Extensions.Configuration;
 
 namespace LogisticsERP.Infrastructure.Jahez;
 
 internal sealed partial class JahezWorkflowService(
     ApplicationDbContext db, ICurrentUser user, IPermissionChecker permissions, TimeProvider clock,
     IJahezTreasuryReportRenderer? treasuryRenderer = null,
-    ILogger<JahezWorkflowService>? logger = null, IdentityDbContext? treasuryIdentity = null) : IJahezWorkflowService, IJahezTreasuryService
+    ILogger<JahezWorkflowService>? logger = null, IdentityDbContext? treasuryIdentity = null,
+    IConfiguration? configuration = null) : IJahezWorkflowService, IJahezTreasuryService
 {
     private string? commandActorName;
     private static readonly Action<ILogger, string, Guid, Exception?> CommandCommittedLog = LoggerMessage.Define<string, Guid>(

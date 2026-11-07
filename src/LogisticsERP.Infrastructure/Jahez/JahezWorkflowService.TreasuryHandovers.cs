@@ -149,6 +149,7 @@ internal sealed partial class JahezWorkflowService
 
     private async Task ValidateRefundHandoverLine(TreasuryHandoverLine line, IReadOnlyList<TreasuryPosting> postings, CancellationToken ct)
     {
+        if (TreasuryReportsOnly) return;
         var movementIds = postings.Where(x => x.SubAccountId == line.SubAccountId && x.Kind == TreasuryEntryKind.Business && x.Amount < 0)
             .Select(x => x.MoneyMovementId).ToArray();
         var refunds = await db.JahezAccountFeeRefunds.AsNoTracking().Where(x => movementIds.Contains(x.MoneyMovementId))

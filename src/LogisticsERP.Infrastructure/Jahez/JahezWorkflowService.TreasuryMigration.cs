@@ -187,48 +187,54 @@ internal sealed partial class JahezWorkflowService
             await db.SaveChangesAsync(ct);
             var handovers = await db.JahezCashboxHandovers.Where(h => h.Status == JahezCashboxHandoverStatus.Confirmed
                 && !db.Set<TreasuryHandoverLine>().Any(l => l.HandoverId == h.Id)).OrderBy(h => h.ConfirmedAtUtc).Take(100).ToArrayAsync(ct);
-            foreach (var h in handovers)
-            {
-                var linked = await (from link in db.JahezCashboxHandoverMovements join m in db.JahezMoneyMovements on link.MoneyMovementId equals m.Id
-                    where link.CashboxHandoverId == h.Id select m).ToArrayAsync(ct);
-                var linkedIds = linked.Select(m => m.Id).ToArray();
-                var postedIds = await db.Set<TreasuryPosting>().Where(p => p.MoneyMovementId.HasValue && linkedIds.Contains(p.MoneyMovementId.Value)
-                    && p.Kind == TreasuryEntryKind.Business).Select(p => p.MoneyMovementId!.Value).Distinct().ToArrayAsync(ct);
-                if (linked.Any(m => m.Amount > 0 && !postedIds.Contains(m.Id))) continue;
-                var lines = await BuildHandoverLines(linked, h.Id, ct);
-                var legacyReference = $"legacy:{h.Id}";
-                var historicalFunding = await db.Set<TreasuryPosting>().AsNoTracking().Where(p => p.Reference == legacyReference
-                    && p.Kind == TreasuryEntryKind.Transfer && p.Amount > 0 && p.CashboxHandoverId == null).ToArrayAsync(ct);
-                foreach (var line in lines)
-                {
-                    var from = await PostingAccount(line.SubAccountId, ct);
-                    if (from.Location == TreasuryLocation.Supervisor)
-                    {
-                        line.Amount += historicalFunding.Where(p => p.SubAccountId == from.Id).Sum(p => p.Amount);
-                        line.MovementCount += historicalFunding.Count(p => p.SubAccountId == from.Id);
-                    }
-                    if (from.Location == TreasuryLocation.Supervisor && line.Amount != 0)
-                    {
-                        var to = await Route(new TreasuryOwnership { SponsorId = line.SponsorId }, JahezMoneyFund.Cashbox, from.Purpose == TreasuryPurpose.AccountFee ? JahezMoneyPurpose.AccountFee : JahezMoneyPurpose.Settlement, ct, central: true);
-                        if (line.Amount > 0)
-                            await Transfer(from, to, line.Amount, legacyReference, reason, ct, h.Id, historical: true, at: h.ConfirmedAtUtc);
-                        else
-                        {
-                            var refundPostings = await db.Set<TreasuryPosting>().AsNoTracking()
-                                .Where(p => p.SubAccountId == from.Id && p.MoneyMovementId.HasValue && linkedIds.Contains(p.MoneyMovementId.Value)).ToArrayAsync(ct);
-                            await ValidateRefundHandoverLine(line, refundPostings, ct);
-                            TransferRefundDeduction(from, to, line.Amount, h.Id, legacyReference, reason, h.ConfirmedAtUtc);
-                        }
-                    }
-                    db.Add(line);
-                }
-                var movementIds = linked.Select(x => x.Id).ToArray();
-                var postingIds = await db.Set<TreasuryPosting>().Where(p => p.MoneyMovementId.HasValue && movementIds.Contains(p.MoneyMovementId.Value))
-                    .Select(p => p.Id).ToArrayAsync(ct);
-                db.AddRange(postingIds.Select(p => new TreasuryHandoverPosting { HandoverId = h.Id, PostingId = p }));
-                db.AddRange(historicalFunding.Select(p => new TreasuryHandoverPosting { HandoverId = h.Id, PostingId = p.Id }));
-                count++;
-            }
-            return count;
+            return count + await ReconstructTreasuryHandovers(handovers, reason, ct);
         }, ct);
+
+    private async Task<int> ReconstructTreasuryHandovers(IReadOnlyList<JahezCashboxHandover> handovers, string reason, CancellationToken ct)
+    {
+        var count = 0;
+        foreach (var h in handovers)
+        {
+            var linked = await (from link in db.JahezCashboxHandoverMovements join m in db.JahezMoneyMovements on link.MoneyMovementId equals m.Id
+                where link.CashboxHandoverId == h.Id select m).ToArrayAsync(ct);
+            var linkedIds = linked.Select(m => m.Id).ToArray();
+            var postedIds = await db.Set<TreasuryPosting>().Where(p => p.MoneyMovementId.HasValue && linkedIds.Contains(p.MoneyMovementId.Value)
+                && p.Kind == TreasuryEntryKind.Business).Select(p => p.MoneyMovementId!.Value).Distinct().ToArrayAsync(ct);
+            if (linked.Any(m => m.Amount > 0 && !postedIds.Contains(m.Id))) continue;
+            var lines = await BuildHandoverLines(linked, h.Id, ct);
+            var legacyReference = $"legacy:{h.Id}";
+            var historicalFunding = await db.Set<TreasuryPosting>().AsNoTracking().Where(p => p.Reference == legacyReference
+                && p.Kind == TreasuryEntryKind.Transfer && p.Amount > 0 && p.CashboxHandoverId == null).ToArrayAsync(ct);
+            foreach (var line in lines)
+            {
+                var from = await PostingAccount(line.SubAccountId, ct);
+                if (from.Location == TreasuryLocation.Supervisor)
+                {
+                    line.Amount += historicalFunding.Where(p => p.SubAccountId == from.Id).Sum(p => p.Amount);
+                    line.MovementCount += historicalFunding.Count(p => p.SubAccountId == from.Id);
+                }
+                if (from.Location == TreasuryLocation.Supervisor && line.Amount != 0)
+                {
+                    var to = await Route(new TreasuryOwnership { SponsorId = line.SponsorId }, JahezMoneyFund.Cashbox, from.Purpose == TreasuryPurpose.AccountFee ? JahezMoneyPurpose.AccountFee : JahezMoneyPurpose.Settlement, ct, central: true);
+                    if (line.Amount > 0)
+                        await Transfer(from, to, line.Amount, legacyReference, reason, ct, h.Id, historical: true, at: h.ConfirmedAtUtc);
+                    else
+                    {
+                        var refundPostings = await db.Set<TreasuryPosting>().AsNoTracking()
+                            .Where(p => p.SubAccountId == from.Id && p.MoneyMovementId.HasValue && linkedIds.Contains(p.MoneyMovementId.Value)).ToArrayAsync(ct);
+                        await ValidateRefundHandoverLine(line, refundPostings, ct);
+                        TransferRefundDeduction(from, to, line.Amount, h.Id, legacyReference, reason, h.ConfirmedAtUtc);
+                    }
+                }
+                db.Add(line);
+            }
+            var movementIds = linked.Select(x => x.Id).ToArray();
+            var postingIds = await db.Set<TreasuryPosting>().Where(p => p.MoneyMovementId.HasValue && movementIds.Contains(p.MoneyMovementId.Value))
+                .Select(p => p.Id).ToArrayAsync(ct);
+            db.AddRange(postingIds.Select(p => new TreasuryHandoverPosting { HandoverId = h.Id, PostingId = p }));
+            db.AddRange(historicalFunding.Select(p => new TreasuryHandoverPosting { HandoverId = h.Id, PostingId = p.Id }));
+            count++;
+        }
+        return count;
+    }
 }
