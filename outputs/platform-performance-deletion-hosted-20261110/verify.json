@@ -1,0 +1,19 @@
+{
+  "Passed": true,
+  "Mode": "Verify",
+  "Database": "db67927",
+  "Server": "db67927.public.databaseasp.net",
+  "VerifiedAtUtc": "2026-11-10T11:13:16.6114153+00:00",
+  "Applied": true,
+  "Permissions": [
+    "hunger.performance.delete",
+    "jahez.performance.delete",
+    "chefz.performance.delete"
+  ],
+  "FreshConnectionVerified": true,
+  "ScriptSha256": {
+    "platform-performance-deletion-application.sql": "811FB0D240204C8D0B6930F246F884B4531F5179094DD0732A25225B2E4063FD",
+    "platform-performance-deletion-identity.sql": "5781604EDDD762F27BCD98DAAEAA8C79A2967042735249955C2BDABB38F3CFBC"
+  },
+  "ApiPublishedByThisRun": false
+}

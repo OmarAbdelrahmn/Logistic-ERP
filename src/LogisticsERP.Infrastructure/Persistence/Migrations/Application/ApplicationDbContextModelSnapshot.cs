@@ -1003,7 +1003,7 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.ToTable("PlatformAccountBusinessDetails", "app", t =>
                         {
-                            t.HasCheckConstraint("CK_PlatformBusiness_Disposition", "[OperationalDisposition] IN ('Normal','Problem','AdministrativeStop','Blocked','DeferredNextMonth')");
+                            t.HasCheckConstraint("CK_PlatformBusiness_Disposition", "[OperationalDisposition] IN ('Normal','Problem','AdministrativeStop','Blocked','DeferredNextMonth','WalletPending')");
                         });
                 });
 
@@ -6671,6 +6671,203 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         });
                 });
 
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Hunger.HungerEvidenceFile", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ClientPlatformId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid?>("FinancialEventId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateOnly>("ObservedOn")
+                        .HasColumnType("date");
+
+                    b.Property<Guid>("PlatformRiderAccountId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Purpose")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<string>("StoragePath")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UploadedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClientPlatformId");
+
+                    b.HasIndex("FinancialEventId");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("PlatformRiderAccountId", "ObservedOn");
+
+                    b.ToTable("EvidenceFiles", "hunger", t =>
+                        {
+                            t.HasCheckConstraint("CK_HungerEvidenceFiles_Purpose", "[Purpose] IN ('WalletBefore','WalletAfter','Wallet','Arrival')");
+                        });
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Hunger.HungerExceptionApproval", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("ClientPlatformId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ConsumedByEventId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DecidedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DecidedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DecisionNote")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTimeOffset?>("DeletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("EvidenceReference")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("IdempotencyKey")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<Guid?>("PlatformRiderAccountId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("RequestHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<Guid>("RequestedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)")
+                        .HasDefaultValue("Requested");
+
+                    b.Property<Guid?>("SupervisorEmployeeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("PlatformRiderAccountId");
+
+                    b.HasIndex("SupervisorEmployeeId");
+
+                    b.HasIndex("ClientPlatformId", "IdempotencyKey")
+                        .IsUnique();
+
+                    b.HasIndex("ClientPlatformId", "Status");
+
+                    b.ToTable("ExceptionApprovals", "hunger", t =>
+                        {
+                            t.HasCheckConstraint("CK_HungerExceptionApprovals_Values", "[Kind] IN ('NonZeroHandover','CustodyIdentityMismatch') AND [Status] IN ('Requested','Approved','Rejected','Consumed') AND [Amount]<>0");
+                        });
+                });
+
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Hunger.HungerFinanceConfiguration", b =>
                 {
                     b.Property<Guid>("Id")
@@ -6768,6 +6965,19 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<string>("ApprovalStatus")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)")
+                        .HasDefaultValue("NotRequired");
+
+                    b.Property<DateTimeOffset?>("ApprovedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("ApprovedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("ArrivalEvidence")
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
@@ -6795,6 +7005,10 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<Guid?>("CreatedByUserId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("DestinationChannel")
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
+
                     b.Property<Guid?>("DestinationOwnerId")
                         .HasColumnType("uniqueidentifier");
 
@@ -6810,6 +7024,9 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
+
+                    b.Property<Guid?>("ExceptionApprovalId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("FromSubAccountId")
                         .HasColumnType("uniqueidentifier");
@@ -6827,6 +7044,10 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<Guid?>("PlatformRiderAccountId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("RejectionReason")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
                     b.Property<Guid?>("RelatedEventId")
                         .HasColumnType("uniqueidentifier");
 
@@ -6842,6 +7063,13 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<Guid?>("RiderProfileId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Role")
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
+
+                    b.Property<string>("SealAccountsJson")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<decimal?>("SourceWalletBalance")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
@@ -6852,6 +7080,9 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .HasMaxLength(32)
                         .HasColumnType("nvarchar(32)")
                         .HasDefaultValue("Posted");
+
+                    b.Property<Guid?>("SupersedesEventId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("SupervisorEmployeeId")
                         .HasColumnType("uniqueidentifier");
@@ -6868,13 +7099,19 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ExceptionApprovalId");
+
                     b.HasIndex("FromSubAccountId");
 
                     b.HasIndex("RelatedEventId");
 
                     b.HasIndex("RiderProfileId");
 
+                    b.HasIndex("SupersedesEventId");
+
                     b.HasIndex("ToSubAccountId");
+
+                    b.HasIndex("ClientPlatformId", "ApprovalStatus");
 
                     b.HasIndex("ClientPlatformId", "IdempotencyKey")
                         .IsUnique();
@@ -6883,7 +7120,10 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
 
                     b.HasIndex("SupervisorEmployeeId", "BusinessDate");
 
-                    b.ToTable("FinancialEvents", "hunger");
+                    b.ToTable("FinancialEvents", "hunger", t =>
+                        {
+                            t.HasCheckConstraint("CK_HungerFinancialEvents_ApprovalStatus", "[ApprovalStatus] IN ('NotRequired','PendingSeal','Sealed','Rejected','Cancelled')");
+                        });
                 });
 
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Hunger.HungerImportPreview", b =>
@@ -7285,6 +7525,9 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateOnly?>("ApprovalDate")
+                        .HasColumnType("date");
+
                     b.Property<decimal?>("CanonicalGrossTotal")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
@@ -7350,6 +7593,10 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("nvarchar(64)");
+
+                    b.Property<decimal?>("RiderBalanceTotal")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("SourceDocumentType")
                         .HasMaxLength(64)
@@ -14205,6 +14452,48 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.HasData(
                         new
                         {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000323"),
+                            Category = "Hunger",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "حذف تشغيل يوم محدد لجميع الحسابات أو لكفيل محدد لإعادة الاستيراد.",
+                            DescriptionEn = "Delete a daily operations report for all accounts or one sponsor for reimport.",
+                            DisplayOrder = 323,
+                            GrantabilityRule = "HIGH_TRUST_ONLY",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = true,
+                            IsSensitive = true,
+                            Key = "hunger.performance.delete",
+                            NameAr = "حذف أداء هنقر اليومي",
+                            NameEn = "Delete Hunger daily performance",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000324"),
+                            Category = "Jahez",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "حذف الطلبات اليومية لجميع الحسابات أو لكفيل محدد لإعادة الاستيراد.",
+                            DescriptionEn = "Delete daily orders for all accounts or one sponsor for reimport.",
+                            DisplayOrder = 324,
+                            GrantabilityRule = "HIGH_TRUST_ONLY",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = true,
+                            IsSensitive = true,
+                            Key = "jahez.performance.delete",
+                            NameAr = "حذف طلبات جاهز اليومية",
+                            NameEn = "Delete Jahez daily orders",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
                             Id = new Guid("019c18d5-62e1-7000-a000-000000000371"),
                             Category = "Hunger",
                             CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
@@ -14513,6 +14802,111 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                             Key = "hunger.finance.configure",
                             NameAr = "ربط حسابات هنقر المحاسبية",
                             NameEn = "Configure Hunger finance",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000384"),
+                            Category = "Hunger",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "اعتماد أو رفض المحاسب للعمليات المالية التي رحّلها المشرف.",
+                            DescriptionEn = "Accountant seal or rejection of supervisor-posted finance events.",
+                            DisplayOrder = 384,
+                            GrantabilityRule = "HIGH_TRUST_ONLY",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = true,
+                            IsSensitive = true,
+                            Key = "hunger.finance.seal",
+                            NameAr = "اعتماد المحاسب لعمليات هنقر",
+                            NameEn = "Seal Hunger finance events",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000385"),
+                            Category = "Hunger",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "اعتماد أو تعديل أو رفض طلب تمويل العهدة قبل التسليم.",
+                            DescriptionEn = "Approve, edit or reject a custody funding request before delivery.",
+                            DisplayOrder = 385,
+                            GrantabilityRule = "HIGH_TRUST_ONLY",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = true,
+                            IsSensitive = true,
+                            Key = "hunger.finance.funding.approve",
+                            NameAr = "اعتماد طلب عهدة هنقر",
+                            NameEn = "Approve Hunger custody funding",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000386"),
+                            Category = "Hunger",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "طلب استثناء تسليم برصيد غير صفري أو فرق تسوية عهدة.",
+                            DescriptionEn = "Request an exception for a non-zero hand-over or a custody settlement mismatch.",
+                            DisplayOrder = 386,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "hunger.finance.exception.request",
+                            NameAr = "طلب استثناء مالي لهنقر",
+                            NameEn = "Request Hunger finance exception",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000387"),
+                            Category = "Hunger",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "اعتماد أو رفض طلبات الاستثناء المالية.",
+                            DescriptionEn = "Approve or reject finance exception requests.",
+                            DisplayOrder = 387,
+                            GrantabilityRule = "HIGH_TRUST_ONLY",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = true,
+                            IsSensitive = true,
+                            Key = "hunger.finance.exception.approve",
+                            NameAr = "اعتماد استثناء مالي لهنقر",
+                            NameEn = "Approve Hunger finance exception",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000388"),
+                            Category = "Hunger",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "تأكيد استلام نقد التحصيل في خزنة أو حساب تحصيلات المالك.",
+                            DescriptionEn = "Confirm receipt of collected cash into the owner collections vault or account.",
+                            DisplayOrder = 388,
+                            GrantabilityRule = "SENSITIVE_DATA",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = false,
+                            IsSensitive = true,
+                            Key = "hunger.finance.owner_collections.confirm",
+                            NameAr = "تأكيد استلام تحصيلات المالك",
+                            NameEn = "Confirm owner collections receipt",
                             RequiresClientScope = true,
                             RequiresHousingScope = false,
                             RowVersion = new byte[0],
@@ -15101,6 +15495,27 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                             Key = "ninja.deductions.import",
                             NameAr = "استيراد خصومات نينجا",
                             NameEn = "Import Ninja deductions",
+                            RequiresClientScope = true,
+                            RequiresHousingScope = false,
+                            RowVersion = new byte[0],
+                            Version = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-a000-000000000322"),
+                            Category = "Ninja",
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DescriptionAr = "حذف أداء يوم محدد لجميع حسابات نينجا أو حسابات كفيل محدد لإعادة الاستيراد.",
+                            DescriptionEn = "Delete a Ninja performance day for all accounts or one sponsor for reimport.",
+                            DisplayOrder = 322,
+                            GrantabilityRule = "HIGH_TRUST_ONLY",
+                            IsDeleted = false,
+                            IsDeprecated = false,
+                            IsHighTrust = true,
+                            IsSensitive = true,
+                            Key = "ninja.performance.delete",
+                            NameAr = "حذف أداء نينجا اليومي",
+                            NameEn = "Delete Ninja daily performance",
                             RequiresClientScope = true,
                             RequiresHousingScope = false,
                             RowVersion = new byte[0],
@@ -26625,6 +27040,45 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Hunger.HungerEvidenceFile", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Platform.ClientPlatform", null)
+                        .WithMany()
+                        .HasForeignKey("ClientPlatformId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Hunger.HungerFinancialEvent", null)
+                        .WithMany()
+                        .HasForeignKey("FinancialEventId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Clients.PlatformRiderAccount", null)
+                        .WithMany()
+                        .HasForeignKey("PlatformRiderAccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LogisticsERP.Domain.Entities.Hunger.HungerExceptionApproval", b =>
+                {
+                    b.HasOne("LogisticsERP.Domain.Entities.Platform.ClientPlatform", null)
+                        .WithMany()
+                        .HasForeignKey("ClientPlatformId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Clients.PlatformRiderAccount", null)
+                        .WithMany()
+                        .HasForeignKey("PlatformRiderAccountId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Workforce.Employee", null)
+                        .WithMany()
+                        .HasForeignKey("SupervisorEmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
             modelBuilder.Entity("LogisticsERP.Domain.Entities.Hunger.HungerFinanceConfiguration", b =>
                 {
                     b.HasOne("LogisticsERP.Domain.Entities.Platform.ClientPlatform", null)
@@ -26678,6 +27132,11 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("LogisticsERP.Domain.Entities.Hunger.HungerExceptionApproval", null)
+                        .WithMany()
+                        .HasForeignKey("ExceptionApprovalId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("LogisticsERP.Domain.Entities.Jahez.TreasurySubAccount", null)
                         .WithMany()
                         .HasForeignKey("FromSubAccountId")
@@ -26696,6 +27155,11 @@ namespace LogisticsERP.Infrastructure.Persistence.Migrations.Application
                     b.HasOne("LogisticsERP.Domain.Entities.Workforce.RiderProfile", null)
                         .WithMany()
                         .HasForeignKey("RiderProfileId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LogisticsERP.Domain.Entities.Hunger.HungerFinancialEvent", null)
+                        .WithMany()
+                        .HasForeignKey("SupersedesEventId")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("LogisticsERP.Domain.Entities.Workforce.Employee", null)

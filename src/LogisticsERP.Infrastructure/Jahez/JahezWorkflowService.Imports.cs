@@ -137,7 +137,7 @@ internal sealed partial class JahezWorkflowService
                 var matches = handovers.Where(h => h.PlatformRiderAccountId == account.Id && h.StartedAtUtc < dayEnd
                     && (h.EndedAtUtc == null || h.EndedAtUtc > dayStart)).ToArray();
                 var manual = byRow.GetValueOrDefault(row.Id) ?? [];
-                if (batch.CommittedAtUtc.HasValue)
+                if (batch.CommittedAtUtc.HasValue && savedDispatches.Any(d => d.ImportRowId == row.Id))
                 {
                     resolvedAllocations.AddRange(savedDispatches.Where(d => d.ImportRowId == row.Id)
                         .Select(d => new JahezDispatchAllocation(row.Id, d.HandoverId, d.Count, d.AllocationReason ?? "Saved allocation")));
@@ -187,7 +187,8 @@ internal sealed partial class JahezWorkflowService
         }
         if (allocations?.Any(a => !knownRows.Contains(a.RowId)) == true)
             issues.Add(new(Guid.Empty, string.Empty, 0, "unknown_allocation_row", "التوزيع يشير إلى صف غير موجود في العملية."));
-        if (!batch.CommittedAtUtc.HasValue && batch.Kind == JahezImportKind.DailyDispatches)
+        if (batch.Kind == JahezImportKind.DailyDispatches && (!batch.CommittedAtUtc.HasValue
+            || rows.Any(row => !savedDispatches.Any(d => d.ImportRowId == row.Id))))
         {
             var otherBatches = db.Set<JahezImportBatch>().Where(b => b.CommittedAtUtc != null && b.Id != batch.Id && b.Id != batch.ReplacesBatchId
                 && !db.Set<JahezImportBatch>().Any(n => n.ReplacesBatchId == b.Id && n.CommittedAtUtc != null));
@@ -227,7 +228,20 @@ internal sealed partial class JahezWorkflowService
         {
             var batch = await db.Set<JahezImportBatch>().SingleOrDefaultAsync(x => x.Id == id, ct);
             Require(batch is not null, JahezErrors.NotFound);
-            if (batch!.CommittedAtUtc.HasValue) return await ImportPreview(batch, request.Allocations, ct);
+            if (batch!.CommittedAtUtc.HasValue)
+            {
+                var savedPreview = await ImportPreview(batch, request.Allocations, ct);
+                if (batch.Kind != JahezImportKind.DailyDispatches) return savedPreview;
+                var fileIds = db.Set<JahezImportFile>().Where(f => f.BatchId == id).Select(f => f.Id);
+                var missing = await db.Set<JahezImportRow>().AnyAsync(r => fileIds.Contains(r.FileId)
+                    && !db.Set<JahezDailyDispatch>().Any(d => d.ImportRowId == r.Id), ct);
+                if (!missing) return savedPreview;
+                Require(!await db.Set<JahezImportBatch>().AnyAsync(b => b.ReplacesBatchId == id && b.CommittedAtUtc != null, ct),
+                    JahezErrors.Conflict("عملية الطلبات مستبدلة؛ استخدم العملية الحالية."));
+                Require(savedPreview.Issues.Count == 0, JahezErrors.Conflict("حل مشاكل التكليف والتداخل قبل إعادة الأيام المحذوفة."));
+                // A fresh command key repairs only removed source rows; surviving days retain their attribution.
+                return await CommitDailyImport(batch, savedPreview, ct, restoreMissing: true);
+            }
             var preview = await ImportPreview(batch, request.Allocations, ct);
             Require(preview.Issues.Count == 0, JahezErrors.Conflict("حل جميع مشاكل المعاينة قبل الترحيل."));
             if (batch.Kind == JahezImportKind.DailyDispatches) return await CommitDailyImport(batch, preview, ct);
@@ -250,9 +264,9 @@ internal sealed partial class JahezWorkflowService
             return preview with { Committed = true };
         }, ct);
 
-    private async Task<JahezImportPreview> CommitDailyImport(JahezImportBatch batch, JahezImportPreview preview, CancellationToken ct)
+    private async Task<JahezImportPreview> CommitDailyImport(JahezImportBatch batch, JahezImportPreview preview, CancellationToken ct, bool restoreMissing = false)
     {
-        if (batch.ReplacesBatchId.HasValue)
+        if (batch.ReplacesBatchId.HasValue && !restoreMissing)
         {
             Require(!await db.Set<JahezImportBatch>().AnyAsync(x => x.ReplacesBatchId == batch.ReplacesBatchId && x.CommittedAtUtc != null, ct), JahezErrors.Conflict("العملية الأصلية مستبدلة بالفعل."));
             var oldBatch = await db.Set<JahezImportBatch>().SingleAsync(x => x.Id == batch.ReplacesBatchId, ct);
@@ -267,8 +281,11 @@ internal sealed partial class JahezWorkflowService
             .Concat(preview.ResolvedAllocations.Select(x => x.HandoverId)).Distinct().ToArray();
         var handovers = await db.Set<JahezAccountSession>().Where(x => hIds.Contains(x.Id)).ToDictionaryAsync(x => x.Id, ct);
         var allocationRows = preview.ResolvedAllocations.GroupBy(x => x.RowId).ToDictionary(g => g.Key, g => g.ToArray());
+        var survivingRowIds = restoreMissing
+            ? await db.Set<JahezDailyDispatch>().Where(d => d.BatchId == batch.Id).Select(d => d.ImportRowId).Distinct().ToArrayAsync(ct) : [];
         foreach (var row in preview.Rows)
         {
+            if (survivingRowIds.Contains(row.RowId)) continue;
             var source = sourceRows[row.RowId];
             var manual = allocationRows.GetValueOrDefault(row.RowId) ?? [];
             if (manual.Length == 0) db.Add(new JahezDailyDispatch { BatchId = batch.Id, ImportRowId = row.RowId,
@@ -283,7 +300,7 @@ internal sealed partial class JahezWorkflowService
                     HandoverId = allocation.HandoverId, Date = businessDate, Count = allocation.Count, AllocationReason = allocation.Reason });
             }
         }
-        batch.CommittedAtUtc = Now;
+        batch.CommittedAtUtc ??= Now;
         return preview with { Committed = true };
     }
 

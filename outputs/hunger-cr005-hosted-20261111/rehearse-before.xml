@@ -1,0 +1,146 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="AppApplied" type="xs:int" minOccurs="0" />
+                <xs:element name="IdentityApplied" type="xs:int" minOccurs="0" />
+                <xs:element name="AppLatestOther" type="xs:string" minOccurs="0" />
+                <xs:element name="IdentityLatestOther" type="xs:string" minOccurs="0" />
+                <xs:element name="SealColumn" type="xs:int" minOccurs="0" />
+                <xs:element name="NewTables" type="xs:int" minOccurs="0" />
+                <xs:element name="ReadViews" type="xs:int" minOccurs="0" />
+                <xs:element name="NewDefinitions" type="xs:int" minOccurs="0" />
+                <xs:element name="NewGrants" type="xs:int" minOccurs="0" />
+                <xs:element name="DefinitionIdsTaken" type="xs:int" minOccurs="0" />
+                <xs:element name="GrantIdsTaken" type="xs:int" minOccurs="0" />
+                <xs:element name="FinanceConfigurations" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Kind" type="xs:string" minOccurs="0" />
+                <xs:element name="Status" type="xs:string" minOccurs="0" />
+                <xs:element name="Records" type="xs:int" minOccurs="0" />
+                <xs:element name="Amount" type="xs:decimal" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table2">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="OperationalDisposition" type="xs:string" minOccurs="0" />
+                <xs:element name="Records" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="Table3">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Dataset" type="xs:string" minOccurs="0" />
+                <xs:element name="Records" type="xs:long" minOccurs="0" />
+                <xs:element name="Fingerprint" type="xs:int" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <AppApplied>0</AppApplied>
+    <IdentityApplied>0</IdentityApplied>
+    <AppLatestOther>20261110105351_AddHungerJahezPerformanceDeletePermissions</AppLatestOther>
+    <IdentityLatestOther>20261110105334_GrantHungerJahezPerformanceDeletePermissions</IdentityLatestOther>
+    <SealColumn>0</SealColumn>
+    <NewTables>0</NewTables>
+    <ReadViews>0</ReadViews>
+    <NewDefinitions>0</NewDefinitions>
+    <NewGrants>0</NewGrants>
+    <DefinitionIdsTaken>0</DefinitionIdsTaken>
+    <GrantIdsTaken>0</GrantIdsTaken>
+    <FinanceConfigurations>0</FinanceConfigurations>
+  </Table>
+  <Table1>
+    <Kind>WalletDelivery</Kind>
+    <Status>Posted</Status>
+    <Records>1</Records>
+    <Amount>0.00</Amount>
+  </Table1>
+  <Table1>
+    <Kind>WalletReturn</Kind>
+    <Status>Posted</Status>
+    <Records>4</Records>
+    <Amount>2226.75</Amount>
+  </Table1>
+  <Table2>
+    <OperationalDisposition>AdministrativeStop</OperationalDisposition>
+    <Records>43</Records>
+  </Table2>
+  <Table2>
+    <OperationalDisposition>DeferredNextMonth</OperationalDisposition>
+    <Records>7</Records>
+  </Table2>
+  <Table2>
+    <OperationalDisposition>Normal</OperationalDisposition>
+    <Records>173</Records>
+  </Table2>
+  <Table2>
+    <OperationalDisposition>Problem</OperationalDisposition>
+    <Records>88</Records>
+  </Table2>
+  <Table3>
+    <Dataset>FinancialEvents</Dataset>
+    <Records>5</Records>
+    <Fingerprint>950715025</Fingerprint>
+  </Table3>
+  <Table3>
+    <Dataset>SettlementDocuments</Dataset>
+    <Records>0</Records>
+  </Table3>
+  <Table3>
+    <Dataset>WalletReviews</Dataset>
+    <Records>26</Records>
+    <Fingerprint>676073973</Fingerprint>
+  </Table3>
+  <Table3>
+    <Dataset>RemittanceLines</Dataset>
+    <Records>0</Records>
+  </Table3>
+  <Table3>
+    <Dataset>BusinessDetails</Dataset>
+    <Records>311</Records>
+    <Fingerprint>-486810560</Fingerprint>
+  </Table3>
+  <Table3>
+    <Dataset>TreasuryPostings</Dataset>
+    <Records>946</Records>
+    <Fingerprint>-605685246</Fingerprint>
+  </Table3>
+  <Table3>
+    <Dataset>Accounts</Dataset>
+    <Records>1949</Records>
+    <Fingerprint>-1447647669</Fingerprint>
+  </Table3>
+  <Table3>
+    <Dataset>Assignments</Dataset>
+    <Records>1352</Records>
+    <Fingerprint>438449176</Fingerprint>
+  </Table3>
+  <Table3>
+    <Dataset>OtherDefinitions</Dataset>
+    <Records>372</Records>
+    <Fingerprint>-2046509148</Fingerprint>
+  </Table3>
+  <Table3>
+    <Dataset>OtherGrants</Dataset>
+    <Records>1610</Records>
+    <Fingerprint>1307527551</Fingerprint>
+  </Table3>
+</NewDataSet>

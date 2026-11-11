@@ -24,6 +24,57 @@ namespace LogisticsERP.Jahez.Tests;
 public sealed class NinjaAssignmentDatesHttpTests
 {
     [Fact]
+    public async Task DeletePerformanceBindsDayOptionalSponsorAndReasonAndRequiresDeletePermission()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var builder = WebApplication.CreateBuilder(new WebApplicationOptions { EnvironmentName = "Testing" });
+        builder.Logging.ClearProviders(); builder.WebHost.UseUrls("http://127.0.0.1:0");
+        var service = DispatchProxy.Create<INinjaService, CaptureDeletion>(); var capture = (CaptureDeletion)service;
+        builder.Services.AddSingleton(service);
+        builder.Services.AddControllers().AddApplicationPart(typeof(NinjaController).Assembly);
+        builder.Services.AddAuthentication("test").AddScheme<AuthenticationSchemeOptions, TestAuthentication>("test", _ => { });
+        builder.Services.AddAuthorizationBuilder().AddPolicy(AuthenticationPolicies.PermissionPrefix + PermissionKeys.Ninja.PerformanceDelete,
+            policy => policy.RequireAuthenticatedUser().RequireClaim("test-permission", PermissionKeys.Ninja.PerformanceDelete));
+        await using var app = builder.Build(); app.UseAuthentication(); app.UseAuthorization(); app.MapControllers();
+        await app.StartAsync(ct);
+        var address = app.Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>()!.Addresses.Single();
+        using var client = new HttpClient { BaseAddress = new Uri(address) };
+        const string path = "/api/ninja/performance?reportDate=2026-10-12&reason=Wrong%20assignment";
+        client.DefaultRequestHeaders.Add("X-Test-Permission", PermissionKeys.Ninja.PerformanceImport);
+        using (var response = await client.DeleteAsync(path, ct)) Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        Assert.Equal(0, capture.Calls);
+        client.DefaultRequestHeaders.Remove("X-Test-Permission");
+        client.DefaultRequestHeaders.Add("X-Test-Permission", PermissionKeys.Ninja.PerformanceDelete);
+        using (var response = await client.DeleteAsync(path, ct)) Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Null(capture.SponsorId); Assert.Equal(new DateOnly(2026, 10, 12), capture.Date); Assert.Equal("Wrong assignment", capture.Reason);
+        var sponsor = Guid.NewGuid();
+        using (var response = await client.DeleteAsync(path + $"&sponsorId={sponsor}", ct)) Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(sponsor, capture.SponsorId);
+        foreach (var invalid in new[] { "/api/ninja/performance?reason=Correction", path + "&sponsorId=invalid", path + "&sponsorId=",
+            "/api/ninja/performance?reportDate=invalid&reason=Correction", "/api/ninja/performance?reportDate=2026-10-12" })
+        {
+            using var response = await client.DeleteAsync(invalid, ct);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+        Assert.Equal(2, capture.Calls);
+        await app.StopAsync(ct);
+    }
+
+    public class CaptureDeletion : DispatchProxy
+    {
+        public int Calls { get; private set; }
+        public DateOnly Date { get; private set; }
+        public Guid? SponsorId { get; private set; }
+        public string? Reason { get; private set; }
+        protected override object? Invoke(MethodInfo? targetMethod, object?[]? args)
+        {
+            if (targetMethod?.Name != nameof(INinjaService.DeletePerformanceAsync)) throw new InvalidOperationException("Unexpected Ninja operation.");
+            Calls++; Date = (DateOnly)args![0]!; SponsorId = (Guid?)args[1]; Reason = (string)args[2]!;
+            return Task.FromResult(Result.Success(new NinjaPerformanceDeletionResponse(Date, SponsorId, 1, 1, 1)));
+        }
+    }
+
+    [Fact]
     public async Task DateEndpointRequiresOnlyItsDedicatedPermissionAndBindsAccountAssignmentAndDates()
     {
         var ct = TestContext.Current.CancellationToken;

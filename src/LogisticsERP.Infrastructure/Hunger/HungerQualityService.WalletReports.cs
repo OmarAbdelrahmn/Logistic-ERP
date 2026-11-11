@@ -47,20 +47,23 @@ internal sealed partial class HungerQualityService
             var restricted = history.Where(e => e.Kind == "WalletReturn" && e.RiderBalanceChange > 0).Sum(e => Math.Max(0,
                 e.RiderBalanceChange - history.Where(w => w.RelatedEventId == e.Id && w.Kind is "WithdrawalCompany" or "WithdrawalSupervisor" && w.Status == "Arrived").Sum(w => w.Amount)));
             restricted += history.Where(e => e.Kind is "WithdrawalCompany" or "WithdrawalSupervisor" && e.Status == "PendingArrival" && e.RelatedEventId == null).Sum(e => e.Amount);
-            var sources = history.Where(e => e.Kind is "Collection" or "TopUpCollected" || e.Kind == "WithdrawalSupervisor" && e.Status == "Arrived").ToArray();
+            var sources = history.Where(IsRemittableSource).ToArray();
             var sourceIds = sources.Select(e => e.Id).ToHashSet();
             var confirmed = lines.Where(l => sourceIds.Contains(l.SourceEventId)).Sum(l => l.ConfirmedAmount)
                 + history.Where(e => e.Kind == "WithdrawalCompany" && e.Status == "Arrived").Sum(e => e.Amount);
             var pending = sources.Sum(e => e.Amount) - lines.Where(l => sourceIds.Contains(l.SourceEventId)).Sum(l => l.ConfirmedAmount);
             var arrival = history.Where(e => e.Kind is "WithdrawalCompany" or "WithdrawalSupervisor" && e.Status == "PendingArrival").Sum(e => e.Amount);
             var state = pending + arrival > 0 ? confirmed > 0 ? "PartiallyConfirmed" : "Pending" : confirmed > 0 ? "Confirmed" : "None";
+            var alert = history.Any(e => e.Kind == "CustodyProposal" && e.Status == "Open") ? "CustodyProposalOpen"
+                : account.AssignmentStatus == "Unassigned" && observation is { MobileBalance: not 0 } ? "WalletNotZero" : "None";
             var item = new HungerWalletItem(account.AccountId, account.ExternalAccountId, observation?.MobileBalance, observation?.BusinessDate,
                 observation?.WalletEvidence, period, restricted, period.HasValue ? HungerWalletRules.Usable(period.Value, restricted) : null,
-                state, arrival, confirmed, pending);
+                state, arrival, confirmed, pending, alert);
             if ((filter.BalanceFrom == null || item.MobileBalance >= filter.BalanceFrom)
                 && (filter.BalanceThrough == null || item.MobileBalance <= filter.BalanceThrough)
                 && (filter.BalanceEqual == null || item.MobileBalance == filter.BalanceEqual)
-                && (filter.ReceiptState == null || state == filter.ReceiptState)) result.Add(item);
+                && (filter.ReceiptState == null || state == filter.ReceiptState)
+                && (filter.AlertOnly != true || alert != "None")) result.Add(item);
         }
         return Result.Success(new HungerWalletPage(all ? result : result.Skip((page - 1) * pageSize).Take(pageSize).ToArray(), result.Count, page, pageSize));
     }
@@ -80,7 +83,8 @@ internal sealed partial class HungerQualityService
         var observations = db.Set<HungerWalletReview>().AsNoTracking().Where(r => r.PlatformRiderAccountId == accountId);
         var eventRows = await events.OrderByDescending(e => e.BusinessDate).ThenByDescending(e => e.CreatedAtUtc).ThenByDescending(e => e.Id)
             .Skip((page - 1) * pageSize).Take(pageSize).Select(e => new HungerFinancialEventItem(e.Id, e.Kind, e.PlatformRiderAccountId, e.RiderProfileId,
-                e.SupervisorEmployeeId, e.Amount, e.RiderBalanceChange, e.BusinessDate, e.EvidenceReference, e.Status)).ToArrayAsync(ct);
+                e.SupervisorEmployeeId, e.Amount, e.RiderBalanceChange, e.BusinessDate, e.EvidenceReference, e.Status,
+                e.ApprovalStatus, e.ApprovedAtUtc, e.SupersedesEventId, e.RejectionReason)).ToArrayAsync(ct);
         var reviewRows = await observations.OrderByDescending(r => r.CreatedAtUtc).ThenByDescending(r => r.Id).Skip((page - 1) * pageSize).Take(pageSize).ToArrayAsync(ct);
         return Result.Success(new HungerWalletHistory(eventRows, reviewRows.Select(r => { var request = Read<HungerWalletReviewRequest>(r.RequestJson);
             return new HungerWalletObservation(r.Id, request.BusinessDate, request.MobileBalance, request.WalletEvidence, r.Status); }).ToArray(),
@@ -94,8 +98,8 @@ internal sealed partial class HungerQualityService
         var result = await QueryWallets(filter, 1, 100, true, ct);
         if (result.IsFailure) return Result.Failure<HungerFile>(result.Error);
         return Result.Success(TabularFile("Hunger-Wallets", format,
-            ["AccountId", "ExternalAccountId", "MobileBalance", "ObservedOn", "Evidence", "CurrentPeriodBalance", "RestrictedRights", "AttributedBalance", "ReceiptState", "PendingArrival", "ConfirmedReceipts", "PendingReceipts"],
+            ["AccountId", "ExternalAccountId", "MobileBalance", "ObservedOn", "Evidence", "CurrentPeriodBalance", "RestrictedRights", "AttributedBalance", "ReceiptState", "PendingArrival", "ConfirmedReceipts", "PendingReceipts", "Alert"],
             result.Value!.Items.Select(w => new object?[] { w.AccountId.ToString(), w.ExternalAccountId, w.MobileBalance, w.ObservedOn?.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture),
-                w.Evidence, w.CurrentPeriodBalance, w.RestrictedRights, w.AttributedBalance, w.ReceiptState, w.PendingArrival, w.ConfirmedReceipts, w.PendingReceipts })));
+                w.Evidence, w.CurrentPeriodBalance, w.RestrictedRights, w.AttributedBalance, w.ReceiptState, w.PendingArrival, w.ConfirmedReceipts, w.PendingReceipts, w.Alert })));
     }
 }

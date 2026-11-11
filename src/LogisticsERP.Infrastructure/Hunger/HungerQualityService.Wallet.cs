@@ -8,6 +8,8 @@ using LogisticsERP.Domain.Enums;
 using LogisticsERP.Domain.Hunger;
 using LogisticsERP.Infrastructure.Hr;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using LogisticsERP.Application.Abstractions.Files;
 
 namespace LogisticsERP.Infrastructure.Hunger;
 
@@ -39,27 +41,81 @@ internal sealed partial class HungerQualityService
         return new(Hash(Serialize(new { account, assignments, details, events, relatedEvents, usages, contributions, settlements, snapshots, operations })), restricted);
     }
     private static bool ValidBalance(decimal value) => Math.Abs(value) <= 1000000000m && decimal.Round(value, 2) == value;
+    private bool Cr005 => configuration.GetValue<bool>("Features:HungerFinanceCr005");
+    private static readonly OperationError WalletImageRequired = HungerErrors.Invalid("لقطة شاشة المحفظة مطلوبة للتسليم والسحب.");
+    // Source: Invoice | Manual | NoPriorPeriod | InvoiceAbsent | Unknown.
+    private sealed record WalletBasis(decimal? Closing, decimal Adjustments, string Source);
+    private async Task<WalletBasis> ReadWalletBasis(Guid accountId, DateOnly date, CancellationToken ct)
+    {
+        var month = new DateOnly(date.Year, date.Month, 1);
+        var previous = month.AddMonths(-1);
+        var close = await db.Set<HungerSettlementDocument>().AsNoTracking().SingleOrDefaultAsync(d => d.PlatformRiderAccountId == accountId
+            && d.Kind == "MonthClose" && d.ChargeFrom == previous && d.Status == "Matched", ct);
+        if (close?.WalletBalance is { } balance)
+            return new(balance, await ClosingAdjustments(accountId, close.Id, date, ct),
+                close.IdempotencyKey.StartsWith("InvoiceClose:", StringComparison.Ordinal) ? "Invoice" : "Manual");
+        if (!await HasPriorWalletPeriod(accountId, month, ct)) return new(0, 0, "NoPriorPeriod");
+        // An account missing from a matched invoice that carried rider balances had no wallet deduction that month.
+        var platform = await db.PlatformRiderAccounts.AsNoTracking().Where(a => a.Id == accountId).Select(a => a.ClientPlatformId).SingleAsync(ct);
+        return await db.Set<HungerSettlementDocument>().AnyAsync(d => d.ClientPlatformId == platform && d.Kind == "Invoice"
+            && d.InvoicePeriod == previous && d.Status == "Matched" && d.RiderBalanceTotal != null, ct)
+            ? new(0, 0, "InvoiceAbsent") : new(null, 0, "Unknown");
+    }
+    private static decimal? Attributed(HungerWalletReviewRequest request, WalletBasis basis, decimal restricted) => basis.Closing.HasValue
+        ? HungerWalletRules.Usable(HungerWalletRules.CurrentPeriod(request.MobileBalance, basis.Closing.Value, basis.Adjustments), restricted) : null;
+    // What the supervisor's custody cannot cover of the amount needed to bring a negative wallet back to zero.
+    private async Task<decimal> CustodyShortfall(Guid platform, Guid supervisor, decimal attributed, CancellationToken ct)
+    {
+        if (!Cr005 || attributed >= 0) return 0;
+        var c = await FinanceConfig(platform, supervisor, ct);
+        return Math.Max(0, -attributed - (c is null ? 0 : await CustodyBalance(c, ct)));
+    }
+    private async Task SetWalletDisposition(Guid accountId, string from, string to, string reason, CancellationToken ct)
+    {
+        var details = await db.Set<PlatformAccountBusinessDetails>().SingleOrDefaultAsync(d => d.PlatformRiderAccountId == accountId, ct);
+        if (details is null || details.OperationalDisposition != from) return;
+        var before = Serialize(details); details.OperationalDisposition = to; details.DispositionReason = reason;
+        db.Add(new PlatformAccountBusinessRevision { PlatformRiderAccountId = accountId, EffectiveFrom = BusinessToday, Reason = reason, BeforeJson = before, AfterJson = Serialize(details) });
+    }
+    // T3-4: the account is unavailable until the wallet is zeroed; the proposal feeds the normal custody funding request.
+    private async Task RaiseReturnProposal(HungerFinancialEvent returned, decimal shortfall, CancellationToken ct)
+    {
+        db.Add(new HungerFinancialEvent { ClientPlatformId = returned.ClientPlatformId, SupervisorEmployeeId = returned.SupervisorEmployeeId,
+            PlatformRiderAccountId = returned.PlatformRiderAccountId, RiderProfileId = returned.RiderProfileId, RelatedEventId = returned.Id,
+            Kind = "CustodyProposal", Status = "Open", Amount = shortfall, BusinessDate = returned.BusinessDate,
+            IdempotencyKey = $"CustodyProposal:{returned.Id:D}", RequestHash = returned.RequestHash, EvidenceReference = returned.EvidenceReference, Role = "Custody" });
+        await SetWalletDisposition(returned.PlatformRiderAccountId!.Value, "Normal", "WalletPending", "محفظة سالبة عند السحب والعهدة لا تكفي لتصفيرها.", ct);
+    }
+    private async Task ResolveReturnProposals(Guid accountId, CancellationToken ct)
+    {
+        var open = await (from p in db.Set<HungerFinancialEvent>() join r in db.Set<HungerFinancialEvent>() on p.RelatedEventId equals r.Id
+            where p.PlatformRiderAccountId == accountId && p.Kind == "CustodyProposal" && p.Status == "Open" && r.Kind == "WalletReturn" select p).ToArrayAsync(ct);
+        foreach (var proposal in open) proposal.Status = "Resolved";
+        await SetWalletDisposition(accountId, "WalletPending", "Normal", "تم تصفير المحفظة وإثباته عند التسليم.", ct);
+    }
+    // Hand-over needs a zero attributed wallet or an approved, unused exception for exactly that amount.
+    private async Task<OperationError?> ConsumeHandoverException(Guid accountId, Guid? approvalId, decimal amount, HungerFinancialEvent item, CancellationToken ct)
+    {
+        if (!Cr005 || amount == 0) return null;
+        var approval = approvalId.HasValue ? await db.Set<HungerExceptionApproval>().SingleOrDefaultAsync(e => e.Id == approvalId, ct) : null;
+        if (approval is null || approval.Kind != "NonZeroHandover" || approval.PlatformRiderAccountId != accountId || approval.Status != "Approved"
+            || approval.ConsumedByEventId.HasValue || approval.Amount != amount)
+            return HungerErrors.Conflict("التسليم برصيد منسوب غير صفري يحتاج استثناءً معتمدًا غير مستخدم بنفس المبلغ لهذا الحساب.");
+        approval.Status = "Consumed"; approval.ConsumedByEventId = item.Id; item.ExceptionApprovalId = approval.Id;
+        return null;
+    }
     private async Task<OperationError?> ValidateWallet(Guid accountId, HungerWalletReviewRequest request, CancellationToken ct)
     {
         if (request.Action is not ("Deliver" or "Return") || request.BusinessDate == default || request.BusinessDate > BusinessToday
-            || !ValidBalance(request.MobileBalance) || request.ClosingBalance.HasValue && !ValidBalance(request.ClosingBalance.Value) || !ValidBalance(request.ProvenAdjustments)
-            || string.IsNullOrWhiteSpace(request.WalletEvidence) || request.WalletEvidence.Length > 1000
-            || request.ClosingBalance.HasValue && request.ClosingBalance != 0 && string.IsNullOrWhiteSpace(request.ClosingEvidence)
-            || request.ProvenAdjustments != 0 && string.IsNullOrWhiteSpace(request.AdjustmentEvidence)) return HungerErrors.Invalid("أدخل رصيدًا صريحًا وتاريخه وأدلة الإغلاق والتسويات إن وجدت.");
+            || !ValidBalance(request.MobileBalance) || request.WalletEvidence is null || request.WalletEvidence.Length > 1000)
+            return HungerErrors.Invalid("أدخل رصيدًا صريحًا وتاريخه.");
         if (!await db.Employees.AnyAsync(e => e.Id == request.SupervisorEmployeeId, ct)) return HungerErrors.Invalid("المشرف غير معروف.");
-        var month = new DateOnly(request.BusinessDate.Year, request.BusinessDate.Month, 1);
-        var previousMonth = month.AddMonths(-1);
-        var closing = await db.Set<HungerSettlementDocument>().AsNoTracking().SingleOrDefaultAsync(d => d.PlatformRiderAccountId == accountId && d.Kind == "MonthClose" && d.ChargeFrom == previousMonth && d.Status == "Matched", ct);
-        var hasPriorPeriod = await HasPriorWalletPeriod(accountId, month, ct);
-        var closingBalance = closing?.WalletBalance ?? (hasPriorPeriod ? (decimal?)null : 0m);
-        var adjustments = await ClosingAdjustments(accountId, closing?.Id, request.BusinessDate, ct);
-        if (closingBalance.HasValue && request.ClosingBalance != closingBalance || request.ProvenAdjustments != adjustments)
-            return HungerErrors.Conflict("أثر الإغلاق أو التسويات لا يطابق مستندات المحفظة المعتمدة؛ سجل الأدلة أولًا.");
         if (request.Action == "Deliver")
         {
             if (request.Assignment is null || request.Assignment.ActualRiderProfileId != request.RiderProfileId || request.Assignment.EffectiveFrom != request.BusinessDate || request.Return is not null) return HungerErrors.Invalid("بيانات مراجعة المحفظة لا تطابق طلب التسليم.");
             var details = await db.Set<PlatformAccountBusinessDetails>().AsNoTracking().SingleOrDefaultAsync(d => d.PlatformRiderAccountId == accountId, ct);
-            if (details is { OperationalDisposition: not "Normal" }) return HungerErrors.Conflict("يلزم تفعيل الحساب يدويًا ومعالجة استثنائه قبل التسليم.");
+            // An account parked for a negative wallet reopens only on a hand-over whose screenshot shows the wallet back at zero.
+            if (details is { OperationalDisposition: not "Normal" } && !(Cr005 && details.OperationalDisposition == "WalletPending" && request.MobileBalance == 0)) return HungerErrors.Conflict("يلزم تفعيل الحساب يدويًا ومعالجة استثنائه قبل التسليم.");
         }
         else
         {
@@ -78,30 +134,52 @@ internal sealed partial class HungerQualityService
         db.Set<HungerSettlementDocument>().Where(d => closeId != null && d.ClosingSnapshotId == closeId
             && d.PlatformRiderAccountId == accountId && d.Kind == "Adjustment" && d.ObservedOn <= date && d.Status == "Matched")
             .SumAsync(d => d.WalletBalance ?? 0, ct);
-    private async Task<decimal?> WalletClosing(Guid accountId, DateOnly date, CancellationToken ct)
+    private async Task<decimal?> WalletClosing(Guid accountId, DateOnly date, CancellationToken ct) => (await ReadWalletBasis(accountId, date, ct)).Closing;
+    public async Task<Result<HungerWalletReviewResponse>> ReviewWalletWithImageAsync(Guid accountId, HungerWalletReviewRequest request, PrivateFileUpload? image, CancellationToken ct = default)
     {
-        var month = new DateOnly(date.Year, date.Month, 1);
-        var previous = month.AddMonths(-1);
-        var close = await db.Set<HungerSettlementDocument>().AsNoTracking().SingleOrDefaultAsync(d => d.PlatformRiderAccountId == accountId
-            && d.Kind == "MonthClose" && d.ChargeFrom == previous && d.Status == "Matched", ct);
-        return close?.WalletBalance ?? (await HasPriorWalletPeriod(accountId, month, ct) ? (decimal?)null : 0m);
+        // Authorize and validate before writing any file. Only the server supplies the image link.
+        request = request with { WalletEvidence = string.Empty };
+        var account = await db.PlatformRiderAccounts.AsNoTracking().SingleOrDefaultAsync(a => a.Id == accountId, ct);
+        if (account is null || !await FinanceAccess(account.ClientPlatformId, PermissionKeys.Hunger.WalletReview, ct))
+            return Result.Failure<HungerWalletReviewResponse>(HungerErrors.Forbidden);
+        if (await ValidateWallet(accountId, request, ct) is { } error)
+            return Result.Failure<HungerWalletReviewResponse>(error);
+        if (image is null) return Cr005 ? Result.Failure<HungerWalletReviewResponse>(WalletImageRequired) : await ReviewWalletCore(accountId, request, ct);
+        if (files is null || image.ContentType.ToLowerInvariant() is not ("image/jpeg" or "image/png" or "image/webp" or "image/gif" or "image/bmp"))
+            return Result.Failure<HungerWalletReviewResponse>(PrivateFileErrors.InvalidFile);
+        var stored = await files.StoreAsync($"hunger/wallets/{accountId:D}", image, 5 * 1024 * 1024, ct);
+        if (stored.IsFailure) return Result.Failure<HungerWalletReviewResponse>(stored.Error);
+        var keepFile = false;
+        try
+        {
+            var link = "/" + stored.Value!.StoragePath["wwwroot/".Length..];
+            var result = await ReviewWalletCore(accountId, request with { WalletEvidence = link }, ct);
+            keepFile = result.IsSuccess;
+            return result;
+        }
+        finally
+        {
+            if (!keepFile) files.DeleteBestEffort(stored.Value!.StoragePath);
+        }
     }
-    public async Task<Result<HungerWalletReviewResponse>> ReviewWalletAsync(Guid accountId, HungerWalletReviewRequest request, CancellationToken ct = default)
+
+    // Without an image the client would be supplying its own evidence text, which CR-005 no longer accepts.
+    public Task<Result<HungerWalletReviewResponse>> ReviewWalletAsync(Guid accountId, HungerWalletReviewRequest request, CancellationToken ct = default)
+        => Cr005 ? Task.FromResult(Result.Failure<HungerWalletReviewResponse>(WalletImageRequired)) : ReviewWalletCore(accountId, request, ct);
+    private async Task<Result<HungerWalletReviewResponse>> ReviewWalletCore(Guid accountId, HungerWalletReviewRequest request, CancellationToken ct)
     {
         var account = await db.PlatformRiderAccounts.AsNoTracking().SingleOrDefaultAsync(a => a.Id == accountId, ct);
         if (account is null || !await FinanceAccess(account.ClientPlatformId, PermissionKeys.Hunger.WalletReview, ct)) return Result.Failure<HungerWalletReviewResponse>(HungerErrors.Forbidden);
         if (await ValidateWallet(accountId, request, ct) is { } error) return Result.Failure<HungerWalletReviewResponse>(error);
         await using var locks = await PlatformAccountWriteScope.AcquireAsync(db, [accountId, account.ClientPlatformId], ct);
         var state = await ReadWalletState(accountId, ct);
-        var closing = await WalletClosing(accountId, request.BusinessDate, ct);
-        decimal? period = closing.HasValue ? HungerWalletRules.CurrentPeriod(request.MobileBalance, closing.Value, request.ProvenAdjustments) : null;
-        decimal? attributed = period.HasValue ? HungerWalletRules.Usable(period.Value, state.Restricted) : null;
+        var basis = await ReadWalletBasis(accountId, request.BusinessDate, ct);
         var preview = new HungerWalletReview { PlatformRiderAccountId = accountId, UserId = user.UserId!.Value,
             RequestJson = Serialize(request), InputRevision = state.Revision, ExpiresAtUtc = clock.GetUtcNow().AddMinutes(20) };
         await SupersedePendingWalletReviews(accountId, ct);
         db.Add(preview); await db.SaveChangesAsync(ct);
-        return Result.Success(new HungerWalletReviewResponse(preview.Id, period, state.Restricted, attributed,
-            attributed.HasValue ? HungerWalletRules.RiderBalanceChange(request.Action, attributed.Value) : null, preview.ExpiresAtUtc, closing, closing.HasValue));
+        return Result.Success(WalletPreview(preview, request, basis, state.Restricted) with
+            { WalletEvidence = string.IsNullOrEmpty(request.WalletEvidence) ? null : request.WalletEvidence });
     }
     public async Task<Result<HungerWalletConfirmation>> ConfirmWalletAsync(Guid reviewId, CancellationToken ct = default)
     {
@@ -127,16 +205,23 @@ internal sealed partial class HungerQualityService
                 if (await ValidateWallet(account.Id, request, ct) is { } error) return Result.Failure<HungerWalletConfirmation>(error);
                 var state = await ReadWalletState(account.Id, ct);
                 if (current.InputRevision != state.Revision) return Result.Failure<HungerWalletConfirmation>(HungerErrors.Conflict("تغير الحساب أو الرصيد أو الاستخدام؛ أعد مراجعة المحفظة."));
-                var closing = await WalletClosing(account.Id, request.BusinessDate, ct);
-                if (!closing.HasValue) return Result.Failure<HungerWalletConfirmation>(HungerErrors.Invalid("رصيد الإغلاق غير معروف؛ التأكيد المالي محظور."));
-                var attributed = HungerWalletRules.Usable(HungerWalletRules.CurrentPeriod(request.MobileBalance, closing.Value, request.ProvenAdjustments), state.Restricted);
+                var basis = await ReadWalletBasis(account.Id, request.BusinessDate, ct);
+                if (Attributed(request, basis, state.Restricted) is not { } attributed)
+                    return Result.Failure<HungerWalletConfirmation>(HungerErrors.Invalid("رصيد الإغلاق غير معروف؛ التأكيد المالي محظور."));
                 var item = new HungerFinancialEvent { ClientPlatformId = account.ClientPlatformId, SupervisorEmployeeId = request.SupervisorEmployeeId,
                     PlatformRiderAccountId = account.Id, RiderProfileId = request.RiderProfileId, Kind = request.Action == "Deliver" ? "WalletDelivery" : "WalletReturn",
                     Amount = Math.Abs(attributed), RiderBalanceChange = HungerWalletRules.RiderBalanceChange(request.Action, attributed), BusinessDate = request.BusinessDate,
                     IdempotencyKey = $"WalletReview:{reviewId:D}", RequestHash = Hash(current.RequestJson), EvidenceReference = request.WalletEvidence,
-                    DetailsJson = Serialize(new { request, state.Restricted, AttributedBalance = attributed }) };
+                    DetailsJson = Serialize(new { request, state.Restricted, AttributedBalance = attributed, ClosingBalance = basis.Closing,
+                        ProvenAdjustments = basis.Adjustments, ClosingSource = basis.Source }),
+                    ApprovalStatus = "PendingSeal", Role = "Wallet" };
+                if (request.Action == "Deliver" && await ConsumeHandoverException(account.Id, request.ExceptionApprovalId, attributed, item, ct) is { } exceptionError)
+                { db.ChangeTracker.Clear(); return Result.Failure<HungerWalletConfirmation>(exceptionError); }
                 Result<SimplePlatformAssignmentResponse> result;
                 current.Status = "Confirmed";
+                if (request.Action == "Return" && await CustodyShortfall(account.ClientPlatformId, request.SupervisorEmployeeId, attributed, ct) is > 0 and var shortfall)
+                    await RaiseReturnProposal(item, shortfall, ct);
+                if (Cr005 && request.Action == "Deliver" && request.MobileBalance == 0) await ResolveReturnProposals(account.Id, ct);
                 if (request.Action == "Deliver") result = await lifecycle.AssignHungerAccountAsync(account.Id, request.Assignment!, () => db.Add(item), ct);
                 else result = await lifecycle.ReturnHungerAccountAsync(account.Id, request.Return!, () => db.Add(item), ct);
                 if (result.IsFailure) { db.ChangeTracker.Clear(); return Result.Failure<HungerWalletConfirmation>(result.Error); }

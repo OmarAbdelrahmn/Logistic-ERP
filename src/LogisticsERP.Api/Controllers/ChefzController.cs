@@ -154,8 +154,13 @@ public sealed class ChefzController(IChefzService service) : ControllerBase
 
     [HttpDelete("performance")]
     [RequirePermission(PermissionKeys.Chefz.PerformanceDelete)]
-    public Task<IActionResult> DeletePerformance([FromQuery] DateOnly reportDate, CancellationToken ct) =>
-        ToAction(service.DeletePerformanceAsync(reportDate, ct));
+    public async Task<IActionResult> DeletePerformance([FromQuery, Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] DateOnly reportDate,
+        [FromQuery] string reason, [FromQuery] Guid? sponsorId = null, CancellationToken ct = default)
+    {
+        if (Request.Query.TryGetValue("sponsorId", out var suppliedSponsor) && string.IsNullOrWhiteSpace(suppliedSponsor))
+            return Result.Failure<ChefzPerformanceDeletionResponse>(ChefzErrors.Invalid("حدد الكفيل أو احذف المعامل لحذف أداء اليوم لجميع الحسابات.")).ToProblem(HttpContext);
+        return await ToAction(service.DeletePerformanceAsync(reportDate, sponsorId, reason, ct));
+    }
 
     [HttpGet("performance")]
     [RequirePermission(PermissionKeys.Chefz.Read)]

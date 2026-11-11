@@ -14,11 +14,12 @@ using LogisticsERP.Infrastructure.Hr;
 using LogisticsERP.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using LogisticsERP.Application.Abstractions.Files;
 
 namespace LogisticsERP.Infrastructure.Hunger;
 
 internal sealed partial class HungerQualityService(ApplicationDbContext db, ICurrentUser user, IPermissionChecker permissions,
-    TimeProvider clock, IConfiguration configuration, SimplePlatformService? lifecycle = null) : IHungerQualityService
+    TimeProvider clock, IConfiguration configuration, SimplePlatformService? lifecycle = null, IPrivateFileStorage? files = null) : IHungerQualityService
 {
     private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
     private static string Serialize<T>(T value) => JsonSerializer.Serialize(value, Json);

@@ -1,5 +1,7 @@
 # Ninja accounts and daily reports
 
+**10 November 2026:** `DELETE /api/ninja/performance` removes a single performance day across all Ninja accounts or one sponsor's accounts. It requires `ninja.performance.delete`, a report date, and a reason. See [day deletion and reimport](ninja-performance-day-deletion.md).
+
 **21 October 2026:** Returns accept optional `dayUsage` figures. Daily imports now split account totals between actual same-day assignments and retain original sources. Missing figures block only affected imports. See [shared-day handovers and API additions](shared-account-day-handovers.md).
 
 **17 October 2026:** Ninja now uses [dedicated permissions](ninja-permissions.md). Apply the new application/identity permission migrations and update frontend permission checks before using the updated API.

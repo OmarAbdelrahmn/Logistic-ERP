@@ -33,6 +33,6 @@ public sealed class NinjaEvaluationAuthorizationTests
     public void NewRoutesDoNotReplaceLegacyEndpoints()
     {
         Assert.Equal(13, typeof(NinjaEvaluationController).GetMethods().Count(m => m.GetCustomAttributes().OfType<HttpMethodAttribute>().Any()));
-        Assert.Equal(20, typeof(NinjaController).GetMethods().Count(m => m.GetCustomAttributes().OfType<HttpMethodAttribute>().Any()));
+        Assert.Equal(21, typeof(NinjaController).GetMethods().Count(m => m.GetCustomAttributes().OfType<HttpMethodAttribute>().Any()));
     }
 }

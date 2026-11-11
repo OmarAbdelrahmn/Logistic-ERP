@@ -524,7 +524,8 @@ public sealed partial class HungerFinanceTests
         private User User { get; init; } = new();
         internal ApplicationDbContext OtherContext() => new(new DbContextOptionsBuilder<ApplicationDbContext>().UseSqlServer(Db.Database.GetConnectionString())
             .AddInterceptors(new ApplicationPersistenceInterceptor(User, new Clock())).Options);
-        internal static async Task<Fixture> Create(bool intercept = false, bool relational = false, bool sql = false)
+        internal static async Task<Fixture> Create(bool intercept = false, bool relational = false, bool sql = false,
+            LogisticsERP.Application.Abstractions.Files.IPrivateFileStorage? files = null, bool cr005 = false)
         {
             var ct = TestContext.Current.CancellationToken;
             var options = new DbContextOptionsBuilder<ApplicationDbContext>();
@@ -556,11 +557,12 @@ public sealed partial class HungerFinanceTests
             db.AddRange(platform, supervisor, employee, rider, account, sponsor, custody, collections, wallet, clearing, bank,
                 new RiderClientAssignment { PlatformRiderAccountId = account.Id, RiderProfileId = rider.Id, EffectiveFrom = new(2026, 11, 1), Status = RiderAssignmentStatus.Active, RowVersion = [1] });
             await db.SaveChangesAsync(ct);
-            var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?> { ["Features:Hunger"] = "true", ["Features:HungerFinance"] = "true" }).Build();
+            var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?> { ["Features:Hunger"] = "true", ["Features:HungerFinance"] = "true",
+                ["Features:HungerFinanceCr005"] = cr005 ? "true" : "false" }).Build();
             var checker = new Checker();
             var currentUser = new User();
             var service = new HungerQualityService(db, currentUser, checker, new Clock(), config,
-                new SimplePlatformService(db, currentUser, new Clock(), new PlatformCredentialProtector(() => new byte[32])));
+                new SimplePlatformService(db, currentUser, new Clock(), new PlatformCredentialProtector(() => new byte[32])), files);
             var setup = await service.ConfigureFinanceAsync(new(platform.Id, supervisor.Id, sponsor.Id, custody.Id, collections.Id, wallet.Id, clearing.Id, "approved mapping", true), ct);
             Assert.True(setup.IsSuccess, setup.Error.Description);
             return new() { User = currentUser, Sql = sql, Connection = connection, Permissions = checker, Db = db, Service = service, Platform = platform, Supervisor = supervisor, Rider = rider, Account = account, Bank = bank };

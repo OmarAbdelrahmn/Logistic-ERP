@@ -158,7 +158,7 @@ internal sealed partial class HungerQualityService : IHungerAccountsService
                     account.RegisteredEmployeeId = match.OwnerEmployeeId; account.OperatingCityId = cities.Single(c => c.NameAr == source.City).Id;
                     details.PhoneNumber = source.Phone; details.RegistryIdentifier = source.Registry; details.SettlementModel = source.SettlementModel;
                     details.RegisteredVehicleType = source.RegisteredVehicleType; details.SimOwnership = source.SimOwnership;
-                    details.SourceStatus = source.SourceStatus; details.OperationalDisposition = SourceDisposition(source.SourceStatus);
+                    details.SourceStatus = source.SourceStatus; details.OperationalDisposition = details.OperationalDisposition == "WalletPending" ? "WalletPending" : SourceDisposition(source.SourceStatus);
                     details.DispositionReason = source.SourceStatus; details.SourceActualRiderProfileId = match.ActualRiderProfileId;
                     details.SourceActualIqama = source.ActualIqama; details.SourceCompensationModel = source.CompensationModel;
                     details.SourceVehicleDescription = source.ActualVehicleDescription; details.SourceAssignmentFrom = source.AssignmentFrom;

@@ -12,6 +12,14 @@ namespace LogisticsERP.Api.Controllers;
 [Route("api/jahez/v2")]
 public sealed class JahezWorkflowController(IJahezWorkflowService service) : ControllerBase
 {
+    [HttpDelete("performance"), RequirePermission(PermissionKeys.Jahez.PerformanceDelete)]
+    public async Task<IActionResult> DeletePerformance([FromQuery, BindRequired] DateOnly reportDate, [FromQuery] string reason,
+        [FromQuery] Guid? sponsorId = null, CancellationToken ct = default)
+    {
+        if (Request.Query.TryGetValue("sponsorId", out var suppliedSponsor) && string.IsNullOrWhiteSpace(suppliedSponsor))
+            return Result.Failure<JahezPerformanceDeletionResponse>(JahezErrors.Invalid("حدد الكفيل أو احذف المعامل لحذف طلبات اليوم لجميع الحسابات.")).ToProblem(HttpContext);
+        return await Respond(service.DeletePerformanceAsync(reportDate, sponsorId, reason, ct));
+    }
     [HttpGet("settlement-reminders"), RequirePermission(PermissionKeys.Jahez.Read)]
     public Task<IActionResult> SettlementReminders(int page = 1, int pageSize = 50, CancellationToken ct = default) =>
         Respond(service.SettlementRemindersAsync(page, pageSize, ct));

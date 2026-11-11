@@ -241,16 +241,21 @@ public sealed partial class NinjaWorkflowTests
         public required RiderProfile Rider { get; init; }
         public required RiderProfile OwnerRider { get; init; }
         public string? Connection { get; init; }
-        public static async Task<Fixture> Create(bool sql = false)
+        public static async Task<Fixture> Create(bool sql = false, bool sqlite = false, SaveChangesInterceptor? saveInterceptor = null)
         {
             var user = new CurrentUser(); var clock = new Clock(); var checker = new Checker();
             var server = Environment.GetEnvironmentVariable("NINJA_SQL_TEST_SERVER");
             var connection = sql ? $"Server={server};Database=NinjaTests_{Guid.NewGuid():N};Trusted_Connection=True;TrustServerCertificate=True" : null;
             var options = new DbContextOptionsBuilder<ApplicationDbContext>();
             if (connection is not null) options.UseSqlServer(connection);
+            else if (sqlite) options.UseSqlite("Data Source=:memory:")
+                .ReplaceService<Microsoft.EntityFrameworkCore.Infrastructure.IModelCustomizer, OilWorkflowTestModelCustomizer>();
             else options.UseInMemoryDatabase($"NinjaTests_{Guid.NewGuid():N}", m => m.EnableNullChecks(false)).AddInterceptors(new InMemoryRowversionInterceptor());
             options.AddInterceptors(new ApplicationPersistenceInterceptor(user, clock));
+            if (sqlite) options.AddInterceptors(new DeletionTestVersions());
+            if (saveInterceptor is not null) options.AddInterceptors(saveInterceptor);
             var db = new ApplicationDbContext(options.Options, clock);
+            if (sqlite) await db.Database.OpenConnectionAsync(TestContext.Current.CancellationToken);
             await db.Database.EnsureCreatedAsync(TestContext.Current.CancellationToken);
             var p = new ClientPlatform { Code = "NINJA", NameAr = "نينجا", NameEn = "Ninja" };
             var owner = new Employee { FullNameAr = "صاحب الحساب", Status = EmployeeStatus.Active };

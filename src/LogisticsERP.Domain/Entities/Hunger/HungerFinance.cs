@@ -42,6 +42,55 @@ public sealed class HungerFinancialEvent : HistoryEntity
     public string RequestHash { get; set; } = string.Empty;
     public string EvidenceReference { get; set; } = string.Empty;
     public string DetailsJson { get; set; } = "{}";
+    // Accountant seal: NotRequired | PendingSeal | Sealed | Rejected | Cancelled.
+    public string ApprovalStatus { get; set; } = "NotRequired";
+    public DateTimeOffset? ApprovedAtUtc { get; set; }
+    public Guid? ApprovedByUserId { get; set; }
+    public string? RejectionReason { get; set; }
+    // A replacement for a rejected row. It carries no postings until it is sealed.
+    public Guid? SupersedesEventId { get; set; }
+    // Custody | Collections | Wallet | RiderClearing | OwnerCollections.
+    public string? Role { get; set; }
+    // Stc | Cashbox | Bank | OwnerVault.
+    public string? DestinationChannel { get; set; }
+    public Guid? ExceptionApprovalId { get; set; }
+    // Account codes chosen by the accountant at seal. Stored verbatim; the ERP never interprets them.
+    public string? SealAccountsJson { get; set; }
+}
+
+/// <summary>Server-issued screenshot. Clients reference it by id and never supply a storage link.</summary>
+public sealed class HungerEvidenceFile : AuditableEntity
+{
+    public Guid ClientPlatformId { get; set; }
+    public Guid PlatformRiderAccountId { get; set; }
+    public Guid UploadedByUserId { get; set; }
+    public string StoragePath { get; set; } = string.Empty;
+    public string ContentType { get; set; } = string.Empty;
+    // WalletBefore | WalletAfter | Wallet | Arrival.
+    public string Purpose { get; set; } = string.Empty;
+    public DateOnly ObservedOn { get; set; }
+    public Guid? FinancialEventId { get; set; }
+}
+
+public sealed class HungerExceptionApproval : AuditableEntity
+{
+    public Guid ClientPlatformId { get; set; }
+    public Guid? PlatformRiderAccountId { get; set; }
+    public Guid? SupervisorEmployeeId { get; set; }
+    // NonZeroHandover | CustodyIdentityMismatch.
+    public string Kind { get; set; } = string.Empty;
+    public decimal Amount { get; set; }
+    public string Reason { get; set; } = string.Empty;
+    public string? EvidenceReference { get; set; }
+    // Requested | Approved | Rejected | Consumed.
+    public string Status { get; set; } = "Requested";
+    public Guid RequestedByUserId { get; set; }
+    public Guid? DecidedByUserId { get; set; }
+    public DateTimeOffset? DecidedAtUtc { get; set; }
+    public string? DecisionNote { get; set; }
+    public Guid? ConsumedByEventId { get; set; }
+    public string IdempotencyKey { get; set; } = string.Empty;
+    public string RequestHash { get; set; } = string.Empty;
 }
 
 public sealed class HungerRemittanceLine : AuditableEntity

@@ -1,8 +1,10 @@
 ﻿using LogisticsERP.Api.Authorization;
 using LogisticsERP.Api.ErrorHandling;
 using LogisticsERP.Application.Authorization;
+using LogisticsERP.Application.Common.Results;
 using LogisticsERP.Application.Features.Hunger;
 using Microsoft.AspNetCore.Mvc;
+using LogisticsERP.Application.Abstractions.Files;
 
 namespace LogisticsERP.Api.Controllers;
 
@@ -75,9 +77,9 @@ public sealed partial class HungerController(IHungerQualityService quality, IHun
     }
     [HttpPost("finance/requests/{requestId:guid}/execute")]
     [RequirePermission(PermissionKeys.Hunger.FundingExecute, PermissionKeys.Hunger.TopUpExecute)]
-    public async Task<IActionResult> ExecuteMoneyRequest(Guid requestId, CancellationToken ct)
+    public async Task<IActionResult> ExecuteMoneyRequest(Guid requestId, [FromBody] HungerMoneyExecution? execution = null, CancellationToken ct = default)
     {
-        var result = await finance.ExecuteMoneyRequestAsync(requestId, ct);
+        var result = await finance.ExecuteMoneyRequestAsync(requestId, execution, ct);
         return result.IsFailure ? result.ToProblem(HttpContext) : Ok(result.Value);
     }
     [HttpPost("finance/remittances/drafts")]
@@ -115,11 +117,110 @@ public sealed partial class HungerController(IHungerQualityService quality, IHun
         var result = await finance.PendingCollectionsAsync(platformId, supervisorEmployeeId, page, pageSize, ct);
         return result.IsFailure ? result.ToProblem(HttpContext) : Ok(result.Value);
     }
-    [HttpPost("accounts/{accountId:guid}/wallet-review")]
-    [RequirePermission(PermissionKeys.Hunger.WalletReview)]
-    public async Task<IActionResult> ReviewWallet(Guid accountId, HungerWalletReviewRequest request, CancellationToken ct)
+    [HttpPost("finance/events/{eventId:guid}/seal")]
+    [RequirePermission(PermissionKeys.Hunger.Seal)]
+    public async Task<IActionResult> SealEvent(Guid eventId, HungerSealRequest request, CancellationToken ct)
     {
-        var result = await finance.ReviewWalletAsync(accountId, request, ct);
+        var result = await finance.SealEventAsync(eventId, request, ct);
+        return result.IsFailure ? result.ToProblem(HttpContext) : Ok(result.Value);
+    }
+    [HttpPost("finance/events/{eventId:guid}/reject")]
+    [RequirePermission(PermissionKeys.Hunger.Seal)]
+    public async Task<IActionResult> RejectEvent(Guid eventId, HungerSealRejection request, CancellationToken ct)
+    {
+        var result = await finance.RejectEventAsync(eventId, request, ct);
+        return result.IsFailure ? result.ToProblem(HttpContext) : Ok(result.Value);
+    }
+    [HttpGet("finance/seal-queue")]
+    [RequirePermission(PermissionKeys.Hunger.Seal, PermissionKeys.Hunger.FinanceRead)]
+    public async Task<IActionResult> SealQueue(Guid platformId, string? status = null, int page = 1, int pageSize = 50, CancellationToken ct = default)
+    {
+        var result = await finance.SealQueueAsync(platformId, status, page, pageSize, ct);
+        return result.IsFailure ? result.ToProblem(HttpContext) : Ok(result.Value);
+    }
+    [HttpPost("finance/evidence")]
+    [Consumes("multipart/form-data")]
+    [RequestSizeLimit(6 * 1024 * 1024)]
+    [RequirePermission(PermissionKeys.Hunger.WalletReview, PermissionKeys.Hunger.TopUpRequest, PermissionKeys.Hunger.TopUpExecute, PermissionKeys.Hunger.WithdrawalRequest)]
+    public async Task<IActionResult> UploadEvidence([FromForm] HungerEvidenceForm form, CancellationToken ct)
+    {
+        await using var stream = form.File?.OpenReadStream();
+        var image = form.File is { } file ? new PrivateFileUpload(stream!, file.FileName, file.ContentType, file.Length) : null;
+        var result = await finance.UploadEvidenceAsync(new(form.PlatformId, form.AccountId, form.Purpose, form.ObservedOn), image, ct);
+        return result.IsFailure ? result.ToProblem(HttpContext) : Ok(result.Value);
+    }
+    [HttpPost("finance/requests/{requestId:guid}/approve")]
+    [RequirePermission(PermissionKeys.Hunger.FundingApprove)]
+    public async Task<IActionResult> ApproveFunding(Guid requestId, HungerFundingDecision request, CancellationToken ct)
+    {
+        var result = await finance.DecideFundingAsync(requestId, true, request, ct);
+        return result.IsFailure ? result.ToProblem(HttpContext) : Ok(result.Value);
+    }
+    [HttpPost("finance/requests/{requestId:guid}/reject")]
+    [RequirePermission(PermissionKeys.Hunger.FundingApprove)]
+    public async Task<IActionResult> RejectFunding(Guid requestId, HungerFundingDecision request, CancellationToken ct)
+    {
+        var result = await finance.DecideFundingAsync(requestId, false, request, ct);
+        return result.IsFailure ? result.ToProblem(HttpContext) : Ok(result.Value);
+    }
+    [HttpGet("finance/custody-settlement")]
+    [RequirePermission(PermissionKeys.Hunger.FinanceRead)]
+    public async Task<IActionResult> CustodySettlement(Guid platformId, Guid supervisorEmployeeId, CancellationToken ct)
+    {
+        var result = await finance.CustodySettlementAsync(platformId, supervisorEmployeeId, ct);
+        return result.IsFailure ? result.ToProblem(HttpContext) : Ok(result.Value);
+    }
+    [HttpPost("finance/owner-collections/{receiptId:guid}/confirm")]
+    [RequirePermission(PermissionKeys.Hunger.OwnerCollectionsConfirm)]
+    public async Task<IActionResult> ConfirmOwnerCollection(Guid receiptId, HungerOwnerCollectionConfirmation request, CancellationToken ct)
+    {
+        var result = await finance.ConfirmOwnerCollectionAsync(receiptId, request, ct);
+        return result.IsFailure ? result.ToProblem(HttpContext) : Ok(result.Value);
+    }
+    [HttpPost("finance/exceptions")]
+    [RequirePermission(PermissionKeys.Hunger.ExceptionRequest)]
+    public async Task<IActionResult> RequestException(HungerExceptionRequest request, CancellationToken ct)
+    {
+        var result = await finance.RequestExceptionAsync(request, ct);
+        return result.IsFailure ? result.ToProblem(HttpContext) : Ok(result.Value);
+    }
+    [HttpPost("finance/exceptions/{exceptionId:guid}/approve")]
+    [RequirePermission(PermissionKeys.Hunger.ExceptionApprove)]
+    public async Task<IActionResult> ApproveException(Guid exceptionId, HungerExceptionDecision request, CancellationToken ct)
+    {
+        var result = await finance.DecideExceptionAsync(exceptionId, true, request, ct);
+        return result.IsFailure ? result.ToProblem(HttpContext) : Ok(result.Value);
+    }
+    [HttpPost("finance/exceptions/{exceptionId:guid}/reject")]
+    [RequirePermission(PermissionKeys.Hunger.ExceptionApprove)]
+    public async Task<IActionResult> RejectException(Guid exceptionId, HungerExceptionDecision request, CancellationToken ct)
+    {
+        var result = await finance.DecideExceptionAsync(exceptionId, false, request, ct);
+        return result.IsFailure ? result.ToProblem(HttpContext) : Ok(result.Value);
+    }
+    [HttpGet("finance/exceptions")]
+    [RequirePermission(PermissionKeys.Hunger.FinanceRead, PermissionKeys.Hunger.ExceptionApprove)]
+    public async Task<IActionResult> Exceptions(Guid platformId, string? status = null, int page = 1, int pageSize = 50, CancellationToken ct = default)
+    {
+        var result = await finance.ExceptionsAsync(platformId, status, page, pageSize, ct);
+        return result.IsFailure ? result.ToProblem(HttpContext) : Ok(result.Value);
+    }
+    [HttpPost("accounts/{accountId:guid}/wallet-review")]
+    [Consumes("multipart/form-data")]
+    [RequestSizeLimit(6 * 1024 * 1024)]
+    [RequirePermission(PermissionKeys.Hunger.WalletReview)]
+    public async Task<IActionResult> ReviewWalletImage(Guid accountId, [FromForm] HungerWalletReviewForm form, CancellationToken ct)
+    {
+        await using var stream = form.WalletEvidence?.OpenReadStream();
+        var image = form.WalletEvidence is { } file
+            ? new PrivateFileUpload(stream!, file.FileName, file.ContentType, file.Length) : null;
+        HungerWalletReviewRequest request;
+        try { request = form.ToRequest(await Request.ReadFormAsync(ct)); }
+        catch (ArgumentException)
+        {
+            return Result.Failure<HungerWalletReviewResponse>(HungerErrors.Invalid("حقول إصدارات استخدام اليوم غير صالحة أو متعارضة؛ أعد تحميل سياق التكليف.")).ToProblem(HttpContext);
+        }
+        var result = await finance.ReviewWalletWithImageAsync(accountId, request, image, ct);
         return result.IsFailure ? result.ToProblem(HttpContext) : Ok(result.Value);
     }
     [HttpPost("wallet-reviews/{reviewId:guid}/confirm")]
@@ -129,7 +230,28 @@ public sealed partial class HungerController(IHungerQualityService quality, IHun
         var result = await finance.ConfirmWalletAsync(reviewId, ct);
         return result.IsFailure ? result.ToProblem(HttpContext) : Ok(result.Value);
     }
+    // Multipart variant: field `request` holds the JSON swap request, `walletEvidence` the screenshot.
     [HttpPost("accounts/{accountId:guid}/rider-swap/review")]
+    [Consumes("multipart/form-data")]
+    [RequestSizeLimit(6 * 1024 * 1024)]
+    [RequirePermission(PermissionKeys.Hunger.WalletReview)]
+    public async Task<IActionResult> ReviewRiderSwapImage(Guid accountId, [FromForm] string? request, IFormFile? walletEvidence, CancellationToken ct)
+    {
+        HungerRiderSwapRequest? parsed = null;
+        try
+        {
+            var options = HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Options.IOptions<JsonOptions>>().Value.JsonSerializerOptions;
+            if (!string.IsNullOrWhiteSpace(request)) parsed = System.Text.Json.JsonSerializer.Deserialize<HungerRiderSwapRequest>(request, options);
+        }
+        catch (System.Text.Json.JsonException) { }
+        if (parsed is null) return Result.Failure<HungerRiderSwapReview>(HungerErrors.Invalid("حقل request يجب أن يحمل طلب التبديل بصيغة JSON.")).ToProblem(HttpContext);
+        await using var stream = walletEvidence?.OpenReadStream();
+        var image = walletEvidence is { } file ? new PrivateFileUpload(stream!, file.FileName, file.ContentType, file.Length) : null;
+        var result = await finance.ReviewRiderSwapWithImageAsync(accountId, parsed, image, ct);
+        return result.IsFailure ? result.ToProblem(HttpContext) : Ok(result.Value);
+    }
+    [HttpPost("accounts/{accountId:guid}/rider-swap/review")]
+    [Consumes("application/json")]
     [RequirePermission(PermissionKeys.Hunger.WalletReview)]
     public async Task<IActionResult> ReviewRiderSwap(Guid accountId, HungerRiderSwapRequest request, CancellationToken ct)
     {

@@ -208,6 +208,7 @@ internal sealed partial class FleetService(
                 || vehicle.VehicleManufacturerId != request.VehicleManufacturerId)
             && !await support.HasPermissionAsync(PermissionKeys.Fleet.VehicleIdentity, null, cancellationToken))
             return Result.Failure<VehicleDetailResponse>(FleetErrors.Forbidden);
+        // Serial, chassis, plate and registration type may now be edited directly through the upsert (still gated by the identity permission).
         if (vehicle is not null &&
             (!string.Equals(FleetServiceSupport.TrimOrNull(vehicle.SerialNumber), FleetServiceSupport.TrimOrNull(request.SerialNumber), StringComparison.Ordinal)
              || !string.Equals(FleetServiceSupport.TrimOrNull(vehicle.ChassisNumber), FleetServiceSupport.TrimOrNull(request.ChassisNumber), StringComparison.Ordinal)
@@ -216,7 +217,9 @@ internal sealed partial class FleetService(
              || !string.Equals(FleetServiceSupport.TrimOrNull(vehicle.PlateLettersAr), FleetServiceSupport.TrimOrNull(request.PlateLettersAr), StringComparison.Ordinal)
              || !string.Equals(FleetServiceSupport.TrimOrNull(vehicle.PlateLettersEn), FleetServiceSupport.TrimOrNull(request.PlateLettersEn), StringComparison.Ordinal)
              || !string.Equals(FleetServiceSupport.TrimOrNull(vehicle.PlateDigits), FleetServiceSupport.TrimOrNull(request.PlateDigits), StringComparison.Ordinal)
-             || vehicle.RegistrationType != request.RegistrationType)) return Result.Failure<VehicleDetailResponse>(FleetErrors.VehicleIdentityCorrectionRequired);
+             || request.RegistrationType.HasValue && vehicle.RegistrationType != request.RegistrationType)
+            && !await support.HasPermissionAsync(PermissionKeys.Fleet.VehicleIdentity, null, cancellationToken))
+            return Result.Failure<VehicleDetailResponse>(FleetErrors.Forbidden);
         if (vehicle is null && (normalizedSerial is null || normalizedChassis is null || normalizedAr is null || normalizedEn is null || !request.RegistrationType.HasValue)) return Result.Failure<VehicleDetailResponse>(FleetErrors.InvalidRequest);
         if (vehicle is not null && request.CurrentOdometer < vehicle.CurrentOdometer) return Result.Failure<VehicleDetailResponse>(FleetErrors.OdometerDecreased);
         var actor = support.UserId;
@@ -1450,6 +1453,19 @@ internal sealed partial class FleetService(
             v.PlateLettersAr = FleetServiceSupport.TrimOrNull(r.PlateLettersAr); v.PlateLettersEn = FleetServiceSupport.TrimOrNull(r.PlateLettersEn); v.PlateDigits = FleetServiceSupport.TrimOrNull(r.PlateDigits);
             v.ChassisNumber = FleetServiceSupport.TrimOrNull(r.ChassisNumber); v.NormalizedChassisNumber = normalizedChassis;
             v.RegistrationType = r.RegistrationType;
+        }
+        else
+        {
+            // Required identity fields keep their current value when omitted; optional plate parts follow the request.
+            static bool Differs(string? current, string? requested) => !string.Equals(FleetServiceSupport.TrimOrNull(current), FleetServiceSupport.TrimOrNull(requested), StringComparison.Ordinal);
+            if (normalizedSerial is not null && Differs(v.SerialNumber, r.SerialNumber)) { v.SerialNumber = FleetServiceSupport.TrimOrNull(r.SerialNumber); v.NormalizedSerialNumber = normalizedSerial; }
+            if (normalizedChassis is not null && Differs(v.ChassisNumber, r.ChassisNumber)) { v.ChassisNumber = FleetServiceSupport.TrimOrNull(r.ChassisNumber); v.NormalizedChassisNumber = normalizedChassis; }
+            if (normalizedAr is not null && Differs(v.PlateNumberAr, r.PlateNumberAr)) { v.PlateNumberAr = FleetServiceSupport.TrimOrNull(r.PlateNumberAr); v.NormalizedPlateNumberAr = normalizedAr; }
+            if (normalizedEn is not null && Differs(v.PlateNumberEn, r.PlateNumberEn)) { v.PlateNumberEn = FleetServiceSupport.TrimOrNull(r.PlateNumberEn); v.NormalizedPlateNumberEn = normalizedEn; }
+            if (Differs(v.PlateLettersAr, r.PlateLettersAr)) v.PlateLettersAr = FleetServiceSupport.TrimOrNull(r.PlateLettersAr);
+            if (Differs(v.PlateLettersEn, r.PlateLettersEn)) v.PlateLettersEn = FleetServiceSupport.TrimOrNull(r.PlateLettersEn);
+            if (Differs(v.PlateDigits, r.PlateDigits)) v.PlateDigits = FleetServiceSupport.TrimOrNull(r.PlateDigits);
+            if (r.RegistrationType.HasValue && v.RegistrationType != r.RegistrationType) v.RegistrationType = r.RegistrationType;
         }
         v.Vin = FleetServiceSupport.TrimOrNull(r.Vin)?.ToUpperInvariant(); v.EngineNumber = FleetServiceSupport.TrimOrNull(r.EngineNumber);
         v.SponsorId = r.SponsorId; v.OperatingCityId = r.OperatingCityId; v.RegisteredOwnerSupplierId = registeredOwnerSupplierId; v.RegisteredOwnerSponsorId = registeredOwnerSponsorId;

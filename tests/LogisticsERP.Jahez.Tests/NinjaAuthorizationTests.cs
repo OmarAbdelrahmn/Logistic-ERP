@@ -35,6 +35,7 @@ public sealed class NinjaAuthorizationTests
     [InlineData(nameof(NinjaController.Credentials), PermissionKeys.Ninja.AccountsUpdate)]
     [InlineData(nameof(NinjaController.UpdateAssignmentDates), PermissionKeys.Ninja.AssignmentDatesUpdate)]
     [InlineData(nameof(NinjaController.ImportPerformance), PermissionKeys.Ninja.PerformanceImport)]
+    [InlineData(nameof(NinjaController.DeletePerformance), PermissionKeys.Ninja.PerformanceDelete)]
     [InlineData(nameof(NinjaController.ImportDeductions), PermissionKeys.Ninja.DeductionsImport)]
     [InlineData(nameof(NinjaController.Performance), PermissionKeys.Ninja.Read)]
     [InlineData(nameof(NinjaController.Deductions), PermissionKeys.Ninja.Read)]
@@ -49,7 +50,7 @@ public sealed class NinjaAuthorizationTests
     public void EveryNinjaEndpointUsesOnlyNinjaPermissionKeys()
     {
         var actions = typeof(NinjaController).GetMethods().Where(m => m.GetCustomAttributes().OfType<HttpMethodAttribute>().Any()).ToArray();
-        Assert.Equal(20, actions.Length);
+        Assert.Equal(21, actions.Length);
         Assert.All(actions, action => Assert.StartsWith(AuthenticationPolicies.PermissionPrefix + "ninja.",
             action.GetCustomAttribute<RequirePermissionAttribute>()!.Policy, StringComparison.Ordinal));
     }
@@ -92,7 +93,7 @@ public sealed class NinjaAuthorizationTests
             new Claim(AuthenticationClaimNames.PasswordChangeRequired, "false") }, "test"));
         foreach (var permission in new[] { PermissionKeys.Ninja.Read, PermissionKeys.Ninja.AccountsUpdate,
             PermissionKeys.Ninja.AssignmentsCreate, PermissionKeys.Ninja.AssignmentsDelete, PermissionKeys.Ninja.AssignmentDatesUpdate,
-            PermissionKeys.Ninja.CredentialsRotate, PermissionKeys.Ninja.PerformanceImport, PermissionKeys.Ninja.DeductionsImport })
+            PermissionKeys.Ninja.CredentialsRotate, PermissionKeys.Ninja.PerformanceImport, PermissionKeys.Ninja.PerformanceDelete, PermissionKeys.Ninja.DeductionsImport })
         {
             var http = new DefaultHttpContext(); http.Request.Path = path;
             var context = new AuthorizationHandlerContext([new PermissionRequirement(permission)], principal, http);

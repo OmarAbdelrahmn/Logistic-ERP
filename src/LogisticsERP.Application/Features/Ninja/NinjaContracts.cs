@@ -86,6 +86,8 @@ public sealed record NinjaAccountResponse(Guid AccountId, string CaptainId, stri
 public sealed record NinjaPage<T>(IReadOnlyList<T> Items, int Page, int PageSize);
 public sealed record NinjaImportIssue(int RowNumber, string? CaptainId, string Message);
 public sealed record NinjaImportResponse(Guid? ImportId, DateOnly ReportDate, int ImportedRows, int SkippedRows, IReadOnlyList<NinjaImportIssue> Issues);
+public sealed record NinjaPerformanceDeletionResponse(DateOnly ReportDate, Guid? SponsorId, int PerformanceRowsDeleted,
+    int SourcesDeleted, int ProvenanceRowsDeleted);
 public sealed record NinjaPerformanceResponse(Guid Id, Guid AccountId, Guid AssignmentId, Guid RiderProfileId,
     DateOnly ReportDate, string CaptainId, int TotalOrders, decimal TotalWorkingHours);
 public sealed record NinjaDeductionResponse(Guid Id, Guid AccountId, Guid AssignmentId, Guid RiderProfileId,
@@ -111,6 +113,7 @@ public interface INinjaService
     Task<Result<NinjaAssignmentDatesResponse>> UpdateAssignmentDatesAsync(Guid accountId, Guid assignmentId, NinjaAssignmentDatesRequest request, CancellationToken ct = default);
     Task<Result<NinjaCredentialResponse>> UpdateCredentialsAsync(Guid accountId, NinjaCredentialRequest request, CancellationToken ct = default);
     Task<Result<NinjaImportResponse>> ImportAsync(bool deductions, DateOnly reportDate, string fileName, byte[] content, CancellationToken ct = default);
+    Task<Result<NinjaPerformanceDeletionResponse>> DeletePerformanceAsync(DateOnly reportDate, Guid? sponsorId, string reason, CancellationToken ct = default);
     Task<Result<NinjaPage<NinjaPerformanceResponse>>> GetPerformanceAsync(DateOnly dateFrom, DateOnly dateTo, Guid? accountId, Guid? riderId, int page, int pageSize, CancellationToken ct = default);
     Task<Result<NinjaPage<NinjaDeductionResponse>>> GetDeductionsAsync(DateOnly dateFrom, DateOnly dateTo, Guid? accountId, Guid? riderId, int page, int pageSize, CancellationToken ct = default);
 }

@@ -123,6 +123,16 @@ public sealed class NinjaController(INinjaService service) : ControllerBase
     public Task<IActionResult> Performance(DateOnly from, DateOnly to, Guid? accountId, Guid? riderId, int page = 1, int pageSize = 50,
         CancellationToken ct = default) => ToAction(service.GetPerformanceAsync(from, to, accountId, riderId, page, pageSize, ct));
 
+    [HttpDelete("performance")]
+    [RequirePermission(PermissionKeys.Ninja.PerformanceDelete)]
+    public async Task<IActionResult> DeletePerformance([FromQuery, Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] DateOnly reportDate, [FromQuery] string reason,
+        [FromQuery] Guid? sponsorId = null, CancellationToken ct = default)
+    {
+        if (Request.Query.TryGetValue("sponsorId", out var suppliedSponsor) && string.IsNullOrWhiteSpace(suppliedSponsor))
+            return Result.Failure<NinjaPerformanceDeletionResponse>(NinjaErrors.Invalid("حدد الكفيل أو احذف المعامل لحذف أداء اليوم لجميع الحسابات.")).ToProblem(HttpContext);
+        return await ToAction(service.DeletePerformanceAsync(reportDate, sponsorId, reason, ct));
+    }
+
     [HttpGet("deductions")]
     [RequirePermission(PermissionKeys.Ninja.Read)]
     public Task<IActionResult> Deductions(DateOnly from, DateOnly to, Guid? accountId, Guid? riderId, int page = 1, int pageSize = 50,

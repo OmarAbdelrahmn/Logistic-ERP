@@ -24,6 +24,7 @@ internal sealed class HungerSettlementConfiguration : IEntityTypeConfiguration<H
         b.Property(x => x.IdempotencyKey).HasMaxLength(150); b.Property(x => x.RequestHash).HasMaxLength(64);
         b.Property(x => x.EvidenceReference).HasMaxLength(1000);
         b.Property(x => x.WalletBalance).HasPrecision(18, 2); b.Property(x => x.CompanyControlTotal).HasPrecision(18, 2); b.Property(x => x.CanonicalGrossTotal).HasPrecision(18, 2);
+        b.Property(x => x.RiderBalanceTotal).HasPrecision(18, 2);
         b.HasIndex(x => new { x.ClientPlatformId, x.IdempotencyKey }).IsUnique();
         b.HasIndex(x => new { x.PlatformRiderAccountId, x.Kind, x.ChargeFrom, x.ChargeThrough }).IsUnique().HasFilter("[Kind]='MonthClose' AND [PlatformRiderAccountId] IS NOT NULL");
     }

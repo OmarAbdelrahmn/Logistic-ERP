@@ -98,6 +98,7 @@ public sealed record JahezCashboxHandoverCancel(string Reason, string RowVersion
 
 public interface IJahezWorkflowService
 {
+    Task<Result<JahezPerformanceDeletionResponse>> DeletePerformanceAsync(DateOnly reportDate, Guid? sponsorId, string reason, CancellationToken ct = default);
     Task<Result<JahezPage<JahezSettlementReminder>>> SettlementRemindersAsync(int page, int pageSize, CancellationToken ct = default);
     Task<Result<JahezHandoverResponse>> HandoverAsync(string key, JahezHandoverRequest request, CancellationToken ct = default);
     Task<Result<JahezEarningsStatement>> RecordEarningsAsync(string key, JahezEarningsRequest request, CancellationToken ct = default);

@@ -1,0 +1,60 @@
+﻿{
+    "Passed":  true,
+    "Mode":  "Apply",
+    "Database":  "db67927",
+    "Server":  "db67927.public.databaseasp.net",
+    "VerifiedAtUtc":  "2026-11-11T08:39:58.0920811+00:00",
+    "Applied":  true,
+    "AlreadyAppliedBeforeRun":  false,
+    "Batches":  44,
+    "ApplicationMigrations":  [
+                                  "20261111071640_HungerCr005SealEvidenceExceptions",
+                                  "20261111073327_HungerCr005InvoiceFedMonthClose",
+                                  "20261111074551_HungerCr005AdjustmentApprovalDate",
+                                  "20261111081325_HungerCr005WalletPendingDisposition",
+                                  "20261111082612_HungerCr005FinanceReadViews"
+                              ],
+    "IdentityMigrations":  [
+                               "20261111071648_GrantHungerCr005Permissions"
+                           ],
+    "FinanceConfigurations":  0,
+    "FreshConnectionVerified":  true,
+    "ScriptSha256":  {
+                         "hunger-cr005-application.sql":  "916E959C54BA934C8B9D15ADABF1DA8739BDB41446BFC625A005684B2A2748E4",
+                         "hunger-cr005-identity.sql":  "0BE8C403B8D8F410616D8A349E972780C36F3AEB601BF673D67C20F037BF8DCA"
+                     },
+    "BackupPath":  "D:\\Services\\MSSQL\\Backup\\db67927_before_hunger_cr005_20261111_083943.bak",
+    "ApiPublishedByThisRun":  false,
+    "FinancialEvents":  [
+                            {
+                                "Kind":  "WalletDelivery",
+                                "Status":  "Posted",
+                                "Records":  1,
+                                "Amount":  0.00
+                            },
+                            {
+                                "Kind":  "WalletReturn",
+                                "Status":  "Posted",
+                                "Records":  4,
+                                "Amount":  2226.75
+                            }
+                        ],
+    "Dispositions":  [
+                         {
+                             "Disposition":  "AdministrativeStop",
+                             "Records":  43
+                         },
+                         {
+                             "Disposition":  "DeferredNextMonth",
+                             "Records":  7
+                         },
+                         {
+                             "Disposition":  "Normal",
+                             "Records":  173
+                         },
+                         {
+                             "Disposition":  "Problem",
+                             "Records":  88
+                         }
+                     ]
+}

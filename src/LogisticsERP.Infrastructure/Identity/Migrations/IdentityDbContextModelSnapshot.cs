@@ -3302,6 +3302,87 @@ namespace LogisticsERP.Infrastructure.Identity.Migrations
                             PermissionKey = "fleet.vehicles.fields.identity",
                             RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
                             RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000317"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "ninja.performance.delete",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000318"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "hunger.performance.delete",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000319"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "jahez.performance.delete",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000320"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "chefz.performance.delete",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000321"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "hunger.finance.seal",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000322"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "hunger.finance.funding.approve",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000323"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "hunger.finance.exception.request",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000324"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "hunger.finance.exception.approve",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
+                        },
+                        new
+                        {
+                            Id = new Guid("019c18d5-62e1-7000-b000-000000000325"),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsDeleted = false,
+                            PermissionKey = "hunger.finance.owner_collections.confirm",
+                            RoleId = new Guid("019c18d5-62e1-7000-9000-000000000001"),
+                            RowVersion = new byte[0]
                         });
                 });
 

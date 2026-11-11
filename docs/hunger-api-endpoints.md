@@ -181,6 +181,16 @@ All finance endpoints require the Hunger and HungerFinance feature flags and an 
 
 A missing prior close is Unknown, even if the caller supplies zero. Zero is legitimate only when the account has no earlier assignments, usage, contributions, financial events, or settlement history. Existing negative-balance handover policy is unchanged.
 
+### Optional wallet image (2026-11-08)
+
+`POST /api/hunger/accounts/{accountId}/wallet-review` now consumes **multipart/form-data**, replacing its JSON request body. Keep the existing scalar field names. `walletEvidence` is an optional **file**, not a text reference. Omit the file part when no image is available; do not send the literal text `null`. Accepted images: JPEG, PNG, WebP, GIF and BMP, up to 5 MiB, with extension and content signature validation. Empty or invalid uploaded files are rejected.
+
+Send nested assignment/return properties as dotted form fields, for example `assignment.actualRiderProfileId`, `assignment.effectiveFrom`, `assignment.wasBackdated`, `assignment.compensationModel`, or `return.effectiveTo`, `return.status`, `return.reason`, `return.rowVersion`. Use indexed dotted fields for nested collections. Omit nullable fields when absent. Continue sending `closingBalance=0` and `provenAdjustments=0` for a confirmed first-period account.
+
+Files are saved with generated names under `wwwroot/private/hunger/wallets/{accountId}/`. The review response includes `walletEvidence`, a root-relative image URL (`/private/hunger/wallets/...`) or `null` when omitted. Resolve this URL against the API origin. Confirmation retains that same link in the financial event's `evidenceReference`, wallet observations, history and exports. When no file was supplied, the existing non-null database evidence column stores an empty string. Failed review creation removes the uploaded file. Successful reviews retain their images even if later superseded or expired, preserving evidence history. Confirmation remains a separate POST with no body. No database migration is required.
+
+The rider-swap review endpoint retains its existing JSON contract. Its evidence references and legacy stored review payloads remain supported.
+
 An adjustment's `invoicePeriod` is the month being adjusted and must equal its linked MonthClose's `chargeFrom`. The economic source key is `(accountId, invoicePeriod, sourceDocumentType, sourceReference)`, independent of `idempotencyKey`. Reusing the source with a different key returns a conflict. Only `Matched` adjustments linked to the specific prior close and observed by the review date enter posted A. Capturing a source alone never matches it.
 
 Withdrawal kinds remain `WithdrawalCompany` and `WithdrawalSupervisor`. In addition to the existing money fields, supply:
@@ -322,3 +332,136 @@ Default internal hours rules: `<8` High, `8.. <10` Warning, `>=10` no short-hour
 Catalog evaluations include rule ID, evidence, code, metric, actual, threshold, severity, date, match and target deficit. Monthly targets use scheduled responsibility divided by calendar month length, not attended hours. A shared day without known scheduled rider weights leaves the rider target unresolved instead of splitting equally. The row-level target/deficit/achievement/forecast summarizes one monthly CompletedOrders target code, combining its effective date/city versions; all other metrics remain independently visible in `catalog`. Coverage cutoff is the earlier of the requested through date and the previous completed Riyadh business date (`coverageThrough`). Monthly rows extend scheduled responsibility through the last requested month end, so a partial-month data query still forecasts to month end; observed source totals remain limited to the requested dates. Forecast uses `forecastObservedOrders` through that cutoff; row totals may additionally include an imported current day. Actual vehicle type and ownership are independent dimensions. For elapsed responsibility `e` and remaining `r`, orders `O`, target `T`: forecast `O + O/e*r`; required pace `max(T-O,0)/r`. `e=0` has no run rate; `r=0` returns the observed end result with no required pace. Gaps suppress a reliable forecast. Export includes the requested scope and cutoff, with complete Alerts and Catalog worksheets (the main sheet contains their counts), avoiding Excel cell-length truncation of rule evidence.
 
 Positive NoShow shifts create one `Potential` fine per operational source, atomically with import; replay creates no duplicate. The number is shifts, not days or money. Resolve to `Invoiced` only with a Matched invoice covering the same account/source day and the specified canonical source line. An invoice line may declare optional `noShowCount` in `HungerInvoiceSourceLine`. Several daily reviews can share that canonical monthly line only within its observed shift count; without a count, only one source can be linked. A rider-specific line requires the same unambiguous source rider. Waive with evidence and no invoice reference. Both transitions check the row version and are terminal; no transition posts rider debt, treasury entries, or account blocks. Invoice capture likewise remains separate from rider accounting.
+
+## CR-005 phase 1: seal, evidence files, exceptions (2026-11-11)
+
+Application migration `HungerCr005SealEvidenceExceptions`, Identity migration `GrantHungerCr005Permissions`. Not applied to any database yet.
+
+Every financial event now carries `approvalStatus`: `NotRequired`, `PendingSeal`, `Sealed`, `Rejected` or `Cancelled`. Top-ups, collections, withdrawals, rider payments and wallet delivery/return events are created as `PendingSeal`. Funding and audit rows are `NotRequired`. Rows that existed before the migration are backfilled to `Sealed` with `approvedAtUtc = createdAtUtc` and no approver. `HungerMoneyResult` and `HungerFinancialEventItem` gained `approvalStatus`; the event item also has `approvedAtUtc`, `supersedesEventId`, `rejectionReason`.
+
+| Method | Route | Permission | Body / query |
+|---|---|---|---|
+| POST | `finance/events/{eventId}/seal` | `hunger.finance.seal` | `{ accounts?: { [label]: code }, note? }` |
+| POST | `finance/events/{eventId}/reject` | `hunger.finance.seal` | `{ reason }` |
+| GET | `finance/seal-queue` | `hunger.finance.seal` or `hunger.finance.read` | `platformId`, `status` = `PendingSeal` (default) or `Rejected`, `page`, `pageSize` |
+| POST | `finance/evidence` (multipart) | wallet review, top-up request/execute or withdrawal request | `platformId`, `accountId`, `purpose` = `WalletBefore`/`WalletAfter`/`Wallet`/`Arrival`, `observedOn`, `file` (image, max 5 MB) |
+| POST | `finance/exceptions` | `hunger.finance.exception.request` | `{ platformId, kind, accountId?, supervisorEmployeeId?, amount, reason, idempotencyKey, evidenceReference? }` |
+| POST | `finance/exceptions/{id}/approve` | `hunger.finance.exception.approve` | `{ note? }` |
+| POST | `finance/exceptions/{id}/reject` | `hunger.finance.exception.approve` | `{ note }` (required) |
+| GET | `finance/exceptions` | `hunger.finance.read` or `hunger.finance.exception.approve` | `platformId`, `status?`, `page`, `pageSize` |
+
+Rules:
+
+- The user who created an event cannot seal it, and the requester of an exception cannot decide it. Both return 409.
+- Seal and reject are idempotent. Reject never moves money: the rejected row keeps its custody/wallet effect.
+- To replace a rejected top-up or withdrawal, post the corrected request to `finance/events` with `supersedesEventId` set to the rejected row. Same account and supervisor, same family (top-up or withdrawal). A replacement top-up is stored with status `AwaitingSeal` and no postings. Sealing it reverses the rejected row's postings, marks that row `Cancelled`, and posts the replacement, all in one transaction. Only one live replacement per rejected row; a rejected replacement is dead and the original must be replaced again.
+- Custody check for a replacement top-up counts the amount the rejected row will return.
+- `accounts` at seal is stored verbatim for the finance reader; the ERP does not validate or use the codes.
+- `kind` for exceptions is `NonZeroHandover` (needs `accountId`) or `CustodyIdentityMismatch` (needs `supervisorEmployeeId`). `amount` is signed and non-zero. Nothing consumes approvals yet; that arrives with the hand-over rules.
+- Evidence upload returns `{ evidenceFileId, purpose, observedOn, link }`. Nothing requires or attaches evidence files yet.
+
+## CR-005 phase 2: hand-over rules and invoice-fed month close (2026-11-11)
+
+Application migration `HungerCr005InvoiceFedMonthClose` (one nullable column, `SettlementDocuments.RiderBalanceTotal`). Not applied to any database yet.
+
+### Always on
+
+- **Closing balance and adjustments are derived by the server.** `closingBalance`, `provenAdjustments`, `closingEvidence` and `adjustmentEvidence` on the wallet-review request are accepted and ignored. The review response returns the values used: `closingBalance`, `provenAdjustments` and `closingSource` = `Invoice`, `Manual`, `NoPriorPeriod`, `InvoiceAbsent` or `Unknown`. Confirmation stays blocked while the source is `Unknown`.
+- **Invoice-fed month close.** An `Invoice` settlement request may carry `riderBalance` (the invoice "Rider Balance", >= 0) on `RiderLVL` lines, with `riderBalanceControlTotal` on the request. Requirements: the invoice covers the full month of `invoicePeriod`, each such line has an `accountId`, one line per account, and the control total is present. When the sum equals the control total and the invoice is otherwise `Matched`, a `MonthClose` with `walletBalance = -riderBalance` is created per listed account. A control mismatch makes the invoice `NeedsReview` and creates nothing.
+- The response has `generatedCloses` and `closeConflictAccountIds`. An account that already has a month close for that period with a different balance is never overwritten; it is listed as a conflict and its existing close stays authoritative.
+- An account with a prior period that is **not listed** in such an invoice closes at 0 (`closingSource = InvoiceAbsent`).
+
+### Behind `Features:HungerFinanceCr005`
+
+- **Screenshot is mandatory.** `accounts/{id}/wallet-review` without `walletEvidence` returns 400. The JSON `rider-swap/review` returns 400; use the multipart variant.
+- **Multipart rider swap.** `POST accounts/{id}/rider-swap/review` with `Content-Type: multipart/form-data`: field `request` holds the swap request as a JSON string, field `walletEvidence` the image. One screenshot is stored and used for both reviews.
+- **Zero or approval on hand-over.** A Deliver whose attributed balance is not zero needs `exceptionApprovalId` (wallet review) or `handoverExceptionApprovalId` (swap request): an `Approved`, unused `NonZeroHandover` exception for the same account and exactly that amount. The review response sets `requiresException`. Confirmation without it returns 409; on success the approval becomes `Consumed` and is linked to the delivery event. Return is not affected. In a swap the receiver only inherits a negative balance, so a positive balance needs no exception.
+
+## CR-005 phase 3: close-adjustment rider entries (2026-11-11)
+
+Application migration `HungerCr005AdjustmentApprovalDate` (one nullable column, `SettlementDocuments.ApprovalDate`). Not applied to any database yet.
+
+`POST finance/settlement-documents/{documentId}/reconcile` body is now `{ closingSnapshotId, evidenceReference, approvalDate?, supervisorEmployeeId? }`.
+
+With `Features:HungerFinanceCr005` off the behaviour is unchanged: the adjustment becomes `Matched` and nothing is posted.
+
+With the flag on:
+
+- `approvalDate` (the day the platform approved the adjustment) and `supervisorEmployeeId` are required. The date must be after the closed month and not in the future; the supervisor must have an approved finance configuration.
+- The **closer** is the rider holding the account on the last day of the closed month; the **holder** is the rider holding it on `approvalDate`. On a swap day the rider who ended the day with the account counts.
+- The adjustment becomes `Matched` and two financial events are created with `businessDate = approvalDate`, both `PendingSeal`, role `RiderClearing`:
+  - `CloseAdjustmentAdvance` on the holder, `riderBalanceChange = -adjustment`;
+  - `CloseAdjustmentWash` on the closer, `riderBalanceChange = +adjustment`.
+  When holder and closer are the same rider the two entries net to zero. A zero adjustment creates no events.
+- No custody or treasury posting is ever created by an adjustment.
+- The advance is linked through `relatedEventId` to the holder's most recent posted `TopUpAdvance` on that account between the month end and `approvalDate`, when one exists. The remaining top-up is `topUp.amount - adjustment`; the top-up row itself is not changed.
+- If either rider cannot be determined the adjustment becomes `NeedsReview`, nothing is posted, and it is not counted in the wallet formula. Reconcile again after the assignment history is corrected.
+- Reconciling a `Matched` adjustment again is a no-op; a different `approvalDate` returns 409.
+
+Fix shipped with this phase: the persistence guard rejected every update to a settlement document, so reconciling an adjustment failed with a server error whenever the guard was active. Adjustment reconciliation (status, reconciliation evidence, approval date) is now an allowed transition.
+
+## CR-005 phase 4: top-ups (2026-11-11)
+
+No migration. All behaviour below is behind `Features:HungerFinanceCr005` except the shared remittance-source rule.
+
+- **Before and after screenshots.** `TopUpAdvance` and `TopUpCollected` posted through `finance/events` need `evidenceBeforeId` and `evidenceAfterId`: two unused files uploaded with `finance/evidence` for the same account, purposes `WalletBefore` and `WalletAfter`. They are attached to the top-up and cannot be reused. `evidenceReference` is still a required text note.
+- **Requested top-ups.** `finance/requests` takes no screenshots. `finance/requests/{id}/execute` now accepts an optional body `{ evidenceBeforeId, evidenceAfterId }`; an empty body still works for funding and with the flag off.
+- **Collected top-up.** Custody -> wallet is posted as before. The second leg into supervisor collections is no longer posted. The event gets `destinationChannel = OwnerVault`, and a child event `OwnerCollectionReceipt` (`status = PendingReceipt`, `relatedEventId` = the top-up) records the cash expected by the owner. No treasury posting exists for that cash. Such top-ups are not remittance sources and do not count in `pendingRemittances`.
+- **Confirming owner cash.** `POST finance/owner-collections/{receiptId}/confirm`, permission `hunger.finance.owner_collections.confirm`, body `{ idempotencyKey, businessDate, evidenceReference, capacity }` with `capacity` = `Accountant` or `Owner`. The receipt becomes `Received`; an `OwnerCollectionConfirmation` audit event stores the capacity and the confirming user.
+- **Replacing a rejected collected top-up.** Sealing the replacement cancels the rejected row's pending receipt and creates one for the replacement. If the owner already confirmed the original cash, the seal returns 409; there is no correction path for that case yet.
+- **Custody proposal.** A top-up request larger than the supervisor's custody is still stored as a request, and a `CustodyProposal` event (`status = Open`, `amount` = shortfall, `relatedEventId` = the request) is created. Execution stays blocked until custody covers it. Nothing closes a proposal yet; that arrives with the withdraw and funding phases.
+
+Always on: the rule for what a supervisor can remit is now defined once. A collected top-up is remittable only if it is a legacy row (`destinationChannel` empty) with status `Posted`, so cancelled or not-yet-sealed replacement rows are excluded.
+
+## CR-005 phase 5: withdraw, account status, wallet alert (2026-11-11)
+
+Application migration `HungerCr005WalletPendingDisposition` (adds `WalletPending` to the allowed account dispositions). Not applied to any database yet.
+
+Behind `Features:HungerFinanceCr005`:
+
+- **Withdrawal channel.** Withdrawals posted through `finance/events` need `destinationChannel`: `Stc` (only with `WithdrawalSupervisor`, into the supervisor's own receive account), `Cashbox` (company account located in the central treasury) or `Bank` (company bank account). The chosen sub-account must match the channel. The channel is stored on the event.
+- **Withdrawal screenshot.** `walletEvidenceId`: one unused `Wallet` file uploaded with `finance/evidence` for the same account.
+- **Remittance confirmation.** `finance/remittances/{id}/confirm` needs `destinationType = "Company"`, `destinationOwnerId` and `destinationChannel` = `Cashbox` or `Bank`, matching the receiving sub-account. Nothing defaults to the company bank any more.
+- **Custody proposal on return.** When a Return confirms with a negative attributed wallet and the supervisor's custody cannot cover the amount needed to bring it to zero, a `CustodyProposal` event is created (`status = Open`, `amount` = shortfall, `relatedEventId` = the `WalletReturn`) and the account disposition changes from `Normal` to `WalletPending`, with a business-details revision.
+- **Reopening the account.** A `WalletPending` account refuses hand-over reviews, except one whose `mobileBalance` is 0. Confirming that hand-over resolves the open proposals and returns the disposition to `Normal`. An accounts import never overwrites `WalletPending`.
+- **Short top-up request.** The proposal raised by a top-up request larger than custody is resolved when that request executes.
+- A rider swap never raises a proposal: a negative wallet passes to the receiver under the approved hand-over exception.
+
+Always on:
+
+- `GET wallets` items have `alert`: `CustodyProposalOpen` when the account has an open proposal, `WalletNotZero` when the account is unassigned and its latest observed balance is not zero, otherwise `None`. Filter with `alertOnly=true`. The export has an `Alert` column. The alert clears by itself.
+- If `destinationChannel` is sent with the flag off it is still validated and stored.
+
+## CR-005 phase 6: custody funding chain and settlement identity (2026-11-11)
+
+No migration. Behind `Features:HungerFinanceCr005`:
+
+| Step | Route | Permission | Notes |
+|---|---|---|---|
+| Request | `POST finance/requests` (`kind = "Funding"`) | `hunger.finance.funding.request` | Supervisor. Any `counterSubAccountId` sent here is ignored at delivery. |
+| Approve | `POST finance/requests/{id}/approve` | `hunger.finance.funding.approve` | Body `{ amount?, sourceSubAccountId, note? }`. `amount` defaults to the requested amount and may be edited. |
+| Reject | `POST finance/requests/{id}/reject` | `hunger.finance.funding.approve` | Body `{ note }` (required). Final. |
+| Deliver | `POST finance/requests/{id}/execute` | `hunger.finance.funding.execute` | Cashier or bank teller. Posts the approved amount from the approved source into custody. |
+
+- The source may be any active posting sub-account of the sponsor located in the central treasury or a bank; it is chosen per request.
+- The requester cannot approve their own request. The decision is stored as a `FundingApproval` audit event.
+- Posting `Funding` directly through `finance/events` returns 400.
+- `GET finance/custody-settlement?platformId&supervisorEmployeeId` (permission `hunger.finance.read`, available with the flag off too) returns `fundingDelivered`, `topUpAdvance`, `topUpCollected`, `cancelledTopUps`, `expectedBalance`, `postingBalance`, `difference`, `balanced`, `exceptionApproved`.
+- While `difference` is not zero, top-ups for that supervisor return 409 unless an `Approved` `CustodyIdentityMismatch` exception exists for that supervisor with exactly that amount. The approval is not consumed: it covers top-ups for as long as the difference stays the same.
+
+## CR-005 phase 7: finance_read views (2026-11-11)
+
+Application migration `HungerCr005FinanceReadViews` creates schema `finance_read` and five views. The SQL has not been executed against SQL Server yet (LocalDB would not start on the development machine); the test `HungerSqlFinanceReadViewsExposeSealStateAndTheWalletFormulaInputs` covers it and must be run with `LOGISTICS_HUNGER_SQL_TESTS=1` before deployment.
+
+| View | Content |
+|---|---|
+| `vw_hunger_financial_events_v1` | Every financial event with `Role`, `ApprovalStatus`, approver, `IsSealed`, `SupersedesEventId`, `DestinationChannel`, `ExpenseLabel` (`HungerWalletTopUpExpense` for owner-vault collected top-ups), `SealAccountsJson` |
+| `vw_hunger_wallet_reviews_v1` | One row per wallet review: `Direction`, `M`, `MObservedAt`, `C`, `A`, `ClosingSource`, `ExplicitBalance`, `ApprovalId`, linked `EventId` and its seal state |
+| `vw_hunger_month_close_v1` | Month closes: `C`, `Source` (`Invoice`/`Manual`), summed matched `A`, status |
+| `vw_hunger_adjustments_v1` | Adjustments: `A`, status, `ApprovalDate`, source reference |
+| `vw_hunger_custody_v1` | Per supervisor: funding, top-ups, expected and posting balance, difference |
+
+- Views show all rows; filter `IsSealed = 1` for company books. Funding rows are never sealed (`ApprovalStatus = NotRequired`) because they are approved before delivery.
+- `C`, `A` and `ClosingSource` in the wallet-reviews view are filled only for reviews confirmed after this release; they are stored on the wallet event at confirmation.
+- Column names are a contract. Change them only by adding a `_v2` view.
+- The migration grants nothing. Give the reader login `GRANT SELECT ON SCHEMA::finance_read` at deployment.

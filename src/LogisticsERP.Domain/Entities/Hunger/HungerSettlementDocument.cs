@@ -17,9 +17,13 @@ public sealed class HungerSettlementDocument : HistoryEntity
     public DateOnly ChargeFrom { get; set; }
     public DateOnly ChargeThrough { get; set; }
     public DateOnly ObservedOn { get; set; }
+    // Adjustment only: the day the platform approved it. Decides which rider the adjustment belongs to.
+    public DateOnly? ApprovalDate { get; set; }
     public decimal? WalletBalance { get; set; }
     public decimal? CompanyControlTotal { get; set; }
     public decimal? CanonicalGrossTotal { get; set; }
+    // Set on an invoice whose rider balances matched their control total; such an invoice is the source of month closes.
+    public decimal? RiderBalanceTotal { get; set; }
     public string Status { get; set; } = string.Empty;
     public string IdempotencyKey { get; set; } = string.Empty;
     public string RequestHash { get; set; } = string.Empty;

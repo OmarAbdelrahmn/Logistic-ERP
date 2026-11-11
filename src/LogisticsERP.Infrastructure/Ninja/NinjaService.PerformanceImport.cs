@@ -31,7 +31,7 @@ internal sealed partial class NinjaService
                 if (!plan.Valid) return Result.Success(new NinjaImportResponse(null, date, 0, 0,
                     plan.Rows.Where(r => r.Issues.Count > 0).SelectMany(r => r.Issues.Select(i => new NinjaImportIssue(r.RowNumber, r.CaptainId, i))).ToArray()));
                 // The same batch replay is read-only; don't duplicate the artifact or create extra history.
-                if (plan.Imports.Count == 0) return Result.Success(plan.Results[0]);
+                if (plan.Imports.Count == 0 && plan.Sources.Count == 0) return Result.Success(plan.Results[0]);
                 plan.Stage(db); await NinjaPerformanceImportService.Artifact(db, plan, null, name, content, ct);
                 return await Persist(plan.Results[0], ct);
             });

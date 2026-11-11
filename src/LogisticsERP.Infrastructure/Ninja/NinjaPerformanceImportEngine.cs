@@ -70,7 +70,8 @@ internal static class NinjaPerformanceImportEngine
                 var allocation = await allocator.AllocateAsync(account, row.Date,
                     new Dictionary<PlatformDayMetric, decimal> { [PlatformDayMetric.OrdersCount] = row.Orders, [PlatformDayMetric.WorkingHours] = row.Hours }, ct);
                 if (allocation.IsFailure) { rows.Add(new(row.RowNumber, row.CaptainId, row.Date, account, row.Orders, row.Hours, "UnresolvedAllocation", [allocation.Error.Description])); continue; }
-                if (previousBatch is not null) { rows.Add(new(row.RowNumber, row.CaptainId, row.Date, account, row.Orders, row.Hours, "Conflict", ["The saved batch no longer matches its original scope."])); continue; }
+                // A day deletion may remove only one sponsor from this batch. Rebuild missing
+                // account/days using the corrected assignments while leaving surviving rows intact.
                 rows.Add(new(row.RowNumber, row.CaptainId, row.Date, account, row.Orders, row.Hours, "New", []));
                 var source = new NinjaDailyPerformanceSource { PlatformRiderAccountId = account, ImportId = batch.Id, ReportDate = row.Date,
                     CaptainId = row.CaptainId, SourceRowNumber = row.RowNumber, TotalOrders = row.Orders, TotalWorkingHours = row.Hours };

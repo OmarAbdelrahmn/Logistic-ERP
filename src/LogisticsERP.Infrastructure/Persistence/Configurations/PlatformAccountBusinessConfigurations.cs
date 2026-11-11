@@ -21,7 +21,7 @@ internal sealed class PlatformAccountBusinessConfigurations : IEntityTypeConfigu
         b.Property(x => x.SourceActualIqama).HasMaxLength(50); b.Property(x => x.SourceCompensationModel).HasMaxLength(150);
         b.Property(x => x.SourceVehicleDescription).HasMaxLength(150); b.Property(x => x.SourceReference).HasMaxLength(500);
         b.Property(x => x.SourceOpeningWallet).HasPrecision(18, 2);
-        b.ToTable(t => t.HasCheckConstraint("CK_PlatformBusiness_Disposition", "[OperationalDisposition] IN ('Normal','Problem','AdministrativeStop','Blocked','DeferredNextMonth')"));
+        b.ToTable(t => t.HasCheckConstraint("CK_PlatformBusiness_Disposition", "[OperationalDisposition] IN ('Normal','Problem','AdministrativeStop','Blocked','DeferredNextMonth','WalletPending')"));
     }
     public void Configure(EntityTypeBuilder<PlatformAccountBusinessRevision> b)
     {

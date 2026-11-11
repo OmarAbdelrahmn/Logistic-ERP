@@ -32,7 +32,7 @@ public sealed partial class ChefzWorkflowTests
         var deleted = Value(await f.Service.DeletePerformanceAsync(date, ct));
         Assert.Equal(1, deleted.PerformanceRowsDeleted);
         Assert.Equal(1, deleted.SourcesDeleted);
-        Assert.Equal(1, deleted.ImportsDeleted);
+        Assert.Equal(0, deleted.ImportsDeleted); // Original import evidence is retained, including shared sponsor batches.
         f.Db.ChangeTracker.Clear();
         Assert.Equal(date.AddDays(1), (await f.Db.ChefzDailyPerformance.SingleAsync(ct)).ReportDate);
         var repeated = Value(await f.Service.DeletePerformanceAsync(date, ct));

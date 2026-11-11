@@ -4,6 +4,7 @@ using LogisticsERP.Application.Features.Hunger;
 using LogisticsERP.Domain.Entities.Hunger;
 using LogisticsERP.Domain.Entities.Jahez;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace LogisticsERP.Infrastructure.Hunger;
 
@@ -31,24 +32,78 @@ internal sealed partial class HungerQualityService
         {
             var old = await db.Set<HungerFinancialEvent>().SingleOrDefaultAsync(e => e.ClientPlatformId == request.PlatformId && e.IdempotencyKey == request.IdempotencyKey, ct);
             if (old != null) return old.RequestHash == hash ? Result.Success(MoneyResult(old)) : Result.Failure<HungerMoneyResult>(HungerErrors.Conflict("مفتاح مستخدم لطلب مختلف."));
-            if (await FinanceConfig(request.PlatformId, request.SupervisorEmployeeId, ct) == null)
+            var config = await FinanceConfig(request.PlatformId, request.SupervisorEmployeeId, ct);
+            if (config == null)
                 return Result.Failure<HungerMoneyResult>(HungerErrors.Conflict("الربط المالي غير معتمد."));
             if (request.Kind != "Funding" && (!request.AccountId.HasValue || !await db.PlatformRiderAccounts.AnyAsync(a => a.Id == request.AccountId && a.ClientPlatformId == request.PlatformId, ct)))
                 return Result.Failure<HungerMoneyResult>(HungerErrors.Invalid("حساب هنقر مطلوب."));
             var item = new HungerFinancialEvent { ClientPlatformId = request.PlatformId, SupervisorEmployeeId = request.SupervisorEmployeeId,
                 PlatformRiderAccountId = request.AccountId, RiderProfileId = request.RiderProfileId, Kind = "MoneyRequest", Status = "Requested", Amount = request.Amount,
                 BusinessDate = request.BusinessDate, IdempotencyKey = request.IdempotencyKey, RequestHash = hash, EvidenceReference = request.EvidenceReference, DetailsJson = Serialize(request) };
-            db.Add(item); return Result.Success(MoneyResult(item));
+            db.Add(item);
+            // CR-005: a top-up the custody cannot cover stays a draft and raises a custody proposal for the shortfall.
+            if (Cr005 && request.Kind != "Funding" && request.Amount - await CustodyBalance(config, ct) is > 0 and var shortfall)
+                db.Add(new HungerFinancialEvent { ClientPlatformId = request.PlatformId, SupervisorEmployeeId = request.SupervisorEmployeeId,
+                    PlatformRiderAccountId = request.AccountId, RiderProfileId = request.RiderProfileId, RelatedEventId = item.Id, Kind = "CustodyProposal",
+                    Status = "Open", Amount = shortfall, BusinessDate = request.BusinessDate, IdempotencyKey = $"CustodyProposal:{item.Id:D}",
+                    RequestHash = hash, EvidenceReference = request.EvidenceReference, Role = "Custody" });
+            return Result.Success(MoneyResult(item));
         }, ct);
     }
 
-    public async Task<Result<HungerMoneyResult>> ExecuteMoneyRequestAsync(Guid requestId, CancellationToken ct = default)
+    public Task<Result<HungerMoneyResult>> ExecuteMoneyRequestAsync(Guid requestId, CancellationToken ct = default)
+        => ExecuteMoneyRequestAsync(requestId, null, ct);
+    public async Task<Result<HungerMoneyResult>> ExecuteMoneyRequestAsync(Guid requestId, HungerMoneyExecution? execution, CancellationToken ct = default)
     {
         var item = await db.Set<HungerFinancialEvent>().AsNoTracking().SingleOrDefaultAsync(e => e.Id == requestId && e.Kind == "MoneyRequest", ct);
         if (item == null) return Result.Failure<HungerMoneyResult>(HungerErrors.NotFound);
         var original = Read<HungerMoneyRequest>(item.DetailsJson);
+        if (Cr005 && original.Kind == "Funding")
+        {
+            // The teller delivers what the accountant approved, from the account the accountant chose.
+            var approval = await db.Set<HungerFinancialEvent>().AsNoTracking().SingleOrDefaultAsync(e => e.RelatedEventId == requestId && e.Kind == "FundingApproval" && e.Status == "Approved", ct);
+            if (approval is null) return Result.Failure<HungerMoneyResult>(HungerErrors.Conflict("طلب التمويل لم يعتمده المحاسب."));
+            original = original with { Amount = approval.Amount, CounterSubAccountId = approval.FromSubAccountId };
+        }
         // Execution has its own deterministic idempotency key; all business validation runs again under the write lock.
-        return await PostMoneyCore(original with { IdempotencyKey = $"execute:{requestId:D}", RelatedEventId = requestId }, requestId, ct);
+        // Screenshots exist only once the top-up was performed, so they arrive with the execution.
+        return await PostMoneyCore(original with { IdempotencyKey = $"execute:{requestId:D}", RelatedEventId = requestId,
+            EvidenceBeforeId = execution?.EvidenceBeforeId ?? original.EvidenceBeforeId, EvidenceAfterId = execution?.EvidenceAfterId ?? original.EvidenceAfterId }, requestId, ct);
+    }
+
+    public async Task<Result<HungerMoneyResult>> DecideFundingAsync(Guid requestId, bool approve, HungerFundingDecision request, CancellationToken ct = default)
+    {
+        var source = await db.Set<HungerFinancialEvent>().AsNoTracking().SingleOrDefaultAsync(e => e.Id == requestId && e.Kind == "MoneyRequest", ct);
+        if (source is null) return Result.Failure<HungerMoneyResult>(HungerErrors.NotFound);
+        if (!await FinanceAccess(source.ClientPlatformId, PermissionKeys.Hunger.FundingApprove, ct)) return Result.Failure<HungerMoneyResult>(HungerErrors.Forbidden);
+        var amount = request.Amount ?? source.Amount;
+        if (Read<HungerMoneyRequest>(source.DetailsJson).Kind != "Funding" || request.Note is { Length: > 1000 }
+            || (approve ? !Money(amount) || !request.SourceSubAccountId.HasValue : string.IsNullOrWhiteSpace(request.Note)))
+            return Result.Failure<HungerMoneyResult>(HungerErrors.Invalid("الاعتماد يحتاج مبلغًا وحساب مصدر، والرفض يحتاج سببًا، لطلب تمويل عهدة."));
+        var hash = Hash(Serialize(new { requestId, approve, request }));
+        return await FinancialWrite([source.ClientPlatformId, source.SupervisorEmployeeId], async () =>
+        {
+            var item = await db.Set<HungerFinancialEvent>().SingleAsync(e => e.Id == requestId, ct);
+            var old = await db.Set<HungerFinancialEvent>().AsNoTracking().SingleOrDefaultAsync(e => e.ClientPlatformId == item.ClientPlatformId && e.IdempotencyKey == $"FundingDecision:{requestId:D}", ct);
+            if (old is not null) return old.RequestHash == hash ? Result.Success(MoneyResult(item) with { Amount = old.Amount })
+                : Result.Failure<HungerMoneyResult>(HungerErrors.Conflict("طلب التمويل حُسم مسبقًا بقرار مختلف."));
+            if (item.Status != "Requested") return Result.Failure<HungerMoneyResult>(HungerErrors.Conflict("طلب التمويل ليس بانتظار الاعتماد."));
+            if (item.CreatedByUserId is { } maker && maker == user.UserId)
+                return Result.Failure<HungerMoneyResult>(HungerErrors.Conflict("لا يعتمد طالب التمويل طلبه بنفسه."));
+            var c = await FinanceConfig(item.ClientPlatformId, item.SupervisorEmployeeId, ct);
+            if (c is null) return Result.Failure<HungerMoneyResult>(HungerErrors.Conflict("الربط المالي غير معتمد."));
+            // Any active company cashbox or bank account of the sponsor may fund custody; none is hard-wired.
+            if (approve && (request.SourceSubAccountId == c.CustodySubAccountId || !await db.Set<TreasurySubAccount>().AnyAsync(a => a.Id == request.SourceSubAccountId
+                && a.IsActive && a.IsPosting && (a.SponsorId == null || a.SponsorId == c.SponsorId) && a.AllowedDirections != TreasuryDirections.InOnly
+                && (a.Location == TreasuryLocation.Central || a.Location == TreasuryLocation.Bank), ct)))
+                return Result.Failure<HungerMoneyResult>(HungerErrors.Invalid("حساب المصدر يجب أن يكون خزنة أو بنكًا نشطًا للشركة."));
+            item.Status = approve ? "Approved" : "Rejected";
+            db.Add(new HungerFinancialEvent { ClientPlatformId = item.ClientPlatformId, SupervisorEmployeeId = item.SupervisorEmployeeId, RelatedEventId = requestId,
+                Kind = "FundingApproval", Status = item.Status, Amount = approve ? amount : 0, FromSubAccountId = approve ? request.SourceSubAccountId : null,
+                ToSubAccountId = approve ? c.CustodySubAccountId : null, BusinessDate = BusinessToday, IdempotencyKey = $"FundingDecision:{requestId:D}",
+                RequestHash = hash, EvidenceReference = request.Note ?? string.Empty, Role = "Custody", DetailsJson = Serialize(new { approve, request, RequestedAmount = item.Amount }) });
+            return Result.Success(MoneyResult(item) with { Amount = approve ? amount : item.Amount });
+        }, ct);
     }
 
     public Task<Result<HungerMoneyResult>> SubmitRemittanceDraftAsync(Guid remittanceId, HungerRemittanceAction request, CancellationToken ct = default)
@@ -137,7 +192,7 @@ internal sealed partial class HungerQualityService
         var batchRows = await batches.OrderBy(e => e.BusinessDate).ThenBy(e => e.Id).Skip((page - 1) * pageSize).Take(pageSize).ToArrayAsync(ct);
         var ids = batchRows.Select(b => b.Id).ToArray();
         var lines = await db.Set<HungerRemittanceLine>().AsNoTracking().Where(l => ids.Contains(l.RemittanceEventId)).ToArrayAsync(ct);
-        var sources = events.Where(e => e.Kind == "Collection" || e.Kind == "TopUpCollected" || e.Kind == "WithdrawalSupervisor" && e.Status == "Arrived");
+        var sources = events.Where(RemittableSource);
         var sourceTotals = sources.Select(e => new { SourceEventId = e.Id, e.Amount,
             ConfirmedAmount = (from line in db.Set<HungerRemittanceLine>() where line.SourceEventId == e.Id select line.ConfirmedAmount).Sum(),
             RemainingAmount = e.Amount - (from line in db.Set<HungerRemittanceLine>() where line.SourceEventId == e.Id select line.ConfirmedAmount).Sum() });

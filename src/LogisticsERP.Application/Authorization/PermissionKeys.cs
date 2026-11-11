@@ -24,6 +24,7 @@ public static class PermissionKeys
         public const string AccountsImport = "hunger.accounts.import";
         public const string AccountsUpdate = "hunger.accounts.update";
         public const string PerformanceImport = "hunger.performance.import";
+        public const string PerformanceDelete = "hunger.performance.delete";
         public const string PerformanceExport = "hunger.performance.export";
         public const string AlertsManage = "hunger.alerts.manage";
         public const string FinanceRead = "hunger.finance.read";
@@ -41,7 +42,17 @@ public static class PermissionKeys
         public const string FinanceManage = "hunger.finance.manage";
         public const string FinanceConfigure = "hunger.finance.configure";
         public const string RemittancesConfirm = "hunger.remittances.confirm";
+        public const string Seal = "hunger.finance.seal";
+        public const string FundingApprove = "hunger.finance.funding.approve";
+        public const string ExceptionRequest = "hunger.finance.exception.request";
+        public const string ExceptionApprove = "hunger.finance.exception.approve";
+        public const string OwnerCollectionsConfirm = "hunger.finance.owner_collections.confirm";
     }
+    // Checker-side permissions added by CR-005. They are deliberately not implied by the legacy hunger.finance.manage grant.
+    public static readonly IReadOnlyList<string> HungerCr005Permissions =
+    [
+        Hunger.Seal, Hunger.FundingApprove, Hunger.ExceptionRequest, Hunger.ExceptionApprove, Hunger.OwnerCollectionsConfirm
+    ];
     public static readonly FrozenSet<string> HungerFinancePermissions = new[]
     {
         Hunger.FinanceRead,
@@ -69,6 +80,7 @@ public static class PermissionKeys
         public const string AssignmentDatesUpdate = "ninja.assignments.dates.update";
         public const string CredentialsRotate = "ninja.credentials.rotate";
         public const string PerformanceImport = "ninja.performance.import";
+        public const string PerformanceDelete = "ninja.performance.delete";
         public const string DeductionsImport = "ninja.deductions.import";
     }
 
@@ -257,6 +269,7 @@ public static class PermissionKeys
 
     public static class Jahez
     {
+        public const string PerformanceDelete = "jahez.performance.delete";
         public const string Read = "jahez.read";
         public const string HandoversRead = "jahez.handovers.read";
         public const string HandoversCreate = "jahez.handovers.create";
@@ -387,14 +400,16 @@ public static class PermissionKeys
 
     public static FrozenSet<string> All { get; } = new[]
     {
+        Hunger.PerformanceDelete, Jahez.PerformanceDelete,
         PlatformFields.Identity, PlatformFields.Owner, PlatformFields.City, PlatformFields.Registry, PlatformFields.Contact,
         PlatformFields.Vehicle, PlatformFields.Settlement, PlatformFields.Compensation, PlatformFields.Reveal,
         Hunger.Read, Hunger.QualityImport, Hunger.QualityExport, Hunger.AccountsImport, Hunger.AccountsUpdate,
         Hunger.FinanceRead, Hunger.FundingRequest, Hunger.FundingExecute, Hunger.TopUpRequest, Hunger.TopUpExecute, Hunger.Collection, Hunger.WithdrawalRequest, Hunger.WithdrawalArrivalConfirm, Hunger.RiderPayment, Hunger.WalletReview, Hunger.RemittancesSubmit, Hunger.ReceiptsCancelReverse,
         Hunger.PerformanceImport, Hunger.PerformanceExport, Hunger.AlertsManage, Hunger.FinanceManage, Hunger.FinanceConfigure, Hunger.RemittancesConfirm,
+        Hunger.Seal, Hunger.FundingApprove, Hunger.ExceptionRequest, Hunger.ExceptionApprove, Hunger.OwnerCollectionsConfirm,
         Ninja.EvaluationManage, Ninja.EvaluationExport,
         Ninja.Read, Ninja.AccountsUpdate, Ninja.AssignmentsCreate, Ninja.AssignmentsDelete, Ninja.AssignmentDatesUpdate,
-        Ninja.CredentialsRotate, Ninja.PerformanceImport, Ninja.DeductionsImport,
+        Ninja.CredentialsRotate, Ninja.PerformanceImport, Ninja.PerformanceDelete, Ninja.DeductionsImport,
         Chefz.Read, Chefz.AccountsUpdate, Chefz.PerformanceImport, Chefz.PerformanceDelete, Chefz.SettlementsCreate, Chefz.SettlementsDelete,
         Security.UsersRead,
         Security.UsersCreate,

@@ -31,9 +31,11 @@ public sealed record HungerOperationReport(IReadOnlyList<HungerOperationItem> It
 public sealed record HungerManualPerformanceRequest(int? Orders, decimal? Hours, string Reason, string RowVersion);
 public interface IHungerOperationsService
 {
+    Task<Result<HungerPerformanceDeletionResponse>> DeletePerformanceAsync(DateOnly reportDate, Guid? sponsorId, string reason, CancellationToken ct = default);
     Task<Result<HungerFile>> OperationTemplateAsync(CancellationToken ct = default);
     Task<Result<HungerQualityPreview>> PreviewOperationsAsync(string fileName, byte[] content, DateOnly reportDate, CancellationToken ct = default);
     Task<Result<HungerImportResult>> ConfirmOperationsAsync(Guid previewId, CancellationToken ct = default);
     Task<Result<HungerOperationReport>> OperationsAsync(DateOnly from, DateOnly through, Guid? accountId, Guid? riderId, int page, int pageSize, CancellationToken ct = default);
     Task<Result> ManualPerformanceAsync(Guid sourceId, HungerManualPerformanceRequest request, CancellationToken ct = default);
 }
+public sealed record HungerPerformanceDeletionResponse(DateOnly ReportDate, Guid? SponsorId, int PerformanceRowsDeleted, int PotentialFinesDeleted);

@@ -1,0 +1,20 @@
+{
+  "Passed": true,
+  "Mode": "Apply",
+  "Server": "db67927.public.databaseasp.net",
+  "Database": "db67927",
+  "VerifiedAtUtc": "2026-11-10T10:34:39.9341765+00:00",
+  "Permission": "ninja.performance.delete",
+  "Applied": true,
+  "AlreadyAppliedBeforeRun": false,
+  "NinjaDefinitions": 11,
+  "AdministratorNinjaGrants": 11,
+  "FreshConnectionVerified": true,
+  "ScriptSha256": {
+    "ninja-performance-deletion-application.sql": "0B922EAC3CCF6ADF948BD99870E96CCC94FAE3512C992A66698599EB0165AA69",
+    "ninja-performance-deletion-identity.sql": "4DB9E0213765C0F6C13CDEE7EEDF14BB93F02597A2CF3DB08D514709D79F185B"
+  },
+  "EvidenceDirectory": "./outputs/ninja-performance-deletion-hosted-20261110",
+  "ApiPublishedByThisRun": false,
+  "ExistingDataPreservedInsideTransaction": true
+}

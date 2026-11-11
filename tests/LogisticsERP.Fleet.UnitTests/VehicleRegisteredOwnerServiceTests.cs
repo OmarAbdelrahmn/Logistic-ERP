@@ -273,7 +273,7 @@ public sealed class VehicleRegisteredOwnerServiceTests
     }
 
     [Fact]
-    public async Task UpdateRejectsActualIdentityChangeWithSpecificError()
+    public async Task UpdateAcceptsIdentityChangeThroughUpsert()
     {
         var cancellationToken = TestContext.Current.CancellationToken;
         await using var fixture = await Fixture.CreateAsync(cancellationToken);
@@ -288,8 +288,10 @@ public sealed class VehicleRegisteredOwnerServiceTests
                 RowVersion = created.Value.Summary.RowVersion
             }, cancellationToken);
 
-        Assert.True(changed.IsFailure);
-        Assert.Equal(FleetErrors.VehicleIdentityCorrectionRequired.Code, changed.Error.Code);
+        Assert.True(changed.IsSuccess, changed.Error.Description);
+        var stored = await fixture.Db.Vehicles.AsNoTracking().SingleAsync(x => x.Id == created.Value.Summary.Id, cancellationToken);
+        Assert.Equal("XYZ 1000", stored.PlateNumberEn);
+        Assert.Equal(FleetServiceSupport.NormalizeIdentifier("XYZ 1000"), stored.NormalizedPlateNumberEn);
     }
 
     private sealed class Fixture : IAsyncDisposable

@@ -13,7 +13,18 @@ namespace LogisticsERP.Infrastructure.Hunger;
 
 internal sealed partial class HungerQualityService : IHungerOperationsService
 {
-    private static readonly string[] OperationHeaders = ["Captain ID", "CompletedOrders", "ActualWorkingHours", "RejectedOrders", "CancelledOrders", "NoShowCount", "HoursUnit", "AcceptedOrders", "StackedOrders", "CaptainClassification"];
+    private static readonly Dictionary<string, string[]> OperationHeaderAliases = new()
+    {
+        ["Captain ID"] = ["Rider Id"],
+        ["CompletedOrders"] = ["Completed Deliveries"],
+        ["ActualWorkingHours"] = ["Actual Working Hours"],
+        ["RejectedOrders"] = ["Declined Deliveries"],
+        ["CancelledOrders"] = ["Cancelled Deliveries"],
+        ["NoShowCount"] = ["No Shows"],
+        ["AcceptedOrders"] = ["Accepted Deliveries"],
+        ["StackedOrders"] = ["Stacked Deliveries"],
+    };
+    private static readonly string[] OperationHeaders =["Captain ID", "CompletedOrders", "ActualWorkingHours", "RejectedOrders", "CancelledOrders", "NoShowCount", "HoursUnit", "AcceptedOrders", "StackedOrders", "CaptainClassification"];
     private sealed record OperationEnvelope(HungerOperationInput[] Inputs, HungerImportRow[] Errors);
     private sealed record OperationChange(HungerOperationInput Input, Guid AccountId, IReadOnlyList<PlatformDayShare> Shares);
     private sealed record OperationPlan(string Revision, HungerImportRow[] Rows, OperationChange[] Changes);
@@ -29,11 +40,14 @@ internal sealed partial class HungerQualityService : IHungerOperationsService
     private static OperationEnvelope ParseOperations(byte[] content)
     {
         using var book = new XLWorkbook(new MemoryStream(content)); var sheet = book.Worksheet(1);
-        var headers = sheet.Row(1).CellsUsed().ToLookup(c => new string(c.GetString().ToLowerInvariant().Where(char.IsLetterOrDigit).ToArray()));
+        static string Normalize(string value) => new(value.ToLowerInvariant().Where(char.IsLetterOrDigit).ToArray());
+        var headers = sheet.Row(1).CellsUsed().ToLookup(c => Normalize(c.GetString()));
         var columns = new Dictionary<string, int>();
         foreach (var key in OperationHeaders)
         {
-            var found = headers[new string(key.ToLowerInvariant().Where(char.IsLetterOrDigit).ToArray())].ToArray();
+            // Accept the template header or the platform export header (e.g. "Rider Id", "Completed Deliveries").
+            var names = new[] { key }.Concat(OperationHeaderAliases.TryGetValue(key, out var aliases) ? aliases : []).Select(Normalize).Distinct().ToArray();
+            var found = names.SelectMany(n => headers[n]).Distinct().ToArray();
             if (found.Length == 0 && key is "HoursUnit" or "AcceptedOrders" or "StackedOrders" or "CaptainClassification") continue;
             if (found.Length != 1) throw new FormatException($"العمود {key} مفقود أو مكرر.");
             columns[key] = found[0].Address.ColumnNumber;
@@ -57,8 +71,9 @@ internal sealed partial class HungerQualityService : IHungerOperationsService
                 }
                 if (string.IsNullOrWhiteSpace(account) || account.Length > 150) throw new FormatException("معرف هنقر مطلوب.");
                 var hoursCell = row.Cell(columns["ActualWorkingHours"]);
-                var unit = columns.TryGetValue("HoursUnit", out var unitColumn) ? row.Cell(unitColumn).GetString().Trim() : "DecimalHours";
-                if (unit.Length == 0) unit = "DecimalHours";
+                var unit = columns.TryGetValue("HoursUnit", out var unitColumn) ? row.Cell(unitColumn).GetString().Trim() : "";
+                if (unit.Length == 0)
+                    unit = hoursCell.DataType == XLDataType.TimeSpan || hoursCell.DataType != XLDataType.Number && hoursCell.GetString().Contains(':') ? "Duration" : "DecimalHours";
                 if (hoursCell.HasFormula) throw new FormatException("Formula hours are not accepted.");
                 var raw = hoursCell.DataType == XLDataType.TimeSpan ? ((int)hoursCell.GetTimeSpan().TotalHours).ToString(CultureInfo.InvariantCulture) + hoursCell.GetTimeSpan().ToString(@"\:mm\:ss", CultureInfo.InvariantCulture) : hoursCell.DataType == XLDataType.Number ? hoursCell.GetDouble().ToString("R", CultureInfo.InvariantCulture) : hoursCell.GetString();
                 if (hoursCell.DataType == XLDataType.TimeSpan && unit != "Duration") throw new FormatException("Time cells require Duration unit.");

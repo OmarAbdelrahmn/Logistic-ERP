@@ -207,6 +207,7 @@ internal sealed class ApplicationPersistenceInterceptor(
             if (entry.State == EntityState.Modified)
             {
                 if (IsHungerFinanceLifecycleWrite(entry)) return;
+                if (IsHungerAdjustmentReconciliation(entry)) return;
                 if (IsOilChangeRevisionWrite(entry)) return;
                 // A reupload retires an imported row once, preserving its original values and audit identity.
                 if (history is JahezTransaction
@@ -238,6 +239,7 @@ internal sealed class ApplicationPersistenceInterceptor(
     private static bool IsHungerFinanceLifecycleWrite(EntityEntry<Entity> entry)
     {
         if (entry.Entity is not HungerFinancialEvent item) return false;
+        if (entry.Property(nameof(HungerFinancialEvent.ApprovalStatus)).IsModified) return IsHungerApprovalWrite(entry, item);
         var before = entry.Property(nameof(HungerFinancialEvent.Status)).OriginalValue as string;
         var after = item.Status;
         // Preserve the existing withdrawal completion flow under the same production history guard.
@@ -259,11 +261,26 @@ internal sealed class ApplicationPersistenceInterceptor(
                 && postings.Any(p => p.SubAccountId == item.ToSubAccountId && p.Amount == item.Amount);
         }
         if (entry.Properties.Where(p => p.IsModified).Any(p => p.Metadata.Name != nameof(HungerFinancialEvent.Status))) return false;
+        // A custody proposal closes when its request executes or when a hand-over proves the wallet is back at zero.
+        if (item.Kind == "CustodyProposal")
+            return before == "Open" && after == "Resolved" && entry.Context.ChangeTracker.Entries<HungerFinancialEvent>().Any(e =>
+                e.State == EntityState.Modified && e.Entity.Id == item.RelatedEventId && e.Entity.Kind == "MoneyRequest" && e.Entity.Status == "Executed"
+                || e.State == EntityState.Added && e.Entity.Kind == "WalletDelivery" && e.Entity.PlatformRiderAccountId == item.PlatformRiderAccountId);
         var staged = entry.Context.ChangeTracker.Entries<HungerFinancialEvent>()
             .Where(e => e.State == EntityState.Added && e.Entity.ClientPlatformId == item.ClientPlatformId
                 && e.Entity.SupervisorEmployeeId == item.SupervisorEmployeeId).Select(e => e.Entity).ToArray();
+        if (item.Kind == "OwnerCollectionReceipt")
+        {
+            if (before != "PendingReceipt") return false;
+            if (after == "Received") return staged.Any(e => e.RelatedEventId == item.Id && e.Kind == "OwnerCollectionConfirmation");
+            // The expected receipt dies with its top-up when a replacement is sealed.
+            return after == "Cancelled" && entry.Context.ChangeTracker.Entries<HungerFinancialEvent>().Any(e => e.State == EntityState.Modified
+                && e.Entity.Id == item.RelatedEventId && e.Entity.ApprovalStatus == "Cancelled");
+        }
+        if (item.Kind == "MoneyRequest" && before == "Requested" && after is "Approved" or "Rejected")
+            return staged.Any(e => e.RelatedEventId == item.Id && e.Kind == "FundingApproval" && e.Status == after);
         if (item.Kind == "MoneyRequest")
-            return before == "Requested" && after == "Executed" && staged.Any(e => e.RelatedEventId == item.Id
+            return before is "Requested" or "Approved" && after == "Executed" && staged.Any(e => e.RelatedEventId == item.Id
                 && e.Kind is "Funding" or "TopUpAdvance" or "TopUpCollected");
         if (item.Kind != "Remittance") return false;
         if (before == "Draft" && after == "Submitted")
@@ -276,6 +293,46 @@ internal sealed class ApplicationPersistenceInterceptor(
             return staged.Any(e => e.Kind == "RemittanceReversal"
                 && entry.Context.ChangeTracker.Entries<HungerFinancialEvent>().Any(c => c.Entity.Id == e.RelatedEventId
                     && c.Entity.Kind == "RemittanceConfirmation" && c.Entity.RelatedEventId == item.Id));
+        return false;
+    }
+
+    // An adjustment document is reconciled in place: only its match state, reconciliation evidence and approval date may change.
+    private static bool IsHungerAdjustmentReconciliation(EntityEntry<Entity> entry)
+    {
+        if (entry.Entity is not HungerSettlementDocument { Kind: "Adjustment" } item) return false;
+        var before = entry.Property(nameof(HungerSettlementDocument.Status)).OriginalValue as string;
+        return before is "Unmatched" or "NeedsReview" && item.Status is "Matched" or "NeedsReview"
+            && !string.IsNullOrWhiteSpace(item.ReconciliationEvidence)
+            && entry.Properties.Where(p => p.IsModified).All(p => p.Metadata.Name is nameof(HungerSettlementDocument.Status)
+                or nameof(HungerSettlementDocument.ReconciliationEvidence) or nameof(HungerSettlementDocument.ApprovalDate));
+    }
+
+    // Accountant seal lifecycle. Each transition must travel with its audit event in the same unit of work.
+    private static bool IsHungerApprovalWrite(EntityEntry<Entity> entry, HungerFinancialEvent item)
+    {
+        var before = entry.Property(nameof(HungerFinancialEvent.ApprovalStatus)).OriginalValue as string;
+        var changed = entry.Properties.Where(p => p.IsModified).Select(p => p.Metadata.Name).ToArray();
+        var events = entry.Context.ChangeTracker.Entries<HungerFinancialEvent>().ToArray();
+        bool Audited(Guid id, string kind) => events.Any(e => e.State == EntityState.Added && e.Entity.Kind == kind
+            && e.Entity.RelatedEventId == id && e.Entity.ClientPlatformId == item.ClientPlatformId);
+        if (before == "PendingSeal" && item.ApprovalStatus == "Rejected")
+            return !string.IsNullOrWhiteSpace(item.RejectionReason) && Audited(item.Id, "SealRejection")
+                && changed.All(n => n is nameof(HungerFinancialEvent.ApprovalStatus) or nameof(HungerFinancialEvent.RejectionReason));
+        if (before == "PendingSeal" && item.ApprovalStatus == "Sealed")
+        {
+            if (item.ApprovedAtUtc is null || item.ApprovedByUserId is null || !Audited(item.Id, "Seal")) return false;
+            var allowed = changed.All(n => n is nameof(HungerFinancialEvent.ApprovalStatus) or nameof(HungerFinancialEvent.ApprovedAtUtc)
+                or nameof(HungerFinancialEvent.ApprovedByUserId) or nameof(HungerFinancialEvent.SealAccountsJson) or nameof(HungerFinancialEvent.Status));
+            if (!allowed || !changed.Contains(nameof(HungerFinancialEvent.Status))) return allowed;
+            // Only a replacement top-up gains its money effect at seal.
+            return item.SupersedesEventId is not null && item.Status == "Posted"
+                && entry.Property(nameof(HungerFinancialEvent.Status)).OriginalValue as string == "AwaitingSeal";
+        }
+        if (before == "Rejected" && item.ApprovalStatus == "Cancelled")
+            return item.Status == "Cancelled"
+                && changed.All(n => n is nameof(HungerFinancialEvent.ApprovalStatus) or nameof(HungerFinancialEvent.Status))
+                && events.Any(e => e.State == EntityState.Modified && e.Entity.SupersedesEventId == item.Id
+                    && e.Entity.ApprovalStatus == "Sealed" && Audited(e.Entity.Id, "Seal"));
         return false;
     }
 

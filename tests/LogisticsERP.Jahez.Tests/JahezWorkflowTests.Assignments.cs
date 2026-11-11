@@ -47,7 +47,7 @@ public sealed partial class JahezWorkflowTests
             await f.Db.SaveChangesAsync(ct);
             chefz.Add(tracked);
         }
-        var simple = new SimplePlatformService(f.Db, f.User, f.Clock, new PlatformCredentialProtector(() => new byte[32]));
+        var simple = new SimplePlatformService(f.Db, f.User, f.Clock, new PlatformCredentialProtector(() => new byte[32]), f.Permissions);
         var operations = new PlatformOperationsService(f.Db, f.User, f.Clock, new PlatformCredentialProtector(() => new byte[32]));
         async Task<Result> AssignChefz(int index) => legacy
             ? await operations.AssignAccountAsync(new(f.RiderId, contract.Id, chefz[index].Id, new(2026, 10, 1),
